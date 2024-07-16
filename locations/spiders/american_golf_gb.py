@@ -12,7 +12,9 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class AmericanGolfGBSpider(Spider):
     name = "american_golf_gb"
     item_attributes = {"brand": "American Golf", "brand_wikidata": "Q62657494"}
-    start_urls = ["https://www.americangolf.co.uk/on/demandware.store/Sites-AmericanGolf-GB-Site/en_GB/Stores-GetAllStores"]
+    start_urls = [
+        "https://www.americangolf.co.uk/on/demandware.store/Sites-AmericanGolf-GB-Site/en_GB/Stores-GetAllStores"
+    ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

@@ -2,11 +2,11 @@ from typing import Any
 from urllib.parse import urljoin
 
 from scrapy.http import Response
-from scrapy.spiders import Spider
 
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+
 
 class ChiquitoSpider(scrapy.Spider):
     name = "chiquito"
@@ -38,4 +38,4 @@ class ChiquitoSpider(scrapy.Spider):
                     location["hours"]["{}Close".format(day)].strip(),
                 )
 
-            yield item   
+            yield item
