@@ -4,7 +4,6 @@ from urllib.parse import urljoin
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -30,11 +29,11 @@ class AmericanGolfGBSpider(Spider):
             item["phone"] = location["phone"]
             item["email"] = location["email"]
 
-   #         item["opening_hours"] = OpeningHours()
-   #         for day in map(str.lower, DAYS_FULL):
-   #             item["opening_hours"].add_range(
-   #                 day,
-   #                 location["storeHours"][format(day)].strip(),
-   #             )
+            #         item["opening_hours"] = OpeningHours()
+            #         for day in map(str.lower, DAYS_FULL):
+            #             item["opening_hours"].add_range(
+            #                 day,
+            #                 location["storeHours"][format(day)].strip(),
+            #             )
 
             yield item
