@@ -8,7 +8,6 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-
 class AmericanGolfGBSpider(Spider):
     name = "american_golf_gb"
     item_attributes = {"brand": "American Golf", "brand_wikidata": "Q62657494"}
