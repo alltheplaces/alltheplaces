@@ -24,8 +24,9 @@ class BellaItaliaGBSpider(Spider):
             item["street_address"] = merge_address_lines([location["addressLine1"], location["addressLine2"]])
             item["city"] = location["addressCity"]
             item["postcode"] = location["postcode"]
+            slug=urljoin(location["city"],"/",location["slug"])
             item["website"] = urljoin(
-                "https://www.bellaitalia.co.uk/restaurants/", location["city"], "/", location["slug"]
+                "https://www.bellaitalia.co.uk/restaurants/", slug
             )
             item["phone"] = location["phoneNumber"]
             item["email"] = location["email"]
