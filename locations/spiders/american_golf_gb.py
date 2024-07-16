@@ -1,7 +1,5 @@
-from typing import Any
 from urllib.parse import urljoin
 
-from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.items import Feature
