@@ -20,7 +20,6 @@ class MakroTHSpider(scrapy.Spider):
                 break
 
     def parse_zone(self, response):
-        # an xpath to gather all hrefs from a tag which are deep children of div with id=accordion_branchprovince
         store_links = response.xpath('//div[@id="accordion_branchprovince"]//a/@href').getall()
         for store_link in store_links:
             yield scrapy.Request(store_link, self.parse_store)
