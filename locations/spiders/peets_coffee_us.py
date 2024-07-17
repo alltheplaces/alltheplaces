@@ -29,8 +29,7 @@ class PeetsCoffeeUSSpider(StockistSpider):
             if field["name"] == "Type" and field["value"] == "Licensed Partner":
                 item["located_in"] = item.pop("name")
 
-        if "name" in item:
-            item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name", None)
 
         for feature in location["filters"]:
             apply_yes_no(PaymentMethods.CONTACTLESS, item, feature["name"] == "Contactless Payments")
