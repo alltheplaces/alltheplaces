@@ -1,25 +1,21 @@
-import json
 from typing import Any
+from urllib.parse import urljoin
 
-from scrapy.spiders import Spider
 from scrapy.http import Response
+from scrapy.spiders import Spider
 
 from locations.items import Feature
-from locations.linked_data_parser import LinkedDataParser
 
-from urllib.parse import urljoin
 
 class HaysTravelGBSpider(Spider):
     name = "hays_travel_gb"
     item_attributes = {"brand": "Hays Travel", "brand_wikidata": "Q70250954"}
-    start_urls = [
-        "       https://branches.haystravel.co.uk/api/branches"
-    ]
+    start_urls = ["       https://branches.haystravel.co.uk/api/branches"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data =response.json()
+        data = response.json()
         print(data["data"])
-        items=data["data"]
+        items = data["data"]
 
         for location in items:
             item = Feature()
@@ -36,9 +32,9 @@ class HaysTravelGBSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day in map(str.lower, DAYS_FULL):
-                  item["opening_hours"].add_range(
-                      day,
-                      location["{}_hours".format(day)].strip(),
-                  )
+                item["opening_hours"].add_range(
+                    day,
+                    location["{}_hours".format(day)].strip(),
+                )
 
             yield item
