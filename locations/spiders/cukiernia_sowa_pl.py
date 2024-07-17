@@ -19,4 +19,5 @@ class CukierniaSowaPLSpider(Spider):
             item = DictParser.parse(shop)
             item["website"] = f"https://www.cukierniasowa.pl/cukiernie/{quote(shop['url'])}"
             # TODO: shop["hours"] has PHP serialized opening hours. loads from phpserialize?
+            item.pop("name", None)
             yield item
