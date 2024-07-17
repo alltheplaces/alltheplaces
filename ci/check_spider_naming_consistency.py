@@ -1,7 +1,9 @@
 import ast
 import os
 import re
-from typing import List
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import List, Tuple
 
 COUNTRYCODE_COMPONENTS = {
     "AE",
@@ -179,7 +181,7 @@ def number_to_text(number: int) -> str:
     return str(number)
 
 
-def check_file(file_path: str) -> List[str]:
+def check_file(file_path: Path) -> Tuple[Path, List[str]]:
     errors = []
     file_name = os.path.splitext(os.path.basename(file_path))[0]
 
@@ -225,27 +227,32 @@ def check_file(file_path: str) -> List[str]:
                         f"of '{file_name}.py'"
                     )
 
-    return errors
+    return (file_path, errors)
 
 
 def main():
     # Find all Python files in the spiders directory
     spider_root = os.path.join(os.path.dirname(__file__), "../locations/spiders")
     python_files = [f for f in os.listdir(spider_root) if f.endswith(".py")]
-    all_errors = []
 
-    for file in python_files:
-        errors = check_file(os.path.join(spider_root, file))
-        if errors:
-            all_errors.append((file, errors))
+    # use multiprocessing map to check all files in parallel
+    with ThreadPoolExecutor() as executor:
+        all_errors = executor.map(check_file, [os.path.join(spider_root, file) for file in python_files])
 
-    if not all_errors:
+    # map the files to a list of errors
+    per_file_errors = dict((file, errors) for file, errors in all_errors)
+
+    # If none of the files have errors, exit with a success code
+    if not any(per_file_errors.values()):
         print("No formatting errors found.")
         exit(0)
 
     print("Formatting errors found:")
-    for file, errors in all_errors:
-        print(f"\nIn file {file}:")
+    for file, errors in per_file_errors.items():
+        if not errors:
+            continue
+
+        print(f"\nIn file {os.path.basename(file)}:")
         for error in errors:
             print(f"  - {error}")
     exit(1)
