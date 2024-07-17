@@ -8,9 +8,7 @@ class CoastalCountrySpider(scrapy.Spider):
     item_attributes = {"brand": "Coastal"}
     allowed_domains = ["www.coastalfarm.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    start_urls = (
-        "https://www.coastalcountry.com/about/store-locations",
-    )
+    start_urls = ("https://www.coastalcountry.com/about/store-locations",)
 
     def parse(self, response):
         results = response.json()
