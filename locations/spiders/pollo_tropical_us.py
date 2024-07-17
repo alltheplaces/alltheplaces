@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 
 
 class PolloTropicalUSSpider(scrapy.Spider):
-    name = "pollotropical_us"
+    name = "pollo_tropical_us"
     allowed_domains = ["https://www.pollotropical.com/"]
     item_attributes = {"brand": "Pollo Tropical", "brand_wikidata": "Q3395356"}
     start_urls = ["https://www.pollotropical.com/locations"]

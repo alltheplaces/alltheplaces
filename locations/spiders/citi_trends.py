@@ -6,10 +6,9 @@ from locations.items import Feature
 
 
 class CitiTrendsSpider(scrapy.Spider):
-    name = "cititrends"
+    name = "citi_trends"
     item_attributes = {"brand": "Citi Trends", "brand_wikidata": "Q5122438"}
     allowed_domains = ["locations.cititrends.com"]
-    download_delay = 0.5
     start_urls = ("https://locations.cititrends.com/",)
 
     def parse_stores(self, response):

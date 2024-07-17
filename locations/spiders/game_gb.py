@@ -6,7 +6,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GameGB(SitemapSpider, StructuredDataSpider):
+class GameGBSpider(SitemapSpider, StructuredDataSpider):
     name = "game_gb"
     item_attributes = {"brand": "Game", "brand_wikidata": "Q5519813", "country": "GB"}
     located_in_brands = {

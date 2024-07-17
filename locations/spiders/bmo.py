@@ -40,7 +40,7 @@ from locations.spiders.wegmans import WegmansSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class BMOSpider(Where2GetItSpider):
+class BmoSpider(Where2GetItSpider):
     name = "bmo"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
     api_endpoint = "https://branchlocator.bmo.com/rest/getlist"

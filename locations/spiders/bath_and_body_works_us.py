@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class BathAndBodyWorksUSSpider(scrapy.Spider):
-    name = "bathandbodyworks_us"
+    name = "bath_and_body_works_us"
     item_attributes = {"brand": "Bath & Body Works", "brand_wikidata": "Q810773"}
     allowed_domains = ["bathandbodyworks.com"]
     start_urls = [

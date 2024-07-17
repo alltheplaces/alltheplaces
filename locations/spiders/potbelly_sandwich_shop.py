@@ -8,7 +8,7 @@ from locations.items import Feature
 
 
 class PotbellySandwichShopSpider(Spider):
-    name = "potbelly_sandwich"
+    name = "potbelly_sandwich_shop"
     item_attributes = {"brand": "Potbelly Sandwich Shop", "brand_wikidata": "Q7234777"}
     allowed_domains = ["www.potbelly.com", "api.prod.potbelly.com"]
     start_urls = [

@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class Pizzeria105PlSpider(SitemapSpider, StructuredDataSpider):
+class Pizzeria105PLSpider(SitemapSpider, StructuredDataSpider):
     name = "pizzeria_105_pl"
     allowed_domains = ["105.pl"]
     item_attributes = {"brand": "Pizzeria 105", "brand_wikidata": "Q123090276"}

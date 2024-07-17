@@ -4,8 +4,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class PAWineSpiritsSpider(scrapy.Spider):
-    name = "pawinespirits"
+class FineWineGoodSpiritsSpider(scrapy.Spider):
+    name = "fine_wine_good_spirits"
     item_attributes = {
         "name": "Fine Wine & Good Spirits",
         "brand": "Fine Wine & Good Spirits",

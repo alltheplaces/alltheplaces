@@ -8,7 +8,7 @@ from locations.items import Feature
 
 
 class WhiteCastleSpider(scrapy.Spider):
-    name = "whitecastle"
+    name = "white_castle"
     item_attributes = {"brand": "White Castle", "brand_wikidata": "Q1244034"}
     allowed_domains = ["www.whitecastle.com"]
     timeregex = re.compile("^([0-9:]+)(AM|PM)$")

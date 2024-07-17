@@ -6,8 +6,8 @@ import scrapy
 from locations.items import Feature
 
 
-class PPGPaintsSpider(scrapy.Spider):
-    name = "ppgpaints"
+class PpgPaintsSpider(scrapy.Spider):
+    name = "ppg_paints"
     item_attributes = {"brand": "PPG Paints", "brand_wikidata": "Q83891559"}
     allowed_domains = ["www.ppgpaints.com"]
     start_urls = [

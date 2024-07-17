@@ -8,10 +8,9 @@ from locations.items import Feature
 
 
 class HomeDepotCASpider(SitemapSpider):
-    name = "homedepot_ca"
+    name = "home_depot_ca"
     item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
     allowed_domains = ["homedepot.ca"]
-    download_delay = 0.2
     sitemap_urls = ["https://stores.homedepot.ca/sitemap.xml"]
     sitemap_rules = [
         (

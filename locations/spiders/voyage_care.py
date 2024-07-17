@@ -5,7 +5,7 @@ from locations.items import Feature
 
 
 class VoyageCareSpider(scrapy.Spider):
-    name = "voyagecare"
+    name = "voyage_care"
     item_attributes = {"brand": "Voyage Care"}
     allowed_domains = ["voyagecare.com"]
     start_urls = [

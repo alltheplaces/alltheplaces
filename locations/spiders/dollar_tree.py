@@ -3,7 +3,7 @@ from locations.storefinders.where2getit import Where2GetItSpider
 
 
 class DollarTreeSpider(Where2GetItSpider):
-    name = "dollartree"
+    name = "dollar_tree"
     item_attributes = {"brand": "Dollar Tree", "brand_wikidata": "Q5289230"}
     api_brand_name = "dollartree"
     api_key = "134E9A7A-AB8F-11E3-80DE-744E58203F82"

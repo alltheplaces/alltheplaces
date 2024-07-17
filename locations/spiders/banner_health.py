@@ -10,7 +10,7 @@ from locations.items import Feature
 
 
 class BannerHealthSpider(SitemapSpider):
-    name = "bannerhealth"
+    name = "banner_health"
     item_attributes = {"brand": "Banner Health", "brand_wikidata": "Q4856918"}
     allowed_domains = ["bannerhealth.com"]
     sitemap_urls = ["https://www.bannerhealth.com/sitemap-BH.xml"]

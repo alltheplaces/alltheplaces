@@ -11,7 +11,7 @@ from locations.items import Feature
 ADDRESS_PATTERN = re.compile(r"(?P<street>.*)<br>(?P<postal>[0-9]{2}\s?-\s?[0-9]{3})\s(?P<city>.*)")
 
 
-class PijalnieWedel(Spider):
+class PijalniewedelPLSpider(Spider):
     name = "pijalniewedel_pl"
     item_attributes = {
         "brand": "Pijalnia Czekolady E.Wedel",

@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class Forever21CaSpider(scrapy.Spider):
+class Forever21CASpider(scrapy.Spider):
     name = "forever21_ca"
     item_attributes = {
         "brand": "Forever 21",

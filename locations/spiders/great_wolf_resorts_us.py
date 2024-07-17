@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class GreatWolfResortsUS(SitemapSpider, StructuredDataSpider):
     name = "great_wolf_resorts_us"
     item_attributes = {
-        "brand": " Great Wolf Resorts",
+        "brand": "Great Wolf Resorts",
         "brand_wikidata": "Q5600260",
         "extras": {"leisure": "water_park"},
     }
