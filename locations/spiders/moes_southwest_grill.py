@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class MoesSouthwestGrillSpider(SitemapSpider, StructuredDataSpider):
-    name = "moes"
+    name = "moes_southwest_grill"
     item_attributes = {
         "brand": "Moe's Southwest Grill",
         "brand_wikidata": "Q6889938",

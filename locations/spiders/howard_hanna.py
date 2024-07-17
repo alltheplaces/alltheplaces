@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 class HowardHannaSpider(SitemapSpider):
-    name = "howardhanna"
+    name = "howard_hanna"
     item_attributes = {"brand": "Howard Hanna", "brand_wikidata": "Q119573413"}
     allowed_domains = ["howardhanna.com"]
     sitemap_urls = ["https://www.howardhanna.com/Seo/OfficeSitemap"]

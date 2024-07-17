@@ -5,7 +5,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class AliceDeliceSpider(scrapy.Spider):
-    name = "alicedelice"
+    name = "alice_delice"
     item_attributes = {"brand": "Alice Délice", "brand_wikidata": "Q105099543"}
     allowed_domains = ["www.alicedelice.com"]
     start_urls = ("https://www.alicedelice.com/trouver-ma-boutique",)

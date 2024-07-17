@@ -6,7 +6,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GreatWolfResortsUS(SitemapSpider, StructuredDataSpider):
+class GreatWolfResortsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "great_wolf_resorts_us"
     item_attributes = {
         "brand": "Great Wolf Resorts",

@@ -5,7 +5,7 @@ from locations.searchable_points import open_searchable_points
 
 
 class RaisingCanesSpider(scrapy.Spider):
-    name = "raisingcanes"
+    name = "raising_canes"
     item_attributes = {"brand": "Raising Cane's Chicken Fingers"}
     allowed_domains = ["www.raisingcanes.com"]
     start_urls = ("https://www.raisingcanes.com/locations",)

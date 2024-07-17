@@ -4,8 +4,8 @@ from locations.categories import Categories
 from locations.items import Feature
 
 
-class Ridleys(scrapy.Spider):
-    name = "ridleys"
+class RidleysFamilyMarketsSpider(scrapy.Spider):
+    name = "ridleys_family_markets"
     item_attributes = {
         "brand": "Ridley's Family Markets",
         "brand_wikidata": "Q7332999",

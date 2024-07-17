@@ -12,7 +12,7 @@ def am_pm(s):
 
 
 class ErieInsuranceSpider(SitemapSpider):
-    name = "erieinsurance"
+    name = "erie_insurance"
     item_attributes = {
         "brand": "Erie Insurance",
         "brand_wikidata": "Q5388314",

@@ -5,8 +5,8 @@ import scrapy
 from locations.items import Feature
 
 
-class RoyalLePageSpider(scrapy.Spider):
-    name = "royallepage"
+class RoyalLepageSpider(scrapy.Spider):
+    name = "royal_lepage"
     item_attributes = {"brand": "Royal LePage", "brand_wikidata": "Q7374385"}
     allowed_domains = ["royallepage.ca"]
     start_urls = [

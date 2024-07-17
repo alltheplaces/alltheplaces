@@ -4,7 +4,7 @@ import xmltodict
 from locations.items import Feature
 
 
-class CrocsESDeSpider(scrapy.Spider):
+class CrocsESSpider(scrapy.Spider):
     name = "crocs_es"
     item_attributes = {
         "brand": "Crocs",

@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.spiders.carlsjr_us import CarlsJrUSSpider
+from locations.spiders.carls_jr_us import CarlsJrUSSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 

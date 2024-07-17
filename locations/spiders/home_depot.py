@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
-    name = "homedepot"
+    name = "home_depot"
     item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
     allowed_domains = ["www.homedepot.com"]
     start_urls = ["https://www.homedepot.com/l/storeDirectory"]

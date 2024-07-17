@@ -6,7 +6,7 @@ from scrapy.http import Response
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.spiders.carlsjr_us import CarlsJrUSSpider
+from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrNZSpider(Spider):

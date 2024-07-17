@@ -4,8 +4,8 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class ErbertandGerbertsSpider(scrapy.Spider):
-    name = "erbertandgerberts"
+class ErbertAndGerbertsSpider(scrapy.Spider):
+    name = "erbert_and_gerberts"
     item_attributes = {"brand": "Erbert & Gerbert's", "brand_wikidata": "Q5385097"}
     allowed_domains = ["erbertandgerberts.com"]
     start_urls = ["https://www.erbertandgerberts.com/store-sitemap.xml"]

@@ -4,8 +4,8 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
-class BoneFishGrillSpider(scrapy.spiders.SitemapSpider):
-    name = "bonefishgrill"
+class BonefishGrillSpider(scrapy.spiders.SitemapSpider):
+    name = "bonefish_grill"
     item_attributes = {
         "brand": "Bonefish Grill",
         "brand_wikidata": "Q4941599",

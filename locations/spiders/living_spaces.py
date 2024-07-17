@@ -7,10 +7,9 @@ from locations.items import Feature
 
 
 class LivingSpacesSpider(scrapy.Spider):
-    name = "livingspaces"
+    name = "living_spaces"
     item_attributes = {"brand": "Living Spaces", "brand_wikidata": "Q63626177"}
     allowed_domains = ["livingspaces.com"]
-    download_delay = 0.1
     start_urls = ("https://www.livingspaces.com/stores",)
 
     def parse(self, response):

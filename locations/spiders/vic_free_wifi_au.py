@@ -5,8 +5,8 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class VicFreeWiFiAUSpider(Spider):
-    name = "vicfreewifi_au"
+class VicFreeWifiAUSpider(Spider):
+    name = "vic_free_wifi_au"
     item_attributes = {"operator": "Victorian State Government", "operator_wikidata": "Q5589335"}
     allowed_domains = ["services-ap1.arcgis.com"]
     start_urls = [

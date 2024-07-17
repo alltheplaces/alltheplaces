@@ -7,7 +7,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BaptistHealthArkansasUSSpider(scrapy.Spider):
-    name = "bha_us"
+    name = "baptist_health_arkansas_us"
     item_attributes = {
         "brand": "Baptist Health Foundation",
         "brand_wikidata": "Q50379824",

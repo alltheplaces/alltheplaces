@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.carlsjr_us import CarlsJrUSSpider
+from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrCASpider(scrapy.Spider):

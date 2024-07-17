@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class TrekBikesSpider(scrapy.Spider):
-    name = "trekbikes"
+    name = "trek_bikes"
     allowed_domains = ["www.trekbikes.com"]
     start_urls = ["https://www.trekbikes.com/store-finder/allRetailers/"]
 

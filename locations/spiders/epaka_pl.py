@@ -5,7 +5,7 @@ from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
-class EPakaPLSpider(Spider):
+class EpakaPLSpider(Spider):
     name = "epaka_pl"
     item_attributes = {"brand": "Epaka.pl", "brand_wikidata": "Q123028724", "extras": Categories.POST_OFFICE.value}
     start_urls = ["https://www.epaka.pl/api/getPoints.xml"]

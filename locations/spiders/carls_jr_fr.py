@@ -5,11 +5,11 @@ from scrapy import Spider
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address, merge_address_lines
-from locations.spiders.carlsjr_us import CarlsJrUSSpider
+from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrFRSpider(Spider):
-    name = "carlsjr_fr"
+    name = "carls_jr_fr"
     item_attributes = CarlsJrUSSpider.item_attributes
     start_urls = ["https://www.carlsjr.fr/build/front-mainController.min.513861e5.js"]
 

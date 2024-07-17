@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class ShoeZoneGB(SitemapSpider, StructuredDataSpider):
-    name = "shoezone_gb"
+    name = "shoe_zone_gb"
     item_attributes = {
         "brand": "Shoe Zone",
         "brand_wikidata": "Q7500016",

@@ -6,7 +6,7 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 from locations.google_url import extract_google_position
 from locations.pipelines.address_clean_up import clean_address
-from locations.spiders.carlsjr_us import CarlsJrUSSpider
+from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrTRSpider(Spider):
