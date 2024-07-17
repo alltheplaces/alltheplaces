@@ -1,6 +1,7 @@
 import ast
 import os
 import re
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import List, Tuple
@@ -244,17 +245,17 @@ def main():
 
     # If none of the files have errors, exit with a success code
     if not any(per_file_errors.values()):
-        print("No formatting errors found.")
+        sys.stderr.write("No formatting errors found.\n")
         exit(0)
 
-    print("Formatting errors found:")
+    sys.stderr.write("Formatting errors found:\n")
     for file, errors in per_file_errors.items():
         if not errors:
             continue
 
-        print(f"\nIn file {os.path.basename(file)}:")
+        sys.stderr.write(f"\nIn file {os.path.basename(file)}:\n")
         for error in errors:
-            print(f"  - {error}")
+            sys.stderr.write(f"  - {error}\n")
     exit(1)
 
 
