@@ -49,6 +49,8 @@ class PalmBeachTanUSSpider(SitemapSpider):
         for day in hours_raw:
             if day[0] not in DAYS_EN:
                 continue
+            if ":" not in day[1]:
+                continue
             oh.add_range(DAYS_EN[day[0]], day[1], day[2], "%I:%M%p")
         properties["opening_hours"] = oh.as_opening_hours()
 

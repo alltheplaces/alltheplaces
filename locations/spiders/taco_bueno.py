@@ -3,6 +3,7 @@ from geonamescache import GeonamesCache
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TacobuenoSpider(scrapy.Spider):
@@ -28,7 +29,7 @@ class TacobuenoSpider(scrapy.Spider):
             for i in results:
                 ref = i["storeid"]
                 name = i["restaurantname"]
-                street = ", ".join(filter(None, [i["address1"], i["address2"], i["address3"]]))
+                street = clean_address([i["address1"], i["address2"], i["address3"]])
                 city = i["city"]
                 state = i["statecode"]
                 postcode = i["zipcode"]
@@ -38,7 +39,6 @@ class TacobuenoSpider(scrapy.Spider):
                 lat = i["latitude"]
                 # business_hours seems to hold bad data
                 hours = self.convert_hours(i["businesshours"])
-                addr_full = ", ".join([street, city, state, postcode, country])
                 yield Feature(
                     ref=ref,
                     name=name,
@@ -47,7 +47,6 @@ class TacobuenoSpider(scrapy.Spider):
                     state=state,
                     postcode=postcode,
                     country=country,
-                    addr_full=addr_full,
                     phone=phone,
                     lon=lon,
                     lat=lat,

@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class OrangePLSpider(SitemapSpider):
@@ -27,13 +28,14 @@ class OrangePLSpider(SitemapSpider):
 
     def parse_poi(self, response, website):
         poi = response.json()
-        poi["street_address"] = ", ".join(filter(None, [poi.pop("street1"), poi.pop("street2")]))
-        poi["addr_full"] = ", ".join(filter(None, poi["formatted_address"]))
+        poi["street_address"] = clean_address([poi.pop("street1"), poi.pop("street2")])
+        poi["addr_full"] = clean_address(poi["formatted_address"])
         poi["location"] = poi.pop("_geoloc")
         item = DictParser.parse(poi)
         item["country"] = poi["country"]["code"]
         item["city"] = poi["city"]["name"]
         item["website"] = website
+        item["branch"] = item.pop("name", None)
         self.parse_hours(item, poi)
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item

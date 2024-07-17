@@ -32,6 +32,7 @@ FEED_URI = os.environ.get("FEED_URI")
 FEED_FORMAT = os.environ.get("FEED_FORMAT")
 FEED_EXPORTERS = {
     "geojson": "locations.exporters.geojson.GeoJsonExporter",
+    "parquet": "locations.exporters.geoparquet.GeoparquetExporter",
     "ndgeojson": "locations.exporters.ld_geojson.LineDelimitedGeoJsonExporter",
     "osm": "locations.exporters.osm.OSMExporter",
 }
@@ -46,6 +47,9 @@ DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
+
+# Set a timeout for requests
+DOWNLOAD_TIMEOUT = 15
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -97,6 +101,7 @@ EXTENSIONS = {
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "locations.pipelines.duplicates.DuplicatesPipeline": 200,
+    "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
     "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
     "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
     "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,

@@ -8,6 +8,7 @@ from locations.dict_parser import DictParser
 class PizzaHutNZSpider(Spider):
     name = "pizza_hut_nz"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
+    requires_proxy = "US"  # Akamai blocking is in use
 
     def start_requests(self):
         yield JsonRequest(

@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.hours import DAYS_DE, OpeningHours
+from locations.hours import DAYS, DAYS_DE, OpeningHours
 from locations.items import Feature
 
 
@@ -28,8 +28,15 @@ class KampsDESpider(SitemapSpider):
         for row in response.xpath('//div[@class="card-block"]/table/tr'):
             day_de = row.xpath("./td/text()")[0].extract()
             range_str = row.xpath("./td/text()")[-1].extract()
-            range_start, range_end = range_str.split("-")
-            oh.add_range(DAYS_DE[day_de], range_start, range_end)
+            if range_str == "24 Stunden":
+                oh.add_days_range(DAYS, "00:00", "23:59")
+            if "geschlossen" in range_str:
+                return
+            times = range_str.replace("–", "-")
+            if "-" in times:
+                for time in times.split(","):
+                    range_start, range_end = map(str.strip, time.split("-"))
+                    oh.add_range(DAYS_DE[day_de], range_start, range_end)
 
         properties["opening_hours"] = oh.as_opening_hours()
 

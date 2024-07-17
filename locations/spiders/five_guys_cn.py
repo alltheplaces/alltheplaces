@@ -8,4 +8,4 @@ class FiveGuysCNSpider(SitemapSpider, StructuredDataSpider):
     name = "five_guys_cn"
     item_attributes = FiveGuysUSSpider.item_attributes
     sitemap_urls = ["https://restaurants.fiveguys.cn/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.cn\/en\/[^/]+$", "parse_sd")]
+    sitemap_rules = [(r"^https://restaurants\.fiveguys\.cn\/en_cn\/[^/]+$", "parse_sd")]

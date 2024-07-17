@@ -7,6 +7,7 @@ from locations.dict_parser import DictParser
 class PizzaHutAESpider(scrapy.Spider):
     name = "pizza_hut_ae_sa"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for key, value in {"uae": "uae", "saudi": "ksa"}.items():

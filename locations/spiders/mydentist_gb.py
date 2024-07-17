@@ -2,6 +2,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories
+from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -32,7 +33,7 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
 
         # City can come back as eg ["Penistone", "Sheffield"] - put the locality on the end of street address
         if "city" in item and isinstance(item["city"], list):
-            item["street_address"] = ", ".join([item["street_address"]] + item["city"][:-1])
+            item["street_address"] = clean_address([item["street_address"]] + item["city"][:-1])
             item["city"] = item["city"][-1]
 
         if item["name"] is not None and (
@@ -40,5 +41,8 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
         ):
             item.update(self.MYDENTIST)
             item["name"] = "{my}dentist"
+
+        if isinstance(item.get("email"), list):
+            item["email"] = ", ".join(item["email"])
 
         yield item

@@ -1,10 +1,14 @@
 import json
+import logging
+import traceback
 
 import chompjs
 import json5
 
 from locations.hours import OpeningHours
 from locations.items import Feature, add_social_media
+
+logger = logging.getLogger(__name__)
 
 
 class LinkedDataParser:
@@ -116,8 +120,12 @@ class LinkedDataParser:
             oh = OpeningHours()
             oh.from_linked_data(ld, time_format=time_format)
             item["opening_hours"] = oh
-        except:
-            pass
+        except ValueError as e:
+            # Explicitly handle a ValueError, which is likely time_format related
+            logger.warning(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
+        except Exception as e:
+            logger.warning(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
+            logger.debug(traceback.print_exc())
 
         if image := ld.get("image"):
             if isinstance(image, list):
@@ -162,6 +170,12 @@ class LinkedDataParser:
                 item["website"] = "https://" + item["website"]
 
             return item
+
+    @staticmethod
+    def parse_opening_hours(linked_data, time_format: str = "%H:%M") -> OpeningHours:
+        oh = OpeningHours()
+        oh.from_linked_data(linked_data, time_format)
+        return oh
 
     @staticmethod
     def get_clean(obj, key):

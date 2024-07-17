@@ -41,9 +41,10 @@ class WesternUnionSpider(Spider):
             "query": "query locations($req:LocationInput) { locations(input: $req) }",
             "variables": {
                 "req": {
-                    "longitude": longitude,
-                    "latitude": latitude,
+                    "longitude": str(longitude),
+                    "latitude": str(latitude),
                     "country": "US",  # Seemingly has no effect.
+                    "brand": "wu",
                     "openNow": "",
                     "services": [],
                     "sortOrder": "Distance",
