@@ -7,7 +7,6 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-
 class NormaDESpider(scrapy.Spider):
     name = "norma_de"
     item_attributes = {"brand": "Norma", "brand_wikidata": "Q450180"}
