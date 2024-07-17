@@ -3,42 +3,65 @@ import os
 import re
 from typing import List
 
-ALLOWED_UPPERCASE_COMPONENTS = {
-    "AU",
+COUNTRYCODE_COMPONENTS = {
+    "AE",
+    "AR",
     "AT",
+    "AU",
     "BE",
     "BG",
+    "BH",
+    "BR",
     "CA",
-    "CZ",
     "CH",
+    "CL",
+    "CY",
+    "CZ",
     "DE",
     "DK",
     "ES",
+    "EU",
     "FR",
     "GB",
+    "GR",
+    "HK",
+    "HR",
     "HU",
     "IE",
     "IN",
     "IT",
     "KE",
-    "KW",
     "KR",
+    "KW",
     "KZ",
+    "LT",
+    "LU",
+    "MA",
+    "MO",
     "MT",
     "MX",
+    "MY",
     "NL",
     "NO",
     "NZ",
+    "PE",
+    "PH",
     "PL",
+    "PR",
     "PT",
     "RO",
     "RS",
     "RU",
     "SE",
+    "SG",
+    "SI",
+    "TH",
+    "TR",
     "TR",
     "TW",
-    "US",
+    "UA",
     "UK",
+    "US",
     "ZA",
 }
 
@@ -46,12 +69,16 @@ ALLOWED_UPPERCASE_COMPONENTS = {
 def snake_to_camel(snake_str: str) -> str:
     components = snake_str.split("_")
 
-    # Allow some special cases to be all caps
+    # Capitalize the first letter of each component except the first one
     for i, component in enumerate(components):
-        if component.upper() in ALLOWED_UPPERCASE_COMPONENTS:
-            components[i] = component.upper()
-        else:
-            components[i] = component.title()
+        components[i] = component.capitalize()
+
+    # Allow consecutive country codes at the end of the spider name
+    for i in range(len(components) - 1, 0, -1):
+        if components[i].upper() not in COUNTRYCODE_COMPONENTS:
+            break
+
+        components[i] = components[i].upper()
 
     return "".join(components)
 
