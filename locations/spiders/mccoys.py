@@ -1,17 +1,21 @@
-from scrapy.spiders import SitemapSpider
+from urllib.parse import urljoin
+
+import scrapy
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class McCoysSpider(SitemapSpider, StructuredDataSpider):
+class McCoysSpider(StructuredDataSpider):
     name = "mccoys"
     item_attributes = {"brand": "McCoy's Building Supply", "brand_wikidata": "Q27877295"}
-    allowed_domains = ["www.mccoys.com"]
-    sitemap_urls = ["https://www.mccoys.com/sitemap.xml"]
-    sitemap_rules = [(r"/stores/[-\w]+", "parse_sd")]
-    wanted_types = ["Store"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    time_format = "%I:%M %p"
+    start_urls = ["https://www.mccoys.com/stores"]
+    time_format = "%I%p"
+
+    def parse(self, response):
+        locations = response.xpath('//*[@class="btn btn-block btn-outline-secondary"]//@href').getall()
+        for location in locations:
+            url = urljoin("https://www.mccoys.com", location)
+            yield scrapy.Request(url=url, callback=self.parse_sd)
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["openingHoursSpecification"] = ld_data.pop("OpeningHoursSpecification", None)

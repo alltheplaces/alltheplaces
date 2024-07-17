@@ -35,6 +35,7 @@ class OrangePLSpider(SitemapSpider):
         item["country"] = poi["country"]["code"]
         item["city"] = poi["city"]["name"]
         item["website"] = website
+        item["branch"] = item.pop("name", None)
         self.parse_hours(item, poi)
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
