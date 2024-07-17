@@ -24,7 +24,7 @@ class DelikatesyCentrumPLSpider(Spider):
         for location in response.json()["pageProps"]["shops"]:
             item = DictParser.parse(location)
             item["ref"] = location["shop_code"]
-            item["name"] = location["name"].split("\\", 1)[0].strip()
+            item.pop("name", None)
             item["lat"] = location["address"]["lat"]
             item["lon"] = location["address"]["lon"]
             item["opening_hours"] = OpeningHours()
