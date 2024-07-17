@@ -1,10 +1,11 @@
+import json
+
 from typing import Any
 from urllib.parse import urljoin
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
-
-from locations.hours import DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -29,10 +30,11 @@ class HaysTravelGBSpider(Spider):
             item["phone"] = location["phone"]
             item["email"] = location["email"]
 
-            for day in map(str.lower, DAYS_FULL):
-                item["opening_hours"].add_range(
-                    day,
-                    location["{}_hours".format(day)].strip(),
-                )
+          #  item["opening_hours"] = OpeningHours()
+          #  for day in map(str.lower, DAYS_FULL):
+          #      item["Opening_hours"]=day
+          #      item["opening_hours"].add_ranges_from_string(
+          #          location["{}_hours".format(day)], delimiters=[" - "]
+          #      )
 
             yield item
