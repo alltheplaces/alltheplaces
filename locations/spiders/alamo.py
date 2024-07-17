@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AlamoSpider(scrapy.Spider):
@@ -12,10 +13,9 @@ class AlamoSpider(scrapy.Spider):
     def parse(self, response):
         for loc in response.json():
             properties = {
-                "name": loc["name"],
-                "brand": loc["brand"],
+                "branch": loc["name"],
                 "phone": "; ".join([p["phone_number"] for p in loc["phones"]]),
-                "street_address": ", ".join(loc["address"]["street_addresses"]),
+                "street_address": clean_address(loc["address"]["street_addresses"]),
                 "city": loc["address"].get("city"),
                 "state": loc["address"]["country_subdivision_code"],
                 "postcode": loc["address"]["postal"],

@@ -7,12 +7,12 @@ from locations.dict_parser import DictParser
 class BoxNowSpider(Spider):
     name = "box_now"
     item_attributes = {"brand": "Box Now"}
-    allowed_domains = ["boxlockersloadfilesbg.blob.core.windows.net"]
     start_urls = [
         "https://boxlockersloadfilesbg.blob.core.windows.net/lockerslargenavigate/all.json",
         "https://boxlockersloadfiles.blob.core.windows.net/lockerslargenavigate/all.json",
         "https://boxlockersloadfilescr.blob.core.windows.net/lockerslargenavigate/all.json",
     ]
+    # requires_proxy = "BG"
 
     def start_requests(self):
         for url in self.start_urls:

@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class JohnstonesDecoratingCentreSpider(SitemapSpider):
@@ -17,6 +18,8 @@ class JohnstonesDecoratingCentreSpider(SitemapSpider):
     sitemap_rules = [(r"/(united-kingdom-region|republic-of-ireland-region)-[-\w]+\d+$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        if "https://www.johnstonesdc.com/stores" in response.url:
+            return
         store_locator = response.xpath("//section[contains(@class, 'store-locator')]")
         address = store_locator.xpath(".//div[contains(@class, 'card-address')]/div/div/div/text()").getall()
         hours = store_locator.xpath(
@@ -37,7 +40,7 @@ class JohnstonesDecoratingCentreSpider(SitemapSpider):
             "ref": response.url,
             "website": response.url,
             "opening_hours": oh,
-            "addr_full": ", ".join([address[1].strip(), address[2]]),
+            "addr_full": clean_address([address[1], address[2]]),
             "phone": contact[0],
             "email": contact[1],
             "name": address[0],

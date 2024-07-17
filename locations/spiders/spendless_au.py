@@ -5,6 +5,7 @@ from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SpendlessAUSpider(Spider):
@@ -35,7 +36,7 @@ class SpendlessAUSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["identifier"]
             item.pop("street")
-            item["street_address"] = ", ".join(filter(None, [location.get("street"), location.get("street2")]))
+            item["street_address"] = clean_address([location.get("street"), location.get("street2")])
             hours_string = re.sub(r"\s+", " ", location.get("opening_hours", "")).strip()
             if hours_string:
                 item["opening_hours"] = OpeningHours()

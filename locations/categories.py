@@ -28,6 +28,10 @@ class Categories(Enum):
 
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
 
+    ENFORCEMENT_AVERAGE_SPEED = {"enforcement": "average_speed"}
+    ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
+    ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
+
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
@@ -137,6 +141,7 @@ class Categories(Enum):
     SHOP_NUTRITION_SUPPLEMENTS = {"shop": "nutrition_supplements"}
     SHOP_NUTS = {"shop": "nuts"}
     SHOP_OPTICIAN = {"shop": "optician"}
+    SHOP_ORTHOPEDICS = {"shop": "orthopedics"}
     SHOP_OUTDOOR = {"shop": "outdoor"}
     SHOP_OUTPOST = {"shop": "outpost"}
     SHOP_PAINT = {"shop": "paint"}
@@ -191,8 +196,10 @@ class Categories(Enum):
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
 
+    TOURISM_APARTMENT = {"tourism": "apartment"}
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
     TOURISM_CHALET = {"tourism": "chalet"}
+    TOURISM_HOSTEL = {"tourism": "hostel"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
@@ -246,6 +253,7 @@ class Categories(Enum):
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
+    PREP_SCHOOL = {"amenity": "prep_school"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
@@ -276,6 +284,10 @@ class Categories(Enum):
     TRADE_LANDSCAPING_SUPPLIES = {"trade": "landscaping_supplies"}
     TRADE_PLUMBING = {"trade": "plumbing"}
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
+
+    ANTENNA = {"man_made": "antenna"}
+
+    SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
 
 
 def apply_category(category, item: Feature):
@@ -335,7 +347,7 @@ top_level_tags = [
 ]
 
 
-def get_category_tags(source) -> {}:
+def get_category_tags(source: Feature | Enum | dict) -> dict:
     """
     Retreive OpenStreetMap top level tags from a Feature, Enum or
     dict. All top level tags can exist on their own and do not
@@ -398,6 +410,7 @@ class Fuel(Enum):
     E20 = "fuel:e20"
     E30 = "fuel:e30"
     E85 = "fuel:e85"
+    E88 = "fuel:e88"
     ETHANOL_FREE = "fuel:ethanol_free"
     METHANOL = "fuel:methanol"
     BIOGAS = "fuel:biogas"
@@ -507,6 +520,7 @@ class PaymentMethods(Enum):
     MASTER_CARD_DEBIT = "payment:mastercard_debit"
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
+    MIR = "payment:mir"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
     PAYPAY = "payment:paypay"
@@ -566,6 +580,7 @@ class Access(Enum):
     """
 
     HGV = "hgv"
+    MOTOR_CAR = "motorcar"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):

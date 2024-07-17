@@ -1,4 +1,5 @@
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
@@ -29,7 +30,7 @@ class FamilyDollarUSSpider(Where2GetItSpider):
     def parse_item(self, item, location):
         if location["coming_soon"] == "Y" or location["temp_closed"] == "Y" or location["temporarily_closed"] == "Y":
             return
-        item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
+        item["street_address"] = clean_address([location["address1"], location["address2"]])
         item["website"] = (
             "https://www.familydollar.com/locations/"
             + item["state"].lower()
@@ -46,4 +47,5 @@ class FamilyDollarUSSpider(Where2GetItSpider):
             hours_string = hours_string + f" {day}: {open_time} - {close_time}"
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
+        item["extras"]["ref:branch"] = item.pop("name", "").removeprefix("FAMILY DOLLAR #")
         yield item

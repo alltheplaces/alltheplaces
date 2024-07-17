@@ -2,6 +2,7 @@ from scrapy import Request, Spider
 
 from locations.hours import DAYS_PT, DELIMITERS_PT, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BoloDaMadreBRSpider(Spider):
@@ -32,7 +33,7 @@ class BoloDaMadreBRSpider(Spider):
                 {
                     "ref": name,
                     "name": name,
-                    "addr_full": ", ".join([address_hours[0], address_hours[1]]),
+                    "addr_full": clean_address([address_hours[0], address_hours[1]]),
                     "phone": location.xpath("p/span[@class='whats-phone']/a/text()").get(),
                     "opening_hours": oh,
                 }

@@ -3,7 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BarAndBlockGB(CrawlSpider):
@@ -17,7 +17,7 @@ class BarAndBlockGB(CrawlSpider):
 
         item["name"] = response.xpath("//@data-ldname").get()
         item["ref"] = response.xpath("//@data-lid").get()
-        item["addr_full"] = clean_address(response.xpath("//address/p/text()").getall())
+        item["addr_full"] = merge_address_lines(response.xpath("//address/p/text()").getall())
         item["phone"] = response.xpath('//a[@class="details--table-cell__phone icon__phone"]/text()').get()
         item["email"] = (
             response.xpath('//a[@class="details--table-cell__email icon__email"]/@href').get().replace("mailto:", "")

@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 from collections import defaultdict
@@ -51,6 +52,7 @@ DAYS_EN = {
     "Sun": "Su",
     "Su": "Su",
 }
+
 DAYS_DE = {
     "Montag": "Mo",
     "Mo": "Mo",
@@ -67,6 +69,7 @@ DAYS_DE = {
     "Sonntag": "Su",
     "So": "Su",
 }
+
 DAYS_BG = {
     "Понеделник": "Mo",
     "Пн": "Mo",
@@ -94,6 +97,7 @@ DAYS_BG = {
     "Не": "Su",
     "Нд": "Su",
 }
+
 DAYS_CH = {
     "Mo": "Mo",
     "Di": "Tu",
@@ -103,6 +107,76 @@ DAYS_CH = {
     "Sa": "Sa",
     "So": "Su",
 }
+
+DAYS_CN = {
+    # Standard Modern Chinese
+    "月曜日": "Mo",
+    "Yuèyàorì": "Mo",
+    "星期一": "Mo",
+    "Xīngqīyī": "Mo",
+    "週一": "Mo",
+    "Zhōuyī": "Mo",
+    "禮拜一": "Mo",
+    "Lǐbàiyī": "Mo",
+    "周一": "Mo",
+    "火曜日": "Tu",
+    "Huǒyàorì": "Tu",
+    "星期二": "Tu",
+    "Xīngqī'èr": "Tu",
+    "週二": "Tu",
+    "Zhōu'èr": "Tu",
+    "禮拜二": "Tu",
+    "Lǐbài'èr": "Tu",
+    "水曜日": "We",
+    "Shuǐyàorì": "We",
+    "星期三": "We",
+    "Xīngqīsān": "We",
+    "週三": "We",
+    "Zhōusān": "We",
+    "禮拜三": "We",
+    "Lǐbàisān": "We",
+    "木曜日": "Th",
+    "Mùyàorì": "Th",
+    "星期三": "We",
+    "星期四": "Th",
+    "Xīngqīsì": "Th",
+    "週四": "Th",
+    "Zhōusì": "Th",
+    "禮拜四": "Th",
+    "Lǐbàisì": "Th",
+    "金曜日": "Fr",
+    "Jīnyàorì": "Fr",
+    "星期五": "Fr",
+    "Xīngqīwǔ": "Fr",
+    "週五": "Fr",
+    "Zhōuwǔ": "Fr",
+    "禮拜五": "Fr",
+    "Lǐbàiwǔ": "Fr",
+    "土曜日": "Sa",
+    "Tǔyàorì": "Sa",
+    "星期六": "Sa",
+    "Xīngqīliù": "Sa",
+    "週六": "Sa",
+    "Zhōuliù": "Sa",
+    "禮拜六": "Sa",
+    "Lǐbàiliù": "Sa",
+    "日曜日": "Su",
+    "Rìyàorì": "Su",
+    "星期日": "Su",
+    "Xīngqīrì": "Su",
+    "星期天": "Su",
+    "Xīngqītiān": "Su",
+    "週日": "Su",
+    "Zhōurì": "Su",
+    "週天": "Su",
+    "Zhōutiān": "Su",
+    "禮拜天": "Su",
+    "Lǐbàitiān": "Su",
+    "禮拜日": "Su",
+    "Lǐbàirì": "Su",
+    "周日": "Su",
+}
+
 DAYS_CZ = {
     "Pondělí": "Mo",
     "Po": "Mo",
@@ -119,6 +193,7 @@ DAYS_CZ = {
     "Neděle": "Su",
     "Ne": "Su",
 }
+
 DAYS_GR = {
     "Δε": "Mo",
     "Δευτέρα": "Mo",
@@ -168,6 +243,25 @@ DAYS_IL = {
     "יום שישי": "Fr",
     "יום שבת": "Sa",
     "יום ראשון": "Su",
+}
+
+DAYS_LT = {
+    "pirmadienis": "Mo",
+    "antradienis": "Tu",
+    "trečiadienis": "We",
+    "ketvirtadienis": "Th",
+    "penktadienis": "Fr",
+    "šeštadienis": "Sa",
+    "sekmadienis": "Su",
+    "I": "Mo",
+    "II": "Tu",
+    "III": "We",
+    "IV": "Th",
+    "V": "Fr",
+    "VI": "Sa",
+    "VII": "Su",
+    "Vi": "Sa",
+    "Vii": "Su",
 }
 
 DAYS_SE = {
@@ -300,6 +394,7 @@ DAYS_PL = {
     "Niedz": "Su",
     "Niedzela": "Su",
     "Niedziela": "Su",
+    "Niedziele": "Su",
 }
 DAYS_PT = {
     # "Feriado": "PH",
@@ -431,10 +526,12 @@ DAYS_ES = {
     "Vi": "Fr",
     "Sabado": "Sa",
     "Sábado": "Sa",
+    "Sábados": "Sa",
     "Sab": "Sa",
     "Sáb": "Sa",
     "Sa": "Sa",
     "Domingo": "Su",
+    "Domingos": "Su",
     "Dom": "Su",
     "Do": "Su",
 }
@@ -581,6 +678,8 @@ DELIMITERS_PL = [
 
 DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
+logger = logging.getLogger(__name__)
+
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(sanitise_day(start_day))
@@ -608,10 +707,23 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
+        self.days_closed = set()
+
+    def __bool__(self):
+        return bool(self.day_hours or self.days_closed)
 
     def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
+
+    def set_closed(self, days: str | list[str]):
+        for day in [days] if isinstance(days, str) else days:
+            day = sanitise_day(day)
+
+            if day not in DAYS:
+                raise ValueError(f"day must be one of {DAYS}, not {day!r}")
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
 
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         day = sanitise_day(day)
@@ -620,6 +732,15 @@ class OpeningHours:
             raise ValueError(f"day must be one of {DAYS}, not {day!r}")
 
         if not open_time or not close_time:
+            return
+        if (
+            isinstance(open_time, str)
+            and isinstance(close_time, str)
+            and open_time.lower() == "closed"
+            and close_time.lower() == "closed"
+        ):
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
             return
         if isinstance(open_time, str):
             if open_time.lower() == "closed":
@@ -634,6 +755,7 @@ class OpeningHours:
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
 
+        self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
 
     def as_opening_hours(self) -> str:
@@ -641,14 +763,17 @@ class OpeningHours:
         this_day_group = None
 
         for day in DAYS:
-            hours = ",".join(
-                "%s-%s"
-                % (
-                    time.strftime("%H:%M", h[0]),
-                    time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+            if day in self.days_closed:
+                hours = "closed"
+            else:
+                hours = ",".join(
+                    "%s-%s"
+                    % (
+                        time.strftime("%H:%M", h[0]),
+                        time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+                    )
+                    for h in sorted(self.day_hours[day])
                 )
-                for h in sorted(self.day_hours[day])
-            )
 
             if not this_day_group:
                 this_day_group = {"from_day": day, "to_day": day, "hours": hours}
@@ -661,79 +786,115 @@ class OpeningHours:
         day_groups.append(this_day_group)
 
         opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-24:00",
-            "00:00-00:00",
-        ):
-            opening_hours = "24/7"
-        else:
-            for day_group in day_groups:
-                if not day_group["hours"]:
-                    continue
-                elif day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
-                    opening_hours += "{hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
+
+        for day_group in day_groups:
+            if not day_group["hours"]:
+                continue
+            elif day_group["from_day"] == day_group["to_day"]:
+                opening_hours += "{from_day} {hours}; ".format(**day_group)
+            elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
+                opening_hours += "{hours}; ".format(**day_group)
+            else:
+                opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
+        opening_hours = opening_hours[:-2]
 
         return opening_hours
 
+    # Parses an openingHoursSpecification dict
+    # IE:
+    # {
+    #  "@type": "OpeningHoursSpecification",
+    #  "closes":  "17:00:00",
+    #  "dayOfWeek": "https://schema.org/Sunday",
+    #  "opens":  "09:00:00"
+    # }
+    # See https://schema.org/OpeningHoursSpecification for further examples.
+    def _parse_opening_hours_specification(self, rule: dict, time_format: str):
+        if (
+            not type(rule.get("dayOfWeek")) in [list, str]
+            or not type(rule.get("opens")) == str
+            or not type(rule.get("closes")) == str
+        ):
+            return
+
+        days = rule["dayOfWeek"]
+        if not isinstance(days, list):
+            days = [days]
+
+        for day in days:
+            self.add_range(
+                day=day.strip(),
+                open_time=rule["opens"].strip(),
+                close_time=rule["closes"].strip(),
+                time_format=time_format,
+            )
+
+    # Parse an individual https://schema.org/openingHours property value such as
+    # "Mo,Tu,We,Th 09:00-12:00"
+    # "Mo-Fr 10:00-19:00"
+    def _parse_opening_hours(self, rule: str, time_format: str):
+        days, time_ranges = rule.split(" ", 1)
+
+        for time_range in time_ranges.split(","):
+            if time_ranges.lower() in ["closed", "off"]:
+                start_time = end_time = "closed"
+            else:
+                start_time, end_time = time_range.split("-")
+
+            start_time = start_time.strip()
+            end_time = end_time.strip()
+
+            if "-" in days:
+                start_day, end_day = days.split("-")
+
+                start_day = sanitise_day(start_day)
+                end_day = sanitise_day(end_day)
+
+                for day in day_range(start_day, end_day):
+                    self.add_range(day, start_time, end_time, time_format)
+            else:
+                for day in days.split(","):
+                    if d := sanitise_day(day):
+                        self.add_range(d, start_time, end_time, time_format)
+
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
-        if linked_data.get("openingHoursSpecification"):
-            for rule in linked_data["openingHoursSpecification"]:
-                if not isinstance(rule, dict):
-                    continue
-                if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
-                    continue
+        """
+        Deprecated, please use LinkedDataParser.parse_opening_hours
+        """
+        # TODO: move to LinkedDataParser
+        if spec := linked_data.get("openingHoursSpecification"):
+            if isinstance(spec, list):
+                for rule in linked_data["openingHoursSpecification"]:
+                    if not isinstance(rule, dict):
+                        continue
+                    self._parse_opening_hours_specification(rule, time_format)
+            elif isinstance(spec, dict):
+                self._parse_opening_hours_specification(spec, time_format)
+            else:
+                logger.info("Unknown openingHoursSpecification structure, ignoring")
+                logger.debug(linked_data.get("openingHoursSpecification"))
 
-                days = rule["dayOfWeek"]
-                if not isinstance(days, list):
-                    days = [days]
-
-                for day in days:
-                    self.add_range(
-                        day=day,
-                        open_time=rule["opens"],
-                        close_time=rule["closes"],
-                        time_format=time_format,
-                    )
-        elif linked_data.get("openingHours"):
-            rules = linked_data["openingHours"]
+        elif rules := linked_data.get("openingHours"):
             if not isinstance(rules, list):
                 rules = re.findall(
-                    r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
+                    r"""((
+                        \w{2,3}                 # Day
+                        |\w{2,3}\s?\-\s?\w{2,3} # Day - Day
+                        |(\w{2,3},)+\w{2,3}     # Day,Day
+                    )\s(
+                        (\d\d:\d\d)\s?\-\s?(\d\d:\d\d) # time - range
+                        |(?i:closed) # ignoring case
+                    ))""",
                     rules,
+                    re.X,
                 )
                 rules = [r[0] for r in rules]
 
             for rule in rules:
                 if not rule:
                     continue
-                days, time_ranges = rule.split(" ", 1)
 
-                if "-" not in time_ranges:
-                    continue
-
-                for time_range in time_ranges.split(","):
-                    start_time, end_time = time_range.split("-")
-
-                    start_time = start_time.strip()
-                    end_time = end_time.strip()
-
-                    if "-" in days:
-                        start_day, end_day = days.split("-")
-
-                        start_day = sanitise_day(start_day)
-                        end_day = sanitise_day(end_day)
-
-                        for day in day_range(start_day, end_day):
-                            self.add_range(day, start_time, end_time, time_format)
-                    else:
-                        for day in days.split(","):
-                            if d := sanitise_day(day):
-                                self.add_range(d, start_time, end_time, time_format)
+                self._parse_opening_hours(rule, time_format)
 
     @staticmethod
     def delimiters_regex(delimiters: list[str] = DELIMITERS_EN) -> str:

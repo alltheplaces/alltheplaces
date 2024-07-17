@@ -1,4 +1,4 @@
-from locations.categories import Categories
+from locations.categories import Categories, Extras, PaymentMethods, apply_yes_no
 from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
@@ -29,17 +29,13 @@ class PeetsCoffeeUSSpider(StockistSpider):
             if field["name"] == "Type" and field["value"] == "Licensed Partner":
                 item["located_in"] = item.pop("name")
 
+        item["branch"] = item.pop("name", None)
+
         for feature in location["filters"]:
-            if feature["name"] == "Contactless Payments":
-                item["extras"]["payment:contactless"] = "yes"
-            if feature["name"] == "Accepts Peet's Cards":
-                item["extras"]["payment:gift_card"] = "yes"
-            if feature["name"] == "Warm Breakfast":
-                item["extras"]["breakfast"] = "yes"
-            if feature["name"] == "Free Wi-Fi":
-                item["extras"]["internet_access"] = "wlan"
-                item["extras"]["internet_access:fee"] = "no"
-            if feature["name"] == "Delivery":
-                item["extras"]["delivery"] = "yes"
+            apply_yes_no(PaymentMethods.CONTACTLESS, item, feature["name"] == "Contactless Payments")
+            apply_yes_no("payment:gift_card", item, feature["name"] == "Accepts Peet's Cards")
+            apply_yes_no("breakfast", item, feature["name"] == "Warm Breakfast")
+            apply_yes_no(Extras.WIFI, item, feature["name"] == "Free Wi-Fi")
+            apply_yes_no(Extras.DELIVERY, item, feature["name"] == "Delivery")
 
         yield item

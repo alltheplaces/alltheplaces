@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 

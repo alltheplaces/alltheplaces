@@ -13,9 +13,13 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class KiboSpider(Spider):
     page_size = 1000
+    api_filter = None
 
     def start_requests(self):
-        yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
+        if self.api_filter:
+            yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&filter={self.api_filter}")
+        else:
+            yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
 
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:

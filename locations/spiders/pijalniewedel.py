@@ -15,7 +15,7 @@ class PijalnieWedel(Spider):
     name = "pijalniewedel_pl"
     item_attributes = {
         "brand": "Pijalnia Czekolady E.Wedel",
-        "brand_wikidata": "Q123251317",
+        "brand_wikidata": "Q1273613",
         "extras": Categories.CAFE.value,
     }
     start_urls = ["https://wedelpijalnie.pl/lokale"]

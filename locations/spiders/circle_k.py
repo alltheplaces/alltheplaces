@@ -9,10 +9,22 @@ from locations.dict_parser import DictParser
 
 class CircleKSpider(Spider):
     name = "circle_k"
-    item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
+    CIRCLE_K = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
     allowed_domains = ["www.circlek.com"]
     start_urls = ["https://www.circlek.com/stores_master.php?lat=0&lng=0&page=0"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+
+    brands = {
+        "Car Wash Cleanfreak": ({"name": "Clean Freak Car Wash", "brand": "Clean Freak Car Wash"}, Categories.CAR_WASH),
+        "Circle K": (CIRCLE_K, None),
+        "Corner Store": ({"name": "Corner Store", "brand": "Corner Store"}, Categories.SHOP_CONVENIENCE),
+        "Couche-Tard": ({"brand": "Couche-Tard", "brand_wikidata": "Q2836957"}, None),
+        "Holiday Station": ({"brand": "Holiday", "brand_wikidata": "Q5880490"}, None),
+        "Kangaroo Express": ({"brand": "Kangaroo Express", "brand_wikidata": "Q61747408"}, Categories.SHOP_CONVENIENCE),
+        "Mac's": ({"name": "Mac's", "brand": "Mac's", "brand_wikidata": "Q4043527"}, Categories.SHOP_CONVENIENCE),
+        "On the Run": ({"brand": "On the Run", "brand_wikidata": "Q16931259"}, Categories.SHOP_CONVENIENCE),
+        "Rainstorm Car Wash": ({"name": "Rainstorm Car Wash", "brand": "Rainstorm Car Wash"}, Categories.CAR_WASH),
+    }
 
     def start_requests(self):
         for url in self.start_urls:
@@ -27,38 +39,28 @@ class CircleKSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location_id
             item["street_address"] = item.pop("addr_full")
-            item["website"] = "https://www.circlek.com" + item["website"]
+            item["website"] = response.urljoin(location["url"])
+
             services = [service["name"] for service in location["services"]]
-            apply_yes_no(Extras.ATM, item, "atm" in services or "EU_ATM" in services)
-            apply_yes_no(Extras.INDOOR_SEATING, item, "EU_LOUNGE" in services)
-            apply_yes_no(Extras.TOILETS, item, "public_restrooms" in services or "EU_TOILETS_BOTH" in services)
-            apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "EU_BABY_CHANGING" in services)
-            apply_yes_no(Extras.SHOWERS, item, "EU_SHOWER" in services)
-            apply_yes_no(Extras.WIFI, item, "EU_WIFI" in services)
-            apply_yes_no(
-                Extras.CAR_WASH,
-                item,
-                "car_wash" in services
-                or "car_wash_cleanfreak" in services
-                or "rainstorm_car_wash" in services
-                or "EU_CARWASH" in services
-                or "EU_CARWASH_JETWASH" in services,
-            )
+            apply_yes_no(Extras.ATM, item, "atm" in services)
+            apply_yes_no(Extras.TOILETS, item, "public_restrooms" in services)
+            apply_yes_no(Extras.CAR_WASH, item, "car_wash" in services)
             apply_yes_no(Fuel.DIESEL, item, "diesel" in services)
-            apply_yes_no(Fuel.HGV_DIESEL, item, "EU_TRUCKDIESEL_NETWORK" in services)
-            apply_yes_no(Fuel.ADBLUE, item, "EU_ADBLUE_SERVICE" in services)
-            if (
-                "gas" in services
-                or "EU_GAS" in services
-                or "diesel" in services
-                or "EU_TRUCKDIESEL_NETWORK" in services
-            ):
-                apply_category(Categories.FUEL_STATION, item)
+            apply_yes_no(Fuel.ELECTRIC, item, "ev_charger" in services)
+
+            brand, cat = self.brands.get(location["display_brand"], (None, None))
+            if brand:
+                item.update(brand)
             else:
-                # default category
-                apply_category(Categories.SHOP_CONVENIENCE, item)
-            if "ev_charger" in services or "EU_HIGH_SPEED_CHARGER" in services:
-                apply_category(Categories.CHARGING_STATION, item)
+                self.crawler.stats.inc_value("x/{}".format(location["franchise_brand"]))
+            if cat:
+                apply_category(cat, item)
+            else:
+                if "gas" in services or "diesel" in services:
+                    apply_category(Categories.FUEL_STATION, item)
+                else:
+                    apply_category(Categories.SHOP_CONVENIENCE, item)
+
             yield item
 
         if response.json()["count"] < 10:

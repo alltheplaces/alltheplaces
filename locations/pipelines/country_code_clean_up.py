@@ -40,8 +40,6 @@ class CountryCodeCleanUpPipeline:
 
                     if not item.get("state"):
                         item["state"] = result.get("admin1")
-                    if not item.get("city"):
-                        item["city"] = result.get("admin2")
 
                     return item
 

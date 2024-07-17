@@ -6,7 +6,7 @@ from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class OneStopGBSpider(Spider):
@@ -32,7 +32,9 @@ class OneStopGBSpider(Spider):
             return
         for location in response.json()["message"]["locations"]:
             location["location"]["address"] = location["location"]["address"].pop("details")
-            location["location"]["address"]["street_address"] = clean_address(location["location"]["address"]["lines"])
+            location["location"]["address"]["street_address"] = merge_address_lines(
+                location["location"]["address"]["lines"]
+            )
             location["location"]["contact"]["phone"] = location["location"]["contact"]["phoneNumbers"]["main"]
 
             item = DictParser.parse(location["location"])

@@ -51,7 +51,7 @@ class SuperCutsSpider(scrapy.Spider):
             "city": data["city"],
             "state": data["state"],
             "postcode": data["zip"],
-            "phone": data["phonenumber"],
+            "phone": data.get("phonenumber"),
             "website": f'https://www.supercuts.com/checkin/{data["storeID"]}',
             "opening_hours": self.get_hours(data["store_hours"]),
             "ref": data["storeID"],

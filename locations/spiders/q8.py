@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.q8_italia import Q8ItaliaSpider
 
 
 # AKA Q8 NWE https://www.q8.be/nl/stations
@@ -12,7 +13,7 @@ class Q8Spider(scrapy.Spider):
 
     BRANDS = {
         "EASY": {"brand": "Q8 Easy", "brand_wikidata": "Q1806948"},
-        "Q8": {"brand": "Q8", "brand_wikidata": "Q1634762"},
+        "Q8": Q8ItaliaSpider.item_attributes,
     }
 
     def parse(self, response, **kwargs):

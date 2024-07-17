@@ -3,7 +3,7 @@ import scrapy
 from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CooplandsDoncasterGBSpider(scrapy.Spider):
@@ -22,7 +22,7 @@ class CooplandsDoncasterGBSpider(scrapy.Spider):
 
         for index, store in enumerate(stores):
             data = store.xpath("ul/li/text()").extract()
-            addr_full = clean_address(data[:-1])
+            addr_full = merge_address_lines(data[:-1])
 
             yield Feature(
                 ref=index,

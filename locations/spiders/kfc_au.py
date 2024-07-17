@@ -4,7 +4,8 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.pipelines.address_clean_up import clean_address
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
 class KFCAUSpider(scrapy.Spider):
@@ -25,7 +26,7 @@ class KFCAUSpider(scrapy.Spider):
                 # Ignore dummy stores used for internal testing/development
                 continue
             item["ref"] = location["code"]
-            item["street_address"] = " ".join(location["localAddress"][0]["address"]["addressLines"])
+            item["street_address"] = clean_address(location["localAddress"][0]["address"]["addressLines"])
             item["city"] = location["localAddress"][0]["address"]["city"]
             item["state"] = location["localAddress"][0]["address"]["state"]
             item["country"] = location["localAddress"][0]["address"]["country"]

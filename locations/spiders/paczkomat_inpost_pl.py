@@ -9,14 +9,14 @@ from locations.items import Feature
 
 class PaczkomatInpostPLSpider(Spider):
     name = "paczkomat_inpost_pl"
-    item_attributes = {"brand": "Paczkomat", "brand_wikidata": "Q110970254"}
+    item_attributes = {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254"}
     allowed_domains = ["inpost.pl"]
     start_urls = ["https://inpost.pl/sites/default/files/points.json"]
 
     def parse(self, response, **kwargs):
         for poi in response.json()["items"]:
             # Skip non-active locations and places which are not parcel lockers
-            if poi["s"] != 1 and poi["t"] != 1:
+            if poi["s"] != 1 and poi["t"] != 1 or poi["n"].startswith("POP-"):
                 continue
 
             item = Feature()

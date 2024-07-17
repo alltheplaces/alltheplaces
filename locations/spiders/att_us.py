@@ -1,6 +1,7 @@
 import re
 
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.where2getit import Where2GetItSpider
 from locations.structured_data_spider import clean_facebook
 
@@ -20,7 +21,7 @@ class ATTUSSpider(Where2GetItSpider):
         if location.get("address1") == "123 Main Street":
             item.pop("street_address", None)
         else:
-            item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+            item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
         item["facebook"] = clean_facebook(location.get("facebook_url"))
         if location.get("bho") and len(location.get("bho")) == 7:
             item["opening_hours"] = OpeningHours()

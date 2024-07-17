@@ -4,7 +4,6 @@ from scrapy.http import FormRequest
 from locations.geo import point_locations
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
-from locations.spiders.vapestore_gb import clean_address
 
 
 class PetsAtHomeGBSpider(Spider):
@@ -37,7 +36,7 @@ class PetsAtHomeGBSpider(Spider):
             item["ref"] = item["website"] = f'https://community.petsathome.com{node["slug"]}'
             item["lat"] = node["lat"]
             item["lon"] = node["lng"]
-            item["addr_full"] = clean_address(node["formattedaddress"])
+            item["addr_full"] = node["formattedaddress"]
             # TODO: opentimes
 
             yield item

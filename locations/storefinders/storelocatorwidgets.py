@@ -72,8 +72,8 @@ class StoreLocatorWidgetsSpider(Spider):
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = location["storeid"]
-            item["lat"] = location["data"]["map_lat"]
-            item["lon"] = location["data"]["map_lng"]
+            item["lat"] = location["data"].get("map_lat")
+            item["lon"] = location["data"].get("map_lng")
             item["addr_full"] = location["data"].get("address")
             if "phone" in location["data"]:
                 item["phone"] = location["data"]["phone"]

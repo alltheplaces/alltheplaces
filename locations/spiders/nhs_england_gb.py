@@ -7,7 +7,6 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class NhsEnglandGBSpider(SitemapSpider, StructuredDataSpider):
     name = "nhs_england_gb"
-    item_attributes = {"brand": "NHS England", "brand_wikidata": "Q16251481"}
     sitemap_urls = [
         # The following is an enormous general service file, too fiddly to pick things out for now!
         # "https://www.nhs.uk/sitemaps/sitemap-GDOSprofile.xml",
@@ -16,7 +15,7 @@ class NhsEnglandGBSpider(SitemapSpider, StructuredDataSpider):
         "https://www.nhs.uk/sitemaps/sitemap-GPBprofile.xml",
         # TODO: opticians, pharmacies and hospitals are exposed via a search interface
     ]
-    wanted_types = ["Dentist", "GP", "LocalBusiness"]
+    wanted_types = ["Dentist", "Physician", "LocalBusiness"]
 
     def pre_process_data(self, ld_data, **kwargs):
         for rule in ld_data.get("openingHoursSpecification", []):

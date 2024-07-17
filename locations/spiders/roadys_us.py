@@ -25,6 +25,7 @@ class RoadysUSSpider(scrapy.Spider):
             item["ref"] = location["location_id"]
             item["name"] = location["location_name"]
             item["street_address"] = item.pop("addr_full")
+            item["postcode"] = str(item["postcode"])
             apply_category(Categories.FUEL_STATION, item)
             for amenity in location["amenities"]:
                 match amenity["name"]:

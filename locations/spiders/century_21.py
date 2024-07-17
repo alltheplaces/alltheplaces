@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class Century21Spider(scrapy.spiders.SitemapSpider):
@@ -20,7 +20,7 @@ class Century21Spider(scrapy.spiders.SitemapSpider):
             url = agence.xpath('.//a[contains(@class, "search-result-info")]/@href').get()
             id = re.findall("id=[0-9]*", url)[0].replace("id=", "")
             name = agence.xpath('.//span[contains(@class, "name-label")]/text()').get()
-            address = clean_address(agence.xpath("./a/span[2]/text()").getall())
+            address = merge_address_lines(agence.xpath("./a/span[2]/text()").getall())
             lat = agence.xpath(".//@data-lat").get()
             lon = agence.xpath(".//@data-lng").get()
 
