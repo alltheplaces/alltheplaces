@@ -28,7 +28,7 @@ class HaysTravelGBSpider(Spider):
             item["lon"] = location["longitude"]
             item["branch"] = location["name"]
             item["street_address"] = location["address"]
-            item["city"] = location["city"]
+            item["city"] = location["name"]
             item["postcode"] = location["postcode"]
             item["website"] = urljoin("https://www.americangolf.co.uk/stores?store=", location["ID"])
             item["phone"] = location["phone"]
