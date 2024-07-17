@@ -23,12 +23,13 @@ class PaczkomatInpostPLSpider(Spider):
             # The mapping is available in "load" js function of inpostLocatorMap object
 
             item["ref"] = poi["n"]
-            item["name"] = poi["d"]
+            item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
             item["street"] = poi["e"]
             item["state"] = poi["r"]
             item["postcode"] = poi["o"]
-            item["housenumber"] = poi["b"]
+            if poi["b"] != "b/n":
+                item["housenumber"] = poi["b"]
             item["lat"] = poi["l"]["a"]
             item["lon"] = poi["l"]["o"]
 
