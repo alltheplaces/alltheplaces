@@ -20,7 +20,6 @@ class SushiSushiAUSpider(Spider):
         for location in response.json()["result"]:
             if not location["enabled"]:
                 continue
-            
             item = DictParser.parse(location)
             item["ref"] = location.get("store_id", location.get("_id"))
             item["branch"] = item["name"]
