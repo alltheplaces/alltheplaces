@@ -31,5 +31,6 @@ class SushiSushiAUSpider(Spider):
             if item["phone"] and "CALL ME" in item["phone"]:
                 item.pop("phone", None)
             # 2024-07-18 Spider produces low quality coordinates, so we reject all for now.
-            item["coordinates"] = None
+            item["lat"] = None
+            Item["lon"] = None
             yield item
