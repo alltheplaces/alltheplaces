@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class MisterCarWashSpider(scrapy.Spider):
-    name = "mistercarwash"
+    name = "mister_car_wash"
     item_attributes = {"brand": "Mister Car Wash", "brand_wikidata": "Q114185788"}
     allowed_domains = ["mistercarwash.com/"]
     start_urls = ("http://mistercarwash.com/locations/",)

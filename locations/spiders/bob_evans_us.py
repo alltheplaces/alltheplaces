@@ -7,7 +7,7 @@ from locations.hours import DAYS, OpeningHours
 
 
 class BobEvansUSSpider(SitemapSpider):
-    name = "bobevans_us"
+    name = "bob_evans_us"
     item_attributes = {"brand": "Bob Evans", "brand_wikidata": "Q4932386"}
     sitemap_urls = [
         "https://www.bobevans.com/sitemap.xml",

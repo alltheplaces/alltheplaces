@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 
 class DuluthTradingSpider(CrawlSpider):
-    name = "duluthtrading"
+    name = "duluth_trading"
     item_attributes = {"brand": "Duluth Trading", "brand_wikidata": "Q48977107"}
     allowed_domains = ["duluthtrading.com"]
     start_urls = ["https://www.duluthtrading.com/our-stores"]

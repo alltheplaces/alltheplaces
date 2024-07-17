@@ -18,7 +18,7 @@ from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.marcs import MarcsSpider
 from locations.spiders.market_basket import MarketBasketSpider
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.spiders.nordstrom import NordstromSpider
 from locations.spiders.piggly_wiggly_us import PigglyWigglyUSSpider
 from locations.spiders.race_trac_us import RaceTracUSSpider
@@ -152,8 +152,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = MarketBasketSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = MarketBasketSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Mcdonalds":
-                item["located_in"] = McDonaldsSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = McDonaldsSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = McdonaldsSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = McdonaldsSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Nordstrom":
                 item["located_in"] = NordstromSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = NordstromSpider.item_attributes["brand_wikidata"]

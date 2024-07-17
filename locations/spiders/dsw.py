@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class DesignerShoeWarehouseSpider(SitemapSpider):
+class DswSpider(SitemapSpider):
     name = "dsw"
     item_attributes = {"brand": "Designer Shoe Warehouse", "brand_wikidata": "Q5206207"}
     allowed_domains = [

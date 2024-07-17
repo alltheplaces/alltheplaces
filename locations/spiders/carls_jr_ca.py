@@ -7,7 +7,7 @@ from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrCASpider(scrapy.Spider):
-    name = "carlsjr_ca"
+    name = "carls_jr_ca"
     item_attributes = CarlsJrUSSpider.item_attributes
     start_urls = ["https://www.carlsjr.ca/locations"]
 

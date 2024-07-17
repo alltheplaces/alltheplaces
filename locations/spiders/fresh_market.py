@@ -8,7 +8,7 @@ from locations.items import Feature
 
 
 class FreshMarketSpider(scrapy.Spider):
-    name = "freshmarket"
+    name = "fresh_market"
     item_attributes = {
         "brand": "Fresh Market",
         "brand_wikidata": "Q7735265",

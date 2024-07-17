@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class CarlsJrESSpider(SitemapSpider, StructuredDataSpider):
-    name = "carlsjr_es"
+    name = "carls_jr_es"
     item_attributes = CarlsJrUSSpider.item_attributes
     sitemap_urls = ["https://carlsjr.es/ubicaciones-sitemap.xml"]
     sitemap_rules = [(r"/ubicaciones/", "parse_sd")]

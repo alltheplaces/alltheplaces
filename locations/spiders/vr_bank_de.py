@@ -18,8 +18,8 @@ DAY_MAPPING = {
 }
 
 
-class VRBankSpider(SitemapSpider):
-    name = "vr_bank"
+class VrBankDESpider(SitemapSpider):
+    name = "vr_bank_de"
     allowed_domains = ["www.vr.de"]
     sitemap_urls = ["https://www.vr.de/standorte.sitemap.xml"]
     sitemap_rules = [(r"-\d+\.html$", "parse_details")]

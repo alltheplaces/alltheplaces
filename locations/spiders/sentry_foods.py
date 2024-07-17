@@ -3,7 +3,7 @@ from locations.storefinders.freshop import FreshopSpider
 
 
 class SentryFoodsSpider(FreshopSpider):
-    name = "sentryfoods"
+    name = "sentry_foods"
     item_attributes = {
         "brand": "Sentry Foods",
         "brand_wikidata": "Q7451397",

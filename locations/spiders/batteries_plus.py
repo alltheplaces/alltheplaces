@@ -9,7 +9,7 @@ days_regex = rf"(?:{'|'.join(DAYS)})"
 
 
 class BatteriesPlusSpider(scrapy.spiders.SitemapSpider):
-    name = "batteriesplus"
+    name = "batteries_plus"
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
     allowed_domains = ["batteriesplus.com"]
     sitemap_urls = [

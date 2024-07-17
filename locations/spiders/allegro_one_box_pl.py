@@ -6,7 +6,7 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 
 
-class AllegroOneBoxSpider(Spider):
+class AllegroOneBoxPLSpider(Spider):
     name = "allegro_one_box_pl"
     item_attributes = {"brand": "Allegro One Box", "brand_wikidata": "Q110738715"}
     custom_settings = {"ROBOTSTXT_OBEY": False}

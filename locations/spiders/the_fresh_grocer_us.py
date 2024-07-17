@@ -9,7 +9,7 @@ from locations.hours import OpeningHours, day_range
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class TheFreshGrocerSpider(scrapy.Spider):
+class TheFreshGrocerUSSpider(scrapy.Spider):
     name = "the_fresh_grocer_us"
     item_attributes = {
         "brand": "The Fresh Grocer",

@@ -5,7 +5,7 @@ from locations.items import Feature
 
 
 class STBankSpider(scrapy.Spider):
-    name = "stbank"
+    name = "st_bank"
     item_attributes = {"brand": "S&T Bank"}
     allowed_domains = ["stbank.com"]
     start_urls = ["https://www.stbank.com/page-data/locations/page-data.json"]

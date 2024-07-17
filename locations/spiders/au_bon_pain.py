@@ -8,9 +8,8 @@ from locations.items import Feature
 
 
 class AuBonPainSpider(scrapy.Spider):
-    name = "aubonpain"
+    name = "au_bon_pain"
     item_attributes = {"brand": "Au Bon Pain", "brand_wikidata": "Q4818942"}
-    download_delay = 0.5
     allowed_domains = [
         "www.aubonpain.com",
     ]

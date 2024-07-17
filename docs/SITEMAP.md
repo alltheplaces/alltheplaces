@@ -12,7 +12,7 @@ The sitemap is such an important concept that the [scrapy framework](https://scr
 
 Within our project there are a severeal examples showing slightly different use of `SitemapSpider` support:
 
-* [`jackinthebox.py`](../locations/spiders/jackinthebox.py)
+* [`jackinthebox.py`](../locations/spiders/jack_in_the_box.py)
 * [`moeys.py`](../locations/spiders/moes_southwest_grill.py)
 * [`shopko.py`](../locations/spiders/shopko.py)
 

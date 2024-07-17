@@ -10,7 +10,7 @@ from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrTRSpider(Spider):
-    name = "carlsjr_tr"
+    name = "carls_jr_tr"
     item_attributes = CarlsJrUSSpider.item_attributes
     start_urls = ["https://www.carlsjr.com.tr/en/restaurant/getitems"]
 

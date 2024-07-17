@@ -1,11 +1,11 @@
 import scrapy
 
-from locations.spiders.bestbuy import BestBuySpider
+from locations.spiders.best_buy import BestBuySpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class BestBuyCASpider(StructuredDataSpider):
-    name = "bestbuy_ca"
+    name = "best_buy_ca"
     item_attributes = BestBuySpider.item_attributes
     allowed_domains = ["stores.bestbuy.ca"]
     bb_url = "https://stores.bestbuy.ca/en-ca/index.html"

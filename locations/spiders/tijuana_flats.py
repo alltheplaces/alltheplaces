@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class TijuanaFlatsSpider(scrapy.Spider):
-    name = "tijuanaflats"
+    name = "tijuana_flats"
     item_attributes = {"brand": "Tijuana Flats", "brand_wikidata": "Q7801833"}
     allowed_domains = ["tijuanaflats.com"]
     start_urls = ("https://www.tijuanaflats.com/locations",)

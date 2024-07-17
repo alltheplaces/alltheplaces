@@ -9,7 +9,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 
 class BestWesternSpider(scrapy.spiders.SitemapSpider):
-    name = "bestwestern"
+    name = "best_western"
     brands = [
         ("Best Western Premier", "Q830334"),
         ("Best Western Plus", "Q830334"),

@@ -8,7 +8,7 @@ from locations.items import Feature
 
 
 class BestBuySpider(scrapy.Spider):
-    name = "bestbuy"
+    name = "best_buy"
     item_attributes = {"brand": "Best Buy", "brand_wikidata": "Q533415", "extras": Categories.SHOP_ELECTRONICS.value}
     allowed_domains = ["stores.bestbuy.com"]
     start_urls = ("https://stores.bestbuy.com/",)

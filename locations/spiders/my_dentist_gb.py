@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
     MYDENTIST = {"brand": "My Dentist", "brand_wikidata": "Q65118035", "extras": Categories.DENTIST.value}
 
-    name = "mydentist_gb"
+    name = "my_dentist_gb"
     allowed_domains = ["mydentist.co.uk"]
     start_urls = ["https://www.mydentist.co.uk/dentists/practices/"]
     rules = [

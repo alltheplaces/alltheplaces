@@ -6,7 +6,7 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SproutsFarmersMarket(SitemapSpider, StructuredDataSpider):
+class SproutsFarmersMarketSpider(SitemapSpider, StructuredDataSpider):
     name = "sprouts_farmers_market"
     allowed_domains = ["www.sprouts.com"]
     item_attributes = {"brand": "Sprouts Farmers Market", "brand_wikidata": "Q7581369"}

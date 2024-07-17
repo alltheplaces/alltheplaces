@@ -10,7 +10,7 @@ from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrNZSpider(Spider):
-    name = "carlsjr_nz"
+    name = "carls_jr_nz"
     item_attributes = CarlsJrUSSpider.item_attributes
     start_urls = ["https://www.carlsjr.co.nz/stores"]
     no_refs = True

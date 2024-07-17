@@ -3,12 +3,12 @@ import re
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsSGSpider(scrapy.Spider):
+class McdonaldsSGSpider(scrapy.Spider):
     name = "mcdonalds_sg"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.com.sg"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

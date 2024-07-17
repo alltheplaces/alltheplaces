@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class vhlDESpider(SitemapSpider, StructuredDataSpider):
+class VhlDESpider(SitemapSpider, StructuredDataSpider):
     name = "vhl_de"
     item_attributes = {"brand": "Vereinigte Lohnsteuerhilfe", "brand_wikidata": "Q15852617"}
     sitemap_urls = [

@@ -6,7 +6,7 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 
 
-class MaisonDeLaLiterieSpider(Spider):
+class MaisonDeLaLiterieFRSpider(Spider):
     name = "maison_de_la_literie_fr"
     item_attributes = {"brand": "Maison de la Literie", "brand_wikidata": "Q80955776"}
     start_urls = ["https://www.maisondelaliterie.fr/magasins?ajax=1&p=1&n=500&all=1"]
