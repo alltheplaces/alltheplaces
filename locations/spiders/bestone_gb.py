@@ -11,5 +11,6 @@ class BestOneGBSpider(scrapy.spiders.SitemapSpider):
     def parse(self, response):
         for store_type in ["ConvenienceStore", "WholesaleStore"]:
             if item := LinkedDataParser.parse(response, store_type):
+                item.pop("name", None)
                 yield item
                 return
