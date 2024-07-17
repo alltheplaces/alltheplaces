@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class LJHookerAUNZSpider(Spider):
@@ -24,8 +25,8 @@ class LJHookerAUNZSpider(Spider):
                 .replace(".ljhooker.com.au", "")
                 .replace(".ljhooker.co.nz", "")
             )
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("address1"), location["address"].get("address2")])
+            item["street_address"] = clean_address(
+                [location["address"].get("address1"), location["address"].get("address2")]
             )
             if ".com.au" in response.url:
                 item["country"] = "AU"

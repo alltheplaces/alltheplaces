@@ -1,43 +1,36 @@
 import scrapy
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
 class CostaCoffeePLSpider(scrapy.Spider):
     name = "costacoffee_pl"
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
-    allowed_domains = ["api.costacoffee.pl"]
-    start_urls = ["https://api.costacoffee.pl/api/storelocator/list"]
+    allowed_domains = ["costacoffee.pl"]
+    start_urls = ["https://www.costacoffee.pl/api/cf/?content_type=storeLocatorStore&limit=1000"]
     no_refs = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt is a HTML 404 page, ignore to suppress errors
 
     def parse(self, response):
-        data = response.json()
+        data = response.json()["items"]
         for store in data:
             properties = {
-                "name": store["name"],
-                "street_address": store["address"],
-                "city": store["city"],
-                "postcode": store["postCode"],
+                "name": store["fields"]["cmsLabel"],
+                "addr_full": store["fields"]["storeAddress"],
                 "country": "PL",
-                "addr_full": ", ".join(
-                    filter(
-                        None,
-                        (
-                            store["address"],
-                            store["city"],
-                            store["postCode"],
-                            "Poland",
-                        ),
-                    ),
-                ),
-                "lat": store["gpsY"],
-                "lon": store["gpsX"],
-                "extras": {
-                    "store_type": store["type"],
-                    "delivery": "yes" if store["deliveryAvailable"] else "no",
-                },
+                "lat": store["fields"]["location"]["lat"],
+                "lon": store["fields"]["location"]["lon"],
+                "opening_hours": OpeningHours(),
             }
+
+            for day_name in list(map(str.lower, DAYS_FULL)):
+                opening_time = store["fields"].get(f"{day_name}Opening")
+                closing_time = store["fields"].get(f"{day_name}Closing")
+                if not opening_time or not closing_time:
+                    continue
+                properties["opening_hours"].add_range(day_name.title(), opening_time, closing_time)
 
             apply_category(Categories.CAFE, properties)
 

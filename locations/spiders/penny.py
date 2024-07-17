@@ -15,8 +15,8 @@ class PennySpider(Spider):
 
     def parse(self, response, **kwargs):
         for store in response.json():
-            store["lat"] = store["coordinate"]["y"]
-            store["lon"] = store["coordinate"]["x"]
+            store["lat"] = store["position"]["lat"]
+            store["lon"] = store["position"]["lng"]
             store["street_address"] = store.pop("street")
             store["country"] = kwargs["cc"].upper()
 

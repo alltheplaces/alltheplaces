@@ -24,10 +24,8 @@ class LubaszkaPLSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day, hours in location["opening_hours"].items():
                 day = sanitise_day(day.split("_")[-1], DAYS_PL)
-                hours = hours.replace("–", "-")
+                hours = hours.replace(".", ":")
                 if "-" in hours:
                     start_time, end_time = hours.split("-")
                     item["opening_hours"].add_range(day, start_time, end_time)
-            if item["phone"] and item["phone"] == "-":
-                item.pop("phone")
             yield item

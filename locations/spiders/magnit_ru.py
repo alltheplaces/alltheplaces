@@ -20,12 +20,7 @@ CATEGORY_MAPPING = {
 
 class MagnitRUSpider(Spider):
     name = "magnit_ru"
-    item_attributes = {
-        "brand_wikidata": "Q940518",
-        # TODO: delete this when ApplyNSICategoriesPipeline is fixed,
-        #       currently it does the wrong match
-        "nsi_id": "N/A",
-    }
+    item_attributes = {"brand_wikidata": "Q940518"}
 
     def start_requests(self):
         yield JsonRequest(

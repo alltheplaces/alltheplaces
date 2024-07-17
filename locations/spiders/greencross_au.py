@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class GreencrossAUSpider(Spider):
@@ -22,7 +23,7 @@ class GreencrossAUSpider(Spider):
                 "name": location["n"],
                 "lat": location["l"],
                 "lon": location["g"],
-                "street_address": ", ".join(location["a"][0 : len(location["a"]) - 3]),
+                "street_address": clean_address(location["a"][0 : len(location["a"]) - 3]),
                 "city": location["a"][-3],
                 "state": location["a"][-2],
                 "postcode": location["a"][-1],

@@ -37,11 +37,17 @@ phases:
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
           pip install -qq --upgrade pip pipenv
+
           pipenv sync --system
+          retval=$?
+          if [ ! $retval -eq 0 ]; then
+            (>&2 echo "pipenv sync failed. refusing to continue.")
+            exit 1
+          fi
 
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
           tar -czf "${CACHE_FILE_NAME}" "${PYTHON_INSTALL_LOCATION}"
-          aws s3 --only-show-errors cp ${PIPENV_HASH}.tar.gz $REMOTE_CACHE_LOCATION
+          aws s3 --only-show-errors cp "${CACHE_FILE_NAME}" "${REMOTE_CACHE_LOCATION}"
         fi
   build:
     commands:
@@ -59,6 +65,12 @@ phases:
         else
           echo "This build is not triggered by a pull request. It was ${CODEBUILD_WEBHOOK_EVENT}"
           exit 1
+        fi
+
+        # If the most recent commit on the PR is from the pre-commit bot, skip running the spiders
+        if git log -1 --pretty=format:%an | grep -q "pre-commit"; then
+          echo "Skipping spider run for pre-commit changes."
+          exit 0
         fi
 
         pr_file_changes=$(curl -sL --header "authorization: Bearer ${GITHUB_TOKEN}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
@@ -106,11 +118,13 @@ phases:
 
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
+            PARQUETFILE="${SPIDER_RUN_DIR}/output.parquet"
             FAILURE_REASON="success"
 
             timeout -k 5s 90s \
             scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
+                -o "file://${PARQUETFILE}:parquet" \
                 --loglevel=INFO \
                 --logfile="${LOGFILE}" \
                 -s CLOSESPIDER_TIMEOUT=60 \
@@ -167,6 +181,13 @@ phases:
 
                 if grep -q 'Stored geojson feed' $LOGFILE; then
                     echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}"
+                fi
+
+                aws s3 cp --only-show-errors ${PARQUETFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet
+                retval=$?
+                if [ ! $retval -eq 0 ]; then
+                    (>&2 echo "parquet copy to s3 failed with exit code ${retval}")
+                    exit 1
                 fi
 
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"

@@ -4,7 +4,7 @@ from locations.storefinders.yext import YextSpider
 
 class CitizensUSSpider(YextSpider):
     name = "citizens_us"
-    item_attributes = {"brand": "Citizens", "brand_wikidata": "Q5122694"}
+    item_attributes = {"brand_wikidata": "Q5122694"}
     api_key = "d4d6be17717272573aeece729fdbec0c"
     wanted_types = ["location", "atm"]
 

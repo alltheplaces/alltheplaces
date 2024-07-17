@@ -50,6 +50,7 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
         "wa": ["Waldorf Astoria", "Q3239392"],
     }
     gc = geonamescache.GeonamesCache()
+    requires_proxy = True
 
     def _parse_sitemap(self, response):
         for x in super()._parse_sitemap(response):

@@ -3,6 +3,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class DomayneAUSpider(Spider):
@@ -20,7 +21,7 @@ class DomayneAUSpider(Spider):
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = location["storeCode"]
-            item["street_address"] = ", ".join(filter(None, location["addressLines"]))
+            item["street_address"] = clean_address(location["addressLines"])
             if location.get("phoneNumbers") and len(location["phoneNumbers"]) == 1:
                 item["phone"] = location["phoneNumbers"][0]
             if item["website"]:

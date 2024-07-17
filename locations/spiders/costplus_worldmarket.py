@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CostPlusWorldMarketSpider(scrapy.Spider):
@@ -67,7 +68,7 @@ class CostPlusWorldMarketSpider(scrapy.Spider):
 
         properties = {
             "name": "".join(response.xpath('//span[@class="location-info-header-namee"]/text()').extract()),
-            "street_address": " ".join(response.xpath('//span[@itemprop="streetAddress"]/text()').extract()),
+            "street_address": clean_address(response.xpath('//span[@itemprop="streetAddress"]/text()').getall()),
             "city": (response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first() or "").strip(","),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             "postcode": (response.xpath('//span[@itemprop="postalCode"]/text()').extract_first() or "").strip(),

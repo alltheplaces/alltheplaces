@@ -12,7 +12,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import FIREFOX_LATEST
 
 BRANDS = {
     "https://www.bakersplus.com/": {"brand": "Baker's", "brand_wikidata": "Q4849080"},
@@ -40,9 +40,10 @@ BRANDS = {
 class KrogerUSSpider(SitemapSpider):
     name = "kroger_us"
     sitemap_urls = [f"{brand}storelocator-sitemap.xml" for brand in BRANDS.keys()]
-    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"AUTOTHROTTLE_ENABLED": True}
     url_re = re.compile(r"/(\d{3})/(\d{5})$")
     requires_proxy = True
+    user_agent = FIREFOX_LATEST
 
     departments = {
         "09": Categories.PHARMACY,

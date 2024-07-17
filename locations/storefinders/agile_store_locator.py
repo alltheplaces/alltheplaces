@@ -44,6 +44,10 @@ class AgileStoreLocatorSpider(Spider):
         if location.get("open_hours"):
             item["opening_hours"] = OpeningHours()
             hours_json = json.loads(location["open_hours"])
+
+            if hours_json == []:
+                return item
+
             for day_name, hours_ranges in hours_json.items():
                 for hours_range in hours_ranges:
                     hours_range = hours_range.upper()

@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HairhouseAUSpider(Spider):
@@ -20,7 +21,7 @@ class HairhouseAUSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["internalid"]
-            item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
             item["website"] = "https://www.hairhouse.com.au/stores/" + location["url_component"]
             hours_string = " ".join(
                 [day_hours["day"] + ": " + day_hours["hours"] for day_hours in location["operatingHours"]]

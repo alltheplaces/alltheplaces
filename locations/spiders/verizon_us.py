@@ -1,76 +1,73 @@
+import datetime
 import json
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 
-class VerizonUSSpider(scrapy.Spider):
+class VerizonUSSpider(SitemapSpider):
     name = "verizon_us"
     item_attributes = {"brand": "Verizon", "brand_wikidata": "Q919641"}
-    allowed_domains = ["www.verizonwireless.com"]
-    start_urls = ["https://www.verizonwireless.com/sitemap_storelocator.xml"]
-    user_agent = BROWSER_DEFAULT
+    sitemap_urls = ["https://www.verizon.com/robots.txt"]
+    sitemap_rules = [(r"https://www.verizon.com/stores/city/[^/]+/[^/]+/$", "parse_store")]
 
-    def parse_hours(self, store_hours):
+    OPERATORS = {
+        "Asurion FSL": {"operator": "Asurion FSL"},
+        "BeMobile": {"operator": "BeMobile"},
+        "Best Wireless": {"operator": "Best Wireless"},
+        "Cellular Plus": {"operator": "Cellular Plus"},
+        "Cellular Sales": {"operator": "Cellular Sales", "operator_wikidata": "Q5058345"},
+        "Mobile Generation": {"operator": "Mobile Generation"},
+        "R Wireless": {"operator": "R Wireless"},
+        "Russell Cellular": {"operator": "Russell Cellular", "operator_wikidata": "Q125523800"},
+        "TCC": {"operator": "The Cellular Connection", "operator_wikidata": "Q121336519"},
+        "Team Wireless": {"operator": "Team Wireless"},
+        "Victra": {"operator": "Victra", "operator_wikidata": "Q118402656"},
+        "Wireless Plus": {"operator": "Wireless Plus"},
+        "Wireless World": {"operator": "Wireless World"},
+        "Wireless Zone": {"operator": "Wireless Zone", "operator_wikidata": "Q122517436"},
+        "Your Wireless": {"operator": "Your Wireless"},
+    }
+
+    def parse_hours(self, store_hours: dict) -> OpeningHours:
         opening_hours = OpeningHours()
 
-        for store_day in ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]:
-            open_time = store_hours.get(f"{store_day}Open")
-            close_time = store_hours.get(f"{store_day}Close")
+        for day, time in store_hours.items():
+            if time == "Closed Closed":
+                opening_hours.set_closed(day)
+            elif m := re.match(r"(\d\d:\d\d [AP]M) (\d\d:\d\d [AP]M)", time):
+                opening_hours.add_range(day, *m.groups(), "%I:%M %p")
 
-            if open_time and close_time and open_time.lower() != "closed" and close_time.lower() != "closed":
-                opening_hours.add_range(
-                    day=store_day[0:2],
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%I:%M %p",
-                )
-
-        return opening_hours.as_opening_hours()
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-
-        for url in urls:
-            if url.split("/")[-2].split("-")[-1].isdigit():
-                # Store pages have a number at the end of their URL
-                yield scrapy.Request(url, callback=self.parse_store)
+        return opening_hours
 
     def parse_store(self, response):
-        script = response.xpath('//script[contains(text(), "storeJSON")]/text()').extract_first()
+        script = response.xpath('//script[contains(text(), "cityJSON")]/text()').extract_first()
         if not script:
             return
 
-        store_data = json.loads(re.search(r"var storeJSON = (.*);", script).group(1))
+        for store_data in json.loads(re.search(r"var cityJSON = (.*);", script).group(1))["stores"]:
+            item = DictParser.parse(store_data)
+            item["street_address"] = item.pop("addr_full")
+            item["state"] = store_data["stateAbbr"]
+            item["website"] = response.urljoin(store_data["storeUrl"])
+            item["extras"]["start_date"] = datetime.datetime.strptime(store_data["openingDate"], "%d-%b-%y").strftime(
+                "%Y-%m-%d"
+            )
 
-        properties = {
-            "name": store_data["storeName"],
-            "ref": store_data["storeNumber"],
-            "street_address": store_data["address"]["streetAddress"],
-            "city": store_data["address"]["addressLocality"],
-            "state": store_data["address"]["addressRegion"],
-            "postcode": store_data["address"]["postalCode"],
-            "country": store_data["address"]["addressCountry"],
-            "phone": store_data.get("telephone"),
-            "website": response.url,
-            "lat": store_data["geo"].get("latitude"),
-            "lon": store_data["geo"].get("longitude"),
-            "operator": (store_data.get("posStoreDetail") or {}).get("businessName"),
-            "extras": {
-                # Sometimes 'postStoreDetail' exists with "None" value, usual get w/ default syntax isn't reliable
-                "retail_id": store_data.get("retailId"),
-                "store_type": (store_data.get("posStoreDetail") or {}).get("storeType"),
-                "store_type_note": ";".join(store_data.get("typeOfStore")),
-            },
-        }
+            if "Authorized Retailer" in store_data["typeOfStore"]:
+                for operator, tags in self.OPERATORS.items():
+                    if item["name"].startswith(operator):
+                        item["branch"] = item.pop("name").removeprefix(operator).strip(" -")
+                        item.update(tags)
+                        break
+            else:
+                item["branch"] = item.pop("name")
+                item["operator"] = self.item_attributes["brand"]
+                item["operator_wikidata"] = self.item_attributes["brand_wikidata"]
 
-        hours = self.parse_hours(store_data.get("StoreHours"))
-        if hours:
-            properties["opening_hours"] = hours
+            item["opening_hours"] = self.parse_hours(store_data.get("openingHours"))
 
-        yield Feature(**properties)
+            yield item

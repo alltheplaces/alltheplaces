@@ -8,15 +8,11 @@ class NickTheGreekUSSpider(StoreRocketSpider):
     base_url = "https://www.nickthegreek.com/"
 
     def parse_item(self, item, location):
-        # slug and url returned are incorrect and seemingly there
-        # is no other way to recover the website URL.
-        item.pop("website")
-
+        item["website"] = "https://www.nickthegreek.com/locations"
         # remove unused/non-store-specific-value fields
         if item["email"] == "office@nickthegreek.com":
             item.pop("email")
         item.pop("facebook")
         item.pop("twitter")
-        item["extras"].pop("instagram")
-
+        item["extras"].pop("contact:instagram")
         yield item

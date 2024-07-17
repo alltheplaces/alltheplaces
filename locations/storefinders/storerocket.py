@@ -3,7 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.items import Feature, SocialMedia, set_social_media
 
 
 class StoreRocketSpider(Spider):
@@ -24,9 +24,9 @@ class StoreRocketSpider(Spider):
 
             item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))
 
-            item["facebook"] = location.get("facebook")
-            item["extras"]["instagram"] = location.get("instagram")
-            item["twitter"] = location.get("twitter")
+            set_social_media(item, SocialMedia.FACEBOOK, location.get("facebook"))
+            set_social_media(item, SocialMedia.INSTAGRAM, location.get("instagram"))
+            set_social_media(item, SocialMedia.TWITTER, location.get("twitter"))
 
             if self.base_url:
                 item["website"] = f'{self.base_url}?location={location["slug"]}'

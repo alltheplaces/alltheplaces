@@ -18,4 +18,8 @@ class LewiatanPLSpider(Spider):
             item["street_address"] = item.pop("addr_full")
             item["website"] = response.urljoin(location["url"])
             apply_category(Categories.SHOP_SUPERMARKET, item)
+
+            if item.get("phone") == "BRAK":  # 300 x "missing"
+                item["phone"] = None
+
             yield item
