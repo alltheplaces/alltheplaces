@@ -9,7 +9,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsSISpider(scrapy.Spider):
+class McdonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
     item_attributes = McDonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.si/restavracije/"]

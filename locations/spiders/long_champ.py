@@ -5,7 +5,7 @@ from locations.geo import point_locations
 
 
 class LongChampSpider(scrapy.Spider):
-    name = "longchamp"
+    name = "long_champ"
     item_attributes = {"brand": "Longchamp", "brand_wikidata": "Q1869471"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

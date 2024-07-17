@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class BankOfAmericaSpider(SitemapSpider, StructuredDataSpider):
-    name = "bankofamerica"
+    name = "bank_of_america"
     item_attributes = {"brand": "Bank of America", "brand_wikidata": "Q487907"}
     sitemap_urls = ["https://locators.bankofamerica.com/robots.txt"]
     sitemap_rules = [(r"com/\w\w/\w+/[-\w]+\.html$", "parse_sd")]

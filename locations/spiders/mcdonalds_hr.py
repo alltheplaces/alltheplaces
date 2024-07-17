@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsHRSpider(scrapy.Spider):
+class McdonaldsHRSpider(scrapy.Spider):
     name = "mcdonalds_hr"
     item_attributes = McDonaldsSpider.item_attributes
     start_urls = ["https://mcdonalds.hr/api/locations/"]

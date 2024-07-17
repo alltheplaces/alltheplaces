@@ -4,7 +4,7 @@ from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsTHSpider(scrapy.Spider):
+class McdonaldsTHSpider(scrapy.Spider):
     name = "mcdonalds_th"
     item_attributes = McDonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.co.th/storeLocations"]

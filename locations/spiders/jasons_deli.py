@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class JasonsDeliSpider(scrapy.Spider):
-    name = "jasonsdeli"
+    name = "jasons_deli"
     item_attributes = {"brand": "Jason's Deli", "brand_wikidata": "Q16997641"}
     allowed_domains = ["jasonsdeli.com"]
     start_urls = ("https://www.jasonsdeli.com/restaurants",)

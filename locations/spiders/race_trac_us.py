@@ -32,7 +32,7 @@ ATTRIBUTES_MAP = {
 
 
 class RaceTracUSSpider(SitemapSpider, StructuredDataSpider):
-    name = "racetrac_us"
+    name = "race_trac_us"
     item_attributes = {"brand": "RaceTrac", "brand_wikidata": "Q735942", "nsi_id": "N/A"}
     allowed_domains = ["www.racetrac.com"]
     sitemap_urls = ["https://www.racetrac.com/robots.txt"]

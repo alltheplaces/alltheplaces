@@ -8,7 +8,7 @@ from locations.structured_data_spider import extract_phone
 
 
 class RegisSalonGB(CrawlSpider):
-    name = "regis_gb"
+    name = "regis_salon_gb"
     item_attributes = {
         "brand": "Regis Salon",
         "brand_wikidata": "Q110166032",

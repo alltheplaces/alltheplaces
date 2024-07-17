@@ -3,7 +3,7 @@ from locations.storefinders.momentfeed import MomentFeedSpider
 
 
 class StewartsShopsSpider(MomentFeedSpider):
-    name = "stewartsshops"
+    name = "stewarts_shops"
     item_attributes = {"brand_wikidata": "Q7615690"}
     id = "ZGRQTRLWHXDMDNUO"
 

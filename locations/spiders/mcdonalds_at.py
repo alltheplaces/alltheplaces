@@ -4,7 +4,7 @@ from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsATSpider(scrapy.spiders.SitemapSpider):
+class McdonaldsATSpider(scrapy.spiders.SitemapSpider):
     name = "mcdonalds_at"
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.at"]

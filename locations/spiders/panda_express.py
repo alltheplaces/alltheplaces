@@ -5,7 +5,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 
 class PandaExpressSpider(SitemapSpider, StructuredDataSpider):
-    name = "pandaexpress"
+    name = "panda_express"
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     allowed_domains = ["pandaexpress.com"]
     sitemap_urls = ["https://www.pandaexpress.com/sitemap.xml"]

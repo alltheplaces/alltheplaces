@@ -7,7 +7,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AndPizzaSpider(Spider):
-    name = "andpizza"
+    name = "and_pizza"
     item_attributes = {"brand": "&pizza", "brand_wikidata": "Q21189222"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

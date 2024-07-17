@@ -4,8 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class CarrabbasItalianGrillSpider(SitemapSpider, StructuredDataSpider):
-    download_delay = 0.2
-    name = "carrabbasitaliangrill"
+    name = "carrabbas_italian_grill"
     allowed_domains = ["carrabbas.com"]
     item_attributes = {
         "brand": "Carrabba's Italian Grill",

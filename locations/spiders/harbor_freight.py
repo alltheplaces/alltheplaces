@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class HarborFreightSpider(CrawlSpider, StructuredDataSpider):
-    name = "harborfreight"
+    name = "harbor_freight"
     item_attributes = {"brand": "Harbor Freight Tools", "brand_wikidata": "Q5654601"}
     allowed_domains = ["harborfreight.com"]
     start_urls = ["https://www.harborfreight.com/storelocator/store-directory"]

@@ -7,9 +7,9 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class SproutsFarmersMarket(SitemapSpider, StructuredDataSpider):
-    name = "sprouts_farmer_market"
+    name = "sprouts_farmers_market"
     allowed_domains = ["www.sprouts.com"]
-    item_attributes = {"brand": "Sprouts Farmer Market", "brand_wikidata": "Q7581369"}
+    item_attributes = {"brand": "Sprouts Farmers Market", "brand_wikidata": "Q7581369"}
     sitemap_urls = ["https://www.sprouts.com/store-sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www.sprouts.com\/store\/\w\w\/*\/*\/", "parse_sd")]
 

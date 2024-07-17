@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class JbHifiSpider(scrapy.Spider):
+class JbhifiSpider(scrapy.Spider):
     name = "jbhifi"
     item_attributes = {"brand": "JB Hi-Fi", "brand_wikidata": "Q3310113"}
     allowed_domains = ["algolia.net"]

@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class VisionExpressGBSpider(CrawlSpider, StructuredDataSpider):
-    name = "visionexpress_gb"
+    name = "vision_express_gb"
     item_attributes = {"brand": "Vision Express", "brand_wikidata": "Q7936150"}
     start_urls = ["https://www.visionexpress.com/store-overview"]
     rules = [

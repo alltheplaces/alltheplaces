@@ -4,7 +4,7 @@ from locations.items import Feature
 
 
 class RoadRangerSpider(scrapy.Spider):
-    name = "roadranger"
+    name = "road_ranger"
     item_attributes = {"brand": "Road Ranger"}
     allowed_domains = ["www.roadrangerusa.com"]
     start_urls = ("https://www.roadrangerusa.com/locations-amenities/find-a-road-ranger",)

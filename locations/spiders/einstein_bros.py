@@ -8,8 +8,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class EinsteinBrosSpider(scrapy.Spider):
-    download_delay = 0.5
-    name = "einsteinbros"
+    name = "einstein_bros"
     item_attributes = {"brand": "Einstein Bros. Bagels", "brand_wikidata": "Q5349788"}
     allowed_domains = ["einsteinbros.com"]
     start_urls = ("https://locations.einsteinbros.com/us",)

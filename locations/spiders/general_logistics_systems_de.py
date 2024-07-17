@@ -10,8 +10,8 @@ HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://api.gls-pakete.de/parcelshops?latitude={:0.5}&longitude={:0.5}&distance=40"
 
 
-class GeneralLogisticsSystemsSpider(scrapy.Spider):
-    name = "gls_de"
+class GeneralLogisticsSystemsDESpider(scrapy.Spider):
+    name = "general_logistics_systems_de"
     allowed_domains = ["gls-pakete.de"]
     item_attributes = {
         "brand": "General Logistics Systems",

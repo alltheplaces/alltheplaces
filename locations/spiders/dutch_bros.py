@@ -16,7 +16,7 @@ DAY_IDX = {day: idx for idx, day in enumerate(DAYS)}
 
 
 class DutchBrosSpider(scrapy.Spider):
-    name = "dutchbros"
+    name = "dutch_bros"
     item_attributes = {"brand": "Dutch Bros. Coffee", "brand_wikidata": "Q5317253"}
 
     allowed_domains = ["www.dutchbros.com"]

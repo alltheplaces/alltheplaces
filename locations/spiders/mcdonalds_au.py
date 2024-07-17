@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsAUSpider(Spider):
+class McdonaldsAUSpider(Spider):
     name = "mcdonalds_au"
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.com.au"]

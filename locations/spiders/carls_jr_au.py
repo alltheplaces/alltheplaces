@@ -6,8 +6,8 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class CarlsJrUSSpider(scrapy.Spider):
-    name = "carlsjr_au"
+class CarlsJrAUSpider(scrapy.Spider):
+    name = "carls_jr_au"
     item_attributes = {"brand": "Carl's Jr.", "brand_wikidata": "Q1043486"}
     start_urls = [
         "https://cdncf.storelocatorwidgets.com/json/8OcbNq74HmDWk0HlBmrz4u2nLczZSJf8?callback=slw&_=1714380469680"

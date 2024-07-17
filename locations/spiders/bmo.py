@@ -10,7 +10,7 @@ from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
 from locations.spiders.food_city_us import FoodCityUSSpider
-from locations.spiders.giantfood import GiantFoodSpider
+from locations.spiders.giant_food import GiantFoodSpider
 from locations.spiders.giantfoodstores import GiantFoodStoresSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
 from locations.spiders.h_e_b_us import HEBUSSpider
@@ -21,7 +21,7 @@ from locations.spiders.market_basket import MarketBasketSpider
 from locations.spiders.mcdonalds import McDonaldsSpider
 from locations.spiders.nordstrom import NordstromSpider
 from locations.spiders.piggly_wiggly_us import PigglyWigglyUSSpider
-from locations.spiders.racetrac_us import RaceTracUSSpider
+from locations.spiders.race_trac_us import RaceTracUSSpider
 from locations.spiders.recipe_unlimited import RecipeUnlimitedSpider
 from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider

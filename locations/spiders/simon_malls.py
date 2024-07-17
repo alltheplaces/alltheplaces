@@ -6,7 +6,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class SimonMallsSpider(scrapy.Spider):
-    name = "simonmalls"
+    name = "simon_malls"
     item_attributes = {"brand": "Simon Malls", "brand_wikidata": "Q2287759"}
     start_urls = ["https://api.simon.com/v1.2/mall"]
     custom_settings = {

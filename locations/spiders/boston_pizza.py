@@ -4,7 +4,7 @@ from locations.items import Feature
 
 
 class BostonPizzaSpider(scrapy.Spider):
-    name = "bostonpizza"
+    name = "boston_pizza"
     item_attributes = {
         "brand": "Boston Pizza",
         "brand_wikidata": "Q894578",

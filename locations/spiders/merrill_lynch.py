@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 class MerrillLynchSpider(scrapy.Spider):
-    name = "merrilllynch"
+    name = "merrill_lynch"
     item_attributes = {"brand": "Merrill Lynch", "brand_wikidata": "Q334122"}
     allowed_domains = ["ml.com"]
     start_urls = ("https://fa.ml.com/",)

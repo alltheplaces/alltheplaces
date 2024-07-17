@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsMASpider(scrapy.Spider):
+class McdonaldsMASpider(scrapy.Spider):
     name = "mcdonalds_ma"
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.ma"]

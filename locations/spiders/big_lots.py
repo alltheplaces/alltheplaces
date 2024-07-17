@@ -5,7 +5,7 @@ from locations.microdata_parser import MicrodataParser
 
 
 class BigLotsSpider(scrapy.spiders.SitemapSpider):
-    name = "biglots"
+    name = "big_lots"
     item_attributes = {"brand": "Big Lots", "brand_wikidata": "Q4905973"}
     allowed_domains = ["local.biglots.com"]
     sitemap_urls = [

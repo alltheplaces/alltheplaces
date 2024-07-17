@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AfcUrgentCareSpider(scrapy.Spider):
-    name = "afcurgentcare"
+    name = "afc_urgent_care"
     item_attributes = {"brand": "AFC Urgent Care", "brand_wikidata": "Q110552174"}
     allowed_domains = ["afcurgentcare.com"]
     start_urls = ("https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98",)

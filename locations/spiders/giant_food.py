@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class GiantFoodSpider(scrapy.Spider):
-    name = "giantfood"
+    name = "giant_food"
     item_attributes = {"brand": "Giant Food", "brand_wikidata": "Q5558336"}
     allowed_domains = ["giantfood.com"]
 

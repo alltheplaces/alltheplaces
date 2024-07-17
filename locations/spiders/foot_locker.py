@@ -5,7 +5,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 
 class FootLockerSpider(scrapy.spiders.SitemapSpider):
-    name = "footlocker"
+    name = "foot_locker"
     item_attributes = {"brand": "Foot Locker", "brand_wikidata": "Q63335"}
     sitemap_urls = [
         "https://stores.footlocker.com/sitemap.xml",
