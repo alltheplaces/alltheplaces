@@ -5,7 +5,7 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 
-class NinetyNineBikesAUSpider(Spider):
+class NinetynineBikesAUSpider(Spider):
     name = "99_bikes_au"
     item_attributes = {"brand": "99 Bikes", "brand_wikidata": "Q110288298", "extras": Categories.SHOP_BICYCLE.value}
     allowed_domains = ["www.99bikes.com.au"]

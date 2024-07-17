@@ -96,6 +96,10 @@ COUNTRYCODE_COMPONENTS = {
 def snake_to_camel(snake_str: str) -> str:
     components = snake_str.split("_")
 
+    # If the first component is a number, spell it out
+    if components[0].isdigit():
+        components[0] = number_to_text(int(components[0])).replace(" ", "")
+
     # Capitalize the first letter of each component except the first one
     for i, component in enumerate(components):
         components[i] = component.capitalize()
@@ -112,6 +116,67 @@ def snake_to_camel(snake_str: str) -> str:
 
 def camel_to_snake(camel_str: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", camel_str).lower()
+
+
+def number_to_text(number: int) -> str:
+    """
+    Converts the digits of a number into English words.
+
+    For example, 1 -> "one", 42 -> "Forty Two", 123 -> "One Hundred Twenty Three".
+
+    :param number: The number to convert.
+    :return: The English words representing the number.
+    """
+    ones = [
+        "Zero",
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five",
+        "Six",
+        "Seven",
+        "Eight",
+        "Nine",
+    ]
+    teens = [
+        "Ten",
+        "Eleven",
+        "Twelve",
+        "Thirteen",
+        "Fourteen",
+        "Fifteen",
+        "Sixteen",
+        "Seventeen",
+        "Eighteen",
+        "Nineteen",
+    ]
+    tens = [
+        "",
+        "Ten",
+        "Twenty",
+        "Thirty",
+        "Forty",
+        "Fifty",
+        "Sixty",
+        "Seventy",
+        "Eighty",
+        "Ninety",
+    ]
+
+    if number < 10:
+        return ones[number]
+
+    if number < 20:
+        return teens[number - 10]
+
+    if number < 100:
+        return tens[number // 10] + (ones[number % 10] if number % 10 else "")
+
+    if number < 1000:
+        return ones[number // 100] + "Hundred" + (number_to_text(number % 100) if number % 100 else "")
+
+    return str(number)
 
 
 def check_file(file_path: str) -> List[str]:
