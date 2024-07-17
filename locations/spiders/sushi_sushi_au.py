@@ -32,5 +32,5 @@ class SushiSushiAUSpider(Spider):
                 item.pop("phone", None)
             # 2024-07-18 Spider produces low quality coordinates, so we reject all for now.
             item["lat"] = None
-            Item["lon"] = None
+            item["lon"] = None
             yield item
