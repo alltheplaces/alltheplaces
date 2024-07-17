@@ -1,11 +1,10 @@
-import json
-
 from typing import Any
 from urllib.parse import urljoin
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
-from locations.hours import DAYS_FULL, OpeningHours
+
+from locations.hours import DAYS_FULL
 from locations.items import Feature
 
 
@@ -29,7 +28,6 @@ class HaysTravelGBSpider(Spider):
             item["website"] = urljoin("https://www.haystravel.co.uk/branches/", location["name"])
             item["phone"] = location["phone"]
             item["email"] = location["email"]
-
 
             for day in map(str.lower, DAYS_FULL):
                 item["opening_hours"].add_range(
