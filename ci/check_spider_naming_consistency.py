@@ -5,6 +5,7 @@ from typing import List
 
 COUNTRYCODE_COMPONENTS = {
     "AE",
+    "AL",
     "AR",
     "AT",
     "AU",
@@ -13,6 +14,7 @@ COUNTRYCODE_COMPONENTS = {
     "BH",
     "BO",
     "BR",
+    "BY",
     "CA",
     "CH",
     "CL",
@@ -21,14 +23,18 @@ COUNTRYCODE_COMPONENTS = {
     "CZ",
     "DE",
     "DK",
+    "DO",
     "EE",
+    "EG",
     "ES",
     "EU",
     "FI",
+    "FJ",
     "FR",
     "GB",
     "GG",
     "GR",
+    "GT",
     "HK",
     "HR",
     "HU",
@@ -46,7 +52,10 @@ COUNTRYCODE_COMPONENTS = {
     "KZ",
     "LT",
     "LU",
+    "LV",
     "MA",
+    "ME",
+    "MK",
     "MO",
     "MT",
     "MX",
@@ -55,8 +64,10 @@ COUNTRYCODE_COMPONENTS = {
     "NL",
     "NO",
     "NZ",
+    "OM",
     "PE",
     "PH",
+    "PK",
     "PL",
     "PR",
     "PT",
@@ -128,6 +139,12 @@ def check_file(file_path: str) -> List[str]:
                         break
 
             if spider_name:
+                # Spider names should be lowercase or digits and only use underscores.
+                if not re.match(r"^[a-z0-9_]+$", spider_name):
+                    errors.append(
+                        f"Spider name '{spider_name}' should only use lowercase letters/digits and underscores"
+                    )
+
                 expected_class_name = snake_to_camel(spider_name) + "Spider"
                 expected_file_name = spider_name
 

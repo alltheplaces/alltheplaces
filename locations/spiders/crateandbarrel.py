@@ -4,7 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CrateAndBarrelSpider(CrawlSpider, StructuredDataSpider):
+class CrateandbarrelSpider(CrawlSpider, StructuredDataSpider):
     name = "crateandbarrel"
     allowed_domains = ["www.crateandbarrel.com"]
     item_attributes = {"brand": "crateandbarrel", "brand_wikidata": "Q5182604"}

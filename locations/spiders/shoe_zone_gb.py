@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ShoeZoneGB(SitemapSpider, StructuredDataSpider):
+class ShoeZoneGBSpider(SitemapSpider, StructuredDataSpider):
     name = "shoe_zone_gb"
     item_attributes = {
         "brand": "Shoe Zone",

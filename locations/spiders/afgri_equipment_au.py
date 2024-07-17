@@ -1,7 +1,7 @@
 from locations.storefinders.storepoint import StorepointSpider
 
 
-class AFGRIEquipmentAUSpider(StorepointSpider):
+class AfgriEquipmentAUSpider(StorepointSpider):
     name = "afgri_equipment_au"
     item_attributes = {
         "brand": "AFGRI Equipment",

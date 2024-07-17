@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MarineMaxUSSpider(Spider):
+class MarinemaxUSSpider(Spider):
     name = "marinemax_us"
     item_attributes = {"brand": "MarineMax", "brand_wikidata": "Q119140995"}
     allowed_domains = ["mes124x9ka-1.algolianet.com"]

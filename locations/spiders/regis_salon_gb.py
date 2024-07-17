@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.structured_data_spider import extract_phone
 
 
-class RegisSalonGB(CrawlSpider):
+class RegisSalonGBSpider(CrawlSpider):
     name = "regis_salon_gb"
     item_attributes = {
         "brand": "Regis Salon",

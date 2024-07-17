@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class STBankSpider(scrapy.Spider):
+class StBankSpider(scrapy.Spider):
     name = "st_bank"
     item_attributes = {"brand": "S&T Bank"}
     allowed_domains = ["stbank.com"]

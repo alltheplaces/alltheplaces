@@ -8,7 +8,7 @@ from locations.items import Feature
 
 
 class BremerBankUSSpider(SitemapSpider):
-    name = "bremer_bank_US"
+    name = "bremer_bank_us"
     item_attributes = {
         "brand": "Bremer Bank",
         "brand_wikidata": "Q907603",

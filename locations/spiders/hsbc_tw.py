@@ -5,7 +5,7 @@ from locations.categories import Categories, Extras, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HSBCSpider(StructuredDataSpider):
+class HsbcTWSpider(StructuredDataSpider):
     name = "hsbc_tw"
     item_attributes = {"brand": "HSBC", "brand_wikidata": "Q190464", "extras": Categories.BANK.value}
     start_urls = ["https://www.hsbc.com.tw/en-tw/ways-to-bank/branch/"]
