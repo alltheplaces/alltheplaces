@@ -40,7 +40,6 @@ class McDonaldsAUSpider(Spider):
                 "phone": data.get("store_phone"),
                 "state": data["store_state"],
                 "postcode": data.get("store_postcode"),
-                "name": data["title"],
             }
 
             if data.get("lat_long"):
