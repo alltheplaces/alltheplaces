@@ -260,6 +260,7 @@ DAYS_LT = {
     "V": "Fr",
     "VI": "Sa",
     "VII": "Su",
+    "Iv": "Th",
     "Vi": "Sa",
     "Vii": "Su",
 }
