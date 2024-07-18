@@ -36,23 +36,20 @@ class PressedUSSpider(Spider):
     item_attributes = {"brand": "Pressed", "brand_wikidata": "Q123005477"}
 
     def start_requests(self):
-        return [
-            JsonRequest(
-                url="https://graphql.pressedjuicery.com/",
-                data={
-                    "query": QUERY,
-                    "variables": {
-                        "input": {
-                            "bounds": {
-                                "northeast": {"latitude": "90", "longitude": "180"},
-                                "southwest": {"latitude": "-90", "longitude": "-180"},
-                            }
+        yield JsonRequest(
+            url="https://graphql.pressedjuicery.com/",
+            data={
+                "query": QUERY,
+                "variables": {
+                    "input": {
+                        "bounds": {
+                            "northeast": {"latitude": "90", "longitude": "180"},
+                            "southwest": {"latitude": "-90", "longitude": "-180"},
                         }
-                    },
+                    }
                 },
-                callback=self.parse,
-            )
-        ]
+            },
+        )
 
     def parse(self, response):
         for location in response.json()["data"]["searchStores"]:
