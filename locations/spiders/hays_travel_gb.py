@@ -1,11 +1,10 @@
 import re
 from typing import Any
-from datetime import datetime
+from urllib.parse import urljoin
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from urllib.parse import urljoin
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
@@ -35,19 +34,21 @@ class HaysTravelGBSpider(Spider):
             oh = OpeningHours()
             for day in map(str.lower, DAYS_FULL):
                 if rule := location.get(f"{day}_hours"):
-                    for start_hour, start_minute, start_zone, end_hour, end_minute, end_zone in re.findall(r"(\d*)[:.](\d\d)\s*(am|pm)?\s*-\s*(\d*)[:.](\d\d)\s*(am|pm)?", rule):
+                    for start_hour, start_minute, start_zone, end_hour, end_minute, end_zone in re.findall(
+                        r"(\d*)[:.](\d\d)\s*(am|pm)?\s*-\s*(\d*)[:.](\d\d)\s*(am|pm)?", rule
+                    ):
                         if start_zone:
-                           start_hour = int(start_hour)
-                           if start_zone == 'pm' and start_hour < 12:
+                            start_hour = int(start_hour)
+                            if start_zone == "pm" and start_hour < 12:
                                 start_hour += 12
-                           start = f'{start_hour:02d}:{start_minute}'
-                           end_hour=int(end_hour)
-                           if end_zone == 'pm' and end_hour < 12:
+                            start = f"{start_hour:02d}:{start_minute}"
+                            end_hour = int(end_hour)
+                            if end_zone == "pm" and end_hour < 12:
                                 end_hour += 12
-                           end = f'{end_hour:02d}:{end_minute}'
+                            end = f"{end_hour:02d}:{end_minute}"
                         else:
-                           start=f'{start_hour}:{start_minute}'
-                           end=f'{end_hour}:{end_minute}'
+                            start = f"{start_hour}:{start_minute}"
+                            end = f"{end_hour}:{end_minute}"
                         oh.add_range(day, start, end)
             item["opening_hours"] = oh.as_opening_hours()
 
