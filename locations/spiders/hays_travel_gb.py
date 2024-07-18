@@ -1,10 +1,9 @@
-import json
-
 from typing import Any
 from urllib.parse import urljoin
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
+
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
