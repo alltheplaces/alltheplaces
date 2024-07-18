@@ -25,7 +25,7 @@ class BaptistHealthArkansasUSSpider(AlgoliaSpider):
         item["country"] = "US"
         item["phone"] = location["phone_number"]
         item["lat"] = float(location["_geoloc"]["lat"])
-        item["lon"] = float(location["_geoloc"]["lng"])
+        item["lon"] = -abs(float(location["_geoloc"]["lng"]))
         if facility_type := location.get("facility_type"):
             if "Hospitals" in facility_type:
                 apply_category(Categories.HOSPITAL, item)
