@@ -13,3 +13,8 @@ class LoftUSSpider(SitemapSpider, StructuredDataSpider):
         (r"/store/[-\w]{2}/[-\w]+/[-\w]+$", "parse_sd"),
     ]
     wanted_types = ["ClothingStore"]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("name")
+        item["branch"] = response.xpath('//div[@class="store-heading"]/h2/text()').get()
+        yield item
