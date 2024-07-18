@@ -26,7 +26,6 @@ class PaczkomatInpostPLSpider(Spider):
             item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
             item["street"] = poi["e"]
-            item["state"] = poi["r"]
             item["postcode"] = poi["o"]
             if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru"]:
                 item["housenumber"] = poi["b"]
