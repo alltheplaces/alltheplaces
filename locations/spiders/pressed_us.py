@@ -57,16 +57,20 @@ class PressedUSSpider(Spider):
     def parse(self, response):
         for location in response.json()["data"]["searchStores"]:
             item = DictParser.parse(location)
+
             item["lat"] = location["geometry"]["coordinates"]["latitude"]
             item["lon"] = location["geometry"]["coordinates"]["longitude"]
+            item["branch"] = item.pop("name")
             item["website"] = (
                 f"https://pressed.com/pages/juice-bar-locations/US/{location['region']}/{quote(location['locality'])}/{quote(location['streetAddress'])}?storeId={location['id']}"
             )
-            item["branch"] = item.pop("name")
+
             hours = OpeningHours()
             for line in location["storeHours"]:
                 hours.add_ranges_from_string(line)
             item["opening_hours"] = hours
+
             apply_yes_no(Extras.TAKEAWAY, item, location["isPickupAvailable"], False)
             apply_yes_no(Extras.DELIVERY, item, location["isDeliveryAvailable"], False)
+
             yield item
