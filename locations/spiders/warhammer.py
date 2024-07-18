@@ -11,14 +11,16 @@ class WarhammerSpider(AlgoliaSpider):
 
     def parse_item(self, item, location):
         item["website"] = None  # 404
-        item["lat"] = location["_geoloc"]["lat"]
-        item["lon"] = location["_geoloc"]["lng"]
+        item["lat"] = location.get("_geoloc", {}).get("lat")
+        item["lon"] = location.get("_geoloc", {}).get("lng")
 
         item["opening_hours"] = OpeningHours()
         for day, rule in location.get("hours", {}).items():
-            if rule.get("isClosed") is True:
+            if not isinstance(rule, dict):
                 continue
-            for time in rule.get("openIntervals"):
+            if rule.get("isClosed", False):
+                continue
+            for time in rule.get("openIntervals", []):
                 item["opening_hours"].add_range(day, time["start"], time["end"])
 
         yield item

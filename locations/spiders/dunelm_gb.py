@@ -11,8 +11,8 @@ class DunelmGBSpider(AlgoliaSpider):
     index_name = "stores_prod"
 
     def parse_item(self, item, location):
-        item["lat"] = store["_geoloc"]["lat"]
-        item["lon"] = store["_geoloc"]["lng"]
+        item["lat"] = location["_geoloc"]["lat"]
+        item["lon"] = location["_geoloc"]["lng"]
         item["branch"] = item.pop("name")
         item["ref"] = location["sapStoreId"]
         item["website"] = "https://www.dunelm.com/stores/" + location["uri"]
