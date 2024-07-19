@@ -2,7 +2,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class JOANNUSSpider(Where2GetItSpider):
+class JoannUSSpider(Where2GetItSpider):
     name = "joann_us"
     item_attributes = {"brand": "JOANN", "brand_wikidata": "Q6203968"}
     api_brand_name = "joann"

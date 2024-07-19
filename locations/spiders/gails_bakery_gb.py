@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class GAILsBakeryGBSpider(SitemapSpider):
+class GailsBakeryGBSpider(SitemapSpider):
     name = "gails_bakery_gb"
     item_attributes = {"brand": "GAIL's Bakery", "brand_wikidata": "Q110662562", "extras": Categories.SHOP_BAKERY.value}
     allowed_domains = ["gailsbread.co.uk"]

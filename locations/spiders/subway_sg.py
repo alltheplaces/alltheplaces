@@ -5,7 +5,7 @@ from locations.hours import OpeningHours, sanitise_day
 from locations.spiders.subway import SubwaySpider
 
 
-class SubwaySGpider(scrapy.Spider):
+class SubwaySGSpider(scrapy.Spider):
     name = "subway_sg"
     item_attributes = SubwaySpider.item_attributes
     start_urls = [

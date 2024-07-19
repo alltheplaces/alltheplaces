@@ -9,7 +9,7 @@ from locations.spiders.tgi_fridays_us import TGIFridaysUSSpider
 from locations.structured_data_spider import clean_facebook
 
 
-class TGIFridaysAUSpider(Spider):
+class TgiFridaysAUSpider(Spider):
     name = "tgi_fridays_au"
     item_attributes = TGIFridaysUSSpider.item_attributes
     allowed_domains = ["www.tgifridays.com.au", "goo.gl"]

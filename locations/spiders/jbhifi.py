@@ -3,7 +3,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.algolia import AlgoliaSpider
 
 
-class JbHifiSpider(AlgoliaSpider):
+class JbhifiSpider(AlgoliaSpider):
     name = "jbhifi"
     item_attributes = {"brand": "JB Hi-Fi", "brand_wikidata": "Q3310113"}
     api_key = "a0c0108d737ad5ab54a0e2da900bf040"

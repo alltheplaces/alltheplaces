@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KFCITSpider(Spider):
+class KfcITSpider(Spider):
     name = "kfc_it"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://www.kfc.it/ristoranti"]

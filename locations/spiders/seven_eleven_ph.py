@@ -9,7 +9,7 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
-class SevenElevenPhSpider(scrapy.Spider):
+class SevenElevenPHSpider(scrapy.Spider):
     name = "seven_eleven_ph"
     allowed_domains = ["www.7-eleven.com.ph"]
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
