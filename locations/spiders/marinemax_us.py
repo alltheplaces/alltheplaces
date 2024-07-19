@@ -2,7 +2,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.algolia import AlgoliaSpider
 
 
-class MarineMaxUSSpider(AlgoliaSpider):
+class MarinemaxUSSpider(AlgoliaSpider):
     name = "marinemax_us"
     item_attributes = {"brand": "MarineMax", "brand_wikidata": "Q119140995"}
     app_id = "MES124X9KA"

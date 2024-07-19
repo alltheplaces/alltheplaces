@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class LloydsBankGB(SitemapSpider, StructuredDataSpider):
+class LloydsBankGBSpider(SitemapSpider, StructuredDataSpider):
     name = "lloyds_bank_gb"
     item_attributes = {
         "brand": "Lloyds Bank",

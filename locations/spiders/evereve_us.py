@@ -5,7 +5,7 @@ from scrapy import Request
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class EVEREVEUSSpider(AmastyStoreLocatorSpider):
+class EvereveUSSpider(AmastyStoreLocatorSpider):
     name = "evereve_us"
     item_attributes = {"brand": "EVEREVE", "brand_wikidata": "Q69891997"}
     allowed_domains = ["evereve.com"]

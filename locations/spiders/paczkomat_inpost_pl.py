@@ -25,9 +25,23 @@ class PaczkomatInpostPLSpider(Spider):
             item["ref"] = poi["n"]
             item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
-            item["street"] = poi["e"]
+            if "/" not in poi["e"]:
+                item["street"] = poi["e"].removeprefix("ul.").removesuffix(poi["b"]).strip()
+                item["street"] = item["street"][:1].upper() + item["street"][1:]
+                if item["street"].startswith("Al."):
+                    item["street"] = "Aleja " + item["street"][3:].strip()
+                if item["street"].startswith("Pl."):
+                    item["street"] = "Plac " + item["street"][3:].strip()
+                if item["street"].startswith("Gen."):
+                    item["street"] = "Generała " + item["street"][4:].strip()
+                if item["street"].startswith("Ks."):
+                    item["street"] = "Księdza " + item["street"][3:].strip()
+                if item["street"].startswith("Os."):
+                    item["street"] = "Osiedle " + item["street"][3:].strip()
+                if item["street"].startswith("Płk."):
+                    item["street"] = "Pułkownika " + item["street"][4:].strip()
             item["postcode"] = poi["o"]
-            if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru"]:
+            if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru", "n/n"]:
                 item["housenumber"] = poi["b"]
             item["lat"] = poi["l"]["a"]
             item["lon"] = poi["l"]["o"]
@@ -41,7 +55,7 @@ class PaczkomatInpostPLSpider(Spider):
             # poi["g"]
             # poi["p"]  # payment
 
-            item["website"] = f"https://inpost.pl/{self.parse_slug(item)}"
+            item["website"] = f'https://inpost.pl/{self.parse_slug(item, poi["e"], poi["r"])}'
             if poi["h"] == "24/7":
                 item["opening_hours"] = "24/7"
             else:
@@ -49,12 +63,8 @@ class PaczkomatInpostPLSpider(Spider):
                 item["opening_hours"].add_ranges_from_string(poi["h"], days=DAYS_PL)
             yield item
 
-    def parse_slug(self, item):
-        slug_parts = ["paczkomat", item["city"], item["ref"], item["street"], "paczkomaty"]
-
-        if item_state := item.get("state"):
-            slug_parts.append(item_state)
-
+    def parse_slug(self, item, street, state):
+        slug_parts = ["paczkomat", item["city"], item["ref"], street, "paczkomaty", state]
         slug = "-".join(map(lambda x: unidecode(x.lower().strip()), slug_parts))
         slug = re.sub(r"[·/_:; ]", "-", slug)
         slug = re.sub(r"[^a-z0-9 -]", "", slug)

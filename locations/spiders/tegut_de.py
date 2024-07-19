@@ -6,18 +6,6 @@ import scrapy
 from locations import hours
 from locations.items import Feature
 
-DAY_MAPPING = {
-    "Montag": "Mo",
-    "Dienstag": "Tu",
-    "Mittwoch": "We",
-    "MIttwoch": "We",
-    "Donnerstag": "Th",
-    "Donnertag": "Th",
-    "Freitag": "Fr",
-    "Samstag": "Sa",
-    "Sonntag": "Su",
-}
-
 
 def parse_opening_hours(opening_hours):
     p = re.compile(r"^([A-Za-z-,]+)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$")
@@ -37,7 +25,7 @@ def parse_opening_hours(opening_hours):
     return oh.as_opening_hours()
 
 
-class TegutDeSpider(scrapy.Spider):
+class TegutDESpider(scrapy.Spider):
     name = "tegut_de"
     item_attributes = {"brand": "tegut…", "brand_wikidata": "Q1547993"}
     allowed_domains = ["www.tegut.com"]

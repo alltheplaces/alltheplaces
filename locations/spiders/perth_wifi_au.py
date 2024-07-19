@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class PerthWiFiAUSpider(Spider):
+class PerthWifiAUSpider(Spider):
     name = "perth_wifi_au"
     item_attributes = {"operator": "City of Perth", "operator_wikidata": "Q1855330"}
     allowed_domains = ["services7.arcgis.com"]

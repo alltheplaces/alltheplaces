@@ -1,7 +1,7 @@
 from locations.storefinders.sylinder import SylinderSpider
 
 
-class NarbutikkenNO(SylinderSpider):
+class NarbutikkenNOSpider(SylinderSpider):
     name = "narbutikken_no"
     item_attributes = {"brand": "Nærbutikken", "brand_wikidata": "Q108810007"}
     app_key = "1270"

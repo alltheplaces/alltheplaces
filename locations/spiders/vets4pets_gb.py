@@ -3,7 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import url_to_coords
 from locations.linked_data_parser import LinkedDataParser
-from locations.spiders.petsathome_gb import PetsAtHomeGBSpider
+from locations.spiders.pets_at_home_gb import PetsAtHomeGBSpider
 
 
 def extract_google_position(item, response):
@@ -18,7 +18,7 @@ def set_located_in(item, location):
     item["located_in_wikidata"] = location["brand_wikidata"]
 
 
-class Vets4PetsGBSpider(CrawlSpider):
+class Vets4petsGBSpider(CrawlSpider):
     name = "vets4pets_gb"
     item_attributes = {
         "brand": "Vets4Pets",

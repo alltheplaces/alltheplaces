@@ -5,7 +5,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import extract_phone
 
 
-class FrancoMancaSpider(SitemapSpider):
+class FrancoMancaGBSpider(SitemapSpider):
     name = "franco_manca_gb"
     item_attributes = {"brand": "Franco Manca", "brand_wikidata": "Q28404417"}
     sitemap_urls = ["https://www.francomanca.co.uk/restaurant-sitemap.xml"]
