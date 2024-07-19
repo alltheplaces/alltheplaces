@@ -26,7 +26,11 @@ class PaczkomatInpostPLSpider(Spider):
             item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
             if "/" not in poi["e"]:
-                item["street"] = poi["e"].removesuffix(poi["b"]).removeprefix("ul.").strip()
+                item["street"] = poi["e"].removeprefix("ul.").removesuffix(poi["b"]).strip()
+                if item["street"].lower().startswith("al."):
+                    item["street"] = "Aleja " + item["street"][3:].strip()
+                if item["street"].lower().startswith("pl."):
+                    item["street"] = "Plac " + item["street"][3:].strip()
             item["postcode"] = poi["o"]
             if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru", "n/n"]:
                 item["housenumber"] = poi["b"]
