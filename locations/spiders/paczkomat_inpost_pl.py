@@ -26,7 +26,8 @@ class PaczkomatInpostPLSpider(Spider):
             item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
             if "/" not in poi["e"]:
-                item["street"] = poi["e"].removeprefix("ul.").removesuffix(poi["b"]).capitalize().strip()
+                item["street"] = poi["e"].removeprefix("ul.").removesuffix(poi["b"]).strip()
+                item["street"] = item["street"][:1].upper() + item["street"][1:]
                 if item["street"].startswith("Al."):
                     item["street"] = "Aleja " + item["street"][3:].strip()
                 if item["street"].startswith("Pl."):
