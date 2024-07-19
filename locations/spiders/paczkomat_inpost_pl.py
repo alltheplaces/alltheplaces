@@ -12,7 +12,6 @@ class PaczkomatInpostPLSpider(Spider):
     item_attributes = {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254"}
     allowed_domains = ["inpost.pl"]
     start_urls = ["https://inpost.pl/sites/default/files/points.json"]
-    skip_auto_cc_domain = True
 
     def parse(self, response, **kwargs):
         for poi in response.json()["items"]:
