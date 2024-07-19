@@ -3,11 +3,9 @@ from scrapy import Spider
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
-# SaveOnFoods
-
 
 class SaveOnFoodsCASpider(Spider):
-    name = "Save_On_Foods_ca"
+    name = "save_on_foods_ca"
     item_attributes = {"brand": "Save-On-Foods", "brand_wikidata": "Q7427974"}
     start_urls = ["https://storefrontgateway.saveonfoods.com/api/stores"]
 
