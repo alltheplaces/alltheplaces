@@ -4,7 +4,7 @@ from locations.storefinders.algolia import AlgoliaSpider
 
 
 class BaptistHealthArkansasUSSpider(AlgoliaSpider):
-    name = "bha_us"
+    name = "baptist_health_arkansas_us"
     item_attributes = {
         "brand": "Baptist Health Foundation",
         "brand_wikidata": "Q50379824",

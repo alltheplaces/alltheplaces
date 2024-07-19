@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.spiders.ampol_au import AmpolAUSpider
 from locations.spiders.bp import BPSpider
 from locations.spiders.coles_au import ColesAUSpider
-from locations.spiders.exxonmobil import ExxonMobilSpider
+from locations.spiders.exxon_mobil import ExxonMobilSpider
 from locations.spiders.liberty_au import LibertyAUSpider
 from locations.spiders.night_owl_au import NightOwlAU
 from locations.spiders.otr_au import OTRAUSpider

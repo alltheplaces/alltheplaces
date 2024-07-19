@@ -7,8 +7,8 @@ from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class BremerBankSpider(SitemapSpider):
-    name = "bremer_bank"
+class BremerBankUSSpider(SitemapSpider):
+    name = "bremer_bank_us"
     item_attributes = {
         "brand": "Bremer Bank",
         "brand_wikidata": "Q907603",

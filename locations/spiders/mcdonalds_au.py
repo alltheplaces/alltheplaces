@@ -4,12 +4,12 @@ from scrapy import Spider
 
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsAUSpider(Spider):
+class McdonaldsAUSpider(Spider):
     name = "mcdonalds_au"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.com.au"]
     start_urls = ["https://mcdonalds.com.au/data/store"]
 

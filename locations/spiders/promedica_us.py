@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class ProMedicaUSSpider(XMLFeedSpider):
+class PromedicaUSSpider(XMLFeedSpider):
     name = "promedica_us"
     item_attributes = {"brand": "ProMedica", "brand_wikidata": "Q7246673"}
     allowed_domains = ["www.promedicaseniorcare.org"]

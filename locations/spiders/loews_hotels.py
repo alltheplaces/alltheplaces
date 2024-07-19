@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class LoewsHotelsSpider(StructuredDataSpider):
-    name = "loews"
+    name = "loews_hotels"
     item_attributes = {"brand": "Loews Hotels", "brand_wikidata": "Q6666622"}
     allowed_domains = ["loewshotels.com"]
     start_urls = ("https://www.loewshotels.com/destinations",)

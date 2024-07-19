@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class CorePowerYogaUSSpider(Spider):
+class CorepowerYogaUSSpider(Spider):
     name = "corepower_yoga_us"
     item_attributes = {"brand": "Corepower Yoga", "brand_wikidata": "Q21015663"}
     allowed_domains = ["www.corepoweryoga.com"]

@@ -3,7 +3,7 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class BirkenstockUsSpider(scrapy.Spider):
+class BirkenstockSpider(scrapy.Spider):
     name = "birkenstock"
     item_attributes = {
         "brand": "Birkenstock",

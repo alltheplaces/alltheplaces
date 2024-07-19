@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SpawWorldAUNZSpider(SitemapSpider, StructuredDataSpider):
+class SpaWorldAUNZSpider(SitemapSpider, StructuredDataSpider):
     name = "spa_world_au_nz"
     item_attributes = {
         "brand": "Spa World",

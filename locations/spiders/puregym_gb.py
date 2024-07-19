@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PureGymGBSpider(SitemapSpider, StructuredDataSpider):
+class PuregymGBSpider(SitemapSpider, StructuredDataSpider):
     name = "puregym_gb"
     item_attributes = {"brand": "PureGym", "brand_wikidata": "Q18345898", "country": "GB"}
     allowed_domains = ["www.puregym.com"]

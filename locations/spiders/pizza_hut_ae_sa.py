@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class PizzaHutAESpider(scrapy.Spider):
+class PizzaHutAESASpider(scrapy.Spider):
     name = "pizza_hut_ae_sa"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     custom_settings = {"ROBOTSTXT_OBEY": False}

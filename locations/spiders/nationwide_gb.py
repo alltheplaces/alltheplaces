@@ -5,7 +5,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class NationwideGB(CrawlSpider, StructuredDataSpider):
+class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
     name = "nationwide_gb"
     item_attributes = {
         "brand": "Nationwide",

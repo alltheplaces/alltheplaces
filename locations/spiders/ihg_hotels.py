@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
+class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
     name = "ihg_hotels"
     allowed_domains = ["ihg.com"]
     sitemap_urls = ["https://www.ihg.com/bin/sitemapindex.xml"]

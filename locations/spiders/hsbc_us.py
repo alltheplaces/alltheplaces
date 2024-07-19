@@ -5,7 +5,7 @@ from locations.spiders.hsbc import HSBCSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HSBCUSSpider(CrawlSpider, StructuredDataSpider):
+class HsbcUSSpider(CrawlSpider, StructuredDataSpider):
     name = "hsbc_us"
     item_attributes = HSBCSpider.item_attributes
     start_urls = ["https://www.us.hsbc.com/wealth-center/list/"]

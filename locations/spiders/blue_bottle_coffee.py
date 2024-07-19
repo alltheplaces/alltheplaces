@@ -2,7 +2,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.algolia import AlgoliaSpider
 
 
-class BlueBottleCoffee(AlgoliaSpider):
+class BlueBottleCoffeeSpider(AlgoliaSpider):
     name = "blue_bottle_coffee"
     item_attributes = {"brand": "Blue Bottle Coffee", "brand_wikidata": "Q4928917"}
     api_key = "d5c811630429fa52f432899fe1935c9f"

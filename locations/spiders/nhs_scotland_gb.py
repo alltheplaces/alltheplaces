@@ -36,7 +36,7 @@ def ignore(item):
     return False
 
 
-class NHSScotlandGBSpider(Spider):
+class NhsScotlandGBSpider(Spider):
     name = "nhs_scotland_gb"
     services = {
         "dental-services": Categories.DENTIST,

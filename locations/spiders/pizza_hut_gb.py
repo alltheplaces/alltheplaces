@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PizzaHutGB(SitemapSpider, StructuredDataSpider):
+class PizzaHutGBSpider(SitemapSpider, StructuredDataSpider):
     name = "pizza_hut_gb"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     PIZZA_HUT_DELIVERY = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q107293079"}

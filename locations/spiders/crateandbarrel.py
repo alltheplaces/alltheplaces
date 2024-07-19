@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class CrateAndBarrelSpider(CrawlSpider, StructuredDataSpider):
+class CrateandbarrelSpider(CrawlSpider, StructuredDataSpider):
     name = "crateandbarrel"
     allowed_domains = ["www.crateandbarrel.com"]
     item_attributes = {"brand": "crateandbarrel", "brand_wikidata": "Q5182604"}
