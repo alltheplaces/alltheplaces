@@ -26,7 +26,7 @@ class PaczkomatInpostPLSpider(Spider):
             item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
             if "/" not in poi["e"]:
-                item["street"] = poi["e"].removeprefix("ul.").removesuffix(poi["b"]).strip()
+                item["street"] = poi["e"].removeprefix("ul.").removesuffix(poi["b"]).replace("-go","").strip()
                 item["street"] = item["street"][:1].upper() + item["street"][1:]
                 if item["street"].startswith("Al."):
                     item["street"] = "Aleja " + item["street"][3:].strip()
@@ -36,7 +36,7 @@ class PaczkomatInpostPLSpider(Spider):
                     item["street"] = "Generała " + item["street"][4:].strip()
                 if item["street"].startswith("Ks."):
                     item["street"] = "Księdza " + item["street"][3:].strip()
-                if item["street"].startswith("Os."):
+                if item["street"].startswith("Os.") or item["street"].startswith("Oś."):
                     item["street"] = "Osiedle " + item["street"][3:].strip()
                 if item["street"].startswith("Płk."):
                     item["street"] = "Pułkownika " + item["street"][4:].strip()
