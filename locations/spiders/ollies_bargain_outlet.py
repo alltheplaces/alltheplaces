@@ -58,9 +58,10 @@ class OlliesBargainOutletSpider(scrapy.Spider):
             item["ref"] = data.get("StoreCode")
 
             open_hours = data.get("OpenHours").split("<br />")
-            open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
-            oh = OpeningHours()
-            oh.from_linked_data({"openingHours": open_hour_filtered}, "%I%p")
-            item["opening_hours"] = oh.as_opening_hours()
+            if "COMING SOON" not in open_hours[0].upper():
+                open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
+                oh = OpeningHours()
+                oh.from_linked_data({"openingHours": open_hour_filtered}, "%I%p")
+                item["opening_hours"] = oh.as_opening_hours()
 
-            yield item
+                yield item

@@ -5,8 +5,8 @@ from scrapy.http import Request
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MediaMarktDESpider(StructuredDataSpider):
-    name = "media_markt_de"
+class MediamarktDESpider(StructuredDataSpider):
+    name = "mediamarkt_de"
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
     start_urls = ["https://www.mediamarkt.de/de/store/store-finder"]
 

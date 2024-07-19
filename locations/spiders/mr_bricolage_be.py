@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MrBircolageBeSpider(scrapy.Spider):
+class MrBricolageBESpider(scrapy.Spider):
     name = "mr_bricolage_be"
     item_attributes = {"brand": "Mr. Bricolage", "brand_wikidata": "Q3141657"}
     start_urls = ["https://www.mr-bricolage.be/magasins?ajax=1&all=1"]

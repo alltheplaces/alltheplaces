@@ -15,7 +15,7 @@ from locations.storefinders.woosmap import WoosmapSpider
 
 
 class TotalEnergiesSpider(WoosmapSpider):
-    name = "totalenergies"
+    name = "total_energies"
     key = "mapstore-prod-woos"
     origin = "https://totalenergies.com"
 

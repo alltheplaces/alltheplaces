@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 
 
-class ABCPLSpider(Spider):
+class AbcPLSpider(Spider):
     name = "abc_pl"
     item_attributes = {}
 

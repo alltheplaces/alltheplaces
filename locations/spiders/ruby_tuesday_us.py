@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class RubyTuesdayUsSpider(Spider):
+class RubyTuesdayUSSpider(Spider):
     name = "ruby_tuesday_us"
     item_attributes = {"brand": "Ruby Tuesday", "brand_wikidata": "Q7376400"}
     start_urls = ["https://www.rubytuesday.com/locations/"]

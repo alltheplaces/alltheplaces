@@ -1,7 +1,7 @@
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
-class SpeeDeeUSSpider(AgileStoreLocatorSpider):
+class SpeedeeUSSpider(AgileStoreLocatorSpider):
     name = "speedee_us"
     item_attributes = {"brand": "SpeeDee Oil Change and Auto Service", "brand_wikidata": "Q120537032"}
     allowed_domains = ["www.speedeeoil.com"]

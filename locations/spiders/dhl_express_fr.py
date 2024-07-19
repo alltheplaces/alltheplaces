@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 
 
-class DhlExpressFrSpider(scrapy.Spider):
+class DhlExpressFRSpider(scrapy.Spider):
     name = "dhl_express_fr"
     item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["wsbexpress.dhl.com"]

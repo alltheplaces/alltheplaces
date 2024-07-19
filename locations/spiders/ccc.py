@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, DAYS_CZ, DAYS_EN, DAYS_HU, DAYS_PL, DAYS_RO, DAYS_RS, DAYS_SK, OpeningHours
 
 
-class CCCSpider(Spider):
+class CccSpider(Spider):
     name = "ccc"
     item_attributes = {"brand": "CCC", "brand_wikidata": "Q11788344"}
     start_urls = [

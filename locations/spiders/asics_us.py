@@ -1,7 +1,7 @@
 from locations.storefinders.locally import LocallySpider
 
 
-class AsicsUsSpider(LocallySpider):
+class AsicsUSSpider(LocallySpider):
     name = "asics_us"
     item_attributes = {"brand": "ASICS", "brand_wikidata": "Q327247"}
     allowed_domains = ["www.asics.com"]

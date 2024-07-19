@@ -6,7 +6,7 @@ from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
 
-class YMCASpider(scrapy.Spider):
+class YmcaSpider(scrapy.Spider):
     name = "ymca"
     item_attributes = {"brand": "YMCA", "brand_wikidata": "Q157169"}
     allowed_domains = ["ymca.org"]
