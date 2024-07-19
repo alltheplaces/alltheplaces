@@ -25,7 +25,7 @@ class PaczkomatInpostPLSpider(Spider):
             item["ref"] = poi["n"]
             item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
-            if "/" not in item["street]: 
+            if "/" not in item["street]:
                 item["street"] = poi["e"].removesuffix(poi["b"]).strip()
             item["postcode"] = poi["o"]
             if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru"]:
