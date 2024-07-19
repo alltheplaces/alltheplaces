@@ -87,7 +87,6 @@ COUNTRYCODE_COMPONENTS = {
     "TR",
     "TW",
     "UA",
-    "UK",
     "US",
     "VN",
     "ZA",
