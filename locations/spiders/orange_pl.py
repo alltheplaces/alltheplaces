@@ -19,7 +19,7 @@ class OrangePLSpider(AlgoliaSpider):
         item["country"] = location["country"]["code"]
         item["city"] = location["city"]["name"]
         item["website"] = f"https://salony.orange.pl/pl/{location['url_location']}"
-        item["branch"] = item.pop("name", None)
+        item.pop("name", None)
         self.parse_hours(item, location)
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
