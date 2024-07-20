@@ -41,7 +41,7 @@ class PaczkomatInpostPLSpider(Spider):
                 if item["street"].startswith("Pl."):
                     item["place"] = "Plac " + item["street"][3:].strip()
                 if item["street"].startswith("Plac "):
-                    item["place"] = item["street"]
+                    item["extras"]["addr:place"] = item["street"]
                     item["street"] = ""
             item["postcode"] = poi["o"]
             if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru", "n/n"]:
