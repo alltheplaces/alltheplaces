@@ -39,7 +39,7 @@ class PaczkomatInpostPLSpider(Spider):
                 if item["street"].startswith("Płk."):
                     item["street"] = "Pułkownika " + item["street"][4:].strip()
                 if item["street"].startswith("Pl."):
-                    item["place"] = "Plac " + item["street"][3:].strip()
+                    item["street"] = "Plac " + item["street"][3:].strip()
                 if item["street"].startswith("Plac "):
                     item["extras"]["addr:place"] = item["street"]
                     item["street"] = ""
