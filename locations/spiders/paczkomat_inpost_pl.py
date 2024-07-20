@@ -30,8 +30,6 @@ class PaczkomatInpostPLSpider(Spider):
                 item["street"] = item["street"][:1].upper() + item["street"][1:]
                 if item["street"].startswith("Al."):
                     item["street"] = "Aleja " + item["street"][3:].strip()
-                if item["street"].startswith("Pl."):
-                    item["street"] = "Plac " + item["street"][3:].strip()
                 if item["street"].startswith("Gen."):
                     item["street"] = "Generała " + item["street"][4:].strip()
                 if item["street"].startswith("Ks."):
@@ -40,6 +38,11 @@ class PaczkomatInpostPLSpider(Spider):
                     item["street"] = "Osiedle " + item["street"][3:].strip()
                 if item["street"].startswith("Płk."):
                     item["street"] = "Pułkownika " + item["street"][4:].strip()
+                if item["street"].startswith("Pl."):
+                    item["place"] = "Plac " + item["street"][3:].strip()
+                if item["street"].startswith("Plac "):
+                    item["place"] = item["street"]
+                    item["street"] = ""
             item["postcode"] = poi["o"]
             if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru", "n/n"]:
                 item["housenumber"] = poi["b"]
