@@ -50,7 +50,12 @@ def main():
     geo_metadata = {}
     schemas = []
     for parquet_filename in parquet_filenames:
-        parquet_file = pyarrow.parquet.ParquetFile(parquet_filename)
+        try:
+            parquet_file = pyarrow.parquet.ParquetFile(parquet_filename)
+        except pyarrow.lib.ArrowInvalid as e:
+            print(f"Skipping {parquet_filename} because: {e}")
+            continue
+
         schemas.append(parquet_file.schema_arrow)
 
         if geo_metadata_str := parquet_file.metadata.metadata.get(b"geo"):
