@@ -2020,12 +2020,12 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:b3047b2b8ab6d4a8b5bb04e28e4531be8e72fc87e5fb8f2588196eca9dd11dd0",
-                "sha256:e542f2ae56dc8ac0bb1774f835031e818af2e3a0e3fd133363d5932621e8e66c"
+                "sha256:c8ef9b09ea931b08b262c8c4e9badbab499e58c1da5d01320d13b41f9ac2a8d4",
+                "sha256:d5389c9a730818cd0c9e24c0009d3edcf1181d523999940b2e57ffef534e7fe1"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==1.33.26"
+            "version": "==1.33.27"
         },
         "black": {
             "hashes": [
@@ -2067,11 +2067,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:4215db28d25309d59c99507f1f77df9089e5bebbad35f6e19c7c44ec5383a3e8",
-                "sha256:a2cf26e1bf10d5917a2285e50257bc44e94a1d16574f282f3274f7a5d8d1f08b"
+                "sha256:2e72e262de02adcb0264ac2bac159a28f55dbba8d9e52aa0308773a42950dff5",
+                "sha256:edf0fb4c02186ae29b76263ac5fda18b0a085d334a310551c9984407cf1079e6"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.34.144"
+            "version": "==1.34.145"
         },
         "cfgv": {
             "hashes": [
@@ -2388,7 +2388,7 @@
                 "sha256:a448b2f64d686155468037e1ace9f2d2199776e17f0a46610480d311f73e3472",
                 "sha256:dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
             ],
-            "markers": "python_version >= '3.8'",
+            "markers": "python_version >= '3.10'",
             "version": "==2.2.2"
         },
         "virtualenv": {
