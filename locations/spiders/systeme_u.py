@@ -85,9 +85,6 @@ class SystemeUSpider(scrapy.Spider):
 
             if h:
                 properties["opening_hours"] = h
-
-        except Exception as e:
-            self.logger.error(f"Error parsing hours: {e}")
         except:
             pass
 
