@@ -6,6 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 
+
 class SystemeUSpider(scrapy.Spider):
     name = "systeme_u"
     item_attributes = {"brand": "Systeme U", "brand_wikidata": "Q2529029"}
@@ -23,14 +24,14 @@ class SystemeUSpider(scrapy.Spider):
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
-        
+
         for hour in hours:
 
             # Check if the hour data indicates 24/7 availability
             hour_text = hour.get()
             if hour_text:
                 hour_text = hour_text.strip()
-            
+
             if "24h/24 - 7j/7" in hour_text:
                 for day in DAYS_FR.values():
                     opening_hours.add_range(
@@ -43,7 +44,7 @@ class SystemeUSpider(scrapy.Spider):
 
             day = hour.xpath('.//td[@class="day"]/text()').extract_first()
             schedule = hour.xpath('.//td[@class="schedule"]/text()').extract_first()
-            
+
             if schedule and schedule.lower() != "fermé":
                 open_time, close_time = schedule.split(" - ")
                 opening_hours.add_range(
@@ -59,9 +60,15 @@ class SystemeUSpider(scrapy.Spider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[@class="info-magasin-station"]/h1[@class="h1"]/text()').extract_first(),
-            "addr_full": response.xpath('normalize-space(//div[@class="address b-md b-md--sm"]/p[1]/text())').extract_first(),
-            "city": response.xpath('normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[2]/text())').extract_first(),
-            "postcode": response.xpath('normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[1]/text())').extract_first(),
+            "addr_full": response.xpath(
+                'normalize-space(//div[@class="address b-md b-md--sm"]/p[1]/text())'
+            ).extract_first(),
+            "city": response.xpath(
+                'normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[2]/text())'
+            ).extract_first(),
+            "postcode": response.xpath(
+                'normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[1]/text())'
+            ).extract_first(),
             "country": "FR",
             "lat": response.xpath("//@data-store-latitude").extract_first(),
             "lon": response.xpath("//@data-store-longitude").extract_first(),
