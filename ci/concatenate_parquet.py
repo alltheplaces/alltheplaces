@@ -55,7 +55,7 @@ def main():
         try:
             parquet_file = pyarrow.parquet.ParquetFile(parquet_filename)
         except pyarrow.lib.ArrowInvalid as e:
-            print(f"Skipping {parquet_filename} because: {e}")
+            sys.stderr.write(f"Skipping {parquet_filename} because: {e}\n")
             continue
 
         schemas.append(parquet_file.schema_arrow)
