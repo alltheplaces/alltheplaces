@@ -91,7 +91,7 @@ def main():
     unified_metadata[b"geo"] = json.dumps(geo_metadata)
     unified_schema = unified_schema.with_metadata(unified_metadata)
 
-    # Concatenate the Parquet files, extending the bounding box in the geoparquet metadata if necessary
+    # Concatenate the Parquet files
     with pyarrow.parquet.ParquetWriter(args.output, unified_schema) as writer:
         for parquet_filename in parquet_filenames:
             parquet_file = pyarrow.parquet.ParquetFile(parquet_filename)
