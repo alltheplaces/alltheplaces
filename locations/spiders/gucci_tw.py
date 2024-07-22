@@ -17,10 +17,7 @@ class GucciTWSpider(Spider):
         east = 121.951243931
         yield Request(
             f"https://www.gucci.com/us/en/store/all?south={south}&west={west}&north={north}&east={east}",
-            headers={
-                "Referer": "https://www.gucci.com/us/en/store",
-                "User-Agent": BROWSER_DEFAULT,
-            },
+            headers={"Referer": "https://www.gucci.com/us/en/store"},
         )
 
     def parse(self, response):
