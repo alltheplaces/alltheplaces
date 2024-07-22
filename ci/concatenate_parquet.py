@@ -1,7 +1,9 @@
 import argparse
 import glob
 import json
+import sys
 
+import pyarrow.lib
 import pyarrow.parquet
 
 
@@ -78,6 +80,10 @@ def main():
                 for geometry_type in geometry_types:
                     if geometry_type not in geo_metadata["columns"]["geometry"]["geometry_types"]:
                         geo_metadata["columns"]["geometry"]["geometry_types"].append(geometry_type)
+
+    if not schemas:
+        sys.stderr.write("No valid Parquet files found.\n")
+        exit(1)
 
     unified_schema = pyarrow.unify_schemas(schemas, promote_options="permissive")
 
