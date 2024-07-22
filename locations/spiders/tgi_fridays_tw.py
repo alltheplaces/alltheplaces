@@ -25,6 +25,8 @@ class TgiFridaysTWSpider(Spider):
                 item["phone"] = phone.get("country") + phone.get("area") + phone.get("number")
                 item["extras"]["reservation:website"] = store_en.get("urls", {}).get("reservations")
                 item["image"] = store_en.get("photo")
+                item["lat"] = store_en.get("map", {}).get("latitude")
+                item["lon"] = store_en.get("map", {}).get("longitude")
 
                 # Go into the chinese list and grab the name and address in chinese. (Search by key)
                 for region_zh in zh_data:
