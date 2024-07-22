@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingTH(Spider):
+class BurgerKingTHSpider(Spider):
     name = "burger_king_th"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = [
