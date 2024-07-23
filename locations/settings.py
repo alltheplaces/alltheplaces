@@ -9,11 +9,13 @@
 
 import os
 
+import locations
 import scrapy
 
-import locations
+from .utils import feed_uri_params
 
-BOT_NAME = "locations"
+ENV = "local"
+BOT_NAME = "locations-h"
 
 SPIDER_MODULES = ["locations.spiders"]
 NEWSPIDER_MODULE = "locations.spiders"
@@ -85,8 +87,10 @@ if os.environ.get("ZYTE_API_KEY"):
     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
     TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
-DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
-
+DOWNLOADER_MIDDLEWARES = {
+    "locations.middlewares.cdnstats.CDNStatsMiddleware": 500,
+    "scrapy_zyte_smartproxy.ZyteSmartProxyMiddleware": 610,
+}
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
 # EXTENSIONS = {
@@ -94,7 +98,8 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 # }
 
 EXTENSIONS = {
-    "locations.extensions.LogStatsExtension": 101,
+    "locations.extensions.google_auth.GoogleAuthExtension": 10,
+    "locations.extensions.stackdriver_logger.StackdriverLoggerExtension": 100,
 }
 
 # Configure item pipelines
@@ -114,9 +119,11 @@ ITEM_PIPELINES = {
     "locations.pipelines.closed.ClosePipeline": 650,
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
     "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 750,
-    "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
-    "locations.pipelines.count_brands.CountBrandsPipeline": 810,
-    "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
+    # Huq: These flood the stats objects with keys for every spider - we can aggregate them trivally in BigQuery
+    # "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
+    # "locations.pipelines.count_brands.CountBrandsPipeline": 810,
+    # "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
+    "locations.pipelines.huq_adjust.HuqAdjustPipeline": 99999,
 }
 
 LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
@@ -166,4 +173,81 @@ REQUESTS_CACHE_BACKEND_SETTINGS = {
     "expire_after": 60 * 60 * 24 * 3,
     "backend": "filesystem",
     "wal": True,
+}
+
+
+# HUQ
+# Configure item pipelines
+# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
+# ITEM_PIPELINES = ITEM_PIPELINES | {
+#     "spidermon.contrib.scrapy.pipelines.ItemValidationPipeline": 800,
+# }
+
+# Monitoring
+SPIDERMON_ENABLED = True
+
+SPIDERMON_SPIDER_CLOSE_MONITORS = ("locations.monitors.SpiderCloseMonitorSuite",)
+
+# For local dev, overriden by Scrapy Cloud: https://spidermon.readthedocs.io/en/latest/howto/stats-collection.html
+STATS_CLASS = "spidermon.contrib.stats.statscollectors.local_storage.LocalStorageStatsHistoryCollector"
+
+SPIDERMON_MIN_ITEMS = 1
+SPIDERMON_MAX_CRITICALS = 0
+SPIDERMON_MAX_ERRORS = 0
+# Covers known warnings:
+# [py.warnings] /usr/local/lib/python3.10/site-packages/scrapy/extensions/feedexport.py:42 ScrapyDeprecationWarning x2
+# [py.warnings] /usr/local/lib/python3.10/site-packages/scrapinghub/client/__init__.py:60: UserWarning
+SPIDERMON_MAX_WARNINGS = 3
+
+SPIDERMON_MAX_DOWNLOADER_EXCEPTIONS = 0
+SPIDERMON_MAX_RETRIES = 2
+SPIDERMON_MIN_SUCCESSFUL_REQUESTS = 1
+SPIDERMON_UNWANTED_HTTP_CODES = {
+    400: {"max_count": 100, "max_percentage": 0.5},
+    407: {"max_count": 100, "max_percentage": 0.5},
+    429: {"max_count": 100, "max_percentage": 0.5},
+    500: 0,
+    502: 0,
+    503: 0,
+    504: 0,
+    523: 0,
+    540: 0,
+    541: 0,
+}
+
+# Stores the stats of the last 10 spider execution (default=100)
+SPIDERMON_MAX_STORED_STATS = 10
+
+# SPIDERMON_VALIDATION_MODELS = ("locations.validators.LocationItem",)
+#
+# # Adds _validation to the item when the item doesn’t match the schema
+# SPIDERMON_VALIDATION_ADD_ERRORS_TO_ITEMS = True
+# SPIDERMON_MAX_ITEM_VALIDATION_ERRORS = 0
+
+SPIDERMON_SLACK_FAKE = True  # Override in settings on Zyte
+SPIDERMON_SLACK_SENDER_NAME = "Spidermon"
+SPIDERMON_SLACK_RECIPIENTS = ["#spidercave"]
+SPIDERMON_SLACK_SENDER_TOKEN = "not a valid token"  # Override in settings on Zyte
+SPIDERMON_SLACK_NOTIFIER_INCLUDE_REPORT_LINK = True
+SPIDERMON_SLACK_NOTIFIER_INCLUDE_OK_ATTACHMENTS = True
+
+SPIDERMON_SENTRY_FAKE = True  # Override in settings on Zyte
+SPIDERMON_SENTRY_DSN = "not a valid dsn"  # Override in settings on Zyte
+SPIDERMON_SENTRY_PROJECT_NAME = "poi-finder"
+SPIDERMON_SENTRY_ENVIRONMENT_TYPE = "local"  # Override in settings on Zyte
+
+ZYTE_SMARTPROXY_ENABLED = False  # Override in settings on Zyte
+
+
+STATS_CLASS = "spidermon.contrib.stats.statscollectors.local_storage.LocalStorageStatsHistoryCollector"
+
+FEED_URI_PARAMS = feed_uri_params
+
+FEEDS = {
+    "gs://huq-osm/alltheplaces/%(env)s/dt=%(schedule_date)s/%(spider_name)s-%(batch_id)05d.jl": {
+        "format": "jsonlines",
+        "encoding": "utf8",
+        # When a spider yields a high number of POIs, uploading the file might time out.
+        "batch_item_count": 100000,
+    }
 }

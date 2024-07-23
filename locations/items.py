@@ -38,6 +38,9 @@ class Feature(scrapy.Item):
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()
     extras = scrapy.Field()
+    spider = scrapy.Field()
+    shop = scrapy.Field()
+    amenity = scrapy.Field()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

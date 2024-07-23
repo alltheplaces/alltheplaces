@@ -1,2 +1,8 @@
 stacks:
-  default: "scrapy:2.5"
+  default: "scrapy:2.11"
+
+projects:
+  default: 668973
+
+requirements:
+  file: Pipfile
