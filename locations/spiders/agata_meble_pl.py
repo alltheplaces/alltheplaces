@@ -1,7 +1,6 @@
 from urllib.parse import urljoin
 
 import scrapy
-
 from locations.dict_parser import DictParser
 
 

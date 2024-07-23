@@ -1,23 +1,13 @@
 import re
 
-from scrapy import Spider
-from unidecode import unidecode
-
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
+from scrapy import Spider
+from unidecode import unidecode
 
 
 class PaczkomatInpostPLSpider(Spider):
     name = "paczkomat_inpost_pl"
-    brands = {
-        "paczkomat": {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254"},
-        "appkomat": {
-            "brand": "Appkomat InPost",
-            "brand_wikidata": "",
-            "extras": {"app_operated": "only", "not:brand:wikidata": "Q110970254"},
-        },
-    }
-
     item_attributes = {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254"}
     allowed_domains = ["inpost.pl"]
     start_urls = ["https://inpost.pl/sites/default/files/points.json"]
@@ -32,12 +22,6 @@ class PaczkomatInpostPLSpider(Spider):
             # The mapping is available in "load" js function of inpostLocatorMap object
 
             item["ref"] = poi["n"]
-
-            if item["ref"].endswith("APP"):
-                item.update(self.brands["appkomat"])
-            else:
-                item.update(self.brands["paczkomat"])
-
             item["extras"]["description"] = poi["d"]
             item["city"] = poi["c"]
             if "/" not in poi["e"]:
@@ -57,10 +41,6 @@ class PaczkomatInpostPLSpider(Spider):
                     item["street"] = "Plac " + item["street"][3:].strip()
                 if item["street"].startswith("Plac "):
                     item["extras"]["addr:place"] = item["street"]
-                    item["street"] = ""
-                if item["street"] == item["city"]:
-                    item["extras"]["addr:place"] = item["city"]
-                    item["city"] = ""
                     item["street"] = ""
             item["postcode"] = poi["o"]
             if poi["b"].lower() not in ["b/n", "bn", "b.n", "b.n.", "bn.", "brak numeru", "n/n"]:

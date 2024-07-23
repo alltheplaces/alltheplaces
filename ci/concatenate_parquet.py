@@ -1,9 +1,7 @@
 import argparse
 import glob
 import json
-import sys
 
-import pyarrow.lib
 import pyarrow.parquet
 
 
@@ -52,12 +50,7 @@ def main():
     geo_metadata = {}
     schemas = []
     for parquet_filename in parquet_filenames:
-        try:
-            parquet_file = pyarrow.parquet.ParquetFile(parquet_filename)
-        except pyarrow.lib.ArrowInvalid as e:
-            sys.stderr.write(f"Skipping {parquet_filename} because: {e}\n")
-            continue
-
+        parquet_file = pyarrow.parquet.ParquetFile(parquet_filename)
         schemas.append(parquet_file.schema_arrow)
 
         if geo_metadata_str := parquet_file.metadata.metadata.get(b"geo"):
@@ -81,17 +74,13 @@ def main():
                     if geometry_type not in geo_metadata["columns"]["geometry"]["geometry_types"]:
                         geo_metadata["columns"]["geometry"]["geometry_types"].append(geometry_type)
 
-    if not schemas:
-        sys.stderr.write("No valid Parquet files found.\n")
-        exit(1)
-
     unified_schema = pyarrow.unify_schemas(schemas, promote_options="permissive")
 
     unified_metadata = unified_schema.metadata
     unified_metadata[b"geo"] = json.dumps(geo_metadata)
     unified_schema = unified_schema.with_metadata(unified_metadata)
 
-    # Concatenate the Parquet files
+    # Concatenate the Parquet files, extending the bounding box in the geoparquet metadata if necessary
     with pyarrow.parquet.ParquetWriter(args.output, unified_schema) as writer:
         for parquet_filename in parquet_filenames:
             parquet_file = pyarrow.parquet.ParquetFile(parquet_filename)
