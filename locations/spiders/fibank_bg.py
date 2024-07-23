@@ -6,7 +6,7 @@ from locations.hours import DAYS_BG, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 from locations.items import Feature
 
-class MaxmaraSpider(scrapy.Spider):
+class FibankBGSpider(scrapy.Spider):
     name = "fibank_bg"
     item_attributes = {"brand": "Fibank", "brand_wikidata": "Q3367065"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
