@@ -14,7 +14,7 @@ class PaczkomatInpostPLSpider(Spider):
         "appkomat": {
             "brand": "Appkomat InPost",
             "brand_wikidata": "",
-            "extras": {"app_operated": "only", "not:brand:wikidata": "Q110970254"},
+            "extras": {"app_operated": "only", "not:brand:wikidata": "Q110970254", "amenity": "parcel_locker},
         },
     }
 
