@@ -39,7 +39,6 @@ class FibankBGSpider(scrapy.Spider):
                     if worktime is not None and not isUnparsable:
                         days, hours = worktime.replace("ч", "").replace(" ", "").replace(".", "").split(":", 1)
                         days = days.split("-")
-                        print(worktime)
                         days = [sanitise_day(days[0], DAYS_BG), sanitise_day(days[1], DAYS_BG)]
                         hours = hours.split("-")
                         item["opening_hours"] = OpeningHours()
