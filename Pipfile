@@ -8,7 +8,7 @@ python_version = "3.11"
 
 [dev-packages]
 autoflake8 = "*"
-awscli = "*"
+awscli = "==1.29.62"
 black = "*"
 boto3 = "*"
 flake8 = "*"
@@ -17,6 +17,9 @@ pep8-naming = "*"
 pre-commit = "*"
 pylint = "*"
 pytest = "*"
+shub = "*"
+pipenv = "*"
+bigquery-schema-generator = "*"
 
 [packages]
 babel = "*"
@@ -48,3 +51,14 @@ twisted = {extras = ["http2"], version = "*"}
 tzdata = "*"
 unidecode = "*"
 xmltodict = "*"
+scrapy-zyte-smartproxy = "*"
+spidermon = {version = "*", extras = ["monitoring", "validation"]}
+google-cloud-storage = "*"
+google-cloud-logging = "*"
+google-cloud-firestore = "*"
+firebase-admin = "*"
+msgpack-python = "*"
+mergedeep = "*"
+botocore = "==1.31.62"
+rsa = "<4.8,>=3.1.2"
+s3transfer = "<0.8.0,>=0.7.0"
