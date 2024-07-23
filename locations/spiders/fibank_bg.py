@@ -31,7 +31,9 @@ class FibankBGSpider(scrapy.Spider):
                     apply_category(Categories.BANK, item)
 
                     textResponse = Selector(text=location["text"])
-                    item["phone"] = textResponse.xpath("//div[contains(@class, 'phones')]/text()").get().replace("/", "")
+                    item["phone"] = (
+                        textResponse.xpath("//div[contains(@class, 'phones')]/text()").get().replace("/", "")
+                    )
                     worktime = textResponse.xpath("//div[contains(@class, 'worktime')]/text()").get()
                     isUnparsable = "зимен" in worktime or "и " in worktime or "събота" in worktime or ", " in worktime
                     if worktime is not None and not isUnparsable:
