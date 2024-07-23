@@ -24,7 +24,7 @@ class SmartChargeGBSpider(Spider):
                 continue
 
             item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full", None)
+            item.pop("addr_full", None)
 
             if max_power := location.get("maxPowerKw"):
                 item["extras"]["charging_station:output"] = "{} kW".format(max_power)
