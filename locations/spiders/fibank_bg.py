@@ -33,8 +33,8 @@ class FibankBGSpider(scrapy.Spider):
                     textResponse = Selector(text=location["text"])
                     item["phone"] = textResponse.xpath("//div[contains(@class, 'phones')]/text()").get().replace("/", "")
                     worktime = textResponse.xpath("//div[contains(@class, 'worktime')]/text()").get()
-                    isUnparsable = "зимен" not in worktime and "и " not in worktime and "събота" not in worktime and ", " not in worktime
-                    if worktime is not None and !isUnparsable:
+                    isUnparsable = "зимен" in worktime or "и " in worktime or "събота" in worktime or ", " in worktime
+                    if worktime is not None and not isUnparsable:
                         days, hours = worktime.replace("ч", "").replace(" ", "").replace(".", "").split(":", 1)
                         days = days.split("-")
                         print(worktime)
