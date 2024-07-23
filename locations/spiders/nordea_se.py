@@ -36,6 +36,7 @@ class NordeaSESpider(scrapy.Spider):
             item["lat"] = bank.get("lat")
             item["lon"] = bank.get("lng")
             item["opening_hours"] = oh.as_opening_hours()
+            item["website"] = "https://www.nordea.se"
             apply_category(Categories.BANK, item)
 
             yield item
