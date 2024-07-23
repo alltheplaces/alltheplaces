@@ -1,0 +1,91 @@
+name: Run Selected Spiders
+
+on:
+  workflow_dispatch:
+    inputs:
+      spiders:
+        description: 'List of spiders to run (comma-separated)'
+        required: true
+        type: string
+
+jobs:
+  run-spiders:
+    name: Run selected spiders on Zyte production project
+    runs-on: ubuntu-latest
+    env:
+      SHUB_PROJECTID: ${{ secrets.scrapycloud_project_id }}
+      SHUB_APIKEY: ${{ secrets.scrapycloud_api_key }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pipenv'
+      
+      - name: Install pipenv
+        run: pip --quiet install pipenv
+      
+      - name: Install dependencies
+        run: pipenv install --dev
+      
+      - name: Validate and run spiders
+        id: run-spiders
+        shell: bash
+        continue-on-error: true
+        run: |
+          IFS=',' read -ra SPIDER_ARRAY <<< "${{ github.event.inputs.spiders }}"
+          VALID_SPIDERS=()
+          INVALID_SPIDERS=()
+          SUCCESSFUL_SPIDERS=()
+          FAILED_SPIDERS=()
+          
+          for spider in "${SPIDER_ARRAY[@]}"; do
+            if [ -f "locations/spiders/${spider}.py" ]; then
+              VALID_SPIDERS+=("$spider")
+            else
+              INVALID_SPIDERS+=("$spider")
+              echo "Warning: Spider file for ${spider} not found. Skipping."
+            fi
+          done
+          
+          if [ ${#VALID_SPIDERS[@]} -eq 0 ]; then
+            echo "No valid spiders found. Exiting."
+            exit 1
+          fi
+          
+          echo "Running valid spiders: ${VALID_SPIDERS[*]}"
+          echo "Skipped invalid spiders: ${INVALID_SPIDERS[*]}"
+          
+          for spider in "${VALID_SPIDERS[@]}"; do
+            echo "Scheduling spider: $spider"
+            if pipenv run shub schedule -p 0 $SHUB_PROJECTID/$spider; then
+              SUCCESSFUL_SPIDERS+=("$spider")
+              echo "Successfully scheduled $spider"
+            else
+              FAILED_SPIDERS+=("$spider")
+              echo "Failed to schedule $spider"
+            fi
+          done
+          
+          echo "successful_spiders=${SUCCESSFUL_SPIDERS[*]}" >> $GITHUB_OUTPUT
+          echo "failed_spiders=${FAILED_SPIDERS[*]}" >> $GITHUB_OUTPUT
+          echo "invalid_spiders=${INVALID_SPIDERS[*]}" >> $GITHUB_OUTPUT
+          echo "successful_count=${#SUCCESSFUL_SPIDERS[@]}" >> $GITHUB_OUTPUT
+          echo "failed_count=${#FAILED_SPIDERS[@]}" >> $GITHUB_OUTPUT
+          echo "invalid_count=${#INVALID_SPIDERS[@]}" >> $GITHUB_OUTPUT
+      
+      - name: Report results
+        run: |
+          SUCCESSFUL_SPIDERS="${{ steps.run-spiders.outputs.successful_spiders }}"
+          FAILED_SPIDERS="${{ steps.run-spiders.outputs.failed_spiders }}"
+          INVALID_SPIDERS="${{ steps.run-spiders.outputs.invalid_spiders }}"
+          SUCCESSFUL_COUNT="${{ steps.run-spiders.outputs.successful_count }}"
+          FAILED_COUNT="${{ steps.run-spiders.outputs.failed_count }}"
+          INVALID_COUNT="${{ steps.run-spiders.outputs.invalid_count }}"
+          
+          echo "Summary:"
+          echo "Successfully run spiders (${SUCCESSFUL_COUNT}): $SUCCESSFUL_SPIDERS"
+          echo "Failed to run spiders (${FAILED_COUNT}): $FAILED_SPIDERS"
+          echo "Invalid spiders (${INVALID_COUNT}): $INVALID_SPIDERS"

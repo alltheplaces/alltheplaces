@@ -41,7 +41,7 @@ jobs:
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
         export AWS_REGION="us-east-1"
 
-        SPIDERS=("locations/spiders/the_works.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
+        SPIDERS=("locations/spiders/alamo.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
