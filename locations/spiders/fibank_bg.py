@@ -1,10 +1,11 @@
 import scrapy
 from scrapy.http import HtmlResponse
 
-from locations.categories import Categories, apply_category, apply_yes_no, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
+
 
 class FibankBGSpider(scrapy.Spider):
     name = "fibank_bg"
@@ -13,10 +14,7 @@ class FibankBGSpider(scrapy.Spider):
 
     def start_requests(self):
         url = "https://www.fibank.bg/bg/branch_network_xhr?method=get_locations"
-        headers = {
-            "x-requested-with": "XMLHttpRequest",
-            "User-Agent": BROWSER_DEFAULT
-        }
+        headers = {"x-requested-with": "XMLHttpRequest", "User-Agent": BROWSER_DEFAULT}
         yield scrapy.Request(url=url, headers=headers, callback=self.parse)
 
     def parse(self, response):
@@ -32,14 +30,14 @@ class FibankBGSpider(scrapy.Spider):
                 if location["type"] == 1:
                     apply_category(Categories.BANK, item)
 
-                    textResponse = HtmlResponse(url="my HTML string", body=location["text"], encoding='utf-8')
-                    item["phone"] = textResponse.xpath('//div.phones/text()').get("").replace("/", "").replace(" ", "")
-                    worktime = textResponse.xpath('//div.worktime/text()').get()
+                    textResponse = HtmlResponse(url="my HTML string", body=location["text"], encoding="utf-8")
+                    item["phone"] = textResponse.xpath("//div.phones/text()").get("").replace("/", "").replace(" ", "")
+                    worktime = textResponse.xpath("//div.worktime/text()").get()
                     if worktime is not None:
                         days, times = worktime.replace("ч.", "").replace(" ", "").split(":", 1)
                         days = days.split("-")
                         days = [sanitise_day(days[0], DAYS_BG), sanitise_day(days[1], DAYS_BG)]
-                        hours = hours.split("-");
+                        hours = hours.split("-")
                         item["opening_hours"] = OpeningHours()
                         item["opening_hours"].add_days_range(day_range(days[0], days[1]), hours[0], hours[1])
                 else:
