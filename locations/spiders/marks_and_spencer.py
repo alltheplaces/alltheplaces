@@ -43,6 +43,9 @@ class MarksAndSpencerSpider(scrapy.Spider):
                 "extras": {},
             }
 
+            if store["address"]["country"] != "United Kingdom":
+                properties["website"] = None
+
             if store["storeType"] == "mands":
                 set_operator(self.item_attributes, properties)
 
@@ -62,6 +65,9 @@ class MarksAndSpencerSpider(scrapy.Spider):
                 properties["operator_wikidata"] = "Q7447660"
                 properties["name"] = "M&S Simply Food"
                 apply_category(Categories.SHOP_CONVENIENCE, properties)
+            elif store["locationTypeName"] == "HM Stanley":
+                properties["name"] = "M&S Food"
+                apply_category(Categories.SHOP_CONVENIENCE, properties)
             elif store["locationTypeName"] == "Frn Prtn Simply Food":
                 properties["name"] = "M&S Simply Food"
                 apply_category(Categories.SHOP_CONVENIENCE, properties)
@@ -71,30 +77,20 @@ class MarksAndSpencerSpider(scrapy.Spider):
             elif store["locationTypeName"] in ["Full Line", "Ireland - Full Line"]:
                 properties["name"] = "Marks & Spencer"
                 apply_category(Categories.SHOP_DEPARTMENT_STORE, properties)
-            elif store["locationTypeName"] == "HM Stanley":
-                properties["name"] = "M&S Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
-            elif name.endswith("foodhall"):
-                properties["name"] = "M&S Foodhall"
-                apply_category(Categories.SHOP_SUPERMARKET, properties)
-            elif name.endswith("simply food"):
-                properties["name"] = "M&S Simply Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
             else:
-                properties["name"] = "Marks & Spencer"
-                apply_category({"shop": "yes"}, properties)
-            properties["extras"]["as"] = ";".join([s["id"] for s in store["departments"]])
-
-            properties["extras"]["locationTypeCode"] = str(store["locationTypeCode"])
-            properties["extras"]["locationTypeName"] = store.get("locationTypeName")
+                if name.endswith("foodhall") or name.endswith(" fh"):
+                    properties["name"] = "M&S Foodhall"
+                    apply_category(Categories.SHOP_SUPERMARKET, properties)
+                elif name.endswith("simply food") or name.endswith(" sf"):
+                    properties["name"] = "M&S Simply Food"
+                    apply_category(Categories.SHOP_CONVENIENCE, properties)
+                else:
+                    properties["name"] = "Marks & Spencer"
+                    apply_category({"shop": "yes"}, properties)
 
             services = [s["id"] for s in store["services"]]
             apply_yes_no(Extras.ATM, properties, "SVC_CASHMC" in services)
             apply_yes_no(Extras.WIFI, properties, "SVC_WIFI" in services)
-            for s in store["services"]:
-                self.crawler.stats.inc_value("z/services/{}/{}".format(s["id"], s["name"]))
-            for d in store["departments"]:
-                self.crawler.stats.inc_value("z/departments/{}/{}".format(d["id"], d["name"]))
 
             yield Feature(**properties)
 
