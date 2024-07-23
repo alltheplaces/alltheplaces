@@ -2,7 +2,7 @@ import scrapy
 from scrapy import Selector
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_BG, OpeningHours, sanitise_day, day_range
+from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
