@@ -1,8 +1,8 @@
 import scrapy
-from scrapy.http import HtmlResponse
+from scrapy import Selector
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_BG, OpeningHours
+from locations.hours import DAYS_BG, OpeningHours, sanitise_day, day_range
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -30,12 +30,14 @@ class FibankBGSpider(scrapy.Spider):
                 if location["type"] == 1:
                     apply_category(Categories.BANK, item)
 
-                    textResponse = HtmlResponse(url="my HTML string", body=location["text"], encoding="utf-8")
-                    item["phone"] = textResponse.xpath("//div.phones/text()").get("").replace("/", "").replace(" ", "")
-                    worktime = textResponse.xpath("//div.worktime/text()").get()
-                    if worktime is not None:
-                        days, times = worktime.replace("ч.", "").replace(" ", "").split(":", 1)
+                    textResponse = Selector(text=location["text"])
+                    item["phone"] = textResponse.xpath("//div[contains(@class, 'phones')]/text()").get().replace("/", "")
+                    worktime = textResponse.xpath("//div[contains(@class, 'worktime')]/text()").get()
+                    isUnparsable = "зимен" not in worktime and "и " not in worktime and "събота" not in worktime and ", " not in worktime
+                    if worktime is not None and !isUnparsable:
+                        days, hours = worktime.replace("ч", "").replace(" ", "").replace(".", "").split(":", 1)
                         days = days.split("-")
+                        print(worktime)
                         days = [sanitise_day(days[0], DAYS_BG), sanitise_day(days[1], DAYS_BG)]
                         hours = hours.split("-")
                         item["opening_hours"] = OpeningHours()
