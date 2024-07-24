@@ -52,6 +52,6 @@ class PocztaPolskaPLSpider(Spider):
         )
         addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p").get()[3:-4].split("<br>")
         item["street"], item["housenumber"] = addr[0].rsplit(" ", 1)
-        item["postcode"], item["city"] = addr[1].split(" ")
+        item["postcode"], item["city"] = addr[1].split(" ", 1)
 
         yield item
