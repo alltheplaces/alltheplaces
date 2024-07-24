@@ -1,7 +1,8 @@
-from scrapy import Request, Spider, Selector
+from scrapy import Request, Selector, Spider
 
 from locations.google_url import url_to_coords
 from locations.items import Feature
+
 
 class MinimartBGSpider(Spider):
     name = "minimart_bg"
