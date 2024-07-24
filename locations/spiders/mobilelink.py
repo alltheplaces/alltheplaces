@@ -1,33 +1,36 @@
-import scrapy
+from scrapy import Request, Spider
+from typing import Any
+from scrapy.http import Response
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
-from locations.items import Feature
-
-
-class MobilelinkSpider(scrapy.Spider):
+class MobilelinkSpider(Spider):
     name = "mobilelink"
     item_attributes = {"brand": "Mobilelink"}
-    allowed_domains = ["mobilelinkusa.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    start_urls = [
-        "https://mobilelinkusa.com/wp-admin/admin-ajax.php?action=store_search&lat=29.760427&lng=-95.36980299999999&max_results=1000&search_radius=10000&autoload=1",
-    ]
+    allowed_domains = ["mobilelinkusa.com"]   
+    
+    def start_requests(self):
+        yield Request(
+            url="https://mobilelinkusa.com/GetStores",
+            method="POST",
+        )
 
-    def parse(self, response):
-        data = response.json()
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json():
+            item = DictParser.parse(location)
+            item["branch"] = location["Store"]
+            item["phone"] = location["Contact"]
 
-        for place in data:
-            properties = {
-                "ref": place["id"],
-                "name": place["store"],
-                "addr_full": place["address"],
-                "city": place["city"],
-                "state": place["state"],
-                "postcode": place["zip"],
-                "country": place["country"],
-                "lat": place["lat"],
-                "lon": place["lng"],
-                "phone": place["phone"],
-                "website": place["permalink"],
-            }
+            oh = OpeningHours()
+            for day in DAYS:
+                if day == "Sa":
+                    oh.add_range(day, location["SatOpentime"], location["SatClosetime"], "%H:%M:%S") 
+                elif day == "Su":
+                    oh.add_range(day, location["SunOpentime"], location["SunClosetime"], "%H:%M:%S") 
+                else:
+                    oh.add_range(day, location["Opentime"], location["Closetime"], "%H:%M:%S")
+            item["opening_hours"] = oh
 
-            yield Feature(**properties)
+            yield item
+
+
