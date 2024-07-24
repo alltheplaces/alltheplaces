@@ -9,7 +9,7 @@ from locations.dict_parser import DictParser
 class AllegroOneBoxPLSpider(Spider):
     name = "allegro_one_box_pl"
     item_attributes = {"brand": "Allegro One Box", "brand_wikidata": "Q110738715"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60}
 
     def start_requests(self) -> Iterable[Request]:
         yield Request(
