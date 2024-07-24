@@ -1,4 +1,3 @@
-
 from scrapy import Spider
 from scrapy.http import FormRequest
 
@@ -52,9 +51,7 @@ class PocztaPolskaPLSpider(Spider):
             .replace("<br>", ";")
         )
         addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p").get()[3:-4].split("<br>")
-        item["street"] = addr[0].rsplit(" ", 1)[0]
-        item["housenumber"] = addr[0].rsplit(" ", 1)[1]
-        item["postcode"] = addr[1].split(" ")[0]
-        item["city"] = addr[1].split(" ")[1]
+        item["street"], item["housenumber"] = addr[0].rsplit(" ", 1)
+        item["postcode"], item["city"] = addr[1].split(" ")
 
         yield item
