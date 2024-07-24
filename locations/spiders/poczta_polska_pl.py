@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_PL
+from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
