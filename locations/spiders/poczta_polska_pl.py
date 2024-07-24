@@ -1,10 +1,12 @@
-import scrapy
+import json
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from scrapy.http import FormRequest
+from scrapy import Spider
 
 
-class PocztaPolskaPLSpider(scrapy.Spider):
+class PocztaPolskaPLSpider(Spider):
     name = "poczta_polska_pl"
     item_attributes = {"brand": "Poczta Polska", "brand_wikidata": "Q168833"}
     start_url = "https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/find-markers.php"
@@ -19,7 +21,7 @@ class PocztaPolskaPLSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        yield scrapy.FormRequest(
+        yield FormRequest(
             url=self.start_url,
             method="POST",
             formdata=self.formdata,
@@ -33,7 +35,21 @@ class PocztaPolskaPLSpider(scrapy.Spider):
             item["name"] = location.get("name")
             item["lat"] = location.get("latitude")
             item["lon"] = location.get("longitude")
-            # Todo: More data avaiale at https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/point-info.php && payload: {pointid: xyz}
-            #           don't know how to make that request and extract data
             apply_category(Categories.POST_OFFICE, item)
-            yield item
+            yield FormRequest(
+                url="https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/point-info.php",
+                formdata={"pointid": str(item["ref"])},
+                meta={"item": item},
+                callback=self.parse2
+            )
+
+    def parse2(self, response):
+        item = response.meta["item"]
+        item["phone"] = response.xpath("//div[contains(@class, 'pp-map-tooltip__phones')]//p").get()[3:-4].replace(" ", "").replace("<br>", ";")
+        addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p").get()[3:-4].split("<br>")
+        item["street"] = addr[0].rsplit(' ', 1)[0]
+        item["housenumber"] = addr[0].rsplit(' ', 1)[1]
+        item["postcode"] = addr[1].split(" ")[0]
+        item["city"] = addr[1].split(" ")[1]
+        
+        yield item
