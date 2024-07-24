@@ -1,9 +1,9 @@
-import json
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from scrapy.http import FormRequest
-from scrapy import Spider
 
 
 class PocztaPolskaPLSpider(Spider):
@@ -40,16 +40,21 @@ class PocztaPolskaPLSpider(Spider):
                 url="https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/point-info.php",
                 formdata={"pointid": str(item["ref"])},
                 meta={"item": item},
-                callback=self.parse2
+                callback=self.parse2,
             )
 
     def parse2(self, response):
         item = response.meta["item"]
-        item["phone"] = response.xpath("//div[contains(@class, 'pp-map-tooltip__phones')]//p").get()[3:-4].replace(" ", "").replace("<br>", ";")
+        item["phone"] = (
+            response.xpath("//div[contains(@class, 'pp-map-tooltip__phones')]//p")
+            .get()[3:-4]
+            .replace(" ", "")
+            .replace("<br>", ";")
+        )
         addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p").get()[3:-4].split("<br>")
-        item["street"] = addr[0].rsplit(' ', 1)[0]
-        item["housenumber"] = addr[0].rsplit(' ', 1)[1]
+        item["street"] = addr[0].rsplit(" ", 1)[0]
+        item["housenumber"] = addr[0].rsplit(" ", 1)[1]
         item["postcode"] = addr[1].split(" ")[0]
         item["city"] = addr[1].split(" ")[1]
-        
+
         yield item
