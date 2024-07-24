@@ -18,6 +18,8 @@ class MediaExpertPLSpider(Spider):
         "RETRY_HTTP_CODES": [403],
     }
 
+    requires_proxy = True  # Cloudflare geoblocking in use
+
     item_attributes = {"brand": "Media Expert", "brand_wikidata": "Q11776794"}
 
     start_urls = ["https://sklepy.mediaexpert.pl/data/getshops"]
