@@ -7,7 +7,7 @@ from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
-class T_Market_BGSpider(SitemapSpider):
+class TMarketBGSpider(SitemapSpider):
     name = "t_market_bg"
     item_attributes = {"brand": "T-Market", "brand_wikidata": "Q64033983"}
     allowed_domains = ["tmarket.bg"]

@@ -12,7 +12,7 @@ from locations.geo import postal_regions
 from locations.hours import OpeningHours
 
 
-class NatWestGBSpider(Spider):
+class NatwestGBSpider(Spider):
     name = "natwest_gb"
     item_attributes = {"brand": "NatWest", "brand_wikidata": "Q2740021"}
     total_pois = -1
@@ -47,6 +47,10 @@ class NatWestGBSpider(Spider):
             item["facebook"] = "https://www.facebook.com/{}".format(location["facebookVanityUrl"])
             item["extras"]["ref:facebook"] = location.get("" "facebookPageUrl", "").split("/")[-1]
             item["extras"]["ref:google"] = location["googlePlaceId"]
+
+            if "phone" in item and item["phone"].replace(" ", "").startswith("+443"):
+                # not a phone number specific to given branch
+                item["phone"] = None
 
             item["opening_hours"] = OpeningHours()
             for day, rule in location["hours"].items():

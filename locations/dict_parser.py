@@ -162,6 +162,7 @@ class DictParser:
         "contact-phone",
         "store-phone",
         "primary-phone",
+        "main-phone",
         # ES
         "telefono",  # "phone"
     ]
@@ -203,6 +204,7 @@ class DictParser:
         "storeURL",
         "website-url",
         "websiteURL",
+        "location-url",
     ]
 
     @staticmethod
@@ -223,6 +225,7 @@ class DictParser:
                 "coordinates",
                 "geo-position",
                 "position",
+                "display-coordinate",
             ],
         )
         # If not a good location object then use the parent

@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.uberall import UberallSpider
 
 
-class YvesRocherItSpider(UberallSpider):
+class YvesRocherITSpider(UberallSpider):
     name = "yves_rocher_it"
     item_attributes = {
         "brand": "Yves Rocher",

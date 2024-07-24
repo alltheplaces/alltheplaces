@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class ChortenPLSpider(CrawlSpider):
     name = "chorten_pl"
-    item_attributes = {"brand": "Chorten", "brand_wikidata": "Q48843988"}
+    item_attributes = {}
     start_urls = ["https://chorten.com.pl/sklepy/lista/"]
     rules = [
         Rule(LinkExtractor(allow=[r"/sklepy/lista/p\d+?$"])),
@@ -36,4 +36,6 @@ class ChortenPLSpider(CrawlSpider):
             "website": response.url,
             "ref": response.url.split("_")[-1],
         }
-        yield Feature(**properties)
+        returned = Feature(**properties)
+        returned["extras"]["shop"] = "yes"
+        return returned

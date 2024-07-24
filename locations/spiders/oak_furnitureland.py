@@ -11,19 +11,12 @@ class OakFurniturelandSpider(SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.oakfurnitureland.co.uk/sitemaps/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"https:\/\/www\.oakfurnitureland\.co\.uk\/showrooms\/([\w-]+).html$",
-            "parse",
-        ),
-    ]
+    sitemap_rules = [("/page/", "parse")]
 
     def parse(self, response):
         if "PERMANENTLY CLOSED" in "".join(response.xpath('//div[@id="title"]/descendant::*/text()').getall()):
             return
 
-        item = LinkedDataParser.parse(response, "LocalBusiness")
-
-        item["ref"] = response.url
-
-        return item
+        if item := LinkedDataParser.parse(response, "LocalBusiness"):
+            item["ref"] = response.url
+            return item

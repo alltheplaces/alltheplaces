@@ -1,5 +1,3 @@
-import re
-
 from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
@@ -38,7 +36,7 @@ def ignore(item):
     return False
 
 
-class NHSScotlandGBSpider(Spider):
+class NhsScotlandGBSpider(Spider):
     name = "nhs_scotland_gb"
     services = {
         "dental-services": Categories.DENTIST,
@@ -49,6 +47,7 @@ class NHSScotlandGBSpider(Spider):
         "pharmacies": Categories.PHARMACY,
     }
     download_delay = 0.2
+    requires_proxy = True
 
     def start_requests(self):
         for service in self.services.keys():
@@ -62,9 +61,19 @@ class NHSScotlandGBSpider(Spider):
     def parse(self, response, service):
         for link in response.xpath('//h2[@class="nhsuk-heading-m"]/a/@href').getall():
             yield Request(link, callback=self.parse_service, cb_kwargs=dict(service=service))
+
+        page_link = response.url.split("?page=")
+        new_page_number = str(int(page_link[1].split("&")[0]) + 1)
+        new_link = page_link[0] + "?page=" + new_page_number
+        # Don't request all links, since they then all request duplicate links
+        # Just kick off next page link only if it exists in the links carousel
+        found = False
         for link in response.xpath('//a[contains(@class, "pagination__link")]/@href').getall():
-            link = re.sub(r"\?page=\d+&page=", "?page=", link)
-            yield Request(link, callback=self.parse, cb_kwargs=dict(service=service))
+            if new_page_number in link:
+                found = True
+                break
+        if found:
+            yield Request(new_link, callback=self.parse, cb_kwargs=dict(service=service))
 
     def parse_service(self, response, service):
         item = Feature()

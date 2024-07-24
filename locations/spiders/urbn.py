@@ -3,9 +3,10 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class URBNSpider(Spider):
+class UrbnSpider(Spider):
     name = "urbn"
     allowed_domains = ["www.anthropologie.com"]
     start_urls = ["https://www.anthropologie.com/api/misl/v1/stores/search"]
@@ -61,14 +62,11 @@ class URBNSpider(Spider):
             item["name"] = location["addresses"]["marketing"].get("name")
             if "COMING SOON" in item["name"].upper() or "CLOSED" in item["name"].upper().split():
                 continue
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        location["addresses"]["marketing"].get("addressLineOne"),
-                        location["addresses"]["marketing"].get("addressLineTwo"),
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    location["addresses"]["marketing"].get("addressLineOne"),
+                    location["addresses"]["marketing"].get("addressLineTwo"),
+                ]
             )
             item["city"] = location["addresses"]["marketing"].get("city")
             item["state"] = location["addresses"]["marketing"].get("state")

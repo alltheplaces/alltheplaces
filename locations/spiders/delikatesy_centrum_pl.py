@@ -24,9 +24,10 @@ class DelikatesyCentrumPLSpider(Spider):
         for location in response.json()["pageProps"]["shops"]:
             item = DictParser.parse(location)
             item["ref"] = location["shop_code"]
-            item["name"] = location["name"].split("\\", 1)[0].strip()
+            item.pop("name", None)
             item["lat"] = location["address"]["lat"]
             item["lon"] = location["address"]["lon"]
+            item["website"] = f"https://www.delikatesy.pl/sklepy/{location['external_id']}"
             item["opening_hours"] = OpeningHours()
             for day_hours in location["opening_hours"]:
                 if not day_hours["hours"] or day_hours["hours"] == "czynne":

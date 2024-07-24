@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class LoblawsSpider(scrapy.Spider):
@@ -11,6 +12,8 @@ class LoblawsSpider(scrapy.Spider):
     def parse(self, response):
         results = response.json()
         for i in results:
+            if i["visible"] is False:
+                continue
             if i["locationType"] == "STORE":
                 if i["storeBannerId"] == "dominion":
                     brand = "Dominion Stores"
@@ -19,17 +22,17 @@ class LoblawsSpider(scrapy.Spider):
                     brand = "Extra Foods"
                     wikidata = "Q5422144"
                 elif i["storeBannerId"] == "zehrs":
-                    brand = "Zehrs Markets"
+                    brand = "Zehrs"
                     wikidata = "Q8068546"
                 elif i["storeBannerId"] == "fortinos":
                     brand = "Fortinos"
                     wikidata = "Q5472662"
                 elif i["storeBannerId"] == "rass":
-                    brand = "Real Canadian Superstores"
+                    brand = "Real Canadian Superstore"
                     wikidata = "Q7300856"
                 elif i["storeBannerId"] == "loblaw":
-                    brand = "Loblaw"
-                    wikidata = "Q909856"
+                    brand = "Loblaws"
+                    wikidata = "Q3257626"
                 elif i["storeBannerId"] == "wholesaleclub":
                     brand = "Wholesale Club"
                     wikidata = "Q7997568"
@@ -59,11 +62,12 @@ class LoblawsSpider(scrapy.Spider):
                     "name": i["name"],
                     "lat": i["geoPoint"]["latitude"],
                     "lon": i["geoPoint"]["longitude"],
-                    "street_address": ", ".join(filter(None, [i["address"].get("line2"), i["address"].get("line1")])),
+                    "street_address": clean_address([i["address"].get("line2"), i["address"].get("line1")]),
                     "city": i["address"]["town"],
                     "state": i["address"]["region"],
                     "postcode": i["address"]["postalCode"],
                     "country": i["address"]["country"],
+                    "website": "https://www.loblaws.ca/store-locator/details/{}".format(i["storeId"]),
                 }
 
                 yield Feature(**properties)

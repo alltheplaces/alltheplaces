@@ -22,7 +22,7 @@ class BlueRhinoPRUSSpider(Spider):
             )
 
     def parse(self, response):
-        for row in response.json():
+        for row in response.json()["Data"]:
             properties = {
                 "lat": row["Latitude"],
                 "lon": row["Longitude"],

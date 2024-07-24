@@ -2,9 +2,10 @@ import scrapy
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
-class MrBircolageBeSpider(scrapy.Spider):
+class MrBricolageBESpider(scrapy.Spider):
     name = "mr_bricolage_be"
     item_attributes = {"brand": "Mr. Bricolage", "brand_wikidata": "Q3141657"}
     start_urls = ["https://www.mr-bricolage.be/magasins?ajax=1&all=1"]
@@ -69,7 +70,7 @@ class MrBircolageBeSpider(scrapy.Spider):
                 )[0]
             )
 
-        addr_full = ", ".join([street_address, postcode_city])
+        addr_full = clean_address([street_address, postcode_city])
         properties["addr_full"] = addr_full
         properties["street_address"] = street_address
         return properties

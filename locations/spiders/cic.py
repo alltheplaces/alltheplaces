@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CiceSpider(CrawlSpider, StructuredDataSpider):
+class CicSpider(CrawlSpider, StructuredDataSpider):
     name = "cic"
     item_attributes = {"brand_wikidata": "Q746525"}
     start_urls = ["https://www.cic.fr/fr/banques/entreprises/agences-et-distributeurs/BrowseSubdivision.aspx"]

@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HalifaxGB(SitemapSpider, StructuredDataSpider):
+class HalifaxGBSpider(SitemapSpider, StructuredDataSpider):
     name = "halifax_gb"
     item_attributes = {
         "brand": "Halifax",

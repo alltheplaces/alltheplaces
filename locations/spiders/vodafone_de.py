@@ -8,7 +8,7 @@ from locations.items import Feature
 VODAFONE_SHARED_ATTRIBUTES = {"brand": "Vodafone", "brand_wikidata": "Q122141"}
 
 
-class VodafoneDeSpider(scrapy.Spider):
+class VodafoneDESpider(scrapy.Spider):
     name = "vodafone_de"
     item_attributes = VODAFONE_SHARED_ATTRIBUTES
     allowed_domains = ["vodafone.de"]

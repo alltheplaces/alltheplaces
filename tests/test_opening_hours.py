@@ -99,7 +99,7 @@ def test_twentyfour_seven():
     o.add_range("Sa", "0:00", "23:59")
     o.add_range("Su", "0:00", "23:59")
 
-    assert o.as_opening_hours() == "24/7"
+    assert o.as_opening_hours() == "Mo-Su 00:00-24:00"
 
 
 def test_no_opening_hours():
@@ -333,6 +333,82 @@ def test_ld_parse_opening_hours_array_with_commas():
     assert o.as_opening_hours() == "Mo-Su 00:00-01:00,04:00-24:00"
 
 
+def test_opening_hours_closed():
+    oh = OpeningHours()
+    oh.set_closed("Su")
+    assert oh.as_opening_hours() == "Su closed"
+    oh.set_closed(DAYS)
+    assert oh.as_opening_hours() == "Mo-Su closed"
+
+
+def test_ld_parse_opening_hours_closed():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": [
+                    "Mo Closed",
+                    "Tu Closed",
+                    "We Closed",
+                    "Th Closed",
+                    "Fr Closed",
+                    "Sa Closed",
+                    "Su Closed"
+                ]
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Su closed"
+
+
+def test_ld_parse_opening_hours_closed_range():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": ["Mo-Su Closed"]
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Su closed"
+
+
+def test_ld_parse_opening_hours_no_commas():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": "Su 07:00 - 23:00 Mo 07:00 - 23:00 Tu 07:00 - 23:00 We 07:00 - 23:00 Th 07:00 - 23:00 Fr 07:00 - 23:00 Sa 07:00 - 23:00 "
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Su 07:00-23:00"
+
+
+def test_ld_parse_opening_hours_no_commas_closed():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": "Su closed Mo closed Tu closed We closed Th closed Fr closed Sa closed "
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Su closed"
+
+
 def test_ld_parse_time_format():
     o = OpeningHours()
     o.from_linked_data(
@@ -382,7 +458,7 @@ def test_add_ranges_from_string():
 
     o = OpeningHours()
     o.add_ranges_from_string("Monday - Sunday: 00:00 - 23:59")
-    assert o.as_opening_hours() == "24/7"
+    assert o.as_opening_hours() == "Mo-Su 00:00-24:00"
 
     o = OpeningHours()
     o.add_ranges_from_string("Monday: 08:00 - Midday, 14:00 - Midnight   tue-sat: Midnight-0800")
@@ -452,3 +528,17 @@ def test_add_ranges_from_string():
         DAYS_PL,
     )
     assert o.as_opening_hours() == "Mo-Fr 08:00-19:00; Sa 09:00-15:00"
+
+
+def test_oh_as_bool():
+    # https://github.com/alltheplaces/alltheplaces/pull/8779#issue-2395034394
+    o = OpeningHours()
+    assert not o
+
+    o = OpeningHours()
+    o.add_range("Mo", "09:00", "17:00")
+    assert o
+
+    o = OpeningHours()
+    o.set_closed("Mo")
+    assert o

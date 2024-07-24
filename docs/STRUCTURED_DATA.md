@@ -14,7 +14,7 @@ The `parse_sd` method will look for default `wanted_types` in the page. The spid
 
 This is best illustrated by reference to some example spiders in the project:
 
-* [jackinthebox.py](../locations/spiders/jackinthebox.py) (as simple as it gets!)
+* [jackinthebox.py](../locations/spiders/jack_in_the_box.py) (as simple as it gets!)
 * [petco.py](../locations/spiders/petco.py) (totally declarative, sitemap filter for store pages)
 * [wickes_gb.py](../locations/spiders/wickes_gb.py) (post-process example)
 * [subway.py](../locations/spiders/subway.py) (pre-process example)

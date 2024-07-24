@@ -22,7 +22,7 @@ class VancouverCoastalHealthCASpider(Spider):
         "8": {"amenity": "social_facility", "social_facility:for": "mental_health"},
         "10": {"amenity": "healthcare", "healthcare": "vaccination_centre"},
         "11": {"amenity": "healthcare", "healthcare": "counselling", "healthcare:counselling": "addiction"},
-        "12": {"office": "other"},  # "Environmental health \\u0026 inspections offices",
+        "12": {"office": "yes"},  # "Environmental health \\u0026 inspections offices",
         "13": {"amenity": "healthcare", "healthcare": "centre"},  # "Other",
     }
 

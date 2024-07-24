@@ -13,7 +13,7 @@ class PearleVisionSpider(SitemapSpider):
     item_attributes = {"brand": "Pearle Vision", "brand_wikidata": "Q2231148"}
     allowed_domains = ["pearlevision.com", "www.pearlevision.ca"]
     sitemap_urls = ["https://www.pearlevision.com/sitemap-store-locations.xml"]
-    sitemap_rules = [(r"/[0-9]+/$", "parse")]
+    sitemap_rules = [(r"/stores/\w{2}/[-\w]+/\d+", "parse")]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {

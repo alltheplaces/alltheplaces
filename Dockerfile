@@ -62,7 +62,7 @@ RUN curl -sL https://github.com/felt/tippecanoe/archive/refs/tags/${TIPPECANOE_V
 RUN curl https://pyenv.run | bash \
  && pyenv install ${PYTHON_VERSION} \
  && pyenv global ${PYTHON_VERSION} \
- && pip install --upgrade pip pipenv==2023.6.26
+ && pip install --upgrade pip pipenv==2023.12.1
 
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock

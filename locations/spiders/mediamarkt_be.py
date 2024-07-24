@@ -7,8 +7,8 @@ from locations.hours import DAYS_FR, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MediaMarktBESpider(CrawlSpider, StructuredDataSpider):
-    name = "media_markt_be"
+class MediamarktBESpider(CrawlSpider, StructuredDataSpider):
+    name = "mediamarkt_be"
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
     start_urls = ["https://www.mediamarkt.be/fr/marketselection.html"]
     rules = [Rule(LinkExtractor(restrict_css=".all-markets-list"), callback="parse_sd")]

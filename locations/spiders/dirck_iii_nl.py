@@ -6,9 +6,10 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class DirckIIINLSpider(Spider):
+class DirckIiiNLSpider(Spider):
     name = "dirck_iii_nl"
     item_attributes = {"brand": "Dirck III", "brand_wikidata": "Q109188079", "extras": Categories.SHOP_ALCOHOL.value}
     allowed_domains = ["www.dirckiii.nl"]
@@ -25,7 +26,7 @@ class DirckIIINLSpider(Spider):
 
             item = DictParser.parse(location)
             item["ref"] = location["storelocator_id"]
-            item["street_address"] = ", ".join(location["address"][1:])
+            item["street_address"] = clean_address(location["address"][1:])
 
             item["opening_hours"] = OpeningHours()
             hours_dict = json.loads(location["storetime"])

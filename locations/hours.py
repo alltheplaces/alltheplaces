@@ -52,6 +52,7 @@ DAYS_EN = {
     "Sun": "Su",
     "Su": "Su",
 }
+
 DAYS_DE = {
     "Montag": "Mo",
     "Mo": "Mo",
@@ -68,6 +69,7 @@ DAYS_DE = {
     "Sonntag": "Su",
     "So": "Su",
 }
+
 DAYS_BG = {
     "Понеделник": "Mo",
     "Пн": "Mo",
@@ -95,6 +97,7 @@ DAYS_BG = {
     "Не": "Su",
     "Нд": "Su",
 }
+
 DAYS_CH = {
     "Mo": "Mo",
     "Di": "Tu",
@@ -104,6 +107,76 @@ DAYS_CH = {
     "Sa": "Sa",
     "So": "Su",
 }
+
+DAYS_CN = {
+    # Standard Modern Chinese
+    "月曜日": "Mo",
+    "Yuèyàorì": "Mo",
+    "星期一": "Mo",
+    "Xīngqīyī": "Mo",
+    "週一": "Mo",
+    "Zhōuyī": "Mo",
+    "禮拜一": "Mo",
+    "Lǐbàiyī": "Mo",
+    "周一": "Mo",
+    "火曜日": "Tu",
+    "Huǒyàorì": "Tu",
+    "星期二": "Tu",
+    "Xīngqī'èr": "Tu",
+    "週二": "Tu",
+    "Zhōu'èr": "Tu",
+    "禮拜二": "Tu",
+    "Lǐbài'èr": "Tu",
+    "水曜日": "We",
+    "Shuǐyàorì": "We",
+    "星期三": "We",
+    "Xīngqīsān": "We",
+    "週三": "We",
+    "Zhōusān": "We",
+    "禮拜三": "We",
+    "Lǐbàisān": "We",
+    "木曜日": "Th",
+    "Mùyàorì": "Th",
+    "星期三": "We",
+    "星期四": "Th",
+    "Xīngqīsì": "Th",
+    "週四": "Th",
+    "Zhōusì": "Th",
+    "禮拜四": "Th",
+    "Lǐbàisì": "Th",
+    "金曜日": "Fr",
+    "Jīnyàorì": "Fr",
+    "星期五": "Fr",
+    "Xīngqīwǔ": "Fr",
+    "週五": "Fr",
+    "Zhōuwǔ": "Fr",
+    "禮拜五": "Fr",
+    "Lǐbàiwǔ": "Fr",
+    "土曜日": "Sa",
+    "Tǔyàorì": "Sa",
+    "星期六": "Sa",
+    "Xīngqīliù": "Sa",
+    "週六": "Sa",
+    "Zhōuliù": "Sa",
+    "禮拜六": "Sa",
+    "Lǐbàiliù": "Sa",
+    "日曜日": "Su",
+    "Rìyàorì": "Su",
+    "星期日": "Su",
+    "Xīngqīrì": "Su",
+    "星期天": "Su",
+    "Xīngqītiān": "Su",
+    "週日": "Su",
+    "Zhōurì": "Su",
+    "週天": "Su",
+    "Zhōutiān": "Su",
+    "禮拜天": "Su",
+    "Lǐbàitiān": "Su",
+    "禮拜日": "Su",
+    "Lǐbàirì": "Su",
+    "周日": "Su",
+}
+
 DAYS_CZ = {
     "Pondělí": "Mo",
     "Po": "Mo",
@@ -120,6 +193,7 @@ DAYS_CZ = {
     "Neděle": "Su",
     "Ne": "Su",
 }
+
 DAYS_GR = {
     "Δε": "Mo",
     "Δευτέρα": "Mo",
@@ -186,6 +260,7 @@ DAYS_LT = {
     "V": "Fr",
     "VI": "Sa",
     "VII": "Su",
+    "Iv": "Th",
     "Vi": "Sa",
     "Vii": "Su",
 }
@@ -633,10 +708,23 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
+        self.days_closed = set()
+
+    def __bool__(self):
+        return bool(self.day_hours or self.days_closed)
 
     def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
+
+    def set_closed(self, days: str | list[str]):
+        for day in [days] if isinstance(days, str) else days:
+            day = sanitise_day(day)
+
+            if day not in DAYS:
+                raise ValueError(f"day must be one of {DAYS}, not {day!r}")
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
 
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         day = sanitise_day(day)
@@ -645,6 +733,15 @@ class OpeningHours:
             raise ValueError(f"day must be one of {DAYS}, not {day!r}")
 
         if not open_time or not close_time:
+            return
+        if (
+            isinstance(open_time, str)
+            and isinstance(close_time, str)
+            and open_time.lower() == "closed"
+            and close_time.lower() == "closed"
+        ):
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
             return
         if isinstance(open_time, str):
             if open_time.lower() == "closed":
@@ -659,6 +756,7 @@ class OpeningHours:
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
 
+        self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
 
     def as_opening_hours(self) -> str:
@@ -666,14 +764,17 @@ class OpeningHours:
         this_day_group = None
 
         for day in DAYS:
-            hours = ",".join(
-                "%s-%s"
-                % (
-                    time.strftime("%H:%M", h[0]),
-                    time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+            if day in self.days_closed:
+                hours = "closed"
+            else:
+                hours = ",".join(
+                    "%s-%s"
+                    % (
+                        time.strftime("%H:%M", h[0]),
+                        time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+                    )
+                    for h in sorted(self.day_hours[day])
                 )
-                for h in sorted(self.day_hours[day])
-            )
 
             if not this_day_group:
                 this_day_group = {"from_day": day, "to_day": day, "hours": hours}
@@ -686,22 +787,17 @@ class OpeningHours:
         day_groups.append(this_day_group)
 
         opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-24:00",
-            "00:00-00:00",
-        ):
-            opening_hours = "24/7"
-        else:
-            for day_group in day_groups:
-                if not day_group["hours"]:
-                    continue
-                elif day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
-                    opening_hours += "{hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
+
+        for day_group in day_groups:
+            if not day_group["hours"]:
+                continue
+            elif day_group["from_day"] == day_group["to_day"]:
+                opening_hours += "{from_day} {hours}; ".format(**day_group)
+            elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
+                opening_hours += "{hours}; ".format(**day_group)
+            else:
+                opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
+        opening_hours = opening_hours[:-2]
 
         return opening_hours
 
@@ -715,7 +811,11 @@ class OpeningHours:
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
     def _parse_opening_hours_specification(self, rule: dict, time_format: str):
-        if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
+        if (
+            not type(rule.get("dayOfWeek")) in [list, str]
+            or not type(rule.get("opens")) == str
+            or not type(rule.get("closes")) == str
+        ):
             return
 
         days = rule["dayOfWeek"]
@@ -736,11 +836,11 @@ class OpeningHours:
     def _parse_opening_hours(self, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 
-        if "-" not in time_ranges:
-            return
-
         for time_range in time_ranges.split(","):
-            start_time, end_time = time_range.split("-")
+            if time_ranges.lower() in ["closed", "off"]:
+                start_time = end_time = "closed"
+            else:
+                start_time, end_time = time_range.split("-")
 
             start_time = start_time.strip()
             end_time = end_time.strip()
@@ -778,8 +878,16 @@ class OpeningHours:
         elif rules := linked_data.get("openingHours"):
             if not isinstance(rules, list):
                 rules = re.findall(
-                    r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
+                    r"""((
+                        \w{2,3}                 # Day
+                        |\w{2,3}\s?\-\s?\w{2,3} # Day - Day
+                        |(\w{2,3},)+\w{2,3}     # Day,Day
+                    )\s(
+                        (\d\d:\d\d)\s?\-\s?(\d\d:\d\d) # time - range
+                        |(?i:closed) # ignoring case
+                    ))""",
                     rules,
+                    re.X,
                 )
                 rules = [r[0] for r in rules]
 

@@ -32,6 +32,7 @@ FEED_URI = os.environ.get("FEED_URI")
 FEED_FORMAT = os.environ.get("FEED_FORMAT")
 FEED_EXPORTERS = {
     "geojson": "locations.exporters.geojson.GeoJsonExporter",
+    "parquet": "locations.exporters.geoparquet.GeoparquetExporter",
     "ndgeojson": "locations.exporters.ld_geojson.LineDelimitedGeoJsonExporter",
     "osm": "locations.exporters.osm.OSMExporter",
 }

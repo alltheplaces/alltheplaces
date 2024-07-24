@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class JardilandFRSpider(Spider):
@@ -18,8 +19,8 @@ class JardilandFRSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, location["address"]["road"]))
-            item["website"] = "https://www.jardiland.com/magasins/" + location["slug"]
+            item["street_address"] = clean_address(location["address"]["road"])
+            item["website"] = "https://www.jardiland.com/magasins/magasin-" + location["slug"]
 
             item["opening_hours"] = OpeningHours()
             for day_number, day_name in enumerate(DAYS):

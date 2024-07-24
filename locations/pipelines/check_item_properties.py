@@ -36,7 +36,7 @@ class CheckItemPropertiesPipeline:
         r"^Q[0-9]+$",
     )
     opening_hours_regex = re.compile(
-        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? (?:,?[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2})+(?:; )?)+$"
+        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? (?:,?[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}|closed|off)+(?:; )?)+$"
     )
     min_lat = -90.0
     max_lat = 90.0
@@ -92,12 +92,13 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
-        if opening_hours := item.get("opening_hours"):
+        opening_hours = item.get("opening_hours")
+        if opening_hours is not None:
             if isinstance(opening_hours, OpeningHours):
-                if opening_hours.day_hours:
+                if opening_hours:
                     item["opening_hours"] = opening_hours.as_opening_hours()
                 else:
-                    item["opening_hours"] = None
+                    del item["opening_hours"]
                     spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
             elif not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")

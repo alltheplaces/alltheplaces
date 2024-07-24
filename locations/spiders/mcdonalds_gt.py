@@ -7,12 +7,12 @@ from scrapy.http import Response
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_ES, OpeningHours, sanitise_day
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsGTSpider(scrapy.Spider):
+class McdonaldsGTSpider(scrapy.Spider):
     name = "mcdonalds_gt"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     acustom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://mcdonalds.com.gt/restaurantes"]
 

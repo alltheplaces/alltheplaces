@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.hours import DAYS_FR, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -30,16 +31,10 @@ class MicromaniaFRSpider(StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = response.url.split("?storeid=", 1)[1]
-        item["street_address"] = ", ".join(
-            filter(
-                None,
-                map(
-                    str.strip,
-                    response.xpath(
-                        '//p[@itemprop="address"]//text()/parent::*[@itemprop="streetAddress" or @itemprop="address"]/text()'
-                    ).getall(),
-                ),
-            )
+        item["street_address"] = clean_address(
+            response.xpath(
+                '//p[@itemprop="address"]//text()/parent::*[@itemprop="streetAddress" or @itemprop="address"]/text()'
+            ).getall()
         )
         item.pop("facebook", None)
         item.pop("twitter", None)
