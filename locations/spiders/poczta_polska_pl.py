@@ -53,5 +53,8 @@ class PocztaPolskaPLSpider(Spider):
         addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p").get()[3:-4].split("<br>")
         item["street"], item["housenumber"] = addr[0].rsplit(" ", 1)
         item["postcode"], item["city"] = addr[1].split(" ", 1)
+        hours_text = " ".join(filter(None, map(str.strip, response.xpath('//div[@class="pp-map-tooltip__opening-hours"]//text()').getall())))
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_PL)
 
         yield item
