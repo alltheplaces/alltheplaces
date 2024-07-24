@@ -9,7 +9,7 @@ from locations.dict_parser import DictParser
 class AllegroOneBoxPLSpider(Spider):
     name = "allegro_one_box_pl"
     item_attributes = {"brand": "Allegro One Box", "brand_wikidata": "Q110738715"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self) -> Iterable[Request]:
         yield Request(
@@ -35,6 +35,8 @@ class AllegroOneBoxPLSpider(Spider):
         properties["website"] = f"https://allegro.pl/kampania/one/znajdz-nas?pointId={data['id']}"
         properties["ref"] = data["carrierPointId"]
         properties["extras"]["description"] = data["description"]
+        properties["street_address"] = properties["street"]
+        properties["street"] = None
         if data["openingTimesLabels"][0]["days"] == "całodobowo":
             properties["opening_hours"] = "24/7"
         yield properties
