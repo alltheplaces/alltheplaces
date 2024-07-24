@@ -9,7 +9,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 
 class MediaExpertPLSpider(Spider):
-    name = "mediaexpert_pl"
+    name = "media_expert_pl"
 
     user_agent = BROWSER_DEFAULT
 
