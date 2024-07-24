@@ -1,8 +1,7 @@
 from typing import Iterable
 
-from scrapy.http import JsonRequest
 from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 
@@ -24,9 +23,11 @@ class AllegroOneBoxPLSpider(Spider):
 
         for box in data["points"]:
             yield JsonRequest(
-                url=f"https://edge.allegro.pl/general-deliveries/{box['id']}", headers={"Accept": "application/vnd.allegro.public.v6+json"}, callback=self.parse2
+                url=f"https://edge.allegro.pl/general-deliveries/{box['id']}",
+                headers={"Accept": "application/vnd.allegro.public.v6+json"},
+                callback=self.parse2,
             )
-            
+
     def parse2(self, response):
         data = response.json()
         properties = DictParser.parse(data)
@@ -37,4 +38,3 @@ class AllegroOneBoxPLSpider(Spider):
         if data["openingTimesLabels"][0]["days"] == "całodobowo":
             properties["opening_hours"] = "24/7"
         yield properties
-        
