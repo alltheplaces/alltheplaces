@@ -45,13 +45,10 @@ class PocztaPolskaPLSpider(Spider):
 
     def parse2(self, response):
         item = response.meta["item"]
-        item["phone"] = (
-            response.xpath("//div[contains(@class, 'pp-map-tooltip__phones')]//p")
-            .get()[3:-4]
-            .replace(" ", "")
-            .replace("<br>", ";")
-        )
-        addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p").get()[3:-4].split("<br>")
+        item["phone"] = ";".join(
+            response.xpath("//div[contains(@class, 'pp-map-tooltip__phones')]//p/text()").getall()
+        ).replace(" ", "")
+        addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p/text()").getall()
         item["street"], item["housenumber"] = addr[0].rsplit(" ", 1)
         item["postcode"], item["city"] = addr[1].split(" ", 1)
         hours_text = " ".join(
