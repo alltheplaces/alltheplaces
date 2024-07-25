@@ -34,7 +34,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
         },
         "vons": {"brand": "Vons", "brand_wikidata": "Q7941609"},
     }
-    item_attributes = {"nsi_id": -1}  # Most of these are too small to justify NSI entries
+    item_attributes = {"nsi_id": "-1"}  # Most of these are too small to justify NSI entries
     allowed_domains = [
         "local.albertsons.com",
         "local.fuel.albertsons.com",
