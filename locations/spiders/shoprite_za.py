@@ -11,13 +11,17 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class ShopriteZASpider(StructuredDataSpider):
     name = "shoprite_za"
-    item_attributes = {"brand": "Shoprite", "brand_wikidata": "Q1857639", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {
+        "brand": "Shoprite",
+        "brand_wikidata": "Q1857639",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     start_urls = ["https://www.shoprite.co.za/sitemap/medias/Store-shopriteZA-0.xml"]
     sitemap_rules = [(r"s^http:\/\/www\.shopriteza\.prod\.shopritelabs\.co\.za\/store\/\d+$", "parse_sd")]
     # AWS WAF bot protection appears to be used but can be bypassed with Playwright.
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"CONCURRENT_REQUESTS": 1, "ROBOTSTXT_OBEY": False}
-    requires_proxy = True
+    # requires_proxy = True
 
     def start_requests(self):
         for sitemap_url in self.start_urls:
