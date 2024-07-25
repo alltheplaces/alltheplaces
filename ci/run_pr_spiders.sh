@@ -39,6 +39,12 @@ if [ $spider_count -eq 0 ]; then
     exit 0
 fi
 
+if grep PLAYWRIGHT -q -m 1 $SPIDERS; then
+    echo "Playwright detected. Installing requirements."
+    playwright install-deps
+    playwright install firefox
+fi
+
 RUN_DIR="/tmp/output"
 EXIT_CODE=0
 for file_changed in $SPIDERS
