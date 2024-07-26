@@ -22,4 +22,5 @@ class HypovereinsbankDESpider(UberallSpider):
             apply_category(Categories.ATM, item)
         else:
             apply_category(Categories.BANK, item)
+        item.pop("name", None)
         yield item
