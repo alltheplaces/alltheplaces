@@ -11,6 +11,7 @@ class UbbBGSpider(Spider):
     name = "ubb_bg"
     item_attributes = {"brand": "Обединена българска банка", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
+    requires_proxy = "BG"
 
     def parse(self, response, **kwargs):
         markers = response.json()["markers"]
