@@ -1,11 +1,10 @@
+import re
+
 from scrapy import Spider
 
-import re
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
+from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
-from locations.hours import sanitise_day, OpeningHours, DAYS_BG, day_range
-
 
 
 class UbbBGSpider(Spider):
@@ -23,8 +22,8 @@ class UbbBGSpider(Spider):
             item["lon"] = location["latlng"][1]
             item["name"] = location["data"]["title"]
             item["addr_full"] = location["data"]["address"]
-            item["phone"] = location["data"]["phone"].replace("/","").replace(",",";")
-            
+            item["phone"] = location["data"]["phone"].replace("/", "").replace(",", ";")
+
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.WHEELCHAIR, item, location["data"]["has_accessibility"])
 
@@ -34,13 +33,27 @@ class UbbBGSpider(Spider):
                     item["brand_wikidata"] = "Q7283808"
 
             item["opening_hours"] = OpeningHours()
-            worktimes = location["data"]["worktime"].replace(";", ",").replace("–", "-").replace(" ", "").replace("-", "").replace("Пт", "Пет").replace("Сб", "Съб").replace("Нд", "Нед").replace("Понеделник", "Пон").replace("Неделя", "Нед").split(".,")
+            worktimes = (
+                location["data"]["worktime"]
+                .replace(";", ",")
+                .replace("–", "-")
+                .replace(" ", "")
+                .replace("-", "")
+                .replace("Пт", "Пет")
+                .replace("Сб", "Съб")
+                .replace("Нд", "Нед")
+                .replace("Понеделник", "Пон")
+                .replace("Неделя", "Нед")
+                .split(".,")
+            )
             for worktime in worktimes:
                 worktime = worktime.replace(".", "").replace(",", "")
                 if worktime == "":
                     continue
 
-                hourhour_hourhour_dayday_regex = r"^(\d\d?:\d{2})(\d{2}:\d{2})(\d{2}:\d{2})(\d{2}:\d{2})([а-я]{3})([а-я]{3})$"
+                hourhour_hourhour_dayday_regex = (
+                    r"^(\d\d?:\d{2})(\d{2}:\d{2})(\d{2}:\d{2})(\d{2}:\d{2})([а-я]{3})([а-я]{3})$"
+                )
                 hourhour_dayday_regex = r"^(\d\d?:\d{2})(\d{2}:\d{2})([а-яА-Я]{3})([а-яА-Я]{3})$"
                 hourhour_day_regex = r"^(\d{2}:\d{2})(\d{2}:\d{2})([а-я]{3})$"
 
@@ -76,7 +89,7 @@ class UbbBGSpider(Spider):
             item["addr_full"] = location["data"]["address"]
             item["lat"] = location["latlng"][0]
             item["lon"] = location["latlng"][1]
-            
+
             apply_category(Categories.ATM, item)
             apply_yes_no(Extras.WHEELCHAIR, item, location["data"]["has_accessibility"])
 
