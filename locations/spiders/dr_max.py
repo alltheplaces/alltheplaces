@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_PL, DELIMITERS_PL, OpeningHours
+from locations.hours import OpeningHours
 
 
 class DrMaxSpider(scrapy.Spider):
@@ -70,7 +70,7 @@ class DrMaxSpider(scrapy.Spider):
                     close_time = self.calculate_local_time(opening_hours["to"], item)
                     if open_time and close_time:
                         item["opening_hours"].add_range(weekday, open_time, close_time)
-                
+
             yield item
 
     def calculate_local_time(self, date_string, item) -> str:
