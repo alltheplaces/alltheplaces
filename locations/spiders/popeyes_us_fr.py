@@ -11,12 +11,12 @@ from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class PopeyesUSFRSpider(Spider):
-    name = "popeyes_us_fr"
+class PopeyesSpider(Spider):
+    name = "popeyes"
     item_attributes = {"brand": "Popeyes", "brand_wikidata": "Q1330910"}
 
     def start_requests(self) -> Iterable[Request]:
-        for country in ["us", "fr"]:
+        for country in ["us", "fr", "ca", "kr", "ro"]:
             yield JsonRequest(
                 f"https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_plk_{country}/default",
                 data={
