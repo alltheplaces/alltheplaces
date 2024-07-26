@@ -7,13 +7,14 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class HEBUSSpider(Spider):
     name = "h_e_b_us"
     item_attributes = {"brand": "H-E-B", "brand_wikidata": "Q830621"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = True
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def start_requests(self) -> Iterable[Request]:
         graphql_query = {
