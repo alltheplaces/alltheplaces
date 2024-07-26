@@ -17,6 +17,10 @@ class HEBUSSpider(Spider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def start_requests(self) -> Iterable[Request]:
+        # Get cookies from the regular website first
+        yield scrapy.Request(url="https://www.heb.com/", callback=self.do_graphql_query)
+
+    def do_graphql_query(self, response):
         graphql_query = {
             "query": """
                 query StoreDetailsSearch($address: String!, $radius: Int!, $size: Int!) {
