@@ -13,7 +13,6 @@ class UbbBGSpider(Spider):
     start_urls = ["https://www.ubb.bg/offices/pins"]
 
     def parse(self, response, **kwargs):
-        print(response.text)
         markers = response.json()["markers"]
         for location in markers["offices"]:
             item = Feature()
