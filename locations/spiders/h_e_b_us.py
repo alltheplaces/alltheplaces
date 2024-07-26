@@ -85,7 +85,7 @@ class HEBUSSpider(Spider):
                     if area["name"] == "Pharmacy":
                         pharmacy_info = area
                         break
-                pharmacy["ref"] += str(pharmacy_info["id"])
+                pharmacy["ref"] += "-pharmacy"
                 pharmacy["opening_hours"] = self.parse_opening_hours(pharmacy_info["areaHours"])
                 pharmacy["phone"] = pharmacy_info["phoneNumber"]
                 apply_category(Categories.PHARMACY, pharmacy)
