@@ -22,7 +22,6 @@ class TigerWheelAndTyreZASpider(CrawlSpider):
     def parse(self, response):
         properties = {
             "ref": response.url,
-            "name": response.xpath('//div[contains(@class, "content-wrapper")]/div[1]/h2/text()').get(),
             "addr_full": re.sub(
                 r"\s+",
                 " ",
