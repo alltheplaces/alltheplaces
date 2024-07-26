@@ -13,8 +13,7 @@ class UbbBGSpider(Spider):
     item_attributes = {"brand": "Обединена българска банка", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
     user_agent = FIREFOX_LATEST
-    requires_proxy = "BG"
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # HTTP 401 for robots.txt
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
         markers = response.json()["markers"]
