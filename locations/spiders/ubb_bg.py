@@ -14,6 +14,7 @@ class UbbBGSpider(Spider):
     start_urls = ["https://www.ubb.bg/offices/pins"]
     user_agent = FIREFOX_LATEST
     requires_proxy = "BG"
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # HTTP 401 for robots.txt
 
     def parse(self, response, **kwargs):
         markers = response.json()["markers"]
