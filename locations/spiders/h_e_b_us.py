@@ -7,20 +7,14 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class HEBUSSpider(Spider):
     name = "h_e_b_us"
     item_attributes = {"brand": "H-E-B", "brand_wikidata": "Q830621"}
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    proxy_required = True
 
     def start_requests(self) -> Iterable[Request]:
-        # Get cookies from the regular website first
-        yield Request(url="https://www.heb.com/", callback=self.do_graphql_query)
-
-    def do_graphql_query(self, response):
         graphql_query = {
             "query": """
                 query StoreDetailsSearch($address: String!, $radius: Int!, $size: Int!) {
