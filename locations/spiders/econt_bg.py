@@ -19,6 +19,8 @@ class EcontBGSpider(Spider):
             return dt.fromtimestamp(timestamp * 1e-3).astimezone(timezone).strftime("%H:%M")
 
         for location in response.json()["offices"]:
+            if location["address"]["city"]["country"]["code2"] != "BG":
+                continue
             item = Feature()
             item["ref"] = location["id"]
             item["name"] = location["name"]
@@ -30,12 +32,9 @@ class EcontBGSpider(Spider):
             item["housenumber"] = location["address"]["num"]
             item["lat"] = location["address"]["location"]["latitude"]
             item["lon"] = location["address"]["location"]["longitude"]
-            item["country"] = location["address"]["city"]["country"]["code2"]
 
             item["opening_hours"] = OpeningHours()
-            timezone = ZoneInfo(
-                "Europe/" + {"BG": "Sofia", "GR": "Athens", "RO": "Bucharest", "TR": "Istanbul"}[item["country"]]
-            )
+            timezone = ZoneInfo("Europe/Sofia")
 
             weekday_start_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursFrom"])
             weekday_end_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursTo"])
