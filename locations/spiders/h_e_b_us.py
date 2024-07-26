@@ -18,7 +18,7 @@ class HEBUSSpider(Spider):
 
     def start_requests(self) -> Iterable[Request]:
         # Get cookies from the regular website first
-        yield scrapy.Request(url="https://www.heb.com/", callback=self.do_graphql_query)
+        yield Request(url="https://www.heb.com/", callback=self.do_graphql_query)
 
     def do_graphql_query(self, response):
         graphql_query = {
