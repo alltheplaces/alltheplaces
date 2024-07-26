@@ -39,7 +39,6 @@ class VodafoneDESpider(scrapy.Spider):
                 email = email.replace("mailto:", "")
             properties = {
                 "ref": response.url,
-                "name": name,
                 "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').get(),
                 "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').get(),
                 "city": response.xpath('//span[@class="c-address-city"]/text()').get(),
