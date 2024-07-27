@@ -17,5 +17,5 @@ class BAndMSpider(SitemapSpider, StructuredDataSpider):
 
         if "phone" in item:
             if not item["phone"].replace(" ", "").startswith("+443"):
-                item.pop("name", None)
+                item.pop("phone", None)
         yield item
