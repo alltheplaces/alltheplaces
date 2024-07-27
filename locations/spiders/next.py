@@ -88,4 +88,7 @@ class NextSpider(Spider):
                     item.update(self.VICTORIAS_SECRET)
             # else normal store
 
+            if "phone" in item:
+                if not item["phone"].replace(" ", "").startswith("+443"):
+                    item.pop("name", None)
             yield item
