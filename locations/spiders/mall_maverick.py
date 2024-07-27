@@ -42,7 +42,7 @@ class MallMaverickSpider(Spider):
                 social_media_lower = (social_media.get("social_type") or "").lower()
 
                 # Some social media entries are just the social media website URLs and aren't useful
-                if not social_media["url"].startswith("http"):
+                if not (social_media.get("url") or "").startswith("http"):
                     continue
 
                 if service := SOCIAL_MEDIA_MAP.get(social_media_lower):
