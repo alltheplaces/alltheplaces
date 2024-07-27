@@ -5,7 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import set_social_media, SocialMedia
+from locations.items import SocialMedia, set_social_media
 from locations.pipelines.address_clean_up import merge_address_lines
 
 SOCIAL_MEDIA_MAP = {
