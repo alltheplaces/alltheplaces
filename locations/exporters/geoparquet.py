@@ -28,6 +28,10 @@ class GeoparquetExporter(BaseItemExporter):
         self.features.append(feature)
 
     def finish_exporting(self):
+        # Don't write an empty Parquet file
+        if not self.features:
+            return
+
         # Create a GeoDataFrame from the features
         gdf = geopandas.GeoDataFrame.from_features(self.features)
 
