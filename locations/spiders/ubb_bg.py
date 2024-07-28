@@ -25,7 +25,7 @@ class UbbBGSpider(Spider):
         logging.info(response.body)
         try:
             markers = response.json()["markers"]
-        except json.decoder.JSONDecodeError:
+        except:
             logging.error("Invalid JSON response")
             return
         for location in markers["offices"]:
