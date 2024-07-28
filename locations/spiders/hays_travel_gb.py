@@ -1,15 +1,13 @@
-import re
 from typing import Any
-from datetime import datetime
+from urllib.parse import urljoin
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from urllib.parse import urljoin
-#from locations.hours import DAYS_FULL, OpeningHours
+# from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.pipelines.address_clean_up import clean_address
+
 
 class HaysTravelGBSpider(Spider):
     name = "hays_travel_gb"
@@ -17,15 +15,17 @@ class HaysTravelGBSpider(Spider):
     start_urls = ["https://www.haystravel.co.uk/umbraco/api/branches/getbranchlocatorcontent"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations=response.xpath('//li[contains(@class,"py-8")]')
+        locations = response.xpath('//li[contains(@class,"py-8")]')
         for location in locations:
-            item=Feature()
-            url=location.xpath('//a[contains(@href,"branches")]/@href').get()
-            item["website"]=urljoin('https://www.haystravel.co.uk/',url)
-            item["name"]=location.xpath('@data-branch-title').get()
-            item["ref"]=url
-            coords=location.xpath('@data-branch-lat-lng').get()
-            item["lat"],item["lon"]=[c.strip() for c in coords.split(",")]
-            item["phone"]=location.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "")    
-            item["addr_full"] = merge_address_lines(location.xpath('.//div[contains(@class,"rich-text")]//p//text()').getall())
+            item = Feature()
+            url = location.xpath('//a[contains(@href,"branches")]/@href').get()
+            item["website"] = urljoin("https://www.haystravel.co.uk/", url)
+            item["name"] = location.xpath("@data-branch-title").get()
+            item["ref"] = url
+            coords = location.xpath("@data-branch-lat-lng").get()
+            item["lat"], item["lon"] = [c.strip() for c in coords.split(",")]
+            item["phone"] = location.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "")
+            item["addr_full"] = merge_address_lines(
+                location.xpath('.//div[contains(@class,"rich-text")]//p//text()').getall()
+            )
             yield item
