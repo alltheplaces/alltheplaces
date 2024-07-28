@@ -1,7 +1,7 @@
 import logging
 import re
 
-from scrapy import Spider
+import scrapy
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
