@@ -83,7 +83,6 @@ class UbbBGSpider(Spider):
                     end_time = matches.group(2)
                     day = sanitise_day(matches.group(3), DAYS_BG)
                     item["opening_hours"].add_range(day, start_time, end_time)
-
             yield item
         for location in markers["atms"]:
             item = Feature()
