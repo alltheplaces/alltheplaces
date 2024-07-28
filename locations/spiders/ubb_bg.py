@@ -1,4 +1,5 @@
 import re
+import logging
 
 from scrapy import Spider
 
@@ -16,8 +17,12 @@ class UbbBGSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
-        print(response.body)
-        markers = response.json()["markers"]
+        logging.info(response.body)
+        try:
+            markers = response.json()["markers"]
+        except json.decoder.JSONDecodeError:
+            logging.error("Invalid JSON response")
+            return
         for location in markers["offices"]:
             item = Feature()
             item["ref"] = location["data"]["id"]
