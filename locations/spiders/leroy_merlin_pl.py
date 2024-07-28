@@ -6,3 +6,7 @@ class LeroyMerlinPLSpider(WoosmapSpider):
     item_attributes = {"brand": "Leroy Merlin", "brand_wikidata": "Q889624"}
     key = "woos-936f7dae-38cd-3785-8a3c-153b43bd33ca"
     origin = "https://www.leroymerlin.pl"
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("name", None)
+        yield item
