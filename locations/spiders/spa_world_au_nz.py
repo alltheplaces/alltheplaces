@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SpawWorldAUNZSpider(SitemapSpider, StructuredDataSpider):
+class SpaWorldAUNZSpider(SitemapSpider, StructuredDataSpider):
     name = "spa_world_au_nz"
     item_attributes = {
         "brand": "Spa World",
@@ -15,3 +15,7 @@ class SpawWorldAUNZSpider(SitemapSpider, StructuredDataSpider):
         "https://www.spaworld.co.nz/sitemap/sitemap-index.xml",
     ]
     sitemap_rules = [("find-a-showroom/(.*)", "parse_sd")]
+
+    def post_process_item(self, item, response, ld_data):
+        item["postcode"] = str(item["postcode"])
+        yield item

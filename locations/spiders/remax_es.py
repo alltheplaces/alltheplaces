@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 
 
-class RemaxEsSpider(Spider):
+class RemaxESSpider(Spider):
     name = "remax_es"
     item_attributes = {
         "brand": "RE/MAX",
@@ -18,7 +18,7 @@ class RemaxEsSpider(Spider):
             yield JsonRequest(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 
     def parse(self, response):
-        for location in response.json():
+        for location in response.json().values():
             item = DictParser.parse(location)
             item["ref"] = location["id_oficina_anaconda"]
             item["name"] = location["headline"]

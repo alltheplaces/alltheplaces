@@ -12,13 +12,18 @@ class DairyQueenUSSpider(Spider):
     allowed_domains = ["prod-dairyqueen.dotcmscloud.com"]
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Missing robots.txt
+    item_attributes = {"nsi_id": "N/A"}
     brands = {
         "Food and Treat": {
             "brand": "DQ Grill & Chill",
             "brand_wikidata": "Q1141226",
-            "extras": {"cuisine": "ice_cream;burger"},
+            "extras": {"amenity": "fast_food", "cuisine": "ice_cream;burger"},
         },
-        "Treat Only": {"brand": "Dairy Queen", "brand_wikidata": "Q1141226", "extras": {"cuisine": "ice_cream"}},
+        "Treat Only": {
+            "brand": "Dairy Queen",
+            "brand_wikidata": "Q1141226",
+            "extras": {"amenity": "fast_food", "cuisine": "ice_cream"},
+        },
     }
 
     def start_requests(self):
@@ -40,7 +45,8 @@ class DairyQueenUSSpider(Spider):
                 item["brand_wikidata"] = self.brands[location["conceptType"]]["brand_wikidata"]
                 for tag_key, tag_value in self.brands[location["conceptType"]]["extras"].items():
                     apply_category({tag_key: tag_value}, item)
-            item["name"] = re.sub(r"^\d+ : ", "", item["name"])
+            item["branch"] = re.sub(r"^\d+ : ", "", item["name"])
+            item["name"] = item["brand"]
             item["street_address"] = location.get("address3")
             item["website"] = "https://www.dairyqueen.com" + location.get("urlTitle")
             yield item

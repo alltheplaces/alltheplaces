@@ -8,6 +8,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
+from locations.spiders.q8_italia import Q8ItaliaSpider
 
 
 class GovOsservaprezziCarburantiITSpider(Spider):
@@ -15,8 +16,6 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     dataset_attributes = {"source": "api", "api": "carburanti.mise.gov.it"}
 
     custom_settings = {
-        "HTTPCACHE_ENABLED": True,
-        "HTTPCACHE_EXPIRATION_SECS": 1800,
         "DOWNLOAD_DELAY": 0.1,
     }
 
@@ -38,9 +37,9 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     }
 
     BRANDS = {
-        "Api-Ip": {"brand": "IP", "brand_wikidata": "Q646807"},
+        "Api-Ip": {"brand": "IP", "brand_wikidata": "Q3788748"},
         "Esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "Q8": {"brand": "Q8", "brand_wikidata": "Q1634762"},
+        "Q8": Q8ItaliaSpider.item_attributes,
         "Tamoil": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
         "AgipEni": {"brand": "Eni", "brand_wikidata": "Q565594"},
         "Shell": {"brand": "Shell", "brand_wikidata": "Q110716465"},
@@ -53,8 +52,6 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "Beyfin": {"brand": "Beyfin", "brand_wikidata": "Q3639256"},
         "Costantin": {"brand": "Costantin", "brand_wikidata": "Q48800790"},
         "Lukoil": {"brand": "Lukoil", "brand_wikidata": "Q329347"},
-        # "brand" used by non-branded stations
-        "PompeBianche": {},
     }
 
     def get_price_tag(self, fuel_tag):
@@ -117,8 +114,11 @@ class GovOsservaprezziCarburantiITSpider(Spider):
                     self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_price/{charged_fuel}")
 
             if (brand := result["brand"]) in self.BRANDS:
+                item["name"] = None  # Use NSI name
                 item.update(self.BRANDS[brand])
+            elif result["brand"] == "PompeBianche":  # "brand" used by non-branded stations
+                pass
             else:
-                item["brand"] = brand
+                item["brand"] = item["name"] = brand  # Use the brand as the name as well
                 self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_brand/{brand}")
             yield item

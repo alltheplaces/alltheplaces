@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AutoZoneUSSpider(SitemapSpider, StructuredDataSpider):
+class AutozoneUSSpider(SitemapSpider, StructuredDataSpider):
     name = "autozone_us"
     item_attributes = {"brand": "AutoZone", "brand_wikidata": "Q4826087"}
     sitemap_urls = ["https://www.autozone.com/locations/sitemap.xml"]
@@ -17,8 +17,7 @@ class AutoZoneUSSpider(SitemapSpider, StructuredDataSpider):
     user_agent = BROWSER_DEFAULT
 
     def post_process_item(self, item, response, ld_data):
-        item["ref"] = item["name"].split(" #", 1)[1]
-        item["name"] = item["name"].split(" #", 1)[0]
+        item["ref"] = response.url
         item.pop("facebook", None)
         item.pop("twitter", None)
         item.pop("image", None)

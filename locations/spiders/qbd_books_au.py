@@ -10,7 +10,7 @@ def qbd_extract_microdata(doc: Selector):
     return {"items": [get_object(doc.xpath('//*[@itemscope][@itemtype="http://schema.org/Store"]')[0].root)]}
 
 
-class QBDBooksAUSpider(CrawlSpider, StructuredDataSpider):
+class QbdBooksAUSpider(CrawlSpider, StructuredDataSpider):
     name = "qbd_books_au"
     item_attributes = {"brand": "QBD Books", "brand_wikidata": "Q7270909"}
     allowed_domains = ["www.qbd.com.au"]

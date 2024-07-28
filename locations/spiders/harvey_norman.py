@@ -4,6 +4,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HarveyNormanSpider(Spider):
@@ -21,7 +22,7 @@ class HarveyNormanSpider(Spider):
         for location in json.loads(data_raw)["props"]["pageProps"]["locations"]:
             item = DictParser.parse(location)
             item["ref"] = location["storeCode"]
-            item["street_address"] = ", ".join(filter(None, location["addressLines"]))
+            item["street_address"] = clean_address(location["addressLines"])
             if ".co.nz" in response.url:
                 item.pop("state")
             if len(location["phoneNumbers"]) > 0:

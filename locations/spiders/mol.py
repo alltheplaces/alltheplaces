@@ -15,6 +15,25 @@ from locations.dict_parser import DictParser
 from locations.geo import country_coordinates
 from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
 
+COUNTRIES = {
+    "2": "BA",
+    "3": "CZ",
+    "5": "AT",
+    "6": "HR",
+    "7": "SI",
+    "8": "SK",
+    "9": "HU",
+    "10": "RO",
+    "11": "RS",
+    "22": "ME",
+    "121": "PL",
+    "141": "BE",
+    "142": "DE",
+    "143": "FR",
+    "144": "NL",
+    "145": "LU",
+}
+
 BRANDS_MAPPING = {
     "INA": ("INA", "Q1662137"),
     "MOL": ("MOL", "Q549181"),
@@ -23,6 +42,10 @@ BRANDS_MAPPING = {
     "MOLPLUGEE": ("MOL", "Q549181"),
     "PapOil": ("PapOil", None),
     "Slovnaft": ("Slovnaft", "Q1587563"),
+    "TOTAL": ("Total", "Q154037"),
+    "LOTOS": ("Lotos", "Q1256909"),
+    "TOTAL ACCESS": ("Total Access", "Q154037"),
+    "ex-OMV": ("MOL", "Q549181"),
 }
 
 FUEL_MAPPING = {
@@ -120,7 +143,7 @@ class MolSpider(scrapy.Spider):
 
     def start_requests(self):
         country_coords = country_coordinates(return_lookup=True)
-        for country in ["HU", "RO", "SL", "CZ", "SR"]:
+        for country in COUNTRIES.values():
             if coords := country_coords.get(country):
                 yield FormRequest(
                     url="https://toltoallomaskereso.mol.hu/en/portlet/routing/along_latlng.json",
@@ -145,6 +168,7 @@ class MolSpider(scrapy.Spider):
         if poi := response.json():
             fs = poi.get("fs")
             item = DictParser.parse(fs)
+            item["street_address"] = item.pop("addr_full", None)
             item["country"] = response.meta.get("country")
             item["phone"] = "; ".join(filter(None, [fs.get("fs_phone_num"), fs.get("fs_mobile_num")]))
             self.parse_attribute(item, poi, "products", FUEL_MAPPING)

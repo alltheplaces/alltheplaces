@@ -8,7 +8,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class StudenacHrSpider(CrawlSpider):
+class StudenacHRSpider(CrawlSpider):
     item_attributes = {"brand": "Studenac", "brand_wikidata": "Q65156084"}
     name = "studenac_hr"
     allowed_domains = ["studenac.hr"]
@@ -30,6 +30,9 @@ class StudenacHrSpider(CrawlSpider):
         for day, range in zip(DAYS, ranges):
             if "zatvoreno" in range:
                 continue  # closed
-            opening_hours.add_range(day, *(range.split("-")))
+            if ":" not in range:
+                continue  # no hours
+            open_time, close_time = range.split("-")
+            opening_hours.add_range(day, open_time.strip(), close_time.strip())
         item["opening_hours"] = opening_hours
         yield item

@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
 
-class MurphyUSAUSSpider(Spider):
+class MurphyUsaUSSpider(Spider):
     name = "murphy_usa_us"
     item_attributes = {"brand": "Murphy USA", "brand_wikidata": "Q19604459"}
     allowed_domains = ["service.murphydriverewards.com"]

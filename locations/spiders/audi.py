@@ -12,6 +12,7 @@ class AudiSpider(Spider):
         "brand_wikidata": "Q23317",
     }
     graphql_url = "https://dev-dealer-graphql.apps.emea.vwapps.io/"
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"clientid": "d7sfqwrxzu"}, "ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         market_request = JsonRequest(

@@ -1,29 +1,59 @@
 import re
+from typing import Any, Iterable
 
-import chompjs
-from scrapy import Selector, Spider
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingMXSpider(Spider):
     name = "burger_king_mx"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    start_urls = ["https://www.burgerking.com.mx/es/restaurantes/index-s.html"]
-    no_refs = True
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
-    def parse(self, response, **kwargs):
-        data = response.xpath('//script[contains(., "const features")]/text()').get()
-        if m := re.search(r"const features = (\[.+\]);", data, re.DOTALL):
-            for location in chompjs.parse_js_object(m.group(1)):
-                item = Feature()
-                item["name"] = location["title"]
-                if ll := re.search(r"LatLng\((-?\d+\.\d+),(-?\d+\.\d+)\)", location["position"]):
-                    item["lat"], item["lon"] = ll.groups()
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(
+            url="https://api-lac.menu.app/api/venues?per_page=1000&include=brand_id,address,city,code,latitude,longitude,name,phone,state,zip,available_payment_methods,country,serving_times|type_id;reference_type;date;date_to;days;time_from;time_to;working",
+            headers={"Application": "4160ef94dff50c0ea5067b489653eae0"},
+        )
 
-                sel = Selector(text=location["description"])
-                item["website"] = sel.xpath("//@href").get()  # URL for town, not POI
-                item["addr_full"] = sel.xpath("//h4/text()").get()
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        venues = response.json()["data"]["venues"]
+        for location in venues:
+            if (
+                "(DUPLICATED)" in location["name"]
+                or "(DELETE)" in location["name"]
+                or "(Delete)" in location["name"]
+                or "(Disabled)" in location["name"]
+                or "*PERM. CLOSED*" in location["name"]
+            ):
+                continue
 
-                yield item
+            item = DictParser.parse(location)
+            item["state"] = None
+            item["branch"] = item.pop("name")
+
+            item["website"] = "https://www.burgerking.com.mx/restaurantes/{}/?id={}".format(
+                self.slugify(location["address"]), location["id"]
+            )
+
+            item["opening_hours"] = OpeningHours()
+            for rule in location["serving_times"]:
+                if rule["type_id"] != 2:
+                    continue
+                for day in rule["days"]:
+                    item["opening_hours"].add_range(DAYS[day - 1], rule["time_from"], rule["time_to"])
+
+            yield item
+
+    def slugify(self, s: str) -> str:
+        s = re.sub(r"\s+", "-", s.lower())
+        for a, b in zip(
+            "àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;",
+            "aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------",
+        ):
+            s = s.replace(a, b)
+        return re.sub(r"\-\-+", "-", re.sub(r"[^\w\-]+", "", s.replace("&", "-and-"))).strip("-")

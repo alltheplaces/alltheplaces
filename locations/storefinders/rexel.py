@@ -30,7 +30,8 @@ class RexelSpider(Spider):
             )
             feature["ref"] = feature.pop("name")
             item = DictParser.parse(feature)
-            item["phone"] = feature["address"]["phone"]
+            if not feature["address"]["phone"].replace(" ", "").startswith("+443"):
+                item["phone"] = feature["address"]["phone"]
             # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item["website"] = (
                 f'https://{self.base_url}/{feature["address"]["town"].replace(" ", "-")}/store/{feature["ref"]}'

@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class JJillSpider(scrapy.Spider):
+class JjillSpider(scrapy.Spider):
     name = "jjill"
     item_attributes = {"brand": "J.Jill", "brand_wikidata": "Q64448268"}
     allowed_domains = ["jjill.com"]
@@ -55,14 +55,13 @@ class JJillSpider(scrapy.Spider):
             if "closed" in hours.lower():
                 continue
             start_time, end_time = hours.split("-")
-            start_time = self.sanitise_time(start_time)
-            end_time = self.sanitise_time(end_time)
+            start_time = self.sanitise_time(start_time).replace(" ", "")
+            end_time = self.sanitise_time(end_time).replace(" ", "")
             opening_hours.add_range(day, start_time, end_time, time_format="%I:%M%p")
         return opening_hours
 
     @staticmethod
     def sanitise_time(time: str) -> str:
-        time = time.replace("a", "am").replace("p", "pm").replace(" ", "")
         if ":" not in time:
-            time = time[0:-2] + ":00" + time[-2:]
+            time = time.replace("am", ":00am").replace("pm", ":00pm")
         return time

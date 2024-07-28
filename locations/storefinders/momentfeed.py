@@ -54,7 +54,7 @@ class MomentFeedSpider(Spider):
         if len(response.json()) == self.page_size:
             page = int(urllib.parse.parse_qs(urllib.parse.urlparse(response.url).query)["page"][0])
             yield JsonRequest(
-                url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page={page+1}"
+                url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page={page + 1}"
             )
 
     def parse_item(self, item, feature, store_info, **kwargs):

@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class FantasticFurnitureAUSpider(Spider):
@@ -22,9 +23,7 @@ class FantasticFurnitureAUSpider(Spider):
 
             item = DictParser.parse(location)
             item["ref"] = location["code"]
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
-            ).replace(" , ", ", ")
+            item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
             item["addr_full"] = location["address"]["formattedAddress"].replace(" , ", ", ")
             item.pop("street")
             item["state"] = location["address"]["region"]["name"]

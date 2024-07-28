@@ -8,9 +8,9 @@ from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DominiosMXSpider(Spider):
+class DominosPizzaMXSpider(Spider):
     name = "dominos_pizza_mx"
-    item_attributes = {"brand": "Domino's Pizza", "brand_wikidata": "Q839466"}
+    item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = BROWSER_DEFAULT
 

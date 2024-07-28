@@ -7,7 +7,7 @@ from locations.geo import point_locations
 from locations.items import Feature
 
 
-class AAASpider(scrapy.Spider):
+class AaaSpider(scrapy.Spider):
     name = "aaa"
     item_attributes = {
         "brand": "American Automobile Association",
@@ -26,7 +26,7 @@ class AAASpider(scrapy.Spider):
                 "radius": "5000",
                 "format": "json",
                 "ident": "AAACOM",
-                "destination": ",".join([lat, lon]),
+                "destination": f"{lat},{lon}",
             }
             yield scrapy.http.Request("https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params))
 

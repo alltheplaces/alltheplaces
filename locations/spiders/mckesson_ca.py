@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, DAYS_FR, OpeningHours
 
 
-class McKessonCASpider(Spider):
+class MckessonCASpider(Spider):
     name = "mckesson_ca"
     allowed_domains = [
         "www.guardian-ida-remedysrx.ca",

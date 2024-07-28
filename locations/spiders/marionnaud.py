@@ -2,7 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -28,7 +28,7 @@ class MarionnaudSpider(Spider):
             location.update(location.pop("address"))
             item = DictParser.parse(location)
             item["addr_full"] = location["formattedAddress"]
-            item["street_address"] = clean_address([location["line1"], location.get("line2")])
+            item["street_address"] = merge_address_lines([location["line1"], location.get("line2")])
             item["website"] = response.urljoin(location["url"])
 
             item["opening_hours"] = OpeningHours()

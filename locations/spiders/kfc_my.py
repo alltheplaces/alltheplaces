@@ -4,10 +4,10 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KFCMYSpider(Spider):
+class KfcMYSpider(Spider):
     name = "kfc_my"
     item_attributes = KFC_SHARED_ATTRIBUTES
     allowed_domains = ["kfc.com.my"]

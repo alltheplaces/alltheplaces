@@ -5,6 +5,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CostaCoffeeGGGBIMJESpider(Spider):
@@ -119,8 +120,8 @@ class CostaCoffeeGGGBIMJESpider(Spider):
                 apply_category(Categories.COFFEE_SHOP, item)
             item["lat"] = location["location"]["geo"]["latitude"]
             item["lon"] = location["location"]["geo"]["longitude"]
-            item["street_address"] = ", ".join(
-                filter(None, [location["location"]["address"]["address1"], location["location"]["address"]["address2"]])
+            item["street_address"] = clean_address(
+                [location["location"]["address"]["address1"], location["location"]["address"]["address2"]]
             )
             item["city"] = location["location"]["address"]["city"]
             item["postcode"] = location["location"]["address"]["postCode"]

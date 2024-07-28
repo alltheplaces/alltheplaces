@@ -15,7 +15,6 @@ class PapaJohnsGBSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["branch"] = item.pop("name")
-        if m := re.search(r"\"latitude\":(-?\d+\.\d+),\"longitude\":(-?\d+\.\d+)", response.text):
-            item["lat"], item["lon"] = m.groups()
-
+        if m := re.search(r"\((-?\d+\.\d+),(-?\d+\.\d+)\)", response.xpath('.//*[@class="map col"]/img/@src').get()):
+            item["lon"], item["lat"] = m.groups()
         yield item

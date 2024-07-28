@@ -1,9 +1,7 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.spiders.five_guys_ca import FiveGuysCASpider
 
 
-class FiveGuysUSSpider(SitemapSpider, StructuredDataSpider):
+class FiveGuysUSSpider(FiveGuysCASpider):
     name = "five_guys_us"
     item_attributes = {
         "brand": "Five Guys",

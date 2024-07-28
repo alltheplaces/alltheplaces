@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class MJBaleAUSpider(Spider):
@@ -21,9 +22,7 @@ class MJBaleAUSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["number"]
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"]["address1"], location["address"]["address2"]])
-            )
+            item["street_address"] = clean_address([location["address"]["address1"], location["address"]["address2"]])
             item.pop("website")
             item["email"] = location["website"]
             item["opening_hours"] = OpeningHours()

@@ -1,24 +1,21 @@
-from locations.categories import Extras, PaymentMethods, apply_yes_no
-from locations.storefinders.yext import YextSpider
+from locations.categories import Categories, Extras, apply_yes_no
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class TropicalSmoothieCafeUSSpider(YextSpider):
+class TropicalSmoothieCafeUSSpider(YextAnswersSpider):
     name = "tropical_smoothie_cafe_us"
-    item_attributes = {"brand": "Tropical Smoothie Cafe", "brand_wikidata": "Q7845817"}
+    item_attributes = {
+        "brand": "Tropical Smoothie Cafe",
+        "brand_wikidata": "Q7845817",
+        "extras": Categories.FAST_FOOD.value,
+    }
     api_key = "e00ed8254f827f6c73044941473bb9e9"
-    wanted_types = ["restaurant"]
+    experience_key = "answers"
+    environment = "STAGING"
+    feature_type = "restaurants"
 
-    def parse_item(self, item, location):
-        item["email"] = location.get("c_cafeEmail")
-        apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVE_THRU" in location.get("c_locationPageServices", []), False)
-        apply_yes_no(Extras.DELIVERY, item, "DELIVERY" in location.get("c_locationPageServices", []), False)
-        apply_yes_no(Extras.WIFI, item, "WIFI" in location.get("c_locationPageServices", []), False)
-        apply_yes_no(
-            PaymentMethods.AMERICAN_EXPRESS, item, "AMERICANEXPRESS" in location.get("paymentOptions", []), False
-        )
-        apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "DISCOVER" in location.get("paymentOptions", []), False)
-        apply_yes_no(PaymentMethods.MASTER_CARD, item, "MASTERCARD" in location.get("paymentOptions", []), False)
-        apply_yes_no(PaymentMethods.VISA, item, "VISA" in location.get("paymentOptions", []), False)
-        item["extras"].pop("contact:instagram", None)
-        item.pop("twitter", None)
+    def parse_item(self, location, item):
+        item["email"] = location["data"].get("c_franchiseeEmail")
+        if amenities := location["data"].get("c_locationPageServices"):
+            apply_yes_no(Extras.WIFI, item, "Wifi" in amenities, False)
         yield item

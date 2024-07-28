@@ -5,12 +5,12 @@ import scrapy
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsPLSpider(scrapy.Spider):
+class McdonaldsPLSpider(scrapy.Spider):
     name = "mcdonalds_pl"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.pl"]
 
     start_urls = ["https://mcdonalds.pl/data/places"]

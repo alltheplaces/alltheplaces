@@ -5,9 +5,10 @@ import scrapy
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
+from locations.pipelines.address_clean_up import clean_address
 
 
-class Coffee1GB(scrapy.Spider):
+class Coffee1GBSpider(scrapy.Spider):
     name = "coffee_1_gb"
     item_attributes = {"brand": "Coffee#1", "brand_wikidata": "Q22032058"}
     allowed_domains = ["www.coffee1.co.uk"]
@@ -24,8 +25,9 @@ class Coffee1GB(scrapy.Spider):
         item = DictParser.parse(location)
 
         if "<br />" in location["branch_address"]:
-            address = [i.strip(" ,") for i in location["branch_address"].split("<br />\r\n") if i]
-            item["addr_full"] = ", ".join(address)
+            item["addr_full"] = clean_address(
+                [i.strip(" ,") for i in location["branch_address"].split("<br />\r\n") if i]
+            )
         else:
             item["addr_full"] = location["branch_address"]
 

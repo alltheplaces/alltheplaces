@@ -1,33 +1,33 @@
+from typing import Iterable
 from urllib.parse import quote
 
-from scrapy import Spider
+from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BestAndLessAUSpider(Spider):
     name = "best_and_less_au"
     item_attributes = {"brand": "Best & Less", "brand_wikidata": "Q4896542"}
-    allowed_domains = ["www.bestandless.com.au"]
-    start_urls = [
-        f"https://prodapi.bestandless.com.au/occ/v2/bnlsite/stores/location/{state}?fields=FULL"
-        for state in ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"]
-    ]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url="https://prodapi.bestandless.com.au/occ/v2/bnlsite/stores?fields=FULL&currentPage={}".format(page)
+        )
+
+    def start_requests(self) -> Iterable[Request]:
+        yield self.make_request(0)
 
     def parse(self, response):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["ref"] = location["address"]["id"]
             item["addr_full"] = location["address"].get("formattedAddress")
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
-            )
+            item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
             item["city"] = location["address"].get("town")
             item["state"] = location["address"].get("state")
             item["postcode"] = location["address"].get("postalCode")
@@ -45,3 +45,7 @@ class BestAndLessAUSpider(Spider):
                     "%I:%M %p",
                 )
             yield item
+
+        pagination = response.json()["pagination"]
+        if pagination["currentPage"] < pagination["totalPages"]:
+            yield self.make_request(pagination["currentPage"] + 1)

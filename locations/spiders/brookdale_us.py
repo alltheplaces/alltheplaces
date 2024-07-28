@@ -2,6 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BrookdaleUSSpider(Spider):
@@ -21,7 +22,7 @@ class BrookdaleUSSpider(Spider):
         for location in response.json()["locations"]:
             item = DictParser.parse(location)
             item["ref"] = location["community_id"].replace("BUS-", "")
-            item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
             item["postcode"] = location["zip_postal_code"]
             item["phone"] = location["phone_main"]
             item["email"] = location["community_contact_email"]
