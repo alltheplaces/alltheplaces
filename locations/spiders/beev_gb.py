@@ -7,7 +7,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.items import Feature
 
 
-class BEEVGBSpider(Spider):
+class BeevGBSpider(Spider):
     name = "beev_gb"
     item_attributes = {"brand": "Be.EV", "brand_wikidata": "Q118263083"}
     custom_settings = {"ROBOTSTXT_OBEY": False}

@@ -4,7 +4,7 @@ from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class OTRAUSpider(Spider):
+class OtrAUSpider(Spider):
     name = "otr_au"
     item_attributes = {"brand": "OTR", "brand_wikidata": "Q116394019"}
 

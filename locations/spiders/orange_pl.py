@@ -1,42 +1,26 @@
-import scrapy
-from scrapy.spiders import SitemapSpider
-
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
+from locations.storefinders.algolia import AlgoliaSpider
 
 
-class OrangePLSpider(SitemapSpider):
+class OrangePLSpider(AlgoliaSpider):
     name = "orange_pl"
     item_attributes = {"brand": "Orange", "brand_wikidata": "Q1431486"}
-    sitemap_urls = ["https://salony.orange.pl/client/sitemap-locations-pl.xml.gz"]
-    custom_settings = {
-        "DEFAULT_REQUEST_HEADERS": {
-            "x-algolia-api-key": "7a46160ed01bb0af2c2af8d14b97f3c5",
-            "x-algolia-application-id": "0KNEMTBXX3",
-        }
-    }
+    api_key = "7a46160ed01bb0af2c2af8d14b97f3c5"
+    app_id = "0KNEMTBXX3"
+    index_name = "OEPL_en"
 
-    def parse(self, response):
-        store_id = response.url.rsplit("-")[-1]
-        yield scrapy.Request(
-            url=f"https://0knemtbxx3-dsn.algolia.net/1/indexes/OEPL_en/{store_id}",
-            callback=self.parse_poi,
-            cb_kwargs=dict(website=response.url),
-        )
-
-    def parse_poi(self, response, website):
-        poi = response.json()
-        poi["street_address"] = clean_address([poi.pop("street1"), poi.pop("street2")])
-        poi["addr_full"] = clean_address(poi["formatted_address"])
-        poi["location"] = poi.pop("_geoloc")
-        item = DictParser.parse(poi)
-        item["country"] = poi["country"]["code"]
-        item["city"] = poi["city"]["name"]
-        item["website"] = website
-        item["branch"] = item.pop("name", None)
-        self.parse_hours(item, poi)
+    def parse_item(self, item, location):
+        item["street_address"] = clean_address([location.pop("street1"), location.pop("street2")])
+        item["addr_full"] = clean_address(location["formatted_address"])
+        item["lat"] = location["_geoloc"]["lat"]
+        item["lon"] = location["_geoloc"]["lng"]
+        item["country"] = location["country"]["code"]
+        item["city"] = location["city"]["name"]
+        item["website"] = f"https://salony.orange.pl/pl/{location['url_location']}"
+        item.pop("name", None)
+        self.parse_hours(item, location)
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
 

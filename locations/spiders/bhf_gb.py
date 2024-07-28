@@ -5,7 +5,7 @@ from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BritishHeartFoundationGBSpider(SitemapSpider, StructuredDataSpider):
+class BhfGBSpider(SitemapSpider, StructuredDataSpider):
     name = "bhf_gb"
     item_attributes = {"brand": "British Heart Foundation", "brand_wikidata": "Q4970039"}
     sitemap_urls = ["https://www.bhf.org.uk/sitemap.xml"]

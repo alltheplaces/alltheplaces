@@ -20,14 +20,24 @@ class SushiSushiAUSpider(Spider):
         for location in response.json()["result"]:
             if not location["enabled"]:
                 continue
+
             item = DictParser.parse(location)
             item["ref"] = location.get("store_id", location.get("_id"))
             item["branch"] = item["name"]
             item["street_address"] = clean_address([location.get("address_line_01"), location.get("address_line_02")])
+
             if item["state"]:
                 item["state"] = item["state"].upper()
+
             if item["postcode"]:
                 item["postcode"] = str(item["postcode"])
+
             if item["phone"] and "CALL ME" in item["phone"]:
                 item.pop("phone", None)
+
+            # 2024-07-18 Spider produces low quality coordinates, so we reject all for now.
+            # https://github.com/alltheplaces/alltheplaces/issues/8683
+            item["lat"] = None
+            item["lon"] = None
+
             yield item

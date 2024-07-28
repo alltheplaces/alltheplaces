@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class JCPenneySpider(CrawlSpider, StructuredDataSpider):
+class JcpenneySpider(CrawlSpider, StructuredDataSpider):
     name = "jcpenney"
     item_attributes = {
         "brand": "JCPenney",

@@ -7,7 +7,7 @@ from locations.geo import point_locations
 from locations.items import Feature
 
 
-class AAASpider(scrapy.Spider):
+class AaaSpider(scrapy.Spider):
     name = "aaa"
     item_attributes = {
         "brand": "American Automobile Association",

@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KFCAUSpider(scrapy.Spider):
+class KfcAUSpider(scrapy.Spider):
     name = "kfc_au"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/"]

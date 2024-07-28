@@ -4,7 +4,7 @@ from geonamescache import GeonamesCache
 from locations.items import Feature
 
 
-class USArmyNationalGuardSpider(scrapy.Spider):
+class UsArmyNationalGuardSpider(scrapy.Spider):
     name = "us_army_national_guard"
     item_attributes = {
         "brand": "US Army National Guard",
