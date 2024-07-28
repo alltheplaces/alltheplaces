@@ -13,7 +13,7 @@ class PremierGBSpider(scrapy.spiders.SitemapSpider):
     def parse_store(self, response):
         item = OpenGraphParser.parse(response)
 
-        if "phone" in item and item["phone"] is not None and  not item["phone"].replace(" ", "").startswith("+443"):
+        if "phone" in item and item["phone"] is not None and not item["phone"].replace(" ", "").startswith("+443"):
             item.pop("phone", None)
 
         yield item
