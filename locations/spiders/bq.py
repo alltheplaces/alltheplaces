@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class BQSpider(scrapy.Spider):
+class BqSpider(scrapy.Spider):
     name = "bq"
     item_attributes = {"brand": "B&Q", "brand_wikidata": "Q707602"}
     allowed_domains = ["www.diy.com"]

@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 
 
-class FcBankingSpider(SitemapSpider):
+class FcbankingSpider(SitemapSpider):
     name = "fcbanking"
     item_attributes = {"brand": "First Commonwealth Bank", "brand_wikidata": "Q5452773"}
     allowed_domains = ["www.fcbanking.com"]

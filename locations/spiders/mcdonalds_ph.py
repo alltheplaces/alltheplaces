@@ -7,12 +7,12 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsPHSpider(scrapy.Spider):
+class McdonaldsPHSpider(scrapy.Spider):
     name = "mcdonalds_ph"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.com.ph/store-locator"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 

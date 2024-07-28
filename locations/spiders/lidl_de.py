@@ -14,8 +14,6 @@ class LidlDESpider(VirtualEarthSpider):
     key = "AnTPGpOQpGHsC_ryx9LY3fRTI27dwcRWuPrfg93-WZR2m-1ax9e9ghlD4s1RaHOq"
 
     def parse_item(self, item, feature, **kwargs):
-        item["name"] = feature["ShownStoreName"]
-
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
             r"(\w{2} ?- ?\w{2}|\w{2}) (\d{2}:\d{2})\*?-(\d{2}:\d{2})",

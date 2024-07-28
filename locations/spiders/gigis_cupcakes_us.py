@@ -3,7 +3,7 @@ from locations.hours import OpeningHours
 from locations.storefinders.easylocator import EasyLocatorSpider
 
 
-class GigisCupcakesUS(EasyLocatorSpider):
+class GigisCupcakesUSSpider(EasyLocatorSpider):
     name = "gigis_cupcakes_us"
     item_attributes = {"brand": "Gigi's Cupcakes", "extras": Categories.SHOP_BAKERY.value}
     api_key = "gigiscupcakesusa"

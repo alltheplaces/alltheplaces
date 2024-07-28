@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KeyBankUSSpider(SitemapSpider, StructuredDataSpider):
+class KeybankUSSpider(SitemapSpider, StructuredDataSpider):
     name = "keybank_us"
     item_attributes = {"brand": "KeyBank", "brand_wikidata": "Q1740314"}
     sitemap_urls = ["https://www.key.com/about/seo.sitemap-locator.xml"]

@@ -8,7 +8,7 @@ from locations.spiders.tesco_gb import set_located_in
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class LensCraftersSpider(SitemapSpider, StructuredDataSpider):
+class LenscraftersSpider(SitemapSpider, StructuredDataSpider):
     name = "lenscrafters"
     MACYS = {"brand": "Macy's", "brand_wikidata": "Q629269"}
     item_attributes = {"brand": "LensCrafters", "brand_wikidata": "Q6523209", "extras": Categories.SHOP_OPTICIAN.value}

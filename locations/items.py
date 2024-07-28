@@ -76,20 +76,21 @@ def set_lat_lon(item: Feature, lat: float, lon: float):
 
 class SocialMedia(Enum):
     FACEBOOK = "facebook"
-    TRIPADVISOR = "tripadvisor"
     INSTAGRAM = "instagram"
-    TRIP_ADVISOR = "tripadvisor"
-    VK = "vk"
-    TWITTER = "twitter"
-    YOUTUBE = "youtube"
     LINKEDIN = "linkedin"
-    TELEGRAM = "telegram"
-    WHATSAPP = "whatsapp"
-    VIBER = "viber"
-    YELP = "yelp"
-    PINTEREST = "pinterest"
-    TIKTOK = "tiktok"
     MASTODON = "mastodon"
+    PINTEREST = "pinterest"
+    SNAPCHAT = "snapchat"
+    TELEGRAM = "telegram"
+    TIKTOK = "tiktok"
+    TRIPADVISOR = "tripadvisor"
+    TRIP_ADVISOR = TRIPADVISOR
+    TWITTER = "twitter"
+    VIBER = "viber"
+    VK = "vk"
+    WHATSAPP = "whatsapp"
+    YELP = "yelp"
+    YOUTUBE = "youtube"
 
 
 def get_social_media(item: Feature, service: str | Enum) -> str:

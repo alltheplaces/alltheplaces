@@ -12,7 +12,7 @@ from locations.dict_parser import DictParser
 # are dockless.
 
 
-class GBFSSpider(CSVFeedSpider):
+class GbfsSpider(CSVFeedSpider):
     name = "gbfs"
     start_urls = ["https://github.com/MobilityData/gbfs/raw/master/systems.csv"]
     download_delay = 2

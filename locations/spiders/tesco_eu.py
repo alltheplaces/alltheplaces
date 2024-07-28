@@ -11,7 +11,7 @@ from locations.spiders.tesco_gb import TescoGBSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TescoSpider(scrapy.Spider):
+class TescoEUSpider(scrapy.Spider):
     name = "tesco_eu"
     user_agent = BROWSER_DEFAULT
     COUNTRY_WEBSITE_MAP = {

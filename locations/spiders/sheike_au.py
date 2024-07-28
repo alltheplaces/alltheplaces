@@ -2,7 +2,7 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
 
-class SHEIKEAUSpider(StockistSpider):
+class SheikeAUSpider(StockistSpider):
     name = "sheike_au"
     item_attributes = {"brand": "SHEIKE", "brand_wikidata": "Q117747877"}
     key = "u5720"

@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class LoxamFrSpider(SitemapSpider, StructuredDataSpider):
+class LoxamFRSpider(SitemapSpider, StructuredDataSpider):
     name = "loxam_fr"
     item_attributes = {"brand": "Loxam", "brand_wikidata": "Q3264407"}
     allowed_domains = ["agence.loxam.fr"]

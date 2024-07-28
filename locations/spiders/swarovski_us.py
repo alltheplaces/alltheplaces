@@ -7,7 +7,7 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SwarovskiUsSpider(scrapy.Spider):
+class SwarovskiUSSpider(scrapy.Spider):
     name = "swarovski_us"
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     allowed_domains = ["swarovski.com"]

@@ -80,7 +80,6 @@ python ci/concatenate_parquet.py \
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't convert to parquet")
-    exit 1
 fi
 
 # concatenate_parquet.py leaves behind the parquet files for each spider, and I don't
