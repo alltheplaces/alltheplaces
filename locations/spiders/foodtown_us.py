@@ -2,7 +2,7 @@ from locations.hours import OpeningHours
 from locations.storefinders.freshop import FreshopSpider
 
 
-class FoodtownUS(FreshopSpider):
+class FoodtownUSSpider(FreshopSpider):
     name = "foodtown_us"
     item_attributes = {"brand": "Foodtown", "brand_wikidata": "Q5465575"}
     app_key = "foodtown"

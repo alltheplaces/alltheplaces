@@ -2,6 +2,7 @@ import unicodedata
 from urllib.parse import urlparse
 
 import geonamescache
+from babel import Locale, UnknownLocaleError
 
 
 def strip_accents(s):
@@ -80,4 +81,17 @@ class CountryUtils:
     def country_code_from_url(self, url):
         if isinstance(url, str):
             return self._convert_to_iso2_country_code(urlparse(url).netloc.split("."))
+        return None
+
+
+def get_locale(country_code: str) -> str | None:
+    """
+    Get language locale for a given country code.
+    :param country_code: ISO alpha-2 country code
+    :return: language locale in format of en-US or None if not found
+    """
+    try:
+        locale = Locale.parse("und-" + country_code, sep="-")
+        return "-".join(filter(None, [locale.language, locale.territory]))
+    except (ValueError, UnknownLocaleError):
         return None

@@ -4,6 +4,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class LondonDrugsCASpider(scrapy.Spider):
@@ -12,6 +13,7 @@ class LondonDrugsCASpider(scrapy.Spider):
     allowed_domains = ["www.londondrugs.com"]
     start_urls = ["https://www.londondrugs.com/on/demandware.store/Sites-LondonDrugs-Site/default/MktStoreList-All"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         stores = json.loads(response.body)

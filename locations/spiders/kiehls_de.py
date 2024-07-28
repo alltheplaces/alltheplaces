@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.geo import point_locations
 
 
-class KiehlsDeSpider(scrapy.Spider):
+class KiehlsDESpider(scrapy.Spider):
     name = "kiehls_de"
     item_attributes = {
         "brand": "Kiehl's",

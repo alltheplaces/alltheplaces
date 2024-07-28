@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class IHOPSpider(scrapy.Spider):
+class IhopSpider(scrapy.Spider):
     name = "ihop"
     item_attributes = {"brand": "IHOP", "brand_wikidata": "Q1185675"}
     allowed_domains = ["restaurants.ihop.com"]

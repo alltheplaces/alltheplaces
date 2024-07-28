@@ -1,5 +1,5 @@
 from locations.categories import Extras, PaymentMethods, apply_yes_no
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
@@ -11,16 +11,29 @@ class CulversUSSpider(Where2GetItSpider):
     api_filter = {"number": {"ne": "P"}}
 
     def parse_item(self, item, location):
+        item["branch"] = item.pop("name").removeprefix("Culver's of ")
+        item["website"] = item["website"].replace("http://", "https://")
+
         item["opening_hours"] = OpeningHours()
-        for day_index in range(-1, 5, 1):
+        for day in ["mon", "tues", "wed", "thurs", "fri", "sat", "sun"]:
             item["opening_hours"].add_range(
-                DAYS[day_index], location["bho"][day_index + 1][0], location["bho"][day_index + 1][1], "%H%M"
+                day, location["{}openfrom".format(day)], location["{}opento".format(day)], "%I:%M %p"
             )
-        apply_yes_no(Extras.INDOOR_SEATING, item, location["dine_in"], False)
-        apply_yes_no(Extras.TAKEAWAY, item, location["takeout"], False)
-        apply_yes_no(Extras.DELIVERY, item, location["delivery"], False)
-        apply_yes_no(Extras.DRIVE_THROUGH, item, location["drivethru"], False)
-        apply_yes_no(Extras.TOILETS, item, location["restroom"], False)
-        apply_yes_no(PaymentMethods.VISA, item, location["visa"], False)
-        apply_yes_no(PaymentMethods.MASTER_CARD, item, location["mastercard"], False)
+
+        apply_yes_no(Extras.INDOOR_SEATING, item, location["dine_in"] == "1", False)
+        apply_yes_no(Extras.TAKEAWAY, item, location["takeout"] == "1", False)
+        apply_yes_no(Extras.DELIVERY, item, location["delivery"] == "1", False)
+        apply_yes_no(Extras.DRIVE_THROUGH, item, location["drivethru"] == "1", False)
+        apply_yes_no(Extras.TOILETS, item, location["restroom"] == "1", False)
+        apply_yes_no(PaymentMethods.VISA, item, location["visa"] == "1", False)
+        apply_yes_no(PaymentMethods.MASTER_CARD, item, location["mastercard"] == "1", False)
+
+        if location["drivethru"] == "1":
+            oh = OpeningHours()
+            for day in ["mon", "tues", "wed", "thurs", "fri", "sat", "sun"]:
+                oh.add_range(
+                    day, location["dt_{}openfrom".format(day)], location["dt_{}opento".format(day)], "%I:%M %p"
+                )
+            item["extras"]["opening_hours:drive_through"] = oh.as_opening_hours()
+
         yield item

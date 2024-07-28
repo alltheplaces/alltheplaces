@@ -14,7 +14,7 @@ from locations.items import Feature
 from locations.storefinders.geo_me import GeoMeSpider
 
 
-class BPSpider(GeoMeSpider):
+class BpSpider(GeoMeSpider):
     name = "bp"
     key = "bpretaillocator"
     brands = {

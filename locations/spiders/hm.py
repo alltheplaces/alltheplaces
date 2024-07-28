@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class HMSpider(scrapy.Spider):
+class HmSpider(scrapy.Spider):
     name = "hm"
     item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326"}
 

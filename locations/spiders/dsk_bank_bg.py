@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, OpeningHours
 
 
-class DSKBankBGSpider(scrapy.Spider):
+class DskBankBGSpider(scrapy.Spider):
     name = "dsk_bank_bg"
     item_attributes = {"brand": "Банка ДСК", "brand_wikidata": "Q5206146"}
     allowed_domains = ["https://www.dskbank.bg/"]

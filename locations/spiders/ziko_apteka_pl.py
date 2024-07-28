@@ -24,7 +24,7 @@ class ZikoAptekaPLSpider(Spider):
             item["city"] = location["city_name"][0]
             item.pop("state", None)
             if location.get("link"):
-                item["website"] = "https://zikoapteka.pl/apteki" + location["link"]
+                item["website"] = "https://zikoapteka.pl/apteki" + location["link"] + "/"
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(
                 re.sub(r"\s+", " ", location["hours"].replace(".", "")), days=DAYS_PL

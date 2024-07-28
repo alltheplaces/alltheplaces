@@ -32,7 +32,7 @@ ARG BUILD_OPT_DEPS=" \
 # basic update & locale setting
 RUN apt-get update \
  && apt-get upgrade -yqq \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -yqq --no-install-recommends \
         ${BUILD_PYTHON_DEPS} \
         ${BUILD_OPT_DEPS} \
  && localedef -f UTF-8 -i en_US en_US.UTF-8 \
@@ -63,7 +63,7 @@ RUN curl -sL https://github.com/felt/tippecanoe/archive/refs/tags/${TIPPECANOE_V
 RUN curl https://pyenv.run | bash \
  && pyenv install ${PYTHON_VERSION} \
  && pyenv global ${PYTHON_VERSION} \
- && pip install --upgrade pip pipenv==2023.6.26
+ && pip install --upgrade pip pipenv==2023.12.1
 
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock

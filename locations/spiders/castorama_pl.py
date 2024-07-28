@@ -16,3 +16,12 @@ class CastoramaPLSpider(CrawlSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["image"] = None
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if "name" in item:
+            item["extras"]["web_listing_name"] = item["name"]
+        if "brand" in item:
+            item["name"] = item["brand"]
+        else:
+            item["name"] = "Castorama"
+        yield item

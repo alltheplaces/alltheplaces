@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class LongHornSteakhouseSpider(scrapy.Spider):
+class LonghornSteakhouseSpider(scrapy.Spider):
     name = "longhorn_steakhouse"
     item_attributes = {"brand": "LongHorn Steakhouse", "brand_wikidata": "Q3259007"}
     allowed_domains = []

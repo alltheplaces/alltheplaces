@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class SafewayCaSpider(scrapy.Spider):
+class SafewayCASpider(scrapy.Spider):
     name = "safeway_ca"
     item_attributes = {"brand": "Safeway", "brand_wikidata": "Q17111901"}
     allowed_domains = ["www.safeway.ca"]

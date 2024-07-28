@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class ElJannahSpider(Spider):
+class ElJannahAUSpider(Spider):
     name = "el_jannah_au"
     item_attributes = {"brand": "El Jannah", "brand_wikidata": "Q96377069", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["eljannah.com.au"]

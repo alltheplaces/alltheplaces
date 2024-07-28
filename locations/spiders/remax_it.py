@@ -5,7 +5,7 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class RemaxItSpider(scrapy.Spider):
+class RemaxITSpider(scrapy.Spider):
     name = "remax_it"
     item_attributes = {
         "brand": "RE/MAX",

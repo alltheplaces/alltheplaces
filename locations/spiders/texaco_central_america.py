@@ -6,7 +6,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Fuel, apply_yes_no
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -31,8 +31,8 @@ class TexacoCentralAmericaSpider(Spider):
                 item["lat"] = location["ubicacion"]["lat"]
                 item["lon"] = location["ubicacion"]["lng"]
                 item["city"] = location["ciudad"]
-                for t in location["tipo"]:
-                    self.crawler.stats.inc_value("z/{}".format(t))
+
+                apply_category(Categories.FUEL_STATION, item)
 
                 apply_yes_no(Fuel.DIESEL, item, "diesel" in location["tipo"])
                 yield item

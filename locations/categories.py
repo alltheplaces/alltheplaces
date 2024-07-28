@@ -141,6 +141,7 @@ class Categories(Enum):
     SHOP_NUTRITION_SUPPLEMENTS = {"shop": "nutrition_supplements"}
     SHOP_NUTS = {"shop": "nuts"}
     SHOP_OPTICIAN = {"shop": "optician"}
+    SHOP_ORTHOPEDICS = {"shop": "orthopedics"}
     SHOP_OUTDOOR = {"shop": "outdoor"}
     SHOP_OUTPOST = {"shop": "outpost"}
     SHOP_PAINT = {"shop": "paint"}

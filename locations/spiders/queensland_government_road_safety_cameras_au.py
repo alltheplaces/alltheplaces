@@ -1,7 +1,7 @@
 from chompjs import parse_js_object
 from scrapy import Spider
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.items import Feature
 
 
@@ -27,14 +27,14 @@ class QueenslandGovernmentRoadSafetyCamerasAUSpider(Spider):
             }
             camera_type = camera[5][0][1][0].replace("Camera type: ", "").replace("\\n", "").strip()
             if camera_type == "red light camera":
-                apply_category(Categories.ENFORCEMENT_TRAFFIC_SIGNALS, properties)
+                apply_category({"highway": "traffic_signals", "enforcement": "traffic_signals"}, properties)
             elif camera_type == "combined red light/speed camera":
-                apply_category(Categories.ENFORCEMENT_TRAFFIC_SIGNALS, properties)
-                apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "maxspeed"}, properties)
+                apply_category({"highway": "traffic_signals", "enforcement": "traffic_signals"}, properties)
             elif camera_type == "Fixed speed camera":
-                apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "maxspeed"}, properties)
             elif camera_type == "Point-to-point speed camera system":
-                apply_category(Categories.ENFORCEMENT_AVERAGE_SPEED, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "average_speed"}, properties)
             else:
                 self.logger.warning("Unknown type of road safety camera: {}".format(camera_type))
             yield Feature(**properties)
