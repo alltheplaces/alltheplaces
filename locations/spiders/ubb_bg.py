@@ -16,7 +16,7 @@ class UbbBGSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
-        print(response)
+        print(response.content)
         markers = response.json()["markers"]
         for location in markers["offices"]:
             item = Feature()
