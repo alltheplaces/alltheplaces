@@ -14,7 +14,7 @@ class UbbBGSpider(Spider):
     item_attributes = {"brand": "Обединена българска банка", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
     user_agent = FIREFOX_LATEST
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
     def parse(self, response, **kwargs):
         logging.info(response.body)
