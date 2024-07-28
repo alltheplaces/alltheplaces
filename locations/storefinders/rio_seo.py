@@ -24,11 +24,6 @@ class RioSeoSpider(Spider, AutomaticSpiderGenerator):
             url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/getAsyncLocations\?.+)$"
         )
     ]
-
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
     end_point: str = None
     radius: int = 10000
     limit: int = 3000
