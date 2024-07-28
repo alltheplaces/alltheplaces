@@ -9,7 +9,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class WHSmithSpider(Spider):
+class WhsmithSpider(Spider):
     name = "whsmith"
     item_attributes = {"brand": "WHSmith", "brand_wikidata": "Q1548712", "extras": Categories.SHOP_NEWSAGENT.value}
     allowed_domains = ["whsmith.co.uk"]

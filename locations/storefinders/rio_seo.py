@@ -1,8 +1,9 @@
 import json
-from typing import Iterable
+from typing import Any, Iterable
+from urllib.parse import urljoin
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 from scrapy.selector import Selector
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
@@ -27,6 +28,27 @@ class RioSeoSpider(Spider, AutomaticSpiderGenerator):
     def start_requests(self):
         for url in self.start_urls:
             yield JsonRequest(url=url)
+
+    end_point: str = None
+    radius: int = 10000
+    limit: int = 3000
+
+    def start_requests(self) -> Iterable[Request]:
+        if self.start_urls:
+            for url in self.start_urls:
+                yield JsonRequest(url=url)
+        else:
+            yield JsonRequest(url=urljoin(self.end_point, "getAutocompleteData"), callback=self.parse_autocomplete)
+
+    def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
+        yield JsonRequest(
+            url=urljoin(
+                self.end_point,
+                "getAsyncLocations?template=search&level=search&search={}&radius={}&limit={}".format(
+                    response.json()["data"][0], self.radius, self.limit
+                ),
+            )
+        )
 
     def parse(self, response, **kwargs):
         map_list = response.json()["maplist"]

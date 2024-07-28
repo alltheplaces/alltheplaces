@@ -6,7 +6,7 @@ from scrapy import Spider
 from locations.items import Feature
 
 
-class Good2GoStoresSpider(Spider):
+class Good2GoStoresUSSpider(Spider):
     name = "good_2_go_stores_us"
     item_attributes = {"brand": "Good 2 Go", "brand_wikidata": "Q109826132"}
     start_urls = ["https://good2gostores.com/locations/"]

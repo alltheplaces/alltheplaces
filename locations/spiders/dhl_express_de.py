@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 DHL_EXPRESS_SHARED_ATTRIBUTES = {"brand": "DHL", "brand_wikidata": "Q489815"}
 
 
-class DhlExpressDeSpider(scrapy.Spider):
+class DhlExpressDESpider(scrapy.Spider):
     name = "dhl_express_de"
     item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["dhl.de", "locator.dhl.com", "wsbexpress.dhl.com"]

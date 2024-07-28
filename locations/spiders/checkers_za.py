@@ -4,6 +4,10 @@ from locations.categories import Categories, apply_category
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
+# Shoprite Holdings owns the Checkers brand, as well as another brand,
+# Shoprite. Refer to shoprite_za for an almost identical spider
+# addressing the Shoprite brand.
+
 
 class CheckersZASpider(StructuredDataSpider):
     name = "checkers_za"

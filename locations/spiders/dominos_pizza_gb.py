@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DominiosGBSpider(SitemapSpider, StructuredDataSpider):
+class DominosPizzaGBSpider(SitemapSpider, StructuredDataSpider):
     name = "dominos_pizza_gb"
     item_attributes = {
         "brand": "Domino's Pizza",

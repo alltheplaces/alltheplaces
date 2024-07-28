@@ -6,7 +6,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
+class HomeBargainsGBSpider(CrawlSpider, StructuredDataSpider):
     name = "home_bargains_gb"
     item_attributes = {"brand": "Home Bargains", "brand_wikidata": "Q5888229"}
     allowed_domains = ["storelocator.home.bargains"]

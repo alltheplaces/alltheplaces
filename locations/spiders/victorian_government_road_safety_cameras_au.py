@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.items import Feature
 
 
@@ -33,11 +33,11 @@ class VictorianGovernmentRoadSafetyCamerasAUSpider(Spider):
             }
 
             if location["properties"]["site_type"] == "Intersection":
-                apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
-                apply_category(Categories.ENFORCEMENT_TRAFFIC_SIGNALS, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "maxspeed"}, properties)
+                apply_category({"highway": "traffic_signals", "enforcement": "traffic_signals"}, properties)
             elif location["properties"]["site_type"] in ["Highway", "Freeway"]:
-                apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "maxspeed"}, properties)
             elif location["properties"]["site_type"] == "Point-to-point":
-                apply_category(Categories.ENFORCEMENT_AVERAGE_SPEED, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "average_speed"}, properties)
 
             yield Feature(**properties)

@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TSBGB(SitemapSpider, StructuredDataSpider):
+class TsbGBSpider(SitemapSpider, StructuredDataSpider):
     name = "tsb_gb"
     item_attributes = {
         "brand": "TSB",

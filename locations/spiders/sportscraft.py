@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SportscraftSpider(Spider):
@@ -20,9 +21,7 @@ class SportscraftSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["key"]
             item["name"] = item["name"].split("(", 1)[0].strip()
-            item["street_address"] = ", ".join(
-                filter(None, [location["address1"].strip(), location["address2"].strip()])
-            )
+            item["street_address"] = clean_address([location["address1"].strip(), location["address2"].strip()])
             item["city"] = item["city"].strip()
             item["website"] = "https://www.sportscraft.com.au/store-locator/store-details?id=" + location["key"]
             item["opening_hours"] = OpeningHours()

@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class EmpResUSSpider(Spider):
+class EmpresUSSpider(Spider):
     name = "empres_us"
     item_attributes = {
         "brand": "EmpRes",

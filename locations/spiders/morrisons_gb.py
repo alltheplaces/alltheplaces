@@ -78,5 +78,5 @@ class MorrisonsGBSpider(Spider):
 
             if not item.get("brand"):
                 continue
-
+            item["branch"] = item.pop("name", None)
             yield item

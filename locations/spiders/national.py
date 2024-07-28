@@ -22,8 +22,6 @@ HEADERS = {
 class NationalSpider(scrapy.Spider):
     name = "national"
     item_attributes = {"brand": "National Car Rental", "brand_wikidata": "Q1424142"}
-    allowed_domains = ["nationalcar.com"]
-    start_urls = ["https://www.nationalcar.com/en/car-rental/locations.html"]
 
     def start_requests(self):
         yield scrapy.Request(

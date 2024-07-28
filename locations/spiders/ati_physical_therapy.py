@@ -6,7 +6,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 
 # Can't currently use StructuredDataSpider as there is no type in the source data
-class ATIPhysicalTherapySpider(SitemapSpider):
+class AtiPhysicalTherapySpider(SitemapSpider):
     name = "ati_physical_therapy"
     item_attributes = {
         "brand": "ATI Physical Therapy",

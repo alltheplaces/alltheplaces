@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class NSWRuralFireServiceAUSpider(Spider):
+class NswRuralFireServiceAUSpider(Spider):
     name = "nsw_rural_fire_service_au"
     item_attributes = {"brand": "New South Wales Rural Fire Service", "brand_wikidata": "Q7011777"}
     allowed_domains = ["portal.spatial.nsw.gov.au"]

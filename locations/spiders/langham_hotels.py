@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 class LanghamHotelsSpider(scrapy.Spider):
-    name = "langham"
+    name = "langham_hotels"
     allowed_domains = [
         "www.langhamhotels.com",
         "www.cordishotels.com",

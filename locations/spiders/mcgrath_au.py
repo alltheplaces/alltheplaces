@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class McGrathAUSpider(SitemapSpider, StructuredDataSpider):
+class McgrathAUSpider(SitemapSpider, StructuredDataSpider):
     name = "mcgrath_au"
     item_attributes = {"brand": "McGrath", "brand_wikidata": "Q105290661"}
     allowed_domains = ["www.mcgrath.com.au"]
