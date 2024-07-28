@@ -4,6 +4,10 @@ After an `Item` is emitted from a spider, it goes through several pipelines befo
 If a spider needs to disable these pipelines, they can by overriding `ITEM_PIPELINES` in `custom_settings`.
 See [`fedex.py`](../locations/spiders/fedex.py) for an example.
 
+### `DropAttributesPipeline`
+
+When a spider has `drop_attributes`, we remove those attributes from `Feature`s, this happens early, so it may be re added by other pipelines later on.
+
 ### `ApplySpiderLevelAttributesPipeline`
 
 When a spider has `item_attributes`, they are applied to all the `Item`s produced by the `Spider`.

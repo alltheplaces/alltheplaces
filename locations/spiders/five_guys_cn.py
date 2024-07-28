@@ -1,10 +1,8 @@
-from scrapy.spiders import SitemapSpider
-
+from locations.spiders.five_guys_ca import FiveGuysCASpider
 from locations.spiders.five_guys_us import FiveGuysUSSpider
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class FiveGuysCNSpider(SitemapSpider, StructuredDataSpider):
+class FiveGuysCNSpider(FiveGuysCASpider):
     name = "five_guys_cn"
     item_attributes = FiveGuysUSSpider.item_attributes
     sitemap_urls = ["https://restaurants.fiveguys.cn/sitemap.xml"]

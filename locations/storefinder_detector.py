@@ -13,19 +13,23 @@ from locations.automatic_spider_generator import AutomaticSpiderGenerator, Detec
 from locations.items import GeneratedSpider
 from locations.name_suggestion_index import NSI
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
+from locations.storefinders.aheadworks import AheadworksSpider
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 from locations.storefinders.amrest_eu import AmrestEUSpider
 from locations.storefinders.closeby import ClosebySpider
+from locations.storefinders.easylocator import EasyLocatorSpider
 from locations.storefinders.freshop import FreshopSpider
 from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
+from locations.storefinders.lighthouse import LighthouseSpider
 from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 from locations.storefinders.localisr import LocalisrSpider
-
-# from locations.storefinders.locally import LocallySpider
+from locations.storefinders.locally import LocallySpider
+from locations.storefinders.maps_marker_pro import MapsMarkerProSpider
 from locations.storefinders.metalocator import MetaLocatorSpider
 from locations.storefinders.metizsoft import MetizsoftSpider
 from locations.storefinders.momentfeed import MomentFeedSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 # from locations.storefinders.rexel import RexelSpider
 from locations.storefinders.shopapps import ShopAppsSpider
@@ -39,12 +43,17 @@ from locations.storefinders.storepoint import StorepointSpider
 from locations.storefinders.storerocket import StoreRocketSpider
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
+from locations.storefinders.sylinder import SylinderSpider
 from locations.storefinders.uberall import UberallSpider
 from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 from locations.storefinders.woosmap import WoosmapSpider
+from locations.storefinders.wp_go_maps import WPGoMapsSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
+from locations.storefinders.yext_answers import YextAnswersSpider
+
+# from locations.storefinders.yext_search import YextSearchSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -182,20 +191,25 @@ class StorefinderDetectorSpider(Spider):
             # storefinder detection and automatic spider generation
             # are enabled below. The remainder are work in progress
             # to enable.
+            AheadworksSpider,
             AgileStoreLocatorSpider,
             AmastyStoreLocatorSpider,
             AmrestEUSpider,
             ClosebySpider,
+            EasyLocatorSpider,
             FreshopSpider,
             GeoMeSpider,
             KiboSpider,
+            LighthouseSpider,
             LimesharpStoreLocatorSpider,
             LocalisrSpider,
-            # LocallySpider
+            LocallySpider,
+            MapsMarkerProSpider,
             MetaLocatorSpider,
             MetizsoftSpider,
             MomentFeedSpider,
             # RexelSpider,
+            RioSeoSpider,
             ShopAppsSpider,
             StockInStoreSpider,
             StockistSpider,
@@ -207,12 +221,16 @@ class StorefinderDetectorSpider(Spider):
             StoreRocketSpider,
             SuperStoreFinderSpider,
             SweetIQSpider,
+            SylinderSpider,
             UberallSpider,
             VirtualEarthSpider,
             Where2GetItSpider,
             WoosmapSpider,
+            WPGoMapsSpider,
             WPStoreLocatorSpider,
             YextSpider,
+            YextAnswersSpider,
+            # YextSearchSpider,
         ]
         return all_storefinders
 
@@ -385,8 +403,9 @@ class StorefinderDetectorSpider(Spider):
 
                 # Execute JavaScript code in the main frame and then all
                 # nested iframes in order of their appearance in the DOM for
-                # the provided JQ query to return a non-null response. The
-                # search stops as soon as the first JQ query succeeds.
+                # the provided JS code. The search stops as soon as the first
+                # non-null response is received. Exceptions will cause a null
+                # response.
                 remaining_js_objects = deepcopy(detection_rule.js_objects)
                 for param_name, js_code in detection_rule.js_objects.items():
                     page = response.meta["playwright_page"]

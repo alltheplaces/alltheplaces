@@ -15,14 +15,18 @@ from locations.items import Feature
 
 class KiboSpider(Spider, AutomaticSpiderGenerator):
     page_size: int = 1000
+    api_filter: str = None
     detection_rules = [
         DetectionRequestRule(
-            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+\/api\/commerce\/storefront\/locationUsageTypes\/SP\/locations)(?:\?|\/|$)"
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/commerce\/storefront\/locationUsageTypes\/SP\/locations)(?:\?|\/|$)"
         )
     ]
 
     def start_requests(self):
-        yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
+        if self.api_filter:
+            yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&filter={self.api_filter}")
+        else:
+            yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
 
     def parse(self, response: Response):
         for location in response.json()["items"]:

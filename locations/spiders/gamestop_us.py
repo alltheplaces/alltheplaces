@@ -7,6 +7,7 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 GAMESTOP_SHARED_ATTRIBUTES = {
@@ -92,7 +93,7 @@ class GamestopUSSpider(Spider):
             item["name"] = item["name"].replace(" - GameStop", "")
             if location.get("address2"):
                 suite = location.get("address2").upper().replace("STE", "Suite")
-                item["street_address"] = ", ".join(filter(None, [suite, location.get("address1")]))
+                item["street_address"] = clean_address([suite, location.get("address1")])
             item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
             item["opening_hours"] = OpeningHours()
             for day_hours in json.loads(location.get("storeOperationHours")):

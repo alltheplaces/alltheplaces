@@ -14,6 +14,7 @@ class PizzaHutHUSpider(AmrestEUSpider):
     api_channel = "TAKEAWAY"
 
     def parse_item(self, item, location):
+        item["branch"] = item.pop("name").removeprefix("Pizza Hut ")
         item["website"] = (
             "https://pizzahut.hu/en/restaurants/"
             + item["ref"]

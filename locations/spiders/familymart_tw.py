@@ -9,7 +9,6 @@ from locations.user_agents import BROWSER_DEFAULT
 class FamilyMartTWSpider(Spider):
     name = "familymart_tw"
     item_attributes = {
-        "brand": "FamilyMart",
         "brand_wikidata": "Q10891564",
         "extras": Categories.SHOP_CONVENIENCE.value,
     }

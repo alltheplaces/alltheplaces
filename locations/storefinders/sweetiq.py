@@ -15,7 +15,7 @@ class SweetIQSpider(Spider, AutomaticSpiderGenerator):
     request_batch_size = 10
     detection_rules = [
         DetectionResponseRule(
-            url=r"^(?P<start_urls__list>https?:\/\/.+)",
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+).*)$",
             xpaths={"__": r'//script[contains(text(), "__SLS_REDUX_STATE__")]/text()'},
         )
     ]

@@ -2,6 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CorePowerYogaUSSpider(Spider):
@@ -33,14 +34,11 @@ class CorePowerYogaUSSpider(Spider):
             }
             address_data_ref = location["fields"]["address"]["sys"]["id"]
             if address_data_ref in included_data.keys():
-                properties["street_address"] = ", ".join(
-                    filter(
-                        None,
-                        [
-                            included_data[address_data_ref].get("addressLine1"),
-                            included_data[address_data_ref].get("addressLine2"),
-                        ],
-                    )
+                properties["street_address"] = clean_address(
+                    [
+                        included_data[address_data_ref].get("addressLine1"),
+                        included_data[address_data_ref].get("addressLine2"),
+                    ]
                 )
                 properties["city"] = included_data[address_data_ref]["city"]
                 properties["state"] = included_data[address_data_ref]["state"]

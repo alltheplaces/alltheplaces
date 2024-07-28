@@ -11,5 +11,6 @@ class LaTagliatellaESSpider(AmrestEUSpider):
     api_channel = "DINE_IN"
 
     def parse_item(self, item, location):
+        item["branch"] = item.pop("name")
         item["website"] = location.get("storeLocatorUrl")
         yield item

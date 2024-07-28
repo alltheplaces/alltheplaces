@@ -36,7 +36,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "BA": ["Marriott Beach Apartments", "Q3918608"],
         "BG": ["Bulgari Hotels", "Q91602871"],
         "BR": ["Renaissance Hotels", "Q2143252"],
-        "CY": ["Courtyard by Marriott", "Q1053170"],
+        "CY": ["Courtyard", "Q1053170"],
         "DE": ["Delta Hotels", "Q5254663"],
         "DS": ["Design Hotels", "Q5264274"],
         "EB": ["Edition Hotels", "Q91218404"],
@@ -45,6 +45,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "FI": ["Fairfield by Marriott", "Q5430314"],
         "FP": ["Four Points by Sheraton", "Q1439966"],
         "GE": ["Gaylord Hotels", "Q3099664"],
+        "JW": ["JW Marriott Hotels", "Q1067636"],
         "LC": "ignore",  # Luxury Collection
         "MD": ["Le Méridien", "Q261077"],
         "MV": ["Marriott Vacation Club International", "Q6772996"],
@@ -89,5 +90,12 @@ class MarriottHotelsSpider(scrapy.Spider):
         item["ref"] = hotel["marsha_code"]
         item["image"] = hotel.get("exterior_photo")
         item["brand"], item["brand_wikidata"] = brand
+        item["extras"]["capacity:rooms"] = hotel.get("number_of_rooms")
+        item["extras"]["fax"] = hotel.get("fax")
+        if hotel.get("bookable"):
+            item["extras"]["reservation"] = "yes"
+        item["extras"]["description"] = hotel.get("description_main")
+        if hotel.get("has_sauna"):
+            item["extras"]["sauna"] = "yes"
         apply_category(Categories.HOTEL, item)
         return item

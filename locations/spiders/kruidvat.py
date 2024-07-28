@@ -1,6 +1,9 @@
-import re
+from typing import Any, Iterable
+from urllib.parse import urlencode
 
 import scrapy
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
 
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
@@ -10,14 +13,25 @@ class KruidvatSpider(scrapy.Spider):
     name = "kruidvat"
     item_attributes = {"brand": "Kruidvat", "brand_wikidata": "Q2226366"}
     allowed_domains = ["kruidvat.nl"]
-    start_urls = ["https://www.kruidvat.nl/api/v2/kvn/stores?lang=nl&radius=100000&pageSize=10000&fields=FULL"]
-    custom_settings = {
-        "DEFAULT_REQUEST_HEADERS": {
-            "Accept": "application/json",
-        }
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response):
+    def make_request(self, api: str, page: int) -> JsonRequest:
+        return JsonRequest(
+            url="{}?{}".format(
+                api, urlencode({"fields": "FULL", "radius": "100000", "pageSize": "100", "currentPage": str(page)})
+            ),
+            meta={"api": api, "page": page},
+        )
+
+    def start_requests(self) -> Iterable[Request]:
+        yield self.make_request("https://www.kruidvat.be/api/v2/kvb/stores", 0)
+        yield self.make_request("https://www.kruidvat.nl/api/v2/kvn/stores", 0)
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        pagination = response.json()["pagination"]
+        if pagination["currentPage"] < pagination["totalPages"]:
+            yield self.make_request(response.meta["api"], pagination["currentPage"] + 1)
+
         for store in response.json().get("stores"):
             oh = OpeningHours()
             for day in store.get("openingHours", {}).get("weekDayOpeningList"):
@@ -28,8 +42,7 @@ class KruidvatSpider(scrapy.Spider):
                 )
 
             properties = {
-                "name": store.get("name"),
-                "ref": store.get("address", {}).get("id"),
+                "ref": store.get("externalId"),
                 "addr_full": store.get("address", {}).get("formattedAddress"),
                 "street_address": store.get("address", {}).get("line1"),
                 "country": store.get("address", {}).get("country").get("isocode"),
@@ -38,7 +51,7 @@ class KruidvatSpider(scrapy.Spider):
                 "postcode": store.get("address", {}).get("postalCode"),
                 "lat": store.get("geoPoint", {}).get("latitude"),
                 "lon": store.get("geoPoint", {}).get("longitude"),
-                "website": "https://www.kruidvat.nl{}".format(re.sub(r"\?.+", "", store.get("url"))),
+                "website": response.urljoin(store.get("url")),
                 "opening_hours": oh.as_opening_hours(),
             }
 
