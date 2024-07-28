@@ -13,8 +13,8 @@ class GroszekPLSpider(Spider):
         for feature in response.json()["shops"]:
             item = DictParser.parse(feature)
             item["ref"] = feature["idCRM"]
-            item["housenumber"] = feature["number"]
-            if isinstance(item["housenumber"], str) and item["housenumber"].lower() == "b/n":
+            item["housenumber"] = str(feature["number"])
+            if item["housenumber"].lower() == "b/n":
                 item["housenumber"] = None
             if feature["format"] in ["Market", "Minimarket"]:
                 apply_category(Categories.SHOP_CONVENIENCE, item)
