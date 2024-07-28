@@ -50,7 +50,7 @@ class PocztaPolskaPLSpider(Spider):
         ).replace(" ", "")
         addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p/text()").getall()
         item["street"], item["housenumber"] = addr[0].rsplit(" ", 1)
-        if item["housenumber"].lower() == "b/n":
+        if isinstance(item["housenumber"], str) and item["housenumber"].lower() == "b/n":
             item["housenumber"] = None
         item["postcode"], item["city"] = addr[1].split(" ", 1)
         hours_text = " ".join(
