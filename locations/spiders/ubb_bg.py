@@ -18,7 +18,7 @@ class UbbBGSpider(Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url, cookies={'d41d8cd98f00b204e': '800998ecf8427f'}, callback=self.parse)
+            yield scrapy.Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
 
     def parse(self, response, **kwargs):
         logging.info(response.body)
