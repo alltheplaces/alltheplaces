@@ -23,4 +23,8 @@ class ScrewfixGBSpider(CrawlSpider):
             if data_json:
                 item = LinkedDataParser.parse_ld(data_json)
                 item["website"] = response.url
+
+                if "phone" in item and item["phone"] is not None:
+                    if not item["phone"].replace(" ", "").startswith("+443"):
+                        item.pop("phone", None)
                 yield item
