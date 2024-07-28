@@ -13,7 +13,7 @@ class AgataMeblePLSpider(scrapy.Spider):
     def parse(self, response):
         for poi in response.json()["results"]:
             # global store is not a poi
-            if poi["Slug"] == "globalny":
+            if poi["Enabled"] is False:
                 continue
             item = DictParser.parse(poi)
             item.pop("name", None)
