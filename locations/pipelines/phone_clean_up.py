@@ -34,6 +34,7 @@ class PhoneCleanUpPipeline:
 
     def normalize(self, phone, country, spider):
         phone = re.sub(r"tel:", "", phone, flags=re.IGNORECASE)
+        phone = re.sub(r"undefined", "", phone, flags=re.IGNORECASE)
         phone = phone.strip()
         if not phone:
             return None
