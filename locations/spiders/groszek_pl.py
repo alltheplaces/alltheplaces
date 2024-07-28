@@ -14,6 +14,8 @@ class GroszekPLSpider(Spider):
             item = DictParser.parse(feature)
             item["ref"] = feature["idCRM"]
             item["housenumber"] = feature["number"]
+            if item["housenumber"].lower() == "b/n":
+                item["housenumber"] = None
             if feature["format"] in ["Market", "Minimarket"]:
                 apply_category(Categories.SHOP_CONVENIENCE, item)
             else:
