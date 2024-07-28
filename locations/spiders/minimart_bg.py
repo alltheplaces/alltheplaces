@@ -11,7 +11,6 @@ class MinimartBGSpider(Spider):
     start_urls = ["https://mini-mart.bg/nameri-magazin"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Ignore www.google.com robots.txt
     no_refs = True
-    requires_proxy = "BG"
 
     def parse(self, response):
         locations = response.xpath("//div[contains(@class, 'et_pb_with_border')]").getall()
