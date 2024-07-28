@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class NinetyNineCentsOnlyUSSpider(SitemapSpider, StructuredDataSpider):
+class NinetynineCentsOnlyUSSpider(SitemapSpider, StructuredDataSpider):
     name = "99_cents_only_us"
     item_attributes = {"brand": "99 Cents Only Stores", "brand_wikidata": "Q4646294"}
     sitemap_urls = ["https://locations.99only.com/robots.txt"]

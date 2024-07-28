@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature, SocialMedia, set_social_media
 
 
-class SamsoniteEuSpider(scrapy.Spider):
+class SamsoniteEUSpider(scrapy.Spider):
     name = "samsonite_eu"
     CHIC_ACCENT = {"brand": "Chic Accent"}
     SAMSONITE = {"brand": "Samsonite", "brand_wikidata": "Q1203426"}

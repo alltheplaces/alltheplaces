@@ -2,7 +2,7 @@ from locations.categories import Categories, apply_category
 from locations.storefinders.sylinder import SylinderSpider
 
 
-class SparNoSpider(SylinderSpider):
+class SparNOSpider(SylinderSpider):
     name = "spar_no"
     app_key = "1210"
     base_url = "https://spar.no/Finn-butikk/"

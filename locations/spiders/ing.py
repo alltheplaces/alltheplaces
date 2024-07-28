@@ -6,7 +6,7 @@ from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class INGSpider(scrapy.Spider):
+class IngSpider(scrapy.Spider):
     name = "ing"
     item_attributes = {"brand": "ING", "brand_wikidata": "Q645708"}
     start_urls = ["https://api.www.ing.nl/locator/offices"]

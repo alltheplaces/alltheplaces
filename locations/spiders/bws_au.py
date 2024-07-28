@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.dict_parser import DictParser
 
 
-class BWSAUSpider(Spider):
+class BwsAUSpider(Spider):
     name = "bws_au"
     item_attributes = {"brand": "BWS", "brand_wikidata": "Q4836848"}
     allowed_domains = ["store.bws.com.au"]

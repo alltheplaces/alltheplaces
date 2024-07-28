@@ -41,13 +41,7 @@ class EdekaDESpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
-            oh = OpeningHours()
-            for day in store["businessHours"].values():
-                if not isinstance(day, dict) or not day["open"]:
-                    continue
-                for rule in day["timeEntries"]:
-                    oh.add_range(day["weekday"], rule["from"], rule["to"])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = self.parse_hours(store)
 
             name = item["name"].lower().replace(" ", "").replace("und", "&").replace("-", "")
             if "nah&gut" in name:
@@ -76,7 +70,20 @@ class EdekaDESpider(scrapy.Spider):
                 item.update(self.ELLI)
             else:
                 item.update(self.EDEKA)
+            if item["website"] == "https://www.edeka.de/eh/minden-hannover/edeka-junghans-poppauer-str.-2/index.jspp":
+                item["website"] = "https://www.edeka.de/eh/minden-hannover/edeka-junghans-poppauer-str.-2/index.jsp"
             yield item
 
         if next := response.json()["_links"].get("next"):
             yield Request(url=f'https://www.edeka.de{next["href"]}')
+
+    def parse_hours(self, store_obj):
+        oh = OpeningHours()
+        for day in store_obj["businessHours"].values():
+            if not isinstance(day, dict) or not day["open"]:
+                continue
+
+            for rule in day["timeEntries"]:
+                oh.add_range(day["weekday"], rule["from"], rule["to"])
+
+        return oh

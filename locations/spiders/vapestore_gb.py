@@ -9,7 +9,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import extract_email
 
 
-class VapeStoreGBSpider(SitemapSpider):
+class VapestoreGBSpider(SitemapSpider):
     name = "vapestore_gb"
     item_attributes = {"brand": "vapestore", "brand_wikidata": "Q116710778"}
     sitemap_urls = ["https://www.vapestore.co.uk/pub/sitemap/vapestore_sitemap.xml"]

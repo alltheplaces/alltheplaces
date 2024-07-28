@@ -1,34 +1,62 @@
-import scrapy
-from scrapy.http import JsonRequest
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
-class PocztaPolskaPLSpider(scrapy.Spider):
+class PocztaPolskaPLSpider(Spider):
     name = "poczta_polska_pl"
     item_attributes = {"brand": "Poczta Polska", "brand_wikidata": "Q168833"}
-    start_urls = ["https://placowki.poczta-polska.pl/ajax/getProvince/"]
+    start_url = "https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/find-markers.php"
+
+    formdata = {
+        "tab": "tabPostOffice",
+        "lng": "19",
+        "lat": "52",
+        "province": "0",
+        "district": "0",
+        "ppmapBox_Days": "dni robocze",
+    }
+
+    def start_requests(self):
+        yield FormRequest(
+            url=self.start_url,
+            method="POST",
+            formdata=self.formdata,
+            callback=self.parse,
+        )
 
     def parse(self, response, **kwargs):
-        for province in response.json()["response"]:
-            yield JsonRequest(
-                url=f'https://placowki.poczta-polska.pl/ajax/getResultsByProvince/?province={province["id"]}',
-                callback=self.parse_locations,
-            )
-
-    def parse_locations(self, response, **kwargs):
-        for location in response.json()["response"]:
+        for location in response.json():
             item = Feature()
             item["ref"] = location.get("pni")
-            item["name"] = location.get("nazwa")
-            item["lat"] = location.get("y")
-            item["lon"] = location.get("x")
-            item["street_address"] = location.get("ulica")
-            item["city"] = location.get("miejscowosc")
-            item["state"] = location.get("wojewodztwo")
-            item["postcode"] = location.get("kod")
-            item["phone"] = ";".join(location.get("telefon")[0].split(","))
+            item["name"] = location.get("name")
+            item["lat"] = location.get("latitude")
+            item["lon"] = location.get("longitude")
             apply_category(Categories.POST_OFFICE, item)
-            # TODO: parse hours, services in 'opis' attributes
-            yield item
+            yield FormRequest(
+                url="https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/point-info.php",
+                formdata={"pointid": str(item["ref"])},
+                meta={"item": item},
+                callback=self.parse2,
+            )
+
+    def parse2(self, response):
+        item = response.meta["item"]
+        item["phone"] = ";".join(
+            response.xpath("//div[contains(@class, 'pp-map-tooltip__phones')]//p/text()").getall()
+        ).replace(" ", "")
+        addr = response.xpath("//div[contains(@class, 'pp-map-tooltip__adress')]//p/text()").getall()
+        item["street"], item["housenumber"] = addr[0].rsplit(" ", 1)
+        item["postcode"], item["city"] = addr[1].split(" ", 1)
+        hours_text = " ".join(
+            filter(
+                None, map(str.strip, response.xpath('//div[@class="pp-map-tooltip__opening-hours"]//text()').getall())
+            )
+        )
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_PL)
+
+        yield item

@@ -14,7 +14,7 @@ BURGER_KING_SHARED_ATTRIBUTES = {
 
 
 class BurgerKingSpider(scrapy.Spider):
-    name = "burgerking"
+    name = "burger_king"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     download_delay = 2.0
     custom_settings = {"ROBOTSTXT_OBEY": False}

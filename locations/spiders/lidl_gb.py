@@ -28,8 +28,6 @@ class LidlGBSpider(VirtualEarthSpider):
             item["postcode"] = feature["PostalCode"]
             item["city"] = feature["Locality"]
 
-        item["name"] = feature["ShownStoreName"]
-
         oh = OpeningHours()
         for day, start_time, end_time in re.findall(
             r"(\w{3} ?- ?\w{3}|\w{3}) (\d{2}:\d{2})\*?-(\d{2}:\d{2})",

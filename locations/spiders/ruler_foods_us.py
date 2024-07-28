@@ -5,7 +5,7 @@ from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfS
 from locations.structured_data_spider import clean_facebook
 
 
-class RulerFoodsSpider(StoreLocatorPlusSelfSpider):
+class RulerFoodsUSSpider(StoreLocatorPlusSelfSpider):
     name = "ruler_foods_us"
     item_attributes = {"brand": "Ruler Foods", "brand_wikidata": "Q17125470"}
     allowed_domains = ["rulerfoods.com"]

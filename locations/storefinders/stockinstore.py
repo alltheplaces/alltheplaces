@@ -33,6 +33,7 @@ class StockInStoreSpider(Spider, AutomaticSpiderGenerator):
     api_widget_id: str = None
     api_widget_type: str = None
     api_origin: str = None
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/stockinstore\.net\/stores\/(?:getAllStores|getAllStoresLimited|getStoresForWidget|getStoresStock)$",

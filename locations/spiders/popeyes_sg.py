@@ -7,7 +7,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class PopeyesSGSpider(scrapy.Spider):
     name = "popeyes_sg"
     item_attributes = {"brand": "Popeyes", "brand_wikidata": "Q1330910"}
-    start_urls = ["https://www.popeyes.com.sg/FindPopeyes.html"]
+    start_urls = ["https://www.popeyes.com.sg/locations"]
+    no_refs = True
 
     def parse(self, response, **kwargs):
         for store in response.xpath(r'//*[@class = "location-box"]'):

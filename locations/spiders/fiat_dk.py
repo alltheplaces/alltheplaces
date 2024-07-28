@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -13,4 +14,5 @@ class FiatDKSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for dealer in response.json():
             item = DictParser.parse(dealer)
+            apply_category(Categories.SHOP_CAR, item)
             yield item

@@ -22,7 +22,6 @@ class GreggsGBSpider(Spider):
             )
             item = DictParser.parse(store["address"])
             item["phone"] = store["address"]["phoneNumber"]
-            item["name"] = store["shopName"]
             item["ref"] = store["shopCode"]
             item["website"] = f'https://www.greggs.co.uk/shop-finder?shop-code={store["shopCode"]}'
             item["opening_hours"] = self.decode_hours(store)

@@ -3,7 +3,7 @@ from scrapy import Spider
 from locations.items import Feature
 
 
-class HB1PharmacyPHSpider(Spider):
+class Hb1PharmacyPHSpider(Spider):
     name = "hb1_pharmacy_ph"
     item_attributes = {"brand_wikidata": "Q120350751"}
     start_urls = ["https://nccc.com.ph/business-unit/hb1-pharmacy/"]

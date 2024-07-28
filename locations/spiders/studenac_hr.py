@@ -8,7 +8,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class StudenacHrSpider(CrawlSpider):
+class StudenacHRSpider(CrawlSpider):
     item_attributes = {"brand": "Studenac", "brand_wikidata": "Q65156084"}
     name = "studenac_hr"
     allowed_domains = ["studenac.hr"]

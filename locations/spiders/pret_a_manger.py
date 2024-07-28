@@ -1,9 +1,8 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-
-DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PretAMangerSpider(scrapy.Spider):
@@ -26,7 +25,7 @@ class PretAMangerSpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
-            item["street_address"] = ", ".join(filter(None, [item["housenumber"], item["street"]]))
+            item["street_address"] = clean_address([item["housenumber"], item["street"]])
             item["housenumber"] = item["street"] = None
 
             oh = OpeningHours()
@@ -44,7 +43,7 @@ class PretAMangerSpider(scrapy.Spider):
                     if rule[1].startswith("0:"):
                         rule[1] = rule[1].replace("0:", "12:", 1)
 
-                    oh.add_range(DAYS[i], rule[0], rule[1], "%I:%M%p")
+                    oh.add_range(DAYS_3_LETTERS_FROM_SUNDAY[i], rule[0], rule[1], "%I:%M%p")
 
             item["opening_hours"] = oh.as_opening_hours()
 

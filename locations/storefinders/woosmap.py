@@ -5,6 +5,7 @@ from locations.automatic_spider_generator import AutomaticSpiderGenerator, Detec
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 # Documentation available at https://developers.woosmap.com/products/search-api/get-started/
 #
@@ -43,7 +44,7 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
             for feature in features:
                 item = DictParser.parse(feature["properties"])
 
-                item["street_address"] = ", ".join(filter(None, feature["properties"]["address"]["lines"]))
+                item["street_address"] = clean_address(feature["properties"]["address"]["lines"])
                 item["geometry"] = feature["geometry"]
 
                 item["opening_hours"] = OpeningHours()

@@ -56,6 +56,6 @@ class CaffeNeroGBSpider(Spider):
             apply_yes_no(Extras.OUTDOOR_SEATING, item, location["properties"]["amenities"]["outside_seating"], False)
             apply_category(Categories.COFFEE_SHOP, item)
 
-            item["website"] = f'https://caffenero.com/uk/store/{location["properties"]["slug"]}/'
+            item["website"] = f'https://www.caffenero.com/uk/stores/{location["properties"]["slug"]}/'
 
             yield item

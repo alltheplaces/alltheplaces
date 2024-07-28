@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 class TangoSpider(scrapy.Spider):
     name = "tango"
-    item_attributes = {"brand": "Tango", "brand_wikidata": "Q2423920"}
+    item_attributes = {"brand": "Tango", "brand_wikidata": "Q125867683"}
     start_urls = ["https://www.tango.nl/get/stations.json"]
 
     def parse(self, response):
