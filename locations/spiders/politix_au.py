@@ -1,14 +1,10 @@
 import re
-from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest
 
-from locations.google_url import extract_google_position
-from locations.hours import OpeningHours, sanitise_day
-from locations.items import Feature
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class PolitixAUSpider(Spider):
