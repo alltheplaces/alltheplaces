@@ -4,7 +4,7 @@ from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.storefinders.amrest_eu import AmrestEUSpider
 
 
-class KFCRSSpider(AmrestEUSpider):
+class KfcRSSpider(AmrestEUSpider):
     name = "kfc_rs"
     item_attributes = KFC_SHARED_ATTRIBUTES
     api_brand_key = "KFC"
