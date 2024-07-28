@@ -41,3 +41,4 @@ def test_remove_undefined():
     assert clean_address("undefined") == ""
     assert clean_address("Undefined") == ""
     assert clean_address("UNDEFINED") == ""
+    assert clean_address(" undefined") == ""
