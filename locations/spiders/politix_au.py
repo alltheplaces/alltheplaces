@@ -22,7 +22,10 @@ class PolitixAUSpider(Spider):
     def parse(self, response):
         for location in response.json()["stores"]:
             # MYER/DAVID_JONES also appear
-            if location["storeType"]["value"] == "POLITIX_STORES" or location["storeType"]["value"] == "FACTORY_OUTLETS":
+            if (
+                location["storeType"]["value"] == "POLITIX_STORES"
+                or location["storeType"]["value"] == "FACTORY_OUTLETS"
+            ):
                 item = DictParser.parse(location)
                 hours_string = re.sub(
                     r"\s+", " ", location["storeHours"].replace("</p>", "").replace("<p>", "")
