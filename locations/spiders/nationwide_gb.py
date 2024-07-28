@@ -16,8 +16,10 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=r"/branches/"), callback="parse_sd", follow=True)]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if "permanently closed" not in item["name"].lower():
-            if "phone" in item and item["phone"] is not None:
-                if not item["phone"].replace(" ", "").startswith("+443"):
-                    item.pop("phone", None)
-            yield item
+        if "permanently closed" in item["name"].lower():
+            return
+
+        if "phone" in item and item["phone"] is not None and not item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
+            
+        yield item
