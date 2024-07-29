@@ -5,7 +5,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class PostaSpider(scrapy.Spider):
+class PostaSISpider(scrapy.Spider):
     name = "posta_si"
     item_attributes = {"brand": "Pošta Slovenije", "brand_wikidata": "Q6522631"}
     allowed_domains = ["www.posta.si"]
