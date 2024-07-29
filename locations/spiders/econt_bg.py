@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, day_range
+from locations.hours import OpeningHours, DAYS, DAYS_WEEKDAY
 from locations.items import Feature
 
 
@@ -33,15 +33,15 @@ class EcontBGSpider(Spider):
             item["lat"] = location["address"]["location"]["latitude"]
             item["lon"] = location["address"]["location"]["longitude"]
 
-            timezone = ZoneInfo("Europe/Sofia")
+            item["opening_hours"] = OpeningHours()
 
             if "24/7" in item["name"]:
-                item["opening_hours"] = "24/7"
+                item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             else:
-                item["opening_hours"] = OpeningHours()
+                timezone = ZoneInfo("Europe/Sofia")
                 weekday_start_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursFrom"])
                 weekday_end_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursTo"])
-                item["opening_hours"].add_days_range(day_range("Mo", "Fr"), weekday_start_time, weekday_end_time)
+                item["opening_hours"].add_days_range(DAYS_WEEKDAY, weekday_start_time, weekday_end_time)
 
                 if location["halfDayBusinessHoursFrom"] is not None:
                     saturday_start_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursFrom"])
