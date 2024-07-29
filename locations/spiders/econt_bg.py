@@ -33,13 +33,12 @@ class EcontBGSpider(Spider):
             item["lat"] = location["address"]["location"]["latitude"]
             item["lon"] = location["address"]["location"]["longitude"]
 
-            item["opening_hours"] = OpeningHours()
             timezone = ZoneInfo("Europe/Sofia")
 
             if "24/7" in item["name"]:
                 item["opening_hours"] = "24/7"
             else:
-                item["opening_hours"].add_range
+                item["opening_hours"] = OpeningHours()
                 weekday_start_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursFrom"])
                 weekday_end_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursTo"])
                 item["opening_hours"].add_days_range(day_range("Mo", "Fr"), weekday_start_time, weekday_end_time)
