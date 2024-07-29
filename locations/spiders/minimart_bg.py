@@ -1,4 +1,6 @@
 from scrapy import Request, Spider
+from scrapy.http import Response
+from typing import Any
 
 from locations.google_url import url_to_coords
 from locations.items import Feature
