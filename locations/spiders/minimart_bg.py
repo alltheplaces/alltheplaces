@@ -26,4 +26,3 @@ class MinimartBGSpider(Spider):
         item = response.meta["item"]
         item["lat"], item["lon"] = url_to_coords(str(response.headers["Location"]))
         yield item
-
