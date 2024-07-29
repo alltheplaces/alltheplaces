@@ -7,7 +7,7 @@ from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_T
 
 class FamiliaRUSpider(scrapy.Spider):
     name = "familia_ru"
-    item_attributes = {"brand": "Familia", "brand_wikidata": "Q128004144"}
+    item_attributes = {"brand": "Familia", "brand_wikidata": "Q127514809"}
     start_urls = ["https://cmssiteprod.famil.ru/api/stores?where%5BisOn%5D%5Bequals%5D=true&limit=0&locale=ru"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
