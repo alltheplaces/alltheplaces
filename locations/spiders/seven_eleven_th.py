@@ -10,7 +10,7 @@ from locations.geo import city_locations
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
-class SevenElevenThSpider(scrapy.Spider):
+class SevenElevenTHSpider(scrapy.Spider):
     """
     Store locator: https://www.7eleven.co.th/find-store
     """
