@@ -35,4 +35,6 @@ class SevenElevenThSpider(scrapy.Spider):
             item = DictParser.parse(poi)
             item["name"] = None
             item["branch"] = poi.get("name")
+            item['extras']['addr:district'] = poi.get("district")
+            item['extras']['addr:subdistrict'] = poi.get("subdistrict")
             yield item
