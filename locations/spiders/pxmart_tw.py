@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class PxmartTwSpider(scrapy.Spider):
+class PxmartTWSpider(scrapy.Spider):
     name = "pxmart_tw"
     item_attributes = {"brand_wikidata": "Q7262792"}
     start_urls = ["https://www.pxmart.com.tw/customer-service/stores"]
@@ -27,6 +27,6 @@ class PxmartTwSpider(scrapy.Spider):
             oh = OpeningHours()
             oh.add_days_range(DAYS, poi.get("startDate"), poi.get("endDate"))
             item["opening_hours"] = oh
-            
+
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
