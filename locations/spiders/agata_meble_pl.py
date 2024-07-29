@@ -12,10 +12,12 @@ class AgataMeblePLSpider(scrapy.Spider):
 
     def parse(self, response):
         for poi in response.json()["results"]:
-            # global store is not a poi
+            # Skip disabled results
             if poi["Enabled"] is False:
                 continue
+
             item = DictParser.parse(poi)
             item.pop("name", None)
             item["website"] = urljoin("https://www.agatameble.pl/salon/", poi["Slug"])
+
             yield item
