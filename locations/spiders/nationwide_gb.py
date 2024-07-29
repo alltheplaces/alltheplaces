@@ -19,7 +19,7 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
         if "permanently closed" in item["name"].lower():
             return
 
-        if "phone" in item and item["phone"] is not None and not item["phone"].replace(" ", "").startswith("+443"):
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
             item.pop("phone", None)
 
         yield item
