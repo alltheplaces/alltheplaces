@@ -42,12 +42,12 @@ class EcontBGSpider(Spider):
                 weekday_start_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursFrom"])
                 weekday_end_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursTo"])
                 item["opening_hours"].add_days_range(day_range("Mo", "Fr"), weekday_start_time, weekday_end_time)
-    
+
                 if location["halfDayBusinessHoursFrom"] is not None:
                     saturday_start_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursFrom"])
                     saturday_end_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursTo"])
                     item["opening_hours"].add_range("Sa", saturday_start_time, saturday_end_time)
-    
+
                 if location["sundayBusinessHoursFrom"] is not None:
                     sunday_start_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursFrom"])
                     sunday_end_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursTo"])
