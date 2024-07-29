@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS, DAYS_WEEKDAY
+from locations.hours import DAYS, DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 
 
