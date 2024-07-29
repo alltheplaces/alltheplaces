@@ -4,13 +4,19 @@ import scrapy
 from scrapy import Request
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
 class SevenElevenThSpider(scrapy.Spider):
+    """
+    Store locator: https://www.7eleven.co.th/find-store
+    """
+
     name = "seven_eleven_th"
-    start_urls = ["https://7eleven-api-prod.jenosize.tech/v1/Store/GetStoreByCurrentLocation"]
+    item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     requires_proxy = "TH"
     custom_settings = {
         # The website may block the spider
@@ -20,6 +26,9 @@ class SevenElevenThSpider(scrapy.Spider):
     }
 
     def start_requests(self) -> Iterable[Request]:
+        # TODO: better way to iterate over geo-based API, only half of the POIs are fetched.
+        #       Small towns are not present in geonamescache.
+        #       Big cities are not fully covered due to big area.
         for city in city_locations("TH"):
             payload = {
                 "latitude": city.get("latitude"),
@@ -35,6 +44,7 @@ class SevenElevenThSpider(scrapy.Spider):
             item = DictParser.parse(poi)
             item["name"] = None
             item["branch"] = poi.get("name")
-            item['extras']['addr:district'] = poi.get("district")
-            item['extras']['addr:subdistrict'] = poi.get("subdistrict")
+            item["extras"]["addr:district"] = poi.get("district")
+            item["extras"]["addr:subdistrict"] = poi.get("subdistrict")
+            apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item
