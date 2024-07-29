@@ -36,19 +36,23 @@ class EcontBGSpider(Spider):
             item["opening_hours"] = OpeningHours()
             timezone = ZoneInfo("Europe/Sofia")
 
-            weekday_start_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursFrom"])
-            weekday_end_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursTo"])
-            item["opening_hours"].add_days_range(day_range("Mo", "Fr"), weekday_start_time, weekday_end_time)
-
-            if location["halfDayBusinessHoursFrom"] is not None:
-                saturday_start_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursFrom"])
-                saturday_end_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursTo"])
-                item["opening_hours"].add_range("Sa", saturday_start_time, saturday_end_time)
-
-            if location["sundayBusinessHoursFrom"] is not None:
-                sunday_start_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursFrom"])
-                sunday_end_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursTo"])
-                item["opening_hours"].add_range("Su", sunday_start_time, sunday_end_time)
+            if "24/7" in item["name"]:
+                item["opening_hours"] = "24/7"
+            else:
+                item["opening_hours"].add_range
+                weekday_start_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursFrom"])
+                weekday_end_time = unix_timestamp_to_local_time(timezone, location["normalBusinessHoursTo"])
+                item["opening_hours"].add_days_range(day_range("Mo", "Fr"), weekday_start_time, weekday_end_time)
+    
+                if location["halfDayBusinessHoursFrom"] is not None:
+                    saturday_start_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursFrom"])
+                    saturday_end_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursTo"])
+                    item["opening_hours"].add_range("Sa", saturday_start_time, saturday_end_time)
+    
+                if location["sundayBusinessHoursFrom"] is not None:
+                    sunday_start_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursFrom"])
+                    sunday_end_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursTo"])
+                    item["opening_hours"].add_range("Su", sunday_start_time, sunday_end_time)
 
             if location["isAPS"]:
                 apply_category(Categories.PARCEL_LOCKER, item)
