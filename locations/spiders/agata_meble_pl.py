@@ -18,4 +18,8 @@ class AgataMeblePLSpider(scrapy.Spider):
             item = DictParser.parse(poi)
             item.pop("name", None)
             item["website"] = urljoin("https://www.agatameble.pl/salon/", poi["Slug"])
-            yield item
+            yield scrapy.Request(item["website"], self.parse_store, meta={"item": item})
+
+    def parse_store(self, response, **kwargs):
+        item = response.meta["item"]
+        yield item
