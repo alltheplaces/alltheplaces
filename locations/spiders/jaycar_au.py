@@ -5,6 +5,8 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import extract_email
 
+from locations.user_agents import BROWSER_DEFAULT
+
 
 class JaycarAUSpider(SitemapSpider):
     name = "jaycar_au"
@@ -12,6 +14,8 @@ class JaycarAUSpider(SitemapSpider):
     sitemap_urls = ["https://www.jaycar.com.au/sitemap.xml"]
     sitemap_follow = ["/Store-en-aud-"]
     sitemap_rules = [("/store/", "parse")]
+    user_agent = BROWSER_DEFAULT
+
 
     def sitemap_filter(self, entries):
         for entry in entries:
