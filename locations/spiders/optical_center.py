@@ -19,6 +19,7 @@ class OpticalCenterSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         )
     ]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     def iter_linked_data(self, response):
         yield json.loads(response.xpath("//script[@data-lf-location-json]/text()").get())
