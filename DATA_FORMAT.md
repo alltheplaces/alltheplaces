@@ -67,6 +67,7 @@ When we can, the format for opening hours follows [OpenStreetMap's `opening_hour
 * In some cases only some days of week can be parsed. The unparseable days are omitted from the opening hours while not actually be closed. It is impossible to distinguish between a parsing error and the store being closed, as described in [this issue](https://github.com/alltheplaces/alltheplaces/issues/6943).
 * Opening hours provided by a source and recorded in All the Places may be special for the week due to presence of public holidays within the week at the time of parsing. As a result, the day may be omitted from opening hours output. Also for this reason, some days may have unusually short or unusually long opening hours. Data captured from previous All the Places builds can be checked to find the most common (regular) opening hours for a location.
 * Opening hours format does not match OSM syntax exactly [when time ranges extend across midnight](https://github.com/alltheplaces/alltheplaces/discussions/4959).
+* You should skip entries with `Mo-Su closed` if you want to process only open POIs. These POIs may be not marked otherwise as not existing.
 
 ## Categories
 
