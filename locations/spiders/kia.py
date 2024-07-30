@@ -52,7 +52,7 @@ class KiaSpider(scrapy.Spider):
                 elif website.startswith("kia"):
                     website = "https://www." + website
                 item["website"] = website
-            else:
+            if not item.get("website"):
                 item["website"] = "https://www.kia.com/"
             item["ref"] = store.get("dealerSeq")
             item["country"] = store.get("dealerCountry")
