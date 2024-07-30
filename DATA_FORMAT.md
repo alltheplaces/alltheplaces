@@ -22,6 +22,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 |-----------------------|---|
 | `ref`                 | A unique identifier for this feature inside this spider. The code that generates the output will remove duplicates based on the value of this key.
 | `@spider`             | The name of the spider that produced this feature. It is [specified in each spider](https://github.com/alltheplaces/alltheplaces/blob/11d9be56515ef0f6419e001b1950f69d28d4f400/locations/spiders/apple.py#L9), so it isn't necessarily related to the file name of the spider.
+| `@source`             | A URI of where the POI was obtained, this is not guranteed to be viewable in a web browser.
 | `branch`              | This is often the location specific part of a chain location's name, like the name of the mall or city it is in, without the brand name included.
 | `name`                | The name of the feature. Ideally the fascia, however this is often a combination of the brand and the branch.
 | **Brand**             | _Information about the brand for the venue_
