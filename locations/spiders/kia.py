@@ -12,6 +12,19 @@ class KiaSpider(scrapy.Spider):
         "https://www.kia.com/api/bin/dealer?locale=de-de&program=dealerLocatorSearch",
         "https://www.kia.com/api/bin/dealer?locale=es-es&program=dealerLocatorSearch",
         "https://www.kia.com/api/bin/dealer?locale=nl-nl&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=be-nl&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=cz-cz&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=dk-da&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=fi-fi&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=gr-el&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=hu-hu&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=ie-en&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=it-it&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=lu-fr&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=no-nn&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=se-sv&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=pl-pl&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=sk-sk&program=dealerLocatorSearch",
     ]
 
     def parse(self, response, **kwargs):
