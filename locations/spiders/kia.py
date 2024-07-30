@@ -46,4 +46,5 @@ class KiaSpider(scrapy.Spider):
             else:
                 item["website"] = "https://www.kia.com/"
             item["ref"] = store.get("dealerSeq")
+            item["country"] = store.get("dealerCountry")
             yield item
