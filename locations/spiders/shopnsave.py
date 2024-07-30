@@ -26,7 +26,7 @@ DAY_DICT = {
 }
 
 
-class ShopnSaveSpider(scrapy.Spider):
+class ShopnsaveSpider(scrapy.Spider):
     name = "shopnsave"
     item_attributes = {"brand": "SHOP ‘n SAVE"}
     allowed_domains = ["www.shopnsave.com"]

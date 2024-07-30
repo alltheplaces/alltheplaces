@@ -5,7 +5,7 @@ from locations.settings import ITEM_PIPELINES
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FedExSpider(SitemapSpider, StructuredDataSpider):
+class FedexSpider(SitemapSpider, StructuredDataSpider):
     name = "fedex"
     item_attributes = {"brand": "FedEx", "brand_wikidata": "Q459477"}
     sitemap_urls = [

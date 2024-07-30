@@ -5,7 +5,7 @@ from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BritishHeartFoundationGBSpider(SitemapSpider, StructuredDataSpider):
+class BhfGBSpider(SitemapSpider, StructuredDataSpider):
     name = "bhf_gb"
     item_attributes = {"brand": "British Heart Foundation", "brand_wikidata": "Q4970039"}
     sitemap_urls = ["https://www.bhf.org.uk/sitemap.xml"]
@@ -24,5 +24,8 @@ class BritishHeartFoundationGBSpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.SHOP_FURNITURE, item)
 
         extract_google_position(item, response)
+
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
 
         yield item

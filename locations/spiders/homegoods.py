@@ -10,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
-class HomeGoodsSpider(SitemapSpider):
+class HomegoodsSpider(SitemapSpider):
     name = "homegoods"
     item_attributes = {
         "brand": "HomeGoods",

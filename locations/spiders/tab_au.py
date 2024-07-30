@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.user_agents import FIREFOX_LATEST
 
 
-class TABAUSpider(Spider):
+class TabAUSpider(Spider):
     name = "tab_au"
     item_attributes = {"brand": "TAB", "brand_wikidata": "Q110288149", "extras": Categories.SHOP_BOOKMAKER.value}
     allowed_domains = ["api.beta.tab.com.au"]

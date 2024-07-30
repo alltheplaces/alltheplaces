@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TargetOpticalSpider(SitemapSpider, StructuredDataSpider):
+class TargetOpticalUSSpider(SitemapSpider, StructuredDataSpider):
     name = "target_optical_us"
     # Presumably a sub brand of item_attributes = {"brand": "Luxottica", "brand_wikidata": "Q1878364"}
     item_attributes = {"brand": "Target Optical", "brand_wikidata": "Q19903688"}

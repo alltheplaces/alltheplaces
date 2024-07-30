@@ -12,6 +12,7 @@ class KasikornBankTHSpider(Spider):
     name = "kasikorn_bank_th"
     item_attributes = {"brand_wikidata": "Q276557"}
     start_urls = ["https://www.kasikornbank.com/th/branch/Pages/result.aspx?qs=branch&qw=&qn=n"]
+    requires_proxy = "TH"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(

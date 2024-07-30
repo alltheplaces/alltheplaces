@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.storefinders.sylinder import SylinderSpider
 
 
-class StorcashNoSpider(SylinderSpider):
+class StorcashNOSpider(SylinderSpider):
     name = "storcash_no"
     item_attributes = {"brand": "Storcash", "extras": Categories.SHOP_WHOLESALE.value}
     base_url = "https://storcash.no/#"  # Note: Doesn't use the same storefinder

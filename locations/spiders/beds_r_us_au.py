@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class BedsRUsAUSpider(Spider):
+class BedsRUSAUSpider(Spider):
     name = "beds_r_us_au"
     item_attributes = {"brand": "Beds R Us", "brand_wikidata": "Q126179491", "extras": Categories.SHOP_BED.value}
     allowed_domains = ["bedsrus.com.au"]

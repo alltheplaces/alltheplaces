@@ -8,7 +8,7 @@ from locations.items import Feature
 AM_PM = r"am|pm|a.m.|p.m.|a|p"
 
 
-class Tillys(scrapy.Spider):
+class TillysSpider(scrapy.Spider):
     name = "tillys"
     item_attributes = {"brand": "Tillys", "brand_wikidata": "Q7802889"}
     start_urls = [
