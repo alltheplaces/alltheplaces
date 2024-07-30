@@ -18,11 +18,11 @@ class TrackSourcesMiddleware:
 
     def _process_item(self, response, item, spider):
         if isinstance(item, Item):
-            if "source:url" not in item["extras"]:
-                item["extras"]["source:url"] = response.url
+            if "@source" not in item["extras"]:
+                item["extras"]["@source"] = response.url
 
             self.crawler.stats.inc_value(
-                "atp/item_scraped_host_count/{}".format(urlparse(item["extras"]["source:url"]).netloc)
+                "atp/item_scraped_host_count/{}".format(urlparse(item["extras"]["@source"]).netloc)
             )
 
     def process_spider_output(self, response, result, spider):
