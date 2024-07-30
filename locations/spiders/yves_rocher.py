@@ -18,7 +18,7 @@ class YvesRocherSpider(CrawlSpider):
     start_urls = ["https://www.yves-rocher.es/encuentra-tu-tienda/SL"]
     rules = [Rule(LinkExtractor(allow=r"https://www.yves.+?/.+?/SL", tags="link"), callback="parse")]
     user_agent = BROWSER_DEFAULT
-    custom_settings = {"REDIRECT_ENABLED": False}
+    custom_settings = {"REDIRECT_ENABLED": False, "DOWNLOAD_TIMEOUT": 60}
 
     def parse(self, response, **kwargs):
         data = json.loads(
