@@ -68,7 +68,7 @@ When we can, the format for opening hours follows [OpenStreetMap's `opening_hour
 * Opening hours provided by a source and recorded in All the Places may be special for the week due to presence of public holidays within the week at the time of parsing. As a result, the day may be omitted from opening hours output. Also for this reason, some days may have unusually short or unusually long opening hours. Data captured from previous All the Places builds can be checked to find the most common (regular) opening hours for a location.
 * Opening hours format does not match OSM syntax exactly [when time ranges extend across midnight](https://github.com/alltheplaces/alltheplaces/discussions/4959).
 * `Mo-Su closed` typically indicates POI closed temporarily for reasons of maintenance and refurbishment. POIs that are permanently closed but listed by source data are returned with the `end_date` field (see `end_date` specification for details).
-  
+
 ## Categories
 
 Along with the above properties we aim to output [OpenStreetMap categories](https://wiki.openstreetmap.org/wiki/Map_features) as properties on the GeoJSON Feature.
