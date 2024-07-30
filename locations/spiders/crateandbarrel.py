@@ -8,7 +8,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class CrateandbarrelSpider(CrawlSpider, StructuredDataSpider):
     name = "crateandbarrel"
     allowed_domains = ["www.crateandbarrel.com"]
-    item_attributes = {"brand": "crateandbarrel", "brand_wikidata": "Q5182604"}
+    item_attributes = {"brand": "Crate & Barrel", "brand_wikidata": "Q5182604"}
     start_urls = ["https://www.crateandbarrel.com/stores/list-state/retail-stores"]
     user_agent = BROWSER_DEFAULT
     rules = [
