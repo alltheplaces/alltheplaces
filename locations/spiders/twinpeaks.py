@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 
 
 class TwinPeaksSpider(scrapy.Spider):
-    name = "twinpeaks"
+    name = "twin_peaks"
     item_attributes = {
         "brand": "Twin Peaks",
         "brand_wikidata": "Q7858255",
