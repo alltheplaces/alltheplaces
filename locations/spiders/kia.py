@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -56,4 +57,10 @@ class KiaSpider(scrapy.Spider):
                 item["website"] = "https://www.kia.com/"
             item["ref"] = store.get("dealerSeq")
             item["country"] = store.get("dealerCountry")
+            dealer_type = store.get("dealerDealertype", "").lower()
+            if "sales" in dealer_type:
+                apply_category(Categories.SHOP_CAR, item)
+            else:
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            apply_yes_no("service:vehicle:car_repair", item, "service" in dealer_type)
             yield item
