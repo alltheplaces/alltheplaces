@@ -43,7 +43,8 @@ class KiaSpider(scrapy.Spider):
             item["phone"] = (
                 phone.replace(";", "").replace(".", "").replace("/", "").replace(",", ";") if phone else None
             )
-            item["email"] = store.get("dealerEmail")
+            email = store.get("dealerEmail")
+            item["email"] = email.strip().strip(".").replace("@@", "@") if email else None
             if store.get("websiteUrl") not in ["None", ""]:
                 item["website"] = store.get("websiteUrl")
             else:
