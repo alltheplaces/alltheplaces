@@ -45,8 +45,13 @@ class KiaSpider(scrapy.Spider):
             )
             email = store.get("dealerEmail")
             item["email"] = email.strip().strip(".").replace("@@", "@") if email else None
-            if store.get("websiteUrl") not in ["None", ""]:
-                item["website"] = store.get("websiteUrl")
+            if store.get("websiteUrl") not in ["None", "", "No Website", None]:
+                website = store.get("websiteUrl").strip().replace("null", "")
+                if website.startswith("www"):
+                    website = "https://" + website
+                elif website.startswith("kia"):
+                    website = "https://www." + website
+                item["website"] = website
             else:
                 item["website"] = "https://www.kia.com/"
             item["ref"] = store.get("dealerSeq")
