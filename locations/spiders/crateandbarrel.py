@@ -20,7 +20,9 @@ class CrateandbarrelSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
+    search_for_facebook = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = item["website"] = response.url
+        item["branch"] = item.pop("name")
         yield item
