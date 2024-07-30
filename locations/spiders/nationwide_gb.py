@@ -19,7 +19,7 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
         if "permanently closed" in item["name"].lower():
             return
 
-        if item["street"] is not None and "store is opening" in item["street"]:
+        if item["street_address"] is not None and "store is opening" in item["street_address"]:
             # 'addr:street_address': 'This store is opening September/October 2024'
             return
 
