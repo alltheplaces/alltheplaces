@@ -26,7 +26,7 @@ class LeonidasSpider(scrapy.Spider):
                 closing_hour = hours[-1]
                 if "-" in closing_hour:
                     continue
-                if len(hours) >3 and not ("-" in hours[1] or "-" in hours[2]):
+                if len(hours) > 3 and not ("-" in hours[1] or "-" in hours[2]):
                     closing_mid_hour = hours[1]
                     opening_mid_hour = hours[2]
                     opening_hours.add_range(DAYS[i], opening_hour, closing_mid_hour)
