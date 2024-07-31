@@ -1,7 +1,7 @@
 from locations.storefinders.freshop import FreshopSpider
 
 
-class DWFreshMarketUSSpider(FreshopSpider):
+class DwFreshMarketUSSpider(FreshopSpider):
     name = "dw_fresh_market_us"
     item_attributes = {
         "brand_wikidata": "Q5203035",

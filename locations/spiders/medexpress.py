@@ -5,7 +5,7 @@ import scrapy
 from locations.items import Feature
 
 
-class MedExpressSpider(scrapy.Spider):
+class MedexpressSpider(scrapy.Spider):
     name = "medexpress"
     item_attributes = {"brand": "MedExpress", "brand_wikidata": "Q102183820"}
     allowed_domains = ["medexpress.com"]

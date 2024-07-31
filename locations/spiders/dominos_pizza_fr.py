@@ -31,6 +31,7 @@ class DominosPizzaFRSpider(SitemapSpider):
             "country": "FR",
             "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
             "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
+            "phone": response.xpath('//div[@class="store-phone"]/a/text()').get(),
             "website": response.url,
         }
         yield Feature(**properties)

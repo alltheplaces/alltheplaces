@@ -1,12 +1,12 @@
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsATSpider(scrapy.spiders.SitemapSpider):
+class McdonaldsATSpider(scrapy.spiders.SitemapSpider):
     name = "mcdonalds_at"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.at"]
     sitemap_urls = ["https://www.mcdonalds.at/wso_restaurant-sitemap.xml"]
     download_delay = 0.5

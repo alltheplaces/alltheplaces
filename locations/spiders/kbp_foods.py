@@ -13,7 +13,7 @@ BRAND_MAPPING = {
 }
 
 
-class KBPFoodsSpider(scrapy.Spider):
+class KbpFoodsSpider(scrapy.Spider):
     name = "kbp_foods"
     allowed_domains = ["kbp-foods.com"]
     item_attributes = {"brand": "KBP Foods"}

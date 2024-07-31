@@ -5,6 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -26,5 +27,11 @@ class VuoriSpider(Spider):
             )
             if phones := location.get("phones"):
                 item["phone"] = "; ".join(phones)
+            item["state"] = location["provinceCode"]
+            item["image"] = location["image"]
+            hours = OpeningHours()
+            for line in location["workingHours"]:
+                hours.add_ranges_from_string(line)
+            item["opening_hours"] = hours
 
             yield item

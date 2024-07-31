@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class COBSBreadSpider(SitemapSpider):
+class CobsBreadSpider(SitemapSpider):
     name = "cobs_bread"
     item_attributes = {"brand": "COBS Bread", "brand_wikidata": "Q116771375"}
     allowed_domains = ["www.cobsbread.com"]

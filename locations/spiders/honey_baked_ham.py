@@ -6,8 +6,7 @@ from locations.items import Feature
 
 
 class HoneyBakedHamSpider(scrapy.Spider):
-    # download_delay = 0.2
-    name = "honey_baked"
+    name = "honey_baked_ham"
     item_attributes = {"brand": "Honey Baked Ham", "brand_wikidata": "Q5893363"}
     allowed_domains = ["honeybaked.com"]
     start_urls = ("https://www.honeybaked.com/stores",)

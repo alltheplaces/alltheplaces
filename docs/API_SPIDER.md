@@ -60,5 +60,5 @@ on [geo.py](../locations/geo.py).
 All the above is best illustrated with some further examples:
 
 * [spar_gb.py](../locations/spiders/spar_gb.py) (drive query API by postcode)
-* [petsathome_gb.py](../locations/spiders/petsathome_gb.py) (query GB at 20km point resolution)
-* [thebodyshop.py](../locations/spiders/thebodyshop.py) (use sitemap to generate API parameters)
+* [petsathome_gb.py](../locations/spiders/pets_at_home_gb.py) (query GB at 20km point resolution)
+* [thebodyshop.py](../locations/spiders/the_body_shop.py) (use sitemap to generate API parameters)
