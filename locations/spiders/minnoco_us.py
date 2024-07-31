@@ -1,5 +1,5 @@
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.categories import Categories
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
 class MinnocoUSSpider(WPStoreLocatorSpider):
