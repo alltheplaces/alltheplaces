@@ -4,7 +4,6 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import extract_email
-
 from locations.user_agents import CHROME_LATEST
 
 
@@ -15,7 +14,6 @@ class JaycarAUSpider(SitemapSpider):
     sitemap_follow = ["/Store-en-aud-"]
     sitemap_rules = [("/store/", "parse")]
     user_agent = CHROME_LATEST
-
 
     def sitemap_filter(self, entries):
         for entry in entries:
