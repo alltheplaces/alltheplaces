@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class LiquorShopZASpider(Spider):
+class LiquorshopZASpider(Spider):
     name = "liquorshop_za"
     item_attributes = {"brand": "LiquorShop", "brand_wikidata": "Q5089126", "extras": Categories.SHOP_ALCOHOL.value}
     allowed_domains = ["www.liquorshop.co.za"]

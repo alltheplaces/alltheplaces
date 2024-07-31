@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, DAYS_CZ, DAYS_EN, DAYS_SK, OpeningHours, sanitise_day
 
 
-class BILLASpider(Spider):
+class BillaSpider(Spider):
     name = "billa"
     allowed_domains = ["www.billa.at", "www.billa.bg", "www.billa.sk", "www.billa.cz"]
     start_urls = [

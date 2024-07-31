@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GNCSpider(SitemapSpider, StructuredDataSpider):
+class GncSpider(SitemapSpider, StructuredDataSpider):
     name = "gnc"
     item_attributes = {"brand": "GNC", "brand_wikidata": "Q4808595"}
     download_delay = 5

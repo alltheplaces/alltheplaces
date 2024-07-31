@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class UniversityMarylandMedicalSystemSpider(scrapy.Spider):
-    name = "universitymarylandmedicalsystem"
+    name = "university_maryland_medical_system"
     item_attributes = {"brand": "University of Maryland Medical System"}
     allowed_domains = ["www.umms.org"]
     start_urls = ["https://www.umms.org/locations"]

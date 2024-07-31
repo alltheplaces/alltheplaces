@@ -19,7 +19,7 @@ BRANDS = {
 
 
 class KwikTripSpider(scrapy.Spider):
-    name = "kwiktrip"
+    name = "kwik_trip"
     item_attributes = {"brand": "Kwik Trip", "brand_wikidata": "Q6450420"}
     allowed_domains = ["www.kwiktrip.com"]
     start_urls = ["https://www.kwiktrip.com/Maps-Downloads/Store-List"]

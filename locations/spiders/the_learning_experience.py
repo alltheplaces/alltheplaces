@@ -4,7 +4,7 @@ from locations.items import Feature
 
 
 class TheLearningExperienceSpider(scrapy.Spider):
-    name = "learning_experience"
+    name = "the_learning_experience"
     item_attributes = {"brand": "Learning Experience", "brand_wikidata": "Q29097682"}
     allowed_domains = ["thelearningexperience.com"]
     start_urls = ("https://thelearningexperience.com/our-centers/directory",)

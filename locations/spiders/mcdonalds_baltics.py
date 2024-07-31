@@ -1,13 +1,13 @@
 import scrapy
 
 from locations.open_graph_parser import OpenGraphParser
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsBalticsSpider(scrapy.spiders.SitemapSpider):
+class McdonaldsBalticsSpider(scrapy.spiders.SitemapSpider):
     name = "mcdonalds_baltics"
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     sitemap_urls = [
         "https://mcdonalds.ee/location-sitemap.xml",
         "https://mcd.lt/location-sitemap.xml",

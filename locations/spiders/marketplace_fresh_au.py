@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class MarketPlaceFreshAUSpider(Spider):
+class MarketplaceFreshAUSpider(Spider):
     name = "marketplace_fresh_au"
     item_attributes = {"brand": "MarketPlace Fresh", "brand_wikidata": "Q117847717"}
     allowed_domains = ["marketplacefresh.com.au"]

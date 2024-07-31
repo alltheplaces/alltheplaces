@@ -6,7 +6,7 @@ from locations.categories import apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GoApeGB(SitemapSpider, StructuredDataSpider):
+class GoApeGBSpider(SitemapSpider, StructuredDataSpider):
     name = "go_ape_gb"
     item_attributes = {"brand": "Go Ape", "brand_wikidata": "Q5574692"}
     sitemap_urls = ["https://goape.co.uk/googlesitemap.xml"]

@@ -1,15 +1,13 @@
 from scrapy import Spider
-from scrapy.crawler import Crawler
+from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
 from locations.pipelines.drop_attributes import DropAttributesPipeline
-from locations.spiders.greggs_gb import GreggsGBSpider
 
 
 def get_objects() -> (Spider, DropAttributesPipeline, Feature):
-    spider = GreggsGBSpider()
-    spider.crawler = Crawler(GreggsGBSpider)
-    spider.crawler._apply_settings()
+    spider = Spider(name="test")
+    spider.crawler = get_crawler()
     return spider, DropAttributesPipeline(), Feature()
 
 

@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class EmpikSpider(Spider):
+class EmpikPLSpider(Spider):
     name = "empik_pl"
     item_attributes = {"brand": "Empik", "brand_wikidata": "Q3045978"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -29,7 +29,7 @@ class EmpikSpider(Spider):
             properties["email"] = properties["email"].strip()
             properties["phone"] = shop["phone"] or shop["cellPhone"]
             properties["website"] = "https://www.empik.com" + shop["storePage"]
-            properties["branch"] = properties.pop("name", None)
+            properties.pop("name", None)
             properties["opening_hours"] = OpeningHours()
 
             hours = {

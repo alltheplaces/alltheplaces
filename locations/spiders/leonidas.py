@@ -4,7 +4,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class CoopNOSpider(scrapy.Spider):
+class LeonidasSpider(scrapy.Spider):
     name = "leonidas"
     item_attributes = {"brand": "Leonidas", "brand_wikidata": "Q80335"}
     start_urls = [

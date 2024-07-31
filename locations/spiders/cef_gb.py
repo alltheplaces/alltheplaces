@@ -7,7 +7,7 @@ from locations.google_url import extract_google_position
 from locations.linked_data_parser import LinkedDataParser
 
 
-class CEFGBSpider(CrawlSpider):
+class CefGBSpider(CrawlSpider):
     name = "cef_gb"
     item_attributes = {"brand": "City Electrical Factors", "brand_wikidata": "Q116495226"}
     start_urls = ["https://www.cef.co.uk/stores/directory"]

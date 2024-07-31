@@ -8,7 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class EmobilitaBrnoCzSpider(scrapy.Spider):
+class EmobilitaBrnoCZSpider(scrapy.Spider):
     name = "emobilita_brno_cz"
     item_attributes = {"operator": "Teplárny Brno", "operator_wikidata": "Q54980987"}
 
