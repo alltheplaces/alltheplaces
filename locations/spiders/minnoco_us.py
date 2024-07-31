@@ -7,3 +7,4 @@ class MinnocoUSSpider(WPStoreLocatorSpider):
     item_attributes = {"brand": "Minnoco", "extras": Categories.FUEL_STATION}
     allowed_domains = ["minnoco.com"]
     start_urls = ["https://www.minnoco.com/wp-admin/admin-ajax.php?action=store_search&autoload=1"]
+    time_format = "%I:%M %p"
