@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 
+from scrapy import Spider
 from scrapy.item import Item
 
 
@@ -9,21 +10,20 @@ class TrackSourcesMiddleware:
     and overall stats per hostname.
     """
 
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls(crawler)
+    def _process_item(self, response, item: Item, spider: Spider):
+        if not isinstance(item, Item):
+            return
 
-    def __init__(self, crawler):
-        self.crawler = crawler
+        if not item["extras"].get("@source"):
+            item["extras"]["@source"] = response.url
 
-    def _process_item(self, response, item, spider):
-        if isinstance(item, Item):
-            if "@source" not in item["extras"]:
-                item["extras"]["@source"] = response.url
-
-            self.crawler.stats.inc_value(
+        try:
+            spider.crawler.stats.inc_value(
                 "atp/item_scraped_host_count/{}".format(urlparse(item["extras"]["@source"]).netloc)
             )
+        except ValueError:
+            spider.logger.error("Failed to parse @source: {}".format(item["extras"]["@source"]))
+            spider.crawler.stats.inc_value("atp/parse_error/@source")
 
     def process_spider_output(self, response, result, spider):
         for item in result or []:
