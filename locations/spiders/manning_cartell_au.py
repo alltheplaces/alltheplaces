@@ -13,3 +13,4 @@ class ManningCartellAUSpider(StockInStoreSpider):
     api_widget_id = "52"
     api_widget_type = "sis"
     api_origin = "https://www.manningcartell.com.au"
+    custom_settings = {"ROBOTSTXT_OBEY": False}

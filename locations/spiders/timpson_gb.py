@@ -37,7 +37,7 @@ class TimpsonGBSpider(CrawlSpider):
     item_attributes = {"brand": "Timpson", "brand_wikidata": "Q7807658"}
     start_urls = ["https://www.timpson.co.uk/stores/"]
     rules = [Rule(LinkExtractor(allow="stores/"), callback="parse_func", follow=True)]
-    download_delay = 0.5
+    requires_proxy = "GB"
 
     def parse_func(self, response):
         return self.extract(response)

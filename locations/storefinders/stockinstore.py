@@ -30,6 +30,7 @@ class StockInStoreSpider(Spider):
     api_widget_id = None
     api_widget_type = None
     api_origin = None
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         data = {

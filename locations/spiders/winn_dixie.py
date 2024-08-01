@@ -5,7 +5,7 @@ from locations.items import Feature
 
 
 class WinnDixieSpider(scrapy.Spider):
-    name = "winndixie"
+    name = "winn_dixie"
     item_attributes = {"brand": "Winn Dixie", "brand_wikidata": "Q1264366"}
     allowed_domains = ["winndixie.com"]
 

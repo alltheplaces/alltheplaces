@@ -7,7 +7,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class McDonaldsSpider(scrapy.Spider):
+class McdonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
     item_attributes = {
         "brand": "McDonald's",

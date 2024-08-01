@@ -18,7 +18,7 @@ DAY_MAPPING = {
 }
 
 
-class RentACenterSpider(scrapy.Spider):
+class RentacenterSpider(scrapy.Spider):
     name = "rentacenter"
     item_attributes = {"brand": "Rent-A-Center", "brand_wikidata": "Q7313497"}
     allowed_domains = ["rentacenter.com"]

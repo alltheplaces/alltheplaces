@@ -4,7 +4,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class QuikTripUSSpider(SitemapSpider, StructuredDataSpider):
+class QuiktripUSSpider(SitemapSpider, StructuredDataSpider):
     name = "quiktrip_us"
     item_attributes = {"brand": "QuikTrip", "brand_wikidata": "Q7271953"}
     sitemap_urls = ["https://locations.quiktrip.com/robots.txt"]

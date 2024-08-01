@@ -260,6 +260,7 @@ DAYS_LT = {
     "V": "Fr",
     "VI": "Sa",
     "VII": "Su",
+    "Iv": "Th",
     "Vi": "Sa",
     "Vii": "Su",
 }
@@ -786,22 +787,17 @@ class OpeningHours:
         day_groups.append(this_day_group)
 
         opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-24:00",
-            "00:00-00:00",
-        ):
-            opening_hours = "24/7"
-        else:
-            for day_group in day_groups:
-                if not day_group["hours"]:
-                    continue
-                elif day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
-                    opening_hours += "{hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
+
+        for day_group in day_groups:
+            if not day_group["hours"]:
+                continue
+            elif day_group["from_day"] == day_group["to_day"]:
+                opening_hours += "{from_day} {hours}; ".format(**day_group)
+            elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
+                opening_hours += "{hours}; ".format(**day_group)
+            else:
+                opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
+        opening_hours = opening_hours[:-2]
 
         return opening_hours
 

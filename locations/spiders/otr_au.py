@@ -5,7 +5,7 @@ from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class OTRAUSpider(SitemapSpider):
+class OtrAUSpider(SitemapSpider):
     name = "otr_au"
     item_attributes = {"brand": "OTR", "brand_wikidata": "Q116394019", "extras": Categories.FUEL_STATION.value}
     sitemap_urls = ["https://www.otr.com.au/robots.txt"]

@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_PL, OpeningHours
 
 
-class TUISpider(Spider):
+class TuiSpider(Spider):
     name = "tui"
     item_attributes = {"brand": "TUI", "brand_wikidata": "Q573103"}
     start_urls = ["https://www.tui.pl/api/www/office"]

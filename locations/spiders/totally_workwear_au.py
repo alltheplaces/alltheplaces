@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class TotallyWorkwearAU(Spider):
+class TotallyWorkwearAUSpider(Spider):
     name = "totally_workwear_au"
     item_attributes = {"brand": "Totally Workwear", "brand_wikidata": "Q119247989"}
     allowed_domains = ["www.totallyworkwear.com.au"]

@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class VakifBankTRSpider(scrapy.Spider):
+class VakifbankTRSpider(scrapy.Spider):
     name = "vakifbank_tr"
     item_attributes = {"brand": "Vakıfbank", "brand_wikidata": "Q1148521"}
     allowed_domains = ["vakifbank.com.tr"]

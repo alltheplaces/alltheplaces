@@ -8,7 +8,7 @@ from locations.hours import DAYS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GovBio123DE(SitemapSpider, StructuredDataSpider):
+class GovBio123DESpider(SitemapSpider, StructuredDataSpider):
     name = "gov_bio123_de"
     sitemap_urls = ["https://www.bio123.de/sitemap.xml"]
     # Example: https://www.bio123.de/anbieter/holzkirchen/bio-terra-markt - Do want

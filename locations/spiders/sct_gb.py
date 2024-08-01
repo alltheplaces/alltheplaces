@@ -1,7 +1,7 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class SCTGBSpider(WPStoreLocatorSpider):
+class SctGBSpider(WPStoreLocatorSpider):
     name = "sct_gb"
     item_attributes = {
         "brand_wikidata": "Q107463316",
