@@ -14,16 +14,16 @@ class TrackSourcesMiddleware:
         if not isinstance(item, Item):
             return
 
-        if not item["extras"].get("@source"):
-            item["extras"]["@source"] = response.url
+        if not item["extras"].get("@source_uri"):
+            item["extras"]["@source_uri"] = response.url
 
         try:
             spider.crawler.stats.inc_value(
-                "atp/item_scraped_host_count/{}".format(urlparse(item["extras"]["@source"]).netloc)
+                "atp/item_scraped_host_count/{}".format(urlparse(item["extras"]["@source_uri"]).netloc)
             )
         except ValueError:
-            spider.logger.error("Failed to parse @source: {}".format(item["extras"]["@source"]))
-            spider.crawler.stats.inc_value("atp/parse_error/@source")
+            spider.logger.error("Failed to parse @source_uri: {}".format(item["extras"]["@source_uri"]))
+            spider.crawler.stats.inc_value("atp/parse_error/@source_uri")
 
     def process_spider_output(self, response, result, spider):
         for item in result or []:
