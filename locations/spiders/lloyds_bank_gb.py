@@ -18,6 +18,6 @@ class LloydsBankGBSpider(SitemapSpider, StructuredDataSpider):
         for entry in entries:
             if "event" not in entry["loc"]:
                 if "phone" in entry:
-                    if not entry["phone"].replace(" ", "").startswith("+443"):
+                    if entry["phone"].replace(" ", "").startswith("+443"):
                         entry.pop("phone", None)
                 yield entry

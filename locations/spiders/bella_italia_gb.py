@@ -12,4 +12,7 @@ class BellaItaliaGBSpider(FrankieAndBennysGBSpider):
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         item["website"] = "https://www.bellaitalia.co.uk/restaurants/{}/{}/".format(location["city"], location["slug"])
 
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
+
         yield item
