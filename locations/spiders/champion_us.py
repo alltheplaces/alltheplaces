@@ -8,3 +8,7 @@ class ChampionUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Champion", "brand_wikidata": "Q2948688"}
     sitemap_urls = ["https://stores.champion.com/robots.txt"]
     sitemap_rules = [(r"/\w\w/[-\w]+/[-\w]+\.html", "parse")]
+
+    def parse_item(self, item, feature, **kwargs):
+        item.pop("name", None)
+        yield item
