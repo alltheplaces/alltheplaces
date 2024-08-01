@@ -18,7 +18,7 @@ class PandoraSpider(RioSeoSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Fix error because of some html tags
         response.json()["maplist"] = (
-            response.json()["maplist"].replace('<\\\/sup\\"', '</sup>\\"').replace("<sup>", "").replace("</sup>", "")
+            response.json()["maplist"].replace('<\\/sup\\"', '</sup>\\"').replace("<sup>", "").replace("</sup>", "")
         )
         yield from RioSeoSpider.parse(self, response=response)
 
