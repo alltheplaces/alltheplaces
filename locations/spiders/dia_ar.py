@@ -18,6 +18,8 @@ class DiaARSpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json():
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
+            item["street_address"] = item.pop("addr_full")
             if store.get("geo") != "0":
                 item["lon"], item["lat"] = store["geo"].split(",")
             item["extras"] = {"type": store["tipo"]}
