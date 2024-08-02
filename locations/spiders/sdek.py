@@ -20,8 +20,6 @@ class SdekSpider(scrapy.Spider):
     allowed_domains = ["www.cdek.ru"]
     start_urls = ["https://www.cdek.ru/api-site/website/office/map/?websiteId=ru&locale=ru"]
     item_attributes = {"brand": "СДЭК", "brand_wikidata": "Q28665980", "extras": {"brand:en": "SDEK"}}
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"CONCURRENT_REQUESTS": 1, "ROBOTSTXT_OBEY": False}
     requires_proxy = True
 
     def parse(self, response):
