@@ -8,21 +8,15 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SephoraUSCAPLSpider(SitemapSpider, StructuredDataSpider):
-    name = "sephora_us_ca_pl"
+class SephoraPLSpider(SitemapSpider, StructuredDataSpider):
+    name = "sephora_pl"
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     sitemap_urls = [
-        "https://www.sephora.com/sephora-store-sitemap.xml",
-        "https://www.sephora.com/sephora-store-sitemap_en-CA.xml",
         "https://www.sephora.pl/sitemap-store-locator.xml",
     ]
 
-    sitemap_rules = [
-        (r"\/happening\/stores\/(?!kohls).+", "parse_sd"),
-        (r"\/ca\/en\/happening\/stores\/(?!kohls).+", "parse_sd"),
-        ("", "parse_sd"),
-    ]
     user_agent = BROWSER_DEFAULT
+    require_proxy = True
 
     def post_process_item(self, item, response, ld_data):
         item.pop("image")
