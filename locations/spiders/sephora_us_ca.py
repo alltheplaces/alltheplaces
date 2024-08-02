@@ -15,7 +15,6 @@ class SephoraUSCAPLSpider(SitemapSpider, StructuredDataSpider):
         "https://www.sephora.com/sephora-store-sitemap.xml",
         "https://www.sephora.com/sephora-store-sitemap_en-CA.xml",
     ]
-
     sitemap_rules = [
         (r"\/happening\/stores\/(?!kohls).+", "parse_sd"),
         (r"\/ca\/en\/happening\/stores\/(?!kohls).+", "parse_sd"),
