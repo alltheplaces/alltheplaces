@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class BobsBurgersUSSpider(Spider):
     name = "bobs_burgers_us"
-    item_attributes = {"name": "Bob's Burgers and Brew", "brand": "Bob's Burgers and Brew"}
+    item_attributes = {"name": "Bob's Burgers & Brew", "brand": "Bob's Burgers & Brew"}
     allowed_domains = ["www.bobsburgersandbrew.com"]
     start_urls = ["https://bobsburgersandbrew.com/bob-s-burgers-and-brew-locations"]
 
