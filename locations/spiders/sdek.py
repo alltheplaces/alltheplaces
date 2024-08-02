@@ -6,7 +6,6 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 PAYMENT_MAPPING = {
     "CASH": PaymentMethods.CASH,
