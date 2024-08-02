@@ -1,5 +1,3 @@
-import json
-
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -24,8 +22,4 @@ class SephoraPLSpider(SitemapSpider, StructuredDataSpider):
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
         apply_category(Categories.SHOP_COSMETICS, item)
-        if "sephora.com" in response.url:
-            item["country"] = json.loads(response.xpath('//*[@id="linkStore"]/text()').get())["ssrProps"][
-                "ErrorBoundary(ReduxProvider(StoreDetail))"
-            ]["stores"][0]["address"]["country"]
         yield item
