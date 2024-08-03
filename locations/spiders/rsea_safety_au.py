@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class RSEASafetyAUSpider(Spider):
+class RseaSafetyAUSpider(Spider):
     name = "rsea_safety_au"
     item_attributes = {
         "brand": "RSEA Safety",

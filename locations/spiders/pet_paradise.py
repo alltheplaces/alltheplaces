@@ -7,9 +7,9 @@ from locations.items import Feature
 
 
 class PetParadiseSpider(scrapy.Spider):
-    name = "petparadise"
+    name = "pet_paradise"
     item_attributes = {"brand": "Pet Paradise", "brand_wikidata": "Q122955413"}
-    allowed_domains = ["petparadise.com.com"]
+    allowed_domains = ["petparadise.com"]
     start_urls = ("https://www.petparadise.com/locations.htm",)
 
     def start_requests(self):

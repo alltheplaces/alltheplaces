@@ -8,7 +8,7 @@ from locations.hours import OpeningHours, day_range
 from locations.pipelines.address_clean_up import clean_address
 
 
-class Coffee1GB(scrapy.Spider):
+class Coffee1GBSpider(scrapy.Spider):
     name = "coffee_1_gb"
     item_attributes = {"brand": "Coffee#1", "brand_wikidata": "Q22032058"}
     allowed_domains = ["www.coffee1.co.uk"]

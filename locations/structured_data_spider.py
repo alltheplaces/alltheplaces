@@ -148,7 +148,6 @@ class StructuredDataSpider(Spider):
         "SportingGoodsStore",
         "Dentist",
         "AutoRental",
-        "HardwareStore",
         "AutoPartsStore",
         "GasStation",
         "LiquorStore",

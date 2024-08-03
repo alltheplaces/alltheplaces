@@ -20,6 +20,7 @@ class PerkinsSpider(SitemapSpider, StructuredDataSpider):
     values_pattern = re.compile(r"}\((.+)\)\);")
     stores_pattern = re.compile(r"data:(\[.+\]),fe")
     coordinates_map = {}
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url

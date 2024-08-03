@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class TopsSpider(Spider):
+class TopsAtSparSpider(Spider):
     name = "tops_at_spar"
     item_attributes = {"brand": "Tops", "brand_wikidata": "Q116377563"}
     skip_auto_cc_spider_name = True

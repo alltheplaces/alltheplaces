@@ -9,8 +9,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class BcpizzaSpider(CrawlSpider):
-    name = "bcpizza"
+class BcPizzaSpider(CrawlSpider):
+    name = "bc_pizza"
     item_attributes = {"brand": "BC Pizza", "brand_wikidata": "Q117600284"}
     allowed_domains = ["bc.pizza"]
     start_urls = ["https://bc.pizza/locations/"]

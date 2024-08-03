@@ -16,7 +16,7 @@ class JumboCHSpider(SitemapSpider):
     }
     allowed_domains = ["www.jumbo.ch"]
     sitemap_urls = ["https://www.jumbo.ch/sitemap.xml"]
-    sitemap_follow = ["/medias/STORE-de-"]
+    sitemap_follow = ["/sitemap/STORE-de-"]
     sitemap_rules = [(r"_POS$", "parse_store")]
 
     def parse_store(self, response):

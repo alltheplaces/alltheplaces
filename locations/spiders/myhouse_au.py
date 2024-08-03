@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MyHouseAUSpider(Spider):
+class MyhouseAUSpider(Spider):
     name = "myhouse_au"
     item_attributes = {
         "brand": "MyHouse",

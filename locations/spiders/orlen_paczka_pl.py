@@ -22,6 +22,10 @@ class OrlenPaczkaPLSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["pts"]:
+
+            if location["t"] != "A" or location["r"] == "PKN":
+                continue
+
             properties = {
                 "ref": location["p"],
                 "lat": location["la"],

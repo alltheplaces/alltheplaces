@@ -9,7 +9,7 @@ from locations.items import Feature
 
 
 class CanadaPostSpider(scrapy.Spider):
-    name = "canadapost"
+    name = "canada_post"
     item_attributes = {"brand": "Canada Post", "brand_wikidata": "Q1032001", "extras": Categories.POST_OFFICE.value}
     allowed_domains = ["canadapost-postescanada.ca"]
 

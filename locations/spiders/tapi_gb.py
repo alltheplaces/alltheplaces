@@ -17,4 +17,5 @@ class TapiGBSpider(scrapy.spiders.SitemapSpider):
         item = LinkedDataParser.parse(response, "HomeGoodsStore")
         if item:
             item["ref"] = response.url
-            yield item
+            if item.get("image") != "https://www.tapi.co.uk/":  # drop fake SEO "locations" pretending to be shops
+                yield item
