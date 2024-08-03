@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class SuzukiMarineAU(Spider):
+class SuzukiMarineAUSpider(Spider):
     name = "suzuki_marine_au"
     item_attributes = {"brand": "Suzuki", "brand_wikidata": "Q181642", "extras": Categories.SHOP_BOAT_REPAIR.value}
 
