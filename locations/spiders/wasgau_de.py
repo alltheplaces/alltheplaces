@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_DE, OpeningHours
 
 
-class WasgauDE(Spider):
+class WasgauDESpider(Spider):
     name = "wasgau_de"
     item_attributes = {"brand": "Wasgau", "brand_wikidata": "Q2536857"}
     allowed_domains = ["www.wasgau.de"]
