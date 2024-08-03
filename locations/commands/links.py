@@ -126,14 +126,17 @@ class MySpider(StructuredDataSpider):
             for result in response.xpath(
                 '//a[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "'
                 + label
-                + '")]'
+                + '")]/@href'
             ).getall():
                 self.matching_links.append(result)
 
         if len(self.matching_links) > 0:
             print("Possible storefinder links")
             for link in set(self.matching_links):
-                print(link)
+                if "http" not in link:
+                    print(self.start_urls[0] + link)
+                else:
+                    print(link)
 
         yield
 
