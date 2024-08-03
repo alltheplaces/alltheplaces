@@ -124,7 +124,7 @@ class MySpider(StructuredDataSpider):
             # XPath 2 supports matches(), but we don't have access to it
             # print(response.xpath('//a[matches(text(), "' + label + '", "i")]').get())
             for result in response.xpath(
-                '//a[translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz")="' + label + '"]'
+                '//a[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "' + label + '")]'
             ).getall():
                 self.matching_links.append(result)
 
