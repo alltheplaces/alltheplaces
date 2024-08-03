@@ -151,11 +151,6 @@ class LinksCommand(BaseRunSpiderCommand):
 
     def add_options(self, parser):
         super().add_options(parser)
-        # parser.add_argument(
-        #     "--language",
-        #     dest="language",
-        #     help="wanted place type(s), many times not required as defaults cope with most",
-        # )
 
     def run(self, args, opts):
         if len(args) != 1:
@@ -167,17 +162,6 @@ class LinksCommand(BaseRunSpiderCommand):
             path = os.path.abspath(args[0])
             MySpider.start_urls = [pathlib.Path(path).as_uri()]
 
-        # if opts.language:
-        #     MySpider.item_attributes["brand_wikidata"] = opts.language
-
-        # if opts.spider_name:
-        #     MySpider.name = opts.spider_name
-
         crawler = self.crawler_process.create_crawler(MySpider, **opts.spargs)
         self.crawler_process.crawl(crawler)
         self.crawler_process.start()
-        # stats_dict = crawler.stats.get_stats()
-        # if stats_dict.get("item_scraped_count", 0) == 0:
-        #     print("failed to decode structured data")
-        # if opts.stats:
-        #     pprint.pprint(stats_dict)
