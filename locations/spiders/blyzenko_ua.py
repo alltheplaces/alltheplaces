@@ -17,16 +17,22 @@ class BlyzenkoUASpider(scrapy.Spider):
             shop_map = acf_fields["shop_map"]
 
             item = DictParser.parse(acf_fields)
+            item["ref"] = store["id"]
+            item["name"] = store["title"]
             item["phone"] = acf_fields["shop_tel"]
             item["street_address"] = shop_map["address"]
             item["lat"] = shop_map["lat"]
             item["lon"] = shop_map["lng"]
             # Google place ID? "place_id": "ChIJ1w8zu0jdOkcRUeY2kB95b3I",
-            item["housenumber"] = shop_map["street_number"]
-            item["street"] = shop_map["street_name"]
-            item["city"] = shop_map["city"]
+            if "street_number" in shop_map:
+                item["housenumber"] = shop_map["street_number"]
+            if "street_name" in shop_map:
+                item["street"] = shop_map["street_name"]
+            if "city" in shop_map:
+                item["city"] = shop_map["city"]
             item["state"] = shop_map["state"]
-            item["postal_code"] = shop_map["post_code"]
+            if "post_code" in shop_map:
+                item["postcode"] = shop_map["post_code"]
             item["country"] = shop_map["country_short"]
 
             # Open 7 days a week? Data contains:
