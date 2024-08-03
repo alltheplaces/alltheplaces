@@ -1,5 +1,5 @@
-from locations.storefinders.wp_go_maps import WpGoMapsSpider
 from locations.categories import Categories
+from locations.storefinders.wp_go_maps import WpGoMapsSpider
 
 
 class EzMartUSSpider(WpGoMapsSpider):
