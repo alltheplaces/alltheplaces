@@ -204,6 +204,7 @@ class DictParser:
         "storeURL",
         "website-url",
         "websiteURL",
+        "location-url",
     ]
 
     hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
@@ -226,6 +227,7 @@ class DictParser:
                 "coordinates",
                 "geo-position",
                 "position",
+                "display-coordinate",
             ],
         )
         # If not a good location object then use the parent

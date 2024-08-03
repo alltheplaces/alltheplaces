@@ -1,12 +1,13 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
 class AldiSudCNSpider(Spider):
     name = "aldi_sud_cn"
-    item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171672", "country": "CN"}
+    item_attributes = {"brand_wikidata": "Q41171672", "country": "CN"}
     start_urls = ["https://www.aldi.cn/images/2019aldi/assets/js/stores.json"]
 
     def parse(self, response, **kwargs):
@@ -16,7 +17,7 @@ class AldiSudCNSpider(Spider):
                 item = Feature()
                 item["ref"] = id
 
-                item["name"] = store["title-en"]
+                item["branch"] = store["title-en"].removeprefix("ALDI ").removesuffix(" Store")
                 item["addr_full"] = store["address-en"]
 
                 oh = OpeningHours()
@@ -28,5 +29,7 @@ class AldiSudCNSpider(Spider):
                 # TODO: Transform store["locationX"] store["locationX"]
 
                 item["extras"] = {"map": store["mapLink"]}
+
+                apply_category(Categories.SHOP_SUPERMARKET, item)
 
                 yield item

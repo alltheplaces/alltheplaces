@@ -6,22 +6,11 @@ from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-DAY_MAPPING = {
-    "MONDAY": "Mo",
-    "TUESDAY": "Tu",
-    "WEDNESDAY": "We",
-    "THURSDAY": "Th",
-    "FRIDAY": "Fr",
-    "SATURDAY": "Sa",
-    "SUNDAY": "Su",
-}
 
-
-class NormaDeSpider(scrapy.Spider):
+class NormaDESpider(scrapy.Spider):
     name = "norma_de"
     item_attributes = {"brand": "Norma", "brand_wikidata": "Q450180"}
     allowed_domains = ["www.norma-online.de"]
-    download_delay = 0.2
 
     def start_requests(self):
         url = "https://www.norma-online.de/de/filialfinder/suchergebnis?lng={}&lat={}&r=80000"

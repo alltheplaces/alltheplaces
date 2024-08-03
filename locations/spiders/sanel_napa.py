@@ -1,7 +1,7 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class SanelNAPASpider(WPStoreLocatorSpider):
+class SanelNapaSpider(WPStoreLocatorSpider):
     name = "sanel_napa"
     item_attributes = {
         "brand_wikidata": "Q122564780",

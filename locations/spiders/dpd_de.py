@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 
-class DPDDESpider(scrapy.Spider):
+class DpdDESpider(scrapy.Spider):
     name = "dpd_de"
     item_attributes = {"brand": "DPD", "brand_wikidata": "Q541030"}
     start_urls = ["https://my.dpd.de/shopfinder.aspx"]

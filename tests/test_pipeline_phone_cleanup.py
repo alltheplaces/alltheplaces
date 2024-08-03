@@ -1,14 +1,13 @@
-from scrapy.crawler import Crawler
+from scrapy import Spider
+from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
 from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
-from locations.spiders.greggs_gb import GreggsGBSpider
 
 
 def get_objects(phone, country):
-    spider = GreggsGBSpider()
-    spider.crawler = Crawler(GreggsGBSpider)
-    spider.crawler._apply_settings()
+    spider = Spider(name="test")
+    spider.crawler = get_crawler()
     return (
         Feature(phone=phone, country=country),
         PhoneCleanUpPipeline(),

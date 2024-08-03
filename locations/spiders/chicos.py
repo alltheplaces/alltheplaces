@@ -21,10 +21,10 @@ class ChicosSpider(CrawlSpider, StructuredDataSpider):
         "https://www.whitehouseblackmarket.com/locations/locations-list/",
     ]
     rules = [
-        Rule(LinkExtractor(allow=r"/locations/locations-list/\w{2}/$")),
-        Rule(LinkExtractor(allow=r"/locations/locations-list/\w{2}/[-\w]+/$")),
+        Rule(LinkExtractor(allow=r"/locations/locations-list/\w{2}/?$")),
+        Rule(LinkExtractor(allow=r"/locations/locations-list/\w{2}/[-\w]+/?$")),
         Rule(
-            LinkExtractor(allow=r"/locations/\w{2}/\w{2}/[-\w]+/[-\w]+/$"),
+            LinkExtractor(allow=r"/locations/\w{2}/\w{2}/[-\w]+/[-\w]+/?$"),
             callback="parse_sd",
         ),
     ]

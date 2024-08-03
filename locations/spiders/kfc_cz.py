@@ -1,10 +1,10 @@
 from unidecode import unidecode
 
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.storefinders.amrest_eu import AmrestEUSpider
 
 
-class KFCCZSpider(AmrestEUSpider):
+class KfcCZSpider(AmrestEUSpider):
     name = "kfc_cz"
     item_attributes = KFC_SHARED_ATTRIBUTES
     api_brand_key = "KFC"

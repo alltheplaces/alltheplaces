@@ -4,7 +4,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MTBankUSSpider(SitemapSpider, StructuredDataSpider):
+class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
     name = "mt_bank_us"
     item_attributes = {"brand": "M&T Bank", "brand_wikidata": "Q3272257"}
     sitemap_urls = ["https://locations.mtb.com/robots.txt"]

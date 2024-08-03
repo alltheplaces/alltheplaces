@@ -20,7 +20,7 @@ class JardilandFRSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = clean_address(location["address"]["road"])
-            item["website"] = "https://www.jardiland.com/magasins/" + location["slug"]
+            item["website"] = "https://www.jardiland.com/magasins/magasin-" + location["slug"]
 
             item["opening_hours"] = OpeningHours()
             for day_number, day_name in enumerate(DAYS):

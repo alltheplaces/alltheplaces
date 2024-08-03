@@ -13,10 +13,11 @@ class CinemarkSpider(SitemapSpider):
     sitemap_urls = ["https://www.cinemark.com/sitemap.xml"]
     sitemap_rules = [
         (
-            r"https:\/\/www\.cinemark\.com\/theatres\/",
+            r"https:\/\/www\.cinemark\.com\/theatres\/.",
             "parse",
         ),
     ]
+    download_delay = 10  # Requested by robots.txt
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "MovieTheater")
@@ -28,5 +29,7 @@ class CinemarkSpider(SitemapSpider):
 
         if item["name"].endswith(" - NOW CLOSED"):
             set_closed(item)
+
+        del item["image"]
 
         yield item

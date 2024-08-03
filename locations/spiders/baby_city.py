@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class BabyCity(scrapy.Spider):
+class BabyCitySpider(scrapy.Spider):
     name = "baby_city"
     item_attributes = {"brand": "Baby City", "brand_wikidata": "Q116732888"}
     allowed_domains = ["www.babycity.co.za"]

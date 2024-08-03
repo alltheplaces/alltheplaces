@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class UBreakiFixSpider(SitemapSpider, StructuredDataSpider):
+class UbreakifixSpider(SitemapSpider, StructuredDataSpider):
     name = "ubreakifix"
     ASURION = {
         "brand": "Asurion Tech Repair & Solutions",

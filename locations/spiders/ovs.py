@@ -5,13 +5,14 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
 class OvsSpider(Spider):
     name = "ovs"
-    item_attributes = {"brand": "OVS", "brand_wikidata": "Q2042514"}
+    item_attributes = {"brand": "OVS", "brand_wikidata": "Q2042514", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = ["https://www.ovsfashion.com/en/ie/stores/allstores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

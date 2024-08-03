@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -23,4 +24,5 @@ class SuzukiFRSpider(SitemapSpider):
         )
         item["phone"] = response.xpath(r'//*[contains(@href,"tel:")]/text()').get().replace(".", "")
         item["ref"] = item["website"] = response.url
+        apply_category(Categories.SHOP_CAR, item)
         yield item

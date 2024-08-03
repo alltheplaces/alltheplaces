@@ -39,10 +39,33 @@ class PeugeotSECZESSpider(scrapy.Spider):
             for service in store.get("services", []):
                 service_names.append(service.get("name"))
 
-            if "New Vehicles" in service_names:
+            if any(
+                s in service_names
+                for s in (
+                    "New Vehicles",
+                    "Prodej nových vozů",
+                    "Venta de Vehículos Comerciales",
+                    "Venta de Vehículos Turismos",
+                )
+            ):
                 apply_category(Categories.SHOP_CAR, item)
-            elif "Aftersales" in service_names:
+            elif any(
+                s in service_names
+                for s in (
+                    "Aftersales",
+                    "Autorizovaný servis",
+                    "Servicio Oficial Turismos",
+                )
+            ):
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
-            elif "Parts" in service_names:
+            elif any(
+                s in service_names
+                for s in (
+                    "Parts",
+                    "dílů",
+                    "Pieza de recambio",
+                )
+            ):
                 apply_category(Categories.SHOP_CAR_PARTS, item)
+
             yield item

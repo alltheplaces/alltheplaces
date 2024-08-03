@@ -5,10 +5,11 @@ from locations.geo import point_locations
 from locations.hours import OpeningHours
 
 
-class RelayFrSpider(scrapy.Spider):
+class RelayFRSpider(scrapy.Spider):
     name = "relay_fr"
     item_attributes = {"brand": "Relay", "brand_wikidata": "Q3424298"}
     allowed_domains = ["relay.com"]
+    requires_proxy = "FR"
 
     def start_requests(self):
         point_files = "eu_centroids_120km_radius_country.csv"

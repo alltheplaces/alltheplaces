@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class MoneyGramSpider(Where2GetItSpider):
+class MoneygramSpider(Where2GetItSpider):
     name = "moneygram"
     item_attributes = {"brand": "MoneyGram", "brand_wikidata": "Q1944412"}
     api_brand_name = "moneygram"

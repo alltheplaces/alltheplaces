@@ -3,13 +3,13 @@ import scrapy
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class McDonaldsESSpider(scrapy.Spider):
+class McdonaldsESSpider(scrapy.Spider):
     name = "mcdonalds_es"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = BROWSER_DEFAULT
     start_urls = ["https://mcdonalds.es/api/restaurants?lat=36.721261&lng=-4.4212655&radius=500000000000&limit=10000"]

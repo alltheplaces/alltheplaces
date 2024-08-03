@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class FreshChoiceNZSpider(CrawlSpider):
+class FreshchoiceNZSpider(CrawlSpider):
     name = "freshchoice_nz"
     item_attributes = {"brand": "FreshChoice", "brand_wikidata": "Q22271877"}
     allowed_domains = ["store.freshchoice.co.nz"]
