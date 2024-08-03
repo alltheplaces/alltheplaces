@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class SuzukiMarineAUSpider(Spider):
     name = "suzuki_marine_au"
-    item_attributes = {"brand": "Suzuki", "brand_wikidata": "Q181642", "extras": Categories.SHOP_BOAT_REPAIR.value}
+    item_attributes = {"brand": "Suzuki", "brand_wikidata": "Q181642", "extras": Categories.SHOP_BOAT.value}
 
     def start_requests(self):
         yield JsonRequest(url="https://www.suzukimarine.com.au/find-dealers/dealersByState?state=all")
