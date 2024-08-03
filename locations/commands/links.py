@@ -1,13 +1,9 @@
-import json
 import os
 import pathlib
-import pprint
 
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 
-from locations.hours import OpeningHours
-from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -16,16 +12,14 @@ LABELS = [
     "locations",
     "stores",
     "find a store",
-
     # FR
     "magazin",
-
     # DE
     "mein markt",
-
     # ES
-    "tiendas"
+    "tiendas",
 ]
+
 
 class MySpider(StructuredDataSpider):
     name = "my_spider"
@@ -39,7 +33,9 @@ class MySpider(StructuredDataSpider):
         for label in LABELS:
             # XPath 2 supports matches(), but we don't have access to it
             # print(response.xpath('//a[matches(text(), "' + label + '", "i")]').get())
-            for result in response.xpath('//a[translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz")="' + label + '"]').getall():
+            for result in response.xpath(
+                '//a[translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz")="' + label + '"]'
+            ).getall():
                 self.matching_links.append(result)
 
         if len(self.matching_links) > 0:
@@ -68,7 +64,6 @@ class LinksCommand(BaseRunSpiderCommand):
         #     dest="language",
         #     help="wanted place type(s), many times not required as defaults cope with most",
         # )
-
 
     def run(self, args, opts):
         if len(args) != 1:
