@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.pipelines.email_clean_up import EmailCleanUpPipeline
 
 
-def get_objects(phone):
+def get_objects(email):
     spider = Spider(name="test")
     spider.crawler = get_crawler()
     return (
