@@ -1,7 +1,7 @@
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class WaBaGrillUSSpider(Where2GetItSpider):
+class WabaGrillUSSpider(Where2GetItSpider):
     name = "waba_grill_us"
     item_attributes = {
         "brand_wikidata": "Q113163467",
