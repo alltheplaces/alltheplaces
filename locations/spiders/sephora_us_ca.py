@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SephoraUSCAPLSpider(SitemapSpider, StructuredDataSpider):
+class SephoraUSCASpider(SitemapSpider, StructuredDataSpider):
     name = "sephora_us_ca"
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     sitemap_urls = [
