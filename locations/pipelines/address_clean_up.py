@@ -54,7 +54,7 @@ class AddressCleanUpPipeline:
     def process_item(self, item: Feature, spider: Spider):
         targeted_fields = {"street_address": 2, "addr_full": 2, "street": 2, "city": 2, "postcode": 2, "state": 1}
 
-        for key, min_length in targeted_fields:
+        for (key, min_length) in targeted_fields.items():
             if value := item.get(key):
                 if isinstance(value, str):
                     item[key] = clean_address(value, min_length)

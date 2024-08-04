@@ -1,4 +1,8 @@
-from locations.pipelines.address_clean_up import clean_address, merge_address_lines
+from scrapy import Spider
+from scrapy.utils.test import get_crawler
+
+from locations.items import Feature
+from locations.pipelines.address_clean_up import AddressCleanUpPipeline, clean_address, merge_address_lines
 
 
 def test_merge_null_lines():
@@ -48,3 +52,28 @@ def test_clean_address_removes_very_short_addresses():
     assert clean_address(" -", 2) == ""
     assert clean_address(" -", 1) == ""
     assert clean_address("NY", 1) == "NY"
+
+
+def get_objects(feature):
+    spider = Spider(name="test")
+    spider.crawler = get_crawler()
+    return (
+        feature,
+        AddressCleanUpPipeline(),
+        spider,
+    )
+
+
+def test_handle():
+    # Junk
+    item, pipeline, spider = get_objects(
+        Feature(
+            addr_full="123,    Example Street", postcode="    11111", street="-", state="      ", city=" \tExampletown"
+        )
+    )
+    pipeline.process_item(item, spider)
+    assert item.get("addr_full") == "123, Example Street"
+    assert item.get("postcode") == "11111"
+    assert item.get("street") == ""
+    assert item.get("state") == ""
+    assert item.get("city") == "Exampletown"
