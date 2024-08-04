@@ -45,4 +45,6 @@ def test_remove_undefined():
 
 
 def test_remove_very_short_addresses():
-    assert clean_address(" -") == ""
+    assert clean_address(" -", 2) == ""
+    assert clean_address(" -", 1) == ""
+    assert clean_address("NY", 1) == "NY"
