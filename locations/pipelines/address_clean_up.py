@@ -52,14 +52,7 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
 
 class AddressCleanUpPipeline:
     def process_item(self, item: Feature, spider: Spider):
-        targeted_fields = {
-            "street_address": 2,
-            "addr_full": 2,
-            "street": 2,
-            "city": 2,
-            "postcode": 2,
-            "state": 1
-        }
+        targeted_fields = {"street_address": 2, "addr_full": 2, "street": 2, "city": 2, "postcode": 2, "state": 1}
 
         for key, min_length in targeted_fields:
             if value := item.get(key):

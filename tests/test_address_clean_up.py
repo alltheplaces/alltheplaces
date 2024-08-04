@@ -37,14 +37,14 @@ def test_clean_address_strip():
     )
 
 
-def test_remove_undefined():
+def test_clean_address_removes_undefined():
     assert clean_address("undefined") == ""
     assert clean_address("Undefined") == ""
     assert clean_address("UNDEFINED") == ""
     assert clean_address(" undefined") == ""
 
 
-def test_remove_very_short_addresses():
+def test_clean_address_removes_very_short_addresses():
     assert clean_address(" -", 2) == ""
     assert clean_address(" -", 1) == ""
     assert clean_address("NY", 1) == "NY"
