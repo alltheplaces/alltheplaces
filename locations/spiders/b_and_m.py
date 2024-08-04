@@ -16,6 +16,6 @@ class BAndMSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_VARIETY_STORE, item)
 
         if "phone" in item:
-            if not item["phone"].replace(" ", "").startswith("+443"):
+            if item["phone"].replace(" ", "").startswith("+443"):
                 item.pop("phone", None)
         yield item
