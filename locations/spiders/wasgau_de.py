@@ -16,7 +16,7 @@ class WasgauDESpider(Spider):
             # Response is well formed GeoJSON
             properties = location["properties"]
             item = DictParser.parse(properties)
-            item["lat"], item["lon"] = location["geometry"]["coordinates"]
+            item["geometry"] = location["geometry"]
             item["ref"] = (
                 item["name"] + item["street"] + item["postcode"]
             )  # No ids, so this is the best unique key I can find
