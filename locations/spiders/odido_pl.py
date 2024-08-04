@@ -13,7 +13,6 @@ class OdidoPLSpider(SitemapSpider):
 
     def parse(self, response, **kwargs):
         item = Feature()
-        item["name"] = response.xpath('//*[@class="store-name field-store-name"]/text()').get()
         item["ref"] = item["website"] = response.url
         item["addr_full"] = response.xpath('//*[@class="store-address"]/text()').get()
         extract_google_position(item, response)

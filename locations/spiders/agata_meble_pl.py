@@ -12,12 +12,15 @@ class AgataMeblePLSpider(scrapy.Spider):
 
     def parse(self, response):
         for poi in response.json()["results"]:
-            # global store is not a poi
-            if poi["Slug"] == "globalny":
+            # Skip disabled results
+            if poi["Enabled"] is False:
                 continue
+
             item = DictParser.parse(poi)
             item.pop("name", None)
             item["website"] = urljoin("https://www.agatameble.pl/salon/", poi["Slug"])
+
+            # Make a request to the website so that we filter out closed stores that 404
             yield scrapy.Request(item["website"], self.parse_store, meta={"item": item})
 
     def parse_store(self, response, **kwargs):
