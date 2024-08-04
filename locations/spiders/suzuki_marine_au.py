@@ -21,17 +21,17 @@ class SuzukiMarineAUSpider(Spider):
 
             if "Services" in feature:
                 if "0" in feature["Services"]:
-                    apply_category(item, Categories.SHOP_BOAT)
+                    apply_category(Categories.SHOP_BOAT, item)
                 if "1" in feature["Services"]:
-                    apply_category(item, {"boat:repair": "yes"})
+                    apply_category({"boat:repair": "yes"}, item)
                 if "2" in feature["Services"]:
-                    apply_category(item, {"boat:parts": "yes"})
+                    apply_category({"boat:parts": "yes"}, item)
 
-            if "ServiceHours" in feature:
+            if "ServiceHours" in feature and feature["ServiceHours"] is not None:
                 item["opening_hours"] = OpeningHours()
 
                 # "ServiceHours": "<p>Mon - Fri: 8:00am - 5:00pm<br>Sat: 8:00am - 12:00pm<br>Sun: Closed</p>",
-                # item["opening_hours"].add_ranges_from_string(feature["ServiceHours"].replace("<br>", ", "))
+                item["opening_hours"].add_ranges_from_string(feature["ServiceHours"].replace("<br>", ", ").replace("<p>", "").replace("</p>", ""))
 
             if "LatLong" in feature:
                 item["lat"], item["lon"] = feature["LatLong"].split(",")
