@@ -7,10 +7,7 @@ class PenningtonsCASpider(SweetIQSpider):
         "brand_wikidata": "Q16956527",
         "brand": "Penningtons",
     }
-    allowed_domains = [
-        "locations.penningtons.com",
-        "sls-api-service.sweetiq-sls-production-east.sweetiq.com"
-    ]
+    allowed_domains = ["locations.penningtons.com", "sls-api-service.sweetiq-sls-production-east.sweetiq.com"]
     start_urls = [
         "https://locations.penningtons.com/en",
     ]
