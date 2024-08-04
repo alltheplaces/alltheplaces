@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.items import Feature
+
 
 class MikuchaTHSpider(scrapy.Spider):
     name = "mikucha_th"
