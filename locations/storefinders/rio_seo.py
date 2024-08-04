@@ -45,27 +45,6 @@ class RioSeoSpider(Spider, AutomaticSpiderGenerator):
             )
         )
 
-    end_point: str = None
-    radius: int = 10000
-    limit: int = 3000
-
-    def start_requests(self) -> Iterable[Request]:
-        if self.start_urls:
-            for url in self.start_urls:
-                yield JsonRequest(url=url)
-        else:
-            yield JsonRequest(url=urljoin(self.end_point, "getAutocompleteData"), callback=self.parse_autocomplete)
-
-    def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
-        yield JsonRequest(
-            url=urljoin(
-                self.end_point,
-                "getAsyncLocations?template=search&level=search&search={}&radius={}&limit={}".format(
-                    response.json()["data"][0], self.radius, self.limit
-                ),
-            )
-        )
-
     def parse(self, response, **kwargs):
         map_list = response.json()["maplist"]
         data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
