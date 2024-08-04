@@ -89,6 +89,6 @@ class NextSpider(Spider):
             # else normal store
 
             if "phone" in item and item["phone"] is not None:
-                if not item["phone"].replace(" ", "").startswith("+443"):
+                if item["phone"].replace(" ", "").startswith("+443"):
                     item.pop("phone", None)
             yield item

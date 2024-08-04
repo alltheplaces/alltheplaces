@@ -80,3 +80,13 @@ def test_bad_seperator():
     item, pipeline, spider = get_objects("Fijo: 963034448 / Móvil: 604026467", "ES")
     pipeline.process_item(item, spider)
     assert item.get("phone") == "+34 963 03 44 48;+34 604 02 64 67"
+
+
+def test_undefined():
+    item, pipeline, spider = get_objects("undefined", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == ""
+
+    item, pipeline, spider = get_objects("+undefinedundefinedundefined", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+"

@@ -24,6 +24,8 @@ class MattressFirmUSSpider(Where2GetItSpider):
             item["brand"] = "Mattress Firm"
             item["brand_wikidata"] = "Q6791878"
 
+        item["branch"] = item.pop("name").removeprefix(item["brand"]).strip()
+
         # Store attributes
         # (also includes payment methods, but that's not shown on the website)
         attributes = {kv["id"]: kv["value"] for kv in json.loads(location["attributes"])}

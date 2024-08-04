@@ -6,8 +6,8 @@ from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class JardilandFRSpider(Spider):
-    name = "jardiland_fr"
+class JardilandSpider(Spider):
+    name = "jardiland"
     item_attributes = {"brand": "Jardiland", "brand_wikidata": "Q3162276"}
     allowed_domains = ["api.jardiland.com"]
     start_urls = ["https://api.jardiland.com/store-locator/store"]

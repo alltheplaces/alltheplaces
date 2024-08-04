@@ -35,3 +35,10 @@ def test_clean_address_strip():
         clean_address("Suit 2\n 555 High Street\t My Town\n\r My Country")
         == "Suit 2, 555 High Street, My Town, My Country"
     )
+
+
+def test_remove_undefined():
+    assert clean_address("undefined") == ""
+    assert clean_address("Undefined") == ""
+    assert clean_address("UNDEFINED") == ""
+    assert clean_address(" undefined") == ""

@@ -11,4 +11,9 @@ class PremierGBSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [("/our-stores/", "parse_store")]
 
     def parse_store(self, response):
-        yield OpenGraphParser.parse(response)
+        item = OpenGraphParser.parse(response)
+
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
+
+        yield item

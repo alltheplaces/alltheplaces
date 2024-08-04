@@ -9,6 +9,7 @@ class DollarTreeSpider(Where2GetItSpider):
     api_key = "134E9A7A-AB8F-11E3-80DE-744E58203F82"
 
     def parse_item(self, item, location):
+        item["name"] = None
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(location.get("hours"))
         yield item

@@ -19,4 +19,5 @@ class GoodLoodPLSpider(Spider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(feature["openingHours"])
             apply_yes_no(Extras.WHEELCHAIR, item, feature["facilities"]["ramp"])
+            item.pop("name", None)
             yield item
