@@ -43,6 +43,9 @@ class SainsburysSpider(scrapy.Spider):
                 item["ref"], item["name"].strip().lower().replace(" ", "-")
             )
 
+            if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+                item.pop("phone", None)
+
             yield self.parse_extras(item, store)
 
         yield Request(

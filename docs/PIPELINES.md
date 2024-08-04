@@ -37,6 +37,10 @@ This can be disabled with a spider level attribute `skip_auto_cc = True`.
 
 Items in Canada or the United States get `state` cleaned up to a 2-letter state code.
 
+## `EmailCleanUpPipeline`
+
+Rejects email addresses that appear invalid, ie lacking `@`.
+
 ## `PhoneCleanUpPipeline`
 
 Phone numbers and phone number-like extra attributes (`fax`, `*:phone` and `*:fax`) are normalized to an international format.
