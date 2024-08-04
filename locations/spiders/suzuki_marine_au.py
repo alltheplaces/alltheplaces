@@ -31,7 +31,9 @@ class SuzukiMarineAUSpider(Spider):
                 item["opening_hours"] = OpeningHours()
 
                 # "ServiceHours": "<p>Mon - Fri: 8:00am - 5:00pm<br>Sat: 8:00am - 12:00pm<br>Sun: Closed</p>",
-                item["opening_hours"].add_ranges_from_string(feature["ServiceHours"].replace("<br>", ", ").replace("<p>", "").replace("</p>", ""))
+                item["opening_hours"].add_ranges_from_string(
+                    feature["ServiceHours"].replace("<br>", ", ").replace("<p>", "").replace("</p>", "")
+                )
 
             if "LatLong" in feature:
                 item["lat"], item["lon"] = feature["LatLong"].split(",")
