@@ -58,6 +58,14 @@ class DictParser:
         "direccion",  # "address"
     ]
 
+    street_keys = [
+        # EN
+        "street",
+        "street-name",
+        # DE
+        "strasse",
+    ]
+
     street_address_keys = [
         # EN
         "street-address",
@@ -86,7 +94,9 @@ class DictParser:
         # ES
         "ciudad",  # "city"
         # IT
-        "comune",  # "comune"
+        "comune",  # "comune",
+        # DE
+        "ort",  # location
     ]
 
     region_keys = [
@@ -138,6 +148,9 @@ class DictParser:
         "store-zipcode",
         # JP
         "郵便番号",  # "post code"
+        # DE
+        "plz",
+        "postleitzahl",
     ]
 
     email_keys = [
@@ -243,7 +256,7 @@ class DictParser:
             address = obj
 
         item["housenumber"] = DictParser.get_first_key(address, DictParser.house_number_keys)
-        item["street"] = DictParser.get_first_key(address, ["street", "street-name"])
+        item["street"] = DictParser.get_first_key(address, DictParser.street_keys)
         item["street_address"] = DictParser.get_first_key(address, DictParser.street_address_keys)
         item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
         item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
