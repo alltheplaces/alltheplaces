@@ -61,4 +61,4 @@ def test_handle_invalid():
     for email in invalid:
         item, pipeline, spider = get_objects(email)
         pipeline.process_item(item, spider)
-        assert item.get("email") == None
+        assert item.get("email") is None
