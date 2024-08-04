@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class DSVLockerZASpider(Spider):
+class DsvLockerZASpider(Spider):
     name = "dsv_locker_za"
     item_attributes = {"brand": "DSV Locker", "brand_wikidata": "Q1155771"}
     allowed_domains = ["dsv-clientzone-map.afrigis.co.za"]

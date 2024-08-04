@@ -1,9 +1,8 @@
-from scrapy.crawler import Crawler
+from scrapy.utils.test import get_crawler
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.count_categories import CountCategoriesPipeline
-from locations.spiders.greggs_gb import GreggsGBSpider
 
 
 def get_objects():
@@ -11,9 +10,7 @@ def get_objects():
         pass
 
     spider = Spider()
-    crawler = Crawler(GreggsGBSpider)
-    spider.crawler = crawler
-    crawler._apply_settings()
+    spider.crawler = get_crawler()
     return Feature(), CountCategoriesPipeline(), spider
 
 

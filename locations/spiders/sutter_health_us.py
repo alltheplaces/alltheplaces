@@ -84,7 +84,7 @@ SERVICES_MAP = {
 
 
 class SutterHealthUSSpider(CrawlSpider, StructuredDataSpider):
-    name = "sutter_health"
+    name = "sutter_health_us"
     item_attributes = {"brand": "Sutter Health", "brand_wikidata": "Q7650154"}
     allowed_domains = ["sutterhealth.org", "www.sutterhealth.org"]
     start_urls = ["https://www.sutterhealth.org/location-search?start=1&max=50"]

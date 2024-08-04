@@ -9,3 +9,4 @@ class RegalTheatersSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.regmovies.com/sitemap.xml"]
     sitemap_rules = [("/theatres/", "parse_sd")]
     requires_proxy = True
+    wanted_types = ["MovieTheater"]

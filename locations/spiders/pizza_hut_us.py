@@ -50,7 +50,6 @@ class PizzaHutUSSpider(scrapy.Spider):
         ref = re.findall(r".com/(.+?)/(.+?)/(.+)", response.url)[0]
         ref = "_".join(ref)
         properties = {
-            "name": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
             "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
             "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),

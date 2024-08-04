@@ -4,7 +4,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class CoopNOSpider(scrapy.Spider):
+class LeonidasSpider(scrapy.Spider):
     name = "leonidas"
     item_attributes = {"brand": "Leonidas", "brand_wikidata": "Q80335"}
     start_urls = [
@@ -26,7 +26,13 @@ class CoopNOSpider(scrapy.Spider):
                 closing_hour = hours[-1]
                 if "-" in closing_hour:
                     continue
-                opening_hours.add_range(DAYS[i], opening_hour, closing_hour)
+                if len(hours) > 3 and not ("-" in hours[1] or "-" in hours[2]):
+                    closing_mid_hour = hours[1]
+                    opening_mid_hour = hours[2]
+                    opening_hours.add_range(DAYS[i], opening_hour, closing_mid_hour)
+                    opening_hours.add_range(DAYS[i], opening_mid_hour, closing_hour)
+                else:
+                    opening_hours.add_range(DAYS[i], opening_hour, closing_hour)
             yield Feature(
                 {
                     "ref": attributes.get("path").get("pid"),

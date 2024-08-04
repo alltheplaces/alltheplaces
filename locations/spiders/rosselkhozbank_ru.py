@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
-class RosselkhozbankRuSpider(scrapy.Spider):
+class RosselkhozbankRUSpider(scrapy.Spider):
     name = "rosselkhozbank_ru"
     item_attributes = {"brand_wikidata": "Q3920226"}
 

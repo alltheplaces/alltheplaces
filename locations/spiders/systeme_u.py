@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 
 
@@ -24,17 +24,31 @@ class SystemeUSpider(scrapy.Spider):
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
-        days = hours[0].split(",")
 
-        for d in days:
-            times = d.split(" ")
-            day = times[0]
-            if times[1] == "Fermé":
-                pass
-            else:
-                open_time, close_time = times[1].split("-")
+        for hour in hours:
+
+            # Check if the hour data indicates 24/7 availability
+            hour_text = hour.get()
+            if hour_text:
+                hour_text = hour_text.strip()
+
+            if "24h/24 - 7j/7" in hour_text:
+                for day in DAYS_FR.values():
+                    opening_hours.add_range(
+                        day=day,
+                        open_time="00:00",
+                        close_time="24:00",
+                        time_format="%H:%M",
+                    )
+                continue
+
+            day = hour.xpath('.//td[@class="day"]/text()').extract_first()
+            schedule = hour.xpath('.//td[@class="schedule"]/text()').extract_first()
+
+            if schedule and schedule.lower() != "fermé":
+                open_time, close_time = schedule.split(" - ")
                 opening_hours.add_range(
-                    day=day,
+                    day=DAYS_FR[day],
                     open_time=open_time,
                     close_time=close_time,
                     time_format="%H:%M",
@@ -45,27 +59,36 @@ class SystemeUSpider(scrapy.Spider):
     def parse_stores(self, response):
         properties = {
             "ref": response.url,
-            "name": response.xpath('//*[@id="libelle-magasin"]/text()').extract_first(),
-            "addr_full": response.xpath('normalize-space(//*[@itemprop="streetAddress"]/text())').extract_first(),
-            "city": response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first(),
-            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+            "name": response.xpath('//div[@class="info-magasin-station"]/h1[@class="h1"]/text()').extract_first(),
+            "addr_full": response.xpath(
+                'normalize-space(//div[@class="address b-md b-md--sm"]/p[1]/text())'
+            ).extract_first(),
+            "city": response.xpath(
+                'normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[2]/text())'
+            ).extract_first(),
+            "postcode": response.xpath(
+                'normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[1]/text())'
+            ).extract_first(),
             "country": "FR",
             "lat": response.xpath("//@data-store-latitude").extract_first(),
             "lon": response.xpath("//@data-store-longitude").extract_first(),
-            "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
+            "phone": response.xpath('//div[@class="phone-number b-md"]/text()').extract_first(),
             "website": response.url,
         }
 
         if m := re.search(r"/(magasin|station)/(uexpress|superu|marcheu|hyperu)-\w+", response.url):
             if m.group(1) == "magasin":
                 apply_category(Categories.SHOP_SUPERMARKET, properties)
+                hours_xpath = '//div[@class="u-horaire"]//tr[@class="u-horaire__line-day"]'
             else:
                 apply_category(Categories.FUEL_STATION, properties)
+                hours_xpath = '//div[@class="u-station__magasin"]/p[2]/text()'
 
             properties.update(self.brands[m.group(2)])
 
         try:
-            h = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
+            hours = response.xpath(hours_xpath)
+            h = self.parse_hours(hours)
 
             if h:
                 properties["opening_hours"] = h

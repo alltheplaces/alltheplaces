@@ -8,4 +8,4 @@ class FiveGuysMOSpider(SitemapSpider, StructuredDataSpider):
     name = "five_guys_mo"
     item_attributes = FiveGuysUSSpider.item_attributes
     sitemap_urls = ["https://restaurants.fiveguys.mo/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.mo\/en\/(?!search$)[^/]+$", "parse_sd")]
+    sitemap_rules = [(r"^https:\/\/restaurants\.fiveguys\.mo\/en_mo\/(?!search$)[^/]+$", "parse_sd")]

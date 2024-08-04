@@ -7,7 +7,7 @@ from scrapy.http import Response
 from locations.items import Feature
 
 
-class XSportFitnessUSSpider(Spider):
+class XsportFitnessUSSpider(Spider):
     name = "xsport_fitness_us"
     item_attributes = {"brand": "XSport Fitness", "brand_wikidata": "Q122981991"}
     start_urls = ["https://www.xsportfitness.com/locations/index.aspx"]

@@ -9,7 +9,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KFCNZSpider(scrapy.Spider):
+class KfcNZSpider(scrapy.Spider):
     name = "kfc_nz"
     item_attributes = KFC_SHARED_ATTRIBUTES
     allowed_domains = ["kfc.co.nz"]

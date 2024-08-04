@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class KiehlsUsSpider(SitemapSpider, StructuredDataSpider):
+class KiehlsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "kiehls_us"
     item_attributes = {
         "brand": "Kiehl's",

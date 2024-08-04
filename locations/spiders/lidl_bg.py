@@ -16,6 +16,7 @@ class LidlBGSpider(VirtualEarthSpider):
 
     def parse_item(self, item, feature, **kwargs):
         item["name"] = feature["ShownStoreName"]
+        item["nsi_id"] = "-1"
 
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
@@ -26,5 +27,4 @@ class LidlBGSpider(VirtualEarthSpider):
                 item["opening_hours"].add_range(day, start_time, end_time)
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
-        item["nsi_id"] = -1
         yield item

@@ -99,7 +99,7 @@ def test_twentyfour_seven():
     o.add_range("Sa", "0:00", "23:59")
     o.add_range("Su", "0:00", "23:59")
 
-    assert o.as_opening_hours() == "24/7"
+    assert o.as_opening_hours() == "Mo-Su 00:00-24:00"
 
 
 def test_no_opening_hours():
@@ -458,7 +458,7 @@ def test_add_ranges_from_string():
 
     o = OpeningHours()
     o.add_ranges_from_string("Monday - Sunday: 00:00 - 23:59")
-    assert o.as_opening_hours() == "24/7"
+    assert o.as_opening_hours() == "Mo-Su 00:00-24:00"
 
     o = OpeningHours()
     o.add_ranges_from_string("Monday: 08:00 - Midday, 14:00 - Midnight   tue-sat: Midnight-0800")
@@ -528,3 +528,17 @@ def test_add_ranges_from_string():
         DAYS_PL,
     )
     assert o.as_opening_hours() == "Mo-Fr 08:00-19:00; Sa 09:00-15:00"
+
+
+def test_oh_as_bool():
+    # https://github.com/alltheplaces/alltheplaces/pull/8779#issue-2395034394
+    o = OpeningHours()
+    assert not o
+
+    o = OpeningHours()
+    o.add_range("Mo", "09:00", "17:00")
+    assert o
+
+    o = OpeningHours()
+    o.set_closed("Mo")
+    assert o
