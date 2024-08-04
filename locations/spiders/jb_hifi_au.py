@@ -5,8 +5,8 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.algolia import AlgoliaSpider
 
 
-class JbHiFiAUSpider(AlgoliaSpider):
-    name = "jb_hi_fi_au"
+class JbHifiAUSpider(AlgoliaSpider):
+    name = "jb_hifi_au"
     item_attributes = {"brand": "JB Hi-Fi", "brand_wikidata": "Q3310113"}
     api_key = "a0c0108d737ad5ab54a0e2da900bf040"
     app_id = "VTVKM5URPX"
