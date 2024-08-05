@@ -12,7 +12,6 @@ class UrbanPlatesUSSpider(Spider):
         "brand_wikidata": "Q96413021",
         "name": "Urban Plates",
         "extras": Categories.FAST_FOOD.value,
-        # They claim it's not fast food, but it appears that you order at the cashier, not with a waiter
     }
 
     def start_requests(self):
