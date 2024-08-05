@@ -5,8 +5,8 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class UrbanPlatesSpider(Spider):
-    name = "urban_plates"
+class UrbanPlatesUSSpider(Spider):
+    name = "urban_plates_us"
     item_attributes = {
         "brand": "Urban Plates",
         "brand_wikidata": "Q96413021",
