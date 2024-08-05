@@ -9,4 +9,3 @@ class LLFlooringSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.llflooring.com/stores/sitemap.xml"]
     sitemap_rules = [(r"\/stores\/\w+\/[\w-]+\/[\w-]+$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
-
