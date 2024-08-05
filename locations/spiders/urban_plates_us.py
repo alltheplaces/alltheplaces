@@ -21,7 +21,7 @@ class UrbanPlatesUSSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]:
-            # skip customer service store
+            # Copied from website code: skip customer service store
             if location["store_id"] == "900":
                 continue
 
