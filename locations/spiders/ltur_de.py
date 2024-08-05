@@ -1,7 +1,7 @@
 from locations.storefinders.uberall import UberallSpider
 
 
-class lturDESpider(UberallSpider):
+class LturDESpider(UberallSpider):
     name = "ltur_de"
     item_attributes = {
         "brand_wikidata": "Q519040",
