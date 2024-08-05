@@ -10,9 +10,3 @@ class LLFlooringSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/stores\/\w+\/[\w-]+\/[\w-]+$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
-    # def post_process_item(self, item, response, ld_data, **kwargs):
-    #     # The street address has whitespace at the end sometimes
-    #     item["street_address"] = item["street_address"].strip()
-    #     item["branch"] = item.pop("name").removesuffix(" Store Near You")
-
-    #     yield item
