@@ -1,8 +1,8 @@
 from locations.storefinders.stockist import StockistSpider
 
 
-class WorkWorldSpider(StockistSpider):
-    name = "work_world"
+class WorkWorldUSSpider(StockistSpider):
+    name = "work_world_us"
     item_attributes = {
         "brand_wikidata": "Q113502525",
         "brand": "Work World",
