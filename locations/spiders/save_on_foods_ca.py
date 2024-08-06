@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -12,19 +13,13 @@ class SaveOnFoodsCASpider(Spider):
     def parse(self, response):
         for store in response.json()["items"]:
 
-            item = Feature()
+            item = DictParser.parse(store)
             item["lat"] = store["location"]["latitude"]
             item["lon"] = store["location"]["longitude"]
 
             item["street_address"] = clean_address(
                 [store["addressLine1"], store["addressLine2"], store["addressLine3"]]
             )
-            item["city"] = store["city"]
-            item["postcode"] = store["postCode"]
-            item["country"] = store["country"]
-
-            item["phone"] = store["phone"]
-            item["name"] = store["name"]
             item["ref"] = store["retailerStoreId"]
             # StoreHours provided by the API but not parsed by this scraper; please add
             yield item
