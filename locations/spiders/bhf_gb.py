@@ -25,4 +25,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
 
         extract_google_position(item, response)
 
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
+
         yield item

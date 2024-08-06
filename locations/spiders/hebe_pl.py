@@ -11,7 +11,6 @@ class HebePLSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for shop in response.xpath("//*[@data-lat]"):
             item = Feature()
-            item["name"] = shop.xpath('.//*[@class="store-popup__name text--uppercase"]/text()').get()
             item["street_address"] = shop.xpath('.//*[@class="store-popup__address"]/text()').get()
             item["ref"] = shop.xpath("./@data-id").get()
             item["lat"] = shop.xpath("./@data-lat").get()

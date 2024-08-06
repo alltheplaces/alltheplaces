@@ -6,8 +6,8 @@ from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class JardilandFRSpider(Spider):
-    name = "jardiland_fr"
+class JardilandSpider(Spider):
+    name = "jardiland"
     item_attributes = {"brand": "Jardiland", "brand_wikidata": "Q3162276"}
     allowed_domains = ["api.jardiland.com"]
     start_urls = ["https://api.jardiland.com/store-locator/store"]
@@ -20,7 +20,7 @@ class JardilandFRSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = clean_address(location["address"]["road"])
-            item["website"] = "https://www.jardiland.com/magasins/" + location["slug"]
+            item["website"] = "https://www.jardiland.com/magasins/magasin-" + location["slug"]
 
             item["opening_hours"] = OpeningHours()
             for day_number, day_name in enumerate(DAYS):
