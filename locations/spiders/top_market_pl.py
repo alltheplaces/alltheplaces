@@ -3,28 +3,17 @@ import json
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
-
-class TopMarketPLSpider(Spider):
+class TopMarketPLSpider(AgileStoreLocatorSpider):
     name = "top_market_pl"
     item_attributes = {"brand": "Top Market", "brand_wikidata": "Q9360044"}
     start_urls = ["https://www.topmarkety.pl/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1&layout=1"]
 
-    def parse(self, response: Response, **kwargs):
-        for shop in response.json():
-            item = DictParser.parse(shop)
+    def parse_item(self, item: Feature, location: dict, **kwargs):
+        del item["website"]
+        yield item
 
-            del item["website"]
-
-            del item["street"]
-            item["street_address"] = shop["street"]
-
-            opening_hours = OpeningHours()
-            for day, hours in json.loads(shop["open_hours"]).items():
-                if "-" in hours[0]:
-                    opening_hours.add_ranges_from_string(f"{day} {hours[0]}")
-            item["opening_hours"] = opening_hours
-
-            yield item
