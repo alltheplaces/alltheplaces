@@ -9,7 +9,7 @@ from locations.items import SocialMedia, set_social_media
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GrandVisionSpider(CrawlSpider, StructuredDataSpider):
+class GrandvisionSpider(CrawlSpider, StructuredDataSpider):
     name = "grandvision"
     BRANDS = {
         "pearle": ("Pearle", "Q2231148"),
