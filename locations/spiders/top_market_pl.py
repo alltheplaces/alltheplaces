@@ -1,12 +1,6 @@
-import json
-
-from scrapy import Spider
-from scrapy.http import Response
-
-from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
+
 
 class TopMarketPLSpider(AgileStoreLocatorSpider):
     name = "top_market_pl"
@@ -16,4 +10,3 @@ class TopMarketPLSpider(AgileStoreLocatorSpider):
     def parse_item(self, item: Feature, location: dict, **kwargs):
         del item["website"]
         yield item
-
