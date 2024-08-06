@@ -1,5 +1,6 @@
 from locations.storefinders.storefrontgateway import StorefrontgatewaySpider
 
+
 class CellarbrationsAUSpider(StorefrontgatewaySpider):
     name = "cellarbrations_au"
     item_attributes = {"brand": "Cellarbrations", "brand_wikidata": "Q109807592"}
