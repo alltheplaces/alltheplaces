@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 DAY_MAPPING = {
     "Mo.": "Mo",
@@ -30,7 +31,17 @@ class NettoDESpider(scrapy.Spider):
     }
     item_attributes = NETTO_MARKEN
     allowed_domains = ["netto-online.de"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "User-Agent": BROWSER_DEFAULT,
+            "Connection": "keep-alive",
+            "Referer": "https://www.netto-online.de/filialfinder",
+            "Sec-Fetch-Mode": "cors",
+        },
+    }
 
     def start_requests(self):
         yield scrapy.http.FormRequest(
