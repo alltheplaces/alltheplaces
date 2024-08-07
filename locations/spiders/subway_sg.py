@@ -1,7 +1,3 @@
-import scrapy
-
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
 from locations.spiders.subway import SubwaySpider
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
