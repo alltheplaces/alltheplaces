@@ -10,6 +10,11 @@ class SoneczkoPLSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "sloneczko.zgora.pl",
     ]
+    searchable_points_files = [
+        "eu_centroids_20km_radius_country.csv",
+    ]
+    max_results = 50
+    search_radius = 20
 
     # See also https://github.com/alltheplaces/alltheplaces/pull/9369/files
     def start_requests(self):
