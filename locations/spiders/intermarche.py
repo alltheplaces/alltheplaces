@@ -1,9 +1,10 @@
 import scrapy
-from scrapy import Request
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.user_agents import FIREFOX_LATEST
 
 
 class IntermarcheSpider(scrapy.Spider):
@@ -22,12 +23,17 @@ class IntermarcheSpider(scrapy.Spider):
     INTERMARCHE_HYPER = {"brand": "Intermarché Hyper", "brand_wikidata": "Q98278022"}
     item_attributes = {"country": "FR"}
     requires_proxy = True
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
 
     def start_requests(self):
-        yield Request(
-            url="https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?r=10000&lat=43.646715&lon=1.433066&min=10000",
-            headers={"x-red-version": "3", "x-red-device": "red_fo_desktop"},
+        yield JsonRequest(
+            url="https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?min=20000",
+            headers={
+                "referer": "https://www.intermarche.com/",
+                "sec-fetch-site": "same-origin",
+                "x-red-device": "red_fo_desktop",
+                "x-red-version": "3",
+            },
         )
 
     def parse(self, response, **kwargs):
