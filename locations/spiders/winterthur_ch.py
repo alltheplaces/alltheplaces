@@ -73,7 +73,7 @@ class WinterthurCHSpider(scrapy.Spider):
         for m in response.json()["FeatureCollection"]["member"]:
             if f := m.get("SitzbankWfs"):
                 ref = f["Banknummer"]
-                if ref in self.ids_seen:
+                if ref in self.seen_ids:
                     raise DropItem()
 
                 coords = f["msGeometry"]["Point"]["pos"].split()
