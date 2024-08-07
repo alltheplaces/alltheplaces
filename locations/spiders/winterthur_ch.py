@@ -96,7 +96,7 @@ class WinterthurCHSpider(scrapy.Spider):
                     },
                     "ref": ref,
                 }
-                self.seen_ids.append(ref)
+                self.seen_ids.add(ref)
                 apply_category(Categories.BENCH, item)
                 yield Feature(**item)
 
