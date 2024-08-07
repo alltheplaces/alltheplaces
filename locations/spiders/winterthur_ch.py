@@ -5,6 +5,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from scrapy.exceptions import DropItem
 
 
 # Open Data of the City of Winterthur, Switzerland
@@ -21,6 +22,7 @@ class WinterthurCHSpider(scrapy.Spider):
         "license:wikidata": "Q6938433",
     }
     no_refs = True
+    seen_ids = set()
 
     # Swiss LV95 (https://epsg.io/2056) -> lat/lon (https://epsg.io/4326)
     coord_transformer = pyproj.Transformer.from_crs(2056, 4326)
@@ -70,6 +72,10 @@ class WinterthurCHSpider(scrapy.Spider):
     def parse_benches(self, response):
         for m in response.json()["FeatureCollection"]["member"]:
             if f := m.get("SitzbankWfs"):
+                ref = f["Banknummer"]
+                if ref in self.ids_seen:
+                    raise DropItem()
+
                 coords = f["msGeometry"]["Point"]["pos"].split()
                 [x, y] = [float(c) for c in coords[:2]]
                 lat, lon = self.coord_transformer.transform(x, y)
@@ -88,8 +94,9 @@ class WinterthurCHSpider(scrapy.Spider):
                         "material": self.parse_bench_material(btype),
                         "material:wikidata": self.parse_bench_material_wikidata(btype),
                     },
-                    "ref": f["Banknummer"],
+                    "ref": ref,
                 }
+                self.seen_ids.append(ref)
                 apply_category(Categories.BENCH, item)
                 yield Feature(**item)
 
