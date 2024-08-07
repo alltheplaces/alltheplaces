@@ -41,6 +41,8 @@ DELIVERY_PARTNERS = {
 
 
 def time_dict_to_struct(t):
+    if t is None:
+        return None
     if t["hours"] >= 24:
         t["hours"] = 23
         t["minutes"] = 59
@@ -74,7 +76,9 @@ class LePainQuotidienSpider(Spider):
             oh = OpeningHours()
             for period in location["regularHours"]["periods"]:
                 oh.add_range(
-                    period["openDay"], time_dict_to_struct(period["openTime"]), time_dict_to_struct(period["closeTime"])
+                    period["openDay"],
+                    time_dict_to_struct(period.get("openTime")),
+                    time_dict_to_struct(period.get("closeTime")),
                 )
             item["opening_hours"] = oh
 
