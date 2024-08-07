@@ -1,7 +1,7 @@
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
-class Tiendas3BMXSpider(AgileStoreLocatorSpider):
+class Tiendas3bMXSpider(AgileStoreLocatorSpider):
     name = "tiendas_3b_mx"
     item_attributes = {
         "brand_wikidata": "Q113217378",
