@@ -1,5 +1,4 @@
 from locations.items import Feature
-
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
