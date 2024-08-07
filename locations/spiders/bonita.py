@@ -24,19 +24,19 @@ class BonitaSpider(Spider):
 
             item["street"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])
             item["opening_hours"] = OpeningHours()
-            if location["opening_hours_monday"]:
-                item["opening_hours"].add_ranges_from_string("Monday " + location["opening_hours_monday"])
-            if location["opening_hours_tuesday"]:
-                item["opening_hours"].add_ranges_from_string("Tuesday " + location["opening_hours_tuesday"])
-            if location["opening_hours_wednesday"]:
-                item["opening_hours"].add_ranges_from_string("Wednesday " + location["opening_hours_wednesday"])
-            if location["opening_hours_thursday"]:
-                item["opening_hours"].add_ranges_from_string("Thursday " + location["opening_hours_thursday"])
-            if location["opening_hours_friday"]:
-                item["opening_hours"].add_ranges_from_string("Friday " + location["opening_hours_friday"])
-            if location["opening_hours_saturday"]:
-                item["opening_hours"].add_ranges_from_string("Saturday " + location["opening_hours_saturday"])
-            if location["opening_hours_sunday"]:
-                item["opening_hours"].add_ranges_from_string("Sunday " + location["opening_hours_sunday"])
+            if location["opening_hours_monday"] is not None:
+                item["opening_hours"].add_ranges_from_string("Monday: " + location["opening_hours_monday"])
+            if location["opening_hours_tuesday"] is not None:
+                item["opening_hours"].add_ranges_from_string("Tuesday: " + location["opening_hours_tuesday"])
+            if location["opening_hours_wednesday"] is not None:
+                item["opening_hours"].add_ranges_from_string("Wednesday: " + location["opening_hours_wednesday"])
+            if location["opening_hours_thursday"] is not None:
+                item["opening_hours"].add_ranges_from_string("Thursday: " + location["opening_hours_thursday"])
+            if location["opening_hours_friday"] is not None:
+                item["opening_hours"].add_ranges_from_string("Friday: " + location["opening_hours_friday"])
+            if location["opening_hours_saturday"] is not None:
+                item["opening_hours"].add_ranges_from_string("Saturday: " + location["opening_hours_saturday"])
+            if location["opening_hours_sunday"] is not None:
+                item["opening_hours"].add_ranges_from_string("Sunday: " + location["opening_hours_sunday"])
 
             yield item
