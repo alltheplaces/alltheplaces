@@ -1,7 +1,6 @@
-from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
-from locations.items import set_closed
+
 
 class WahoosUSSpider(AgileStoreLocatorSpider):
     name = "wahoos_us"
