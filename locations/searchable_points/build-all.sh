@@ -311,11 +311,8 @@ if [ ! -f et.shp ]; then
   ogr2ogr -sql "SELECT OGR_GEOMETRY FROM ne_10m_admin_0_countries_lakes WHERE ISO_A2='ET'" et.shp ne_10m_admin_0_countries_lakes.shp
 fi
 
-if [ ! -f fi
-.shp ]; then
-  ogr2ogr -sql "SELECT OGR_GEOMETRY FROM ne_10m_admin_0_countries_lakes WHERE ISO_A2='FI
-  '" fi
-  .shp ne_10m_admin_0_countries_lakes.shp
+if [ ! -f fi.shp ]; then
+  ogr2ogr -sql "SELECT OGR_GEOMETRY FROM ne_10m_admin_0_countries_lakes WHERE ISO_A2='FI'" fi.shp ne_10m_admin_0_countries_lakes.shp
 fi
 
 if [ ! -f fj.shp ]; then
