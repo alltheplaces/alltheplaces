@@ -1,12 +1,7 @@
-import ast
-
-import scrapy
-
-from locations.items import Feature
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
+
 
 class SuzukiCASpider(AgileStoreLocatorSpider):
     name = "suzuki_ca"
