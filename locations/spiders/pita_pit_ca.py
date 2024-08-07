@@ -3,8 +3,8 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PitaPitSpider(SitemapSpider, StructuredDataSpider):
-    name = "pita_pit"
+class PitaPitCASpider(SitemapSpider, StructuredDataSpider):
+    name = "pita_pit_ca"
     item_attributes = {
         "brand_wikidata": "Q7757289",
         "brand": "Pita Pit",
