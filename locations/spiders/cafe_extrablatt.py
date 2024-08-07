@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import DAYS_DE, DELIMITERS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
-from locations.hours import DAYS_DE, OpeningHours, DELIMITERS_DE
 
 
 class CafeExtrablattSpider(SitemapSpider, StructuredDataSpider):

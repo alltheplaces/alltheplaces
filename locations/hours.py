@@ -652,14 +652,7 @@ DELIMITERS_EN = [
     "until",
 ]
 
-DELIMITERS_DE = [
-    "-",
-    "–",
-    "—",
-    "―",
-    "‒",
-    "bis"
-]
+DELIMITERS_DE = ["-", "–", "—", "―", "‒", "bis"]
 
 DELIMITERS_ES = [
     "-",
