@@ -1030,3 +1030,9716 @@ fi
 if [ ! -f zw.shp ]; then
   ogr2ogr -sql "SELECT OGR_GEOMETRY FROM ne_10m_admin_0_countries_lakes WHERE ISO_A2='ZW'" zw.shp ne_10m_admin_0_countries_lakes.shp
 fi
+
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ad_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ad.shp" > ad_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ae_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ae.shp" > ae_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name af_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files af.shp" > af_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ag_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ag.shp" > ag_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ai_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ai.shp" > ai_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name al_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files al.shp" > al_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name am_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files am.shp" > am_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ao_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ao.shp" > ao_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name aq_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files aq.shp" > aq_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ar_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ar.shp" > ar_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name as_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files as.shp" > as_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name at_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files at.shp" > at_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name au_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files au.shp" > au_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name aw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files aw.shp" > aw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ax_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ax.shp" > ax_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name az_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files az.shp" > az_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ba_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ba.shp" > ba_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bb_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bb.shp" > bb_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bd_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bd.shp" > bd_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name be_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files be.shp" > be_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bf.shp" > bf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bg.shp" > bg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bh_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bh.shp" > bh_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bi_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bi.shp" > bi_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bj_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bj.shp" > bj_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bl_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bl.shp" > bl_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bm.shp" > bm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bn.shp" > bn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bo_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bo.shp" > bo_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bq_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bq.shp" > bq_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name br_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files br.shp" > br_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bs_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bs.shp" > bs_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bt_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bt.shp" > bt_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bv_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bv.shp" > bv_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bw.shp" > bw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name by_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files by.shp" > by_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bz.shp" > bz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ca_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ca.shp" > ca_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cc_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cc.shp" > cc_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cd_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cd.shp" > cd_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cf.shp" > cf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cg.shp" > cg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ch_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ch.shp" > ch_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ci_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ci.shp" > ci_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ck_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ck.shp" > ck_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cl_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cl.shp" > cl_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cm.shp" > cm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cn.shp" > cn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name co_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files co.shp" > co_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cr.shp" > cr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cu_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cu.shp" > cu_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cv_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cv.shp" > cv_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cw.shp" > cw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cx_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cx.shp" > cx_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cy_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cy.shp" > cy_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cz.shp" > cz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name de_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files de.shp" > de_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dj_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dj.shp" > dj_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dk.shp" > dk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dm.shp" > dm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name do_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files do.shp" > do_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dz.shp" > dz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ec_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ec.shp" > ec_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ee_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ee.shp" > ee_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name eg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files eg.shp" > eg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name eh_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files eh.shp" > eh_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name er_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files er.shp" > er_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name es_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files es.shp" > es_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name et_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files et.shp" > et_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fi_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fi.shp" > fi_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fj_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fj.shp" > fj_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fk.shp" > fk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fm.shp" > fm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fo_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fo.shp" > fo_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fr.shp" > fr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ga_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ga.shp" > ga_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gb_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gb.shp" > gb_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gd_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gd.shp" > gd_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ge_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ge.shp" > ge_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gf.shp" > gf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gg.shp" > gg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gh_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gh.shp" > gh_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gi_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gi.shp" > gi_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gl_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gl.shp" > gl_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gm.shp" > gm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gn.shp" > gn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gp_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gp.shp" > gp_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gq_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gq.shp" > gq_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gr.shp" > gr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gs_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gs.shp" > gs_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gt_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gt.shp" > gt_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gu_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gu.shp" > gu_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gw.shp" > gw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gy_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gy.shp" > gy_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hk.shp" > hk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hm.shp" > hm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hn.shp" > hn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hr.shp" > hr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ht_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ht.shp" > ht_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hu_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hu.shp" > hu_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name id_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files id.shp" > id_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ie_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ie.shp" > ie_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name il_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files il.shp" > il_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name im_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files im.shp" > im_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name in_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files in.shp" > in_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name io_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files io.shp" > io_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name iq_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files iq.shp" > iq_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ir_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ir.shp" > ir_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name is_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files is.shp" > is_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name it_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files it.shp" > it_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name je_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files je.shp" > je_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jm.shp" > jm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jo_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jo.shp" > jo_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jp_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jp.shp" > jp_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ke_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ke.shp" > ke_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kg.shp" > kg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kh_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kh.shp" > kh_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ki_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ki.shp" > ki_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name km_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files km.shp" > km_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kn.shp" > kn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kp_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kp.shp" > kp_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kr.shp" > kr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kw.shp" > kw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ky_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ky.shp" > ky_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kz.shp" > kz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name la_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files la.shp" > la_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lb_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lb.shp" > lb_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lc_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lc.shp" > lc_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name li_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files li.shp" > li_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lk.shp" > lk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lr.shp" > lr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ls_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ls.shp" > ls_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lt_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lt.shp" > lt_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lu_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lu.shp" > lu_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lv_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lv.shp" > lv_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ly_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ly.shp" > ly_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ma_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ma.shp" > ma_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mc_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mc.shp" > mc_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name md_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files md.shp" > md_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name me_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files me.shp" > me_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mf.shp" > mf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mg.shp" > mg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mh_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mh.shp" > mh_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mk.shp" > mk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ml_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ml.shp" > ml_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mm.shp" > mm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mn.shp" > mn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mo_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mo.shp" > mo_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mp_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mp.shp" > mp_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mq_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mq.shp" > mq_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mr.shp" > mr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ms_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ms.shp" > ms_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mt_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mt.shp" > mt_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mu_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mu.shp" > mu_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mv_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mv.shp" > mv_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mw.shp" > mw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mx_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mx.shp" > mx_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name my_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files my.shp" > my_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mz.shp" > mz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name na_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files na.shp" > na_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nc_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nc.shp" > nc_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ne_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ne.shp" > ne_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nf.shp" > nf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ng_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ng.shp" > ng_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ni_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ni.shp" > ni_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nl_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nl.shp" > nl_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name no_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files no.shp" > no_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name np_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files np.shp" > np_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nr.shp" > nr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nu_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nu.shp" > nu_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nz.shp" > nz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name om_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files om.shp" > om_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pa_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pa.shp" > pa_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pe_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pe.shp" > pe_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pf.shp" > pf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pg.shp" > pg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ph_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ph.shp" > ph_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pk.shp" > pk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pl_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pl.shp" > pl_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pm.shp" > pm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pn.shp" > pn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pr.shp" > pr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ps_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ps.shp" > ps_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pt_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pt.shp" > pt_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pw.shp" > pw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name py_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files py.shp" > py_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name qa_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files qa.shp" > qa_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name re_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files re.shp" > re_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ro_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ro.shp" > ro_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name rs_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files rs.shp" > rs_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ru_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ru.shp" > ru_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name rw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files rw.shp" > rw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sa_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sa.shp" > sa_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sb_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sb.shp" > sb_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sc_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sc.shp" > sc_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sd_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sd.shp" > sd_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name se_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files se.shp" > se_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sg.shp" > sg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sh_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sh.shp" > sh_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name si_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files si.shp" > si_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sj_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sj.shp" > sj_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sk.shp" > sk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sl_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sl.shp" > sl_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sm.shp" > sm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sn.shp" > sn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name so_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files so.shp" > so_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sr.shp" > sr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ss_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ss.shp" > ss_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name st_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files st.shp" > st_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sv_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sv.shp" > sv_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sx_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sx.shp" > sx_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sy_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sy.shp" > sy_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sz.shp" > sz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tc_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tc.shp" > tc_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name td_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files td.shp" > td_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tf.shp" > tf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tg.shp" > tg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name th_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files th.shp" > th_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tj_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tj.shp" > tj_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tk_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tk.shp" > tk_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tl_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tl.shp" > tl_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tm.shp" > tm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tn.shp" > tn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name to_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files to.shp" > to_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tr_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tr.shp" > tr_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tt_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tt.shp" > tt_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tv_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tv.shp" > tv_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tw.shp" > tw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tz.shp" > tz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ua_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ua.shp" > ua_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ug_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ug.shp" > ug_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name um_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files um.shp" > um_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name us_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files us.shp" > us_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name uy_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files uy.shp" > uy_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name uz_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files uz.shp" > uz_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name va_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files va.shp" > va_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vc_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vc.shp" > vc_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ve_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ve.shp" > ve_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vg_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vg.shp" > vg_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vi_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vi.shp" > vi_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vn_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vn.shp" > vn_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vu_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vu.shp" > vu_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name wf_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files wf.shp" > wf_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ws_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ws.shp" > ws_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ye_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ye.shp" > ye_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name yt_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files yt.shp" > yt_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name za_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files za.shp" > za_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name zm_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files zm.shp" > zm_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name zw_iseagg_20km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files zw.shp" > zw_iseagg_20km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ad_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ad.shp" > ad_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ae_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ae.shp" > ae_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name af_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files af.shp" > af_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ag_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ag.shp" > ag_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ai_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ai.shp" > ai_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name al_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files al.shp" > al_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name am_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files am.shp" > am_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ao_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ao.shp" > ao_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name aq_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files aq.shp" > aq_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ar_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ar.shp" > ar_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name as_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files as.shp" > as_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name at_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files at.shp" > at_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name au_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files au.shp" > au_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name aw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files aw.shp" > aw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ax_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ax.shp" > ax_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name az_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files az.shp" > az_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ba_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ba.shp" > ba_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bb_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bb.shp" > bb_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bd_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bd.shp" > bd_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name be_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files be.shp" > be_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bf.shp" > bf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bg.shp" > bg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bh_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bh.shp" > bh_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bi_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bi.shp" > bi_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bj_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bj.shp" > bj_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bl_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bl.shp" > bl_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bm.shp" > bm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bn.shp" > bn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bo_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bo.shp" > bo_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bq_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bq.shp" > bq_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name br_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files br.shp" > br_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bs_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bs.shp" > bs_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bt_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bt.shp" > bt_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bv_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bv.shp" > bv_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bw.shp" > bw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name by_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files by.shp" > by_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bz.shp" > bz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ca_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ca.shp" > ca_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cc_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cc.shp" > cc_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cd_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cd.shp" > cd_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cf.shp" > cf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cg.shp" > cg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ch_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ch.shp" > ch_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ci_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ci.shp" > ci_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ck_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ck.shp" > ck_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cl_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cl.shp" > cl_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cm.shp" > cm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cn.shp" > cn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name co_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files co.shp" > co_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cr.shp" > cr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cu_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cu.shp" > cu_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cv_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cv.shp" > cv_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cw.shp" > cw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cx_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cx.shp" > cx_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cy_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cy.shp" > cy_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cz.shp" > cz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name de_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files de.shp" > de_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dj_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dj.shp" > dj_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dk.shp" > dk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dm.shp" > dm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name do_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files do.shp" > do_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dz.shp" > dz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ec_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ec.shp" > ec_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ee_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ee.shp" > ee_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name eg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files eg.shp" > eg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name eh_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files eh.shp" > eh_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name er_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files er.shp" > er_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name es_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files es.shp" > es_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name et_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files et.shp" > et_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fi_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fi.shp" > fi_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fj_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fj.shp" > fj_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fk.shp" > fk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fm.shp" > fm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fo_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fo.shp" > fo_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fr.shp" > fr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ga_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ga.shp" > ga_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gb_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gb.shp" > gb_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gd_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gd.shp" > gd_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ge_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ge.shp" > ge_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gf.shp" > gf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gg.shp" > gg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gh_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gh.shp" > gh_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gi_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gi.shp" > gi_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gl_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gl.shp" > gl_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gm.shp" > gm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gn.shp" > gn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gp_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gp.shp" > gp_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gq_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gq.shp" > gq_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gr.shp" > gr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gs_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gs.shp" > gs_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gt_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gt.shp" > gt_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gu_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gu.shp" > gu_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gw.shp" > gw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gy_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gy.shp" > gy_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hk.shp" > hk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hm.shp" > hm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hn.shp" > hn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hr.shp" > hr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ht_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ht.shp" > ht_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hu_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hu.shp" > hu_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name id_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files id.shp" > id_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ie_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ie.shp" > ie_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name il_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files il.shp" > il_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name im_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files im.shp" > im_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name in_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files in.shp" > in_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name io_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files io.shp" > io_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name iq_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files iq.shp" > iq_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ir_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ir.shp" > ir_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name is_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files is.shp" > is_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name it_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files it.shp" > it_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name je_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files je.shp" > je_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jm.shp" > jm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jo_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jo.shp" > jo_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jp_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jp.shp" > jp_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ke_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ke.shp" > ke_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kg.shp" > kg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kh_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kh.shp" > kh_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ki_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ki.shp" > ki_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name km_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files km.shp" > km_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kn.shp" > kn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kp_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kp.shp" > kp_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kr.shp" > kr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kw.shp" > kw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ky_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ky.shp" > ky_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kz.shp" > kz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name la_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files la.shp" > la_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lb_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lb.shp" > lb_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lc_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lc.shp" > lc_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name li_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files li.shp" > li_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lk.shp" > lk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lr.shp" > lr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ls_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ls.shp" > ls_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lt_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lt.shp" > lt_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lu_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lu.shp" > lu_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lv_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lv.shp" > lv_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ly_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ly.shp" > ly_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ma_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ma.shp" > ma_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mc_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mc.shp" > mc_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name md_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files md.shp" > md_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name me_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files me.shp" > me_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mf.shp" > mf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mg.shp" > mg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mh_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mh.shp" > mh_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mk.shp" > mk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ml_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ml.shp" > ml_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mm.shp" > mm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mn.shp" > mn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mo_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mo.shp" > mo_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mp_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mp.shp" > mp_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mq_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mq.shp" > mq_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mr.shp" > mr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ms_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ms.shp" > ms_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mt_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mt.shp" > mt_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mu_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mu.shp" > mu_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mv_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mv.shp" > mv_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mw.shp" > mw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mx_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mx.shp" > mx_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name my_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files my.shp" > my_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mz.shp" > mz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name na_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files na.shp" > na_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nc_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nc.shp" > nc_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ne_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ne.shp" > ne_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nf.shp" > nf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ng_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ng.shp" > ng_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ni_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ni.shp" > ni_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nl_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nl.shp" > nl_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name no_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files no.shp" > no_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name np_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files np.shp" > np_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nr.shp" > nr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nu_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nu.shp" > nu_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nz.shp" > nz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name om_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files om.shp" > om_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pa_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pa.shp" > pa_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pe_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pe.shp" > pe_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pf.shp" > pf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pg.shp" > pg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ph_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ph.shp" > ph_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pk.shp" > pk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pl_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pl.shp" > pl_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pm.shp" > pm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pn.shp" > pn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pr.shp" > pr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ps_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ps.shp" > ps_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pt_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pt.shp" > pt_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pw.shp" > pw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name py_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files py.shp" > py_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name qa_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files qa.shp" > qa_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name re_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files re.shp" > re_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ro_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ro.shp" > ro_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name rs_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files rs.shp" > rs_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ru_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ru.shp" > ru_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name rw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files rw.shp" > rw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sa_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sa.shp" > sa_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sb_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sb.shp" > sb_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sc_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sc.shp" > sc_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sd_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sd.shp" > sd_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name se_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files se.shp" > se_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sg.shp" > sg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sh_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sh.shp" > sh_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name si_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files si.shp" > si_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sj_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sj.shp" > sj_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sk.shp" > sk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sl_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sl.shp" > sl_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sm.shp" > sm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sn.shp" > sn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name so_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files so.shp" > so_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sr.shp" > sr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ss_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ss.shp" > ss_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name st_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files st.shp" > st_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sv_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sv.shp" > sv_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sx_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sx.shp" > sx_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sy_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sy.shp" > sy_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sz.shp" > sz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tc_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tc.shp" > tc_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name td_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files td.shp" > td_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tf.shp" > tf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tg.shp" > tg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name th_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files th.shp" > th_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tj_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tj.shp" > tj_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tk_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tk.shp" > tk_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tl_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tl.shp" > tl_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tm.shp" > tm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tn.shp" > tn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name to_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files to.shp" > to_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tr_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tr.shp" > tr_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tt_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tt.shp" > tt_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tv_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tv.shp" > tv_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tw.shp" > tw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tz.shp" > tz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ua_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ua.shp" > ua_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ug_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ug.shp" > ug_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name um_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files um.shp" > um_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name us_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files us.shp" > us_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name uy_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files uy.shp" > uy_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name uz_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files uz.shp" > uz_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name va_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files va.shp" > va_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vc_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vc.shp" > vc_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ve_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ve.shp" > ve_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vg_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vg.shp" > vg_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vi_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vi.shp" > vi_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vn_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vn.shp" > vn_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vu_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vu.shp" > vu_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name wf_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files wf.shp" > wf_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ws_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ws.shp" > ws_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ye_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ye.shp" > ye_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name yt_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files yt.shp" > yt_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name za_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files za.shp" > za_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name zm_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files zm.shp" > zm_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name zw_iseagg_40km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files zw.shp" > zw_iseagg_40km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ad_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ad.shp" > ad_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ae_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ae.shp" > ae_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name af_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files af.shp" > af_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ag_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ag.shp" > ag_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ai_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ai.shp" > ai_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name al_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files al.shp" > al_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name am_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files am.shp" > am_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ao_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ao.shp" > ao_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name aq_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files aq.shp" > aq_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ar_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ar.shp" > ar_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name as_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files as.shp" > as_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name at_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files at.shp" > at_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name au_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files au.shp" > au_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name aw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files aw.shp" > aw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ax_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ax.shp" > ax_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name az_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files az.shp" > az_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ba_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ba.shp" > ba_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bb_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bb.shp" > bb_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bd_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bd.shp" > bd_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name be_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files be.shp" > be_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bf.shp" > bf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bg.shp" > bg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bh_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bh.shp" > bh_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bi_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bi.shp" > bi_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bj_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bj.shp" > bj_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bl_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bl.shp" > bl_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bm.shp" > bm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bn.shp" > bn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bo_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bo.shp" > bo_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bq_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bq.shp" > bq_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name br_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files br.shp" > br_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bs_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bs.shp" > bs_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bt_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bt.shp" > bt_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bv_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bv.shp" > bv_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bw.shp" > bw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name by_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files by.shp" > by_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name bz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files bz.shp" > bz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ca_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ca.shp" > ca_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cc_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cc.shp" > cc_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cd_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cd.shp" > cd_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cf.shp" > cf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cg.shp" > cg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ch_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ch.shp" > ch_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ci_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ci.shp" > ci_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ck_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ck.shp" > ck_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cl_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cl.shp" > cl_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cm.shp" > cm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cn.shp" > cn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name co_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files co.shp" > co_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cr.shp" > cr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cu_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cu.shp" > cu_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cv_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cv.shp" > cv_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cw.shp" > cw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cx_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cx.shp" > cx_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cy_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cy.shp" > cy_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name cz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files cz.shp" > cz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name de_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files de.shp" > de_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dj_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dj.shp" > dj_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dk.shp" > dk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dm.shp" > dm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name do_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files do.shp" > do_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name dz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files dz.shp" > dz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ec_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ec.shp" > ec_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ee_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ee.shp" > ee_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name eg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files eg.shp" > eg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name eh_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files eh.shp" > eh_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name er_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files er.shp" > er_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name es_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files es.shp" > es_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name et_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files et.shp" > et_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fi_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fi.shp" > fi_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fj_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fj.shp" > fj_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fk.shp" > fk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fm.shp" > fm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fo_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fo.shp" > fo_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name fr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files fr.shp" > fr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ga_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ga.shp" > ga_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gb_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gb.shp" > gb_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gd_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gd.shp" > gd_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ge_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ge.shp" > ge_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gf.shp" > gf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gg.shp" > gg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gh_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gh.shp" > gh_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gi_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gi.shp" > gi_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gl_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gl.shp" > gl_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gm.shp" > gm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gn.shp" > gn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gp_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gp.shp" > gp_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gq_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gq.shp" > gq_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gr.shp" > gr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gs_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gs.shp" > gs_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gt_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gt.shp" > gt_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gu_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gu.shp" > gu_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gw.shp" > gw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name gy_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files gy.shp" > gy_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hk.shp" > hk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hm.shp" > hm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hn.shp" > hn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hr.shp" > hr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ht_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ht.shp" > ht_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name hu_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files hu.shp" > hu_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name id_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files id.shp" > id_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ie_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ie.shp" > ie_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name il_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files il.shp" > il_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name im_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files im.shp" > im_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name in_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files in.shp" > in_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name io_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files io.shp" > io_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name iq_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files iq.shp" > iq_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ir_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ir.shp" > ir_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name is_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files is.shp" > is_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name it_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files it.shp" > it_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name je_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files je.shp" > je_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jm.shp" > jm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jo_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jo.shp" > jo_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name jp_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files jp.shp" > jp_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ke_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ke.shp" > ke_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kg.shp" > kg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kh_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kh.shp" > kh_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ki_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ki.shp" > ki_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name km_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files km.shp" > km_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kn.shp" > kn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kp_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kp.shp" > kp_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kr.shp" > kr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kw.shp" > kw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ky_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ky.shp" > ky_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name kz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files kz.shp" > kz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name la_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files la.shp" > la_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lb_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lb.shp" > lb_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lc_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lc.shp" > lc_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name li_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files li.shp" > li_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lk.shp" > lk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lr.shp" > lr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ls_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ls.shp" > ls_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lt_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lt.shp" > lt_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lu_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lu.shp" > lu_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name lv_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files lv.shp" > lv_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ly_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ly.shp" > ly_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ma_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ma.shp" > ma_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mc_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mc.shp" > mc_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name md_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files md.shp" > md_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name me_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files me.shp" > me_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mf.shp" > mf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mg.shp" > mg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mh_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mh.shp" > mh_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mk.shp" > mk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ml_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ml.shp" > ml_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mm.shp" > mm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mn.shp" > mn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mo_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mo.shp" > mo_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mp_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mp.shp" > mp_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mq_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mq.shp" > mq_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mr.shp" > mr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ms_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ms.shp" > ms_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mt_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mt.shp" > mt_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mu_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mu.shp" > mu_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mv_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mv.shp" > mv_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mw.shp" > mw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mx_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mx.shp" > mx_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name my_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files my.shp" > my_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name mz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files mz.shp" > mz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name na_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files na.shp" > na_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nc_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nc.shp" > nc_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ne_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ne.shp" > ne_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nf.shp" > nf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ng_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ng.shp" > ng_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ni_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ni.shp" > ni_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nl_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nl.shp" > nl_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name no_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files no.shp" > no_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name np_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files np.shp" > np_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nr.shp" > nr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nu_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nu.shp" > nu_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name nz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files nz.shp" > nz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name om_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files om.shp" > om_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pa_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pa.shp" > pa_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pe_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pe.shp" > pe_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pf.shp" > pf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pg.shp" > pg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ph_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ph.shp" > ph_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pk.shp" > pk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pl_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pl.shp" > pl_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pm.shp" > pm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pn.shp" > pn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pr.shp" > pr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ps_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ps.shp" > ps_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pt_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pt.shp" > pt_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name pw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files pw.shp" > pw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name py_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files py.shp" > py_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name qa_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files qa.shp" > qa_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name re_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files re.shp" > re_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ro_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ro.shp" > ro_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name rs_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files rs.shp" > rs_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ru_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ru.shp" > ru_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name rw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files rw.shp" > rw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sa_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sa.shp" > sa_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sb_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sb.shp" > sb_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sc_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sc.shp" > sc_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sd_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sd.shp" > sd_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name se_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files se.shp" > se_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sg.shp" > sg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sh_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sh.shp" > sh_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name si_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files si.shp" > si_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sj_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sj.shp" > sj_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sk.shp" > sk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sl_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sl.shp" > sl_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sm.shp" > sm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sn.shp" > sn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name so_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files so.shp" > so_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sr.shp" > sr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ss_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ss.shp" > ss_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name st_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files st.shp" > st_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sv_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sv.shp" > sv_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sx_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sx.shp" > sx_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sy_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sy.shp" > sy_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name sz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files sz.shp" > sz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tc_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tc.shp" > tc_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name td_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files td.shp" > td_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tf.shp" > tf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tg.shp" > tg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name th_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files th.shp" > th_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tj_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tj.shp" > tj_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tk_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tk.shp" > tk_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tl_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tl.shp" > tl_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tm.shp" > tm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tn.shp" > tn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name to_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files to.shp" > to_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tr_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tr.shp" > tr_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tt_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tt.shp" > tt_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tv_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tv.shp" > tv_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tw.shp" > tw_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name tz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files tz.shp" > tz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ua_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ua.shp" > ua_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ug_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ug.shp" > ug_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name um_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files um.shp" > um_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name us_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files us.shp" > us_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name uy_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files uy.shp" > uy_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name uz_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files uz.shp" > uz_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name va_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files va.shp" > va_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vc_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vc.shp" > vc_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ve_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ve.shp" > ve_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vg_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vg.shp" > vg_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vi_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vi.shp" > vi_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vn_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vn.shp" > vn_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name vu_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files vu.shp" > vu_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name wf_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files wf.shp" > wf_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ws_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ws.shp" > ws_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name ye_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files ye.shp" > ye_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name yt_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files yt.shp" > yt_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name za_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files za.shp" > za_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name zm_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files zm.shp" > zm_iseagg_120km_radius.meta
+
+echo "dggrid_operation GENERATE_GRID
+
+dggs_type ISEA43H
+dggs_num_aperture_4_res 3
+dggs_res_spec 5
+
+point_output_type TEXT
+point_output_file_name zw_iseagg_120km_radius
+
+clip_type POLY_INTERSECT
+clip_subset_type SHAPEFILE
+clip_region_files zw.shp" > zw_iseagg_120km_radius.meta
+
