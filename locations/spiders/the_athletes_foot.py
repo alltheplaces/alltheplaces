@@ -10,3 +10,6 @@ class TheAthletesFootSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.theathletesfoot.com",
     ]
+    search_radius = 20000
+    max_results = 50
+    searchable_points_files = ["earth_centroids_iseadgg_346km_radius.csv"]
