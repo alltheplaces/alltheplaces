@@ -4,8 +4,8 @@ from locations.hours import DAYS_DE, DELIMITERS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CafeExtrablattSpider(SitemapSpider, StructuredDataSpider):
-    name = "cafe_extrablatt"
+class CafeExtrablattDESpider(SitemapSpider, StructuredDataSpider):
+    name = "cafe_extrablatt_de"
     item_attributes = {"brand": "Cafe Extrablatt", "brand_wikidata": "Q1025505"}
     sitemap_urls = ["https://cafe-extrablatt.de/sitemap.xml"]
     sitemap_rules = [(r"/standorte/details/cafe-extrablatt-.*", "parse_sd")]
