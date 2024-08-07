@@ -17,7 +17,7 @@ class LewiatanPLSpider(Spider):
             item["operator"] = html.unescape(item.pop("name"))
             item["street_address"] = item.pop("addr_full")
             item["website"] = response.urljoin(location["url"])
-            if "(" in item["city"]:
+            if " (" in item["city"]:
                 item["city"] = item["city"].split(" (")[0]
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
