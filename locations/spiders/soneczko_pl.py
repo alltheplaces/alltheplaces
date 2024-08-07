@@ -1,3 +1,6 @@
+from scrapy.http import JsonRequest
+
+from locations.geo import point_locations
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
