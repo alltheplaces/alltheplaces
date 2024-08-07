@@ -16,6 +16,8 @@ class GrandvisionSpider(CrawlSpider, StructuredDataSpider):
         "apollo": ("Apollo-Optik", "Q618940"),
         "grandoptical": ("GrandOptical", "Q3113677"),
         "optica2000": ("Optica2000", "Q15812731"),
+        "synoptik": ("Synoptik", "Q10687541"),
+        "visionexpress": ("Vision Express", "Q7936150"),
     }
     start_urls = [
         "https://www.pearle.at/filialen-uebersicht",
@@ -28,6 +30,10 @@ class GrandvisionSpider(CrawlSpider, StructuredDataSpider):
         "https://www.grandoptical.pt/lojas/por-todo-pais",
         "https://www.grandoptical.sk/predajne",
         "https://www.optica2000.com/grupo-tiendas",
+        "https://www.synoptik.se/butiksoversikt",
+        "https://www.synoptik.dk/butiksoversigt",
+        "https://www.visionexpress.com/store-overview",
+        "https://www.visionexpress.ie/store-overview",
     ]
     rules = [
         Rule(
@@ -59,6 +65,20 @@ class GrandvisionSpider(CrawlSpider, StructuredDataSpider):
             LinkExtractor(allow=r"https://www\.optica2000\.com/buscar-opticas/[-\w]+$"),
         ),
         Rule(LinkExtractor(allow=r"https://www\.optica2000\.com/buscar-opticas/[-\w]+/[-\w]+$"), callback="parse_sd"),
+        Rule(
+            LinkExtractor(allow=r"https://www\.synoptik\.se/butiker/[-\w]+$"),
+        ),
+        Rule(LinkExtractor(allow=r"https://www\.synoptik\.se/butiker/[-\w]+/[-\w]+$"), callback="parse_sd"),
+        Rule(
+            LinkExtractor(allow=r"https://www\.synoptik\.dk/butikker/[-\w]+$"),
+        ),
+        Rule(LinkExtractor(allow=r"https://www\.synoptik\.dk/butikker/[-\w]+/[-\w]+$"), callback="parse_sd"),
+        Rule(
+            LinkExtractor(allow=r"https://www\.visionexpress\.(com|ie)/opticians/[-\w]+$"),
+        ),
+        Rule(
+            LinkExtractor(allow=r"https://www\.visionexpress\.(com|ie)/opticians/[-\w]+/[-\w]+$"), callback="parse_sd"
+        ),
     ]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
