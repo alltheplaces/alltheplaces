@@ -1,12 +1,7 @@
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
-from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
-from locations.dict_parser import DictParser
 from locations.geo import point_locations
-from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
-from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
 class NaszSklepPLSpider(WPStoreLocatorSpider):
