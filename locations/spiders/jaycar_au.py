@@ -3,7 +3,6 @@ from scrapy.spiders import SitemapSpider
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import extract_email
 
 
@@ -13,8 +12,7 @@ class JaycarAUSpider(SitemapSpider):
     sitemap_urls = ["https://www.jaycar.com.au/sitemap.xml"]
     sitemap_follow = ["/Store-en-aud-"]
     sitemap_rules = [("/store/", "parse")]
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
