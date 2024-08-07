@@ -10742,4 +10742,3 @@ point_output_file_name zw_iseagg_120km_radius
 clip_type POLY_INTERSECT
 clip_subset_type SHAPEFILE
 clip_region_files zw.shp" > zw_iseagg_120km_radius.meta
-
