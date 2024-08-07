@@ -1,5 +1,5 @@
 import scrapy
-from scrapy import Request
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -9,8 +9,14 @@ from locations.hours import DAYS, OpeningHours
 class IntermarcheSpider(scrapy.Spider):
     name = "intermarche"
     allowed_domains = ["intermarche.com"]
-    INTERMARCHE = {"brand": "Intermarché", "brand_wikidata": "Q3153200"}
-    INTERMARCHE_SUPER = {"brand": "Intermarché Super", "brand_wikidata": "Q98278038"}
+    INTERMARCHE = {
+        "brand": "Intermarché",
+        "brand_wikidata": "Q3153200",
+    }
+    INTERMARCHE_SUPER = {
+        "brand": "Intermarché Super",
+        "brand_wikidata": "Q98278038",
+    }
     INTERMARCHE_CONTACT = {
         "brand": "Intermarché Contact",
         "brand_wikidata": "Q98278049",
@@ -19,15 +25,16 @@ class IntermarcheSpider(scrapy.Spider):
         "brand": "Intermarché Express",
         "brand_wikidata": "Q98278043",
     }
-    INTERMARCHE_HYPER = {"brand": "Intermarché Hyper", "brand_wikidata": "Q98278022"}
+    INTERMARCHE_HYPER = {
+        "brand": "Intermarché Hyper",
+        "brand_wikidata": "Q98278022",
+    }
     item_attributes = {"country": "FR"}
     requires_proxy = True
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        yield Request(
-            url="https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?r=10000&lat=43.646715&lon=1.433066&min=10000",
-            headers={"x-red-version": "3", "x-red-device": "red_fo_desktop"},
+        yield JsonRequest(
+            url="https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?min=20000",
         )
 
     def parse(self, response, **kwargs):
