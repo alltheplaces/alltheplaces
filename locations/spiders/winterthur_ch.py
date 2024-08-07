@@ -2,10 +2,10 @@ import logging
 
 import pyproj
 import scrapy
+from scrapy.exceptions import DropItem
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from scrapy.exceptions import DropItem
 
 
 # Open Data of the City of Winterthur, Switzerland
