@@ -1,10 +1,10 @@
-from scrapy import FormRequest, Request, Spider
-from scrapy.http import Response
 from typing import Any, Iterable
 
-from locations.items import Feature
+from scrapy import FormRequest, Request, Spider
+from scrapy.http import Response
+
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+
 
 class SupermacsGBIESpider(Spider):
     name = "supermacs_gb_ie"
