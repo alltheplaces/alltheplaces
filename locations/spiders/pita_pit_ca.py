@@ -18,7 +18,7 @@ class PitaPitCASpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Restaurant"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if "| " in name:
+        if "| " in item["name"]:
             item["name"] = item["name"].split(" | ")[0].replace("Health Food Restaurant at ", "")
 
         yield item
