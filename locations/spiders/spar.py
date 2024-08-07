@@ -66,8 +66,6 @@ class SparSpider(scrapy.Spider):
 
     def parse(self, response, config):
         for row in response.json():
-            # TODO: handle "type"
-            base_url = "/".join(response.url.split("/")[:3])
             feature = Feature(
                 ref=row["locationId"],
                 name=row["name"],
