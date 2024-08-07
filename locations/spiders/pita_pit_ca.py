@@ -17,7 +17,6 @@ class PitaPitCASpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://pitapit.ca/restaurants/\w+/$", "parse_sd")]
     wanted_types = ["Restaurant"]
 
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "| " in name:
             item["name"] = item["name"].split(" | ")[0].replace("Health Food Restaurant at ", "")
