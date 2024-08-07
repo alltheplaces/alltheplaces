@@ -17,7 +17,7 @@ class NaszSklepPLSpider(WPStoreLocatorSpider):
         "eu_centroids_20km_radius_country.csv",
     ]
     time_format = "%I:%M %p"
-    max_results = 50
+    max_results = 100
     search_radius = 20
 
     def start_requests(self):
