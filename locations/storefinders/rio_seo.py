@@ -41,7 +41,7 @@ class RioSeoSpider(Spider):
         map_list = response.json()["maplist"]
         try:
             data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
-        except json.decoder.JSONDecodeError:
+        except json.decoder.JSONDecodeError e:
             logging.warning(f"Could not parse response - check API output: " + e.message)
             data = []
 
