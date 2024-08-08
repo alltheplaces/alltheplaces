@@ -41,13 +41,13 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
             line = line.strip("\n\r\t\f ,")
             if line:
                 return_addr.append(line)
-    assessmbled_address = ", ".join(return_addr)
+    assembled_address = ", ".join(return_addr)
 
     # If after all of the cleaning our address is very short, its likely to be "-" or similar dud content
-    if len(assessmbled_address) <= min_length:
+    if len(assembled_address) <= min_length:
         return ""
 
-    return assessmbled_address
+    return assembled_address
 
 
 class AddressCleanUpPipeline:
