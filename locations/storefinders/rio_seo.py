@@ -10,6 +10,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+import logging
 
 
 class RioSeoSpider(Spider):
@@ -38,7 +39,12 @@ class RioSeoSpider(Spider):
 
     def parse(self, response, **kwargs):
         map_list = response.json()["maplist"]
-        data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
+        try:
+            data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
+        except json.decoder.JSONDecodeError:
+            logging.warning(f"Could not parse response - check API output: " + e.message)
+            data = []
+
         for location in data:
             feature = DictParser.parse(location)
             feature["name"] = location["location_name"]
