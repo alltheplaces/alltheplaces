@@ -1,6 +1,6 @@
 import re
 
-from locations.categories import Extras, Fuel, apply_yes_no
+from locations.categories import Extras, Fuel, apply_yes_no, apply_category, Categories
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
@@ -19,8 +19,8 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
             charging_station_item = item.deepcopy()
             charging_station_item["ref"] = item.get("ref") + "-charging-station"
             charging_station_item["name"] = None
-            charging_station_item["operator"] = item.get("brand")
-            charging_station_item["operator_wikidata"] = item.get("brand_wikidata")
+            charging_station_item["phone"] = None
+            charging_station_item["opening_hours"] = None
             apply_category(Categories.CHARGING_STATION, charging_station_item)
             yield charging_station_item
             
