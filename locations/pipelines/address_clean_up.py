@@ -13,7 +13,7 @@ def merge_address_lines(address_lines: [str]) -> str:
 _multiple_spaces = re.compile(r" +")
 
 
-def clean_address(address: list[str] | str) -> str:
+def clean_address(address: list[str] | str, min_length=2) -> str:
     if not address:
         return ""
 
@@ -41,16 +41,28 @@ def clean_address(address: list[str] | str) -> str:
             line = line.strip("\n\r\t\f ,")
             if line:
                 return_addr.append(line)
+    assembled_address = ", ".join(return_addr)
 
-    return ", ".join(return_addr)
+    # If after all of the cleaning our address is very short, its likely to be "-" or similar dud content
+    if len(assembled_address) <= min_length:
+        return ""
+
+    return assembled_address
 
 
 class AddressCleanUpPipeline:
     def process_item(self, item: Feature, spider: Spider):
-        if street_address := item.get("street_address"):
-            if isinstance(street_address, str):
-                item["street_address"] = clean_address(street_address)
-        if addr_full := item.get("addr_full"):
-            if isinstance(addr_full, str):
-                item["addr_full"] = clean_address(addr_full)
+        targeted_fields = {
+            "street": 2,
+            "city": 2,
+            "postcode": 2,
+            "state": 1,
+            "street_address": 2,
+            "addr_full": 2,
+        }
+
+        for key, min_length in targeted_fields.items():
+            if value := item.get(key):
+                if isinstance(value, str):
+                    item[key] = clean_address(value, min_length)
         return item
