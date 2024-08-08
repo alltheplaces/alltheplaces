@@ -68,4 +68,6 @@ class WienerschnitzelUSECSpider(StoreLocatorPlusSelfSpider):
             if extra is not None:
                 apply_yes_no(extra, item, has == "yes")
 
+        item["image"] = response.xpath("//div[starts-with(@class, 'streetview-thumb')]/img/@src").get()
+
         yield item
