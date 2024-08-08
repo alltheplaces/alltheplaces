@@ -48,6 +48,8 @@ class MasoutisGRSpider(Spider):
             # },
             item["ref"] = location["Storeid"]
             item["image"] = location["PhotoData"]
+            item["lat"] = location["Langitude"]
+            item["lon"] = location["Longitude"]
 
             # TODO:  "KategoryIDEn": "SUPER MARKET" should probably override these extas
             apply_yes_no(Extras.ATM, item, location["IfAtm"])
