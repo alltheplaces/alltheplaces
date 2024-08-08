@@ -1,6 +1,6 @@
 import re
 
-from locations.categories import Extras, Fuel, apply_yes_no, apply_category, Categories
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
@@ -23,7 +23,7 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
             charging_station_item["opening_hours"] = None
             apply_category(Categories.CHARGING_STATION, charging_station_item)
             yield charging_station_item
-            
+
         apply_yes_no(Fuel.DIESEL, item, ("19" in categories or "20" in categories))
         apply_yes_no(Fuel.OCTANE_100, item, "21" in categories)
         apply_yes_no(Fuel.OCTANE_95, item, "22" in categories)
