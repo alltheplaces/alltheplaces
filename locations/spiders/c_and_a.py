@@ -48,7 +48,7 @@ class CAndASpider(scrapy.Spider):
         country = find_between(response.url, "stores/", "-").upper()
         for store in stores:
             flags = json.loads(store.xpath("./@data-flags").get())
-            contact = [i.strip() for i in store.xpath('./div[@class="addressBox"]/p[@class="Kontakt"]/text()').getall()]
+            phone = store.xpath('./div[@class="addressBox"]/p[@class="Kontakt"]/a[@href]/text()').get()
             address = [i.strip() for i in store.xpath('./div[@class="addressBox"]/p[@class="address"]/text()').getall()]
             hours = [
                 i.xpath("./@data-day").get()[0:2]
@@ -72,7 +72,7 @@ class CAndASpider(scrapy.Spider):
                     ).get()
                 ),
                 "name": store.xpath('./div[@class="addressBox"]/p[@class="store"]/text()').get(),
-                "phone": contact[2].replace("Tel: ", ""),
+                "phone": phone.replace("Tel: ", "") if phone else None,
                 "country": country,
                 "opening_hours": "; ".join(hours),
                 "street_address": address[0],

@@ -61,6 +61,7 @@ class Categories(Enum):
     SHOP_BICYCLE = {"shop": "bicycle"}
     SHOP_BOOKMAKER = {"shop": "bookmaker"}
     SHOP_BOOKS = {"shop": "books"}
+    SHOP_BOAT = {"shop": "boat"}
     SHOP_BUTCHER = {"shop": "butcher"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
@@ -442,6 +443,7 @@ class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     BARBEQUES = "bbq"
+    BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
     CARAVAN_SITES = "caravans"
@@ -457,6 +459,7 @@ class Extras(Enum):
     FAXING = "service:fax"
     FEE = "fee"
     HALAL = "diet:halal"
+    ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
     KOSHER = "diet:kosher"
     MOTOR_VEHICLES = "motor_vehicle"
