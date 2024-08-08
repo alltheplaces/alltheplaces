@@ -27,6 +27,7 @@ COUNTRYCODE_COMPONENTS = {
     "DE",
     "DK",
     "DO",
+    "EC",
     "EE",
     "EG",
     "ES",
