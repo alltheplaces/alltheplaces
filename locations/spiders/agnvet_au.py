@@ -4,9 +4,15 @@ from scrapy import Selector, Spider
 from locations.dict_parser import DictParser
 
 
-class AGnVETAUSpider(Spider):
+class AgnvetAUSpider(Spider):
     name = "agnvet_au"
-    item_attributes = {"brand": "AGnVET", "brand_wikidata": "Q119263284"}
+    item_attributes = {
+        "brand": "AGnVET",
+        "brand_wikidata": "Q119263284",
+        "extras": {
+            "shop": "agrarian",
+        },
+    }
     allowed_domains = ["agnvet.com.au"]
     start_urls = ["https://agnvet.com.au/group/locations/"]
 

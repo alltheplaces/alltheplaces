@@ -1,8 +1,8 @@
-from locations.categories import Fuel, apply_yes_no
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
-class GASNZSpider(StoreLocatorWidgetsSpider):
+class GasNZSpider(StoreLocatorWidgetsSpider):
     name = "gas_nz"
     item_attributes = {"brand": "G.A.S.", "brand_wikidata": "Q112189761"}
     key = "ed66addbfde705ac2e642e1ecd322ccd"
@@ -12,4 +12,5 @@ class GASNZSpider(StoreLocatorWidgetsSpider):
         apply_yes_no(Fuel.OCTANE_91, item, "Unleaded 91" in location["filters"])
         apply_yes_no(Fuel.OCTANE_95, item, "Premium 95" in location["filters"])
         apply_yes_no(Fuel.DIESEL, item, "Diesel" in location["filters"])
+        apply_category(Categories.FUEL_STATION, item)
         yield item

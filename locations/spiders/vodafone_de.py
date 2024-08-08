@@ -5,13 +5,12 @@ import scrapy
 from locations.hours import OpeningHours
 from locations.items import Feature
 
+VODAFONE_SHARED_ATTRIBUTES = {"brand": "Vodafone", "brand_wikidata": "Q122141"}
 
-class VodafoneDeSpider(scrapy.Spider):
+
+class VodafoneDESpider(scrapy.Spider):
     name = "vodafone_de"
-    item_attributes = {
-        "brand": "Vodafone",
-        "brand_wikidata": "Q122141",
-    }
+    item_attributes = VODAFONE_SHARED_ATTRIBUTES
     allowed_domains = ["vodafone.de"]
     start_urls = ["https://shops.vodafone.de"]
 
@@ -35,12 +34,12 @@ class VodafoneDeSpider(scrapy.Spider):
                         close_time=f"{end[:2]}:{end[2:]}",
                     )
 
-        if name := response.xpath('//h1[@id="location-name"]/span[1]/text()').get():
+        if response.xpath('//h1[@id="location-name"]/span[1]/text()').get():
             if email := response.xpath('//a[@class="Hero-email"]/@href').get():
                 email = email.replace("mailto:", "")
+
             properties = {
                 "ref": response.url,
-                "name": name,
                 "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').get(),
                 "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').get(),
                 "city": response.xpath('//span[@class="c-address-city"]/text()').get(),

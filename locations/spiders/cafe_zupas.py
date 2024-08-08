@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class CafeZupasSpider(scrapy.Spider):
     name = "cafe_zupas"
-    item_attributes = {"brand": "Cafe Zupas"}
+    item_attributes = {"brand": "Café Zupas", "brand_wikidata": "Q123687995"}
     allowed_domains = ["cafezupas.com"]
     start_urls = ["https://cafezupas.com/server.php?url=https://api.controlcenter.zupas.com/api/markets/listing"]
 

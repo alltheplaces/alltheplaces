@@ -1,12 +1,14 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 
 
-class DhlExpressGbSpider(scrapy.Spider):
+class DhlExpressGBSpider(scrapy.Spider):
     name = "dhl_express_gb"
-    item_attributes = {"brand": "DHL", "brand_wikidata": "Q489815"}
+    item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["dhlparcel.co.uk"]
 
     def start_requests(self):
@@ -31,5 +33,6 @@ class DhlExpressGbSpider(scrapy.Spider):
                     day=DAYS[day.get("Day") - 1], open_time=day.get("OpenTime"), close_time=day.get("CloseTime")
                 )
             item["opening_hours"] = oh.as_opening_hours()
+            apply_category(Categories.POST_OFFICE, item)
 
             yield item

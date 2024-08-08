@@ -1,7 +1,9 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.spiders.q8_italia import Q8ItaliaSpider
 
 
 class F24Spider(Spider):
@@ -12,7 +14,7 @@ class F24Spider(Spider):
 
     BRANDS = {
         "F24": {"brand": "F24", "brand_wikidata": "Q12310853"},
-        "Q8": {"brand": "Q8", "brand_wikidata": "Q1634762"},
+        "Q8": Q8ItaliaSpider.item_attributes,
     }
 
     def parse(self, response, **kwargs):
@@ -34,6 +36,8 @@ class F24Spider(Spider):
 
             if brand := self.BRANDS.get(location["net"]):
                 item.update(brand)
+
+            apply_category(Categories.FUEL_STATION, item)
 
             yield item
 

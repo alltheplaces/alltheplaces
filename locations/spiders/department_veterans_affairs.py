@@ -1,12 +1,11 @@
-import datetime
-import re
-
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class DepartmentVeteransAffairsSpider(scrapy.Spider):
@@ -15,80 +14,94 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
     allowed_domains = ["api.va.gov"]
 
     def start_requests(self):
+        data = {
+            "page": 1,
+            "per_page": 1000,
+            "mobile": False,
+            "radius": 1000,
+            "bbox": ["-180", "-90", "180", "90"],
+            "latitude": "0",
+            "longitude": "0",
+        }
         yield JsonRequest(
-            "https://api.va.gov/facilities_api/v1/va?bbox[]=-180&bbox[]=90&bbox[]=180&bbox[]=-90&per_page=50",
+            "https://api.va.gov/facilities_api/v2/va",
+            data=data,
             callback=self.parse_info,
         )
 
-    def store_hours(self, store_hours):
-        o = OpeningHours()
-
-        for day in (
-            "monday",
-            "tuesday",
-            "wednesday",
-            "thursday",
-            "friday",
-            "saturday",
-            "sunday",
-        ):
-            hours = store_hours.get(day)
-            d = day[:2]
-            d = d.title()
-
-            if not hours:
-                continue
-
-            try:
-                m = re.match(
-                    r"((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))-((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))",
-                    hours,
-                )
-                try:
-                    open = datetime.datetime.strptime(m.group(1), "%I:%M%p").strftime("%H:%M")
-                    close = datetime.datetime.strptime(m.group(5), "%I:%M%p").strftime("%H:%M")
-                except:
-                    continue
-
-                o.add_range(d, open_time=open, close_time=close, time_format="%H:%M")
-            except AttributeError:
-                continue
-
-        return o.as_opening_hours()
-
     def parse_info(self, response):
-        data = response.json()
+        resp_json = response.json()
 
-        data = data["data"]
+        data = resp_json["data"]
+        types = {}
+        facitlity_types = {}
 
         for row in data:
             place_info = row["attributes"]
 
+            if row["type"] not in types:
+                types[row["type"]] = 1
+            else:
+                types[row["type"]] += 1
+
+            if place_info["facilityType"] not in facitlity_types:
+                facitlity_types[place_info["facilityType"]] = 1
+            else:
+                facitlity_types[place_info["facilityType"]] += 1
+
+            item = DictParser.parse(place_info)
+            item["ref"] = row["id"]
+            item["country"] = "US"
+            self.parse_address(item, place_info)
+            if not isinstance(place_info.get("phone"), list):
+                item["phone"] = place_info.get("phone", {}).get("main")
+                item["extras"]["fax"] = place_info.get("phone", {}).get("fax")
+            item["extras"]["type"] = row["type"]
+            item["opening_hours"] = self.parse_hours(place_info.get("hours"))
+
+            if "clinic" in item["name"].lower():
+                apply_category(Categories.CLINIC, item)
+            elif "hospital" in item["name"].lower():
+                apply_category(Categories.HOSPITAL, item)
+            elif "urgent care" in item["name"].lower():
+                apply_category(Categories.CLINIC_URGENT, item)
+            else:
+                apply_category(Categories.CLINIC, item)
+
+            yield item
+
+        if next_url := resp_json["links"]["next"]:
+            yield JsonRequest(next_url, callback=self.parse_info, method="POST")
+
+    def parse_address(self, item: Feature, place_info: dict):
+        addr = place_info["address"]
+        if "physical" in addr:
             addr = place_info["address"]["physical"]
-            if not addr:
-                addr = place_info["address"]["mailing"]
+        elif "mailing" in addr:
+            addr = place_info["address"]["mailing"]
+        if addr:
+            item["street_address"] = merge_address_lines(
+                [addr.get("address1"), addr.get("address2"), addr.get("address3")]
+            )
+            item["city"] = addr.get("city")
+            item["state"] = addr.get("state")
+            item["postcode"] = addr.get("zip")
 
-            properties = {
-                "ref": row["id"],
-                "name": place_info["name"],
-                "lat": place_info["lat"],
-                "lon": place_info["long"],
-                "street_address": clean_address([addr.get("address1"), addr.get("address2"), addr.get("address3")]),
-                "city": addr.get("city"),
-                "state": addr.get("state"),
-                "country": "US",
-                "postcode": addr.get("zip"),
-                "website": place_info["website"],
-                "phone": place_info["phone"]["main"],
-                "extras": {"type": row["type"]},
-            }
+    def parse_hours(self, hours):
+        if not hours:
+            return None
 
-            hours = place_info.get("hours")
-            opening_hours = self.store_hours(hours)
-            if opening_hours:
-                properties["opening_hours"] = opening_hours
+        opening_hours = OpeningHours()
 
-            yield Feature(**properties)
+        if hours.get("monday") == "24/7":
+            return "24/7"
 
-        if next_url := response.json()["links"]["next"]:
-            yield JsonRequest(next_url, callback=self.parse_info)
+        for day, hours in hours.items():
+            day = day[:2].lower()
+            try:
+                open_time, close_time = hours.split("-")
+                opening_hours.add_range(day, open_time=open_time, close_time=close_time, time_format="%I%M%p")
+            except:
+                continue
+
+        return opening_hours.as_opening_hours()

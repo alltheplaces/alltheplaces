@@ -24,7 +24,7 @@ The rest of this page discusses some different kinds of JSON API by example.
 
 In nearly all cases you should find that our [DictParser](../locations/dict_parser.py)
 class can help keep your code tight. There are only so many ways that you
-can name a field `latitide`. The `DictParser` code tries those different ways for
+can name a field `latitude`. The `DictParser` code tries those different ways for
 this and other fields. Of course, it will not get everything right for every API.
 This is where you may have to write a little code yourself, but a lot
 less than otherwise.
@@ -60,5 +60,5 @@ on [geo.py](../locations/geo.py).
 All the above is best illustrated with some further examples:
 
 * [spar_gb.py](../locations/spiders/spar_gb.py) (drive query API by postcode)
-* [petsathome_gb.py](../locations/spiders/petsathome_gb.py) (query GB at 20km point resolution)
-* [thebodyshop.py](../locations/spiders/thebodyshop.py) (use sitemap to generate API parameters)
+* [petsathome_gb.py](../locations/spiders/pets_at_home_gb.py) (query GB at 20km point resolution)
+* [thebodyshop.py](../locations/spiders/the_body_shop.py) (use sitemap to generate API parameters)

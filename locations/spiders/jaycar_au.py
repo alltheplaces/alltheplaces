@@ -2,7 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import extract_email
 
 
@@ -12,6 +12,7 @@ class JaycarAUSpider(SitemapSpider):
     sitemap_urls = ["https://www.jaycar.com.au/sitemap.xml"]
     sitemap_follow = ["/Store-en-aud-"]
     sitemap_rules = [("/store/", "parse")]
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
@@ -26,7 +27,7 @@ class JaycarAUSpider(SitemapSpider):
         item["phone"] = response.xpath('normalize-space(//div[@class="detailSection"][contains(., "Telephone")])').get()
         item["lon"] = response.xpath("//@data-longitude").get()
         item["lat"] = response.xpath("//@data-latitude").get()
-        item["addr_full"] = clean_address(
+        item["addr_full"] = merge_address_lines(
             response.xpath('//div[@class="detailSection"][contains(., "Australia")]/ul/li/text()').getall()
         )
 

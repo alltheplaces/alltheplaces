@@ -3,13 +3,14 @@ import re
 
 from scrapy import Spider
 
+from locations.categories import Categories
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class SephoraBRSpider(Spider):
     name = "sephora_br"
-    item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
+    item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041", "extras": Categories.SHOP_COSMETICS.value}
     allowed_domains = ["www.sephora.com.br"]
     start_urls = ["https://www.sephora.com.br/nossas-lojas/"]
     user_agent = BROWSER_DEFAULT

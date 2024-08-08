@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import chompjs
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import convert_item, get_object
 
@@ -30,5 +31,7 @@ class FastStopUSSpider(Spider):
 
             if ll := coords_map.get(item["name"]):
                 item["lat"], item["lon"] = ll
+
+            apply_category(Categories.FUEL_STATION, item)
 
             yield item

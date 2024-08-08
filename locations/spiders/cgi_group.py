@@ -1,11 +1,12 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
-class CGIGroupSpider(scrapy.Spider):
+class CgiGroupSpider(scrapy.Spider):
     name = "cgi_group"
-    item_attributes = {"brand": "CGI Group", "brand_wikidata": "Q1798370"}
+    item_attributes = {"brand": "CGI Group", "brand_wikidata": "Q1798370", "extras": Categories.OFFICE_COMPANY.value}
     allowed_domains = ["cgi.com"]
     start_urls = (
         "https://www.cgi.com/en/offices?field_address_country_code=All&field_address_administrative_area=All&field_address_locality=All",

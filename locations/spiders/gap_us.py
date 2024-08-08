@@ -14,26 +14,20 @@ class GapUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = response.xpath('normalize-space(//div[@class="location-name"]/text())').get()
-
         types = response.xpath('normalize-space(//div[@class="store-carries"]/text())').get()
-
         if types == "Gap Factory Store":
             item["brand"] = "Gap Factory Store"
+            apply_category(Categories.SHOP_CLOTHES, item)
         else:
             item["brand"] = "Gap"
-            clothes = []
+            apply_category(Categories.SHOP_CLOTHES, item)
             if "GapBody" in types:
-                clothes.append(Clothes.UNDERWEAR.value)
+                apply_clothes([Clothes.UNDERWEAR], item)
             if "GapMaternity" in types:
-                clothes.append(Clothes.MATERNITY.value)
+                apply_clothes([Clothes.MATERNITY], item)
             if "babyGap" in types:
-                clothes.append(Clothes.BABY.value)
+                apply_clothes([Clothes.BABY], item)
             if "GapKids" in types:
-                clothes.append(Clothes.CHILDREN.value)
-            apply_clothes(clothes, item)
-
+                apply_clothes([Clothes.CHILDREN], item)
         item["image"] = None
-
-        apply_category(Categories.SHOP_CLOTHES, item)
-
         yield item

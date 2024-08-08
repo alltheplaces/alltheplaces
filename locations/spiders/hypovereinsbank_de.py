@@ -7,6 +7,10 @@ class HypovereinsbankDESpider(UberallSpider):
     item_attributes = {"brand": "HypoVereinsbank", "brand_wikidata": "Q220189"}
     key = "QZ7auxGUWKL0MfAnUOgweafKIwrXPb"
     business_id_filter = 77215
+    # Ignores:
+    # 599793 - Wealth Management
+    # 337143 - Unternehmenskunden (corporate clients services)
+    # 337141 - Private Banking
 
     def parse_item(self, item, feature, **kwargs):
         item["website"] = "https://www.hypovereinsbank.de/hvb/kontaktwege/filiale#!/l/{}/{}/{}".format(
@@ -18,4 +22,5 @@ class HypovereinsbankDESpider(UberallSpider):
             apply_category(Categories.ATM, item)
         else:
             apply_category(Categories.BANK, item)
+        item.pop("name", None)
         yield item

@@ -51,7 +51,7 @@ class MokaHouseSpider(scrapy.Spider):
             phone_number = match.groups()[0]
 
         l_hours = p_4 + p_5
-        l_hours = [x.replace("\n", "") for x in l_hours if x != "\n" and self.hasDigit(x)]
+        l_hours = [x.replace("\n", "") for x in l_hours if x != "\n" and self.has_digit(x)]
         opening_hours = ";".join(l_hours)
 
         properties = {
@@ -68,5 +68,5 @@ class MokaHouseSpider(scrapy.Spider):
 
         yield Feature(**properties)
 
-    def hasDigit(self, str):
+    def has_digit(self, str):
         return bool(re.search(r"\d", str))

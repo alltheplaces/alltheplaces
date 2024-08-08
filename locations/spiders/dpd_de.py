@@ -3,11 +3,13 @@ import csv
 import scrapy
 from scrapy import FormRequest
 
+from locations.categories import apply_category
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 
-class DPDDESpider(scrapy.Spider):
+class DpdDESpider(scrapy.Spider):
     name = "dpd_de"
     item_attributes = {"brand": "DPD", "brand_wikidata": "Q541030"}
     start_urls = ["https://my.dpd.de/shopfinder.aspx"]
@@ -18,12 +20,10 @@ class DPDDESpider(scrapy.Spider):
         ]
 
         for point_file in searchable_point_files:
-            with open_searchable_points(point_file) as openFile:
-                results = csv.DictReader(openFile)
+            with open_searchable_points(point_file) as open_file:
+                results = csv.DictReader(open_file)
                 for result in results:
                     if result["country"] == "DE":
-                        headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
                         formdata = {
                             "ctl00$hidMarkerHouse": "https://my.dpd.de/themes/Icons/summer2020/house.svg",
                             "ctl00$hidMarkerShop": "https://my.dpd.de/themes/Icons/summer2020/parcelshop.svg",
@@ -49,31 +49,30 @@ class DPDDESpider(scrapy.Spider):
                         rq = FormRequest.from_response(
                             response,
                             formdata=formdata,
-                            headers=headers,
-                            callback=self.shopsResults,
+                            callback=self.shops_results,
                             meta=result,
                         )
                         yield rq
 
-    def shopsResults(self, response):
+    def shops_results(self, response):
         result = response.meta
         body = response.css("body")
-        shopList = body.css("div.ShopList")
-        shop = shopList.css("a")
-        lengthOfShops = len(shop) - 1
-        for nr in range(lengthOfShops):
+        shop_list = body.css("div.ShopList")
+        shop = shop_list.css("a")
+        length_of_shops = len(shop) - 1
+        for nr in range(length_of_shops):
             item = Feature()
             name = shop.css(
                 "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_" + str(nr) + "::text"
             ).extract()[0]
-            streetElement = shop.css(
+            street_element = shop.css(
                 "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_" + str(nr) + "::text"
             ).extract()[0]
-            streets = streetElement.split("\xa0")
+            streets = street_element.split("\xa0")
             street = streets[0]
             housenumber = streets[1]
 
-            postalAndCity = (
+            postal_and_city = (
                 shop.css("span#ContentPlaceHolder1_modShopFinder_repShopList_labShopCity_" + str(nr) + "::text")
                 .extract()[0]
                 .split()
@@ -84,8 +83,8 @@ class DPDDESpider(scrapy.Spider):
             lng = shop.css(
                 "input#ContentPlaceHolder1_modShopFinder_repShopList_longitude_" + str(nr) + "::attr(value)"
             ).extract()[0]
-            plz = postalAndCity[0]
-            city = postalAndCity[1]
+            plz = postal_and_city[0]
+            city = postal_and_city[1]
             item["lat"] = lat
             item["lon"] = lng
             item["name"] = name
@@ -94,8 +93,7 @@ class DPDDESpider(scrapy.Spider):
             item["postcode"] = plz
             item["ref"] = lat + lng
             item["housenumber"] = housenumber
-
-            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            apply_category({"amenity": "post_office", "post_office": "post_partner"}, item)
 
             formdata = {
                 "ctl00$ctl16": "ctl00$ContentPlaceHolder1$modShopFinder$ctl01|ctl00$ContentPlaceHolder1$modShopFinder$repShopList$ctl0"
@@ -126,38 +124,32 @@ class DPDDESpider(scrapy.Spider):
             rq = FormRequest.from_response(
                 response,
                 formdata=formdata,
-                headers=headers,
-                callback=self.openingHoursParse,
-                meta=item,
+                callback=self.opening_hours_parse,
+                meta={"item": item},
             )
 
             yield rq
 
-    def openingHoursParse(self, response):
+    def opening_hours_parse(self, response):
         body = response.css("body")
-        shopDetails = body.css("div.panShopDetails")
-        shops = shopDetails.css("div.panBusinessHour")
-        item = response.meta
-        openingShop = dict()
+        shop_details = body.css("div.panShopDetails")
+        shops = shop_details.css("div.panBusinessHour")
+        item = response.meta["item"]
+        item["opening_hours"] = OpeningHours()
         if len(shops) > 0:
             for nr in range(7):
                 day = shops.css(
                     "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessDay_" + str(nr) + "::text"
                 ).extract()[0]
-                openningHours = (
+                opening_hours = (
                     shops.css(
                         "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessHour_" + str(nr) + "::text"
                     )
                     .extract()[0]
                     .split(" ")
                 )
-
-                for element in openningHours:
-                    if element == "-":
-                        del openningHours[1]
-
-                openingShop[day] = openningHours
-
-            item["opening_hours"] = openingShop
+                if "Geschlossen" in opening_hours:
+                    continue
+                item["opening_hours"].add_range(sanitise_day(day, DAYS_DE), opening_hours[0], opening_hours[-1])
 
         yield item

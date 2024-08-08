@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class KeyFoodUSSpider(Spider):
@@ -42,7 +43,7 @@ class KeyFoodUSSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["name"]
             item["name"] = location["displayName"]
-            item["street_address"] = ", ".join(filter(None, [location["line1"], location["line2"]]))
+            item["street_address"] = clean_address([location["line1"], location["line2"]])
             item["website"] = location["siteUrl"] + location["url"].split("?", 1)[0]
 
             if brand := self.brands.get(location["siteUrl"]):

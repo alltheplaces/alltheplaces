@@ -2,13 +2,14 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class PetParadiseSpider(scrapy.Spider):
-    name = "petparadise"
-    item_attributes = {"brand": "Pet Paradise"}
-    allowed_domains = ["petparadise.com.com"]
+    name = "pet_paradise"
+    item_attributes = {"brand": "Pet Paradise", "brand_wikidata": "Q122955413"}
+    allowed_domains = ["petparadise.com"]
     start_urls = ("https://www.petparadise.com/locations.htm",)
 
     def start_requests(self):
@@ -43,4 +44,5 @@ class PetParadiseSpider(scrapy.Spider):
                 "website": store_data["interestpointMoreInfoLink"],
             }
 
+            apply_category(Categories.ANIMAL_BOARDING, properties)
             yield Feature(**properties)

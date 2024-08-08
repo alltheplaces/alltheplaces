@@ -19,6 +19,8 @@ class VolvoSpider(scrapy.Spider):
         "https://www.volvocars.com/de/dealers/haendlersuche",
         "https://www.volvocars.com/es/dealers/concesionarios-talleres",
         "https://www.volvocars.com/it/dealers/concessionari",
+        "https://www.volvocars.com/uk/dealers/car-retailers",
+        "https://www.volvocars.com/nl/dealers/autodealers",
     ]
     user_agent = BROWSER_DEFAULT
 

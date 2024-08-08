@@ -3,12 +3,12 @@ import re
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsMASpider(scrapy.Spider):
+class McdonaldsMASpider(scrapy.Spider):
     name = "mcdonalds_ma"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.ma"]
     start_urls = ("http://www.mcdonalds.ma/nos-restaurants/r%C3%A9seau-maroc",)
 
@@ -17,10 +17,10 @@ class McDonaldsMASpider(scrapy.Spider):
         city = ""
         matches = re.finditer(r"([\w|\s|\,]{1,}) <br>", data)
 
-        for matchNum, match in enumerate(matches):
-            if matchNum == 0:
+        for match_num, match in enumerate(matches):
+            if match_num == 0:
                 address = match.groups()[0].strip()
-            elif matchNum == 1:
+            elif match_num == 1:
                 city = match.groups()[0].strip()
 
         return address, city

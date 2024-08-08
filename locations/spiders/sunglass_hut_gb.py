@@ -2,13 +2,13 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.sunglass_hut import SunglassHutSpider
+from locations.spiders.sunglass_hut_1 import SunglassHut1Spider
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class SunglassHutGBSpider(Spider):
     name = "sunglass_hut_gb"
-    item_attributes = SunglassHutSpider.item_attributes
+    item_attributes = SunglassHut1Spider.item_attributes
     start_urls = [
         "https://www.sunglasshut.com/AjaxSGHFindPhysicalStoreLocations?latitude=53.4138458&longitude=-1.782017&radius=1000&storeId=11352"
     ]

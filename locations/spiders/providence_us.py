@@ -2,6 +2,7 @@ import re
 
 from scrapy import Request
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -11,7 +12,8 @@ class ProvidenceUSSpider(StructuredDataSpider):
     item_attributes = {"brand": "Providence", "brand_wikidata": "Q7252430"}
     allowed_domains = ["www.providence.org"]
     start_urls = ["https://www.providence.org/locations?postal=66102&latlng=39.103,-94.666&radius=100000&page=1"]
-    wanted_types = ["MedicalOrganization", "MedicalClinic", "Hospital", "EmergencyService", "SpecialAnnouncement"]
+    wanted_types = ["MedicalOrganization", "MedicalClinic", "Hospital"]
+    requires_proxy = True
 
     def parse(self, response):
         self.parse_location_results(response)
@@ -52,4 +54,8 @@ class ProvidenceUSSpider(StructuredDataSpider):
             .replace("p.m", "PM")
         )
         item["opening_hours"].add_ranges_from_string(hours_string)
+        if ld_data["@type"] == "Hospital":
+            apply_category(Categories.HOSPITAL, item)
+        elif ld_data["@type"] == "MedicalClinic" or ld_data["@type"] == "MedicalOrganization":
+            apply_category(Categories.CLINIC, item)
         yield item

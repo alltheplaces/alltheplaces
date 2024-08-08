@@ -1,11 +1,12 @@
 import scrapy
 
-from locations.items import Feature
+from locations.categories import Categories, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 
 
 class SkodaSpider(scrapy.Spider):
     name = "skoda"
-    item_attributes = {"brand": "Skoda", "brand_wikidata": "Q29637"}
+    item_attributes = {"brand": "Škoda", "brand_wikidata": "Q29637"}
 
     available_countries = {
         260: "CZ",
@@ -60,6 +61,7 @@ class SkodaSpider(scrapy.Spider):
     }
 
     def start_requests(self):
+        # TODO: check how to get country ids dynamically
         for country_id, country_code in self.available_countries.items():
             yield scrapy.Request(
                 f"https://retailers.skoda-auto.com/api/{country_id}/en-us/Dealers/GetDealers",
@@ -69,17 +71,13 @@ class SkodaSpider(scrapy.Spider):
 
     def parse_stores(self, response):
         for store in response.json().get("Items"):
-            address_details = store.get("Address")
-            yield Feature(
-                {
-                    "ref": store.get("GlobalId"),
-                    "name": store.get("Name"),
-                    "street_address": address_details.get("street"),
-                    "country": response.meta.get("country_code"),
-                    "state": address_details.get("District"),
-                    "city": address_details.get("City"),
-                    "postcode": address_details.get("ZIP"),
-                    "lat": address_details.get("Latitude"),
-                    "lon": address_details.get("Longitude"),
-                }
-            )
+            store.update(store.pop("Address"))
+            item = DictParser.parse(store)
+            item["ref"] = store["GlobalId"]
+            item["state"] = store["District"]
+            if store.get("HasSales"):
+                apply_category(Categories.SHOP_CAR, item)
+                apply_yes_no("service:vehicle:car_repair", item, store.get("HasServices"), True)
+            elif store.get("HasServices"):
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            yield item

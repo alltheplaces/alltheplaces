@@ -1,7 +1,9 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.q8_italia import Q8ItaliaSpider
 
 
 # AKA Q8 NWE https://www.q8.be/nl/stations
@@ -11,7 +13,7 @@ class Q8Spider(scrapy.Spider):
 
     BRANDS = {
         "EASY": {"brand": "Q8 Easy", "brand_wikidata": "Q1806948"},
-        "Q8": {"brand": "Q8", "brand_wikidata": "Q1634762"},
+        "Q8": Q8ItaliaSpider.item_attributes,
     }
 
     def parse(self, response, **kwargs):
@@ -30,9 +32,7 @@ class Q8Spider(scrapy.Spider):
                     "ref": store.get("StationId"),
                     "name": store.get("Name"),
                     "country": store.get("Country"),
-                    "street_address": ", ".join(
-                        filter(None, [store.get("Address_line_1"), store.get("Address_line_2")])
-                    ),
+                    "addr_full": ", ".join(filter(None, [store.get("Address_line_1"), store.get("Address_line_2")])),
                     "phone": store.get("Phone"),
                     "email": store.get("Email"),
                     "website": f"https://www.q8.be/{website}" if website else None,
@@ -44,5 +44,5 @@ class Q8Spider(scrapy.Spider):
 
             if brand := self.BRANDS.get(store["Category"]):
                 item.update(brand)
-
+            apply_category(Categories.FUEL_STATION, item)
             yield item

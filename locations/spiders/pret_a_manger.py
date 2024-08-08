@@ -1,15 +1,21 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-
-DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PretAMangerSpider(scrapy.Spider):
     name = "pret_a_manger"
-    veggie_pret = {"brand": "Veggie Pret", "brand_wikidata": "Q108118332"}
-    item_attributes = {"brand": "Pret A Manger", "brand_wikidata": "Q2109109"}
+    brands = {
+        "Pret A Manger": {"brand": "Pret A Manger", "brand_wikidata": "Q2109109"},
+        "Veggie Pret": {
+            "brand": "Veggie Pret",
+            "brand_wikidata": "Q108118332",
+            "extras": {"amenity": "fast_food", "diet:vegetarian": "only"},
+        },
+    }
+
     start_urls = ["https://api1.pret.com/v1/shops"]
 
     def parse(self, response):
@@ -19,7 +25,7 @@ class PretAMangerSpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
-            item["street_address"] = ", ".join(filter(None, [item["housenumber"], item["street"]]))
+            item["street_address"] = clean_address([item["housenumber"], item["street"]])
             item["housenumber"] = item["street"] = None
 
             oh = OpeningHours()
@@ -37,19 +43,20 @@ class PretAMangerSpider(scrapy.Spider):
                     if rule[1].startswith("0:"):
                         rule[1] = rule[1].replace("0:", "12:", 1)
 
-                    oh.add_range(DAYS[i], rule[0], rule[1], "%I:%M%p")
+                    oh.add_range(DAYS_3_LETTERS_FROM_SUNDAY[i], rule[0], rule[1], "%I:%M%p")
 
             item["opening_hours"] = oh.as_opening_hours()
 
             item["extras"] = {}
 
-            item["extras"]["delivery"] = "yes" if store["features"]["delivery"] else "no"
+            item["extras"]["delivery"] = "yes" if store["features"].get("delivery") else "no"
             item["extras"]["storeType"] = store["features"].get("storeType")
             item["extras"]["wheelchair"] = "yes" if store["features"]["wheelchairAccess"] else "no"
             item["extras"]["internet_access"] = "wlan" if store["features"]["wifi"] else "no"
 
             if store["features"].get("storeType") == "veggie-pret":
-                item["brand"] = self.veggie_pret["brand"]
-                item["brand_wikidata"] = self.veggie_pret["brand_wikidata"]
+                item.update(self.brands["Veggie Pret"])
+            else:
+                item.update(self.brands["Pret A Manger"])
 
             yield item

@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class RemaxDeSpider(scrapy.Spider):
+class RemaxDESpider(scrapy.Spider):
     name = "remax_de"
     item_attributes = {
         "brand": "RE/MAX",
@@ -20,11 +20,11 @@ class RemaxDeSpider(scrapy.Spider):
         for data in response.json():
             item = DictParser.parse(data.get("acf"))
             item["ref"] = data.get("id")
-            openHours = (
+            open_hours = (
                 data.get("yoast_head_json", {}).get("schema", {}).get("@graph", {})[3].get("openingHoursSpecification")
             )
             oh = OpeningHours()
-            for days in openHours:
+            for days in open_hours:
                 for day in days.get("dayOfWeek"):
                     oh.add_range(
                         day=day,

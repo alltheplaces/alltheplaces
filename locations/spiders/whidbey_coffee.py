@@ -3,13 +3,14 @@ from datetime import datetime
 
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.categories import Categories
+from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 
 
 class WhidbeyCoffeeSpider(scrapy.Spider):
-    name = "whidbeycoffee"
-    item_attributes = {"brand": "Whidbey Coffee"}
+    name = "whidbey_coffee"
+    item_attributes = {"brand": "Whidbey Coffee", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.whidbeycoffee.com"]
     start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)
 
@@ -44,8 +45,6 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
 
-        DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-
         for hour in hours:
             if "-" not in hour:
                 continue
@@ -64,7 +63,10 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
             # Day range, e.g. Mon - Fri
             if "-" in day_range:
                 start_day, end_day = re.sub(r"[\s:]", "", day_range).split("-")
-                for day in DAYS[DAYS.index(start_day[0:3]) : DAYS.index(end_day[0:3]) + 1]:
+                for day in DAYS_3_LETTERS_FROM_SUNDAY[
+                    DAYS_3_LETTERS_FROM_SUNDAY.index(start_day[0:3]) : DAYS_3_LETTERS_FROM_SUNDAY.index(end_day[0:3])
+                    + 1
+                ]:
                     opening_hours.add_range(
                         day=day[0:2],
                         open_time=open_time,

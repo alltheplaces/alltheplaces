@@ -1,13 +1,13 @@
-from scrapy.crawler import Crawler
+from scrapy import Spider
+from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
 from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
-from locations.spiders.greggs_gb import GreggsGBSpider
 
 
 def get_objects(phone, country):
-    spider = GreggsGBSpider()
-    spider.crawler = Crawler(GreggsGBSpider)
+    spider = Spider(name="test")
+    spider.crawler = get_crawler()
     return (
         Feature(phone=phone, country=country),
         PhoneCleanUpPipeline(),
@@ -80,3 +80,13 @@ def test_bad_seperator():
     item, pipeline, spider = get_objects("Fijo: 963034448 / Móvil: 604026467", "ES")
     pipeline.process_item(item, spider)
     assert item.get("phone") == "+34 963 03 44 48;+34 604 02 64 67"
+
+
+def test_undefined():
+    item, pipeline, spider = get_objects("undefined", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == ""
+
+    item, pipeline, spider = get_objects("+undefinedundefinedundefined", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+"

@@ -36,7 +36,7 @@ class CheckItemPropertiesPipeline:
         r"^Q[0-9]+$",
     )
     opening_hours_regex = re.compile(
-        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? (?:,?[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2})+(?:; )?)+$"
+        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? (?:,?[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}|closed|off)+(?:; )?)+$"
     )
     min_lat = -90.0
     max_lat = 90.0
@@ -45,6 +45,7 @@ class CheckItemPropertiesPipeline:
 
     def process_item(self, item, spider):  # noqa: C901
         check_field(item, spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
+        check_field(item, spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
         check_field(item, spider, "website", (str,), self.url_regex)
         check_field(item, spider, "image", (str,), self.url_regex)
         check_field(item, spider, "email", (str,), self.email_regex)
@@ -56,6 +57,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "country", (str,), self.country_regex)
         check_field(item, spider, "name", (str,))
         check_field(item, spider, "brand", (str,))
+        check_field(item, spider, "operator", (str,))
 
         if coords := get_lat_lon(item):
             lat, lon = coords
@@ -90,12 +92,13 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
-        if opening_hours := item.get("opening_hours"):
+        opening_hours = item.get("opening_hours")
+        if opening_hours is not None:
             if isinstance(opening_hours, OpeningHours):
-                if opening_hours.day_hours:
+                if opening_hours:
                     item["opening_hours"] = opening_hours.as_opening_hours()
                 else:
-                    item["opening_hours"] = None
+                    del item["opening_hours"]
                     spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
             elif not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")

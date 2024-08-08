@@ -2,11 +2,12 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingEsPtSpider(scrapy.Spider):
+class BurgerKingESPTSpider(scrapy.Spider):
     name = "burger_king_es_pt"
-    item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = [
         "https://static.burgerkingencasa.es/bkhomewebsite/pt/stores_pt.json",
         "https://static.burgerkingencasa.es/bkhomewebsite/es/stores_es.json",

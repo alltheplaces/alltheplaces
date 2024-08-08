@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -22,7 +23,6 @@ class MailBoxesEtcGBIESpider(Spider):
     def parse(self, response: Response, **kwargs):
         for location in json.loads(response.json()["d"]["StoreLocationResults"]):
             item = DictParser.parse(location)
-
             item["website"] = urljoin("https://www.mbe.co.uk", location["Directory"])
-
+            apply_category(Categories.POST_OFFICE, item)
             yield item

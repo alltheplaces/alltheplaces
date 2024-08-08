@@ -6,8 +6,8 @@ import scrapy
 from locations.hours import DAYS, OpeningHours, day_range
 from locations.items import Feature
 
-kDaysRe = re.compile(rf"(?:({'|'.join(DAYS)})\w*)")
-kTimesRe = re.compile(r"(\d+)(:\d+)? *([APap][Mm])")
+days_regex = re.compile(rf"(?:({'|'.join(DAYS)})\w*)")
+times_regex = re.compile(r"(\d+)(:\d+)? *([APap][Mm])")
 
 
 class ShopriteSpider(scrapy.Spider):
@@ -54,12 +54,12 @@ class ShopriteSpider(scrapy.Spider):
             if " daily" in row:
                 row = "Mo-Sa " + row.replace(" daily", "")
             row = re.sub("open 24 hours", "12 am - 12 am", row, flags=re.I)
-            start_time, end_time = map(list, kTimesRe.findall(row))
+            start_time, end_time = map(list, times_regex.findall(row))
             start_time[1] = start_time[1] or ":00"
             end_time[1] = end_time[1] or ":00"
             start_time = "".join(start_time)
             end_time = "".join(end_time)
-            days = kDaysRe.findall(row)
+            days = days_regex.findall(row)
             if len(days) == 2:
                 for day in day_range(*days):
                     oh.add_range(day, start_time, end_time, "%I:%M%p")

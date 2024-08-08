@@ -4,13 +4,17 @@ from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class McDonaldsSpider(scrapy.Spider):
+class McdonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {
+        "brand": "McDonald's",
+        "brand_wikidata": "Q38076",
+        "extras": Categories.FAST_FOOD.value,
+    }
     allowed_domains = ["www.mcdonalds.com"]
-    download_delay = 0.5
 
     def start_requests(self):
         template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="
@@ -93,9 +97,7 @@ class McDonaldsSpider(scrapy.Spider):
             item = DictParser.parse(properties)
             item["ref"] = store_identifier
             item["website"] = store_url
-            item["street_address"] = ", ".join(
-                filter(None, [properties.get("addressLine1"), properties.get("addressLine2")])
-            )
+            item["street_address"] = clean_address([properties.get("addressLine1"), properties.get("addressLine2")])
             item["city"] = properties.get("addressLine3")
             item["state"] = properties.get("subDivision")
             item["country"] = country.upper()

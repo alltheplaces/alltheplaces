@@ -1,5 +1,6 @@
 import re
 
+from locations.categories import apply_category
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -14,4 +15,5 @@ class DuskAUSpider(AmastyStoreLocatorSpider):
         item["postcode"] = address_string.split("Zip: ", 1)[1].split(" Address: ", 1)[0]
         item["street_address"] = address_string.split("Address: ", 1)[1].split(" State: ", 1)[0]
         item["state"] = address_string.split("State: ", 1)[1].split(" Description: ", 1)[0]
+        apply_category({"shop": "houseware"}, item)
         yield item

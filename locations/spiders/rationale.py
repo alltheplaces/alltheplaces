@@ -1,9 +1,10 @@
 import re
 
+from locations.categories import Categories, apply_category
 from locations.storefinders.stockist import StockistSpider
 
 
-class RATIONALESpider(StockistSpider):
+class RationaleSpider(StockistSpider):
     name = "rationale"
     item_attributes = {"brand": "RATIONALE", "brand_wikidata": "Q119442596"}
     key = "u6176"
@@ -14,4 +15,5 @@ class RATIONALESpider(StockistSpider):
                 return
         if location.get("full_address"):
             item["addr_full"] = re.sub(r"\s+", " ", location["full_address"])
+        apply_category(Categories.SHOP_COSMETICS, item)
         yield item

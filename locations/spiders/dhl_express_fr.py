@@ -1,13 +1,15 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
+from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 
 
-class DhlExpressFrSpider(scrapy.Spider):
+class DhlExpressFRSpider(scrapy.Spider):
     name = "dhl_express_fr"
-    item_attributes = {"brand": "DHL", "brand_wikidata": "Q489815"}
+    item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["wsbexpress.dhl.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
@@ -35,5 +37,6 @@ class DhlExpressFrSpider(scrapy.Spider):
                         day=day.get("dayOfWeek"), open_time=day.get("openingTime"), close_time=day.get("closingTime")
                     )
                 item["opening_hours"] = oh.as_opening_hours()
+                apply_category(Categories.POST_OFFICE, item)
 
                 yield item

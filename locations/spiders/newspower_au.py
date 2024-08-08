@@ -1,14 +1,17 @@
-import re
-from html import unescape
-
 from chompjs import parse_js_object
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class NewspowerAUSpider(SitemapSpider):
+    # Whilst WP Store Locator is used for this brand, it is set to
+    # return at most the 5 closest points to a provided search
+    # coordinate. There is an impractical number of search requests
+    # thus required to use the WP Store Locator store finder API.
+    # A Sitemap spider is used instead.
     name = "newspower_au"
     item_attributes = {"brand": "Newspower", "brand_wikidata": "Q120670137"}
     allowed_domains = ["newspower.com.au"]
@@ -16,7 +19,11 @@ class NewspowerAUSpider(SitemapSpider):
         "https://newspower.com.au/wpsl_stores-sitemap1.xml",
         "https://newspower.com.au/wpsl_stores-sitemap2.xml",
     ]
-    sitemap_rules = [("/stores/", "parse")]
+    sitemap_rules = [(r"^https:\/\/newspower\.com\.au\/stores/[^/]+\/$", "parse")]
+    # Server will redirect wpsl_stores-sitemap2.xml to
+    # https://newspower.com.au/store-locator/ if it doesn't like
+    # the country/netblock requesting the page.
+    requires_proxy = True
 
     def parse(self, response):
         map_marker_js_blob = response.xpath('//script[contains(text(), "var wpslMap_0 = ")]/text()').get()
@@ -25,16 +32,8 @@ class NewspowerAUSpider(SitemapSpider):
         properties = {
             "ref": map_marker_dict["id"],
             "name": response.xpath('//div[@class="wpsl-locations-details"]/span/strong/text()').get().strip(),
-            "addr_full": unescape(
-                re.sub(
-                    r"\s+",
-                    " ",
-                    ", ".join(filter(None, response.xpath('//div[@class="wpsl-location-address"]//text()').getall())),
-                )
-            )
-            .replace(" ,", ",")
-            .strip(),
-            "street_address": ", ".join(filter(None, [map_marker_dict["address"], map_marker_dict["address2"]])),
+            "addr_full": clean_address(response.xpath('//div[@class="wpsl-location-address"]//text()').getall()),
+            "street_address": clean_address([map_marker_dict["address"], map_marker_dict["address2"]]),
             "city": map_marker_dict["city"],
             "state": map_marker_dict["state"],
             "postcode": map_marker_dict["zip"],

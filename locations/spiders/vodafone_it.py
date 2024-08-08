@@ -1,38 +1,21 @@
-import scrapy
+from typing import Iterable
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.spiders.vodafone_de import VODAFONE_SHARED_ATTRIBUTES
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class VodafoneItSpider(scrapy.Spider):
+class VodafoneITSpider(YextAnswersSpider):
     name = "vodafone_it"
-    item_attributes = {
-        "brand": "Vodafone",
-        "brand_wikidata": "Q122141",
-    }
-    allowed_domains = ["vodafone.it"]
-    start_urls = ["https://negozi.vodafone.it/d/index"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    item_attributes = VODAFONE_SHARED_ATTRIBUTES
+    api_key = "07377ddb3ff87208d4fb4d14fed7c6ff"
+    experience_key = "store-locator-basic-search"
+    locale = "it"
 
-    def parse(self, response):
-        for data in response.json():
-            item = DictParser.parse(data.get("profile"))
-            item["ref"] = data.get("url")
-            if data.get("profile", {}).get("mainPhone", {}):
-                item["phone"] = data.get("profile", {}).get("mainPhone", {}).get("number")
-            item["website"] = f'https://negozi.vodafone.it/{data.get("url")}'
-            item["lat"] = data.get("profile", {}).get("yextDisplayCoordinate", {}).get("lat")
-            item["lon"] = data.get("profile", {}).get("yextDisplayCoordinate", {}).get("long")
-            oh = OpeningHours()
-            if data.get("profile", {}).get("hours", {}):
-                for openHour in data.get("profile", {}).get("hours", {}).get("normalHours"):
-                    for i in range(len(openHour.get("intervals"))):
-                        start = str(openHour.get("intervals", {})[i].get("start")).zfill(4)
-                        end = str(openHour.get("intervals", {})[i].get("end")).zfill(4)
-                        oh.add_range(
-                            day=openHour.get("day"),
-                            open_time=f"{start[:2]}:{start[2:]}",
-                            close_time=f"{end[:2]}:{end[2:]}",
-                        )
+    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        self.crawler.stats.inc_value("x/c_storeType/{}".format(location["data"].get("c_storeType")))
+        if location["data"].get("c_storeType") != "Vodafone Store":
+            return None
 
-            yield item
+        item["branch"] = item.pop("name").removeprefix("Vodafone Store").strip(" |")
+        yield item

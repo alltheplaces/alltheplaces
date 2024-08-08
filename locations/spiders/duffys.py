@@ -5,9 +5,9 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
-class Duffys(scrapy.Spider):
+class DuffysSpider(scrapy.Spider):
     name = "duffys"
-    item_attributes = {"brand": "Duffys"}
+    item_attributes = {"brand": "Duffys", "extras": {"amenity": "restaurant", "cuisine": "american"}}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):

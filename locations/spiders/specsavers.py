@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SpecsaversSpider(Spider):
@@ -118,10 +119,8 @@ fragment sectionalNotification on StoreSectionalNotification {
         for location in response.json()["data"]["storesSearch"]["stores"]:
             store = location["store"]
             base_item = DictParser.parse(store)
-            base_item["street_address"] = ", ".join(
-                filter(
-                    None, [store["address"].get("line1"), store["address"].get("line2"), store["address"].get("line3")]
-                )
+            base_item["street_address"] = clean_address(
+                [store["address"].get("line1"), store["address"].get("line2"), store["address"].get("line3")]
             )
             if base_item["state"] == "GGY":
                 base_item["country"] = "GG"
@@ -141,8 +140,9 @@ fragment sectionalNotification on StoreSectionalNotification {
                     continue
                 item = deepcopy(base_item)
                 item["ref"] = store[store_type]["storeNumber"]
-                item["phone"] = store[store_type]["contactInfo"].get("phone")
-                item["email"] = store[store_type]["contactInfo"].get("email")
+                if store[store_type].get("contactInfo"):
+                    item["phone"] = store[store_type]["contactInfo"].get("phone")
+                    item["email"] = store[store_type]["contactInfo"].get("email")
                 if store_type == "optical":
                     apply_category(Categories.SHOP_OPTICIAN, item)
                     item["extras"]["healthcare"] = "optometrist"

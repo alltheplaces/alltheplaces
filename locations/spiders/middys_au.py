@@ -9,7 +9,10 @@ class MiddysAUSpider(Spider):
     item_attributes = {"brand": "Middy's", "brand_wikidata": "Q117157352"}
     allowed_domains = ["mybranch.middys.com.au"]
     start_urls = ["https://mybranch.middys.com.au/branch/all"]
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "text/plain; charset=utf-8"}}
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {"Accept": "text/plain; charset=utf-8"},
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def start_request(self):
         for url in self.start_urls:

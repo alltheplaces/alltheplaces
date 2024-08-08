@@ -5,7 +5,7 @@ from locations.settings import ITEM_PIPELINES
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FedExSpider(SitemapSpider, StructuredDataSpider):
+class FedexSpider(SitemapSpider, StructuredDataSpider):
     name = "fedex"
     item_attributes = {"brand": "FedEx", "brand_wikidata": "Q459477"}
     sitemap_urls = [
@@ -52,5 +52,8 @@ class FedExSpider(SitemapSpider, StructuredDataSpider):
         elif "FedEx Express Poland" in item["name"]:
             item["name"] = item["brand"] = "FedEx Express"
             apply_category(Categories.POST_OFFICE, item)
+        elif "FedEx Location" in item["name"]:
+            item["located_in"] = item.pop("name").split(" FedEx Location")[0]
+            apply_category({"post_office": "post_partner"}, item)
 
         yield item

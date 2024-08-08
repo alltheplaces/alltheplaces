@@ -1,3 +1,5 @@
+import reverse_geocoder
+
 from locations.categories import (
     Access,
     Categories,
@@ -8,11 +10,12 @@ from locations.categories import (
     apply_category,
     apply_yes_no,
 )
+from locations.items import get_lat_lon, set_lat_lon
 from locations.storefinders.woosmap import WoosmapSpider
 
 
 class TotalEnergiesSpider(WoosmapSpider):
-    name = "totalenergies"
+    name = "total_energies"
     key = "mapstore-prod-woos"
     origin = "https://totalenergies.com"
 
@@ -118,5 +121,16 @@ class TotalEnergiesSpider(WoosmapSpider):
             self.crawler.stats.inc_value(
                 f'atp/total_energies/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
             )
+
+        # Some locations have flipped coordinates - all gas stations of certain brands (Agip) and
+        # some, but not all stations of other brands (Cepsa).
+
+        lat, lon = get_lat_lon(item)
+        coords_country = reverse_geocoder.get((lat, lon), mode=1, verbose=False)["cc"]
+        flipped_coords_country = reverse_geocoder.get((lon, lat), mode=1, verbose=False)["cc"]
+        expected_country = item["country"]
+
+        if expected_country == flipped_coords_country and expected_country != coords_country:
+            set_lat_lon(item, lon, lat)
 
         yield item

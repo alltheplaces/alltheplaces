@@ -1,10 +1,10 @@
 from chompjs import parse_js_object
-from scrapy import Request, Spider
+from scrapy import Request
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SweetFrogUSSpider(StructuredDataSpider):
+class SweetfrogUSSpider(StructuredDataSpider):
     name = "sweetfrog_us"
     item_attributes = {"brand": "sweetFrog", "brand_wikidata": "Q16952110"}
     allowed_domains = ["locator.kahalamgmt.com", "www.sweetfrog.com"]

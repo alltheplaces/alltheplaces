@@ -9,8 +9,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class BcpizzaSpider(CrawlSpider):
-    name = "bcpizza"
+class BcPizzaSpider(CrawlSpider):
+    name = "bc_pizza"
     item_attributes = {"brand": "BC Pizza", "brand_wikidata": "Q117600284"}
     allowed_domains = ["bc.pizza"]
     start_urls = ["https://bc.pizza/locations/"]
@@ -41,8 +41,8 @@ class BcpizzaSpider(CrawlSpider):
         days = response.xpath('//table[contains(@class, "op-table")]//tr')
         oh = OpeningHours()
         for i, day in enumerate(days):
-            dd = day.xpath(f"//tr[{i+1}]//th/text()").get()
-            hh = day.xpath(f"//tr[{i+1}]//span/text()").get()
+            dd = day.xpath(f"//tr[{i + 1}]//th/text()").get()
+            hh = day.xpath(f"//tr[{i + 1}]//span/text()").get()
             if hh == "Closed":
                 continue
             open_time, close_time = hh.split(" – ")

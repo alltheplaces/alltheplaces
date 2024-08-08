@@ -39,9 +39,9 @@ class BedBathBeyondSpider(scrapy.Spider):
             item["lat"] = store["stores"][0]["latitude"]
             item["country"] = store["stores"][0]["countryCode"]
             item["website"] = f'https://www.{self.allowed_domains[0]}{store["stores"][0]["storeUrl"].replace(" ", "")}'
-            storeTimings = re.split(", |,", store["stores"][0]["storeTimings"].strip("\t"))
+            store_timings = re.split(", |,", store["stores"][0]["storeTimings"].strip("\t"))
 
-            for timing in storeTimings:
+            for timing in store_timings:
                 if timing.split(": ")[1] == "Closed":
                     continue
                 for day in re.split("-| - ", timing.split(": ")[0]):

@@ -1,11 +1,12 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class JeffersonUniversityHospitalSpider(scrapy.Spider):
-    name = "jefferson_univ_hosp"
+    name = "jefferson_university_hospital"
     item_attributes = {
         "brand": "Jefferson University Hospital",
         "brand_wikidata": "Q59676202",
@@ -31,7 +32,13 @@ class JeffersonUniversityHospitalSpider(scrapy.Spider):
             yield scrapy.Request(url=f'{domain}{url.get("page_url")}.model.json', callback=self.parse_location)
 
     def parse_location(self, response):
+        location_data = response.json().get("locationLinkingData")
         item = DictParser.parse(response.json().get("locationLinkingData"))
         item["ref"] = item["website"]
 
+        if item["name"] == item["street_address"]:
+            item["name"] = f"{location_data['parentOrganization']} {location_data['@type']} at {item.get('city')}"
+            self.crawler.stats.inc_value("jefferson_univ_hosp/name_is_same_as_address")
+
+        apply_category(Categories.CLINIC, item)
         yield item

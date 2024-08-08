@@ -4,16 +4,16 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 
 
 class NandosOMSpider(scrapy.Spider):
     name = "nandos_om"
-    item_attributes = {"brand": "Nando's", "brand_wikidata": "Q3472954"}
+    item_attributes = NANDOS_SHARED_ATTRIBUTES
     allowed_domains = ["www.nandosoman.com"]
     start_urls = [
         "https://www.nandosoman.com/eat/restaurants-all",
     ]
-    download_delay = 0.3
 
     def parse(self, response):
         urls = response.xpath('//div[@class="row"]/a/@href').extract()

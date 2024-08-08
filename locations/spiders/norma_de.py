@@ -6,22 +6,11 @@ from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-DAY_MAPPING = {
-    "MONDAY": "Mo",
-    "TUESDAY": "Tu",
-    "WEDNESDAY": "We",
-    "THURSDAY": "Th",
-    "FRIDAY": "Fr",
-    "SATURDAY": "Sa",
-    "SUNDAY": "Su",
-}
 
-
-class NormaDeSpider(scrapy.Spider):
+class NormaDESpider(scrapy.Spider):
     name = "norma_de"
     item_attributes = {"brand": "Norma", "brand_wikidata": "Q450180"}
     allowed_domains = ["www.norma-online.de"]
-    download_delay = 0.2
 
     def start_requests(self):
         url = "https://www.norma-online.de/de/filialfinder/suchergebnis?lng={}&lat={}&r=80000"
@@ -88,17 +77,17 @@ class NormaDeSpider(scrapy.Spider):
             if match:
                 street = match.group(1)
 
-            match = re.search(r"(\d{5}) (.*?)<\/p>", address)
+            match = re.search(r"(\d{5})\s*(.*?)\s*$", address, re.MULTILINE)
             if match:
                 zip = match.group(1)
                 city = match.group(2)
 
             position = store.xpath('.//div[@class="col-xs-12 col-sm-6 col-md-2 col-lg-2 actions"]' "//a/@href").get()
             if position:
-                match = re.search(r"lng=(.*?)&lat=(.*?)&", position)
+                match = re.search(r"@(-?\d+\.\d+),(-?\d+\.\d+)", position)
                 if match:
-                    lat = match.group(2)
-                    lon = match.group(1)
+                    lat = match.group(1)
+                    lon = match.group(2)
 
             properties = {
                 "ref": f"{lat}_{lon}",

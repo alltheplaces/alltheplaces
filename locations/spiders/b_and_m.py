@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.spiders.vapestore_gb import clean_address
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -13,5 +13,9 @@ class BAndMSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["LocalBusiness"]
 
     def inspect_item(self, item, response):
-        item["street_address"] = clean_address(item["street_address"])
+        apply_category(Categories.SHOP_VARIETY_STORE, item)
+
+        if "phone" in item:
+            if item["phone"].replace(" ", "").startswith("+443"):
+                item.pop("phone", None)
         yield item

@@ -2,13 +2,18 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class BremerBankSpider(SitemapSpider):
-    name = "bremer_bank"
-    item_attributes = {"brand": "Bremer Bank", "brand_wikidata": "Q907603"}
+class BremerBankUSSpider(SitemapSpider):
+    name = "bremer_bank_us"
+    item_attributes = {
+        "brand": "Bremer Bank",
+        "brand_wikidata": "Q907603",
+        "extras": Categories.BANK.value,
+    }
     sitemap_urls = ["https://www.bremer.com/sitemap.xml"]
     sitemap_rules = [("/locations/", "parse")]
     download_delay = 5.0

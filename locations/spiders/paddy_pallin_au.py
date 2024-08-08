@@ -1,12 +1,17 @@
 from scrapy import Request
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
 class PaddyPallinAUSpider(AmastyStoreLocatorSpider):
     name = "paddy_pallin_au"
-    item_attributes = {"brand": "Paddy Pallin", "brand_wikidata": "Q117949623"}
+    item_attributes = {
+        "brand": "Paddy Pallin",
+        "brand_wikidata": "Q117949623",
+        "extras": Categories.SHOP_SPORTS.value,
+    }
     allowed_domains = ["www.paddypallin.com.au"]
 
     def start_requests(self):

@@ -8,8 +8,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
-from locations.user_agents import BROWSER_DEFAULT
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class YvesRocherSpider(CrawlSpider):
@@ -17,8 +16,7 @@ class YvesRocherSpider(CrawlSpider):
     item_attributes = {"brand": "Yves Rocher", "brand_wikidata": "Q28496595"}
     start_urls = ["https://www.yves-rocher.es/encuentra-tu-tienda/SL"]
     rules = [Rule(LinkExtractor(allow=r"https://www.yves.+?/.+?/SL", tags="link"), callback="parse")]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"REDIRECT_ENABLED": False}
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         data = json.loads(
@@ -32,7 +30,7 @@ class YvesRocherSpider(CrawlSpider):
         for location in DictParser.get_nested_key(data, "allStores"):
             location["lon"], location["lat"] = location.pop("location")
             location.pop("countryCode")
-            location["street_address"] = clean_address([location.get("address1"), location.get("address2")])
+            location["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
             item = DictParser.parse(location)
 
             item["opening_hours"] = OpeningHours()

@@ -1,45 +1,33 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.linked_data_parser import LinkedDataParser
+from locations.spiders.central_england_cooperative import COOP_FUNERALCARE, set_operator
+from locations.structured_data_spider import StructuredDataSpider
+
+THE_COOPERATIVE_GROUP = {"brand": "The Co-operative Group", "brand_wikidata": "Q117202"}
+THE_COOPERATIVE_GROUP_FOOD = {"brand": "Co-op Food", "brand_wikidata": "Q3277439"}
 
 
-class TheCooperativeGroupSpider(SitemapSpider):
+class TheCooperativeGroupSpider(SitemapSpider, StructuredDataSpider):
     name = "the_cooperative_group"
-    item_attributes = {"brand": "The Co-operative Group", "brand_wikidata": "Q117202"}
     sitemap_urls = [
         "https://www.coop.co.uk/store-finder/sitemap.xml",
         "https://www.coop.co.uk/funeralcare/funeral-directors/sitemap.xml",
     ]
     sitemap_rules = [
-        (
-            r"https:\/\/www\.coop\.co\.uk\/store-finder\/[-\w]+\/[-\w]+$",
-            "parse_store",
-        ),
-        (
-            r"https:\/\/www\.coop\.co\.uk\/funeralcare\/funeral-directors\/",
-            "parse_funeralcare",
-        ),
+        ("/store-finder/", "parse_sd"),
+        ("/funeralcare/funeral-directors/", "parse_sd"),
     ]
+    wanted_types = ["ConvenienceStore", "LocalBusiness"]
 
-    def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "ConvenienceStore")
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if ld_data["@type"] == "ConvenienceStore":
+            item.update(THE_COOPERATIVE_GROUP_FOOD)
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        else:
+            item.update(COOP_FUNERALCARE)
+            apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
 
-        if item is None:
-            return
+        set_operator(THE_COOPERATIVE_GROUP, item)
 
-        item["ref"] = item["website"]
-        apply_category(Categories.SHOP_CONVENIENCE, item)
-
-        return item
-
-    def parse_funeralcare(self, response):
-        item = LinkedDataParser.parse(response, "LocalBusiness")
-
-        if item is None:
-            return
-
-        item["ref"] = item["website"]
-        apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
-
-        return item
+        yield item

@@ -1,5 +1,8 @@
+import re
+from typing import Any
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -9,14 +12,15 @@ from locations.hours import OpeningHours
 class CaffeNeroGBSpider(Spider):
     name = "caffe_nero_gb"
     item_attributes = {"brand": "Caffe Nero", "brand_wikidata": "Q675808"}
-    allowed_domains = ["caffenero-webassets-production.s3.eu-west-2.amazonaws.com"]
-    start_urls = ["https://caffenero-webassets-production.s3.eu-west-2.amazonaws.com/stores/stores_gb.json"]
+    allowed_domains = ["caffenero.com", "caffenerowebsite.blob.core.windows.net"]
+    start_urls = ["https://caffenero.com/uk/stores/"]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield JsonRequest(
+            re.search(r"loadGeoJson\(\n\s+'(https://.+)', {", response.text).group(1), callback=self.parse_geojson
+        )
 
-    def parse(self, response):
+    def parse_geojson(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["features"]:
             if (
                 not location["properties"]["status"]["open"]
@@ -29,6 +33,8 @@ class CaffeNeroGBSpider(Spider):
             item["geometry"] = location["geometry"]
             if location["properties"]["status"]["express"]:
                 item["brand"] = "Nero Express"
+
+            item["branch"] = item.pop("name")
 
             item["opening_hours"] = OpeningHours()
             for day_name, day_hours in location["properties"]["hoursRegular"].items():
@@ -50,6 +56,6 @@ class CaffeNeroGBSpider(Spider):
             apply_yes_no(Extras.OUTDOOR_SEATING, item, location["properties"]["amenities"]["outside_seating"], False)
             apply_category(Categories.COFFEE_SHOP, item)
 
-            item["website"] = f'https://caffenero.com/uk/store/{location["properties"]["slug"]}/'
+            item["website"] = f'https://www.caffenero.com/uk/stores/{location["properties"]["slug"]}/'
 
             yield item

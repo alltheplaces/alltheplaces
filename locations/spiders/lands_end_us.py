@@ -3,13 +3,14 @@ import re
 import scrapy
 import xmltodict
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
 
 
 class LandsEndUSSpider(scrapy.Spider):
     name = "lands_end_us"
-    item_attributes = {"brand": "Lands' End", "brand_wikidata": "Q839555"}
+    item_attributes = {"brand": "Lands' End", "brand_wikidata": "Q839555", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = [
         "https://www.landsend.com/pp/StoreLocator?lat=42.7456634&lng=-90.4879916&radius=3000&S=S&L=L&C=undefined&N=N"
     ]

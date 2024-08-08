@@ -10,6 +10,7 @@ class OlliesBargainOutletSpider(scrapy.Spider):
     allowed_domains = ["ollies.us"]
     item_attributes = {"brand": "Ollie's Bargain Outlet", "brand_wikidata": "Q7088304"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "US"
 
     def start_requests(self):
         formdata = {
@@ -56,10 +57,11 @@ class OlliesBargainOutletSpider(scrapy.Spider):
             item["website"] = f'https://www.{self.allowed_domains[0]}{data.get("CustomUrl")}'
             item["ref"] = data.get("StoreCode")
 
-            openHours = data.get("OpenHours").split("<br />")
-            openHourFiltered = [row.replace(":", "") for row in openHours if "-" in row]
-            oh = OpeningHours()
-            oh.from_linked_data({"openingHours": openHourFiltered}, "%I%p")
-            item["opening_hours"] = oh.as_opening_hours()
+            open_hours = data.get("OpenHours").split("<br />")
+            if "COMING SOON" not in open_hours[0].upper():
+                open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
+                oh = OpeningHours()
+                oh.from_linked_data({"openingHours": open_hour_filtered}, "%I%p")
+                item["opening_hours"] = oh.as_opening_hours()
 
-            yield item
+                yield item

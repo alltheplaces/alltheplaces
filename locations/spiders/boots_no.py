@@ -3,7 +3,9 @@ import urllib.parse
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BootsNOSpider(scrapy.Spider):
@@ -33,12 +35,14 @@ class BootsNOSpider(scrapy.Spider):
             "website": response.meta["website"],
         }
 
+        apply_category(Categories.PHARMACY, properties)
         yield Feature(**properties)
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        address_parts = response.xpath('//div[contains(text(),"Besøksadresse")]/following-sibling::text()').extract()
-        address = " ".join(map(str.strip, address_parts))
+        address = clean_address(
+            response.xpath('//div[contains(text(),"Besøksadresse")]/following-sibling::text()').getall()
+        )
         name = urllib.parse.unquote_plus(re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1))
         phone = response.xpath('//a[contains(@href,"tel")]/text()').extract_first()
 

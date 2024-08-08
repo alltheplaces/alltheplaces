@@ -1,13 +1,16 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import clean_facebook, clean_twitter
 
 
 class FollettSpider(Spider):
     name = "follett"
+    item_attributes = {"operator": "Follett Corporation", "operator_wikidata": "Q5464641"}
     allowed_domains = ["svc.bkstr.com"]
     start_urls = ["https://svc.bkstr.com/store/byName?storeType=FMS&langId=-1&schoolName=*"]
 
@@ -45,7 +48,7 @@ class FollettSpider(Spider):
 
         for location_data in location["locationInfo"]:
             if location_data["languageId"] == "-1":  # English
-                properties["street_address"] = ", ".join(filter(None, location_data["address"]["addressLine"]))
+                properties["street_address"] = clean_address(location_data["address"]["addressLine"])
                 properties["city"] = location_data["address"].get("city")
                 properties["state"] = location_data["address"].get("stateOrProvinceName")
                 properties["country"] = location_data["address"].get("country")
@@ -71,8 +74,7 @@ class FollettSpider(Spider):
                 properties["opening_hours"] = OpeningHours()
                 properties["opening_hours"].add_ranges_from_string(hours_string)
 
-        properties["extras"] = {}
-        properties["extras"]["operator"] = "Follett Corporation"
-        properties["extras"]["operator:wikidata"] = "Q5464641"
+        apply_category(Categories.SHOP_BOOKS, properties)
+        properties["extras"]["books"] = "academic"
 
         yield Feature(**properties)

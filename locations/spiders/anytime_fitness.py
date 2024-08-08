@@ -1,34 +1,33 @@
 import html
-import json
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AnytimeFitnessSpider(scrapy.Spider):
     name = "anytime_fitness"
     item_attributes = {"brand": "Anytime Fitness", "brand_wikidata": "Q4778364"}
-    allowed_domains = ["www.anytimefitness.com"]
+    start_urls = ["https://www.anytimefitness.com/wp-content/uploads/locations.json"]
 
-    def start_requests(self):
-        url = "https://www.anytimefitness.com/wp-content/uploads/locations.json"
-        yield scrapy.Request(url, callback=self.parse)
-
-    def parse(self, response):
-        gyms = json.loads(response.text)
-
-        for gym in gyms:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for gym in response.json():
             yield Feature(
                 lat=gym["latitude"],
                 lon=gym["longitude"],
-                addr_full=", ".join(filter(None, [gym["content"]["address"], gym["content"]["address2"]])),
+                street_address=clean_address([gym["content"]["address"], gym["content"]["address2"]]),
                 city=gym["content"]["city"],
                 phone=gym["content"]["phone"],
+                website=gym["content"]["url"].replace(
+                    "https://anytimefitness.co.uk", "https://www.anytimefitness.co.uk"
+                ),
+                email=gym["content"]["email"],
                 state=gym["content"]["state_abbr"],
                 postcode=gym["content"]["zip"],
-                ref=gym["content"]["url"],
+                ref=gym["content"]["number"],
                 country=gym["content"]["country"],
-                name=html.unescape(gym["content"]["title"]),
-                extras={"number": gym["content"]["number"]},
+                branch=html.unescape(gym["content"]["title"]),
             )

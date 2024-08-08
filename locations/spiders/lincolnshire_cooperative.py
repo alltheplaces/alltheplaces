@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -18,6 +19,17 @@ class LincolnshireCooperativeSpider(SitemapSpider):
             "parse_item",
         )
     ]
+    categories = [
+        ("food store", Categories.SHOP_CONVENIENCE),
+        ("pharmacy", Categories.PHARMACY),
+        ("funeral", Categories.SHOP_FUNERAL_DIRECTORS),
+        ("florist", Categories.SHOP_FLORIST),
+        ("coffee", Categories.COFFEE_SHOP),
+        ("filling station", Categories.FUEL_STATION),
+        ("travel", Categories.SHOP_TRAVEL_AGENCY),
+        ("chiropody", Categories.SHOP_ORTHOPEDICS),
+        ("podiatry", Categories.SHOP_ORTHOPEDICS),
+    ]
 
     def parse_item(self, response):
         ld_item = response.xpath('//script[@type="application/ld+json"]//text()').get()
@@ -30,5 +42,10 @@ class LincolnshireCooperativeSpider(SitemapSpider):
 
         if item.get("phone"):
             item["phone"] = item["phone"].replace(" (24 hours)", "")
+
+        for label, cat in self.categories:
+            if label in item["name"].lower():
+                apply_category(cat, item)
+                break
 
         return item

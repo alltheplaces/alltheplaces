@@ -1,6 +1,7 @@
 from chompjs import parse_js_object
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_SI, OpeningHours
 
@@ -36,4 +37,5 @@ class A1SISpider(Spider):
             item["street_address"] = item.pop("addr_full", None)
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location["workingHours"], days=DAYS_SI)
+            apply_category(Categories.SHOP_TELECOMMUNICATION, item)
             yield item

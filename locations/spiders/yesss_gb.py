@@ -5,7 +5,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 class YesssGBSpider(Spider):
     name = "yesss_gb"
-    item_attributes = {"brand": "Yesss Electrical", "brand_wikidata": "Q91307483"}
+    item_attributes = {"brand": "Yesss Electrical", "brand_wikidata": "Q91307483", "extras": {"shop": "electrical"}}
     start_urls = ["https://www.yesss.co.uk/store-finder/location-data/all"]
 
     def parse(self, response, **kwargs):

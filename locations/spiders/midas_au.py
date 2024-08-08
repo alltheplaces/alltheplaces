@@ -4,6 +4,7 @@ from urllib.parse import unquote
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -56,4 +57,5 @@ class MidasAUSpider(Spider):
                     break
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category(Categories.SHOP_CAR_REPAIR, properties)
             yield Feature(**properties)

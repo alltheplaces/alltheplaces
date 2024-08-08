@@ -5,9 +5,9 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class EBGamesAUSpider(SitemapSpider, StructuredDataSpider):
+class EbGamesAUSpider(SitemapSpider, StructuredDataSpider):
     name = "eb_games_au"
-    item_attributes = {"brand": "EB Games", "brand_wikidata": "Q4993686"}
+    item_attributes = {"brand": "EB Games", "brand_wikidata": "Q5322604"}
     sitemap_urls = ["https://www.ebgames.com.au/sitemap-stores.xml"]
     sitemap_rules = [(r"/stores/store/(\d+)-[-\w]+$", "parse_sd")]
     is_playwright_spider = True

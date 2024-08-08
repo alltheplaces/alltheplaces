@@ -18,10 +18,10 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
         "carrsqc": {"brand": "Carrs", "brand_wikidata": "Q5046735"},
         "jewelosco": {"brand": "Jewel-Osco", "brand_wikidata": "Q3178470"},
         "kingsfoodmarkets": {"brand": "Kings", "brand_wikidata": "Q6412914"},
-        "luckylowprices": {"brand": "Lucky", "brand_wikidata": "Q115350483"},
+        "luckylowprices": {"brand": "Lucky", "brand_wikidata": "Q6698032"},
         "marketstreetunited": {
             "brand": "Market Street",
-            "brand_wikidata": "Q113009729",
+            "brand_wikidata": "Q119405196",
         },
         "pavilions": {"brand": "Pavilions", "brand_wikidata": "Q7155886"},
         "randalls": {"brand": "Randalls", "brand_wikidata": "Q7291489"},
@@ -34,7 +34,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
         },
         "vons": {"brand": "Vons", "brand_wikidata": "Q7941609"},
     }
-    item_attributes = {"nsi_id": -1}  # Most of these are too small to justify NSI entries
+    item_attributes = {"nsi_id": "-1"}  # Most of these are too small to justify NSI entries
     allowed_domains = [
         "local.albertsons.com",
         "local.fuel.albertsons.com",

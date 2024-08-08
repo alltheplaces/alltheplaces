@@ -39,12 +39,13 @@ class ToyotaEUSpider(scrapy.Spider):
         "it",
         "rs",
         "bg",
+        "cz",
     ]
 
     def start_requests(self):
         for country in self.available_countries:
             yield scrapy.Request(
-                f"https://kong-proxy-aws.toyota-europe.com/dxp/dealers/api/toyota/{country}/{country}/drive/2.344148/48.862893?count=1000&extraCountries=&isCurrentLocation=false",
+                f"https://kong-proxy-aws.toyota-europe.com/dxp/dealers/api/toyota/{country}/cs/all?extraCountries=&services=&randomize=false",
                 callback=self.parse,
             )
 
@@ -53,7 +54,7 @@ class ToyotaEUSpider(scrapy.Spider):
             address_details = store["address"]
             coordinates = address_details["geo"]
             item = DictParser.parse(store)
-            item["ref"] = store["uuid"]
+            item["ref"] = store["id"]
             item["email"] = store["eMail"]
             item["lat"] = coordinates["lat"]
             item["lon"] = coordinates["lon"]

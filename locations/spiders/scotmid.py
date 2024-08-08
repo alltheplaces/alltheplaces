@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -18,16 +19,25 @@ class ScotmidSpider(Spider):
             item = DictParser.parse(store)
 
             type = store.get("style")
+            item["extras"] = {}
+            item["extras"]["type"] = type
 
             if type == "post-offices":
                 # Skip post offices
                 continue
+            elif type == "scotmid":
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif type == "semichem":
                 item["brand"] = "Semichem"
                 item["brand_wikidata"] = "Q17032096"
             elif type == "lakes-and-dales":
                 item["brand"] = "Lakes & Dales Co-operative"
                 item["brand_wikidata"] = "Q110620660"
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+            elif type == "funeral-branches":
+                item["brand"] = "Scotmid Funerals"
+                item["brand_wikidata"] = "Q125940846"
+                apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
 
             item["name"] = store.get("title")
 
@@ -36,6 +46,9 @@ class ScotmidSpider(Spider):
             item["state"] = store.get("address_line_3")
 
             item["phone"] = store.get("telephone_number")
+
+            if "slug" in store:
+                item["website"] = "https://scotmid.coop/store/" + store["slug"] + "/"
 
             oh = OpeningHours()
             for day in [
@@ -64,8 +77,5 @@ class ScotmidSpider(Spider):
                     pass
 
             item["opening_hours"] = oh.as_opening_hours()
-
-            item["extras"] = {}
-            item["extras"]["type"] = store.get("style")
 
             yield item

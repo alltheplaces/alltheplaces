@@ -5,13 +5,14 @@ from locations.hours import DAYS, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BluePearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
+class BluepearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
     name = "bluepearl_pet_hospital_us"
     item_attributes = {"brand": "BluePearl Pet Hospital", "brand_wikidata": "Q4928764"}
     allowed_domains = ["bluepearlvet.com"]
     sitemap_urls = ["https://bluepearlvet.com/hospital-sitemap.xml"]
     sitemap_rules = [(r"\/hospital\/[\w\-]+\/$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
+    requires_proxy = True  # Cloudflare bot protection used
 
     def post_process_item(self, item, response, ld_data):
         name_html = Selector(text=ld_data["name"])

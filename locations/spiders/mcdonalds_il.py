@@ -3,18 +3,18 @@ import re
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsILSpider(scrapy.Spider):
+class McdonaldsILSpider(scrapy.Spider):
     name = "mcdonalds_il"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.co.il"]
     start_urls = ("https://www.mcdonalds.co.il/%D7%90%D7%99%D7%AA%D7%95%D7%A8_%D7%9E%D7%A1%D7%A2%D7%93%D7%94",)
 
     # TODO: Does have hours but the days are not in english and the function does not work. Hence its deletion
 
-    def parse_Ref(self, data):
+    def parse_ref(self, data):
         match = re.search(r"store_id=(.*\d)", data)
         ref = match.groups()[0]
         return ref
@@ -58,7 +58,7 @@ class McDonaldsILSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.xpath('//div[@class="mod_geo_location_store_link"]/span/a/@href').extract()
         for store in stores:
-            ref = self.parse_Ref(store)
+            ref = self.parse_ref(store)
             yield scrapy.Request(
                 "https:" + store, meta={"ref": ref}, callback=self.parse_store, cb_kwargs={"store_id": ref}
             )

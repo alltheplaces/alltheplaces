@@ -26,7 +26,7 @@ class GoodwillSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Goodwill",
         "brand_wikidata": "Q5583655",
-        "nsi_id": -1,
+        "nsi_id": "-1",
         "extras": Categories.SHOP_CHARITY.value,
     }
     allowed_domains = ["www.goodwill.org"]
@@ -61,9 +61,9 @@ class GoodwillSpider(scrapy.Spider):
                 "lat": store.get("LocationLatitude1"),
                 "lon": store.get("LocationLongitude1"),
                 "website": f'https://www.goodwill.org/locator/location/?store={b64_wrap(store["LocationId"])}&lat={b64_wrap(store["LocationLatitude1"])}&lng={b64_wrap(store["LocationLongitude1"])}',
+                "operator": store.get("Name_Parent"),
                 "extras": {
                     "store_categories": store.get("calcd_ServicesOffered"),
-                    "operator": store.get("Name_Parent"),
                     "operator:website": store.get("LocationParentWebsite"),
                     "operator:phone": store.get("Phone_Parent"),
                     "operator:facebook": store.get("LocationParentURLFacebook"),

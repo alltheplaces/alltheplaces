@@ -1,13 +1,14 @@
 import scrapy
 
+from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsCZSpider(scrapy.Spider):
+class McdonaldsCZSpider(scrapy.Spider):
     name = "mcdonalds_cz"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.cz"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = (
@@ -28,9 +29,22 @@ class McDonaldsCZSpider(scrapy.Spider):
     def parse(self, response):
         pois = response.json().get("restaurants")
         for poi in pois:
+            if poi["slug"] == "test-lsm":
+                continue
+
             poi["street_address"] = poi.pop("address")
             item = DictParser.parse(poi)
+            item["branch"] = item.pop("name")
             item["website"] = response.urljoin(poi["slug"])
             item["postcode"] = str(item["postcode"])
             self.parse_hours(item, poi)
+
+            apply_yes_no(Extras.WIFI, item, "wifi" in poi["categories"])
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "mcdrive" in poi["categories"])
+            apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "amex" in poi["categories"])
+            apply_yes_no(PaymentMethods.MASTER_CARD, item, "mastercard" in poi["categories"])
+            apply_yes_no(PaymentMethods.VISA, item, "visa" in poi["categories"])
+            # TODO: other payment methods include:
+            #  chequedejeuner club cup darkove doxx edenred eur gastropass isic master nasestravenkaa ticket usd visael
+
             yield item

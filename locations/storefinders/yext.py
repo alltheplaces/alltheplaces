@@ -19,6 +19,8 @@ from locations.structured_data_spider import clean_facebook
 
 
 class YextSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "yext"}
+
     api_key = ""
     api_version = ""
     search_filter = "{}"
@@ -40,7 +42,7 @@ class YextSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["entities"]:
-            if location["meta"].get("entityType") not in self.wanted_types:
+            if location["meta"].get("entityType") and location["meta"].get("entityType") not in self.wanted_types:
                 continue
             if location.get("closed") or "CLOSED" in location["name"].upper():
                 continue

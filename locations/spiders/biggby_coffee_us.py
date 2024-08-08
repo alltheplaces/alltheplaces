@@ -1,8 +1,10 @@
+from chompjs import parse_js_object
 from scrapy import Spider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BiggbyCoffeeUSSpider(Spider):
@@ -12,20 +14,48 @@ class BiggbyCoffeeUSSpider(Spider):
     start_urls = ["https://www.biggby.com/locations/"]
 
     def parse(self, response):
-        for location in response.xpath("(//markers)[1]/marker"):
-            if location.attrib["coming-soon"]:
+        js_blob = response.xpath('//script[contains(text(), "locations: [{")]/text()').get()
+        js_blob = "[{" + js_blob.split("locations: [{", 1)[1].split("}]", 1)[0] + "}]"
+        for location in parse_js_object(js_blob):
+            if location["acf"]["store_coming_soon"]:
                 continue
-            item = DictParser.parse(location.attrib)
-            item["street_address"] = ", ".join(
-                filter(None, [location.attrib["address-one"], location.attrib["address-two"]])
-            )
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_days_range(
-                ["Mo", "Tu", "We", "Th"], location.attrib["mon-thurs-open-hour"], location.attrib["mon-thurs-open-hour"]
-            )
-            item["opening_hours"].add_range("Fr", location.attrib["fri-open-hour"], location.attrib["fri-close-hour"])
-            item["opening_hours"].add_range("Sa", location.attrib["sat-open-hour"], location.attrib["sat-close-hour"])
-            item["opening_hours"].add_range("Su", location.attrib["sun-open-hour"], location.attrib["sun-close-hour"])
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location.attrib["drive-thru"], False)
-            apply_yes_no(Extras.WIFI, item, location.attrib["wifi"], False)
+            item = DictParser.parse(location["acf"])
+            item["street_address"] = clean_address([location["acf"]["address_one"], location["acf"]["address_two"]])
+            if location["acf"].get("location_map"):
+                item["addr_full"] = location["acf"]["location_map"]["address"]
+                item["lat"] = location["acf"]["location_map"]["lat"]
+                item["lon"] = location["acf"]["location_map"]["lng"]
+            if location["acf"].get("monday_thru_thurs_open_hour"):
+                item["opening_hours"] = OpeningHours()
+                hours_string = (
+                    "Mo-Th: "
+                    + location["acf"].get("monday_thru_thurs_open_hour", "")
+                    + " - "
+                    + location["acf"].get("mon_thru_thurs_close_hour", "")
+                )
+                hours_string = (
+                    hours_string
+                    + " Fr: "
+                    + location["acf"].get("friday_open_hour", "")
+                    + " - "
+                    + location["acf"].get("friday_close_hour", "")
+                )
+                hours_string = (
+                    hours_string
+                    + " Sa: "
+                    + location["acf"].get("sat_open_hour", "")
+                    + " - "
+                    + location["acf"].get("sat_close_hour", "")
+                )
+                hours_string = (
+                    hours_string
+                    + " Su: "
+                    + location["acf"].get("sun_open_hour", "")
+                    + " - "
+                    + location["acf"].get("sun_close_hour", "")
+                )
+                item["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category(Categories.CAFE, item)
+            apply_yes_no(Extras.WIFI, item, location["acf"]["wifi"], False)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, location["acf"]["drive_thru"], False)
             yield item

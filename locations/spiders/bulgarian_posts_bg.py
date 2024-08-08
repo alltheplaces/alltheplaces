@@ -1,3 +1,5 @@
+import re
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -25,10 +27,24 @@ class BulgarianPostsBGSpider(Spider):
             item["state"] = location["district"]
             item["phone"] = location["phone"]
             item["opening_hours"] = OpeningHours()
+
+            has_break = False
+            if location["note"] is not None:
+                if break_times := re.match(r"(\d+:\d+)-(\d+:\d+) - затворено", location["note"]):
+                    break_start = break_times.group(1)
+                    break_end = break_times.group(2)
+                    has_break = True
+
             for day_name in DAYS_FULL:
                 if location[f"working_hours_{day_name.lower()}"]:
-                    item["opening_hours"].add_range(
-                        day_name, *location[f"working_hours_{day_name.lower()}"].split("-", 1), "%H:%M"
-                    )
+                    try:
+                        day_hours = location[f"working_hours_{day_name.lower()}"].split("-", 1)
+                        if has_break:
+                            item["opening_hours"].add_range(day_name, day_hours[0], break_start, "%H:%M")
+                            item["opening_hours"].add_range(day_name, break_end, day_hours[1], "%H:%M")
+                        else:
+                            item["opening_hours"].add_range(day_name, *day_hours, "%H:%M")
+                    except ValueError:
+                        continue
             apply_category(Categories.POST_OFFICE, item)
             yield item

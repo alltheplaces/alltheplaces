@@ -7,9 +7,9 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class KFCJPSpider(Spider):
+class KfcJPSpider(Spider):
     name = "kfc_jp"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = {"brand_wikidata": "Q524757"}
     allowed_domains = ["search.kfc.co.jp"]
     start_urls = ["https://search.kfc.co.jp/api/point?b=31,129,46,146"]
 

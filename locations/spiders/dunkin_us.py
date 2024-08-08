@@ -2,12 +2,13 @@ from chompjs import parse_js_object
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Extras, apply_yes_no
+from locations.spiders.dunkin_at import DUNKIN_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class DunkinUSSpider(SitemapSpider, StructuredDataSpider):
     name = "dunkin_us"
-    item_attributes = {"brand": "Dunkin'", "brand_wikidata": "Q847743"}
+    item_attributes = DUNKIN_SHARED_ATTRIBUTES
     allowed_domains = ["locations.dunkindonuts.com"]
     sitemap_urls = ["https://locations.dunkindonuts.com/sitemap.xml"]
     sitemap_rules = [(r"locations\.dunkindonuts\.com\/en\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/\d+$", "parse_sd")]

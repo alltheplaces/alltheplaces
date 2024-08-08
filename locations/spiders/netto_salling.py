@@ -1,3 +1,4 @@
+import html
 from datetime import datetime
 
 from scrapy.spiders import SitemapSpider
@@ -21,6 +22,10 @@ class NettoSallingSpider(SitemapSpider, StructuredDataSpider):
     ]
 
     def pre_process_data(self, ld_data, **kwargs):
+        ld_data["name"] = html.unescape(ld_data["name"])
+        ld_data["address"]["streetAddress"] = html.unescape(ld_data["address"]["streetAddress"])
+        ld_data["address"]["addressLocality"] = html.unescape(ld_data["address"]["addressLocality"])
+
         for oh in ld_data.get("openingHoursSpecification", []):
             if oh.get("dayOfWeek"):
                 continue

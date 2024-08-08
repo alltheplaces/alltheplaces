@@ -7,7 +7,7 @@ from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 
 class CroixRougeFrancaiseFRSpider(Spider):
     name = "croix_rouge_francaise_fr"
-    item_attributes = {"brand": "Croix-Rouge française", "brand_wikidata": "Q3003244"}
+    item_attributes = {"brand": "Croix-Rouge Française", "brand_wikidata": "Q3003244"}
     allowed_domains = ["backend.structure.croix-rouge.fr"]
     start_urls = ["https://backend.structure.croix-rouge.fr/graphql"]
 

@@ -6,9 +6,10 @@ from scrapy import Request, Spider
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class WHSmithSpider(Spider):
+class WhsmithSpider(Spider):
     name = "whsmith"
     item_attributes = {"brand": "WHSmith", "brand_wikidata": "Q1548712", "extras": Categories.SHOP_NEWSAGENT.value}
     allowed_domains = ["whsmith.co.uk"]
@@ -31,7 +32,7 @@ class WHSmithSpider(Spider):
 
             item = DictParser.parse(store)
             item["city"] = item["city"].strip()
-            item["street_address"] = ", ".join(filter(None, [store.get("address1"), store.get("address2")]))
+            item["street_address"] = clean_address([store.get("address1"), store.get("address2")])
             item["website"] = "https://www.whsmith.co.uk/stores/details/?StoreID=" + item["ref"]
             item["extras"] = {"type": store["_type"]}
 
@@ -52,7 +53,7 @@ class WHSmithSpider(Spider):
             for day in DAYS_FULL:
                 if not store.get(f"c_openingTimes{day}") or "closed" in store[f"c_openingTimes{day}"].lower():
                     continue
-                start_time, end_time = store[f"c_openingTimes{day}"].split("-")
+                start_time, end_time = map(str.strip, store[f"c_openingTimes{day}"].split("-"))
                 if ":" not in start_time:
                     if start_time == "24hr":
                         start_time = "00:00"

@@ -1,5 +1,3 @@
-import re
-
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -13,14 +11,12 @@ class KohlsUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.kohls.com/sitemap_store.xml"]
     sitemap_rules = [(r"\/stores\/\w{2}\/\w+-(\d+)\.shtml$", "parse_sd")]
     wanted_types = ["DepartmentStore"]
+    custom_settings = {"REDIRECT_ENABLED": False}
 
     def post_process_item(self, item, response, ld_data):
-        item["ref"] = re.search(self.sitemap_rules[0][0], response.url).group(1)
-        if "|" in item["name"]:
-            item["name"] = item["name"].split("|")[0]
+        item["branch"] = item.pop("name").removeprefix("Kohl's ").removesuffix(" Department & Clothing Store")
         item.pop("image")
         item.pop("facebook")
-        item.pop("twitter")
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(ld_data["openingHours"])
         yield item

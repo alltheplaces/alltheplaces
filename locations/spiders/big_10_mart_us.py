@@ -1,5 +1,6 @@
 import re
 
+from locations.categories import Categories, apply_category
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
@@ -12,4 +13,5 @@ class Big10MartUSSpider(StoreLocatorWidgetsSpider):
         if m := re.search(r"#(\d+)", item["name"]):
             item["ref"] = m.group(1)
         item["addr_full"] = " ".join(item["addr_full"].split())
+        apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
