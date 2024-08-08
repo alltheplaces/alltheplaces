@@ -15,6 +15,15 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
             item["name"] = m.group(2)
 
         categories = (location["categories"] or "").split(",")
+        if "31" in categories:
+            charging_station_item = item.deepcopy()
+            charging_station_item["ref"] = item.get("ref") + "-charging-station"
+            charging_station_item["name"] = None
+            charging_station_item["operator"] = item.get("brand")
+            charging_station_item["operator_wikidata"] = item.get("brand_wikidata")
+            apply_category(Categories.CHARGING_STATION, charging_station_item)
+            yield charging_station_item
+            
         apply_yes_no(Fuel.DIESEL, item, ("19" in categories or "20" in categories))
         apply_yes_no(Fuel.OCTANE_100, item, "21" in categories)
         apply_yes_no(Fuel.OCTANE_95, item, "22" in categories)
@@ -22,9 +31,8 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
         apply_yes_no(Fuel.CNG, item, "24" in categories)
         apply_yes_no(Extras.CAR_WASH, item, "25" in categories)
         apply_yes_no(Extras.ATM, item, "26" in categories)
-        apply_yes_no("restaurant", item, "27" in categories)
+        apply_yes_no("cafe", item, "27" in categories)
         apply_yes_no("self_service", item, "28" in categories)
         apply_yes_no(Fuel.ADBLUE, item, "29" in categories)
-        apply_yes_no("amenity:chargingstation", item, "31" in categories)
 
         yield item
