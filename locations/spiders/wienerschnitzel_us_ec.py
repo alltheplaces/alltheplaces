@@ -24,7 +24,7 @@ class WienerschnitzelUSECSpider(StoreLocatorPlusSelfSpider):
         "brand_wikidata": "Q324679",
         "brand": "Wienerschnitzel",
     }
-    allowed_domains = ["www.wienerschnitzel.com"]
+    allowed_domains = ["www.wienerschnitzel.com", "wienerschnitzel.ec"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     max_results = 10000
     search_radius = 30000
