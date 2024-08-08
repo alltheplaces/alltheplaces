@@ -1,10 +1,8 @@
 from scrapy import Spider
+from scrapy.http import FormRequest
 
-from scrapy.http import FormRequest, JsonRequest
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import merge_address_lines
-from locations.categories import Extras, Fuel, apply_yes_no
 
 
 class MasoutisGRSpider(Spider):
