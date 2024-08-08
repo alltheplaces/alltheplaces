@@ -11,7 +11,7 @@ class BonitaSpider(Spider):
     allowed_domains = ["www.bonita.de"]
     start_urls = [
         "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=DE&distance=10000",
-        "https://www.bonita.de/nl/de/shop_api/app/store_finder/search.json?country=NL&distance=10000",
+        "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=NL&distance=10000",
         "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=AT&distance=10000",
         "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=CH&distance=10000",
     ]
