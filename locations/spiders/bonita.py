@@ -11,9 +11,9 @@ class BonitaSpider(Spider):
     allowed_domains = ["www.bonita.de"]
     start_urls = [
         "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=DE&distance=10000",
-        "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=NL&distance=10000",
-        "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=AT&distance=10000",
-        "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?country=CH&distance=10000",
+        "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?address=&country=NL&distance=10000",
+        "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?address=&country=AT&distance=10000",
+        "https://www.bonita.de/de/de/shop_api/app/store_finder/search.json?address=&country=CH&distance=10000",
     ]
 
     def parse(self, response):
@@ -21,6 +21,7 @@ class BonitaSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["id"]
             item["name"] = None
+
 
             item["street"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])
             item["opening_hours"] = OpeningHours()
