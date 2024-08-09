@@ -1,7 +1,7 @@
 from locations.spiders.kfc_au import KfcAUSpider
 
 
-class KfcZASpider(KfcAUSpider):
+class KfcTHSpider(KfcAUSpider):
     name = "kfc_za"
 
     region_code = "apac"
