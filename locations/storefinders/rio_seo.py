@@ -42,7 +42,7 @@ class RioSeoSpider(Spider):
         try:
             data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
         except json.decoder.JSONDecodeError:
-            logging.warning(f"Could not parse response - check API output")
+            logging.warning("Could not parse response - check API output")
             data = []
 
         for location in data:
