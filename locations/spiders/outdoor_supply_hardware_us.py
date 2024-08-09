@@ -27,7 +27,7 @@ class OutdoorSupplyHardwareUSSpider(Spider):
             item = DictParser.parse(location)
             del item["street"]
 
-            item["name"] = location["branchName"]
+            item["branch"] = location["branchName"]
             item["ref"] = location["branchId"]
             item["street_address"] = location["street"]
             item["extras"]["fax"] = location["faxNum"]

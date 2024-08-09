@@ -1,10 +1,12 @@
+import re
+
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.algolia import AlgoliaSpider
 
 
-class JbhifiSpider(AlgoliaSpider):
-    name = "jbhifi"
+class JbHifiAUSpider(AlgoliaSpider):
+    name = "jb_hifi_au"
     item_attributes = {"brand": "JB Hi-Fi", "brand_wikidata": "Q3310113"}
     api_key = "a0c0108d737ad5ab54a0e2da900bf040"
     app_id = "VTVKM5URPX"
@@ -21,8 +23,16 @@ class JbhifiSpider(AlgoliaSpider):
         return opening_hours.as_opening_hours()
 
     def parse_item(self, item, location):
+        if location.get("displayOnWeb") != "p":
+            return
+
+        if location["locationType"] == 2:
+            item["brand"] = item["name"] = "JB Hi-Fi Home"
+        else:
+            del item["name"]
+
         item["ref"] = location["shopId"]
-        item["name"] = location["storeName"]
+        item["branch"] = location["storeName"]
         item["street_address"] = clean_address(
             [
                 location["storeAddress"]["Line1"],
@@ -30,13 +40,11 @@ class JbhifiSpider(AlgoliaSpider):
                 location["storeAddress"].get("Line3"),
             ]
         )
-        item["city"] = location["storeAddress"]["Suburb"]
-        item["state"] = location["storeAddress"].get("State")
-        item["postcode"] = location["storeAddress"]["Postcode"]
-        item["country"] = "AU"
         item["lat"] = location["_geoloc"]["lat"]
         item["lon"] = location["_geoloc"]["lng"]
-        item["phone"] = location["phone"]
         item["opening_hours"] = self.process_trading_hours(location["normalTradingHours"])
+
+        slug = re.sub(r"\W+", "-", location["storeName"]).lower()
+        item["website"] = f"https://www.jbhifi.com.au/pages/{slug}"
 
         yield item
