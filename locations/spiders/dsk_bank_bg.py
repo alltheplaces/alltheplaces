@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Extrasm Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, OpeningHours
 
@@ -19,6 +19,7 @@ class DskBankBGSpider(scrapy.Spider):
                 apply_category(Categories.BANK, item)
             else:
                 apply_category(Categories.ATM, item)
+                apply_yes_no(Extras.CASH_IN, item, "Внасяне на пари" in data["Services"])
 
             if data["Phone"]:
                 item["phone"] = data.get("Phone").split(";", 1)[0]
