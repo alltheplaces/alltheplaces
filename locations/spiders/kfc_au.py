@@ -19,7 +19,7 @@ class KfcAUSpider(scrapy.Spider):
     def start_requests(self):
         yield JsonRequest(
             url="https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/",
-            headers={"x-tenant-id": self.tenant_id}
+            headers={"x-tenant-id": self.tenant_id},
         )
 
     def parse(self, response):

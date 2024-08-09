@@ -1,4 +1,3 @@
-
 from locations.spiders.kfc_au import KfcAUSpider
 
 
