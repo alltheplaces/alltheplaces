@@ -43,8 +43,8 @@ class KfcAUSpider(scrapy.Spider):
                 if channel["channel"] == "web":
                     apply_yes_no(Extras.DELIVERY, item, "delivery" in channel["services"], False)
                     break
+            web_path = item["name"].lower().replace(" ", "-") + "/" + item["postcode"]
             if self.web_root:
-                web_path = item["name"].lower().replace(" ", "-") + "/" + item["postcode"]
                 item["website"] = self.web_root + web_path
             details_url = (
                 "https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/details/" + web_path
