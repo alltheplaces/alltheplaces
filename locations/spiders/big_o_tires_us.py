@@ -1,5 +1,3 @@
-import logging
-
 from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest
@@ -7,8 +5,6 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.searchable_points import open_searchable_points
-
-logger = logging.getLogger(__name__)
 
 
 class BigOTiresUSSpider(Spider):
@@ -40,7 +36,7 @@ class BigOTiresUSSpider(Spider):
             # Unfortunately, this can also mean "too many stores"
             return
         elif status["code"] != "000":
-            logger.error(f"Got code {status['code']} for request {params}: {status['description']}")
+            self.logger.error(f"Got code {status['code']} for request {params}: {status['description']}")
             return
 
         if "storesType" not in response.json() or "stores" not in response.json()["storesType"]:
