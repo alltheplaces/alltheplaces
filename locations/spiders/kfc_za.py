@@ -1,5 +1,5 @@
+
 from locations.spiders.kfc_au import KfcAUSpider
-from scrapy.http import JsonRequest
 
 
 class KfcZASpider(KfcAUSpider):
