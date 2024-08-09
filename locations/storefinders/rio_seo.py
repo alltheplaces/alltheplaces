@@ -44,6 +44,8 @@ class RioSeoSpider(Spider):
         except json.decoder.JSONDecodeError:
             logging.warning("Could not parse response - check API output")
             data = []
+        except TypeError:
+            data = []
 
         for location in data:
             feature = DictParser.parse(location)
