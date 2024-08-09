@@ -10,6 +10,7 @@ class CashterminalBGSpider(Spider):
     start_urls = ["https://www.cashterminal.bg/places"]
     no_refs = True
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse(self, response):
         for location in response.xpath("//li[@class='contact-link']/a[@data-lat]"):
