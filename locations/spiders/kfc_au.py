@@ -11,13 +11,16 @@ from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 class KfcAUSpider(scrapy.Spider):
     name = "kfc_au"
     item_attributes = KFC_SHARED_ATTRIBUTES
-    start_urls = ["https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/"]
+    region_code = "apac"
     tenant_id = "afd3813afa364270bfd33f0a8d77252d"
+    web_root = "https://www.kfc.com.au/restaurants/"
     requires_proxy = True  # Requires AU proxy, possibly residential IPs only.
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url, headers={"x-tenant-id": self.tenant_id})
+        yield JsonRequest(
+            url="https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/",
+            headers={"x-tenant-id": self.tenant_id},
+        )
 
     def parse(self, response):
         for location in response.json():
@@ -41,8 +44,11 @@ class KfcAUSpider(scrapy.Spider):
                     apply_yes_no(Extras.DELIVERY, item, "delivery" in channel["services"], False)
                     break
             web_path = item["name"].lower().replace(" ", "-") + "/" + item["postcode"]
-            item["website"] = "https://www.kfc.com.au/restaurants/" + web_path
-            details_url = "https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/details/" + web_path
+            if self.web_root:
+                item["website"] = self.web_root + web_path
+            details_url = (
+                "https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/details/" + web_path
+            )
             yield JsonRequest(
                 url=details_url, headers={"x-tenant-id": self.tenant_id}, meta={"item": item}, callback=self.parse_hours
             )
