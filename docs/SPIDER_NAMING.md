@@ -60,5 +60,4 @@ has not been set by the spider itself.
 
 ## Next steps
 
-When you know the best naming for your spider, use either [scrapy's genspider](
-https://docs.scrapy.org/en/latest/topics/commands.html#std-command-genspider) command to start with a basic template, or explore other existing spiders as a basis to start.
+When you know the best naming for your spider, use either [scrapy's genspider](https://docs.scrapy.org/en/latest/topics/commands.html#std-command-genspider) command to start with a basic template, or explore other existing spiders as a basis to start.
