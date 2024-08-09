@@ -7,7 +7,11 @@ from locations.geo import point_locations
 
 class GreenwaySpider(Spider):
     name = "greenway"
-    item_attributes = {"operator": "GreenWay", "operator_wikidata": "Q116450281", extras: {"amenity": "charging_station"}}
+    item_attributes = {
+        "operator": "GreenWay",
+        "operator_wikidata": "Q116450281",
+        extras: {"amenity": "charging_station"},
+    }
 
     def start_requests(self):
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", ["PL", "SK"]):
