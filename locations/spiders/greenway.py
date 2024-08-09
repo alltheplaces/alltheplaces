@@ -10,7 +10,7 @@ class GreenwaySpider(Spider):
     item_attributes = {
         "operator": "GreenWay",
         "operator_wikidata": "Q116450281",
-        extras: {"amenity": "charging_station"},
+        "extras": {"amenity": "charging_station"},
     }
 
     def start_requests(self):
