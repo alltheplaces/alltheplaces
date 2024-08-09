@@ -5,7 +5,7 @@ from locations.storefinders.storemapper import StoremapperSpider
 class GuessAUSpider(StoremapperSpider):
     name = "guess_au"
     item_attributes = {"brand": "Guess", "brand_wikidata": "Q2470307", "extras": Categories.SHOP_CLOTHES.value}
-    key = "7404"
+    company_id = "7404"
 
     def parse_item(self, item, location):
         item.pop("email")

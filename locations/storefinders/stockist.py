@@ -3,10 +3,11 @@ import random
 import pygeohash
 from chompjs import parse_js_object
 from scrapy import Request, Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 from scrapy.spidermiddlewares.httperror import HttpError
 
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # Documentation for this Stockist store finder is available at:
 # https://help.stockist.co/
@@ -27,9 +28,9 @@ from locations.dict_parser import DictParser
 
 class StockistSpider(Spider):
     dataset_attributes = {"source": "api", "api": "stockist.co"}
-    key = ""
-    max_distance = 50000
-    coordinates_pending = []
+    key: str = ""
+    max_distance: int = 50000
+    coordinates_pending: list[tuple[float, float]] = []
 
     def start_requests(self):
         yield JsonRequest(
@@ -38,7 +39,7 @@ class StockistSpider(Spider):
             errback=self.parse_all_locations_error,
         )
 
-    def parse_all_locations(self, response, **kwargs):
+    def parse_all_locations(self, response: Response):
         for location in response.json():
             yield from self.parse_item(self.parse_location(location), location) or []
 
@@ -57,14 +58,14 @@ class StockistSpider(Spider):
                             url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
                         )
 
-    def parse_search_config(self, response, **kwargs):
+    def parse_search_config(self, response: Response):
         config = parse_js_object(response.text.split("(", 1)[1].split(");", 1)[0])
         self.max_distance = config["max_distance"]
         yield JsonRequest(
             url=f"https://stockist.co/api/v1/{self.key}/locations/overview.js", callback=self.parse_geohashes
         )
 
-    def parse_geohashes(self, response, **kwargs):
+    def parse_geohashes(self, response: Response):
         self.coordinates_pending = [pygeohash.decode(geohash[:-1]) for geohash in response.json()["i"]]
         if len(self.coordinates_pending) > 0:
             yield from self.make_next_search_request()
@@ -76,7 +77,7 @@ class StockistSpider(Spider):
             callback=self.parse_search_results,
         )
 
-    def parse_search_results(self, response, **kwargs):
+    def parse_search_results(self, response: Response):
         for location in response.json()["locations"]:
             yield from self.parse_item(self.parse_location(location), location) or []
 
@@ -90,5 +91,5 @@ class StockistSpider(Spider):
         if len(self.coordinates_pending) > 0:
             yield from self.make_next_search_request()
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item

@@ -44,12 +44,12 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class WPStoreLocatorSpider(Spider):
-    days = None
-    time_format = "%H:%M"
-    searchable_points_files = []
-    search_radius = 0
-    max_results = 0
-    possible_days = DAYS_BY_FREQUENCY
+    days: dict = None
+    time_format: str = "%H:%M"
+    searchable_points_files: list[str] = []
+    search_radius: int = 0
+    max_results: int = 0
+    possible_days: list[dict] = DAYS_BY_FREQUENCY
 
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
