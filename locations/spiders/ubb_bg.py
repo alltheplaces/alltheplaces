@@ -19,6 +19,7 @@ class UbbBGSpider(Spider):
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json, text/javascript, */*"},
     }
+    requires_proxy = True
 
     def start_requests(self):
         for url in self.start_urls:
