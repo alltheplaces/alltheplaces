@@ -10,4 +10,3 @@ class LondisGBSpider(scrapy.spiders.SitemapSpider, OpenGraphSpider):
     allowed_domains = ["londis.co.uk"]
     sitemap_urls = ["https://www.londis.co.uk/sitemap.xml"]
     sitemap_rules = [("/our-stores/", "parse")]
-
