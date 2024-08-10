@@ -26,12 +26,7 @@ class UbbBGSpider(Spider):
             yield scrapy.Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
 
     def parse(self, response, **kwargs):
-        logging.info(response.body)
-        try:
-            markers = response.json()["markers"]
-        except:
-            logging.error("Invalid JSON response")
-            return
+        markers = response.json()["markers"]
         for location in markers["offices"]:
             item = Feature()
             item["ref"] = location["data"]["id"]
