@@ -47,7 +47,6 @@ class WpGoMapsSpider(Spider):
         path = base64.b64encode(data).rstrip(b"=").decode()
         return f"base64{path}"
 
-    # TODO: Rename through spiders that inherit
     def pre_process_marker(self, marker):
         if "<img" in marker["title"]:
             marker.pop("title")
@@ -61,10 +60,10 @@ class WpGoMapsSpider(Spider):
 
     def parse_stores(self, response):
         for marker in response.json()["markers"]:
-            location = self.pre_process_data(marker)
+            self.pre_process_data(marker)
+            location = self.pre_process_marker(marker)
             item = DictParser.parse(location)
             yield self.post_process_item(item, location)
 
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the item."""
-        self.pre_process_marker(location)
