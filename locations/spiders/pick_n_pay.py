@@ -11,7 +11,10 @@ class PickNPaySpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for store in response.json():
-            if store["storeType"] in ("", "ONLINE", "NO_FORMAT", "WHOLESALE") or "(incomplete)" in store["storeName"].lower():
+            if (
+                store["storeType"] in ("", "ONLINE", "NO_FORMAT", "WHOLESALE")
+                or "(incomplete)" in store["storeName"].lower()
+            ):
                 # "" appears to be a data error and the single current result is a data error
                 # "WHOLESALE" appear to be colocated with HYPER locations, so is probably not a distinct store
                 continue
@@ -26,7 +29,7 @@ class PickNPaySpider(scrapy.Spider):
                 # dayId of 8 is only present on some 24/7 stores so we ignore it
                 if day["dayId"] < 8:
                     item["opening_hours"].add_range(DAYS[day["dayId"] - 1], day["openTime"], day["closeTime"])
-            
+
             if store["storeType"] in ("LOCAL", "MINI", "FAMILY", "SUPER", "MARKET"):
                 # "LOCAL", "MINI" appear to be branded as normal PnP supermarkets
                 # "FAMILY", "SUPER" are standard PnP supermarkets
@@ -93,7 +96,7 @@ class PickNPaySpider(scrapy.Spider):
                         "extras": Categories.SHOP_DOITYOURSELF.value,
                     }
                 )
-            elif store["storeType"] == "DC": # Distribution Centre
+            elif store["storeType"] == "DC":  # Distribution Centre
                 item.update(
                     {
                         "extras": Categories.INDUSTRIAL_WAREHOUSE.value,
@@ -119,5 +122,5 @@ class PickNPaySpider(scrapy.Spider):
                 )
             # Unhandled:
             # "DAILY" was two stores, but both marked as incomplete in the data
-            
+
             yield item
