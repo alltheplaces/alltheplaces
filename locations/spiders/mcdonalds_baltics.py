@@ -13,6 +13,7 @@ class McdonaldsBalticsSpider(scrapy.spiders.SitemapSpider, OpenGraphSpider):
         "https://mcd.lt/location-sitemap.xml",
         "https://mcdonalds.lv/location-sitemap.xml",
     ]
+    wanted_types = ["article"]
 
     def post_process_item(self, item, response, **kwargs):
         item["lat"] = response.xpath("//@data-lat").extract_first()
