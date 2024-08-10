@@ -9,6 +9,7 @@ class FrancoMancaGBSpider(SitemapSpider, OpenGraphSpider):
     name = "franco_manca_gb"
     item_attributes = {"brand": "Franco Manca", "brand_wikidata": "Q28404417"}
     sitemap_urls = ["https://www.francomanca.co.uk/restaurant-sitemap.xml"]
+    wanted_types = ["article"]
 
     def post_process_item(self, item, response, **kwargs):
         item["name"] = "Franco Manca"
