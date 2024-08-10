@@ -4,7 +4,7 @@
 ### Common storefinders
 
 Often, a storefinder is a plugin or common software component. To encourage code
-re-use, there are a large number of [pre-built store finders](./locations/storefinders/)
+re-use, there are a large number of [pre-built store finders](../locations/storefinders/)
 
 Over and above the [core scrapy spider API](https://docs.scrapy.org/en/latest/topics/spiders.html),
 typically these store finders follow a pattern of:
@@ -18,8 +18,8 @@ IE: is there an ajax call with a `get_stores` attribute? If so, are there any ex
 This will often lead to very simple, minimal spiders.
 
 Examples:
-- [univeral_store_au](./locations/spiders/universal_store_au.py) - Based on a [closeby](./locations/storefinders/closeby.py) storefinder.
-- [see_candies](./locations/spiders/see_candies.py) - Based on a [rioseo](./locations/storefinders/rio_seo.py) storefinder, overriding the default behaviours
+- [univeral_store_au](../locations/spiders/universal_store_au.py) - Based on a [closeby](../locations/storefinders/closeby.py) storefinder.
+- [see_candies](../locations/spiders/see_candies.py) - Based on a [rioseo](../locations/storefinders/rio_seo.py) storefinder, overriding the default behaviours
 
 ### Investigating an API
 
