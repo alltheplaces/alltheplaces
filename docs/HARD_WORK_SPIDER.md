@@ -20,7 +20,7 @@ then we have some tips to help with writing your spider.
 
 Use xpath and `parse_js_object` to extract the content; suitable for `DictParser`.
 
-Example: [a1_rs](./locations/spiders/a1_rs.py)
+Example: [a1_rs](../locations/spiders/a1_rs.py)
 ```
     def parse(self, response):
         cities_js = (
@@ -34,7 +34,7 @@ Example: [a1_rs](./locations/spiders/a1_rs.py)
 ```
 #### Coordinates as google urls
 
-Use `locations.google_url.extract_google_position` - see [averitt](./locations/spiders/averitt.py)
+Use `locations.google_url.extract_google_position` - see [averitt](../locations/spiders/averitt.py)
 
 ### Using the scrapy shell
 
