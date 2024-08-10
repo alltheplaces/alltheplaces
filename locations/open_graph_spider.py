@@ -14,9 +14,10 @@ class OpenGraphSpider(Spider):
     def parse_og(self, response: Response):  # noqa: C901
         og = OpenGraphParser()
         properties = og.extract_properties(response)
-        if properties["type"] in self.wanted_types:
-            item = og.as_item(properties, response)
-            yield from self.post_process_item(item, response) or []
+        if "type" in properties:
+            if properties["type"] in self.wanted_types:
+                item = og.as_item(properties, response)
+                yield from self.post_process_item(item, response) or []
 
     def post_process_item(self, item, response, **kwargs):
         """Override with any post-processing on the item."""
