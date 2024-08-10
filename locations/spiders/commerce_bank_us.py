@@ -10,7 +10,7 @@ class CommerceBankUSSpider(RioSeoSpider):
         "https://maps.locations.commercebank.com/api/getAsyncLocations?template=search&level=search&search=Kansas%20City,%20KS,%20US&radius=100000&limit=100000"
     ]
 
-    def post_process_feature(self, feature, location):
+    def post_process_item(self, feature, location):
         if location["Location Type_CS"] == "ATM":
             apply_category(Categories.ATM, feature)
         elif location["Location Type_CS"] == "Branch":

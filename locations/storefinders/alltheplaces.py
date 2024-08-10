@@ -28,10 +28,9 @@ class AllThePlacesSpider(Spider):
             item["geometry"] = feature.get("geometry", {})
             item["extras"] = properties
 
-            yield from self.post_process_feature(item, feature, response) or []
+            yield from self.post_process_item(item, feature, response) or []
 
-    # TODO: Naming, should this change to post_process_item?
-    def post_process_feature(
+    def post_process_item(
         self, item: Feature, source_feature: dict, response: Response, **kwargs
     ) -> Iterable[Feature]:
         yield item

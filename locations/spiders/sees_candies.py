@@ -9,7 +9,7 @@ class SeesCandiesSpider(RioSeoSpider):
         "https://maps.sees.com/api/getAsyncLocations?template=search&level=search&search=Kansas%20City,%20KS,%20US&radius=100000&limit=100000"
     ]
 
-    def post_process_feature(self, feature, location):
+    def post_process_item(self, feature, location):
         if "Partner" in location["Location Type_CS"]:
             return
 

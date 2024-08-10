@@ -35,9 +35,9 @@ class KiaAUSpider(Spider):
                 )
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(hours_text)
-            yield from self.post_process_feature(item, location) or []
+            yield from self.post_process_item(item, location) or []
 
-    def post_process_feature(self, item: Feature, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, feature: dict) -> Iterable[Feature]:
         if feature["dealerNm"] == "testtest":
             return
         yield item

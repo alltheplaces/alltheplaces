@@ -10,7 +10,7 @@ class UnitedBankUSSpider(RioSeoSpider):
         "https://maps.locations.bankwithunited.com/api/getAsyncLocations?template=search&level=search&search=Washington,%20DC,%20US&radius=100000&limit=100000"
     ]
 
-    def post_process_feature(self, feature, location):
+    def post_process_item(self, feature, location):
         if location["location_type_cs"] == "Branch":
             apply_category(Categories.BANK, feature)
         elif location["location_type_cs"] == "Branch & ATM":

@@ -61,13 +61,12 @@ class RioSeoSpider(Spider):
                 if hours.get("days"):
                     feature["opening_hours"] = self.parse_hours(hours["days"])
 
-            yield from self.post_process_feature(feature, location) or []
+            yield from self.post_process_item(feature, location) or []
 
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the item."""
 
-    # TODO: Check naming, refactor to post_process_item?
-    def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
+    def post_process_item(self, feature: Feature, location: dict) -> Iterable[Feature]:
         yield feature
 
     def parse_hours(self, store_hours: dict) -> OpeningHours:
