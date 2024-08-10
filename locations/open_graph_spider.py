@@ -16,8 +16,6 @@ class OpenGraphSpider(Spider):
         properties = og.extract_properties(response)
         if properties["type"] in self.wanted_types:
             item = og.as_item(properties, response)
-            if item:
-                print(item)
             yield from self.post_process_item(item, response) or []
 
     def post_process_item(self, item, response, **kwargs):
