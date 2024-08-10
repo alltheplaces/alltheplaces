@@ -42,7 +42,21 @@ We can run the `scrapy og` custom tool on one of the URLs:
 
 ```
 $ pipenv run scrapy og https://www.budgens.co.uk/our-stores/praed-street
-...
+{'city': 'Paddington',
+ 'country': 'United Kingdom',
+ 'email': None,
+ 'extras': {},
+ 'housenumber': None,
+ 'lat': '51.515637209437',
+ 'lon': '-0.17522994453623',
+ 'name': 'Budgens Praed Street',
+ 'phone': '0207 402 3117',
+ 'postcode': 'W2 1RH',
+ 'ref': 'https://www.budgens.co.uk/our-stores/praed-street',
+ 'state': 'London',
+ 'street': None,
+ 'street_address': '171-173 Praed Street,',
+ 'website': 'https://www.budgens.co.uk/our-stores/praed-street'}
 ```
 
 
