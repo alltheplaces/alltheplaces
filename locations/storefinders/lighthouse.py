@@ -16,6 +16,8 @@ from locations.items import Feature
 class LighthouseSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.xpath("//article[@data-control='box']"):
+            self.pre_process_data(location)
+
             item = Feature()
             item["ref"] = location.xpath("@id").get()
             item["lat"] = location.xpath("@data-latitude").get()
@@ -47,3 +49,6 @@ class LighthouseSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

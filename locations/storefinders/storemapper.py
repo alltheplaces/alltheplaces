@@ -15,9 +15,14 @@ class StoremapperSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
 
             yield from self.parse_item(item, location) or []
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

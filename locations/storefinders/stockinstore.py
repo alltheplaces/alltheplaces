@@ -52,6 +52,8 @@ class StockInStoreSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["stores_list"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             item["ref"] = location["code"]
             item["street_address"] = " ".join(location["address_lines"])
@@ -64,3 +66,6 @@ class StockInStoreSpider(Spider):
 
     def parse_item(self, item, location: {}, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

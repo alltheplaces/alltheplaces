@@ -34,6 +34,8 @@ class VirtualEarthSpider(Spider):
 
     def parse(self, response, **kwargs):
         for feature in response.json()["d"]["results"]:
+            self.pre_process_data(feature)
+
             feature["ref"] = feature.get("EntityID")
             feature["address"] = {
                 "street_address": feature.get("AddressLine"),
@@ -49,3 +51,6 @@ class VirtualEarthSpider(Spider):
 
     def parse_item(self, item, feature, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

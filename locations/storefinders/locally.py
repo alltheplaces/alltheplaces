@@ -31,6 +31,7 @@ class LocallySpider(scrapy.Spider):
             self.post_process_item(item, store)
             yield item
 
+    # TODO: Rename to pre_process_data and arguments pattern?
     def pre_process_item(self, item, store):
         yield item
 

@@ -37,6 +37,8 @@ class AmastyStoreLocatorSpider(Spider):
 
     def parse_items(self, items: [dict]):
         for location in items:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             if "popup_html" in location:
                 popup_html = Selector(text=location["popup_html"])
@@ -52,3 +54,6 @@ class AmastyStoreLocatorSpider(Spider):
 
     def parse_item(self, item, location, popup_html):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

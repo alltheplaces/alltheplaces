@@ -32,6 +32,7 @@ class LimesharpStoreLocatorSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
+            self.pre_process_data(location)
             if (
                 not location["name"]
                 and not location["latitude"]
@@ -46,3 +47,7 @@ class LimesharpStoreLocatorSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
+

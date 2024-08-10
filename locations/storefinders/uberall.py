@@ -21,6 +21,8 @@ class UberallSpider(Spider):
             logging.warning("Request failed")
 
         for feature in response.json()["response"]["locations"]:
+            self.pre_process_data(feature)
+
             if self.business_id_filter:
                 if feature["businessId"] != self.business_id_filter:
                     continue
@@ -50,3 +52,6 @@ class UberallSpider(Spider):
 
     def parse_item(self, item, feature, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

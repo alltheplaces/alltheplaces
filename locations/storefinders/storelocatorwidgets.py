@@ -70,6 +70,7 @@ class StoreLocatorWidgetsSpider(Spider):
         data_clean = response.text[4 : len(response.text) - 1]
         locations = json.loads(data_clean)["stores"]
         for location in locations:
+            self.pre_process_data(location)
             item = DictParser.parse(location)
             item["ref"] = location["storeid"]
             item["lat"] = location["data"].get("map_lat")
@@ -88,3 +89,6 @@ class StoreLocatorWidgetsSpider(Spider):
 
     def parse_item(self, item, location: {}, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

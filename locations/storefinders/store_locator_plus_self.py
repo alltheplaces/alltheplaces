@@ -65,7 +65,8 @@ class StoreLocatorPlusSelfSpider(Spider):
                 "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
             )
         for location in response.json()["response"]:
-            # print(location)
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
@@ -75,3 +76,6 @@ class StoreLocatorPlusSelfSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

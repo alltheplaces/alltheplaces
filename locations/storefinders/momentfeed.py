@@ -24,6 +24,7 @@ class MomentFeedSpider(Spider):
             return
 
         for feature in response.json():
+            self.pre_process_data(feature)
             if feature["status"] != "open":
                 continue
 
@@ -59,3 +60,6 @@ class MomentFeedSpider(Spider):
 
     def parse_item(self, item, feature, store_info, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

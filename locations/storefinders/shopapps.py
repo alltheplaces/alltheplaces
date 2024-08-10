@@ -23,6 +23,8 @@ class ShopAppsSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["stores"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
@@ -32,3 +34,6 @@ class ShopAppsSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

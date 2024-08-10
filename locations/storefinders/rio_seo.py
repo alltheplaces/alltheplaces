@@ -47,6 +47,8 @@ class RioSeoSpider(Spider):
             data = []
 
         for location in data:
+            self.pre_process_data(location)
+
             feature = DictParser.parse(location)
             feature["name"] = location["location_name"]
             feature["ref"] = "{}_{}".format(location["fid"], location["lid"])
@@ -61,6 +63,10 @@ class RioSeoSpider(Spider):
 
             yield from self.post_process_feature(feature, location) or []
 
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
+
+    # TODO: Check naming, refactor to post_process_item?
     def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
         yield feature
 

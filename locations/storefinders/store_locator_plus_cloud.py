@@ -32,6 +32,8 @@ class StoreLocatorPlusCloudSpider(Spider):
             return
 
         for location in response.json()["data"]["response"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             item["addr_full"] = None
             item["street_address"] = ", ".join(filter(None, [location["address2"], location["address"]]))
@@ -40,3 +42,6 @@ class StoreLocatorPlusCloudSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

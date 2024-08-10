@@ -33,6 +33,8 @@ class SuperStoreFinderSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.xpath("//store/item"):
+            self.pre_process_data(location)
+
             properties = {
                 "ref": location.xpath("./storeId/text()").get(),
                 "name": location.xpath("./location/text()").get(),
@@ -61,3 +63,6 @@ class SuperStoreFinderSpider(Spider):
 
     def parse_item(self, item: Feature, location: Selector, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

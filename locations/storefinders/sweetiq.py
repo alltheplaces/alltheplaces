@@ -35,6 +35,8 @@ class SweetIQSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["features"]:
+            self.pre_process_data(location)
+
             if location["properties"]["isPermanentlyClosed"]:
                 return
 
@@ -73,3 +75,6 @@ class SweetIQSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

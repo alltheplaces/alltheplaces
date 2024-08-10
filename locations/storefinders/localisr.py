@@ -58,6 +58,8 @@ class LocalisrSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["data"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             item["ref"] = location["store_identifier"]
             item["housenumber"] = location["location"].get("street_number")
@@ -83,3 +85,6 @@ class LocalisrSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

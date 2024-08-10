@@ -44,6 +44,8 @@ class StockistSpider(Spider):
 
     @staticmethod
     def parse_location(location):
+        self.pre_process_data(location)
+
         item = DictParser.parse(location)
         item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))
         return item
@@ -92,3 +94,6 @@ class StockistSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

@@ -18,6 +18,8 @@ class StorepointSpider(Spider):
             return
 
         for location in response.json()["results"]["locations"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             item["lat"] = location["loc_lat"]
             item["lon"] = location["loc_long"]
@@ -34,3 +36,6 @@ class StorepointSpider(Spider):
 
     def parse_item(self, item, location: {}, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

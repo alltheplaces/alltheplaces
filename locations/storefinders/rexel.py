@@ -18,6 +18,8 @@ class RexelSpider(Spider):
 
     def parse(self, response):
         for feature in response.json()["results"]:
+            self.pre_process_data(feature)
+
             feature["address"]["street_address"] = ", ".join(
                 filter(
                     None,
@@ -46,6 +48,9 @@ class RexelSpider(Spider):
 
     def parse_item(self, item, feature, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
 
     @staticmethod
     def decode_hours(feature):

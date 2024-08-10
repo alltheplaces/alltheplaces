@@ -79,6 +79,8 @@ class WPStoreLocatorSpider(Spider):
                 "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
             )
         for location in response.json():
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             item["street_address"] = merge_address_lines([location.get("address"), location.get("address2")])
             item["name"] = location["store"]
@@ -117,3 +119,6 @@ class WPStoreLocatorSpider(Spider):
             oh.add_range(day, start_time.strip(), end_time.strip(), time_format=self.time_format)
 
         return oh
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

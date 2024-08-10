@@ -30,9 +30,13 @@ class EasyLocatorSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["physical"]:
+            self.pre_process_data(location)
             item = DictParser.parse(location["properties"])
             item["postcode"] = location["properties"]["zip_postal_code"]
             yield from self.parse_item(item, location) or []
 
     def parse_item(self, item, location):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

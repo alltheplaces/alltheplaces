@@ -27,6 +27,7 @@ class AheadworksSpider(Spider):
 
         for tab in locations:
             location = tab["tabs"][0]
+            self.pre_process_data(location)
 
             item = DictParser.parse(location)
             item["website"] = self.start_urls[0] + location["slug"]
@@ -36,3 +37,6 @@ class AheadworksSpider(Spider):
                 item["opening_hours"].add_range(day, hours[0], hours[1])
 
             yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

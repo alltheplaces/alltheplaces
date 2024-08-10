@@ -36,6 +36,7 @@ class AgileStoreLocatorSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
+            self.pre_process_data(location)
             item = DictParser.parse(location)
             item["name"] = item["name"].strip()
             item["street_address"] = item.pop("street")
@@ -72,5 +73,9 @@ class AgileStoreLocatorSpider(Spider):
                         item["opening_hours"].add_range(DAYS_EN[day_name.title()], start_time, end_time)
         return item
 
+    # TODO: Should this refactor to the post_process_item pattern?
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

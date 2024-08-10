@@ -44,6 +44,8 @@ class MapsMarkerProSpider(Spider):
 
     def parse_popups(self, response, features, **kwargs):
         for location in features:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location["properties"])
             item["geometry"] = location["geometry"]
 
@@ -63,3 +65,6 @@ class MapsMarkerProSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
