@@ -9,7 +9,7 @@ re-use, there are a large number of [pre-built store finders](./locations/storef
 Over and above the [core scrapy spider API](https://docs.scrapy.org/en/latest/topics/spiders.html),
 typically these store finders follow a pattern of:
 
-- Specifying an API key or request pattern
+- Specifying an API key or `start_url`
 - `pre_process_data` - a method for cleaning or transforming a structure from the API (dict, xpath/dom node) prior to processing.
 - `parse_item` or `post_process_item` - a method for further decorating an item after the primary processing is done. IE, removing invalid names or phone numbers.
 
@@ -33,7 +33,7 @@ These APIs exhibit a good degree of similarity in terms of the fields returned.
 
 You are encouraged to run the following checks as a first step:
 
-- `pipenv run scrapy sitemap http://example.com/` - Determine if there are sitemaps and useful links - see [sitemap](./SITEMAP.md) for your next steps.
+- `pipenv run scrapy sitemap http://example.com/` - determine if there are sitemaps and useful links - see [sitemap](./SITEMAP.md) for your next steps.
 - `pipenv run scrapy sd http://example.com/path/to/individual/store` or pasting the URL into https://validator.schema.org/ - see [structured data](./STRUCTURED_DATA.md)
 
 If these yield no results or you wish to explore more efficient ways to query; the
@@ -44,6 +44,10 @@ enabled, navigate using the store locator, to one of the store pages. Then with 
 field like phone number or postcode search for that string in the network transfers section
 of the console. If the data has come in via an API call you will quickly see this and also by
 examining the URL and headers for the data transfer start to understand the API.
+
+Example: _Discovering a site is powered by a JSON response from a stockist API_
+![image](https://github.com/user-attachments/assets/8a4e7f0d-3b21-45e3-92c4-39c59a0753f9)
+
 
 If you find that the POI data you want is present in the web page itself as HTML then
 most likely you will be having to write a spider the hard way.
