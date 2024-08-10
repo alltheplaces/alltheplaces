@@ -1,12 +1,8 @@
-import re
-from typing import Iterable
-from urllib.parse import parse_qs, urlencode, urljoin, urlparse
-
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import Response
+
 from locations.open_graph_parser import OpenGraphParser
 
-from locations.items import Feature
 
 class OpenGraphSpider(Spider):
     dataset_attributes = {"source": "open_graph"}
