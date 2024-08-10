@@ -40,12 +40,11 @@ class StockistSpider(Spider):
 
     def parse_all_locations(self, response, **kwargs):
         for location in response.json():
+            self.pre_process_data(location)
             yield from self.parse_item(self.parse_location(location), location) or []
 
     @staticmethod
     def parse_location(location):
-        self.pre_process_data(location)
-
         item = DictParser.parse(location)
         item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))
         return item
