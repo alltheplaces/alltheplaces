@@ -1,10 +1,10 @@
 import scrapy
 
-from locations.open_graph_parser import OpenGraphParser
+from locations.open_graph_spider import OpenGraphParser
 from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McdonaldsBalticsSpider(scrapy.spiders.SitemapSpider):
+class McdonaldsBalticsSpider(scrapy.spiders.SitemapSpider, OpenGraphParser):
     name = "mcdonalds_baltics"
     custom_settings = {"ROBOTSTXT_OBEY": False}
     item_attributes = McdonaldsSpider.item_attributes
@@ -14,8 +14,7 @@ class McdonaldsBalticsSpider(scrapy.spiders.SitemapSpider):
         "https://mcdonalds.lv/location-sitemap.xml",
     ]
 
-    def parse(self, response):
-        item = OpenGraphParser.parse(response)
+    def post_process_item(self, item, response, **kwargs):
         item["lat"] = response.xpath("//@data-lat").extract_first()
         item["lon"] = response.xpath("//@data-lng").extract_first()
         yield item
