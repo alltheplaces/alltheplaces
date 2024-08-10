@@ -28,7 +28,7 @@ class NsriBasesZASpider(Spider):
             item["phone"] = selector.xpath('//a[contains(@href, "tel:")]/text()').get()
             item["website"] = selector.xpath('//a[contains(@href, "nsri.org.za")]/@href').get()
 
-            coordinates = selector.xpath('//p/strong[contains(text(),"Coordinates:")]/../text()').get()
+            coordinates = selector.xpath('//p/strong[contains(text(),"Coordinates:")]/../text()').get().split(",")
             item["lat"] = coordinates[0]
             item["lon"] = coordinates[1]
 
