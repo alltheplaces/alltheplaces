@@ -34,7 +34,8 @@ An ATP spider will typically use [CrawlSpider](https://docs.scrapy.org/en/latest
 
 This is best illustrated by reference to some example spiders in the project:
 
-* [premier_gb.py](../locations/spiders/premier_gb.py) (as simple as it gets!)
+* [londis_gb.py](../locations/spiders/londis_gb.py) (as simple as it gets!)
+* [premier_gb.py](../locations/spiders/premier_gb.py) (post processing)
 
 ### `scrapy og` can help
 
