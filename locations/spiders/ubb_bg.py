@@ -14,10 +14,6 @@ class UbbBGSpider(Spider):
     item_attributes = {"brand": "Обединена българска банка", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
     user_agent = FIREFOX_LATEST
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json, text/javascript, */*"},
-    }
     requires_proxy = True
 
     def start_requests(self):
