@@ -3,7 +3,7 @@ import re
 import scrapy
 from scrapy.http import FormRequest
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
@@ -56,7 +56,7 @@ class PostbankBGSpider(scrapy.Spider):
 
                 if location["isATM"]:
                     apply_category(Categories.ATM, item)
-                    apply_yes_no("deposit", item, location["isATMWithDeposit"])
+                    apply_yes_no(Extras.CASH_IN, item, location["isATMWithDeposit"])
                 elif location["isBranch"]:
                     apply_category(Categories.BANK, item)
                     apply_yes_no("self_service", item, location["isSelfServiceZone"])
