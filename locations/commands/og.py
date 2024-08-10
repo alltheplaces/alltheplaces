@@ -1,4 +1,3 @@
-import json
 import os
 import pathlib
 import pprint
@@ -6,8 +5,6 @@ import pprint
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 
-from locations.hours import OpeningHours
-from locations.open_graph_parser import OpenGraphParser
 from locations.open_graph_spider import OpenGraphSpider
 from locations.user_agents import BROWSER_DEFAULT
 

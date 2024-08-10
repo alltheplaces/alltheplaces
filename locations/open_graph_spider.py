@@ -6,6 +6,7 @@ from locations.open_graph_parser import OpenGraphParser
 
 class OpenGraphSpider(Spider):
     dataset_attributes = {"source": "open_graph"}
+    wanted_types = ["place", "business.business", "store"]
 
     def parse(self, response: Response, **kwargs):
         yield from self.parse_og(response)
