@@ -36,6 +36,14 @@ Example: [a1_rs](../locations/spiders/a1_rs.py)
 
 Use `locations.google_url.extract_google_position` - see [averitt](../locations/spiders/averitt.py)
 
+#### Site uses a HTML list of links to other store pages
+
+Use `CrawlSpider` and LinkExtractor rules - see [crew_clothing_gb](../locations/spiders/crew_clothing_gb.py)
+```
+rules = [Rule(LinkExtractor(r"/customer-services/stores/[-\w]+/$"), "parse_sd")]
+```
+
+
 ### Using the scrapy shell
 
 Digging around in HTML responses for data is fiddly.
