@@ -30,9 +30,7 @@ class AllThePlacesSpider(Spider):
 
             yield from self.post_process_item(item, feature, response) or []
 
-    def post_process_item(
-        self, item: Feature, source_feature: dict, response: Response, **kwargs
-    ) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, source_feature: dict, response: Response, **kwargs) -> Iterable[Feature]:
         yield item
 
     def pre_process_data(self, location, **kwargs):
