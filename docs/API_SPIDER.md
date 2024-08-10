@@ -11,7 +11,7 @@ typically these store finders follow a pattern of:
 
 - Specifying an API key or `start_url`
 - `pre_process_data` - a method for cleaning or transforming a structure from the API (dict, xpath/dom node) prior to processing.
-- `parse_item` or `post_process_item` - a method for further decorating an item after the primary processing is done. IE, removing invalid names or phone numbers.
+- `parse_item` or `post_process_item` (StructuredDataSpiders) - a method for further decorating an item after the primary processing is done. IE, removing invalid names or phone numbers.
 
 While exploring the storefinder you wish to spider, look for indicators or common elements in the existing codebase.
 IE: is there an ajax call with a `get_stores` attribute? If so, are there any existing spiders that make similar calls?
