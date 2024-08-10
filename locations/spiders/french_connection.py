@@ -7,4 +7,4 @@ class FrenchConnectionSpider(StoremapperSpider):
         "brand_wikidata": "Q306457",
         "brand": "French Connection",
     }
-    key = "11232"
+    company_id = "11232"
