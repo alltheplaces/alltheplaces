@@ -14,6 +14,7 @@ class McdonaldsBalticsSpider(scrapy.spiders.SitemapSpider, OpenGraphSpider):
         "https://mcdonalds.lv/location-sitemap.xml",
     ]
     wanted_types = ["article"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, **kwargs):
         item["lat"] = response.xpath("//@data-lat").extract_first()
