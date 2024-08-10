@@ -10,6 +10,32 @@ These sites are to be avoided, if you can,
 [but if you must](./WHY_SPIDER.md),
 then we have some tips to help with writing your spider.
 
+### Common patterns
+
+#### Site embeds JSON or Javascript hash ("JS Blob")
+
+```
+<script>var markers = [{....}, {....}]</script>
+```
+
+Use xpath and `parse_js_object` to extract the content; suitable for `DictParser`.
+
+Example: [a1_rs](./locations/spiders/a1_rs.py)
+```
+    def parse(self, response):
+        cities_js = (
+            response.xpath('//script[contains(text(), "var cities_json = ")]/text()')
+            .get()
+            .split("var cities_json = ", 1)[1]
+            .split("}];", 1)[0]
+            + "}]"
+        )
+        cities_dict = parse_js_object(cities_js)
+```
+#### Coordinates as google urls
+
+Use `locations.google_url.extract_google_position` - see [averitt](./locations/spiders/averitt.py)
+
 ### Using the scrapy shell
 
 Digging around in HTML responses for data is fiddly.
