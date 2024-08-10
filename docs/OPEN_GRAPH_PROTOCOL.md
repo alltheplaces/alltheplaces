@@ -58,5 +58,3 @@ $ pipenv run scrapy og https://www.budgens.co.uk/our-stores/praed-street
  'street_address': '171-173 Praed Street,',
  'website': 'https://www.budgens.co.uk/our-stores/praed-street'}
 ```
-
-
