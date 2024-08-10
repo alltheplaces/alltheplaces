@@ -10,7 +10,7 @@ class CrewClothingGBSpider(CrawlSpider, StructuredDataSpider):
     name = "crew_clothing_gb"
     item_attributes = {"brand": "Crew Clothing Company", "brand_wikidata": "Q5184783"}
     start_urls = ["https://www.crewclothing.co.uk/customer-services/stores/"]
-    rules = [Rule(LinkExtractor(r"/customer-services/stores/[-\w]+/$"), "parse_sd")]
+    rules = [Rule(LinkExtractor(restrict_xpaths='//div[@id="storelistall"]/div/a'), "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if not item.get("lat"):
