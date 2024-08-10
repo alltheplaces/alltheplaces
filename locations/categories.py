@@ -43,6 +43,8 @@ class Categories(Enum):
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
+    INDUSTRIAL_WAREHOUSE = {"industrial": "warehouse"}
+
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
 
