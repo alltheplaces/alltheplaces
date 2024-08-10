@@ -9,6 +9,6 @@ class ChampionUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.champion.com/robots.txt"]
     sitemap_rules = [(r"/\w\w/[-\w]+/[-\w]+\.html", "parse")]
 
-    def parse_item(self, item, feature, **kwargs):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("name", None)
         yield item
