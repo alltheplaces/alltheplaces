@@ -16,10 +16,6 @@ class NsriBuoysZa(Spider):
     }
     start_urls = ["https://www.nsri.org.za/water-safety/pink-rescue-buoys"]
 
-    # custom_settings = {
-    #    "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None}
-    # }
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         script = [s for s in response.xpath("//script") if "window._gmData.infoWindows['buoy-finder']" in s.get()][0]
         locations = script.re(r".*\'[0-9]+-buoyLocation\':\s\{\"content\":\"(.+)\"\},")
