@@ -35,6 +35,11 @@ class OgCommand(BaseRunSpiderCommand):
     def add_options(self, parser):
         super().add_options(parser)
         parser.add_argument(
+            "--wanted-types",
+            dest="wanted_types",
+            help="wanted place type(s). Optionally specify ie: place,business.business,store,article,website",
+        )
+        parser.add_argument(
             "--wikidata",
             dest="wikidata",
             help="wikidata Q-code, see if brand name and NSI category data pulled in",
@@ -59,6 +64,9 @@ class OgCommand(BaseRunSpiderCommand):
         else:
             path = os.path.abspath(args[0])
             MySpider.start_urls = [pathlib.Path(path).as_uri()]
+
+        if opts.wanted_types:
+            MySpider.wanted_types = opts.wanted_types.split(",")
 
         if opts.wikidata:
             MySpider.item_attributes["brand_wikidata"] = opts.wikidata
