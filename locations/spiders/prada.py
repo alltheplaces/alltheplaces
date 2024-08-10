@@ -9,7 +9,7 @@ class PradaSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Prada", "brand_wikidata": "Q193136"}
     allowed_domains = ["www.prada.com"]
     sitemap_urls = ["https://www.prada.com/us/en/sitemap.xml"]
-    sitemap_rules = [(r"/store-locator/store\.[\w%]+\.\d+\.html$", "parse_sd")]
+    sitemap_rules = [("/store-locator/store", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("image")
