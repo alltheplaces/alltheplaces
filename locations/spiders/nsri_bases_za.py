@@ -7,8 +7,8 @@ from locations.categories import Categories
 from locations.items import Feature
 
 
-class NsriBuoysZa(Spider):
-    name = "nsri_buoys_za"
+class NsriBasesZa(Spider):
+    name = "nsri_bases_za"
     item_attributes = {
         "operator": "National Sea Rescue Institute",
         "operator_wikidata": "Q6978306",
