@@ -19,7 +19,7 @@ This will often lead to very simple, minimal spiders.
 
 Examples:
 - [univeral_store_au](./locations/spiders/universal_store_au.py) - Based on a [closeby](./locations/storefinders/closeby.py) storefinder.
-- [see_candies](./locations/spiders/see_candies.py) - Based on a [rioseo](./locations/storefinders/closeby.py) storefinder, overriding the default behaviours
+- [see_candies](./locations/spiders/see_candies.py) - Based on a [rioseo](./locations/storefinders/rio_seo.py) storefinder, overriding the default behaviours
 
 ### Investigating an API
 
