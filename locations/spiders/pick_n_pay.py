@@ -13,7 +13,7 @@ class PickNPaySpider(scrapy.Spider):
         for store in response.json():
             if (
                 store["storeType"] in ("", "ONLINE", "NO_FORMAT", "WHOLESALE")
-                or "(incomplete)" in store["storeName"].lower()
+                or "(incomplete)" in (store["storeName"] or "").lower()
             ):
                 # "" appears to be a data error and the single current result is a data error
                 # "WHOLESALE" appear to be colocated with HYPER locations, so is probably not a distinct store
