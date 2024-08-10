@@ -3,8 +3,8 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.items import set_closed
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class CrewClothingGBSpider(CrawlSpider, StructuredDataSpider):
