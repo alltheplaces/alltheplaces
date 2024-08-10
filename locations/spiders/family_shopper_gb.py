@@ -1,6 +1,3 @@
-from typing import Any
-
-from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
