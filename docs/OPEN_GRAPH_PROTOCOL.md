@@ -2,7 +2,7 @@
 
 Similar to [Structured Data](./docs/STRUCTURED_DATA.md]; [Open Graph Protocol](https://ogp.me) is a way for sites to assert facts in the `<meta>` tags of their websites.
 
-While this can be any RDF/Schema.org/similar terminology, it is commonly used with open graph specific vocabularies.
+While this can be any RDFa/Schema.org/similar terminology, it is commonly used with open graph specific vocabularies.
 
 Example:
 ```
