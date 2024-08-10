@@ -12,6 +12,8 @@ class PickNPaySpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for store in response.json():
+            if store["storeType"] in ("ONLINE", "NO_FORMAT") or "(incomplete)" in store["storeName"].lower():
+                continue
             address = store["storeAddress"]
             store.update(address)
             store["province"] = (address.get("province") or {}).get("name")
@@ -24,6 +26,13 @@ class PickNPaySpider(scrapy.Spider):
                 if day["dayId"] < 8:
                     item["opening_hours"].add_range(DAYS[day["dayId"] - 1], day["openTime"], day["closeTime"])
 
+            if store["storeType"] == "HYPER":
+                item.update(
+                    {
+                        "brand": "Pick n Pay Hyper",
+                        "brand_wikidata": TODO,
+                    }
+                )
             if store["storeType"] == "CLOTHING":
                 item.update(
                     {
@@ -40,7 +49,7 @@ class PickNPaySpider(scrapy.Spider):
                         "extras": Categories.SHOP_ALCOHOL.value,
                     }
                 )
-            elif store["storeType"] == "EXPRESS":
+            elif store["storeType"] == in ("EXPRESS", "BPFORECOURT"):
                 item.update(
                     {
                         "brand": "Pick n Pay Express",
@@ -72,7 +81,28 @@ class PickNPaySpider(scrapy.Spider):
                         "extras": Categories.SHOP_DOITYOURSELF.value,
                     }
                 )
-            # Unhandled: "", "BPFORECOURT", "DAILY", "DC", "FAMILY", "HYPER", "LOCAL", "MARKET",
-            # "MINI", "NO_FORMAT", "ONLINE", "REGIONAL OFFICE", "SUPER", "WHOLESALE"
-
+            elif store["storeType"] == "DC": # Distribution Centre
+                item.update(
+                    {
+                        "extras": Categories.INDUSTRIAL_WAREHOUSE.value,
+                        "operator": "Pick n Pay",
+                        "operator_wikidata": "Q7190735",
+                    }
+                )
+            elif store["storeType"] == "REGIONAL OFFICE":
+                item.update(
+                    {
+                        "extras": Categories.OFFICE_COMPANY.value,
+                        "brand": "Pick n Pay",
+                        "brand_wikidata": "Q7190735",
+                    }
+                )
+            # Unhandled:
+            # "" appears to be a data error and the single current result is a data error
+            # "DAILY" was two stores, but both marked as incomplete in the data
+            " "LOCAL", "MINI" appear to be branded as normal PnP supermarkets
+            # "FAMILY", "SUPER" are standard PnP supermarkets
+            # "MARKET" probably should be shown as PnP supermarket. Township location stores and numbers have dropped significantly recently
+            # "WHOLESALE" appear to be colocated with HYPER locations
+            
             yield item
