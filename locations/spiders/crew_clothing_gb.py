@@ -13,9 +13,14 @@ class CrewClothingGBSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(restrict_xpaths='//div[@id="storelistall"]/div/a'), "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        if " - Now Closed" in item["name"]:
+            item["name"] = item["name"].split(" - ")[0]
+            set_closed(item)
+
         if not item.get("lat"):
             if m := re.search(r"dblCustomerlatitude\s*=\s*(-?\d+\.\d+);", response.text):
                 item["lat"] = m.group(1)
+
         if not item.get("lon"):
             if m := re.search(r"dblCustomerlongitude\s*=\s*(-?\d+\.\d+);", response.text):
                 item["lon"] = m.group(1)
