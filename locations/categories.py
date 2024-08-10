@@ -267,6 +267,7 @@ class Categories(Enum):
     RESTAURANT = {"amenity": "restaurant"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VETERINARY = {"amenity": "veterinary"}
+    WATER_RESCUE = {"emergency": "water_rescue"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
 
     DATA_CENTRE = {"telecom": "data_center"}
