@@ -3,7 +3,7 @@
 
 ### Common storefinders
 
-Often, a storefinder is a plugin or common software component. To encourage code 
+Often, a storefinder is a plugin or common software component. To encourage code
 re-use, there are a large number of [pre-built store finders](./locations/storefinders/)
 
 Over and above the [core scrapy spider API](https://docs.scrapy.org/en/latest/topics/spiders.html),
