@@ -1,6 +1,6 @@
-name: "New Spider: WP Store Locator"
-description: A spider using the WP Store Locator storefinder
-labels: "Store finder: WP Store Locator"
+name: "New Spider: WPStoreLocator"
+description: A spider using the WPStoreLocator storefinder
+labels: "Store finder: WPStoreLocator"
 body:
   - type: input
     attributes:
