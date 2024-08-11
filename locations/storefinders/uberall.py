@@ -9,7 +9,7 @@ from locations.hours import DAYS, OpeningHours
 
 class UberallSpider(Spider):
     """
-    Uberall providers a web based store locator.
+    Uberall provides a web based store locator.
     https://uberall.com/en-us/products/locator-local-pages
 
     Use by specifying the `key`, and optional filtering via `business_id_filter` 
