@@ -5,6 +5,11 @@ from locations.dict_parser import DictParser
 
 
 class StoremapperSpider(Spider):
+    """
+    Storemapper (https://www.storemapper.com/) is an medded map based store locator.
+
+    Use by specifying a `key`
+    """
     dataset_attributes = {"source": "api", "api": "storemapper.com"}
 
     key = ""
