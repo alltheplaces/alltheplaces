@@ -12,6 +12,7 @@ class StorefrontgatewaySpider(Spider):
 
     To use, specify `start_urls`
     """
+
     start_urls = []
 
     def start_requests(self):
