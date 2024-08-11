@@ -13,10 +13,30 @@ body:
       placeholder: Q38076
       description: >-
         If possible get the ID from
-        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page). 
+        Bonus points: Add the storefinder link as a `Location information url` claim
   - type: textarea
     attributes:
       label: Store finder url(s)
       placeholder: >-
         https://www.mcdonalds.com/gb/en-gb/restaurant-locator.html
         https://www.mcdonalds.com.hk/find-a-restaurant/
+  - type: textarea
+    attributes:
+      label: Sample store page url
+      description: Add a sample store page url if applicable
+      placeholder: >-
+  - type: checkboxes
+    id: behaviour
+    attributes:
+      label: Behaviours
+      description: How does the storefinder appear to work?
+      options:
+        - label: JSON API?
+        - label: Embedded JSON?
+        - label: HTML markup?
+        - label: Structured Data? (`pipenv run scrapy sd (specific page url)`)
+        # - label: Open Graph Data? (`pipenv run scrapy og (specific page url)`)
+        - label: Sitemap? (`pipenv run scrapy sitemap (url)`)
+        - label: Requires proxy?
+        - label: Has 'bot protection' (Cloudflare, etc)?
