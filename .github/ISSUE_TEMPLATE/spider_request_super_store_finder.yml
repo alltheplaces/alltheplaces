@@ -1,0 +1,21 @@
+name: "New Spider: Super Store Finder"
+description: A spider using the Super Store Finder storefinder
+labels: "Store finder: Super Store Finder"
+body:
+  - type: input
+    attributes:
+      label: Brand name
+      placeholder: McDonald's
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Wikidata ID
+      placeholder: Q38076
+      description: >-
+        If possible get the ID from
+        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: textarea
+    attributes:
+      label: Other detail
+      description: Any other relevant information or sample code
