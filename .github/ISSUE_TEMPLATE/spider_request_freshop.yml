@@ -1,5 +1,5 @@
 name: "New Spider: Freshop"
-description: A spider using the Freshop storefinder. Makes requets to `https://api.freshop.com/1/stores?app_key={app_key}`
+description: A spider using the Freshop storefinder. Makes requests to `https://api.freshop.com/1/stores?app_key={app_key}`
 labels: "Store finder: Freshop"
 body:
   - type: input
