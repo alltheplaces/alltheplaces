@@ -1,6 +1,6 @@
-name: "New Spider: Where2getit"
-description: A spider using the Where2getit storefinder
-labels: "Store finder: Where2getit"
+name: "New Spider: Where2GetIt"
+description: A spider using the Where2GetIt storefinder
+labels: "Store finder: Where2GetIt"
 body:
   - type: input
     attributes:
