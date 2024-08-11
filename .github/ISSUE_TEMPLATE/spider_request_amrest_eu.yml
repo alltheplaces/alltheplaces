@@ -1,5 +1,5 @@
 name: "New Spider: Amrest EU"
-description: A spider using the Amrest EU storefinder
+description: A spider using the Amrest EU storefinder. Identifiable by calls to `https://api.amrest.eu/amdv/ordering-api`
 labels: "Store finder: Amrest EU"
 body:
   - type: input

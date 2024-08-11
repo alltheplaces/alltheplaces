@@ -1,5 +1,5 @@
 name: "New Spider: Easy Locator"
-description: A spider using the Easy Locator storefinder
+description: A spider using the Easy Locator storefinder. Ajax calls to `https://easylocator.net/ajax/search_by_lat_lon_geojson/`
 labels: "Store finder: Easy Locator"
 body:
   - type: input
@@ -15,6 +15,10 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: Start URL
+      description: Found in ajax requests to `https://easylocator.net/ajax/search_by_lat_lon_geojson/{brand}/...`
   - type: textarea
     attributes:
       label: Other detail
