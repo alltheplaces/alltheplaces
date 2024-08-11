@@ -13,6 +13,7 @@ class StoreRocketSpider(Spider):
 
     To use, specify the `storerocket_id` and optionally `base_url` to set website attributes.
     """
+
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
 
     storerocket_id = ""
