@@ -1,5 +1,5 @@
 name: "New Spider: ShopApps"
-description: A spider using the ShopApps storefinder
+description: A spider using the ShopApps storefinder. Makes requests to `https://stores.shopapps.site`
 labels: "Store finder: ShopApps"
 body:
   - type: input
@@ -15,6 +15,10 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: API Key
+      description: Found in requests as `https://stores.shopapps.site/front-end/get_surrounding_stores.php?shop={api_key}`
   - type: textarea
     attributes:
       label: Other detail

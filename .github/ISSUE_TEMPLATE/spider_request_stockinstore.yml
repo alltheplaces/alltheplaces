@@ -1,6 +1,6 @@
-name: "New Spider: stockinstore"
-description: A spider using the stockinstore storefinder
-labels: "Store finder: stockinstore"
+name: "New Spider: StockInStore"
+description: A spider using the StockInStore storefinder. Makes requests to `https://stockinstore.net`
+labels: "Store finder: StockInStore"
 body:
   - type: input
     attributes:
@@ -15,6 +15,19 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+  - type: input
+    attributes:
+      label: API Site ID
+  - type: input
+    attributes:
+      label: API Widget ID
+  - type: input
+    attributes:
+      label: API Widget Type
+  - type: input
+    attributes:
+      label: API Widget Origin
   - type: textarea
     attributes:
       label: Other detail

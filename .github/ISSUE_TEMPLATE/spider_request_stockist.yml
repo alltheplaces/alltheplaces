@@ -1,5 +1,5 @@
 name: "New Spider: Stockist"
-description: A spider using the Stockist storefinder
+description: A spider using the Stockist storefinder. Makes requests to `https://stockist.co/api/v1/{key}/locations/all`
 labels: "Store finder: Stockist"
 body:
   - type: input
@@ -15,6 +15,11 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+
+  - type: input
+    attributes:
+      label: API Key
+      description: Found in urls as `https://stockist.co/api/v1/{key}/locations/all`
   - type: textarea
     attributes:
       label: Other detail
