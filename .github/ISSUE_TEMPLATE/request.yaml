@@ -35,7 +35,7 @@ body:
     id: difficulty
     attributes:
       label: Difficulty?
-      description: How similar to existing code is this spider? See [API SPIDER](../../docs/API_SPIDER.md] and [HARD WORK SPIDER](../../docs/HARD_WORK_SPIDER.md)
+      description: How similar to existing code is this spider? See [API SPIDER](../../docs/API_SPIDER.md) and [HARD WORK SPIDER](../../docs/HARD_WORK_SPIDER.md)
       options:
         - Easy - existing storefinders and no customisation
         - Medium - some customisation or data cleansing
@@ -56,7 +56,7 @@ body:
     id: behaviour
     attributes:
       label: Behaviours
-      description: How does the storefinder appear to work? See [API SPIDER](../../docs/API_SPIDER.md] and [HARD WORK SPIDER](../../docs/HARD_WORK_SPIDER.md)
+      description: How does the storefinder appear to work? See [API SPIDER](../../docs/API_SPIDER.md) and [HARD WORK SPIDER](../../docs/HARD_WORK_SPIDER.md)
       options:
         - label: Has coordinates?
         - label: Has opening hours?
