@@ -1,5 +1,5 @@
 name: "New Spider: Rexel"
-description: A spider using the Rexel storefinder. Makes calls to `/store-finder/findNearbyStores`
+description: A spider using the Rexel storefinder, typically part of the Rexel Group. Makes calls to `/store-finder/findNearbyStores`
 labels: "Store finder: Rexel"
 body:
   - type: input
