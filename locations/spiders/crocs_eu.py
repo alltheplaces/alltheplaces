@@ -10,5 +10,5 @@ class CrocsEUSpider(LocallySpider):
     ]
     skip_auto_cc_spider_name = True
 
-    def post_process_item(self, item, store):
+    def post_process_item(self, item, location):
         item["street_address"] = item.pop("addr_full")
