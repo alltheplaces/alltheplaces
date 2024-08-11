@@ -26,7 +26,7 @@ class GameGBSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"DOWNLOAD_TIMEOUT": 10}
     wanted_types = ["Store"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response):
         street_address = item["street_address"]
         street_address = street_address.replace("GAME", "").replace("Game", "")
         street_address = clean_address(street_address)
