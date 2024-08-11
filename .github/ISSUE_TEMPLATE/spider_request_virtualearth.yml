@@ -1,6 +1,6 @@
-name: "New Spider: Virtualearth"
-description: A spider using the Virtualearth storefinder
-labels: "Store finder: Virtualearth"
+name: "New Spider: Virtual Earth"
+description: A spider using the Virtual Earth storefinder
+labels: "Store finder: Virtual Earth"
 body:
   - type: input
     attributes:
