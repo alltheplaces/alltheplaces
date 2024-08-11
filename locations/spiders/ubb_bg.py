@@ -13,7 +13,6 @@ class UbbBGSpider(Spider):
     name = "ubb_bg"
     item_attributes = {"brand": "Обединена българска банка", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
-    user_agent = FIREFOX_LATEST
     requires_proxy = True
 
     def start_requests(self):
