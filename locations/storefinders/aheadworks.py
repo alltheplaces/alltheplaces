@@ -38,7 +38,6 @@ class AheadworksSpider(Spider):
 
             yield from self.post_process_item(item, response, location) or []
 
-
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the item."""
 
