@@ -141,14 +141,15 @@ class StructuredDataSpider(Spider):
     - search_for_instagram
     - search_for_image
 
-    If the response contains malformed JSON; an alternative `json_parser` can be specified - ie json5 or chompjs.
-
     By default the spider only looks for certain `wanted_types`.
     You can change this behaviour by specifying this as a list of your desired types.
+    Use either https://validator.schema.org/ or pipenv run scrapy sd <url> to examine potential structured data available.
+
+    `time_format` can be specified if a non standard pattern is used.
 
     Use either `pre_process_data` or `post_process_item` to add to the core behaviour of this spider.
 
-    Use either https://validator.schema.org/ or pipenv run scrapy sd <url> to examine potential structured data available.
+    If the response contains malformed JSON; an alternative `json_parser` can be specified - ie json5 or chompjs.
     """
 
     dataset_attributes = {"source": "structured_data"}
