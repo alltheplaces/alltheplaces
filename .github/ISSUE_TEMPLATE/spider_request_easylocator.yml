@@ -1,6 +1,6 @@
-name: "New Spider: Easylocator"
-description: A spider using the Easylocator storefinder
-labels: "Store finder: Easylocator"
+name: "New Spider: Easy Locator"
+description: A spider using the Easy Locator storefinder
+labels: "Store finder: Easy Locator"
 body:
   - type: input
     attributes:
