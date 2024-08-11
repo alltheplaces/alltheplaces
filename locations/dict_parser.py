@@ -1,7 +1,13 @@
 from locations.items import Feature
 
-
 class DictParser:
+    """
+    This class models the common human language patterns for naming common fields,
+    such as `latitude` or `street`
+
+    Primary used via `DictParser.parse()`
+    """
+
     # Variations can't handle capitalised acronyms such as "ID" so
     # the common variants of case including such acronyms need to
     # all be listed below.
@@ -222,6 +228,34 @@ class DictParser:
 
     @staticmethod
     def parse(obj) -> Feature:
+        """
+        Parse a dict with well known keys typically used into a Feature.
+
+        Usage:
+        ```
+        item = DictParser.parse({"title": "xyz store", "lat": 124, "lng": 123})
+        ```
+
+        Populates where possible:
+            `ref`, 
+            `name`, 
+            `lat`, 
+            `lon`, 
+            `addr_full`, 
+            `housenumber`, 
+            `street`, 
+            `street_address`, 
+            `city`, 
+            `state`, 
+            `postcode`, 
+            `country`, 
+            `email`, 
+            `phone`, 
+            `website`
+
+        :param dict obj: the object to traverse.
+        :return: Feature
+        """
         item = Feature()
 
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
