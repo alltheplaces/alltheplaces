@@ -13,7 +13,7 @@ class MomentFeedSpider(Spider):
     MomentFeed (owned by Uberall)
     https://momentfeed.com/
 
-    To use, specify `id` and optionally, `page_size`
+    To use, specify `api_key` and optionally, `page_size`
     """
 
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
