@@ -3,6 +3,7 @@ from scrapy import Request, Spider
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 
 
 class SaladStoryPLSpider(Spider):
@@ -49,7 +50,7 @@ class SaladStoryPLSpider(Spider):
                     item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
             yield item
 
-    def fix_streets(self, item) -> "Feature":
+    def fix_streets(self, item) -> Feature:
         # split street like: "Al.. Jerozolimskie 54" to street and housenumber
         house_number = item["street"].split(" ")[-1]
         street_cutoff = -len(house_number) - 1
