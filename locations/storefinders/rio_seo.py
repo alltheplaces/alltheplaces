@@ -19,6 +19,7 @@ class RioSeoSpider(Spider):
 
     To use, specify `end_point`
     """
+
     dataset_attributes = {"source": "api", "api": "rio_seo"}
 
     end_point: str = None
