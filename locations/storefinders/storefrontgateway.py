@@ -7,6 +7,12 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class StorefrontgatewaySpider(Spider):
+    """
+    A relatively unknown storefinder, associated with https://mi9retail.com/
+
+    To use, specify `start_urls`
+    """
+
     start_urls = []
 
     def start_requests(self):
