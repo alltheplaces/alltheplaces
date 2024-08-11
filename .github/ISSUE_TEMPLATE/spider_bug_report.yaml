@@ -13,7 +13,7 @@ body:
       label: Log output
       placeholder: https://www.alltheplaces.xyz/spiders/...
       description: >-
-        If possible get the logs from [the latest](https://www.alltheplaces.xyz/spiders)
+        If possible get the logs from [the latest](https://www.alltheplaces.xyz/spiders) run
   - type: textarea
     attributes:
       label: Backtrace (if applicable)
