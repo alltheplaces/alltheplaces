@@ -38,7 +38,14 @@ class RioSeoSpider(Spider):
 
     def parse(self, response, **kwargs):
         map_list = response.json()["maplist"]
-        data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
+        try:
+            data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
+        except json.decoder.JSONDecodeError:
+            self.logger.warning("Could not parse response - check API output")
+            data = []
+        except TypeError:
+            data = []
+
         for location in data:
             feature = DictParser.parse(location)
             feature["name"] = location["location_name"]

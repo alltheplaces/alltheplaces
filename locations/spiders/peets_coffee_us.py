@@ -34,7 +34,7 @@ class PeetsCoffeeUSSpider(StockistSpider):
         for feature in location["filters"]:
             apply_yes_no(PaymentMethods.CONTACTLESS, item, feature["name"] == "Contactless Payments")
             apply_yes_no("payment:gift_card", item, feature["name"] == "Accepts Peet's Cards")
-            apply_yes_no("breakfast", item, feature["name"] == "Warm Breakfast")
+            apply_yes_no(Extras.BREAKFAST, item, feature["name"] == "Warm Breakfast")
             apply_yes_no(Extras.WIFI, item, feature["name"] == "Free Wi-Fi")
             apply_yes_no(Extras.DELIVERY, item, feature["name"] == "Delivery")
 
