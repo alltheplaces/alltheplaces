@@ -13,7 +13,7 @@ class BaptistHealthArkansasUSSpider(AlgoliaSpider):
     app_id = "6EH1IB012D"
     index_name = "wp_posts_location"
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         item["name"] = location["post_title"]
         item["ref"] = location["permalink"]
         item["website"] = location["permalink"]

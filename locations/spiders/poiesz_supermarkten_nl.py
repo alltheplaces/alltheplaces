@@ -23,4 +23,4 @@ class PoieszSupermarktenNLSpider(SitemapSpider, StructuredDataSpider):
                 item["lat"] = m.group(1)
                 item["lon"] = m.group(2)
 
-        yield from self.inspect_item(item, response)
+        yield item

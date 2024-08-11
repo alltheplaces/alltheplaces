@@ -9,7 +9,7 @@ class BlueBottleCoffeeSpider(AlgoliaSpider):
     app_id = "1WJCUS8NHR"
     index_name = "us-production-cafes"
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         del item["name"]
         del item["street"]
 
