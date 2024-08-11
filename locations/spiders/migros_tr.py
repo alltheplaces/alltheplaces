@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MigrosTRScraper(scrapy.Spider):
+class MigrosTRSpider(scrapy.Spider):
     name = "migros_tr"
     start_urls = ["https://www.migros.com.tr/rest/api/external-warehouses"]
     item_attributes = {"brand": "Migros", "brand_wikidata": "Q1754510"}
