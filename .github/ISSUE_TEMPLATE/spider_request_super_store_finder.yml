@@ -1,5 +1,5 @@
 name: "New Spider: Super Store Finder"
-description: A spider using the Super Store Finder storefinder
+description: A spider using the Super Store Finder storefinder. Makes requests to `/wp-content/plugins/superstorefinder-wp/`
 labels: "Store finder: Super Store Finder"
 body:
   - type: input

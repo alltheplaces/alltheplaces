@@ -15,7 +15,6 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
-
   - type: input
     attributes:
       label: API Key

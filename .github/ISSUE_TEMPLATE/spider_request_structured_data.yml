@@ -15,6 +15,18 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: Sitemap?
+      description: Is there a sitemap URL? Does it contain the store pages?
+  - type: input
+    attributes:
+      label: Sample store detail URL
+      description: Add a link to an example store detail url, so any url patterns can be checked
+  - type: input
+    attributes:
+      label: Wanted Type
+      description: Visit [validator](https://validator.schema.org/) to discover the type
   - type: textarea
     attributes:
       label: Other detail

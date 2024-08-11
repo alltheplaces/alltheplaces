@@ -1,5 +1,5 @@
 name: "New Spider: Virtual Earth"
-description: A spider using the Virtual Earth storefinder
+description: A spider using the Virtual Earth storefinder. Makes calls to `https://spatial.virtualearth.net/REST/v1/data/`
 labels: "Store finder: Virtual Earth"
 body:
   - type: input
@@ -15,6 +15,18 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: API key
+      description: Extract from an AJAX request for `?key={api_key}`
+  - type: input
+    attributes:
+      label: Dataset ID
+      description: Extract from an AJAX request for `/REST/v1/data/{dataset_id}/{dataset_name}`
+  - type: input
+    attributes:
+      label: Dataset Name
+      description: Extract from an AJAX request for `/REST/v1/data/{dataset_id}/{dataset_name}`
   - type: textarea
     attributes:
       label: Other detail

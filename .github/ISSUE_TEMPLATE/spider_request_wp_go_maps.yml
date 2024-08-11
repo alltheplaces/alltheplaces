@@ -1,5 +1,5 @@
 name: "New Spider: WP Go Maps"
-description: A spider using the WP Go Maps storefinder
+description: A spider using the WP Go Maps storefinder. Makes requests with `/wp-json/wpgmza/v1/marker-listing/`
 labels: "Store finder: WP Go Maps"
 body:
   - type: input
@@ -15,6 +15,14 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: Domain
+      description: Top level domain
+  - type: input
+    attributes:
+      label: Start URL
+      description: Or a start URL
   - type: textarea
     attributes:
       label: Other detail

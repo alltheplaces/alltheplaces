@@ -1,5 +1,5 @@
 name: "New Spider: SweetIQ"
-description: A spider using the SweetIQ storefinder
+description: A spider using the SweetIQ storefinder. Page contains `__SLS_REDUX_STATE__`
 labels: "Store finder: SweetIQ"
 body:
   - type: input

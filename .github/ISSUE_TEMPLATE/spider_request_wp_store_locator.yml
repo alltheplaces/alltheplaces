@@ -1,5 +1,5 @@
 name: "New Spider: WPStoreLocator"
-description: A spider using the WPStoreLocator storefinder
+description: A spider using the WPStoreLocator storefinder. Makes requests to `wp-admin/admin-ajax.php?action=store_search`
 labels: "Store finder: WPStoreLocator"
 body:
   - type: input
@@ -15,6 +15,14 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: Domain
+      description: Top level domain
+  - type: input
+    attributes:
+      label: Start URL
+      description: Or a start URL
   - type: textarea
     attributes:
       label: Other detail

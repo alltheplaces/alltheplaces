@@ -1,5 +1,5 @@
 name: "New Spider: StoreRocket"
-description: A spider using the StoreRocket storefinder
+description: A spider using the StoreRocket storefinder. Makes requets to `https://storerocket.io/api/user/{api_key}/locations`
 labels: "Store finder: StoreRocket"
 body:
   - type: input
@@ -15,6 +15,10 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: API Key
+      description: Found in urls as `https://storerocket.io/api/user/{api_key}/locations`
   - type: textarea
     attributes:
       label: Other detail

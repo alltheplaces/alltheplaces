@@ -1,5 +1,5 @@
 name: "New Spider: Uberall"
-description: A spider using the Uberall storefinder
+description: A spider using the Uberall storefinder. Makes requests to `https://uberall.com/api`
 labels: "Store finder: Uberall"
 body:
   - type: input
@@ -18,7 +18,7 @@ body:
   - type: input
     attributes:
       label: API key
-      description: Extract from an AJAX request for https://uberall.com/api/storefinders/{{key}}/locations/all
+      description: Extract from an AJAX request for `https://uberall.com/api/storefinders/{key}/locations/all`
   - type: textarea
     attributes:
       label: Other detail
