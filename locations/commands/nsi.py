@@ -95,16 +95,6 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata)
 
     @staticmethod
-    def show(code, data):
-        print('"{}", "{}"'.format(data["label"], code))
-        print("       -> https://www.wikidata.org/wiki/{}".format(code))
-        print("       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(code))
-        if s := data.get("description"):
-            print("       -> {}".format(s))
-        if s := data.get("identities"):
-            print("       -> {}".format(s.get("website", "N/A")))
-
-    @staticmethod
     def issue_template(code, data):
         print("### Brand name\n")
         print(data["label"])
