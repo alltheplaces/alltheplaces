@@ -23,3 +23,7 @@ body:
   - type: textarea
     attributes:
       label: Expected behaviour or results
+  - type: textarea
+    attributes:
+      label: Possible causes?
+      description: Is this due to common issues like requiring a proxy, or changes to the underlying structure?
