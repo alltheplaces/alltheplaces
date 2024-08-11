@@ -13,6 +13,7 @@ class RexelSpider(Spider):
 
     To use, specify a `base_url`, `search_lat` and `search_lon`
     """
+
     base_url = ""
     search_lat = ""
     search_lon = ""
