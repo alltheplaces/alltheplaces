@@ -1,5 +1,5 @@
 name: Broken Spider
-about: Report a specific issue with a spider
+description: Report a specific issue with a spider
 labels: bug
 body:
   - type: input
