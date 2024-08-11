@@ -56,7 +56,11 @@ class PepSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(
-                location["business_hours"].replace("\\n", " ").replace("H", ":")
+                # 00H00-00H00 was interpreted as being open all day, but has the opposite meaning
+                location["business_hours"]
+                .replace("00H00-00H00", "closed")
+                .replace("\\n", " ")
+                .replace("H", ":")
             )
 
             yield item
