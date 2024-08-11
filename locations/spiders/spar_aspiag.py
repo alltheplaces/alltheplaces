@@ -6,8 +6,10 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class SparSpider(scrapy.Spider):
-    name = "spar"
+class SparAspiagSpider(scrapy.Spider):
+    # Spar stores run by ASPIAG: https://www.aspiag.com/en/countries
+    # See also https://github.com/alltheplaces/alltheplaces/pull/9379
+    name = "spar_aspiag"
     item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
 
     COUNTRIES = [
