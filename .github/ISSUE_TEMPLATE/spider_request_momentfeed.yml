@@ -1,6 +1,6 @@
-name: "New Spider: Momentfeed"
-description: A spider using the Momentfeed storefinder
-labels: "Store finder: Momentfeed"
+name: "New Spider: MomentFeed"
+description: A spider using the MomentFeed storefinder
+labels: "Store finder: MomentFeed"
 body:
   - type: input
     attributes:
