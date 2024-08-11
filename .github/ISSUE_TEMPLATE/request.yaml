@@ -36,7 +36,7 @@ body:
         - label: Embedded JSON?
         - label: HTML markup?
         - label: Structured Data? (`pipenv run scrapy sd (specific page url)`)
-        # - label: Open Graph Data? (`pipenv run scrapy og (specific page url)`)
         - label: Sitemap? (`pipenv run scrapy sitemap (url)`)
         - label: Requires proxy?
         - label: Has 'bot protection' (Cloudflare, etc)?
+        # - label: Open Graph Data? (`pipenv run scrapy og (specific page url)`)
