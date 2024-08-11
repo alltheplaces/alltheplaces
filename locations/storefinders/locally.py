@@ -11,6 +11,7 @@ class LocallySpider(scrapy.Spider):
 
     To use, specify `start_urls`
     """
+
     allowed_domains = []
     start_urls = []
     api_key = None  # Later, will refactor to this
