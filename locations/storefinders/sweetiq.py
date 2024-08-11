@@ -14,6 +14,7 @@ class SweetIQSpider(Spider):
 
     Provide `start_urls`, which will then automatically extract API keys and other data.
     """
+
     dataset_attributes = {"source": "api", "api": "sweetiq.com"}
     request_batch_size = 10
 
