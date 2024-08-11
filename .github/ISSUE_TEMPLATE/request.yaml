@@ -31,6 +31,7 @@ body:
       label: Behaviours
       description: How does the storefinder appear to work? See [API SPIDER](../../docs/API_SPIDER.md] and [HARD WORK SPIDER](../../docs/HARD_WORK_SPIDER.md)
       options:
+        - label: Has coordinates?
         - label: JSON API?
         - label: Embedded JSON?
         - label: HTML markup?
