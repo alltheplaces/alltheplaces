@@ -12,11 +12,11 @@ class HypovereinsbankDESpider(UberallSpider):
     # 337143 - Unternehmenskunden (corporate clients services)
     # 337141 - Private Banking
 
-    def parse_item(self, item, feature, **kwargs):
+    def post_process_item(self, item, response, location):
         item["website"] = "https://www.hypovereinsbank.de/hvb/kontaktwege/filiale#!/l/{}/{}/{}".format(
             item["city"].replace(" ", "-").lower(),
-            feature["streetAndNumber"].replace(" ", "-").lower(),
-            feature["identifier"],
+            location["streetAndNumber"].replace(" ", "-").lower(),
+            location["identifier"],
         )
         if "geldautomat" in item["name"].lower():
             apply_category(Categories.ATM, item)
