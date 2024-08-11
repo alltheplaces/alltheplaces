@@ -15,8 +15,8 @@ class LocallySpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json()["markers"]:
             oh = OpeningHours()
+            self.pre_process_data(store)
             item = DictParser.parse(store)
-            self.pre_process_item(item, store)
             for day in DAYS_FULL:
                 open = f"{day[:3].lower()}_time_open"
                 close = f"{day[:3].lower()}_time_close"
@@ -31,8 +31,8 @@ class LocallySpider(scrapy.Spider):
             self.post_process_item(item, store)
             yield item
 
-    def pre_process_item(self, item, store):
-        yield item
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
 
     def post_process_item(self, item, store):
         yield item
