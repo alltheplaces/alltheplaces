@@ -1,5 +1,6 @@
 name: New Spider
 description: Request a new spider
+labels: new-spider
 body:
   - type: input
     attributes:
