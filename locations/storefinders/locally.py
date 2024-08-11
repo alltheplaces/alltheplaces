@@ -5,6 +5,12 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 
 class LocallySpider(scrapy.Spider):
+    """
+    Locally provides an embeddable storefinder.
+    https://support.locally.com/en/support/solutions/articles/14000098813-store-locator-overview
+
+    To use, specify `start_urls`
+    """
     allowed_domains = []
     start_urls = []
     api_key = None  # Later, will refactor to this
