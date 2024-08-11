@@ -13,6 +13,13 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RioSeoSpider(Spider):
+    """
+    RioSEO is a number of related storefinders.
+    https://www.rioseo.com/platform/local-pages/
+
+    To use, specify `end_point`
+    """
+
     dataset_attributes = {"source": "api", "api": "rio_seo"}
 
     end_point: str = None
