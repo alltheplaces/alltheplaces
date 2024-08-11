@@ -128,6 +128,30 @@ def get_url(response) -> str:
 
 
 class StructuredDataSpider(Spider):
+    """
+    From a scrapy Response, attempt to extract all JSON LD information.
+
+    Use in conjunction with a `CrawlSpider` or directly call `parse_sd`.
+
+    To search for or omit specific data, set any of the spider attributes for:
+    - search_for_email
+    - search_for_phone
+    - search_for_twitter
+    - search_for_facebook
+    - search_for_instagram
+    - search_for_image
+
+    By default the spider only looks for certain `wanted_types`.
+    You can change this behaviour by specifying this as a list of your desired types.
+    Use either https://validator.schema.org/ or pipenv run scrapy sd <url> to examine potential structured data available.
+
+    `time_format` can be specified if a non standard pattern is used.
+
+    Use either `pre_process_data` or `post_process_item` to add to the core behaviour of this spider.
+
+    If the response contains malformed JSON; an alternative `json_parser` can be specified - ie json5 or chompjs.
+    """
+
     dataset_attributes = {"source": "structured_data"}
 
     wanted_types = [
@@ -260,8 +284,4 @@ class StructuredDataSpider(Spider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         """Override with any post-processing on the item."""
-        yield from self.inspect_item(item, response)
-
-    def inspect_item(self, item, response):
-        """Deprecated, please use post_process_item(self, item, response, ld_data):"""
         yield item

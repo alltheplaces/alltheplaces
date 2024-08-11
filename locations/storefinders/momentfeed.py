@@ -9,6 +9,13 @@ from locations.items import Feature
 
 
 class MomentFeedSpider(Spider):
+    """
+    MomentFeed (owned by Uberall)
+    https://momentfeed.com/
+
+    To use, specify `id` and optionally, `page_size`
+    """
+
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
     api_key: str = ""
     page_size: int = 100
