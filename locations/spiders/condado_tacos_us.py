@@ -14,7 +14,9 @@ class CondadoTacosUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         description = response.css("meta[name=description]").attrib["content"]
-        [name] = re.search(r"(Condado [^,]+),", description).groups()
-        item["name"] = name
+        matches = re.search(r"(Condado [^,]+),", description)
+        if matches is not None:
+            [name] = matches.groups()
+            item["name"] = name
         item["country"] = response.css("[itemprop=addressCountry]::text").get()
         yield item
