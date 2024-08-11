@@ -15,6 +15,18 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: API key
+      description: Found in HTTP headers as `x-algolia-api-key` for requests to `(app_id)-dsn.algolia.net/1/indexes/*/queries`
+  - type: input
+    attributes:
+      label: App key
+      description: Found in HTTP headers as `x-algolia-application-id` to `(app_id)-dsn.algolia.net/1/indexes/*/queries`
+  - type: input
+    attributes:
+      label: Index Name
+      description: Found in request form data as `indexName`
   - type: textarea
     attributes:
       label: Other detail

@@ -1,5 +1,5 @@
 name: "New Spider: Aheadworks"
-description: A spider using the Aheadworks storefinder
+description: A spider using the Aheadworks storefinder. Page will contain `Aheadworks_StoreLocator`
 labels: "Store finder: Aheadworks"
 body:
   - type: input
