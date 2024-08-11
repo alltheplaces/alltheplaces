@@ -21,6 +21,7 @@ class UberallSpider(Spider):
             logging.warning("Request failed")
 
         for feature in response.json()["response"]["locations"]:
+            self.pre_process_data(feature)
             if self.business_id_filter:
                 if feature["businessId"] != self.business_id_filter:
                     continue
@@ -46,7 +47,11 @@ class UberallSpider(Spider):
                         )
             item["opening_hours"] = oh.as_opening_hours()
 
-            yield from self.parse_item(item, feature)
+            yield from self.post_process_item(item, response, feature)
 
-    def parse_item(self, item, feature, **kwargs):
+    def post_process_item(self, item, response, location):
+        """Override with any post-processing on the item."""
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
