@@ -21,7 +21,7 @@ body:
       placeholder: >-
         https://www.mcdonalds.com/gb/en-gb/restaurant-locator.html
         https://www.mcdonalds.com.hk/find-a-restaurant/
-  - type: textarea
+  - type: input
     attributes:
       label: Sample store page url
       description: Add a sample store page url if applicable
