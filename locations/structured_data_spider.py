@@ -150,6 +150,7 @@ class StructuredDataSpider(Spider):
 
     Use either https://validator.schema.org/ or pipenv run scrapy sd <url> to examine potential structured data available.
     """
+
     dataset_attributes = {"source": "structured_data"}
 
     wanted_types = [
