@@ -52,7 +52,7 @@ class SaladStoryPLSpider(Spider):
     def fix_streets(self, item) -> "Feature":
         # split street like: "Al.. Jerozolimskie 54" to street and housenumber
         house_number = item["street"].split(" ")[-1]
-        street_cutoff = -len(house_number)-1
+        street_cutoff = -len(house_number) - 1
         item["housenumber"] = house_number
         item["street"] = item["street"][:street_cutoff]
         if item["street"].lower().startswith("ul. "):
