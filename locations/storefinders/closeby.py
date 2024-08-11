@@ -5,6 +5,11 @@ from locations.dict_parser import DictParser
 
 
 class ClosebySpider(Spider):
+    """
+    Closeby is a map based storefinder, relying on a JSON API.
+
+    Use by specifying the `api_key` spider attribute.
+    """
     dataset_attributes = {"source": "api", "api": "closeby.co"}
     api_key = ""
 
