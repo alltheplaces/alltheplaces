@@ -12,6 +12,7 @@ class StoremapperSpider(Spider):
 
     Use by specifying a `key`
     """
+
     dataset_attributes = {"source": "api", "api": "storemapper.com"}
 
     key = ""
