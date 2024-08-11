@@ -38,7 +38,6 @@ class CoopFoodGBSpider(scrapy.Spider):
 
             properties = {
                 "ref": store["url"],
-                "name": store["name"],
                 "opening_hours": open_hours,
                 "website": "https://www.coop.co.uk" + store["url"],
                 "street_address": merge_address_lines(
