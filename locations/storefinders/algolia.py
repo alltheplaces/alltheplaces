@@ -62,3 +62,4 @@ class AlgoliaSpider(Spider):
 
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the item."""
+        pass
