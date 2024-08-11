@@ -26,4 +26,3 @@ class ClosebySpider(Spider):
 
     def pre_process_data(self, location: dict, **kwargs):
         """Override with any pre-processing on the item."""
-        pass
