@@ -28,6 +28,7 @@ class SuperStoreFinderSpider(Spider):
     - start_urls
     - domain
     """
+
     def start_requests(self):
         if len(self.start_urls) > 0:
             for url in self.start_urls:
