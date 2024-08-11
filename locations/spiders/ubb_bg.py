@@ -6,7 +6,6 @@ from scrapy import Spider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
-from locations.user_agents import FIREFOX_LATEST
 
 
 class UbbBGSpider(Spider):
