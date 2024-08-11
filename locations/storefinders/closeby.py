@@ -10,6 +10,7 @@ class ClosebySpider(Spider):
 
     Use by specifying the `api_key` spider attribute.
     """
+
     dataset_attributes = {"source": "api", "api": "closeby.co"}
     api_key = ""
 
