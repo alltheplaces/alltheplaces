@@ -14,7 +14,7 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"[0-9]+$", "parse_sd")]
     wanted_types = ["GroceryStore"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         days = json.loads(response.xpath("//@data-days").get())
         oh = OpeningHours()
         for day in days:
