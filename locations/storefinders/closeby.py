@@ -24,5 +24,5 @@ class ClosebySpider(Spider):
         """Override with any post-processing on the item."""
         yield item
 
-    def pre_process_data(self, location, **kwargs):
+    def pre_process_data(self, location: dict, **kwargs):
         """Override with any pre-processing on the item."""
