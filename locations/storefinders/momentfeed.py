@@ -14,6 +14,7 @@ class MomentFeedSpider(Spider):
 
     To use, specify `id` and optionally, `page_size`
     """
+
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
 
     id = ""
