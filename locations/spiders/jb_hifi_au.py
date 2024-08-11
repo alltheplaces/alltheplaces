@@ -22,7 +22,7 @@ class JbHifiAUSpider(AlgoliaSpider):
 
         return opening_hours.as_opening_hours()
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         if location.get("displayOnWeb") != "p":
             return
 

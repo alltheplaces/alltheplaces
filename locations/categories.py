@@ -43,6 +43,8 @@ class Categories(Enum):
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
+    INDUSTRIAL_WAREHOUSE = {"industrial": "warehouse"}
+
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
 
@@ -260,12 +262,14 @@ class Categories(Enum):
     PUB = {"amenity": "pub"}
     PUBLIC_BOOKCASE = {"amenity": "public_bookcase"}
     REHABILITATION = {"healthcare": "rehabilitation"}
+    RESCUE_BUOY = {"emergency": "rescue_buoy"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
     TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VETERINARY = {"amenity": "veterinary"}
+    WATER_RESCUE = {"emergency": "water_rescue"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
 
     DATA_CENTRE = {"telecom": "data_center"}
@@ -443,6 +447,7 @@ class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     BARBEQUES = "bbq"
+    BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
     CARAVAN_SITES = "caravans"
@@ -458,6 +463,7 @@ class Extras(Enum):
     FAXING = "service:fax"
     FEE = "fee"
     HALAL = "diet:halal"
+    ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
     KOSHER = "diet:kosher"
     MOTOR_VEHICLES = "motor_vehicle"
