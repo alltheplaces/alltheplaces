@@ -1,5 +1,5 @@
 name: "New Spider: Localisr"
-description: A spider using the Localisr storefinder
+description: A spider using the Localisr storefinder. Makes requests to `localisr.io`
 labels: "Store finder: Localisr"
 body:
   - type: input
@@ -15,6 +15,14 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: API Key
+      description: Found in POST parameters as api_key
+  - type: input
+    attributes:
+      label: API Version
+      description: Found in POST parameters as api_verison
   - type: textarea
     attributes:
       label: Other detail

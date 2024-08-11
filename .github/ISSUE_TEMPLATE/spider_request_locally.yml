@@ -1,5 +1,5 @@
 name: "New Spider: Locally"
-description: A spider using the Locally storefinder
+description: A spider using the Locally storefinder. Makes requests to `locally.com/stores/conversion_data`
 labels: "Store finder: Locally"
 body:
   - type: input

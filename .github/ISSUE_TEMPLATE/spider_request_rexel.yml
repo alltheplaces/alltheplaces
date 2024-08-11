@@ -1,5 +1,5 @@
 name: "New Spider: Rexel"
-description: A spider using the Rexel storefinder
+description: A spider using the Rexel storefinder. Makes calls to `/store-finder/findNearbyStores`
 labels: "Store finder: Rexel"
 body:
   - type: input
@@ -15,6 +15,9 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: Start URL
   - type: textarea
     attributes:
       label: Other detail

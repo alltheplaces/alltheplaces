@@ -1,5 +1,5 @@
 name: "New Spider: Lighthouse"
-description: A spider using the Lighthouse storefinder
+description: A spider using the Lighthouse storefinder. Has a `<meta name="generator" content="Created by Lighthouse, powered by VENDD e-commerce platform - www.lighthouse.gr">`
 labels: "Store finder: "
 body:
   - type: input

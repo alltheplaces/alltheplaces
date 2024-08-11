@@ -1,5 +1,5 @@
 name: "New Spider: MapsMarkerPro"
-description: A spider using the MapsMarkerPro storefinder
+description: A spider using the MapsMarkerPro storefinder. Makes requests with `mmp_map_markers`.
 labels: "Store finder: MapsMarkerPro"
 body:
   - type: input

@@ -1,5 +1,5 @@
 name: "New Spider: Limesharp Store Locator"
-description: A spider using the Limesharp Store Locator storefinder
+description: A spider using the Limesharp Store Locator storefinder. Makes calls to `/stockists/ajax/stores/`
 labels: "Store finder: Limesharp Store Locator"
 body:
   - type: input

@@ -1,5 +1,5 @@
 name: "New Spider: MomentFeed"
-description: A spider using the MomentFeed storefinder
+description: A spider using the MomentFeed storefinder. Makes requests to `https://api.momentfeed.com/`
 labels: "Store finder: MomentFeed"
 body:
   - type: input
@@ -15,6 +15,10 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: Auth Token
+      description: Found in urls as `v1/analytics/api/llp.json?auth_token={auth_token}`
   - type: textarea
     attributes:
       label: Other detail

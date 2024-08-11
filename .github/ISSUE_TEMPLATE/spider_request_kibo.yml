@@ -1,5 +1,5 @@
 name: "New Spider: Kibo"
-description: A spider using the Kibo storefinder
+description: A spider using the Kibo storefinder. Makes requests to `/commerce/storefront/locationUsageTypes/DL/locations`
 labels: "Store finder: Kibo"
 body:
   - type: input
@@ -15,6 +15,10 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: Start URL
+      placeholder: http://site.com/commerce/storefront/locationUsageTypes/DL/locations  
   - type: textarea
     attributes:
       label: Other detail
