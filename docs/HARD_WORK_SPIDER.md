@@ -12,6 +12,7 @@ Many sites export clean [structured data](./STRUCTURED_DATA.md) or have a simple
 
 Use xpath and `parse_js_object` to extract the content; suitable for `DictParser`.
 
+
 Example: [a1_rs](../locations/spiders/a1_rs.py)
 ```
     def parse(self, response):

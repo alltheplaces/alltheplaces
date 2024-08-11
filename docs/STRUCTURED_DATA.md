@@ -59,3 +59,7 @@ Note that the [ATP pipeline](../locations/pipelines/apply_nsi_categories.py) cod
 The `smashburger.geojson` file can be examined in any number of tools, a popular choice here is [geojson.io](https://geojson.io/).
 
 The ATP tooling described here and on related pages can go a long way to giving you confidence in your end spider before writing any code!
+
+
+### Reference
+::: locations.structured_data_spider

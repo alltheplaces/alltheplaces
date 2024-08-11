@@ -48,3 +48,4 @@ https://smashburger.com/locations/us/co/denver/7305-e-35th-avenue/
 ```
 
 That is a good start! One of the next steps would be to analyze one of the store URLs for SEO content using our [structured data tooling](./STRUCTURED_DATA.md), or give it to a [schema validation tool](https://validator.schema.org/). In the example case, this [yields a good structure data result](https://validator.schema.org/#url=https%3A%2F%2Fsmashburger.com%2Flocations%2Fus%2Fco%2Flafayette%2F2755-dagny-way%2F).
+

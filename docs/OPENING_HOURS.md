@@ -47,3 +47,8 @@ spider walks their JSON structure and is able to pull
 out the opening hours rather simply using the ATP library support.
 The cost-benefit analysis in this case is very much in favour of
 us making the effort!
+
+
+### Reference
+
+::: locations.hours
