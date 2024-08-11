@@ -1,5 +1,6 @@
 from locations.items import Feature
 
+
 class DictParser:
     """
     This class models the common human language patterns for naming common fields,
@@ -237,20 +238,20 @@ class DictParser:
         ```
 
         Populates where possible:
-            `ref`, 
-            `name`, 
-            `lat`, 
-            `lon`, 
-            `addr_full`, 
-            `housenumber`, 
-            `street`, 
-            `street_address`, 
-            `city`, 
-            `state`, 
-            `postcode`, 
-            `country`, 
-            `email`, 
-            `phone`, 
+            `ref`,
+            `name`,
+            `lat`,
+            `lon`,
+            `addr_full`,
+            `housenumber`,
+            `street`,
+            `street_address`,
+            `city`,
+            `state`,
+            `postcode`,
+            `country`,
+            `email`,
+            `phone`,
             `website`
 
         :param dict obj: the object to traverse.
