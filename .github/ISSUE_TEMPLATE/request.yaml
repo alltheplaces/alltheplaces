@@ -29,7 +29,7 @@ body:
     id: behaviour
     attributes:
       label: Behaviours
-      description: How does the storefinder appear to work?
+      description: How does the storefinder appear to work? See [HARD WORK SPIDER](docs/HARD_WORK_SPIDER.md)
       options:
         - label: JSON API?
         - label: Embedded JSON?
