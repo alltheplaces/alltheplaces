@@ -1,6 +1,6 @@
-name: "New Spider: Stockinstore"
-description: A spider using the Stockinstore storefinder
-labels: "Store finder: Stockinstore"
+name: "New Spider: stockinstore"
+description: A spider using the stockinstore storefinder
+labels: "Store finder: stockinstore"
 body:
   - type: input
     attributes:
