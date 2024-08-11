@@ -1,6 +1,6 @@
-name: "New Spider: FreshOp"
-description: A spider using the FreshOp storefinder
-labels: "Store finder: FreshOp"
+name: "New Spider: Freshop"
+description: A spider using the Freshop storefinder
+labels: "Store finder: Freshop"
 body:
   - type: input
     attributes:
