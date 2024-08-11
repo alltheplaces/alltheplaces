@@ -12,8 +12,9 @@ class StoreLocatorWidgetsSpider(Spider):
     Store Locator Widgets are a set of store locator components.
     https://www.storelocatorwidgets.com/api/
 
-    To use, specify a `key` 
+    To use, specify a `key`
     """
+
     dataset_attributes = {"source": "api", "api": "storelocatorwidgets.com"}
 
     key = ""
