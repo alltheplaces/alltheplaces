@@ -1,6 +1,6 @@
-name: "New Spider: Storelocatorwidgets"
-description: A spider using the Storelocatorwidgets storefinder
-labels: "Store finder: Storelocatorwidgets"
+name: "New Spider: StoreLocatorWidgets"
+description: A spider using the StoreLocatorWidgets storefinder
+labels: "Store finder: StoreLocatorWidgets"
 body:
   - type: input
     attributes:
