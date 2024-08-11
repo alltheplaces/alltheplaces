@@ -48,3 +48,5 @@ twisted = {extras = ["http2"], version = "*"}
 tzdata = "*"
 unidecode = "*"
 xmltodict = "*"
+mkdocstrings = {version = "*", extras = ["python"]}
+mkdocs = "*"

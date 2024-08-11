@@ -1,0 +1,9 @@
+site_name: "AllThePlaces"
+
+theme:
+  name: "readthedocs"
+
+plugins:
+- search
+- autorefs
+- mkdocstrings

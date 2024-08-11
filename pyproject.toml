@@ -1,3 +1,10 @@
 [tool.black]
 line-length = 120
 target-version = ['py311']
+
+# PEP 621 dependencies declaration
+# adapt to your dependencies manager
+[project]
+dependencies = [
+    "mkdocstrings[python]>=0.18",
+]
