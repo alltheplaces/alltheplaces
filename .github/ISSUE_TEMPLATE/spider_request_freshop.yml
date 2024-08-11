@@ -15,7 +15,7 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
-- type: input
+  - type: input
     attributes:
       label: App Key
       description: Found in ajax requests to `https://api.freshop.com/1/stores?app_key={app_key}`
