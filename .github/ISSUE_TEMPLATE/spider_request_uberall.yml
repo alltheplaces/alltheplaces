@@ -18,4 +18,8 @@ body:
   - type: input
     attributes:
       label: API key
-      description: https://uberall.com/api/storefinders/**key**/locations/all
+      description: Extract from an AJAX request for https://uberall.com/api/storefinders/{{key}}/locations/all
+  - type: textarea
+    attributes:
+      label: Other detail
+      description: Any other relevant information or sample code
