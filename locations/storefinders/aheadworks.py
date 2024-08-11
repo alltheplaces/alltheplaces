@@ -40,7 +40,6 @@ class AheadworksSpider(Spider):
 
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the item."""
-        pass
 
     def post_process_item(self, item, response, location):
         """Override with any post-processing on the item."""
