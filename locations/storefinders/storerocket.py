@@ -7,6 +7,12 @@ from locations.items import Feature, SocialMedia, set_social_media
 
 
 class StoreRocketSpider(Spider):
+    """
+    StoreRocket is a map based JSON API driven store locator.
+    https://storerocket.io/
+
+    To use, specify the `storerocket_id` and optionally `base_url` to set website attributes.
+    """
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
 
     storerocket_id = ""
