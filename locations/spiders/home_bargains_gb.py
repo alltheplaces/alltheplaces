@@ -16,7 +16,7 @@ class HomeBargainsGBSpider(CrawlSpider, StructuredDataSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.5
 
-    def post_process_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/store/", 1)[1].split("/", 1)[0]
         full_address_parts = response.xpath('//*[@itemprop="address"]/text()').extract()[:-1]
         item["addr_full"] = clean_address(full_address_parts)
