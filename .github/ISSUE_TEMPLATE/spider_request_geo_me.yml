@@ -1,6 +1,6 @@
-name: "New Spider: Geo Me"
-description: A spider using the Geo Me storefinder
-labels: "Store finder: Geo Me"
+name: "New Spider: GeoMe"
+description: A spider using the GeoMe storefinder
+labels: "Store finder: GeoMe"
 body:
   - type: input
     attributes:
