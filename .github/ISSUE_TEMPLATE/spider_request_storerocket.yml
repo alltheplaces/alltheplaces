@@ -1,6 +1,6 @@
-name: "New Spider: Storerocket"
-description: A spider using the Storerocket storefinder
-labels: "Store finder: Storerocket"
+name: "New Spider: StoreRocket"
+description: A spider using the StoreRocket storefinder
+labels: "Store finder: StoreRocket"
 body:
   - type: input
     attributes:
