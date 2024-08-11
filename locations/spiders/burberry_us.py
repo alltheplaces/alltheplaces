@@ -6,7 +6,7 @@ class BurberryUSSpider(UberallSpider):
     item_attributes = {"brand": "Burberry", "brand_wikidata": "Q390107"}
     key = "wDs2IZte6mniM6J7TUaR3YI51ePyPa"
 
-    def parse_item(self, item, feature, **kwargs):
+    def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
 
         yield item

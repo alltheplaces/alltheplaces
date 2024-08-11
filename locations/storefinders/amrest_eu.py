@@ -8,6 +8,14 @@ from locations.hours import OpeningHours
 
 
 class AmrestEUSpider(Spider):
+    """
+    AmRest is a European multinational casual dining, fast-food restaurant and coffee shop operator headquartered in the Spanish capital, Madrid
+    https://www.wikidata.org/wiki/Q4738898
+    https://en.wikipedia.org/wiki/AmRest
+
+    This spider is specifically for the common functionality across all child brands.
+    """
+
     base_urls = ["https://api.amrest.eu/amdv/ordering-api/{}/"]
     auth_url = "rest/v1/auth/get-token"
     restaurants_url = "rest/v2/restaurants/"
