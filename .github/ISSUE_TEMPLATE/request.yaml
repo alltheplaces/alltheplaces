@@ -14,7 +14,7 @@ body:
       placeholder: Q38076
       description: >-
         If possible get the ID from
-        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page). 
+        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page).
         Bonus points: Add the storefinder link as a `Location information url` claim
   - type: textarea
     attributes:
