@@ -6,6 +6,14 @@ from locations.hours import OpeningHours
 
 
 class RexelSpider(Spider):
+    """
+    Rexel (https://www.wikidata.org/wiki/Q962489) is a large multinational company.
+
+    This spider is for all common functionality across subsidary brands.
+
+    To use, specify a `base_url`, `search_lat` and `search_lon`
+    """
+
     base_url = ""
     search_lat = ""
     search_lon = ""

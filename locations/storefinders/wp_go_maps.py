@@ -12,7 +12,6 @@ from locations.dict_parser import DictParser
 # Optionally, filter to a specific map_id
 
 
-#
 class WpGoMapsSpider(Spider):
     map_id = None
     length = 10000

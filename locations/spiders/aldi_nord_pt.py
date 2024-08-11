@@ -7,7 +7,7 @@ class AldiNordPTSpider(UberallSpider):
     item_attributes = {"brand_wikidata": "Q41171373"}
     key = "ALDINORDPT_YTvsWfhEG5TCPruM6ab6sZIi0Xodyx"
 
-    def parse_item(self, item, feature, **kwargs):
+    def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").removeprefix("ALDI ")
 
         apply_category(Categories.SHOP_SUPERMARKET, item)

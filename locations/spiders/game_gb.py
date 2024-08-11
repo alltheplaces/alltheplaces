@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -26,7 +27,7 @@ class GameGBSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"DOWNLOAD_TIMEOUT": 10}
     wanted_types = ["Store"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         street_address = item["street_address"]
         street_address = street_address.replace("GAME", "").replace("Game", "")
         street_address = clean_address(street_address)
@@ -54,6 +55,9 @@ class GameGBSpider(SitemapSpider, StructuredDataSpider):
         if item.get("image") == "https://cdn.game.net/image/upload/":
             item["image"] = None
 
-        # TODO: fix opening hours
+        if "openingHours" in ld_data:
+            item["opening_hours"] = OpeningHours()
+            for hours in ld_data["openingHours"]:
+                item["opening_hours"].add_ranges_from_string(hours)
 
         yield item
