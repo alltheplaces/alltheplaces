@@ -7,14 +7,20 @@ from locations.hours import DAYS, OpeningHours
 
 class PickNPaySpider(scrapy.Spider):
     name = "pick_n_pay"
-    item_attributes = {"brand": "Pick n Pay", "brand_wikidata": "Q7190735", "extras": Categories.SHOP_SUPERMARKET.value}
     start_urls = ["https://api.pnp.co.za/stores/v2"]
 
     def parse(self, response, **kwargs):
         for store in response.json():
+            if (
+                store["storeType"] in ("", "ONLINE", "NO_FORMAT", "WHOLESALE")
+                or "(incomplete)" in (store["storeName"] or "").lower()
+            ):
+                # "" appears to be a data error and the single current result is a data error
+                # "WHOLESALE" appear to be colocated with HYPER locations, so is probably not a distinct store
+                continue
             address = store["storeAddress"]
+            address["province"] = (address.get("province") or {}).get("name")
             store.update(address)
-            store["province"] = (address.get("province") or {}).get("name")
             item = DictParser.parse(store)
 
             item["opening_hours"] = OpeningHours()
@@ -24,7 +30,25 @@ class PickNPaySpider(scrapy.Spider):
                 if day["dayId"] < 8:
                     item["opening_hours"].add_range(DAYS[day["dayId"] - 1], day["openTime"], day["closeTime"])
 
-            if store["storeType"] == "CLOTHING":
+            if store["storeType"] in ("LOCAL", "MINI", "FAMILY", "SUPER", "MARKET"):
+                # "LOCAL", "MINI" appear to be branded as normal PnP supermarkets
+                # "FAMILY", "SUPER" are standard PnP supermarkets
+                # "MARKET" probably should be shown as PnP supermarket. Township location stores and numbers have dropped significantly in recent years
+                item.update(
+                    {
+                        "brand": "Pick n Pay",
+                        "brand_wikidata": "Q7190735",
+                        "extras": Categories.SHOP_SUPERMARKET.value,
+                    }
+                )
+            elif store["storeType"] == "HYPER":
+                item.update(
+                    {
+                        "brand": "Pick n Pay Hyper",
+                        "brand_wikidata": "Q128791977",
+                    }
+                )
+            elif store["storeType"] == "CLOTHING":
                 item.update(
                     {
                         "brand": "Pick n Pay Clothing",
@@ -40,7 +64,7 @@ class PickNPaySpider(scrapy.Spider):
                         "extras": Categories.SHOP_ALCOHOL.value,
                     }
                 )
-            elif store["storeType"] == "EXPRESS":
+            elif store["storeType"] in ("EXPRESS", "BPFORECOURT"):
                 item.update(
                     {
                         "brand": "Pick n Pay Express",
@@ -72,7 +96,31 @@ class PickNPaySpider(scrapy.Spider):
                         "extras": Categories.SHOP_DOITYOURSELF.value,
                     }
                 )
-            # Unhandled: "", "BPFORECOURT", "DAILY", "DC", "FAMILY", "HYPER", "LOCAL", "MARKET",
-            # "MINI", "NO_FORMAT", "ONLINE", "REGIONAL OFFICE", "SUPER", "WHOLESALE"
+            elif store["storeType"] == "DC":  # Distribution Centre
+                item.update(
+                    {
+                        "extras": Categories.INDUSTRIAL_WAREHOUSE.value,
+                        "operator": "Pick n Pay",
+                        "operator_wikidata": "Q7190735",
+                    }
+                )
+            elif store["storeType"] == "REGIONAL OFFICE":
+                item.update(
+                    {
+                        "extras": Categories.OFFICE_COMPANY.value,
+                        "brand": "Pick n Pay",
+                        "brand_wikidata": "Q7190735",
+                    }
+                )
+            else:
+                item.update(
+                    {
+                        "brand": "Pick n Pay",
+                        "brand_wikidata": "Q7190735",
+                        "extras": Categories.SHOP_SUPERMARKET.value,
+                    }
+                )
+            # Unhandled:
+            # "DAILY" was two stores, but both marked as incomplete in the data
 
             yield item
