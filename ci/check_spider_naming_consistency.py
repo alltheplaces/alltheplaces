@@ -62,6 +62,7 @@ COUNTRYCODE_COMPONENTS = {
     "MK",
     "MO",
     "MT",
+    "MU",
     "MX",
     "MY",
     "NI",
