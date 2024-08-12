@@ -1,5 +1,6 @@
 from .easybox_bg import EasyboxBGSpider
 
+
 class EasyboxHUSpider(EasyboxBGSpider):
     name = "easybox_hu"
     allowed_domains = ["sameday.hu"]
