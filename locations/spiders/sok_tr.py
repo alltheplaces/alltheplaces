@@ -44,8 +44,9 @@ class SokTRSpider(scrapy.Spider):
 
             item["name"] = name
             item["branch"] = branch_name
-            item["lat"] = self.parse_float(store["ltd"])
-            item["lon"] = self.parse_float(store["lng"])
+            # SOK API returns lat and lon in the wrong order
+            item["lat"] = self.parse_float(store["lng"])
+            item["lon"] = self.parse_float(store["ltd"])
             item["state"] = response.meta["province"]
             item["city"] = response.meta["district"]
             item["country"] = "TR"
