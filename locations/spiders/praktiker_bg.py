@@ -1,5 +1,5 @@
-from locations.spiders.technopolis_bg import TechnopolisBGSpider
 from locations.categories import Categories, apply_category
+from locations.spiders.technopolis_bg import TechnopolisBGSpider
 
 
 class PraktikerBGSpider(TechnopolisBGSpider):
