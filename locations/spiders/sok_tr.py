@@ -7,9 +7,9 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address, merge_address_lines
 
-PROVINCES_URL = "https://localhost:8080/ajax/servis/sehirler"
-DISTRICTS_URL = "https://localhost:8080/ajax/servis/ilceler?city={province}"
-STORES_URL = "https://localhost:8080/ajax/servis/magazalarimiz?city={province}&district={district}"
+PROVINCES_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/sehirler"
+DISTRICTS_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/ilceler?city={province}"
+STORES_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/magazalarimiz?city={province}&district={district}"
 
 
 class SokTRSpider(scrapy.Spider):
