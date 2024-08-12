@@ -48,7 +48,3 @@ class TechnopolisBGSpider(scrapy.Spider):
                 else:
                     item["opening_hours"].add_range(days[0], hours[0], hours[1])
             yield item
-
-    def post_process_feature(self, item, feature):
-        apply_category(Categories.SHOP_ELECTRONICS, item)
-        yield item
