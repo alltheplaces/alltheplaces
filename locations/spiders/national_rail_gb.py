@@ -1,6 +1,8 @@
 import string
+from typing import Iterable
 
-from scrapy import Spider
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -9,9 +11,6 @@ from locations.items import Feature
 class NationalRailGBSpider(Spider):
     name = "national_rail_gb"
     item_attributes = {"extras": {"network": "National Rail", "network:wikidata": "Q26334"}}
-    start_urls = [
-        "https://stationpicker.nationalrail.co.uk/stationPicker/{}".format(letter) for letter in string.ascii_uppercase
-    ]
 
     operators = {
         "AW": ("Transport for Wales", "Q104878180"),
@@ -44,6 +43,13 @@ class NationalRailGBSpider(Spider):
         "XR": ("Elizabeth line", None),
         "XS": ("London Southend Airport", None),
     }
+
+    def start_requests(self) -> Iterable[Request]:
+        for letter in string.ascii_uppercase:
+            yield JsonRequest(
+                url="https://stationpicker.nationalrail.co.uk/stationPicker/{}".format(letter),
+                headers={"Origin": "https://www.nationalrail.co.uk"},
+            )
 
     def parse(self, response, **kwargs):
         for location in response.json()["payload"]["stations"]:
