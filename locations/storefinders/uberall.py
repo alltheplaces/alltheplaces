@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
 class UberallSpider(Spider, AutomaticSpiderGenerator):
@@ -60,7 +61,7 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
 
             yield from self.post_process_item(item, response, feature)
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response, location: dict):
         """Override with any post-processing on the item."""
         yield item
 
