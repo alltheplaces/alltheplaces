@@ -2,8 +2,6 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
-
 
 # To use this spider, specify api_brand_name as the brand name key existing
 # in calls to the Easy Locator API at https://easylocator.net/ajax/...
