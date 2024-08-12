@@ -9,7 +9,7 @@ class MarinemaxUSSpider(AlgoliaSpider):
     api_key = "2a57d01f2b35f0f1c60cb188c65cab0d"
     index_name = "StoreLocations"
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         if not location["isActive"]:
             return
         item["ref"] = location["IDS_Site_ID"]

@@ -11,6 +11,6 @@ class YvesRocherITSpider(UberallSpider):
     }
     key = "HLGRPp968JZaR0D235dXJa5fMRPHuA"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item, response, locaton):
         item.pop("name", None)
         yield item
