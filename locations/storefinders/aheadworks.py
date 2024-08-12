@@ -7,7 +7,6 @@ from scrapy.http import Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 # Documentation available at:
 # 1. https://aheadworks.com/store-locator-extension-for-magento-1

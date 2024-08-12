@@ -16,6 +16,7 @@ class SweetIQSpider(Spider, AutomaticSpiderGenerator):
     To use, specify:
       - `start_urls`: mandatory parameter
     """
+
     dataset_attributes = {"source": "api", "api": "sweetiq.com"}
     request_batch_size = 10
     detection_rules = [

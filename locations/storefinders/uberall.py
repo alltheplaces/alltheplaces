@@ -4,7 +4,6 @@ from scrapy.http import JsonRequest, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 
 
 class UberallSpider(Spider, AutomaticSpiderGenerator):
@@ -16,6 +15,7 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
       - `key`: mandatory parameter
       - `business_id_filter`: optional parameter, default value is `None`
     """
+
     dataset_attributes = {"source": "api", "api": "uberall.com"}
     key: str = ""
     business_id_filter: int = None

@@ -25,6 +25,7 @@ class RioSeoSpider(Spider, AutomaticSpiderGenerator):
       - `radius`: optional parameter, default value is 10000
       - `limit`: optional parameter, default valus is 3000
     """
+
     dataset_attributes = {"source": "api", "api": "rio_seo"}
     end_point: str = None
     radius: int = 10000

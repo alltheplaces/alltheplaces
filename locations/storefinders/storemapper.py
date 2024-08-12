@@ -29,6 +29,7 @@ class StoremapperSpider(Spider, AutomaticSpiderGenerator):
     To use, specify:
       - `company_id`: mandatory parameter
     """
+
     dataset_attributes = {"source": "api", "api": "storemapper.com"}
     company_id: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}

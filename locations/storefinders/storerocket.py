@@ -17,6 +17,7 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
       - `base_url`: optional parameter, sets the base URL for individual
         location pages (which may be provided as a URL slug by this API)
     """
+
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
     storerocket_id: str = ""
     base_url: str | None = None

@@ -18,6 +18,7 @@ class StoreLocatorWidgetsSpider(Spider, AutomaticSpiderGenerator):
     To use, specify:
       - `key`: mandatory parameter
     """
+
     dataset_attributes = {"source": "api", "api": "storelocatorwidgets.com"}
     key: str = ""
     detection_rules = [

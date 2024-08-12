@@ -1,4 +1,3 @@
-from locations.storefinders.wp_go_maps import WPGoMapsSpider
 
 
 class BauspeziDESpider(WpGoMapsSpider):

@@ -25,6 +25,7 @@ class VirtualEarthSpider(Spider, AutomaticSpiderGenerator):
       - `dataset_select`: optional parameter, default valus is "*"
       - `page_size`: optional parameter, default value is 250
     """
+
     dataset_attributes = {"source": "api", "api": "virtualearth.net"}
     dataset_id = ""
     dataset_name = ""

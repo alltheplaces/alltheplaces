@@ -3,7 +3,6 @@ from scrapy import Spider
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.items import Feature
 
 # To use this spider, specify one or more start_urls which have a domain of
 # www.locally.com or brandname.locally.com and path of /stores/conversion_data
@@ -17,6 +16,7 @@ class LocallySpider(Spider, AutomaticSpiderGenerator):
 
     To use, specify `start_urls`
     """
+
     custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
         DetectionRequestRule(
