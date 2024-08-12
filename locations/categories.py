@@ -447,6 +447,7 @@ class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
+    BACKUP_GENERATOR = "backup_generator"
     BARBEQUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
