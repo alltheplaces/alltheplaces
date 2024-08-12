@@ -1,4 +1,4 @@
-from .easybox_bg import EasyboxBGSpider
+from locations.spiders.easybox_bg import EasyboxBGSpider
 
 
 class EasyboxHUSpider(EasyboxBGSpider):
