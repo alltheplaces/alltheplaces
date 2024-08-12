@@ -196,6 +196,7 @@ class Categories(Enum):
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_ENGINEER = {"office": "engineer"}
+    OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
 
