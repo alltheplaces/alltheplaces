@@ -48,19 +48,21 @@ class LeonidasSpider(scrapy.Spider):
                 else:
                     opening_hours.add_range(DAYS[i], opening_hour, closing_hour)
 
-            yield Feature({
-                "ref": attributes.get("path").get("pid"),
-                "name": attributes.get("title"),
-                "city": attributes.get("field_shop_address_city"),
-                "country": attributes.get("field_shop_address_country"),
-                "street_address": store.get("field_shop_address_street1"),
-                "postcode": store.get("field_shop_address_postal"),
-                "phone": attributes.get("field_shop_tel"),
-                "email": attributes.get("field_shop_email_2"),
-                "website": self.construct_website_url(
-                    attributes.get("field_shop_address_country"), attributes.get("path").get("alias")
-                ),
-                "lat": attributes.get("field_shop_address_latitude"),
-                "lon": attributes.get("field_shop_address_longitude"),
-                "opening_hours": opening_hours.as_opening_hours(),
-            })
+            yield Feature(
+                {
+                    "ref": attributes.get("path").get("pid"),
+                    "name": attributes.get("title"),
+                    "city": attributes.get("field_shop_address_city"),
+                    "country": attributes.get("field_shop_address_country"),
+                    "street_address": store.get("field_shop_address_street1"),
+                    "postcode": store.get("field_shop_address_postal"),
+                    "phone": attributes.get("field_shop_tel"),
+                    "email": attributes.get("field_shop_email_2"),
+                    "website": self.construct_website_url(
+                        attributes.get("field_shop_address_country"), attributes.get("path").get("alias")
+                    ),
+                    "lat": attributes.get("field_shop_address_latitude"),
+                    "lon": attributes.get("field_shop_address_longitude"),
+                    "opening_hours": opening_hours.as_opening_hours(),
+                }
+            )
