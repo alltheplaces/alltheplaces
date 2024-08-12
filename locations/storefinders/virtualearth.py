@@ -36,7 +36,8 @@ class VirtualEarthSpider(Spider):
 
     def start_requests(self):
         yield JsonRequest(
-            url=f"https://spatial.virtualearth.net/REST/v1/data/{self.dataset_id}/{self.dataset_name}?key={self.api_key}&$filter={self.dataset_filter}&$select={self.dataset_select}&$format=json&$top=1&$inlinecount=allpages",            callback=self.pages,
+            url=f"https://spatial.virtualearth.net/REST/v1/data/{self.dataset_id}/{self.dataset_name}?key={self.api_key}&$filter={self.dataset_filter}&$select={self.dataset_select}&$format=json&$top=1&$inlinecount=allpages",
+            callback=self.pages,
         )
 
     def pages(self, response, **kwargs):
