@@ -1,6 +1,5 @@
 import scrapy
 
-from locations.categories import Categories, apply_category
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
