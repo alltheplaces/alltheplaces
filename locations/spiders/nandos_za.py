@@ -10,9 +10,9 @@ class NandosZASpider(scrapy.Spider):
     name = "nandos_za"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
     allowed_domains = ["api.locationbank.net"]
-    start_urls = [
-        "https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=67b9c5e4-6ddf-4856-b3c0-cf27cfe53255"
-    ]
+    client_id = "67b9c5e4-6ddf-4856-b3c0-cf27cfe53255"
+    start_urls = ["https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=" + client_id]
+    web_root = "https://store.nandos.co.za/details/"
 
     def parse(self, response):
         data = response.json()
@@ -20,7 +20,7 @@ class NandosZASpider(scrapy.Spider):
             i["name"] = i.pop("locationName")
             i["phone"] = i.pop("primaryPhone")
             i["province"] = i.pop("administrativeArea")
-            i["website"] = "https://store.nandos.co.za/details/" + i.pop("storeLocatorDetailsShortURL")
+            i["website"] = self.web_root + i.pop("storeLocatorDetailsShortURL")
             item = DictParser.parse(i)
 
             oh = OpeningHours()
