@@ -284,8 +284,4 @@ class StructuredDataSpider(Spider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         """Override with any post-processing on the item."""
-        yield from self.inspect_item(item, response)
-
-    def inspect_item(self, item, response):
-        """Deprecated, please use post_process_item(self, item, response, ld_data):"""
         yield item

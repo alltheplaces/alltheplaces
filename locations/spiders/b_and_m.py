@@ -12,7 +12,7 @@ class BAndMSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.SHOP_VARIETY_STORE, item)
 
         if "phone" in item:

@@ -13,7 +13,7 @@ class IowaUniversityUSSpider(AlgoliaSpider):
     index_name = "uihc_locations"
     referer = "https://uihc.org/locations"
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         item["ref"] = location["objectID"]
         item["street_address"] = location["field_address:thoroughfare"]
         item["city"] = location["field_address:locality"]

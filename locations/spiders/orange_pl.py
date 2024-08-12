@@ -11,7 +11,7 @@ class OrangePLSpider(AlgoliaSpider):
     app_id = "0KNEMTBXX3"
     index_name = "OEPL_en"
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         item["street_address"] = clean_address([location.pop("street1"), location.pop("street2")])
         item["addr_full"] = clean_address(location["formatted_address"])
         item["lat"] = location["_geoloc"]["lat"]
