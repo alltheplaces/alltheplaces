@@ -19,6 +19,9 @@ class EasyboxBGSpider(scrapy.Spider):
             apply_category(Categories.PARCEL_LOCKER, item)
             item["image"] = "https://sameday.bg" + location["photo"]
             item["opening_hours"] = OpeningHours()
-            for day in location["schedule"]:
-                item["opening_hours"].add_range(DAYS[day["day"] - 1], day["openingHour"], day["closingHour"])
+            for day_schedule in location["schedule"]:
+                day = DAYS[day_schedule["day"] - 1]
+                opening_hour = day_schedule["openingHour"].rsplit(":", 1)[0]
+                closing_hour = day_schedule["closingHour"].rsplit(":", 1)[0]
+                item["opening_hours"].add_range(day, opening_hour, closing_hour)
             yield item
