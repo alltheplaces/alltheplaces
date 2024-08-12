@@ -10,8 +10,9 @@ class NandosZASpider(scrapy.Spider):
     name = "nandos_za"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
     allowed_domains = ["api.locationbank.net"]
-    client_id = "67b9c5e4-6ddf-4856-b3c0-cf27cfe53255"
-    start_urls = ["https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=" + client_id]
+    start_urls = [
+        "https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=67b9c5e4-6ddf-4856-b3c0-cf27cfe53255"
+    ]
     web_root = "https://store.nandos.co.za/details/"
 
     def parse(self, response):
