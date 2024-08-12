@@ -20,5 +20,7 @@ class OpenGraphParser:
             item["ref"] = response.url
         return item
 
-    def parse(self, response) -> Feature:
-        return self.as_item(self.extract_properties(response), response)
+    @staticmethod
+    def parse(response) -> Feature:
+        oh = OpeningHours()
+        return oh.as_item(oh.extract_properties(response), response)
