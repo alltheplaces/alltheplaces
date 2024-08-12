@@ -13,8 +13,8 @@ from locations.hours import OpeningHours
 
 class FreshopSpider(Spider):
     dataset_attributes = {"source": "api", "api": "freshop.com"}
-    app_key = ""
-    location_type_ids = ["1567647"]
+    app_key: str = ""
+    location_type_ids: list[str] = ["1567647"]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://api.freshop.com/1/stores?app_key={self.app_key}")
