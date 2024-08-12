@@ -1,5 +1,3 @@
-from urllib.parse import quote_plus
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
