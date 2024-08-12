@@ -14,6 +14,7 @@ class PaintSpotAUSpider(AmastyStoreLocatorSpider):
         },
     }
     allowed_domains = ["paintspot.com.au"]
+    requires_proxy = "AU"  # Geoblocking appears to be used
 
     def parse_item(self, item, location, popup_html):
         if "Dulux Spray Centre" in item["name"]:

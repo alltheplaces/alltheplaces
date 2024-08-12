@@ -1,6 +1,6 @@
 from locations.categories import Categories
 from locations.hours import OpeningHours
-from locations.storefinders.easylocator import EasyLocatorSpider
+from locations.storefinders.easy_locator import EasyLocatorSpider
 
 
 class GigisCupcakesUSSpider(EasyLocatorSpider):
