@@ -725,6 +725,9 @@ class OpeningHours:
 
         This differs slightly to https://wiki.openstreetmap.org/wiki/Key:opening_hours; in that 'off' or 'closed'
         are more frequently output.
+
+        Recommended to use with an appropriate helper to pass a specific string or list, ie:
+        `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
         """
         for day in [days] if isinstance(days, str) else days:
             day = sanitise_day(day)
