@@ -1,4 +1,3 @@
-import re
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -39,17 +38,32 @@ class RedRoosterAUSpider(Spider):
                 "postcode": address_fields.get("postcode", {}).get("value"),
                 "email": location["attributes"].get("storeEmail"),
                 "phone": location["attributes"].get("storePhone"),
-                "website": "https://www.redrooster.com.au/locations/" + location["relationships"]["slug"]["data"]["attributes"]["slug"],
+                "website": "https://www.redrooster.com.au/locations/"
+                + location["relationships"]["slug"]["data"]["attributes"]["slug"],
             }
 
             properties["opening_hours"] = OpeningHours()
             for day_hours in location["relationships"]["collection"]["data"]["attributes"]["collectionTimes"]:
                 for time_period in day_hours["collectionTimePeriods"]:
-                    properties["opening_hours"].add_range(day_hours["dayOfWeek"], time_period["openTime"], time_period["closeTime"], "%H:%M:%S")
+                    properties["opening_hours"].add_range(
+                        day_hours["dayOfWeek"], time_period["openTime"], time_period["closeTime"], "%H:%M:%S"
+                    )
 
-            apply_yes_no(Extras.DRIVE_THROUGH, properties, location["relationships"]["collection"]["data"]["attributes"]["pickupTypes"]["driveThru"], False)
+            apply_yes_no(
+                Extras.DRIVE_THROUGH,
+                properties,
+                location["relationships"]["collection"]["data"]["attributes"]["pickupTypes"]["driveThru"],
+                False,
+            )
             apply_yes_no(Extras.DELIVERY, properties, location["attributes"]["isDeliveryEnabled"], False)
-            apply_yes_no(Extras.WIFI, properties, location["relationships"]["amenities"]["data"]["attributes"]["haveWifi"], False)
-            apply_yes_no(Extras.TOILETS, properties, location["relationships"]["amenities"]["data"]["attributes"]["haveToilet"], False)
+            apply_yes_no(
+                Extras.WIFI, properties, location["relationships"]["amenities"]["data"]["attributes"]["haveWifi"], False
+            )
+            apply_yes_no(
+                Extras.TOILETS,
+                properties,
+                location["relationships"]["amenities"]["data"]["attributes"]["haveToilet"],
+                False,
+            )
 
             yield Feature(**properties)
