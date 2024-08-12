@@ -265,7 +265,7 @@ touch "${SPIDER_RUN_DIR}/latest_placeholder.txt"
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="${RUN_S3_KEY_PREFIX}/output.zip" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.zip" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.zip"
 
@@ -277,7 +277,7 @@ fi
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="${RUN_S3_KEY_PREFIX}/output.pmtiles" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.pmtiles" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.pmtiles"
 
@@ -289,7 +289,7 @@ fi
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="${RUN_S3_KEY_PREFIX}/output.parquet" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.parquet" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.parquet"
 
@@ -303,7 +303,7 @@ for spider in $(scrapy list)
 do
     aws s3 cp \
         --only-show-errors \
-        --website-redirect="${RUN_S3_KEY_PREFIX}/output/${spider}.geojson" \
+        --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output/${spider}.geojson" \
         "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
         "s3://${S3_BUCKET}/runs/latest/output/${spider}.geojson"
 
