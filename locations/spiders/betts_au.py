@@ -14,7 +14,6 @@ class BettsAUSpider(Spider):
     allowed_domains = ["www.betts.com.au"]
     no_refs = True
 
-
     def parse(self, response):
         csv_raw = response.xpath('//script[@id="store-locations"]/text()').get()
         rows = csv.DictReader(StringIO(csv_raw))
