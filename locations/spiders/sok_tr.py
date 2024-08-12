@@ -50,7 +50,7 @@ class SokTRSpider(scrapy.Spider):
             item["city"] = response.meta["district"]
             item["country"] = "TR"
             item["phone"] = store.get("phone")
-            item["street_adress"] = clean_address(store["address"])
+            item["street_address"] = clean_address(store["address"])
             item["addr_full"] = merge_address_lines([item["street_adress"], item["city"], item["state"]])
 
             yield item
