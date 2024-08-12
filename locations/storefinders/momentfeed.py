@@ -18,6 +18,7 @@ class MomentFeedSpider(Spider, AutomaticSpiderGenerator):
       - `api_key`: mandatory parameter
       - `page_size`: optional parameter, default value is 100
     """
+
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
     api_key: str = ""
     page_size: int = 100
