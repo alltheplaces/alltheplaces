@@ -17,7 +17,7 @@ from locations.storefinders.aheadworks import AheadworksSpider
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 from locations.storefinders.amrest_eu import AmrestEUSpider
 from locations.storefinders.closeby import ClosebySpider
-from locations.storefinders.easylocator import EasyLocatorSpider
+from locations.storefinders.easy_locator import EasyLocatorSpider
 from locations.storefinders.freshop import FreshopSpider
 from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
