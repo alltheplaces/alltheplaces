@@ -1,6 +1,5 @@
 import csv
 from io import StringIO
-import re
 
 from scrapy import Spider
 
