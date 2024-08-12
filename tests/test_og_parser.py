@@ -9,7 +9,7 @@ def test_open_graph_parser():
     file.close()
     website = "http://test.com"
     response = HtmlResponse(url=website, body=page, encoding="utf-8")
-    item = OpenGraphParser().parse(response)
+    item = OpenGraphParser.parse(response)
     assert item["name"] == "Londis Texaco Olton Service Station"
     assert item["lat"] == "52.4194312"
     assert item["lon"] == "-1.7876606"
