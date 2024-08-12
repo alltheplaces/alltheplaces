@@ -2,7 +2,7 @@ from scrapy import Spider
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class SleepNumberUSSpider(Spider):
