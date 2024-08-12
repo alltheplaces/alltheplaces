@@ -10,18 +10,18 @@ from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
 from locations.spiders.food_city_us import FoodCityUSSpider
-from locations.spiders.giantfood import GiantFoodSpider
-from locations.spiders.giantfoodstores import GiantFoodStoresSpider
+from locations.spiders.giant_food import GiantFoodSpider
+from locations.spiders.giant_food_stores import GiantFoodStoresSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
 from locations.spiders.h_e_b_us import HEBUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.marcs import MarcsSpider
 from locations.spiders.market_basket import MarketBasketSpider
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.spiders.nordstrom import NordstromSpider
 from locations.spiders.piggly_wiggly_us import PigglyWigglyUSSpider
-from locations.spiders.racetrac_us import RaceTracUSSpider
+from locations.spiders.race_trac_us import RaceTracUSSpider
 from locations.spiders.recipe_unlimited import RecipeUnlimitedSpider
 from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
@@ -40,7 +40,7 @@ from locations.spiders.wegmans import WegmansSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class BMOSpider(Where2GetItSpider):
+class BmoSpider(Where2GetItSpider):
     name = "bmo"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
     api_endpoint = "https://branchlocator.bmo.com/rest/getlist"
@@ -152,8 +152,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = MarketBasketSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = MarketBasketSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Mcdonalds":
-                item["located_in"] = McDonaldsSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = McDonaldsSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = McdonaldsSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = McdonaldsSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Nordstrom":
                 item["located_in"] = NordstromSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = NordstromSpider.item_attributes["brand_wikidata"]

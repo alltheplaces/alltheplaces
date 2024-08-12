@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KFCSGSpider(scrapy.Spider):
+class KfcSGSpider(scrapy.Spider):
     name = "kfc_sg"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.com.sg/stores/All/locateusStores"]

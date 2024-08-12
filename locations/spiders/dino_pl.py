@@ -40,6 +40,7 @@ class DinoPLSpider(Spider):
             if location["properties"]["status"] != "MARKET OTWARTY":  # "MARKET OPEN"
                 continue
             item = DictParser.parse(location["properties"])
+            item.pop("name", None)
             item["geometry"] = location["geometry"]
             item["opening_hours"] = OpeningHours()
             if week_hours := location["properties"].get("weekHours"):

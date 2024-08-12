@@ -6,6 +6,14 @@ from locations.hours import OpeningHours
 
 
 class RexelSpider(Spider):
+    """
+    Rexel (https://www.wikidata.org/wiki/Q962489) is a large multinational company.
+
+    This spider is for all common functionality across subsidary brands.
+
+    To use, specify a `base_url`, `search_lat` and `search_lon`
+    """
+
     base_url = ""
     search_lat = ""
     search_lon = ""
@@ -30,7 +38,8 @@ class RexelSpider(Spider):
             )
             feature["ref"] = feature.pop("name")
             item = DictParser.parse(feature)
-            item["phone"] = feature["address"]["phone"]
+            if not feature["address"]["phone"].replace(" ", "").startswith("+443"):
+                item["phone"] = feature["address"]["phone"]
             # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item["website"] = (
                 f'https://{self.base_url}/{feature["address"]["town"].replace(" ", "-")}/store/{feature["ref"]}'

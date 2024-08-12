@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class BucadiBeppoUSSpider(Spider):
+class BucaDiBeppoUSSpider(Spider):
     name = "buca_di_beppo_us"
     item_attributes = {"brand": "Buca di Beppo", "brand_wikidata": "Q4982340", "extras": Categories.RESTAURANT.value}
     allowed_domains = ["www.bucadibeppo.com"]

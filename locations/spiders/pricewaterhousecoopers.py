@@ -3,7 +3,7 @@ import scrapy
 from locations.items import Feature
 
 
-class PricewaterhouseCoopersSpider(scrapy.Spider):
+class PricewaterhousecoopersSpider(scrapy.Spider):
     name = "pricewaterhousecoopers"
     item_attributes = {"brand": "PricewaterhouseCoopers", "brand_wikidata": "Q488048"}
     allowed_domains = []

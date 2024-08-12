@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SecurCareSelfStorageUSSpider(SitemapSpider, StructuredDataSpider):
+class SecurcareSelfStorageUSSpider(SitemapSpider, StructuredDataSpider):
     name = "securcare_self_storage_us"
     item_attributes = {"brand": "SecurCare Self Storage", "brand_wikidata": "Q124821649"}
     sitemap_urls = ["https://www.securcareselfstorage.com/robots.txt"]

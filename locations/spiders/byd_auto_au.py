@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class BYDAutoAUSpider(Spider):
+class BydAutoAUSpider(Spider):
     name = "byd_auto_au"
     item_attributes = {"brand": "BYD Auto", "brand_wikidata": "Q27423"}
     allowed_domains = ["bydautomotive.com.au"]

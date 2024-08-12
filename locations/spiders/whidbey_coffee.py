@@ -9,7 +9,7 @@ from locations.items import Feature
 
 
 class WhidbeyCoffeeSpider(scrapy.Spider):
-    name = "whidbeycoffee"
+    name = "whidbey_coffee"
     item_attributes = {"brand": "Whidbey Coffee", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.whidbeycoffee.com"]
     start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)

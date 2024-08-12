@@ -82,6 +82,8 @@ class OrlenSpider(scrapy.Spider):
             item.update(brand)
         item.pop("street_address")
         item["street"] = data["StreetAddress"]
+        if item["phone"] == "---":
+            item["phone"] = None
         if data["BrandTypeName"].lower() not in data["Name"].lower():
             item["name"] = data["BrandTypeName"] + " " + data["Name"]
 

@@ -2,7 +2,7 @@ from locations.storefinders.momentfeed import MomentFeedSpider
 
 
 class CoffeeTimeSpider(MomentFeedSpider):
-    name = "coffeetime"
+    name = "coffee_time"
     item_attributes = {"brand": "Coffee Time", "brand_wikidata": "Q5140932"}
     id = "YDGUJSNDOUAFKPRL"
 

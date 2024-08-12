@@ -14,8 +14,7 @@ class DorevitchPathologyAUSpider(Spider):
         "brand_wikidata": "Q126165490",
         "extras": Categories.SAMPLE_COLLECTION.value,
     }
-    allowed_domains = ["www.healius.com.au"]
-    start_urls = ["https://www.healius.com.au/structr/rest/Location/fetchLocationFromFindUsAPI"]
+    start_urls = ["https://locations.healius.com.au/structr/rest/Location/fetchLocationFromFindUsAPI"]
     company_code = "dorevitch"
     custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt doesn't exist, ignore to avoid warnings.
 

@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class CeXSpider(scrapy.Spider):
+class CexSpider(scrapy.Spider):
     name = "cex"
     item_attributes = {"brand": "CeX", "brand_wikidata": "Q5055676", "country": "GB"}
     allowed_domains = ["wss2.cex.uk.webuy.io"]

@@ -14,7 +14,6 @@ class NandosOMSpider(scrapy.Spider):
     start_urls = [
         "https://www.nandosoman.com/eat/restaurants-all",
     ]
-    download_delay = 0.3
 
     def parse(self, response):
         urls = response.xpath('//div[@class="row"]/a/@href').extract()
