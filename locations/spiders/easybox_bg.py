@@ -1,10 +1,11 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class easyboxBGSpider(scrapy.Spider):
+class EasyboxBGSpider(scrapy.Spider):
     name = "easybox_bg"
     item_attributes = {"brand": "easybox", "brand_wikidata": "Q114496224"}
     allowed_domains = ["sameday.bg"]
@@ -15,6 +16,7 @@ class easyboxBGSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
+            apply_category(Categories.PARCEL_LOCKER, item)
             item["image"] = "https://sameday.bg" + location["photo"]
             item["opening_hours"] = OpeningHours()
             for day in location["schedule"]:
