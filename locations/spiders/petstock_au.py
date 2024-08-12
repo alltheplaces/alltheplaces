@@ -31,15 +31,20 @@ class PetstockAUSpider(AlgoliaSpider):
         elif location["services"]["isVetClinic"] is True:
             apply_category(Categories.VETERINARY, item)
 
-        hours_string = " ".join([day_hours["day"] + ": " + day_hours["openHours"]["open"] + "-" + day_hours["openHours"]["close"] for day_hours in location["openingHours"]])
+        hours_string = " ".join(
+            [
+                day_hours["day"] + ": " + day_hours["openHours"]["open"] + "-" + day_hours["openHours"]["close"]
+                for day_hours in location["openingHours"]
+            ]
+        )
         day_pairs = [
-                ["Monday", "Tuesday"],
-                ["Tuesday", "Wednesday"],
-                ["Wednesday", "Thursday"],
-                ["Thursday", "Friday"],
-                ["Friday", "Saturday"],
-                ["Saturday", "Sunday"],
-                ["Sunday", "Monday"],
+            ["Monday", "Tuesday"],
+            ["Tuesday", "Wednesday"],
+            ["Wednesday", "Thursday"],
+            ["Thursday", "Friday"],
+            ["Friday", "Saturday"],
+            ["Saturday", "Sunday"],
+            ["Sunday", "Monday"],
         ]
         for day_pair in day_pairs:
             if day_pair[0] not in hours_string and day_pair[1] not in hours_string:
