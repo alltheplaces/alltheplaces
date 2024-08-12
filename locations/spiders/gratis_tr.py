@@ -1,4 +1,5 @@
 import re
+
 import scrapy
 import scrapy.http
 
@@ -10,7 +11,9 @@ from locations.pipelines.address_clean_up import clean_address
 
 class GratisTRSpider(scrapy.Spider):
     name = "gratis_tr"
-    start_urls = ["https://api.cn94v1klbw-gratisicv1-p1-public.model-t.cc.commerce.ondemand.com/gratiscommercewebservices/v2/gratis/stores/country/TR?fields=DEFAULT&lang=tr&curr=TRY"]
+    start_urls = [
+        "https://api.cn94v1klbw-gratisicv1-p1-public.model-t.cc.commerce.ondemand.com/gratiscommercewebservices/v2/gratis/stores/country/TR?fields=DEFAULT&lang=tr&curr=TRY"
+    ]
     item_attributes = {"brand": "Gratis", "brand_wikidata": "Q28605813"}
 
     def start_requests(self):
@@ -26,7 +29,9 @@ class GratisTRSpider(scrapy.Spider):
             item["city"] = get_loop(["address", "townInfo", "name"], store)
             item["state"] = get_loop(["address", "cityInfo", "name"], store)
             item["branch"] = store["displayName"]
-            street_address, addr_full = self.process_address(get_loop(["address", "line1"], store), item["city"], item["state"])
+            street_address, addr_full = self.process_address(
+                get_loop(["address", "line1"], store), item["city"], item["state"]
+            )
             item["addr_full"] = addr_full
             item["street_address"] = street_address
             item["name"] = "Gratis"
@@ -41,9 +46,9 @@ class GratisTRSpider(scrapy.Spider):
                 apply_category({"website": self.get_page_url(item["branch"], item["city"], item["state"])}, item)
             if store.get("phone") is not None and store.get("phone") != "-":
                 item["phone"] = store["phone"]
-            
+
             yield item
-            
+
     # The only added information is opening hours but all stores have the same opening hours so this is not used
     # For future reference, this is how the opening hours are scraped
     def parse_page(self, response: scrapy.http.TextResponse):
@@ -62,7 +67,7 @@ class GratisTRSpider(scrapy.Spider):
         cleaned_street_adress = clean_address(address.strip().removesuffix(f"/{district}").strip())
         cleaned_addr_full = clean_address([cleaned_street_adress, district, province])
         return cleaned_street_adress, cleaned_addr_full
-    
+
     @staticmethod
     def get_page_url(display_name: str, district: str, province: str) -> str:
         display_name = "-".join(map(lambda e: GratisTRSpider.process_for_url(e.strip()), display_name.split(" ")))
@@ -77,7 +82,8 @@ class GratisTRSpider(scrapy.Spider):
         for char, replacement in chars_dict.items():
             s = s.replace(char, replacement)
         return s.lower()
-    
+
+
 def get_loop(keys: list[str], d: dict):
     for key in keys:
         d = d.get(key)
