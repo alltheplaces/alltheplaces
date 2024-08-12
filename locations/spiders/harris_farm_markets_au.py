@@ -1,5 +1,3 @@
-import json
-import re
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -29,7 +27,9 @@ class HarrisFarmMarketsAUSpider(CrawlSpider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[@class="child"]/h1[@class="title"]/a/text()').get(),
-            "addr_full": clean_address(response.xpath('//div[@class="metafield-rich_text_field"]/p[1]//text()').getall()),
+            "addr_full": clean_address(
+                response.xpath('//div[@class="metafield-rich_text_field"]/p[1]//text()').getall()
+            ),
             "phone": response.xpath(
                 '//text()[contains(., "Telephone:")]/ancestor::*[self::strong][1]/ancestor::*[self::li][1]/text()'
             ).get(),
