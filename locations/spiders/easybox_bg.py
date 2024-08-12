@@ -15,8 +15,8 @@ class easyboxBGSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
-            item["image"] = "https://sameday.bg"+location["photo"]
+            item["image"] = "https://sameday.bg" + location["photo"]
             item["opening_hours"] = OpeningHours()
             for day in location["schedule"]:
-                item["opening_hours"].add_range(DAYS[day["day"]-1], day["openingHour"], day["closingHour"])
+                item["opening_hours"].add_range(DAYS[day["day"] - 1], day["openingHour"], day["closingHour"])
             yield item
