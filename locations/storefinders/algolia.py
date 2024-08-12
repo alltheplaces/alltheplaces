@@ -49,11 +49,16 @@ class AlgoliaSpider(Spider):
     def parse(self, response):
         result = response.json()["results"][0]
         for location in result["hits"]:
+            self.pre_process_data(location)
             item = DictParser.parse(location)
-            yield from self.parse_item(item, location) or []
+            yield from self.post_process_item(item, response, location) or []
 
         if result["page"] + 1 < result["nbPages"]:
             yield self._make_request(result["page"] + 1)
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
+        """Override with any post-processing on the item."""
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

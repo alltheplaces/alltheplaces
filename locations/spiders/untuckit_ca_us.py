@@ -7,4 +7,4 @@ class UntuckitCAUSSpider(StoremapperSpider):
         "brand_wikidata": "Q28207006",
         "brand": "UNTUCKit",
     }
-    key = "5048"
+    company_id = "5048"
