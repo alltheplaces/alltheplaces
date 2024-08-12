@@ -22,5 +22,5 @@ class OpenGraphParser:
 
     @staticmethod
     def parse(response) -> Feature:
-        oh = OpeningHours()
-        return oh.as_item(oh.extract_properties(response), response)
+        og = OpenGraphParser()
+        return og.as_item(og.extract_properties(response), response)
