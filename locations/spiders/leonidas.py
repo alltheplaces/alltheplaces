@@ -13,17 +13,17 @@ class LeonidasSpider(scrapy.Spider):
     ]
 
     language_url_map = {
-        'FR': ('fr_fr', '/boutiques/'),
-        'NL': ('nl_nl', '/winkels/'),
-        'DE': ('de_de', '/boutiquen/'),
+        "FR": ("fr_fr", "/boutiques/"),
+        "NL": ("nl_nl", "/winkels/"),
+        "DE": ("de_de", "/boutiquen/"),
     }
 
     def construct_website_url(self, country, alias):
         if not alias:
             return None
 
-        lang, path_replacement = self.language_url_map.get(country, ('en', '/shops/'))
-        alias = alias.replace('/shops/', path_replacement)
+        lang, path_replacement = self.language_url_map.get(country, ("en", "/shops/"))
+        alias = alias.replace("/shops/", path_replacement)
         return f"https://www.leonidas.com/{lang}{alias}"
 
     def parse(self, response, **kwargs):
@@ -58,7 +58,9 @@ class LeonidasSpider(scrapy.Spider):
                     "postcode": store.get("field_shop_address_postal"),
                     "phone": attributes.get("field_shop_tel"),
                     "email": attributes.get("field_shop_email_2"),
-                    "website": self.construct_website_url(attributes.get("field_shop_address_country"), attributes.get("path").get("alias")),
+                    "website": self.construct_website_url(
+                        attributes.get("field_shop_address_country"), attributes.get("path").get("alias")
+                    ),
                     "lat": attributes.get("field_shop_address_latitude"),
                     "lon": attributes.get("field_shop_address_longitude"),
                     "opening_hours": opening_hours.as_opening_hours(),
