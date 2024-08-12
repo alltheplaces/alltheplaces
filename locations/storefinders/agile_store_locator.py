@@ -25,6 +25,7 @@ from locations.items import Feature
 
 
 class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
+    time_format = "%I:%M%p"
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=asl_load_stores(?:&|$)"
@@ -69,9 +70,9 @@ class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
                     if "AM" in start_time or "PM" in start_time or "AM" in end_time or "PM" in end_time:
                         item["opening_hours"].add_range(
                             DAYS_EN[day_name.title()],
-                            start_time.replace(" AM", "AM").replace(" PM", "PM"),
-                            end_time.replace(" AM", "AM").replace(" PM", "PM"),
-                            "%I:%M%p",
+                            start_time.replace(" AM", "AM").replace(" PM", "PM").replace(".", ":"),
+                            end_time.replace(" AM", "AM").replace(" PM", "PM").replace(".", ":"),
+                            self.time_format,
                         )
                     else:
                         item["opening_hours"].add_range(DAYS_EN[day_name.title()], start_time, end_time)

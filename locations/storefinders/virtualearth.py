@@ -7,6 +7,24 @@ from locations.items import Feature
 
 
 class VirtualEarthSpider(Spider, AutomaticSpiderGenerator):
+    """
+    A virtual earth spider is typically data hosted via virtualearth.net as a JSON API.
+
+    Spiders using this will likely migrate to other means in the near future.
+
+    > Free (Basic) account customers can continue to use Bing Maps Spatial Data Service Query API until June 30th, 2025.
+    > Enterprise account customers can continue to use Bing Maps Spatial Data Service Query API until June 30th, 2028.
+
+    See https://learn.microsoft.com/en-us/bingmaps/spatial-data-services/query-api/
+
+    To use, specify:
+      - `dataset_id`: mandatory parameter
+      - `dataset_name`: mandatory parameter
+      - `api_key`: mandatory parameter
+      - `dataset_filter`: optional parameter, default value is "Adresstyp Eq 1"
+      - `dataset_select`: optional parameter, default valus is "*"
+      - `page_size`: optional parameter, default value is 250
+    """
     dataset_attributes = {"source": "api", "api": "virtualearth.net"}
     dataset_id = ""
     dataset_name = ""

@@ -25,6 +25,11 @@ from locations.items import Feature
 
 
 class SuperStoreFinderSpider(Spider, AutomaticSpiderGenerator):
+    """
+    To use, specify:
+      - `start_urls`: mandatory parameter if `allowed_domains` is unspecified
+      - `allowed_domains`: mandatory parameter if `start_urls` is unspecified
+    """
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?|$)"

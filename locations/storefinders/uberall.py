@@ -8,6 +8,14 @@ from locations.items import Feature
 
 
 class UberallSpider(Spider, AutomaticSpiderGenerator):
+    """
+    Uberall provides a web based store locator.
+    https://uberall.com/en-us/products/locator-local-pages
+
+    To use, specify:
+      - `key`: mandatory parameter
+      - `business_id_filter`: optional parameter, default value is `None`
+    """
     dataset_attributes = {"source": "api", "api": "uberall.com"}
     key: str = ""
     business_id_filter: int = None
@@ -24,6 +32,7 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
             self.logger.warning("Request failed")
 
         for feature in response.json()["response"]["locations"]:
+            self.pre_process_data(feature)
             if self.business_id_filter:
                 if feature["businessId"] != self.business_id_filter:
                     continue
@@ -49,7 +58,11 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
                         )
             item["opening_hours"] = oh.as_opening_hours()
 
-            yield from self.parse_item(item, feature)
+            yield from self.post_process_item(item, response, feature)
 
-    def parse_item(self, item: Feature, feature: dict):
+    def post_process_item(self, item, response, location):
+        """Override with any post-processing on the item."""
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

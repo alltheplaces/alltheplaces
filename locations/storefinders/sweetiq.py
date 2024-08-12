@@ -9,6 +9,13 @@ from locations.hours import OpeningHours
 
 
 class SweetIQSpider(Spider, AutomaticSpiderGenerator):
+    """
+    SweetIQ (now owned by uberall) provides a store locator
+    https://sweetiq.com/our-products/store-locator-microsites/
+
+    To use, specify:
+      - `start_urls`: mandatory parameter
+    """
     dataset_attributes = {"source": "api", "api": "sweetiq.com"}
     request_batch_size = 10
     detection_rules = [

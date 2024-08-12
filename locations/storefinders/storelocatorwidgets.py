@@ -11,6 +11,13 @@ from locations.items import Feature
 
 
 class StoreLocatorWidgetsSpider(Spider, AutomaticSpiderGenerator):
+    """
+    Store Locator Widgets are a set of store locator components.
+    https://www.storelocatorwidgets.com/api/
+
+    To use, specify:
+      - `key`: mandatory parameter
+    """
     dataset_attributes = {"source": "api", "api": "storelocatorwidgets.com"}
     key: str = ""
     detection_rules = [

@@ -9,6 +9,13 @@ from locations.items import Feature
 
 
 class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
+    """
+    AmRest is a European multinational casual dining, fast-food restaurant and coffee shop operator headquartered in the Spanish capital, Madrid
+    https://www.wikidata.org/wiki/Q4738898
+    https://en.wikipedia.org/wiki/AmRest
+
+    This spider is specifically for the common functionality across all child brands.
+    """
     api_brand_key: str = None
     api_brand_country_key: str = None
     api_source: str = None

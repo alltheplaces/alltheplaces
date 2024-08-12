@@ -10,7 +10,7 @@ class DunelmGBSpider(AlgoliaSpider):
     api_key = "ae9bc9ca475f6c3d7579016da0305a33"
     index_name = "stores_prod"
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         item["lat"] = location["_geoloc"]["lat"]
         item["lon"] = location["_geoloc"]["lng"]
         item["branch"] = item.pop("name")

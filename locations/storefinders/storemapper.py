@@ -21,6 +21,14 @@ from locations.items import Feature
 
 
 class StoremapperSpider(Spider, AutomaticSpiderGenerator):
+    """
+    Storemapper (https://www.storemapper.com/) is an emedded map based store locator.
+
+    API docs are available via https://help.storemapper.com/category/4313-advanced-settings-and-customisation
+
+    To use, specify:
+      - `company_id`: mandatory parameter
+    """
     dataset_attributes = {"source": "api", "api": "storemapper.com"}
     company_id: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
