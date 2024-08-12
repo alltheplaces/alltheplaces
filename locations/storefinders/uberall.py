@@ -1,10 +1,9 @@
-import logging
-
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
 class UberallSpider(Spider):
@@ -16,16 +15,15 @@ class UberallSpider(Spider):
     """
 
     dataset_attributes = {"source": "api", "api": "uberall.com"}
-
-    key = ""
-    business_id_filter = None
+    key: str = ""
+    business_id_filter: int = None
 
     def start_requests(self):
         yield JsonRequest(url=f"https://uberall.com/api/storefinders/{self.key}/locations/all")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         if response.json()["status"] != "SUCCESS":
-            logging.warning("Request failed")
+            self.logger.warning("Request failed")
 
         for feature in response.json()["response"]["locations"]:
             self.pre_process_data(feature)
@@ -56,7 +54,7 @@ class UberallSpider(Spider):
 
             yield from self.post_process_item(item, response, feature)
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response, location: dict):
         """Override with any post-processing on the item."""
         yield item
 

@@ -1,7 +1,8 @@
-import html
 import re
+from html import unescape
 
 from scrapy import Request, Selector, Spider
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -37,14 +38,14 @@ class SuperStoreFinderSpider(Spider):
             for allowed_domain in self.allowed_domains:
                 yield Request(url=f"https://{allowed_domain}/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         for location in response.xpath("//store/item"):
             properties = {
                 "ref": location.xpath("./storeId/text()").get(),
                 "name": location.xpath("./location/text()").get(),
                 "lat": location.xpath("./latitude/text()").get(),
                 "lon": location.xpath("./longitude/text()").get(),
-                "addr_full": html.unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
+                "addr_full": unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
                 "phone": location.xpath("./telephone/text()").get(),
                 "email": location.xpath("./email/text()").get(),
                 "website": location.xpath("./website/text()").get(),
@@ -65,5 +66,5 @@ class SuperStoreFinderSpider(Spider):
 
             yield from self.parse_item(Feature(**properties), location) or []
 
-    def parse_item(self, item: Feature, location: Selector, **kwargs):
+    def parse_item(self, item: Feature, location: Selector):
         yield item
