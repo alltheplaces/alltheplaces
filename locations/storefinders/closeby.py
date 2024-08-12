@@ -12,7 +12,7 @@ class ClosebySpider(Spider):
     """
 
     dataset_attributes = {"source": "api", "api": "closeby.co"}
-    api_key = ""
+    api_key: str = ""
 
     def start_requests(self):
         yield JsonRequest(url=f"https://www.closeby.co/embed/{self.api_key}/locations")
