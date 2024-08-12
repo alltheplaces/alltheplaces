@@ -17,6 +17,7 @@ COUNTRYCODE_COMPONENTS = {
     "BH",
     "BO",
     "BR",
+    "BW",
     "BY",
     "CA",
     "CH",
