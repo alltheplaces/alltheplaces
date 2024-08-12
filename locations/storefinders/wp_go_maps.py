@@ -31,7 +31,7 @@ from locations.items import Feature
 # be extracted, override the `post_process_item` method.
 
 
-class WPGoMapsSpider(Spider, AutomaticSpiderGenerator):
+class WpGoMapsSpider(Spider, AutomaticSpiderGenerator):
     map_id: int = None
     length: int = 10000
     start: int = 0

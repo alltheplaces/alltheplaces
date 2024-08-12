@@ -1,8 +1,8 @@
 from locations.hours import DAYS_PL, OpeningHours
-from locations.storefinders.wp_go_maps import WPGoMapsSpider
+from locations.storefinders.wp_go_maps import WpGoMapsSpider
 
 
-class GrycanPLSpider(WPGoMapsSpider):
+class GrycanPLSpider(WpGoMapsSpider):
     name = "grycan_pl"
     item_attributes = {"brand": "Grycan", "brand_wikidata": "Q97372889"}
     allowed_domains = ["grycan.pl"]

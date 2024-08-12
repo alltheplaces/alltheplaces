@@ -9,7 +9,6 @@ class LaTagliatellaESSpider(AmrestEUSpider):
     api_source = "WEB"
     api_auth_source = "WEB_KFC"
     api_channel = "DINE_IN"
-    base_urls = ["https://api.amrest.eu/amdv/ordering-api/TAG_ES/"]  # https://www.latagliatella.es/restaurantes
 
     def parse_item(self, item, feature, **kwargs):
         # storeLocatorUrl format vary for other Amrest brands

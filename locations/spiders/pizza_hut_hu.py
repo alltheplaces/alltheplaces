@@ -19,6 +19,6 @@ class PizzaHutHUSpider(AmrestEUSpider):
             "https://pizzahut.hu/en/restaurants/"
             + item["ref"]
             + "-"
-            + unidecode(item["name"]).lower().replace(" ", "-")
+            + unidecode(location["name"]).lower().replace(" ", "-")
         )
         yield item

@@ -25,7 +25,6 @@ class RioSeoSpider(Spider, AutomaticSpiderGenerator):
       - `radius`: optional parameter, default value is 10000
       - `limit`: optional parameter, default valus is 3000
     """
-
     dataset_attributes = {"source": "api", "api": "rio_seo"}
     end_point: str = None
     radius: int = 10000
@@ -35,27 +34,6 @@ class RioSeoSpider(Spider, AutomaticSpiderGenerator):
             url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/getAsyncLocations\?.+)$"
         )
     ]
-
-    def start_requests(self) -> Iterable[Request]:
-        if self.start_urls:
-            for url in self.start_urls:
-                yield JsonRequest(url=url)
-        else:
-            yield JsonRequest(url=urljoin(self.end_point, "getAutocompleteData"), callback=self.parse_autocomplete)
-
-    def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
-        yield JsonRequest(
-            url=urljoin(
-                self.end_point,
-                "getAsyncLocations?template=search&level=search&search={}&radius={}&limit={}".format(
-                    response.json()["data"][0], self.radius, self.limit
-                ),
-            )
-        )
-
-    end_point: str = None
-    radius: int = 10000
-    limit: int = 3000
 
     def start_requests(self) -> Iterable[Request]:
         if self.start_urls:

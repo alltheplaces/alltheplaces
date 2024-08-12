@@ -16,7 +16,7 @@ class KfcHRSpider(AmrestEUSpider):
         item["branch"] = item.pop("name").removeprefix("KFC ")
         item["website"] = (
             "https://kfc.hr/en/restaurants/"
-            + unidecode(item["name"]).lower().replace(" - ", "-").replace(" ", "-")
+            + unidecode(location["name"]).lower().replace(" - ", "-").replace(" ", "-")
             + "-"
             + item["ref"]
         )

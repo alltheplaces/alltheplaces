@@ -77,4 +77,3 @@ def test_handle():
     assert item.get("street") == ""
     assert item.get("state") == ""
     assert item.get("city") == "Exampletown"
->>>>>>> master

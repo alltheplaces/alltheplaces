@@ -19,6 +19,6 @@ class PizzaHutCZSpider(AmrestEUSpider):
             "https://pizzahut.cz/en/restaurants/"
             + item["ref"]
             + "-"
-            + unidecode(item["name"]).lower().replace(" ", "-")
+            + unidecode(location["name"]).lower().replace(" ", "-")
         )
         yield item
