@@ -1,4 +1,4 @@
-from scrapy import Spider, Response
+from scrapy import Response, Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
