@@ -3,9 +3,10 @@ import re
 
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
-from locations.hours import DAYS, OpeningHours
+
 
 class CAndASpider(scrapy.Spider):
     name = "c_and_a"
@@ -54,7 +55,7 @@ class CAndASpider(scrapy.Spider):
             for i in store.xpath('./div[@class="addressBox"]/p[@class="openingHours hideopeninghours"]'):
                 opening_time = i.xpath("./@data-openingtime").get()
                 closing_time = i.xpath("./@data-closingtime").get()
-                
+
                 # Only keep days where none of opening and closing times are "00:00"
                 if not opening_time == "00:00" and not closing_time == "00:00":
                     day = i.xpath("./@data-day").get()
