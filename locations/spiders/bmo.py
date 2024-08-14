@@ -36,7 +36,7 @@ from locations.spiders.thrifty_foods_ca import ThriftyFoodsCASpider
 from locations.spiders.united_dairy_farmers_us import UnitedDairyFarmersUSSpider
 from locations.spiders.walgreens import WalgreensSpider
 from locations.spiders.wawa import WawaSpider
-from locations.spiders.wegmans import WegmansSpider
+from locations.spiders.wegmans_us import WegmansUSSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
