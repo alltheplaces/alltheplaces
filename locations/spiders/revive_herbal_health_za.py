@@ -39,7 +39,11 @@ class ReviveHerbalHealthZASpider(scrapy.Spider):
                 "country": "ZA",
                 "website": store["gu"],
                 "ref": store["ID"],
-                "phone": store["te"],
             }
+
+            if "te" in store:
+                properties["phone"] = store["te"]
+            elif "mo" in store:
+                properties["phone"] = store["mo"]
 
             yield Feature(**properties)
