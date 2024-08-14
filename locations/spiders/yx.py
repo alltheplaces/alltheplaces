@@ -12,8 +12,8 @@ UNOX = {"brand": "Uno-X", "brand_wikidata": "Q3362746"}
 YX = {"brand": "YX", "brand_wikidata": "Q4580519"}
 
 
-class XySpider(Spider):
-    name = "xy"
+class YxSpider(Spider):
+    name = "yx"
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
