@@ -29,7 +29,7 @@ class PhoneCleanUpPipeline:
         return tag in ("phone", "fax") or tag.endswith(":phone") or tag.endswith(":fax")
 
     def normalize_numbers(self, phone, country, spider):
-        numbers = [self.normalize(p, country, spider) for p in re.split(r"[;/]\s?", str(phone))]
+        numbers = [self.normalize(p, country, spider) for p in re.split(r"[;/]\s", str(phone))]
         return ";".join(filter(None, numbers))
 
     def normalize(self, phone, country, spider):
