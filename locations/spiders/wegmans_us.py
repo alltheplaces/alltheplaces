@@ -19,7 +19,13 @@ class WegmansUSSpider(Spider):
         for location in response.json()["items"]:
             item = DictParser.parse(location)
             item["branch"] = item.pop("name", None)
-            item["street_address"] = clean_address([location["address"].get("address1"), location["address"].get("address2"), location["address"].get("address3")])
+            item["street_address"] = clean_address(
+                [
+                    location["address"].get("address1"),
+                    location["address"].get("address2"),
+                    location["address"].get("address3"),
+                ]
+            )
             if location.get("amenities"):
                 apply_yes_no(Extras.WIFI, item, "Wi-Fi Internet Access" in location["amenities"], False)
             apply_yes_no(Extras.DELIVERY, item, location.get("has_delivery") is True, False)
@@ -34,7 +40,11 @@ class WegmansUSSpider(Spider):
     def parse_opening_hours(self, response):
         item = response.meta["item"]
         hours_string = response.xpath('//div[@id="storeHoursID"]/text()').get("").strip().replace("Midnight", "11:59PM")
-        if m := re.match(r"Open (\d{1,2}(?:\:\d{2})?\s*AM) to (\d{1,2}(?:\:\d{2})?\s*PM)\s*,\s*7 Days a Week", hours_string, flags=re.IGNORECASE):
+        if m := re.match(
+            r"Open (\d{1,2}(?:\:\d{2})?\s*AM) to (\d{1,2}(?:\:\d{2})?\s*PM)\s*,\s*7 Days a Week",
+            hours_string,
+            flags=re.IGNORECASE,
+        ):
             item["opening_hours"] = OpeningHours()
             open_time = re.sub(r"\s+", "", m.group(1))
             if ":" not in open_time:
