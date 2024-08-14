@@ -55,7 +55,7 @@ class TjxSpider(Spider):
                         "geolat": str(lat),
                         "geolong": str(lon),
                     },
-                    headers={"Accept": "application/json"}
+                    headers={"Accept": "application/json"},
                 )
 
     def parse(self, response):
@@ -71,8 +71,8 @@ class TjxSpider(Spider):
             item.pop("addr_full", None)
             if location["Country"] not in ["CA", "US"]:
                 item.pop("state", None)  # Outside of CA and US, the "State"
-                                         # field is incorrectly the country
-                                         # name.
+                # field is incorrectly the country
+                # name.
 
             if location.get("Hours"):  # Hours can sometimes be None.
                 item["opening_hours"] = OpeningHours()
