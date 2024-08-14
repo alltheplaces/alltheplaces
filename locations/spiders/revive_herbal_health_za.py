@@ -17,10 +17,9 @@ class ReviveHerbalHealthZASpider(scrapy.Spider):
         yield scrapy.FormRequest(
             url="https://reviveherbalhealth.co.za/shop/wp-admin/admin-ajax.php",
             formdata={
-                "action": "get_stores",
-                "lat": "-29.679604756080494",
-                "lng": "31.021939690785292",
-                "radius": "600",
+                "action": "get_all_stores",
+                "lat": "",
+                "lng": "",
             },
             callback=self.parse,
         )
@@ -41,5 +40,10 @@ class ReviveHerbalHealthZASpider(scrapy.Spider):
                 "website": store["gu"],
                 "ref": store["ID"],
             }
+
+            if "te" in store:
+                properties["phone"] = store["te"]
+            elif "mo" in store:
+                properties["phone"] = store["mo"]
 
             yield Feature(**properties)
