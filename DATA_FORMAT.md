@@ -41,7 +41,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `addr:postcode`       | The postcode part of the address.
 | `addr:country`        | The country part of the address.
 | **Contact**           | _Contact information for the venue_
-| `phone`               | The telephone number for the venue. Note that this is usually pulled from a website assuming local visitors, so it probably doesn't include the country code.
+| `phone`               | The telephone number(s) for the venue, separated by `;` if there is more than one number. These numbers are cleaned using the [phonenumbers library](https://pypi.org/project/phonenumbers/), however invalid numbers will still be returned as-is if they cannot be parsed.
 | `website`             | The website for the venue. We try to make this a URL specific to the venue and not a generic URL for the brand that is operating the venue.
 | `email`               | The email address for the venue. We try to make this an email specific to the venue and not a generic email for the brand that is operating the venue.
 | `contact:twitter`     | The twitter account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
