@@ -15,7 +15,6 @@ class PizzaPerfectZASpider(WPStoreLocatorSpider):
     ]
     max_results = 100
     search_radius = 50
-    # TODO: We do not have this file yet
     # searchable_point_files = ["za_centroids_100km_radius.csv"]
     # country_filter = ["ZA"]
 
