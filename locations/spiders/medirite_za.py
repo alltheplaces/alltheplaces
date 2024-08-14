@@ -36,7 +36,7 @@ class MediriteZASpider(Spider):
             item = DictParser.parse(location)
 
             item["branch"] = location["branch"]
-            item["brand"] = location["brand"]
+            item["name"] = location["brand"]
 
             yield JsonRequest(
                 url=f'https://www.medirite.co.za/bin/stores.json?uid={item["ref"]}',
