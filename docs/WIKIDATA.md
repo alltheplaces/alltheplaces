@@ -59,6 +59,22 @@ Note the OSM POI category attributes for a hotel (`'tourism': 'hotel'`) are part
 
 You may also notice that the bottom line has an `'id'` &ndash; an internal NSI identifier of the brand. This ID is not stable, so you shouldn't hardcode it into spiders. Instead, our pipeline will retrieve it directly from NSI each time a spider launches, based on the Wikidata QID specified in the spider. If the brand/operator doesn't have a Wikidata QID in NSI, you can either [raise an issue in the NSI repository](https://github.com/osmlab/name-suggestion-index/issues), or [contribute the missing QID to NSI](https://github.com/osmlab/name-suggestion-index/wiki/Adding-Wikidata-Tags) yourself.
 
+### Finding scrapers to build by category
+
+To looking for missing or existing scrapers by a given category, review https://nsi.guide/?t=brands and supply the category
+to the nsi --detect-missing command.
+
+```
+$ pipenv run scrapy nsi --detect-missing brands/shop/supermarket
+Fetched 915 brands/shop/supermarket from NSI
+Missing by wikidata: 619
+"3hreeSixty", "Q7797310"
+       -> https://www.wikidata.org/wiki/Q7797310
+       -> https://www.wikidata.org/wiki/Special:EntityData/Q7797310.json
+```
+
+Check carefully if this is simply a scraper missing a wikidata entry, or if it is truely missing a scraper.
+
 ### Automatic POI categorisation
 
 The [ATP item pipeline](../locations/pipelines/apply_nsi_categories.py) will attempt to enhance POIs it sees automatically with OSM category data from the NSI. It only does this if there is a non-ambiguous match of QID, country location (if appropriate) and category suggestion.

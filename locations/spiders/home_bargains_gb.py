@@ -6,7 +6,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
+class HomeBargainsGBSpider(CrawlSpider, StructuredDataSpider):
     name = "home_bargains_gb"
     item_attributes = {"brand": "Home Bargains", "brand_wikidata": "Q5888229"}
     allowed_domains = ["storelocator.home.bargains"]
@@ -14,9 +14,8 @@ class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow="/store/"), callback="parse_sd", follow=False)]
     wanted_types = ["LocalBusiness"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.5
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/store/", 1)[1].split("/", 1)[0]
         full_address_parts = response.xpath('//*[@itemprop="address"]/text()').extract()[:-1]
         item["addr_full"] = clean_address(full_address_parts)

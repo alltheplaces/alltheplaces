@@ -13,14 +13,19 @@ class NandosZASpider(scrapy.Spider):
     start_urls = [
         "https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=67b9c5e4-6ddf-4856-b3c0-cf27cfe53255"
     ]
+    web_root = "https://store.nandos.co.za/details/"
 
     def parse(self, response):
         data = response.json()
         for i in data["locations"]:
             i["name"] = i.pop("locationName")
             i["phone"] = i.pop("primaryPhone")
+            if i["additionalPhone1"]:
+                i["phone"] += ";" + i.pop("additionalPhone1")
             i["province"] = i.pop("administrativeArea")
-            i["website"] = "https://store.nandos.co.za/details/" + i.pop("storeLocatorDetailsShortURL")
+            i["website"] = self.web_root + i.pop("storeLocatorDetailsShortURL")
+            if i["addressLine2"]:
+                i["addressLine1"] += ", " + i.pop("addressLine2")
             item = DictParser.parse(i)
 
             oh = OpeningHours()
@@ -28,11 +33,13 @@ class NandosZASpider(scrapy.Spider):
                 oh.add_range(x["openDay"], x["openTime"], x["closeTime"])
             item["opening_hours"] = oh
 
-            apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in i["slAttributes"])
+            apply_yes_no(Extras.BACKUP_GENERATOR, item, "Generator" in i["slAttributes"])
             apply_yes_no(Extras.DELIVERY, item, "Delivery" in i["slAttributes"])
-            apply_yes_no(Extras.WIFI, item, "WiFi" in i["slAttributes"])
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in i["slAttributes"])
             apply_yes_no(Extras.HALAL, item, "Halaal" in i["slAttributes"])
             apply_yes_no(Extras.KOSHER, item, "Kosher" in i["slAttributes"])
-            # Unhandled: "Alcohol License", "Dine In", "Generator"
+            apply_yes_no(Extras.TAKEAWAY, item, "Collect" in i["slAttributes"])
+            apply_yes_no(Extras.WIFI, item, "WiFi" in i["slAttributes"])
+            # Unhandled: "Alcohol License", "Dine In"
 
             yield item

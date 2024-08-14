@@ -6,12 +6,12 @@ from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsMTSpider(Spider):
+class McdonaldsMTSpider(Spider):
     name = "mcdonalds_mt"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://mcdonalds.com.mt/locate/"]
     requires_proxy = True
 

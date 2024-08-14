@@ -4,7 +4,7 @@ import xmltodict
 from locations.items import Feature
 
 
-class PDQSpider(scrapy.Spider):
+class PdqSpider(scrapy.Spider):
     name = "pdq"
     item_attributes = {"brand": "PDQ", "brand_wikidata": "Q87675367"}
     allowed_domains = ["eatpdq.qatserver.com"]

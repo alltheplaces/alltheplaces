@@ -1,7 +1,7 @@
 from locations.storefinders.woosmap import WoosmapSpider
 
 
-class MDITSpider(WoosmapSpider):
+class MdITSpider(WoosmapSpider):
     name = "md_it"
     item_attributes = {
         "brand_wikidata": "Q3841263",

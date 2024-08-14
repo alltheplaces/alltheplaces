@@ -12,10 +12,11 @@ class LidlBGSpider(VirtualEarthSpider):
 
     dataset_id = "04982a582660451a8e08b705855a1008"
     dataset_name = "Filialdaten-BG/Filialdaten-BG"
-    key = "AkK9Xgxa6n1ly8c3xz1ntR6ojGGT3h-hys5yW7P9xHpJS2FycVLoYxLo_eeFR69o"
+    api_key = "AkK9Xgxa6n1ly8c3xz1ntR6ojGGT3h-hys5yW7P9xHpJS2FycVLoYxLo_eeFR69o"
 
     def parse_item(self, item, feature, **kwargs):
         item["name"] = feature["ShownStoreName"]
+        item["nsi_id"] = "-1"
 
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
@@ -26,5 +27,4 @@ class LidlBGSpider(VirtualEarthSpider):
                 item["opening_hours"].add_range(day, start_time, end_time)
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
-        item["nsi_id"] = -1
         yield item

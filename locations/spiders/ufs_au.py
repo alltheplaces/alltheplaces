@@ -1,7 +1,7 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class UFSAUSpider(WPStoreLocatorSpider):
+class UfsAUSpider(WPStoreLocatorSpider):
     name = "ufs_au"
     item_attributes = {"brand": "UFS", "brand_wikidata": "Q63367573"}
     allowed_domains = ["www.ufs.com.au"]

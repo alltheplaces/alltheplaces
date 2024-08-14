@@ -23,7 +23,7 @@ from locations.dict_parser import DictParser
 # 'https://st-regis.marriott.com/hotel-directory/'
 # 'https://fairfield.marriott.com/locations/'
 class MarriottHotelsSpider(scrapy.Spider):
-    name = "marriott"
+    name = "marriott_hotels"
     custom_settings = {"REDIRECT_ENABLED": False}
     download_delay = 2.0
 

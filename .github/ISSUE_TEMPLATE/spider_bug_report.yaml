@@ -1,0 +1,29 @@
+name: Broken Spider
+description: Report a specific issue with a spider
+labels: bug
+body:
+  - type: input
+    attributes:
+      label: Spider name
+      placeholder: example_gb
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Log output
+      placeholder: https://www.alltheplaces.xyz/spiders/...
+      description: >-
+        If possible get the logs from [the latest](https://www.alltheplaces.xyz/spiders) run
+  - type: textarea
+    attributes:
+      label: Backtrace (if applicable)
+  - type: textarea
+    attributes:
+      label: Example bad data or results
+  - type: textarea
+    attributes:
+      label: Expected behaviour or results
+  - type: textarea
+    attributes:
+      label: Possible causes?
+      description: Is this due to common issues like requiring a proxy, or changes to the underlying structure?

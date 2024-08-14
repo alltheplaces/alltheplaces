@@ -13,6 +13,13 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RioSeoSpider(Spider):
+    """
+    RioSEO is a number of related storefinders.
+    https://www.rioseo.com/platform/local-pages/
+
+    To use, specify `end_point`
+    """
+
     dataset_attributes = {"source": "api", "api": "rio_seo"}
 
     end_point: str = None
@@ -38,7 +45,14 @@ class RioSeoSpider(Spider):
 
     def parse(self, response, **kwargs):
         map_list = response.json()["maplist"]
-        data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
+        try:
+            data = json.loads("[{}]".format(Selector(text=map_list).xpath("//div/text()").get()[:-1]))
+        except json.decoder.JSONDecodeError:
+            self.logger.warning("Could not parse response - check API output")
+            data = []
+        except TypeError:
+            data = []
+
         for location in data:
             feature = DictParser.parse(location)
             feature["name"] = location["location_name"]
