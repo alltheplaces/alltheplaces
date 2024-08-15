@@ -85,9 +85,11 @@ class DictParser:
         "address-locality",
         "city",
         "address-city",
+        "physical-city",
         "town",
         "locality",
         "suburb",
+        "physical-suburb",
         "city-name",
         "store-city",
         # JP
