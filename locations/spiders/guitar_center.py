@@ -1,7 +1,7 @@
 from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class GuitarCenterRioSpider(RioSeoSpider):
+class GuitarCenterSpider(RioSeoSpider):
     name = "guitar_center"
     item_attributes = {"brand": "Guitar Center", "brand_wikidata": "Q3622794"}
     domain = "stores.guitarcenter.com"

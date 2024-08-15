@@ -1,7 +1,7 @@
 from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class JDSportsUSSpider(RioSeoSpider):
+class JdSportsUSSpider(RioSeoSpider):
     name = "jd_sports_us"
     item_attributes = {
         "brand_wikidata": "Q6108019",

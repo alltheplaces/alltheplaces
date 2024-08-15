@@ -2,7 +2,7 @@ from locations.categories import Categories, apply_category
 from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class GuessRioSpider(RioSeoSpider):
+class GuessSpider(RioSeoSpider):
     name = "guess"
     item_attributes = {"brand": "Guess", "brand_wikidata": "Q2470307", "extras": Categories.SHOP_CLOTHES.value}
     domain = "stores.guess.com"

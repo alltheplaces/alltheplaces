@@ -2,7 +2,7 @@ from locations.categories import Categories, apply_category
 from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class FleetPrideUSSpider(RioSeoSpider):
+class FleetprideUSSpider(RioSeoSpider):
     name = "fleetpride_us"
     domain = "branches.fleetpride.com"
 
