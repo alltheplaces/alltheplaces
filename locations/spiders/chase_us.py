@@ -2,6 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
+from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,6 +15,12 @@ class ChaseUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = item["ref"].split("#", 1)[1]
+
+        messages = response.xpath('//div[contains(@class, "Core-emergencyMessage")]/text()').get()
+        if messages is not None:
+            if "closed" in messages.lower() or "closing" in messages.lower():
+                set_closed(item)
+
         hours_text = " ".join(
             response.xpath(
                 '//div[contains(@class, "Core-branchRow--hours")]//table[1]/tbody/tr[@itemprop="openingHours"]/@content'
