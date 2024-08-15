@@ -78,6 +78,7 @@ class OkFoodsSpider(Spider):
 
             if location["brand"] in OK_FOODS_BRANDS:
                 item.update(OK_FOODS_BRANDS[location["brand"]])
+                item["name"] = item["brand"]
 
             try:
                 oh = OpeningHours()
