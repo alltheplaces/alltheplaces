@@ -270,7 +270,9 @@ class StructuredDataSpider(Spider):
 
     def extract_amenity_features(self, item, response: Response, ld_item):
         if "amenityFeature" in ld_item and len(ld_item["amenityFeature"]) > 0:
-            self.logger.info("Found amenityFeature data, implement `extract_amenity_features` or set `search_for_amenity_features` to suppress this message")
+            self.logger.info(
+                "Found amenityFeature data, implement `extract_amenity_features` or set `search_for_amenity_features` to suppress this message"
+            )
             self.logger.debug(ld_item["amenityFeature"])
             self.crawler.stats.inc_value("atp/structured_data/unmapped/amenity_features")
 
