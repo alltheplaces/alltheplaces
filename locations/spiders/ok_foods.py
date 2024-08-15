@@ -87,7 +87,9 @@ class OkFoodsSpider(Spider):
                         oh.add_range(day, location[day].split("-")[0].strip(), location[day].split("-")[1].strip())
                     else:
                         oh.set_closed(day)
-                item["opening_hours"] = oh.as_opening_hours()
+                # Fully undefined opening hours should not be treated as closed
+                if "".join([location[day].strip() for day in DAYS_FULL]) != "":
+                    item["opening_hours"] = oh.as_opening_hours()
             except Exception:
                 pass
 
