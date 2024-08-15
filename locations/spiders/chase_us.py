@@ -43,8 +43,6 @@ class ChaseUSSpider(SitemapSpider, StructuredDataSpider):
             # Cash Dispenser
             # Deposit Friendly
 
-            
-
     def post_process_item(self, item, response, ld_data):
         item["ref"] = item["ref"].split("#", 1)[1]
         hours_text = " ".join(
