@@ -15,7 +15,9 @@ class LevisSpider(RioSeoSpider):
             item["brand"] = "Levi's"
             item["brand_wikidata"] = "Q127962"
 
-        item["branch"] = item["name"].removeprefix(item["brand"]).removeprefix("® ").removeprefix("Factory ").removeprefix("Outlet ")
+        item["branch"] = (
+            item["name"].removeprefix(item["brand"]).removeprefix("® ").removeprefix("Factory ").removeprefix("Outlet ")
+        )
 
         if location["Store Type_CS"] == "Levi's® Outlet":
             item["name"] = item["brand"] + " Outlet"
