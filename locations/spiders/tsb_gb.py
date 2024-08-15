@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TSBGB(SitemapSpider, StructuredDataSpider):
+class TsbGBSpider(SitemapSpider, StructuredDataSpider):
     name = "tsb_gb"
     item_attributes = {
         "brand": "TSB",
@@ -18,4 +18,8 @@ class TSBGB(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["image"] == item["website"]:
             item["image"] = None
+
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
+
         yield item

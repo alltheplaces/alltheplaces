@@ -24,15 +24,15 @@ class NSI(metaclass=Singleton):
 
     @staticmethod
     def _request_file(file):
-        resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/" + file)
+        resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/" + file)
         if not resp.status_code == 200:
             raise Exception("NSI load failure")
         return resp.json()
 
     def _ensure_loaded(self):
         if not self.loaded:
-            self.wikidata_json = self._request_file("wikidata.min.json")["wikidata"]
-            self.nsi_json = self._request_file("nsi.min.json")["nsi"]
+            self.wikidata_json = self._request_file("dist/wikidata.min.json")["wikidata"]
+            self.nsi_json = self._request_file("dist/nsi.min.json")["nsi"]
             self.loaded = True
 
     def lookup_wikidata(self, wikidata_code):

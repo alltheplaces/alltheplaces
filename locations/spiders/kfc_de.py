@@ -15,7 +15,7 @@ SERVICES_MAPPING = {
 }
 
 
-class KFCDESpider(Spider):
+class KfcDESpider(Spider):
     name = "kfc_de"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.de/find-a-kfc/allrestaurant"]

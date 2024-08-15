@@ -3,7 +3,7 @@ import scrapy
 from locations.items import Feature
 
 
-class BurgerFiSpider(scrapy.Spider):
+class BurgerFISpider(scrapy.Spider):
     name = "burger_fi"
     item_attributes = {"brand": "Burger Fi", "brand_wikidata": "Q39045496"}
     allowed_domains = ["api.dineengine.io"]

@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class LeylandSDMGBSpider(AmastyStoreLocatorSpider):
+class LeylandSdmGBSpider(AmastyStoreLocatorSpider):
     name = "leyland_sdm_gb"
     item_attributes = {"brand": "Leyland SDM", "brand_wikidata": "Q110437963"}
     allowed_domains = ["leylandsdm.co.uk"]

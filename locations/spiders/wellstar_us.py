@@ -34,11 +34,12 @@ CATEGORY_MAP = {
 }
 
 
-class WellStarUSSpider(scrapy.Spider):
+class WellstarUSSpider(scrapy.Spider):
     name = "wellstar_us"
     item_attributes = {"brand": "WellStar Health System", "brand_wikidata": "Q7981073"}
     allowed_domains = ["www.wellstar.org"]
     start_urls = ("https://www.wellstar.org/locations",)
+    requires_proxy = "US"  # Cloudflare geoblocking in use
 
     def start_requests(self):
         url = "https://www.wellstar.org/api/LocationSearchApi/GetLocations"

@@ -8,7 +8,7 @@ from locations.hours import OpeningHours, day_range
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class PriceRiteUSSpider(scrapy.Spider):
+class PriceriteUSSpider(scrapy.Spider):
     name = "pricerite_us"
     item_attributes = {"brand": "PriceRite", "brand_wikidata": "Q7242560"}
     allowed_domains = ["priceritemarketplace.com"]

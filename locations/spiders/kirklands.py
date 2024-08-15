@@ -20,7 +20,7 @@ class KirklandsSpider(CrawlSpider, StructuredDataSpider):
         response.css('a[href=""][itemprop="telephone"]').remove()
         yield from self.parse_sd(response)
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         oh = OpeningHours()
         for row in response.css("#inStoreDiv .hours tr"):
             day, interval = row.css("td ::text").extract()

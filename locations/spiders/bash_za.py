@@ -74,7 +74,7 @@ class BashZASpider(Spider):
     name = "bash_za"
     allowed_domains = ["bash.com"]
     start_urls = [
-        'https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"53e625f7c1d5013253fe27c99d9d0b4f9aba2545fffe7b5d8691efbe57ff419c","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}'
+        'https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"966dea829c724e7374c6287b93b15a9fce36b3126e09d32370e251e96738153d","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}'
     ]
 
     def start_requests(self):

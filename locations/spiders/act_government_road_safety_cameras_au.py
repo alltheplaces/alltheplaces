@@ -5,7 +5,7 @@ from locations.categories import apply_category
 from locations.items import Feature
 
 
-class ACTGovernmentRoadSafetyCamerasAUSpider(Spider):
+class ActGovernmentRoadSafetyCamerasAUSpider(Spider):
     name = "act_government_road_safety_cameras_au"
     item_attributes = {"operator": "Government of the Australian Capital Territory", "operator_wikidata": "Q27220504"}
     allowed_domains = ["www.data.act.gov.au"]

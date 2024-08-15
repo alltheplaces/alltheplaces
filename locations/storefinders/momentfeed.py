@@ -1,25 +1,31 @@
 import urllib.parse
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
 class MomentFeedSpider(Spider):
+    """
+    MomentFeed (owned by Uberall)
+    https://momentfeed.com/
+
+    To use, specify `api_key` and optionally, `page_size`
+    """
+
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
-
-    id = ""
-
-    page_size = 100
+    api_key: str = ""
+    page_size: int = 100
 
     def start_requests(self):
         yield JsonRequest(
             url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page=1"
         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         if "message" in response.json():
             return
 
@@ -57,5 +63,5 @@ class MomentFeedSpider(Spider):
                 url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page={page + 1}"
             )
 
-    def parse_item(self, item, feature, store_info, **kwargs):
+    def parse_item(self, item: Feature, feature: dict, store_info: dict):
         yield item

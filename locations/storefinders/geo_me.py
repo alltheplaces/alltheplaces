@@ -38,16 +38,18 @@ from locations.items import Feature
 
 
 class GeoMeSpider(Spider):
-    key = ""
-    api_version = "2"
-    url_within_bounds_template = "https://{}.geoapp.me/api/v{}/locations/within_bounds?sw[]={}&sw[]={}&ne[]={}&ne[]={}"
-    url_nearest_to_template = "https://{}.geoapp.me/api/v{}/locations/nearest_to?lat={}&lng={}&limit=50"
-    locations_found = {}
+    api_key: str = ""
+    api_version: str = "2"
+    url_within_bounds_template: str = (
+        "https://{}.geoapp.me/api/v{}/locations/within_bounds?sw[]={}&sw[]={}&ne[]={}&ne[]={}"
+    )
+    url_nearest_to_template: str = "https://{}.geoapp.me/api/v{}/locations/nearest_to?lat={}&lng={}&limit=50"
+    _locations_found: dict = {}
 
     def start_requests(self):
         self.crawler.signals.connect(self.start_location_requests, signal=spider_idle)
         yield JsonRequest(
-            url=self.url_within_bounds_template.format(self.key, self.api_version, -90, -180, 90, 180),
+            url=self.url_within_bounds_template.format(self.api_key, self.api_version, -90, -180, 90, 180),
             callback=self.parse_bounding_box,
         )
 
@@ -56,12 +58,12 @@ class GeoMeSpider(Spider):
             if b := cluster.get("bounds"):
                 yield JsonRequest(
                     url=self.url_within_bounds_template.format(
-                        self.key, self.api_version, b["sw"][0], b["sw"][1], b["ne"][0], b["ne"][1]
+                        self.api_key, self.api_version, b["sw"][0], b["sw"][1], b["ne"][0], b["ne"][1]
                     ),
                     callback=self.parse_bounding_box,
                 )
         for location in response.json().get("locations", []):
-            self.locations_found[location["id"]] = (float(location["lat"]), float(location["lng"]))
+            self._locations_found[location["id"]] = (float(location["lat"]), float(location["lng"]))
 
     def start_location_requests(self):
         self.crawler.signals.disconnect(self.start_location_requests, signal=spider_idle)
@@ -71,8 +73,8 @@ class GeoMeSpider(Spider):
         for location in response.json()["locations"]:
             # Remove found location from the list of locations which
             # are still waiting to be found.
-            if self.locations_found.get(location["id"]):
-                self.locations_found.pop(location["id"])
+            if self._locations_found.get(location["id"]):
+                self._locations_found.pop(location["id"])
 
             if location.get("inactive"):
                 continue
@@ -86,14 +88,14 @@ class GeoMeSpider(Spider):
         yield self.get_next_location()
 
     def get_next_location(self) -> JsonRequest:
-        if len(self.locations_found) == 0:
+        if len(self._locations_found) == 0:
             return
-        next_search_location_id = random.choice(list(self.locations_found))
-        next_search_location_coords = self.locations_found[next_search_location_id]
-        self.locations_found.pop(next_search_location_id)
+        next_search_location_id = random.choice(list(self._locations_found))
+        next_search_location_coords = self._locations_found[next_search_location_id]
+        self._locations_found.pop(next_search_location_id)
         return JsonRequest(
             url=self.url_nearest_to_template.format(
-                self.key, self.api_version, next_search_location_coords[0], next_search_location_coords[1]
+                self.api_key, self.api_version, next_search_location_coords[0], next_search_location_coords[1]
             ),
             callback=self.parse_locations,
             dont_filter=True,
@@ -123,5 +125,5 @@ class GeoMeSpider(Spider):
                     hours_string = f"{hours_string} {day}: {start_time} - {end_time}"
         item["opening_hours"].add_ranges_from_string(hours_string)
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item

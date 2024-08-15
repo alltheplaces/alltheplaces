@@ -4,7 +4,7 @@ from scrapy import Selector, Spider
 from locations.dict_parser import DictParser
 
 
-class AGnVETAUSpider(Spider):
+class AgnvetAUSpider(Spider):
     name = "agnvet_au"
     item_attributes = {
         "brand": "AGnVET",
