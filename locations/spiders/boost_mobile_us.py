@@ -17,8 +17,11 @@ class BoostMobileUSSpider(scrapy.Spider):
 
     def start_requests(self):
         for lat, lon in point_locations("us_centroids_50mile_radius.csv"):
-            template_url = "https://www.boostmobile.com/locations/api/get-nearby-business/?lat={}&lon={}&showall=false"
-            yield scrapy.Request(url=template_url.format(lat, lon))
+            yield scrapy.Request(
+                "https://www.boostmobile.com/locations/api/get-nearby-business/?lat={}&lon={}&showall=false".format(
+                    lat, lon
+                )
+            )
 
     def parse(self, response):
         data = response.json()["business_list"]
