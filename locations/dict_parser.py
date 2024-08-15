@@ -24,6 +24,9 @@ class DictParser:
         "item-id",
         "ItemID",
         "itemID",
+        "branch-id",
+        "BranchID",
+        "branchID",
     ]
 
     name_keys = [
@@ -82,9 +85,11 @@ class DictParser:
         "address-locality",
         "city",
         "address-city",
+        "physical-city",
         "town",
         "locality",
         "suburb",
+        "physical-suburb",
         "city-name",
         "store-city",
         # JP

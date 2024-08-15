@@ -7,6 +7,12 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class StorefrontgatewaySpider(Spider):
+    """
+    A relatively unknown storefinder, associated with https://mi9retail.com/
+
+    To use, specify `start_urls`
+    """
+
     start_urls = []
 
     def start_requests(self):
@@ -15,6 +21,8 @@ class StorefrontgatewaySpider(Spider):
 
     def parse(self, response):
         for location in response.json()["items"]:
+            self.pre_process_data(location)
+
             if location.get("status") != "Active":
                 continue
             item = DictParser.parse(location)
@@ -28,4 +36,11 @@ class StorefrontgatewaySpider(Spider):
             if location.get("openingHours"):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(location["openingHours"])
-            yield item
+            yield from self.post_process_item(item, response, location) or []
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(self, item, response, location):
+        """Override with any post-processing on the item."""
+        yield item

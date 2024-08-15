@@ -16,7 +16,7 @@ class BobJaneTmartsAUSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"], item["lon"] = self.parse_lat_lon(response)
-        yield from self.inspect_item(item, response)
+        yield item
 
     @staticmethod
     def parse_lat_lon(response):
