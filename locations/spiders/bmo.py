@@ -36,6 +36,7 @@ from locations.spiders.thrifty_foods_ca import ThriftyFoodsCASpider
 from locations.spiders.united_dairy_farmers_us import UnitedDairyFarmersUSSpider
 from locations.spiders.walgreens import WalgreensSpider
 from locations.spiders.wawa import WawaSpider
+from locations.spiders.wegmans_us import WegmansUSSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
@@ -220,8 +221,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = WawaSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = WawaSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Wegmans" or item["name"] == "Wegmans Food Market":
-                item["located_in"] = WegmansSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = WegmansSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = WegmansUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = WegmansUSSpider.item_attributes["brand_wikidata"]
         else:
             self.logger.error("Unknown location type: %s", location["grouptype"])
 
