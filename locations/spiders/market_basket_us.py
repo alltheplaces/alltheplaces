@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -22,4 +23,5 @@ class MarketBasketUSSpider(scrapy.Spider):
             item["postcode"] = poi["field_address_postal_code"]
             item["phone"] = poi["field_phone_number"]
             item["website"] = urljoin("https://www.shopmarketbasket.com", poi["path"])
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
