@@ -15,7 +15,7 @@ class PizzaPerfectZASpider(WPStoreLocatorSpider):
     ]
     max_results = 100
     search_radius = 50
-    searchable_point_files = ["za_centroids_iseadgg_48km_radius.csv"]
+    searchable_points_files = ["za_centroids_iseadgg_48km_radius.csv"]
 
     def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours:
         if not location.get("hours"):
