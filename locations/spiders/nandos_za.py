@@ -21,7 +21,7 @@ class NandosZASpider(scrapy.Spider):
             i["name"] = i.pop("locationName")
             i["phone"] = i.pop("primaryPhone")
             if i["additionalPhone1"]:
-                i["phone"] += ";" + i.pop("additionalPhone1")
+                i["phone"] += "; " + i.pop("additionalPhone1")
             i["province"] = i.pop("administrativeArea")
             i["website"] = self.web_root + i.pop("storeLocatorDetailsShortURL")
             if i["addressLine2"]:
