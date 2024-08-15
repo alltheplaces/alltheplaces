@@ -49,6 +49,7 @@ class KfcAUSpider(scrapy.Spider):
             details_url = (
                 "https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/details/" + web_path
             )
+            item["branch"] = item.pop("name").lstrip("KFC ")
             yield JsonRequest(
                 url=details_url, headers={"x-tenant-id": self.tenant_id}, meta={"item": item}, callback=self.parse_hours
             )
