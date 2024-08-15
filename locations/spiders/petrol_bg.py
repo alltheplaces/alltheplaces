@@ -35,5 +35,5 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
         apply_yes_no("self_service", item, "28" in categories)
         apply_yes_no(Fuel.ADBLUE, item, "29" in categories)
         apply_category(Categories.FUEL_STATION, item)
-        
+
         yield item
