@@ -51,7 +51,7 @@ class OkFoodsSpider(Spider):
 
             location = {k: v for k, v in location.items() if v != "null"}
 
-            if location.get("phoneInternationalCode") != None:
+            if location.get("phoneInternationalCode") is not None:
                 location["phoneNumber"] = (
                     "+" + location["phoneInternationalCode"] + " " + location["phoneNumber"].lstrip("0")
                 )
