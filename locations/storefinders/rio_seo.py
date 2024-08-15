@@ -25,11 +25,14 @@ class RioSeoSpider(Spider):
     radius: int = 20038
 
     def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(f"https://maps.{self.domain}/api/getAutocompleteData", callback=self.parse_autocomplete)
+        domain = self.domain
+        if not domain.startswith("maps"):
+            domain = "maps." + domain
+        yield JsonRequest(f"https://{domain}/api/getAutocompleteData", callback=self.parse_autocomplete)
 
     def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
-        yield JsonRequest(
-            f"https://maps.{self.domain}/api/getAsyncLocations?template=domain&level=domain&search={response.json()['data'][0]}&radius={self.radius}&limit={self.limit}"
+        yield response.follow(
+            f"getAsyncLocations?template=domain&level=domain&search={response.json()['data'][0]}&radius={self.radius}&limit={self.limit}"
         )
 
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
