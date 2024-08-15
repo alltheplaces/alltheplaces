@@ -40,4 +40,6 @@ class ItakaPLSpider(Spider):
                     opening_hours.add_ranges_from_string(ranges_string=f"{days} {hours_range}", days=DAYS_PL)
                 item["opening_hours"] = opening_hours
 
+                item.pop("name", None)
+
                 yield item
