@@ -16,6 +16,7 @@ class IcebolethuZASpider(Spider):
     custom_settings = {
         "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None}
     }
+    no_refs = True
 
     def parse(self, response):
         for id in ICEBOLETHU_CATEGORIES:
@@ -33,8 +34,6 @@ class IcebolethuZASpider(Spider):
                 except:
                     pass
                 properties["street_address"] = " ".join(address_lines).lstrip("Address:").strip()
-
-                properties["ref"] = properties["name"]
 
                 # Some short maps.app.goo.gl links which can't be extracted from
                 try:
