@@ -25,7 +25,7 @@ class OkFurnitureSpider(Spider):
             item["addr_full"] = item["addr_full"].replace("</br>", "")
             try:
                 item["phone"] = Selector(text=location["contact"]).xpath("//a/@href").get().replace("tel:", "")
-                if not item["phone"].startswith("0"):
+                if not (item["phone"].startswith("0") or item["phone"].startswith("(")):
                     item["phone"] = "0" + item["phone"]
             except:
                 pass
