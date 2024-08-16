@@ -23,6 +23,7 @@ class RioSeoSpider(Spider):
     domain: Optional[str] = None
     limit: int = 10000
     radius: int = 20038
+    template: str = "domain"
 
     def start_requests(self) -> Iterable[Request]:
         domain = self.domain
@@ -32,7 +33,7 @@ class RioSeoSpider(Spider):
 
     def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
         yield response.follow(
-            f"getAsyncLocations?template=domain&level=domain&search={response.json()['data'][0]}&radius={self.radius}&limit={self.limit}"
+            f"getAsyncLocations?template={self.template}&level={self.template}&search={response.json()['data'][0]}&radius={self.radius}&limit={self.limit}"
         )
 
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
@@ -40,8 +41,9 @@ class RioSeoSpider(Spider):
         if map_list == "":
             return
         map_list = map_list.removeprefix('<div class="tlsmap_list">')
-        map_list = map_list.removesuffix("</div>")
-        data = json.loads(f"[{map_list[:-1]}]")
+        map_list = map_list.removesuffix(",</div>")
+        map_list = map_list.replace("\t", " ")
+        data = json.loads(f"[{map_list}]")
 
         if len(data) == self.limit:
             self.logger.warning(f"Received {len(data)} entries, the limit may need to be raised")
