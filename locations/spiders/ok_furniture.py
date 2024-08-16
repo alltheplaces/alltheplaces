@@ -9,6 +9,7 @@ class OkFurnitureSpider(Spider):
     item_attributes = {"brand": "OK Furniture", "brand_wikidata": "Q116474866"}
     allowed_domains = ["okfurniture.co.za"]
     start_urls = ["https://www.okfurniture.co.za/store-locator/"]
+    skip_auto_cc_domain = True
 
     def parse(self, response):
         js_blob = [
