@@ -2,7 +2,6 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
-from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -12,9 +11,6 @@ class ChaseUSSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["locator.chase.com"]
     sitemap_urls = ["https://locator.chase.com/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/locator\.chase\.com\/(?!es)[a-z]{2}\/[\w\-]+\/[\w\-]+$", "parse_sd")]
-
-
-
 
     def extract_amenity_features(self, item, response, ld_data):
         # First, determine if we are a bank or ATM.
