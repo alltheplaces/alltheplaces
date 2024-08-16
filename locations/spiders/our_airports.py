@@ -26,7 +26,7 @@ class OurAirportsSpider(CSVFeedSpider):
         item["name"] = row["name"]
         item["lat"] = row["latitude_deg"]
         item["lon"] = row["longitude_deg"]
-        item["extras"]["ele"] = row["elevation_ft"]
+        item["extras"]["ele:ft"] = row["elevation_ft"]
         item["country"] = row["iso_country"]
         item["extras"]["iata"] = row["iata_code"]
         item["website"] = row["home_link"]
