@@ -37,8 +37,9 @@ class RioSeoSpider(Spider):
         if map_list == "":
             return
         map_list = map_list.removeprefix('<div class="tlsmap_list">')
-        map_list = map_list.removesuffix("</div>")
-        data = json.loads(f"[{map_list[:-1]}]")
+        map_list = map_list.removesuffix(",</div>")
+        map_list = map_list.replace("\t", " ")
+        data = json.loads(f"[{map_list}]")
 
         if len(data) == self.limit:
             self.logger.warning(f"Received {len(data)} entries, the limit may need to be raised")
