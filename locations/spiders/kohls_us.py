@@ -4,7 +4,7 @@ from locations.storefinders.rio_seo import RioSeoSpider
 class KohlsUSSpider(RioSeoSpider):
     name = "kohls_us"
     item_attributes = {"brand": "Kohl's", "brand_wikidata": "Q967265"}
-    domain = "kohlslocal.com"
+    end_point = "https://maps.kohlslocal.com"
     template = "search"
 
     def post_process_feature(self, feature, location):

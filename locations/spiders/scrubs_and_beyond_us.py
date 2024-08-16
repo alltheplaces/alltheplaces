@@ -7,7 +7,7 @@ class ScrubsAndBeyondUSSpider(RioSeoSpider):
         "brand_wikidata": "Q119972011",
         "brand": "Scrubs & Beyond",
     }
-    domain = "scrubsandbeyond.com"
+    end_point = "https://maps.scrubsandbeyond.com"
 
     def post_process_feature(self, feature, location):
         feature["opening_hours"] = self.parse_hours(location["hours_set:primary"])

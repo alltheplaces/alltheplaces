@@ -7,7 +7,7 @@ class BuckleUSSpider(RioSeoSpider):
         "brand_wikidata": "Q4983306",
         "brand": "Buckle",
     }
-    domain = "local.buckle.com"
+    end_point = "https://maps.local.buckle.com"
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")

@@ -7,7 +7,7 @@ from locations.storefinders.rio_seo import RioSeoSpider
 class PandoraSpider(RioSeoSpider):
     name = "pandora"
     item_attributes = {"brand": "Pandora", "brand_wikidata": "Q2241604"}
-    domain = "pandora.net"
+    end_point = "https://maps.pandora.net"
 
     def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
         feature["phone"] = location.get("location_phone") or location.get("local_phone")
