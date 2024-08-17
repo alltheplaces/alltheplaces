@@ -2,11 +2,9 @@ import re
 from typing import Any
 
 import chompjs
-from scrapy.http import Response
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
-from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 
 
@@ -16,9 +14,7 @@ class AviaHUSpider(JSONBlobSpider):
     start_urls = ["https://www.avia.hu/kapcsolat/toltoallomasok/"]
 
     def extract_json(self, response):
-        return chompjs.parse_js_object(
-            re.search(r"var markers = (\[.+?\]);", response.text, re.DOTALL).group(1)
-        )
+        return chompjs.parse_js_object(re.search(r"var markers = (\[.+?\]);", response.text, re.DOTALL).group(1))
 
     def pre_process_data(self, location) -> Any:
         location["ref"] = location.pop("kutid")
@@ -26,7 +22,7 @@ class AviaHUSpider(JSONBlobSpider):
         location["addr_full"] = location.pop("cim")
         location["website"] = "https://www.avia.hu/toltoallomas/?id={}".format(location["ref"])
         location["tel"] = location["tel"].replace(",", "; ")
-    
+
     def post_process_item(self, item, response, location):
         apply_yes_no(Fuel.OCTANE_95, item, location["b95"] == "1" or location["b95g"] == "1")
         apply_yes_no(Fuel.DIESEL, item, location["dies"] == "1" or location["gdies"] == "1")
