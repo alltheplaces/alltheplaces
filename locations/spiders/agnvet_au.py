@@ -1,5 +1,6 @@
 import chompjs
-from scrapy import Selector, Spider
+from scrapy import Selector
+
 
 class AgnvetAUSpider(locations.json_blob_spider.JSONBlobSpider):
     name = "agnvet_au"
