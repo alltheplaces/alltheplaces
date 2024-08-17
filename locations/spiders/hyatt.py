@@ -3,11 +3,12 @@ import json
 import scrapy
 
 from locations.items import Feature
+from locations.categories import Categories
 
 
 class HyattSpider(scrapy.Spider):
     name = "hyatt"
-    item_attributes = {"brand": "Hyatt", "brand_wikidata": "Q1425063"}
+    item_attributes = {"brand": "Hyatt", "brand_wikidata": "Q1425063", "extras": Categories.HOTEL}
     allowed_domains = ["hyatt.com"]
     requires_proxy = True
 
