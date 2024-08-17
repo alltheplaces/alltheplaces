@@ -3,7 +3,6 @@ from typing import Iterable
 
 import scrapy
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address, merge_address_lines
 
@@ -14,7 +13,7 @@ STORES_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/magazalarimiz?city={
 
 class SokTRSpider(scrapy.Spider):
     name = "sok_tr"
-    item_attributes = {"brand": "ŞOK", "brand_wikidata": "Q19613992"}
+    item_attributes = {"brand": "Şok", "brand_wikidata": "Q19613992"}
 
     def start_requests(self) -> Iterable[scrapy.Request]:
         yield scrapy.Request(url=PROVINCES_URL, callback=self.parse_provinces)
@@ -38,9 +37,6 @@ class SokTRSpider(scrapy.Spider):
         for store in response.json()["response"]["subeler"]:
             item = DictParser.parse(store)
             name, branch_name = self.parse_branch_name(store["name"])
-
-            if name == "ŞOK Mini":
-                apply_category(Categories.SHOP_CONVENIENCE, item)
 
             item["name"] = name
             item["branch"] = branch_name
@@ -68,7 +64,7 @@ class SokTRSpider(scrapy.Spider):
         mini_re = re.compile(r"ŞOK.[\s]*MİNİ")
         branch_name = branch_name.strip().removesuffix("MAĞAZASI").strip()
 
-        name = "ŞOK"
+        name = "Şok"
         try:
             brand_name_i = branch_name.index("ŞOK")
             mini_match = mini_re.search(branch_name)
@@ -76,14 +72,14 @@ class SokTRSpider(scrapy.Spider):
             if mini_match:
                 start, end = mini_match.span()
                 branch_name = cut(branch_name, start, end)
-                name = "ŞOK Mini"
+                name = "Şok Mini"
             else:
                 start, end = brand_name_i, brand_name_i + 3
                 branch_name = cut(branch_name, start, end)
-                name = "ŞOK"
+                name = "Şok"
 
         except ValueError:
-            name = "ŞOK"
+            name = "Şok"
 
         return name, branch_name
 
