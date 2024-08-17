@@ -9,8 +9,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class VidaCaffeZASpider(Spider):
-    name = "vida_caffe_za"
+class VidaCaffeSpider(Spider):
+    name = "vida_caffe"
     item_attributes = {
         "brand": "Vida e Caffè",
         "brand_wikidata": "Q7927650",
