@@ -1,7 +1,7 @@
 from typing import Any
 
 import chompjs
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
@@ -14,7 +14,9 @@ class JackWillsGBSpider(Spider):
         "brand": "Jack Wills",
         "brand_wikidata": "Q6115814",
     }
-    start_urls = ["https://www.jackwills.com/stores/search?countryName=United%20Kingdom&countryCode=GB&lat=0&long=0&sd=40"]
+    start_urls = [
+        "https://www.jackwills.com/stores/search?countryName=United%20Kingdom&countryCode=GB&lat=0&long=0&sd=40"
+    ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
     }
@@ -30,7 +32,7 @@ class JackWillsGBSpider(Spider):
 
     def post_process_item(self, item, response, location):
         print(location)
-        item['ref'] = location['code']
+        item["ref"] = location["code"]
         item["website"] = "https://www.jackwills.com/" + location["storeUrl"]
         item["opening_hours"] = OpeningHours()
         for rule in location["openingTimes"]:
