@@ -2,8 +2,8 @@ import json
 
 import scrapy
 
-from locations.items import Feature
 from locations.categories import Categories
+from locations.items import Feature
 
 
 class HyattSpider(scrapy.Spider):
