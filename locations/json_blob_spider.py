@@ -1,13 +1,13 @@
-from chompjs import parse_js_object
 from scrapy import Spider
+
 from locations.dict_parser import DictParser
+
 
 # A JSONBlobSpider is a lightweight spider for sites embedding a JS/JSON array of hashes
 # embedded in a single page.
 #
 # To use, implement an `extract_json` method.
 class JSONBlobSpider(Spider):
-
     def extract_json(response):
         """
         Override this method to extract the main JSON content from the page.
@@ -23,7 +23,6 @@ class JSONBlobSpider(Spider):
         data_raw = data_raw.split('},"places":', 1)[1]
         locations = chompjs.parse_js_object(data_raw)
         """
-        pass
 
     def parse(self, response, **kwargs):
         locations = self.extract_json(response)
