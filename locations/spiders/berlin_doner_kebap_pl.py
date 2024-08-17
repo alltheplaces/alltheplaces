@@ -1,11 +1,8 @@
-from typing import Any
-
 import chompjs
-from scrapy import Selector, Spider
+from scrapy import Selector
 from scrapy.http import Response
 
 from locations.json_blob_spider import JSONBlobSpider
-from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
