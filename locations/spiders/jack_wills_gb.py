@@ -31,7 +31,6 @@ class JackWillsGBSpider(Spider):
             yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
-        print(location)
         item["ref"] = location["code"]
         item["website"] = "https://www.jackwills.com/" + location["storeUrl"]
         item["opening_hours"] = OpeningHours()
