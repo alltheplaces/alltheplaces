@@ -273,6 +273,7 @@ class Categories(Enum):
     VETERINARY = {"amenity": "veterinary"}
     WATER_RESCUE = {"emergency": "water_rescue"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
+    MORTUARY = {"amenity": "mortuary"}
 
     DATA_CENTRE = {"telecom": "data_center"}
 

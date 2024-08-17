@@ -7,7 +7,7 @@ class SpencersCAUSSpider(RioSeoSpider):
         "brand_wikidata": "Q7576055",
         "brand": "Spencer Gifts",
     }
-    domain = "spencersonline.com"
+    end_point = "https://maps.spencersonline.com"
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")

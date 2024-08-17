@@ -47,4 +47,5 @@ class DebonairsPizzaZASpider(Spider):
                     day_hours["CloseTime"],
                     "%H:%M:%S",
                 )
+            item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
             yield item

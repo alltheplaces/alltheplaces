@@ -9,6 +9,7 @@ from typing import List, Tuple
 COUNTRYCODE_COMPONENTS = {
     "AE",
     "AL",
+    "AO",
     "AR",
     "AT",
     "AU",
@@ -64,8 +65,10 @@ COUNTRYCODE_COMPONENTS = {
     "MO",
     "MT",
     "MU",
+    "MW",
     "MX",
     "MY",
+    "MZ",
     "NI",
     "NL",
     "NO",

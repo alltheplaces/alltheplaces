@@ -7,7 +7,7 @@ class EuropeanWaxCenterUSSpider(RioSeoSpider):
         "brand_wikidata": "Q5413426",
         "brand": "European Wax Center",
     }
-    domain = "locations.waxcenter.com"
+    end_point = "https://maps.locations.waxcenter.com"
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")

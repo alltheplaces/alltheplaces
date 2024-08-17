@@ -1,12 +1,11 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class OldNavySpider(SitemapSpider, StructuredDataSpider):
+class OldNavySpider(RioSeoSpider):
     name = "old_navy"
     item_attributes = {"brand": "Old Navy", "brand_wikidata": "Q2735242"}
-    allowed_domains = ["oldnavy.gap.com"]
-    sitemap_urls = ["https://oldnavy.gap.com/stores/sitemap.xml"]
-    sitemap_rules = [(r"/stores/[-\w]+/[-\w]+/[-\w]+.html$", "parse_sd")]
-    wanted_types = ["ClothingStore"]
+    end_point = "https://oldnavy.gap.com/stores/maps"
+
+    def post_process_feature(self, feature, location):
+        feature["branch"] = feature.pop("name")
+        yield feature

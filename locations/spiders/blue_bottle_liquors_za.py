@@ -13,3 +13,8 @@ class BlueBottleLiquorsZASpider(AgileStoreLocatorSpider):
     allowed_domains = [
         "bluebottleliquors.co.za",
     ]
+
+    def parse_item(self, item, location):
+        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+        item["name"] = self.item_attributes["brand"]
+        yield item
