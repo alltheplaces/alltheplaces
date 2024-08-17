@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class ThelinskonditoriSESpider(Spider):
+class ThelinsKonditoriSESpider(Spider):
     name = "thelins_konditori_se"
     item_attributes = {
         "brand_wikidata": "Q124048792",
