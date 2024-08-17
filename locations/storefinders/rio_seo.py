@@ -15,21 +15,19 @@ class RioSeoSpider(Spider):
     RioSEO is a number of related storefinders.
     https://www.rioseo.com/platform/local-pages/
 
-    To use, specify `domain` as the API domain without any preceding "maps.".
+    To use, specify `end_point` as the API endpoint, usually starting with
+    "maps.", and omitting the path starting with /api
     """
 
     dataset_attributes = {"source": "api", "api": "rio_seo"}
 
-    domain: Optional[str] = None
+    end_point: Optional[str] = None
     limit: int = 10000
     radius: int = 20038
     template: str = "domain"
 
     def start_requests(self) -> Iterable[Request]:
-        domain = self.domain
-        if not domain.startswith("maps"):
-            domain = "maps." + domain
-        yield JsonRequest(f"https://{domain}/api/getAutocompleteData", callback=self.parse_autocomplete)
+        yield JsonRequest(f"{self.end_point}/api/getAutocompleteData", callback=self.parse_autocomplete)
 
     def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
         yield response.follow(

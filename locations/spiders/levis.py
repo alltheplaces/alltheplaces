@@ -4,7 +4,7 @@ from locations.storefinders.rio_seo import RioSeoSpider
 
 class LevisSpider(RioSeoSpider):
     name = "levis"
-    domain = "levi.com"
+    end_point = "https://maps.levi.com"
 
     def post_process_feature(self, item, location):
         apply_category(Categories.SHOP_CLOTHES, item)

@@ -11,7 +11,7 @@ LOCATION_CATEGORIES = {
 class SantanderUSSpider(RioSeoSpider):
     name = "santander_us"
     item_attributes = {"brand": "Santander", "brand_wikidata": "Q5835668"}
-    domain = "locations.santanderbank.com"
+    end_point = "https://maps.locations.santanderbank.com"
 
     def post_process_feature(self, feature, location):
         location_type = location["Location Type_CS"]

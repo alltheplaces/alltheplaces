@@ -7,4 +7,4 @@ class CleanEatzUSSpider(RioSeoSpider):
         "brand_wikidata": "Q124412638",
         "brand": "Clean Eatz",
     }
-    domain = "locations.cleaneatz.com"
+    end_point = "https://maps.locations.cleaneatz.com"
