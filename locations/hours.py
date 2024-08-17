@@ -54,6 +54,7 @@ DAYS_EN = {
 }
 
 DAYS_DE = {
+    # "Feiertag": "PH",
     "Montag": "Mo",
     "Mo": "Mo",
     "Dienstag": "Tu",
