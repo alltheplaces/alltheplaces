@@ -1,7 +1,7 @@
 from locations.storefinders.uberall import UberallSpider
 
 
-class JustOvertheTopSpider(UberallSpider):
+class JustOverTheTopSpider(UberallSpider):
     name = "just_over_the_top"
     item_attributes = {
         "brand_wikidata": "Q104890420",
