@@ -47,6 +47,6 @@ class VidaCaffeZASpider(Spider):
         apply_yes_no(Extras.HALAL, item, "halaal" in location["store_features"])
 
         # Mobile payment?
-        # apply_yes_no(PaymentMethods.CONTACTLESS, item, "mobile-payment" in location["store_features"])
+        apply_yes_no(PaymentMethods.APP, item, "mobile-payment" in location["store_features"])
 
         yield item
