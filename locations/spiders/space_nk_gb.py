@@ -1,7 +1,7 @@
 from locations.storefinders.uberall import UberallSpider
 
 
-class SpaceNKGBSpider(UberallSpider):
+class SpaceNkGBSpider(UberallSpider):
     name = "space_nk_gb"
     item_attributes = {
         "brand_wikidata": "Q7572184",
