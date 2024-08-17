@@ -16,7 +16,9 @@ class ClaudiaStraterNLSpider(Spider):
     start_urls = ["https://www.claudiastrater.com/over-ons/winkels/"]
 
     def extract_json(self, response):
-        return chompjs.parse_js_object(response.xpath('//script[contains(text(), "map.markers = ")]/text()').get().split("map.markers = ")[1])
+        return chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "map.markers = ")]/text()').get().split("map.markers = ")[1]
+        )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         locations = self.extract_json(response)
