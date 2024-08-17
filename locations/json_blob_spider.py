@@ -6,7 +6,9 @@ from locations.dict_parser import DictParser
 # A JSONBlobSpider is a lightweight spider for sites embedding a JS/JSON array of hashes
 # embedded in a single page.
 #
-# To use, implement an `extract_json` method.
+# To use, implement an `extract_json` method to locate and parse your JSON data;
+# `pre_process_data` to clean up the keys of an individual entry; and
+# `post_process_item` to apply any further attributes
 class JSONBlobSpider(Spider):
     def extract_json(response):
         """
@@ -30,11 +32,11 @@ class JSONBlobSpider(Spider):
         for location in locations:
             self.pre_process_data(location)
             item = DictParser.parse(location)
-            yield from self.post_process_item(item, response) or []
+            yield from self.post_process_item(item, response, location) or []
 
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the data, ie normalising key names for DictParser."""
 
-    def post_process_item(self, item, response):
+    def post_process_item(self, item, response, location):
         """Override ith any post process on the item"""
         yield item
