@@ -1,10 +1,9 @@
 import re
 
 from chompjs import parse_js_object
-from locations.json_blob_spider import JSONBlobSpider
 
-from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class AngusAndCooteAUSpider(JSONBlobSpider):
