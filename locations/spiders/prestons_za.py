@@ -15,7 +15,7 @@ class PrestonsZASpider(WPStoreLocatorSpider):
     time_format = "%I:%M %p"
 
     def parse_item(self, item, location):
-        item["name"] = unescape(item["name"])
+        item["branch"] = unescape(item.pop("name"))
         item["street_address"] = location.get("address")
         item.pop("addr_full", None)
         item["city"] = location.get("address2")
