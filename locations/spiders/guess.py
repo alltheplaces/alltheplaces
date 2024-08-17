@@ -5,7 +5,7 @@ from locations.storefinders.rio_seo import RioSeoSpider
 class GuessSpider(RioSeoSpider):
     name = "guess"
     item_attributes = {"brand": "Guess", "brand_wikidata": "Q2470307", "extras": Categories.SHOP_CLOTHES.value}
-    domain = "stores.guess.com"
+    end_point = "https://maps.stores.guess.com"
 
     def post_process_feature(self, feature, location):
         if location["store_type_cs"] == "Guess Accessories":

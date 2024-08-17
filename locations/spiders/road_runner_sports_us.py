@@ -7,7 +7,7 @@ class RoadRunnerSportsUSSpider(RioSeoSpider):
         "brand_wikidata": "Q113494713",
         "brand": "Road Runner Sports",
     }
-    domain = "stores.roadrunnersports.com"
+    end_point = "https://maps.stores.roadrunnersports.com"
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")

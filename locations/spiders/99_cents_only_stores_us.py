@@ -7,7 +7,7 @@ class NinetynineCentsOnlyStoresUSSpider(RioSeoSpider):
         "brand_wikidata": "Q4646294",
         "brand": "99 Cents Only Stores",
     }
-    domain = "locations.99only.com"
+    end_point = "https://maps.locations.99only.com"
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")
