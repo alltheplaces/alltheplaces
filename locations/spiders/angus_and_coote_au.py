@@ -38,7 +38,6 @@ class AngusAndCooteAUSpider(JSONBlobSpider):
                 location["postcode"] = raw_data.get("Postcode")
         return locations.values()
 
-
     def post_process_item(self, item, response, location):
         item["addr_full"] = re.sub(r"\s+", " ", item.get("addr_full", ""))
         item["website"] = "https://www.anguscoote.com.au/stores/" + location.get("url")
