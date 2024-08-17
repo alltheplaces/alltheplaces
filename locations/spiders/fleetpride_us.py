@@ -4,7 +4,7 @@ from locations.storefinders.rio_seo import RioSeoSpider
 
 class FleetprideUSSpider(RioSeoSpider):
     name = "fleetpride_us"
-    domain = "branches.fleetpride.com"
+    end_point = "https://maps.branches.fleetpride.com"
 
     def post_process_feature(self, feature, location):
         if "Service" in location["Store Type_CS"]:

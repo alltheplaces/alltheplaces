@@ -18,7 +18,6 @@ class NandosZASpider(scrapy.Spider):
     def parse(self, response):
         data = response.json()
         for i in data["locations"]:
-            i["name"] = i.pop("locationName")
             i["phone"] = i.pop("primaryPhone")
             if i["additionalPhone1"]:
                 i["phone"] += "; " + i.pop("additionalPhone1")
@@ -27,6 +26,8 @@ class NandosZASpider(scrapy.Spider):
             if i["addressLine2"]:
                 i["addressLine1"] += ", " + i.pop("addressLine2")
             item = DictParser.parse(i)
+
+            item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
 
             oh = OpeningHours()
             for x in i["regularHours"]:

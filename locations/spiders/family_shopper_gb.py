@@ -1,13 +1,10 @@
-from typing import Any
-
-from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
-from locations.open_graph_parser import OpenGraphParser
+from locations.open_graph_spider import OpenGraphSpider
 
 
-class FamilyShopperGBSpider(SitemapSpider):
+class FamilyShopperGBSpider(SitemapSpider, OpenGraphSpider):
     name = "family_shopper_gb"
     item_attributes = {
         "brand": "Family Shopper",
@@ -17,8 +14,7 @@ class FamilyShopperGBSpider(SitemapSpider):
     sitemap_urls = ["https://www.familyshopperstores.co.uk/sitemap.xml"]
     sitemap_rules = [("/our-stores/", "parse")]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = OpenGraphParser.parse(response)
+    def post_process_item(self, item, response, **kwargs):
         item["branch"] = (
             item.pop("name").removeprefix("Family Shopper").strip(" -").removeprefix("Family Shopper").strip(" -")
         )

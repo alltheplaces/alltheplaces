@@ -4,6 +4,8 @@ The web is full of information. A lot you can see, it is rendered by your browse
 
 More information can be found at [schema.org](https://schema.org/). Various online resources are available such as the [schema validation tool](https://validator.schema.org/) to help you extract structured data on an ad-hoc basis from a URL. For example, the web page for this [smashburger location](https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/) decodes to [yield this structured data](https://validator.schema.org/#url=https%3A%2F%2Fsmashburger.com%2Flocations%2Fus%2Fco%2Flafayette%2F2755-dagny-way%2F).
 
+See also [open graph protocol](docs/OPEN_GRAPH_PROTOCOL.md)
+
 ### StructuredDataSpider
 
 The ATP project has custom library code which helps with the creation of spiders for sites which provide structured data in their pages. One key class provided is [StructuredDataSpider](../locations/structured_data_spider.py).

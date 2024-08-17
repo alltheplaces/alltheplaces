@@ -37,4 +37,5 @@ class DialABedZASpider(AmastyStoreLocatorSpider):
             .split("   ", 1)[0]
             .strip()
         )
+        item["branch"] = item.pop("name").replace("Dial a Bed", "").strip()
         yield item

@@ -4,7 +4,7 @@ from locations.storefinders.rio_seo import RioSeoSpider
 
 class FootLockerSpider(RioSeoSpider):
     name = "foot_locker"
-    domain = "stores.footlocker.com"
+    end_point = "https://maps.stores.footlocker.com"
 
     def post_process_feature(self, feature, location):
         if "Champs Sports" in feature["name"]:

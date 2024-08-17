@@ -7,7 +7,7 @@ class ApplebeesSpider(RioSeoSpider):
         "brand_wikidata": "Q621532",
         "brand": "Applebee's Neighborhood Grill & Bar",
     }
-    domain = "restaurants.applebees.com"
+    end_point = "https://maps.restaurants.applebees.com"
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")

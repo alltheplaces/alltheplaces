@@ -5,7 +5,7 @@ from locations.storefinders.rio_seo import RioSeoSpider
 class UnitedBankUSSpider(RioSeoSpider):
     name = "united_bank_us"
     item_attributes = {"brand": "United Bank", "brand_wikidata": "Q16920636"}
-    domain = "locations.bankwithunited.com"
+    end_point = "https://maps.locations.bankwithunited.com"
 
     def post_process_feature(self, feature, location):
         if location["location_type_cs"] == "Branch":

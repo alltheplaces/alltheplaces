@@ -7,7 +7,7 @@ class GenghisGrillUSSpider(RioSeoSpider):
         "brand_wikidata": "Q29470710",
         "brand": "Genghis Grill",
     }
-    domain = "genghisgrill.com"
+    end_point = "https://maps.genghisgrill.com"
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")

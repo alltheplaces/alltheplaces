@@ -7,4 +7,4 @@ class ChuckECheeseSpider(RioSeoSpider):
         "brand_wikidata": "Q2438391",
         "brand": "Chuck E. Cheese",
     }
-    domain = "locations.chuckecheese.com"
+    end_point = "https://maps.locations.chuckecheese.com"

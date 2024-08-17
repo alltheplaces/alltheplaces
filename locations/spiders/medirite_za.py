@@ -11,6 +11,7 @@ class MediriteZASpider(Spider):
     item_attributes = {"brand_wikidata": "Q115696233"}
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
     start_urls = ["https://www.medirite.co.za/bin/stores.json?national=yes&brand=medirite&country=198"]
+    base_url = "https://www.medirite.co.za"
     brands = ["MediRite", "MediRite Plus"]
 
     def start_requests(self):
@@ -29,12 +30,12 @@ class MediriteZASpider(Spider):
             if "phoneInternationalCode" in location:
                 location["phoneNumber"] = "+" + location["phoneInternationalCode"] + " " + location["phoneNumber"]
 
-            if "physicalAdd3" in location and location["physicalAdd3"]:
-                location["physicalAdd2"] += ", " + location["physicalAdd3"]
-            if "physicalAdd2" in location and location["physicalAdd2"]:
-                location["physicalAdd1"] += ", " + location["physicalAdd2"]
-            if "physicalAdd1" in location:
-                location["street-address"] = location.pop("physicalAdd1")
+            location["street-address"] = ""
+            for i in ["1", "2", "3"]:
+                if ("physicalAdd" + i) in location:
+                    location["street-address"] += location.pop("physicalAdd" + i) + ", "
+            location["street-address"] = location["street-address"].rstrip(", ")
+
             if "physicalProvince" in location:
                 location["province"] = location.pop("physicalProvince")
 
@@ -44,7 +45,7 @@ class MediriteZASpider(Spider):
             item["brand"] = location["brand"]
 
             yield JsonRequest(
-                url=f'https://www.medirite.co.za/bin/stores.json?uid={item["ref"]}',
+                url=f'{self.base_url}/bin/stores.json?uid={item["ref"]}',
                 meta={"item": item},
                 callback=self.parse_store,
             )
