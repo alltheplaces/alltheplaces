@@ -8,7 +8,11 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BackhausNahrstedtDESpider(CrawlSpider, StructuredDataSpider):
     name = "backhaus_nahrstedt_de"
-    item_attributes = {"brand": "Backhaus Nahrstedt", "brand_wikidata": "Q798438", "extras": Categories.SHOP_BAKERY.value}
+    item_attributes = {
+        "brand": "Backhaus Nahrstedt",
+        "brand_wikidata": "Q798438",
+        "extras": Categories.SHOP_BAKERY.value,
+    }
     allowed_domains = ["nahrstedt.de"]
     start_urls = ["https://nahrstedt.de/standorte"]
     wanted_types = ["Bakery"]
@@ -19,7 +23,7 @@ class BackhausNahrstedtDESpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
-    no_refs = True # TODO: I am very confused as to why I have to do this.
+    no_refs = True  # TODO: I am very confused as to why I have to do this.
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["name"] is None:
@@ -32,4 +36,4 @@ class BackhausNahrstedtDESpider(CrawlSpider, StructuredDataSpider):
                 else:
                     item["opening_hours"].add_range(DAYS_DE[rule["dayOfWeek"]], rule["opens"], rule["closes"])
 
-        yield(item)
+        yield (item)
