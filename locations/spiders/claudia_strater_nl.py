@@ -14,6 +14,7 @@ class ClaudiaStraterNLSpider(Spider):
         "brand": "Claudia Sträter",
     }
     start_urls = ["https://www.claudiastrater.com/over-ons/winkels/"]
+    no_refs = True
 
     def extract_json(self, response):
         return chompjs.parse_js_object(
@@ -27,7 +28,8 @@ class ClaudiaStraterNLSpider(Spider):
             yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
-        item["name"] = item["name"].strip
+        print(location)
+        item["name"] = item["name"].strip()
         item["website"] = location["url"].replace("~/", "https://www.claudiastrater.com/")
         item["image"] = location["imageurl"].replace("~/", "https://www.claudiastrater.com/")
 
