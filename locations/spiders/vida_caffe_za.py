@@ -1,5 +1,3 @@
-
-
 from typing import Any
 
 import chompjs
@@ -8,7 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
 
 
 class VidaCaffeZASpider(Spider):
@@ -17,16 +15,12 @@ class VidaCaffeZASpider(Spider):
         "brand": "Vida e Caffè",
         "brand_wikidata": "Q7927650",
     }
-    start_urls = [
-        "https://vidaecaffe.com/contact/stores/"
-    ]
-    # custom_settings = {
-    #     "ROBOTSTXT_OBEY": False,
-    # }
-    # requires_proxy = True
+    start_urls = ["https://vidaecaffe.com/contact/stores/"]
 
     def extract_json(self, response):
-        return chompjs.parse_js_object(response.xpath('//script[@type="rocketlazyloadscript" and contains(text(), "var stores = ")]/text()').get())
+        return chompjs.parse_js_object(
+            response.xpath('//script[@type="rocketlazyloadscript" and contains(text(), "var stores = ")]/text()').get()
+        )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         locations = self.extract_json(response)
