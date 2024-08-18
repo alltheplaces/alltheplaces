@@ -2,6 +2,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.geo import bbox_contains, make_subdivisions
+from locations.dict_parser import DictParser
 
 
 class EvgoSpider(scrapy.Spider):
