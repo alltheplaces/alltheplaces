@@ -1,11 +1,8 @@
-from typing import Any
-
 import chompjs
-from scrapy import Selector, Spider
-from scrapy.http import Response
+from scrapy import Selector
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class MarkantDESpider(JSONBlobSpider):
