@@ -1,9 +1,7 @@
-import re
 from typing import Any
 
 import chompjs
 
-from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.json_blob_spider import JSONBlobSpider
 
 
