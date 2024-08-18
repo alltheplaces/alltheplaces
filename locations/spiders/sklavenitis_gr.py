@@ -1,12 +1,12 @@
 import chompjs
-from scrapy import Spider
+from locations.json_blob_spider import JSONBlobSpider
 
 from locations.hours import DAYS_GR, OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SklavenitisGRSpider(Spider):
+class SklavenitisGRSpider(JSONBlobSpider):
     name = "sklavenitis_gr"
     item_attributes = {
         "brand": "Sklavenitis",
