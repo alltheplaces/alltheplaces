@@ -1,7 +1,7 @@
 from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class ChecknGoUSSpider(RioSeoSpider):
+class CheckNGoUSSpider(RioSeoSpider):
     name = "check_n_go_us"
     item_attributes = {
         "brand_wikidata": "Q96067540",
