@@ -1,11 +1,10 @@
 import re
 
 import chompjs
-import scrapy
 
 from locations.categories import Categories
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import OpeningHours, day_range
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -21,15 +20,14 @@ class TheFreshGrocerUSSpider(JSONBlobSpider):
 
     def extract_json(self, response):
         return chompjs.parse_js_object(
-                    response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').get()
-                )["stores"]["availablePlanningStores"]["items"]
+            response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').get()
+        )["stores"]["availablePlanningStores"]["items"]
 
     def pre_process_data(self, location):
         location["street_address"] = merge_address_lines(
             [location["addressLine1"], location["addressLine2"], location["addressLine3"]]
         )
         location["state"] = location["countyProvinceState"]
-
 
     def post_process_item(self, item, response, location):
         item["ref"] = location["retailerStoreId"]
