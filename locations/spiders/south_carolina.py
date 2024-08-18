@@ -31,7 +31,7 @@ class SouthCarolinaSpider(scrapy.Spider):
 
                 category_mapping = cat[int(i["CategoryId"]) - 1]
 
-                if category_mapping == "Libary":
+                if category_mapping == "Library":
                     apply_category(Category.LIBRARY, item)
                 elif category_mapping == "Court House":
                     apply_category({"amenity": "courthouse"}, item)
