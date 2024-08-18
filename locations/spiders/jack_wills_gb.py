@@ -1,11 +1,7 @@
-from typing import Any
-
 import chompjs
-from scrapy import Spider
-from scrapy.http import Response
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class JackWillsGBSpider(JSONBlobSpider):
