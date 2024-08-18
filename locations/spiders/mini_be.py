@@ -1,18 +1,15 @@
 import scrapy
 import xmltodict
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
-from locations.categories import Categories
+
 
 # TODO: Is this fully covered by the BMW Group Spider? It uses a very similar API endpoint
 class MiniBESpider(scrapy.Spider):
     name = "mini_be"
-    item_attributes = {
-        "brand": "Mini",
-        "brand_wikidata": "Q116232",                
-        "extras": Categories.SHOP_CAR.value
-    }
+    item_attributes = {"brand": "Mini", "brand_wikidata": "Q116232", "extras": Categories.SHOP_CAR.value}
     allowed_domains = ["mini.be"]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
