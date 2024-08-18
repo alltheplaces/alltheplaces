@@ -1,10 +1,6 @@
-from typing import Any
-
 import chompjs
 from scrapy import Spider
-from scrapy.http import Response
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS_GR, OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
