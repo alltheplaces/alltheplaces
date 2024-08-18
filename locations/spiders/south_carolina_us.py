@@ -2,6 +2,9 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
+from locations.dict_parser import DictParser
+
 
 class SouthCarolinaUSSpider(scrapy.Spider):
     download_delay = 0.2
