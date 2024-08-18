@@ -18,7 +18,7 @@ class SteineckeDESpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         opening_hours = OpeningHours()
-        for days, hour_range in store["hours"][0].items():
+        for days, hour_range in location["hours"][0].items():
             opening_hours.add_ranges_from_string(":".join([days, hour_range]), days=DAYS_DE)
         item["opening_hours"] = opening_hours
         yield item
