@@ -1,5 +1,4 @@
 import chompjs
-
 from scrapy import Selector
 
 from locations.json_blob_spider import JSONBlobSpider
@@ -21,7 +20,7 @@ class AlaskaCommercialCompanySpider(JSONBlobSpider):
 
         page_html = Selector(text=location["details"])
         location["address"] = str(page_html.xpath('//p[@class="address"]/strong/text()').get())
-        text = str(page_html.xpath('text()').get())
+        text = str(page_html.xpath("text()").get())
         if "Phone: " in text:
             location["phone"] = text.split("Phone: ")[1]
         location["id"] = location["pid"]
