@@ -1,11 +1,11 @@
 import chompjs
-from scrapy import Spider
 
 from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class VidaCaffeSpider(Spider):
+class VidaCaffeSpider(JSONBlobSpider):
     name = "vida_caffe"
     item_attributes = {
         "brand": "Vida e Caffè",
