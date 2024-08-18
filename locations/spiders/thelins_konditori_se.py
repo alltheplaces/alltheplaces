@@ -1,7 +1,7 @@
 import chompjs
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class ThelinsKonditoriSESpider(JSONBlobSpider):
