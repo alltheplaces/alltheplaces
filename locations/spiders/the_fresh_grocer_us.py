@@ -33,21 +33,22 @@ class TheFreshGrocerUSSpider(JSONBlobSpider):
         item["ref"] = location["retailerStoreId"]
         item["website"] = f'https://www.thefreshgrocer.com/sm/planning/rsid/{item["ref"]}'
 
-        if m := re.search(
-            r"(\w+)(?: (?:-|thru) (\w+))?: (\d+)\s*([ap]m) (?:-|to) (\d+)\s*([ap]m)",
-            location["openingHours"],
-            re.IGNORECASE,
-        ):
-            start_day, end_day, start_time, start_zone, end_time, end_zone = m.groups()
-            if not end_day:
-                end_day = start_day
-            if start_day and end_day:
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_days_range(
-                    day_range(start_day, end_day),
-                    f"{start_time}{start_zone}",
-                    f"{end_time}{end_zone}",
-                    time_format="%I%p",
-                )
+        if "openingHours" in location:
+            if m := re.search(
+                r"(\w+)(?: (?:-|thru) (\w+))?: (\d+)\s*([ap]m) (?:-|to) (\d+)\s*([ap]m)",
+                location["openingHours"],
+                re.IGNORECASE,
+            ):
+                start_day, end_day, start_time, start_zone, end_time, end_zone = m.groups()
+                if not end_day:
+                    end_day = start_day
+                if start_day and end_day:
+                    item["opening_hours"] = OpeningHours()
+                    item["opening_hours"].add_days_range(
+                        day_range(start_day, end_day),
+                        f"{start_time}{start_zone}",
+                        f"{end_time}{end_zone}",
+                        time_format="%I%p",
+                    )
 
         yield item
