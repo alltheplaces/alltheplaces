@@ -4,7 +4,7 @@ import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.dict_parser import DictParser
+from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS_GR, OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
@@ -28,12 +28,6 @@ class SklavenitisGRSpider(Spider):
             locations.append(chompjs.parse_js_object(json_data))
 
         return locations
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = self.extract_json(response)
-        for location in locations:
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
         # {'Key': '1004', 'Title': 'Αγιά', 'Address': 'Supermarket | Αμύρου 8', 'ZipCode': '400 03', 'County': 'Λάρισας', 'Area': 'Αγιά', 'Latitude': 39.7191, 'Longitude': 22.75468, 'DirectionsUrl': 'https://www.google.gr/maps/place/%CE%A3%CE%BF%CF%8D%CF%80%CE%B5%CF%81+%CE%9C%CE%AC%CF%81%CE%BA%CE%B5%CF%84+%C2%AB%CE%91%CE%B3%CE%BF%CF%81%CE%AC%C2%BB/@39.7191011,22.7546833,21z/data=!4m14!1m7!3m6!1s0x14a78460cd0aaa9f:0xb84f5f02ca0c6677!2zzqPOv8-Nz4DOtc-BIM6czqzPgc66zrXPhCDCq86RzrPOv8-BzqzCuw!8m2!3d39.7191264!4d22.7548501!16s%2Fg%2F11f39zdb81!3m5!1s0x14a78460cd0aaa9f:0xb84f5f02ca0c6677!8m2!3d39.7191264!4d22.7548501!16s%2Fg%2F11f39zdb81?hl=el', 'PhoneNumber': "<a href='tel:249 402 3799'>249 402 3799</a>", 'Email': 'g87@sklavenitis.com', 'WorkingHours': 'Δευτέρα - Παρασκευή: 08:00-21:00<br/>Σάββατο: 08:00-20:00', 'Image': 'https://s1.sklavenitis.gr/images/260x115/files/Boreia_Ellada_Stores/G87_ΑΓΙΑ.jpg', 'ParkingSlotsAvailable': None, 'Services': None, 'RecyclingServices': [{'Title': 'Μπαταρίες', 'Icon': 'mpataries', 'Order': 10}]}
