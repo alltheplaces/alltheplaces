@@ -2,9 +2,10 @@ import re
 
 import scrapy
 
-from locations.items import Feature
-from locations.hours import DAYS_EN
 from locations.categories import Categories
+from locations.hours import DAYS_EN
+from locations.items import Feature
+
 
 class TopsSpider(scrapy.Spider):
     name = "tops"
