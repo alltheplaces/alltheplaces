@@ -1,13 +1,15 @@
 import scrapy
 
 from locations.items import Feature
+from locations.categories import Categories
 
-
+# TODO: Is this fully covered by the BMW Group Spider?
 class MiniSESpider(scrapy.Spider):
     name = "mini_se"
     item_attributes = {
         "brand": "Mini",
         "brand_wikidata": "Q116232",
+        "extras": Categories.SHOP_CAR.value
     }
     start_urls = ["https://www.mini.se/umbraco/api/dealers/getall?nodeId=1870"]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
