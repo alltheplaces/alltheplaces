@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
+from locations.categories import PaymentMethods, map_payment
 
 
 def extract_email(item, sel: Selector):
@@ -141,6 +142,7 @@ class StructuredDataSpider(Spider):
     - search_for_instagram
     - search_for_image
     - search_for_amenity_features
+    - search_for_payment_accepted
 
     By default the spider only looks for certain `wanted_types`.
     You can change this behaviour by specifying this as a list of your desired types.
@@ -187,6 +189,7 @@ class StructuredDataSpider(Spider):
     search_for_facebook = True
     search_for_instagram = False
     search_for_amenity_features = True
+    search_for_payment_accepted = True
     search_for_image = True
     json_parser = "json"
     time_format = "%H:%M"
@@ -241,6 +244,9 @@ class StructuredDataSpider(Spider):
             if self.search_for_amenity_features:
                 self.extract_amenity_features(item, response, ld_item)
 
+            if self.search_for_payment_accepted:
+                self.extract_payment_accepted(item, response, ld_item)
+
             if self.search_for_instagram and not item["extras"].get("instagram"):
                 extract_instagram(item, response)
 
@@ -275,6 +281,23 @@ class StructuredDataSpider(Spider):
             )
             self.logger.debug(ld_item["amenityFeature"])
             self.crawler.stats.inc_value("atp/structured_data/unmapped/amenity_features")
+
+    def extract_payment_accepted(self, item, response: Response, ld_item):
+        """
+        https://schema.org/paymentAccepted
+        """
+        if "paymentAccepted" in ld_item:
+            if "," in ld_item["paymentAccepted"]:
+                ld_item["paymentAccepted"] = ld_item["paymentAccepted"].split(", ")
+            if len(ld_item["paymentAccepted"]) > 0:
+                for payment in ld_item["paymentAccepted"]:
+                    if not map_payment(item, payment, PaymentMethods):
+                        self.logger.info(
+                            "Found paymentAccepted data that could not be mapped, implement `extract_payment_accepted` or set `search_for_payment_accepted` to suppress this message"
+                        )
+                        self.logger.debug(payment)
+                        self.crawler.stats.inc_value("atp/structured_data/unmapped/payment_accepted")
+
 
     def get_ref(self, url: str, response: Response) -> str:
         if hasattr(self, "rules"):  # Attempt to pull a match from CrawlSpider.rules
