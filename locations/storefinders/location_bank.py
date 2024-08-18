@@ -26,17 +26,19 @@ class LocationBankSpider(Spider):
     def parse(self, response):
         data = response.json()
 
-        # It looks like it is possibble to have a different key, but it does not appear to be used
-        detail_view_key = re.search("{(.+)}", data["detailViewUrl"]).group(1)
-        if detail_view_key == "locationid":
-            detail_view_key = "id"
+        if data["detailViewUrl"] is not None:
+            # It looks like it is possibble to have a different key, but it does not appear to be used
+            detail_view_key = re.search("{(.+)}", data["detailViewUrl"]).group(1)
+            if detail_view_key == "locationid":
+                detail_view_key = "id"
 
         for location in data["locations"]:
             location["phone"] = location.pop("primaryPhone")
             if location["additionalPhone1"]:
                 location["phone"] += "; " + location.pop("additionalPhone1")
             location["state"] = location.pop("administrativeArea")
-            location["website"] = re.sub(r"\{.+\}", location[detail_view_key], data["detailViewUrl"])
+            if data["detailViewUrl"] is not None:
+                location["website"] = re.sub(r"\{.+\}", location[detail_view_key], data["detailViewUrl"])
             location["street_address"] = clean_address([location.pop("addressLine1"), location.get("addressLine2")])
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
