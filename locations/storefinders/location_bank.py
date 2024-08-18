@@ -54,7 +54,7 @@ class LocationBankSpider(Spider):
 
             # There are also individual store pages that may have more detail, but nothing of interest has been seen yet,
             # so that is being left unimplemented for now:
-            # f"https://api.locationbank.net/storelocator/StoreLocatorAPI/locationDetails?LocationID={location["id"]}&ClientID={self.client_id}"
+            # f"https://api.locationbank.net/storelocator/StoreLocatorAPI/locationDetails?LocationID={location['id']}&ClientID={self.client_id}"
 
             yield from self.parse_item(item, location)
 
