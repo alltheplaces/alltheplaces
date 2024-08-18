@@ -1,14 +1,11 @@
-from typing import Any
-
 import chompjs
-from scrapy import Selector, Spider
-from scrapy.http import Response
+from scrapy import Selector
 
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class MarkantDESpider(Spider):
+class MarkantDESpider(JSONBlobSpider):
     name = "markant_de"
     item_attributes = {
         "brand_wikidata": "Q57523365",
@@ -21,12 +18,6 @@ class MarkantDESpider(Spider):
 
     def extract_json(self, response):
         return chompjs.parse_js_object(response.xpath('//script[contains(text(), "var oMaerkte = ")]/text()').get())
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = self.extract_json(response)
-        for location in locations:
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
         # {'uid': 168, 'name': 'Verbrauchermarkt Höne OHG Rulle', 'marktnamebild': 'Verbrauchermarkt Höne OHG', 'street': 'Parkallee 1', 'zip': '49134',

@@ -1,13 +1,9 @@
-from typing import Any
-
 import chompjs
-from scrapy import Spider
-from scrapy.http import Response
 
-from locations.dict_parser import DictParser
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class RobertHarrisNZSpider(Spider):
+class RobertHarrisNZSpider(JSONBlobSpider):
     name = "robert_harris_nz"
     item_attributes = {
         "brand_wikidata": "Q121652432",
@@ -20,12 +16,6 @@ class RobertHarrisNZSpider(Spider):
 
     def extract_json(self, response):
         return chompjs.parse_js_object(response.xpath('//script[contains(text(), "var branches = ")]/text()').get())
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = self.extract_json(response)
-        for location in locations:
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
         # {'id': 'Robert Harris Whakatane', 'url': 'https://www.robertharris.co.nz/cafe/robert-harris-whakatane/', 'name': 'Robert Harris Whakatane',

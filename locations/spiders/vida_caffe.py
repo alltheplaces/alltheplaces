@@ -1,15 +1,11 @@
-from typing import Any
-
 import chompjs
-from scrapy import Spider
-from scrapy.http import Response
 
 from locations.categories import Extras, PaymentMethods, apply_yes_no
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class VidaCaffeSpider(Spider):
+class VidaCaffeSpider(JSONBlobSpider):
     name = "vida_caffe"
     item_attributes = {
         "brand": "Vida e Caffè",
@@ -21,12 +17,6 @@ class VidaCaffeSpider(Spider):
         return chompjs.parse_js_object(
             response.xpath('//script[@type="rocketlazyloadscript" and contains(text(), "var stores = ")]/text()').get()
         )
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = self.extract_json(response)
-        for location in locations:
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
         # {'id': 353, 'title': '@Home Sandton City', 'location': {'address': 'Sandton City, 163 5th St, Sandhurst, Sandton, GP, South Africa', 'lat': '-26.1082596', 'lng': '28.0531383'}, 'images': False, 'email': 'athomesandton@Caffe.co.za', 'facebook': None, 'times': False, 'shop_number': 'Shop U307', 'contact_number': '', 'store_type': ['corporate'], 'store_features': []}

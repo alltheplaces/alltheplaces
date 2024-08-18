@@ -1,14 +1,10 @@
-from typing import Any
-
 import chompjs
-from scrapy import Spider
-from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ProfiROSpider(Spider):
+class ProfiROSpider(JSONBlobSpider):
     name = "profi_ro"
     item_attributes = {
         "brand_wikidata": "Q956664",
@@ -23,12 +19,6 @@ class ProfiROSpider(Spider):
         return chompjs.parse_js_object(
             response.xpath('//script[contains(text(), "const STORE_LOCATIONS =")]/text()').get()
         )
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = self.extract_json(response)
-        for location in locations:
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
         # {'id': 9393, 'title': 'PROFI Gherla Mihai Eminescu', 'image': 'https://www.profi.ro/wp-content/uploads/2021/11/2038-300x225.jpg',

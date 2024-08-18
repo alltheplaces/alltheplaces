@@ -1,14 +1,10 @@
-from typing import Any
-
 import chompjs
-from scrapy import Spider
-from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class JackWillsGBSpider(Spider):
+class JackWillsGBSpider(JSONBlobSpider):
     name = "jack_wills_gb"
     item_attributes = {
         "brand": "Jack Wills",
@@ -24,12 +20,6 @@ class JackWillsGBSpider(Spider):
 
     def extract_json(self, response):
         return chompjs.parse_js_object(response.xpath('//script[contains(text(),"var stores = ")]/text()').get())
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = self.extract_json(response)
-        for location in locations:
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
         item["ref"] = location["code"]

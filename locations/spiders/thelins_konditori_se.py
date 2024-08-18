@@ -1,14 +1,10 @@
-from typing import Any
-
 import chompjs
-from scrapy import Spider
-from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ThelinsKonditoriSESpider(Spider):
+class ThelinsKonditoriSESpider(JSONBlobSpider):
     name = "thelins_konditori_se"
     item_attributes = {
         "brand_wikidata": "Q124048792",
@@ -23,12 +19,6 @@ class ThelinsKonditoriSESpider(Spider):
         return chompjs.parse_js_object(
             response.xpath('//script[contains(text(), "var stores=\'")]/text()').get().split("var stores='")[1]
         )
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = self.extract_json(response)
-        for location in locations:
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item, response, location):
         # {'address': 'Birger Jarlsgatan 12', 'apiOrderEnabled': True, 'city': 'Stockholm', 'email': 'info@thelinskonditori.se', 'id': 8,
