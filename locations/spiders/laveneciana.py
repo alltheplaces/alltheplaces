@@ -1,6 +1,3 @@
-import re
-
-import scrapy
 import chompjs
 
 from locations.json_blob_spider import JSONBlobSpider
@@ -15,9 +12,7 @@ class LavenecianaSpider(JSONBlobSpider):
 
     def extract_json(self, response):
         # var php_vars = {"markerIcon":"http:\/\/laveneciana.com.ar\/wp-content\/uploads\/2017\/09\/Pin_Logo_WhiteBorder-e1505163277731.png","sucursales":
-        data = response.xpath(
-                '//script[contains(text(), "var php_vars =")]/text()'
-            ).get().split("var php_vars = ")[1]
+        data = response.xpath('//script[contains(text(), "var php_vars =")]/text()').get().split("var php_vars = ")[1]
         return chompjs.parse_js_object(data)["sucursales"]
 
     def pre_process_data(self, location):
