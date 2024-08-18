@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -34,7 +34,7 @@ class SouthCarolinaUSSpider(scrapy.Spider):
                 category_mapping = cat[int(i["CategoryId"]) - 1]
 
                 if category_mapping == "Libary":
-                    apply_category(Category.LIBRARY, item)
+                    apply_category(Categories.LIBRARY, item)
                 elif category_mapping == "Court House":
                     apply_category({"amenity": "courthouse"}, item)
                 else:
