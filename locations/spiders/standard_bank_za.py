@@ -53,7 +53,7 @@ CHAIN_LOCATIONS = {
 
 class StandardBankZASpider(scrapy.Spider):
     name = "standard_bank_za"
-    item_attributes = {"brand": "Standard Bank", "brand_wikidata": "Q1576610", "extras": Categories.BANK.value}
+    item_attributes = {"brand": "Standard Bank", "brand_wikidata": "Q1576610"}
     allowed_domains = ["digitalbanking.standardbank.co.za"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # HTTP 500 error for robots.txt
     start_urls = [
@@ -65,7 +65,6 @@ class StandardBankZASpider(scrapy.Spider):
         data = response.json()
         for location in data["centers"]:
             item = DictParser.parse(location)
-            item["ref"] = location.pop("gresId")
             item["lat"] = location["location"]["latitude"]
             item["lon"] = location["location"]["longitude"]
             item["state"] = location["location"]["nationalProv"]
@@ -77,6 +76,7 @@ class StandardBankZASpider(scrapy.Spider):
                 [location["location"]["shopNo"], location["location"]["shoppingCenter"], location["location"]["street"]]
             )
             item["branch"] = item.pop("name")
+            item["opening_hours"] = self.parse_opening_hours(location)
 
             if location["locationType"] == "Branch":
                 apply_category(Categories.BANK, item)
@@ -89,6 +89,8 @@ class StandardBankZASpider(scrapy.Spider):
                 continue
 
     def parse_branch(self, item, location):
+        item["ref"] = location.pop("centerNo")
+
         services = [service["name"] for service in location["services"]]
         # Possible services: 'Internet Kiosk', 'SBFC presence', 'Cashless Outlet', 'Forex', 'MoneyGram', 'Safe Custody',
         #    'MIE presence', 'Home Affairs Presence', 'Liberty Presence'
@@ -100,7 +102,26 @@ class StandardBankZASpider(scrapy.Spider):
             Extras.BACKUP_GENERATOR, item, location.get("shoppingCenterGeneratorStatus") == "YES"
         )  # Value can be "UNKNOWN"
 
+        yield item
+
+    def parse_atm(self, item, location):
+        item["ref"] = location.pop("gresId")
+
+        # Despite being a list, it appears to always have either 0 or 1 elements
+        if len(location["atms"]) > 0:
+            apply_yes_no(Extras.CASH_IN, item, ATM_TYPES_CASH_IN[location["atms"][0]["atmType"]], False)
+            if location["atms"][0]["chain"] in CHAIN_LOCATIONS:
+                item.update(CHAIN_LOCATIONS[location["atms"][0]["chain"]])
+            else:
+                item["located_in"] = location["atms"][0]["chain"]
+            # location["atms"]["typeOfSite"] does not appear to be useful
+
+        yield item
+
+    def parse_opening_hours(self, location):
         oh = OpeningHours()
+        if location["operatingHours"] == []:
+            return None
         for line in location["operatingHours"]:
             try:
                 day_time = line["hours"].split(":")
@@ -136,18 +157,4 @@ class StandardBankZASpider(scrapy.Spider):
                         pass
             except:
                 pass
-
-        item["opening_hours"] = oh.as_opening_hours()
-        yield item
-
-    def parse_atm(self, item, location):
-        # Despite being a list, it appears to always have either 0 or 1 elements
-        if len(location["atms"]) > 0:
-            apply_yes_no(Extras.CASH_IN, item, ATM_TYPES_CASH_IN[location["atms"][0]["atmType"]], False)
-            if location["atms"][0]["chain"] in CHAIN_LOCATIONS:
-                item.update(CHAIN_LOCATIONS[location["atms"][0]["chain"]])
-            else:
-                item["located_in"] = location["atms"][0]["chain"]
-            # location["atms"]["typeOfSite"] does not appear to be useful
-
-        yield item
+        return oh.as_opening_hours()
