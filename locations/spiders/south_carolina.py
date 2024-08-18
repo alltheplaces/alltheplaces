@@ -26,21 +26,23 @@ class SouthCarolinaSpider(scrapy.Spider):
 
         for i in data:
             try:
-                properties = {
-                    "ref": i["Id"],
-                    "name": i["Description"],
-                    "extras": {
-                        "category": (cat[int(i["CategoryId"]) - 1]),
-                    },
-                    "addr_full": i["Address"],
-                    "postcode": i["Zipcode"],
-                    "country": "US",
-                    "phone": i["Telephone"],
-                    "lat": float(i["Latitude"]),
-                    "lon": -abs(float(i["Longitude"])),
-                }
+                item = DictParser.parse(i)
+                item["lon"] = -abs(float(i["Longitude"]))
+                item["country"] = "US"
+                item["name"] = i["Description"]
 
-                yield Feature(**properties)
+                category_mapping = cat[int(i["CategoryId"]) - 1]
+
+                if category_mapping == "Libary":
+                    apply_category(Category.LIBRARY, item)
+                elif category_mapping == "Court House":
+                    apply_category({"amenity": "courthouse"}, item)
+                else:
+                    item["extras"] = {
+                        "category": category_mapping
+                    }
+
+                yield item
 
             except:
                 pass
