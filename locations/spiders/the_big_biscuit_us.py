@@ -1,8 +1,7 @@
 from chompjs import parse_js_object
-from scrapy import Spider
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class TheBigBiscuitUSSpider(JSONBlobSpider):
