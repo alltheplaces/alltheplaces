@@ -1,12 +1,7 @@
 import json
-from typing import Any
-
-import scrapy
-from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_ES, OpeningHours, sanitise_day
-from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.mcdonalds import McdonaldsSpider
 
@@ -19,7 +14,6 @@ class McdonaldsGTSpider(JSONBlobSpider):
 
     def extract_json(self, response):
         return json.loads(response.xpath("//@data-page").get())["props"]["restaurants"]
-
 
     def post_process_item(self, item, response, location):
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in location["categorias"])
