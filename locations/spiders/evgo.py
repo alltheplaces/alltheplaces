@@ -2,7 +2,6 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.geo import bbox_contains, make_subdivisions
-from locations.items import Feature
 
 
 class EvgoSpider(scrapy.Spider):
@@ -111,20 +110,16 @@ class EvgoSpider(scrapy.Spider):
             )
 
     def parse_station(self, response):
-        for item in response.json().get("data"):
-            properties = {
-                "lat": item["latitude"],
-                "lon": item["longitude"],
-                "ref": item["id"],
-                "street_address": item["addressAddress1"],
-                "city": item["addressCity"],
-                "state": item["addressUsaStateCode"],
-                "name": response.meta.get("name"),
-                "extras": {
-                    "evgo:site_id": response.meta.get("site_id"),
-                },
+        for location in response.json().get("data"):
+            item = DictParser.parse(location)
+            item["street_address"] = location["addressAddress1"]
+            item["city"] = location["addressCity"]
+            item["state"] = location["addressUsaStateCode"]
+            item["name"] = response.meta.get("name")
+            item["extras"] = {
+                "evgo:site_id": response.meta.get("site_id"),
             }
 
             apply_category(Categories.CHARGING_STATION, item)
 
-            yield Feature(**properties)
+            yield item
