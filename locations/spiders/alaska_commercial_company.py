@@ -5,7 +5,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 
 class AlaskaCommercialCompanySpider(JSONBlobSpider):
-    name = "alaska_commrcial_company"
+    name = "alaska_commercial_company"
     item_attributes = {"brand": "Alaska Commercial Company", "brand_wikidata": "Q2637066"}
     allowed_domains = ["www.alaskacommercial.com"]
     download_delay = 0.5
