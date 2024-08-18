@@ -1,10 +1,10 @@
 import chompjs
-from scrapy import Spider
 
+from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS, OpeningHours
 
 
-class ThelinsKonditoriSESpider(Spider):
+class ThelinsKonditoriSESpider(JSONBlobSpider):
     name = "thelins_konditori_se"
     item_attributes = {
         "brand_wikidata": "Q124048792",
