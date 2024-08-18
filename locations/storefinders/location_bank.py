@@ -3,11 +3,10 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 # To use, specify the client ID for the brand in the format of
 # StoreLocatorAPI?clientId={client_id}
@@ -49,7 +48,9 @@ class LocationBankSpider(Spider):
                     item["opening_hours"].set_closed(day["openDay"])
             if self.include_images:
                 image_root = "https://api.locationbank.net/storelocator/StoreLocatorAPI/locationImage"
-                item["image"] = f"{image_root}?clientId={self.client_id}&LocationID={location["id"]}&MediaCat={data["imagesCategory"]}&Rule={data["imagesCategorySelectOnRule"]}"
+                item["image"] = (
+                    f"{image_root}?clientId={self.client_id}&LocationID={location["id"]}&MediaCat={data["imagesCategory"]}&Rule={data["imagesCategorySelectOnRule"]}"
+                )
 
             # There are also individual store pages that may have more detail, but nothing of interest has been seen yet,
             # so that is being left unimplemented for now:
