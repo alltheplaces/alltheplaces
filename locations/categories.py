@@ -790,4 +790,3 @@ def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelC
     if payment := map.get(payment_method):
         apply_yes_no(enum[payment], item, True)
         return True
-

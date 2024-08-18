@@ -5,10 +5,10 @@ from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
+from locations.categories import PaymentMethods, map_payment
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
-from locations.categories import PaymentMethods, map_payment
 
 
 def extract_email(item, sel: Selector):
@@ -297,7 +297,6 @@ class StructuredDataSpider(Spider):
                         )
                         self.logger.debug(payment)
                         self.crawler.stats.inc_value("atp/structured_data/unmapped/payment_accepted")
-
 
     def get_ref(self, url: str, response: Response) -> str:
         if hasattr(self, "rules"):  # Attempt to pull a match from CrawlSpider.rules
