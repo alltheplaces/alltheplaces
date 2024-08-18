@@ -16,7 +16,6 @@ class TexaidBGSpider(scrapy.Spider):
         js = response.xpath('//script[contains(text(), "L.marker")]').get()
         marker_regex = r"L\.marker\(\[(\d+\.\d+),\s*(\d+\.\d+)\].*?bindPopup\(\"(.*?)\"\)"
         markers = re.findall(marker_regex, js)
-        print(markers)
         for lat, lon, popup in markers:
             properties = {
                 "lon": float(lon),
