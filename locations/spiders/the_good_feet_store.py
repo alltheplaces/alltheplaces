@@ -1,12 +1,12 @@
 from chompjs import parse_js_object
-from scrapy import Selector
+from scrapy import Selector, Spider
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class TheGoodFeetStoreSpider(JSONBlobSpider):
+class TheGoodFeetStoreSpider(Spider):
     name = "the_good_feet_store"
     item_attributes = {
         "brand": "The Good Feet Store",
