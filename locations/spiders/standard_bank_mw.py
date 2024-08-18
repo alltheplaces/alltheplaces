@@ -3,7 +3,7 @@ from locations.spiders.standard_bank_za import StandardBankZASpider
 MW_REGIONS = ["Central", "Northern", "Southern"]
 
 
-class StandardBankMWSpider(StandardBankZASpider):
+class StandardBankmWSpider(StandardBankZASpider):
     name = "standard_bank_mw"
     item_attributes = {"brand": "Standard Bank", "brand_wikidata": "Q1576610"}
     allowed_domains = ["digitalbanking.standardbank.co.za"]
