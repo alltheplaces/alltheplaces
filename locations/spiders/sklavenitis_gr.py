@@ -1,7 +1,7 @@
 import chompjs
-from locations.json_blob_spider import JSONBlobSpider
 
 from locations.hours import DAYS_GR, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
