@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-from scrapy import Spider
 
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -23,7 +22,6 @@ class HarcourtsSpider(JSONBlobSpider):
             + "}]"
         )
         return parse_js_object(locations_js)
-
 
     def post_process_item(self, item, response, location):
         if "/nz/" in response.url:
