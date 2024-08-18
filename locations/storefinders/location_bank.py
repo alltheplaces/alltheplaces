@@ -49,7 +49,7 @@ class LocationBankSpider(Spider):
             if self.include_images:
                 image_root = "https://api.locationbank.net/storelocator/StoreLocatorAPI/locationImage"
                 item["image"] = (
-                    f"{image_root}?clientId={self.client_id}&LocationID={location["id"]}&MediaCat={data["imagesCategory"]}&Rule={data["imagesCategorySelectOnRule"]}"
+                    f"{image_root}?clientId={self.client_id}&LocationID={location['id']}&MediaCat={data['imagesCategory']}&Rule={data['imagesCategorySelectOnRule']}"
                 )
 
             # There are also individual store pages that may have more detail, but nothing of interest has been seen yet,
