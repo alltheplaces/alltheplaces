@@ -9,7 +9,7 @@ class TexaidBGSpider(scrapy.Spider):
     name = "texaid_bg"
     item_attributes = {"brand": "Texaid", "brand_wikidata": "Q1395183"}
     allowed_domains = ["texaidbg.texaid.com"]
-    start_urls = [ "https://texaidbg.texaid.com/bg/kontejneri-za-sbirane.html" ]
+    start_urls = ["https://texaidbg.texaid.com/bg/kontejneri-za-sbirane.html"]
     no_refs = True
 
     def parse(self, response):
