@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.dict_parser import DictParser
 
 
