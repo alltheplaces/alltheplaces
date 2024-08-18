@@ -1,50 +1,25 @@
 import re
 
 import scrapy
+import chompjs
 
-from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class LavenecianaSpider(scrapy.Spider):
+class LavenecianaSpider(JSONBlobSpider):
     name = "laveneciana"
     item_attributes = {"brand": "La Veneciana"}
-    allowed_domains = ["www.laveneciana.com.ar"]
+    allowed_domains = ["laveneciana.com.ar"]
     download_delay = 0.5
-    start_urls = ("http://www.laveneciana.com.ar/sucursales.html",)
+    start_urls = ("http://laveneciana.com.ar/sucursales/",)
 
-    def parse(self, response):
-        stores = response.xpath(
-            '//div[@class="navigation-container"]/div[@id="thumbs"]/ul[@class="thumbs noscript"]/li'
-        )
-        for store in stores:
-            addr_full_tel = store.xpath(
-                'normalize-space(./div[@class="caption"]/div[@class="image-desc"]/text())'
-            ).extract_first()
-            location = store.xpath(
-                'normalize-space(./div[@class="caption"]/div[@class="ubicacion"]/iframe/@src)'
-            ).extract_first()
-            position = re.findall(r"ll=[0-9-.,]+", location)
-            id = re.findall(r"cid=[0-9]+", location)
-            if len(position) > 0:
-                lat = float(position[0][3:].split(",")[0])
-                lon = float(position[0][3:].split(",")[1])
-                id = id[0][4:]
-            else:
-                lat = ""
-                lon = ""
-                id = ""
-            addr_full = addr_full_tel.split("Tel.: ")[0]
-            phone_number = addr_full_tel.split("Tel.: ")[1]
-            if addr_full != "Direccion... ":
-                properties = {
-                    "addr_full": addr_full,
-                    "phone": phone_number,
-                    "city": "",
-                    "state": "",
-                    "postcode": "",
-                    "ref": id,
-                    "website": response.url,
-                    "lat": lat,
-                    "lon": lon,
-                }
-                yield Feature(**properties)
+    def extract_json(self, response):
+        # var php_vars = {"markerIcon":"http:\/\/laveneciana.com.ar\/wp-content\/uploads\/2017\/09\/Pin_Logo_WhiteBorder-e1505163277731.png","sucursales":
+        data = response.xpath(
+                '//script[contains(text(), "var php_vars =")]/text()'
+            ).get().split("var php_vars = ")[1]
+        return chompjs.parse_js_object(data)["sucursales"]
+
+    def pre_process_data(self, location):
+        # {'id': '31', 'nombre': 'Lomitas Street', 'direccion': 'Italia 459 | Lomas de Zamora | Buenos Aires', 'latitud': '-34.76602000', 'longitud': '-58.40212900', 'telefono': '7529 - 8791', 'email': '-', 'facebook': None, 'google_map_single': None, 'imagen': '800', 'filtro': 'buenosaires', 'wifi': '1', 'estacionamiento': '1', 'activo': '1'}
+        location["nombre"] = location["nombre"].replace(" | ", ", ")

@@ -39,6 +39,9 @@ class DictParser:
         "item-name",
         "location-name",
         "loc-name",
+
+        # ES
+        "nombre"
     ]
 
     house_number_keys = [
@@ -196,6 +199,7 @@ class DictParser:
         "geo-lat",
         # ES
         "coordenaday",  # "Coordinate Y"
+        "latitud"
     ]
 
     lon_keys = [
@@ -211,6 +215,7 @@ class DictParser:
         "geo-lng",
         # ES
         "coordenadax",  # "Coordinate X"
+        "longitud"
     ]
 
     website_keys = [
