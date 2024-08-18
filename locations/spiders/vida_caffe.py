@@ -1,11 +1,7 @@
-from typing import Any
-
 import chompjs
 from scrapy import Spider
-from scrapy.http import Response
 
 from locations.categories import Extras, PaymentMethods, apply_yes_no
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import OpeningHours
 
 
