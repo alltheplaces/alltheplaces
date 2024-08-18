@@ -1,5 +1,5 @@
 from chompjs import parse_js_object
-from scrapy import Selector, Spider
+from scrapy import Selector
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
@@ -20,7 +20,6 @@ class TheGoodFeetStoreSpider(JSONBlobSpider):
         js_blob = response.xpath('//script[contains(text(), "var addresses = [[")]/text()').get()
         js_blob = "[[" + js_blob.split("var addresses = [[", 1)[1].split("]];", 1)[0] + "]]"
         return parse_js_object(js_blob)
-
 
     def parse(self, response):
         for location in self.extract_json(response):
