@@ -20,7 +20,7 @@ class AfricanBankZASpider(scrapy.Spider):
         data = response.json()
 
         # This is slightly unecessary now, but saving it for later in case of other websites using locationbank.net to see how the detailViewUrl looks
-        detail_view_key = re.search("\{(.+)\}", data["detailViewUrl"]).group(1)
+        detail_view_key = re.search("{(.+)}", data["detailViewUrl"]).group(1)
         if detail_view_key == "locationid":
             detail_view_key = "id"
 
