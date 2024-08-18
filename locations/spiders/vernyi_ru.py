@@ -1,9 +1,8 @@
-import scrapy
 from chompjs import chompjs
 
 from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class VernyiRUSpider(JSONBlobSpider):
