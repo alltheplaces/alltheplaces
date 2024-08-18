@@ -3,8 +3,8 @@ import chompjs
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class LavenecianaSpider(JSONBlobSpider):
-    name = "laveneciana"
+class LavenecianaARSpider(JSONBlobSpider):
+    name = "laveneciana_ar"
     item_attributes = {"brand": "La Veneciana"}
     allowed_domains = ["laveneciana.com.ar"]
     download_delay = 0.5
