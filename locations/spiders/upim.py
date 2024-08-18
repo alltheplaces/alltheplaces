@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
 class UpimSpider(Spider):
@@ -16,18 +16,12 @@ class UpimSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in chompjs.parse_js_object(response.text):
-            item = Feature()
-            item["ref"] = location["id"]
-            item["lat"] = location["lat"]
-            item["lon"] = location["lon"]
-            item["name"] = location["name"]
+            item = DictParser.parse(location)
             item["street_address"] = location["a1"]
-            item["city"] = location["city"]
             item["state"] = location["prov"]
             item["postcode"] = location["cap"]
             item["country"] = location["country_tag"]
             item["website"] = location["l"]
-            item["phone"] = location["phone"]
 
             if item["name"].upper().startswith("UPIM"):
                 item["branch"] = item.pop("name").split(" ", 1)[1]
