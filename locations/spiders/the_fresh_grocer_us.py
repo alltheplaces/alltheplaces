@@ -33,7 +33,7 @@ class TheFreshGrocerUSSpider(JSONBlobSpider):
         item["ref"] = location["retailerStoreId"]
         item["website"] = f'https://www.thefreshgrocer.com/sm/planning/rsid/{item["ref"]}'
 
-        if "openingHours" in location:
+        if "openingHours" in location and location["openingHours"] is not None:
             if m := re.search(
                 r"(\w+)(?: (?:-|thru) (\w+))?: (\d+)\s*([ap]m) (?:-|to) (\d+)\s*([ap]m)",
                 location["openingHours"],
