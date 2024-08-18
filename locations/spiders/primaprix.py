@@ -12,4 +12,3 @@ class PrimaprixSpider(JSONBlobSpider):
     def extract_json(self, response):
         data = response.xpath('//script[contains(text(), "window.shops = ")]/text()').get().split("window.shops = ")[1]
         return chompjs.parse_js_object(data)
-
