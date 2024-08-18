@@ -1,8 +1,4 @@
-from typing import Any
-
 import chompjs
-from scrapy import Spider
-from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
@@ -16,13 +12,13 @@ class UpimSpider(JSONBlobSpider):
 
     def extract_json(self, response):
         return chompjs.parse_js_object(response.text)
-    
+
     def post_process_item(self, item, response, location):
         item["street_address"] = location["a1"]
         item["state"] = location["prov"]
         item["postcode"] = location["cap"]
         item["country"] = location["country_tag"]
-        item["website"] = location["l"]           
+        item["website"] = location["l"]
 
         if item["name"].upper().startswith("UPIM"):
             item["branch"] = item.pop("name").split(" ", 1)[1]
