@@ -2,8 +2,6 @@ import json
 
 import scrapy
 
-from locations.items import Feature
-
 
 class SouthCarolinaSpider(scrapy.Spider):
     download_delay = 0.2
@@ -38,9 +36,7 @@ class SouthCarolinaSpider(scrapy.Spider):
                 elif category_mapping == "Court House":
                     apply_category({"amenity": "courthouse"}, item)
                 else:
-                    item["extras"] = {
-                        "category": category_mapping
-                    }
+                    item["extras"] = {"category": category_mapping}
 
                 yield item
 
