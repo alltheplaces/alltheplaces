@@ -7,7 +7,6 @@ from locations.dict_parser import DictParser
 
 
 class SouthCarolinaUSSpider(scrapy.Spider):
-    download_delay = 0.2
     name = "south_carolina_us"
     allowed_domains = ["sc.gov"]
     start_urls = ("https://applications.sc.gov/PortalMapApi/api/Map/GetMapItemsByCategoryId/1,2,3,4,5,6,7",)
