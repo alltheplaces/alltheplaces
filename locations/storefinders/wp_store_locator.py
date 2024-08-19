@@ -142,7 +142,7 @@ class WPStoreLocatorSpider(Spider):
         """
         NONPREFERRED geographic radius search method with
         NONPREFERRED searchable_points_file method of
-        specifying centroids. 
+        specifying centroids.
         """
         for searchable_points_file in self.searchable_points_files:
             for lat, lon in point_locations(searchable_points_file):
