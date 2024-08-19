@@ -14,6 +14,7 @@ class BwsAUSpider(Spider):
     item_attributes = {"brand": "BWS", "brand_wikidata": "Q4836848", "extras": Categories.SHOP_ALCOHOL.value}
     allowed_domains = ["api.bws.com.au"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "AU"
 
     def start_requests(self) -> Iterable[Request]:
         for state in ["ACT", "NSW", "QLD", "SA", "VIC", "TAS", "WA", "NT"]:
