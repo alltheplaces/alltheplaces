@@ -1,6 +1,6 @@
 from scrapy import Selector
 
-from locations.hours import OpeningHours, sanitise_day
+from locations.hours import DAYS_EN, OpeningHours, sanitise_day
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -14,26 +14,14 @@ class PizzaPerfectZASpider(WPStoreLocatorSpider):
         "pizzaperfect.co.za",
     ]
     max_results = 100
+    iseadgg_countries_list = ["ZA"]
     search_radius = 50
-    searchable_points_files = ["za_centroids_iseadgg_48km_radius.csv"]
+    days = DAYS_EN
+    time_format = "%I:%M %p"
 
-    def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours:
-        if not location.get("hours"):
-            return
-        sel = Selector(text=location["hours"])
-        oh = OpeningHours()
-        for rule in sel.xpath("//tr"):
-            day = sanitise_day(rule.xpath("./td/text()").get(), days)
-            times = rule.xpath("./td/time/text()").get()
-            if not day or not times:
-                continue
-            if times.lower() in ["closed"]:
-                continue
-            start_time, end_time = times.split("-")
-            # TODO: There must be a better way than this
-            try:
-                oh.add_range(day, start_time.strip(), end_time.strip(), time_format="%I:%M %p")
-            except ValueError:
-                oh.add_range(day, start_time.strip(), end_time.strip(), time_format="%H:%M %p")
-
-        return oh
+    def parse_item(self, item, location):
+        item.pop("addr_full", None)
+        if branch_name := item.pop("name", None):
+            item["branch"] = branch_name.removeprefix("Pizza Perfect ")
+        item["phone"] = item["phone"].split("/")[0].split("|")[0]
+        yield item
