@@ -10,9 +10,20 @@ from locations.dict_parser import DictParser
 # `pre_process_data` to clean up the keys of an individual entry; and
 # `post_process_item` to apply any further attributes
 class JSONBlobSpider(Spider):
-    def extract_json(response):
+    """
+    Provide some lightweight support for iterating an array of JSON POI locations
+    and passing each entry to DictParser. Hooks are provided such that subclasses
+    can override the logic at various stages of the pipeline.
+    """
+
+    # If set then use as a key into the JSON response to return the location data array.
+    locations_key = None
+
+    def extract_json(self, response):
         """
-        Override this method to extract the main JSON content from the page.
+        Override this method to extract the main JSON content from the page. The default
+        behaviour is to treat the returned body as JSON and treat it as an array of
+        locations to be given to DictParser.
 
         Example 1:
         raw = response.xpath("//div[@id='content']/script/text()").extract_first()
@@ -25,6 +36,10 @@ class JSONBlobSpider(Spider):
         data_raw = data_raw.split('},"places":', 1)[1]
         locations = chompjs.parse_js_object(data_raw)
         """
+        json_data = response.json()
+        if self.locations_key:
+            return json_data[self.locations_key]
+        return json_data
 
     def parse(self, response, **kwargs):
         locations = self.extract_json(response)

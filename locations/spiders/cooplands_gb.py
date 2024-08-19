@@ -5,7 +5,7 @@ class CooplandsGBSpider(WPStoreLocatorSpider):
     name = "cooplands_gb"
     item_attributes = {"brand": "Cooplands", "brand_wikidata": "Q5167971"}
     allowed_domains = ["cooplands-bakery.co.uk"]
-    searchable_points_files = ["gb_centroids_iseadgg_48km_radius.csv"]
+    iseadgg_countries_list = ["GB"]
     search_radius = 50
     max_results = 50
     time_format = "%I:%M %p"
