@@ -11,7 +11,7 @@ class HemmakvallSESpider(StoreLocatorPlusSelfSpider):
     name = "hemmakvall_se"
     item_attributes = {"brand": "Hemmakväll", "brand_wikidata": "Q10521791"}
     allowed_domains = ["www.hemmakvall.se"]
-    searchable_points_files = ["se_centroids_iseadgg_175km_radius.csv"]
+    iseadgg_countries_list = ["SE"]
     search_radius = 200
     max_results = 75
 
