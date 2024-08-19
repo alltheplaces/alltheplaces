@@ -37,10 +37,10 @@ class HuddleHouseUSSpider(Spider):
             )
 
         if len(locations) > 0:
-            self.crawler.stats.inc_value(f"atp/geo_search/hits")
+            self.crawler.stats.inc_value("atp/geo_search/hits")
         else:
-            self.crawler.stats.inc_value(f"atp/geo_search/misses")
-        self.crawler.stats.max_value(f"atp/geo_search/max_features_returned", len(locations))
+            self.crawler.stats.inc_value("atp/geo_search/misses")
+        self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
 
         for location in locations:
             if not location.get("available"):
