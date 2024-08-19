@@ -9,6 +9,7 @@ class GameZASpider(Spider):
     name = "game_za"
     item_attributes = {"brand": "Game", "brand_wikidata": "Q129263113"}
     start_urls = ["https://api-beta-game.walmart.com/occ/v2/game/stores?fields=FULL"]
+    requires_proxy = True
 
     def start_requests(self):
         for url in self.start_urls:
