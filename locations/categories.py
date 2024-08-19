@@ -199,6 +199,7 @@ class Categories(Enum):
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
 
     TOURISM_APARTMENT = {"tourism": "apartment"}
@@ -470,6 +471,7 @@ class Extras(Enum):
     ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
     KOSHER = "diet:kosher"
+    MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
@@ -776,6 +778,14 @@ def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelC
         variations.add(payment.name.replace("_", " ").lower())
         variations.add(payment.name.replace("_", " ").title())
         variations.add(payment.name.replace("_", " ").upper())
+
+        # Singularize for "cards" vs "card"
+        if payment.name.endswith("S"):
+            variations = variations | DictParser.get_variations(payment.name.replace("_", "-")[:-1])
+            variations.add(payment.name.replace("_", " ").lower()[:-1])
+            variations.add(payment.name.replace("_", " ").title()[:-1])
+            variations.add(payment.name.replace("_", " ").upper()[:-1])
+
         for variation in variations:
             map[variation] = payment.name
 
