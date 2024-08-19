@@ -25,7 +25,7 @@ class HuddleHouseUSSpider(Spider):
         if not response.json().get("locations"):
             return
 
-        locations = response.json()["locations"]       
+        locations = response.json()["locations"]
 
         # A maximum of 25 locations are returned at once. The search radius is
         # set to avoid receiving 25 locations in a single response. If 25

@@ -73,6 +73,7 @@ def test_country_iseadgg_centroids():
     except ValueError:
         assert True
 
+
 def test_point_locations():
     points_file = "eu_centroids_120km_radius_country.csv"
     expected_eu_points = 959

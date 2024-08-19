@@ -16,9 +16,7 @@ class SaveALotUSSpider(Spider):
     def start_requests(self):
         # API returns stores within 25 miles of a provided WGS84 coordinate.
         for lat, lon in country_iseadgg_centroids(["US"], 79):
-            yield JsonRequest(
-                url=f"https://savealot.com/?lat={lat}&lng={lon}&_data=root"
-            )
+            yield JsonRequest(url=f"https://savealot.com/?lat={lat}&lng={lon}&_data=root")
 
     def parse(self, response):
         locations = response.json()["storeList"]["_embedded"]["matches"]
@@ -57,6 +55,8 @@ class SaveALotUSSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day_hours in location["hours"]:
-                item["opening_hours"].add_range(DAYS[day_hours["day"]], day_hours["hours"]["open"], day_hours["hours"]["close"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    DAYS[day_hours["day"]], day_hours["hours"]["open"], day_hours["hours"]["close"], "%H:%M:%S"
+                )
 
             yield item

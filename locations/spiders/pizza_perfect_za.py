@@ -1,6 +1,5 @@
-from scrapy import Selector
 
-from locations.hours import DAYS_EN, OpeningHours, sanitise_day
+from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 

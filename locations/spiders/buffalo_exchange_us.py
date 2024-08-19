@@ -24,6 +24,8 @@ class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
         if "PERMANENTLY CLOSED" in item["name"]:
             return
         if branch_name := item.pop("name", None):
-            item["branch"] = unescape(branch_name).removeprefix("Buffalo Outlet – ").removeprefix("Buffalo Trading Post – ")
+            item["branch"] = (
+                unescape(branch_name).removeprefix("Buffalo Outlet – ").removeprefix("Buffalo Trading Post – ")
+            )
         item["website"] = urljoin("https://buffaloexchange.com", item["website"])
         yield item

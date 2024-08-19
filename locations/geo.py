@@ -87,12 +87,16 @@ def country_iseadgg_centroids(country_codes: list[str] | str, radius: int) -> li
     all_points = []
     for country_code in country_codes:
         try:
-            with open_searchable_points("iseadgg/{}_centroids_iseadgg_{}km_radius.csv".format(country_code.lower(), str(radius))) as file:
+            with open_searchable_points(
+                "iseadgg/{}_centroids_iseadgg_{}km_radius.csv".format(country_code.lower(), str(radius))
+            ) as file:
                 rows = csv.DictReader(file)
                 for row in rows:
                     all_points.append((float(row["latitude"]), float(row["longitude"])))
         except FileNotFoundError:
-            raise ValueError("Invalid ISO-3166 alpha-2 country code supplied. Ensure supplied code is represented in the locations/searchable_points/iseadgg/ path.")
+            raise ValueError(
+                "Invalid ISO-3166 alpha-2 country code supplied. Ensure supplied code is represented in the locations/searchable_points/iseadgg/ path."
+            )
 
     unique_points = list(set(all_points))
     return unique_points

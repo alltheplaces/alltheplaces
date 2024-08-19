@@ -51,7 +51,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 #             for use with the point_locations function of
 #             locations.geo and a suitable non-zero search_radius
 #             value in kilometres.
-#      
+#
 #      The max_results parameter is hard-coded in server
 #      configuration and cannot be changed. No radius search
 #      should return max_results locations because this is a sign
