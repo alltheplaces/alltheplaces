@@ -12,17 +12,27 @@ class GoGamesToysUSSpider(WPStoreLocatorSpider):
         "goretailgroup.com",
     ]
     max_results = 100
-    search_radius = 500
+    iseadgg_countries_list = ["US"]
     # https://goretailgroup.com/wp-admin/admin-ajax.php?action=store_search&lat=29.42519&lng=-98.49459&max_results=100&search_radius=500
     # Max is 500 miles
-    searchable_points_files = [
-        "us_centroids_iseadgg_458km_radius.csv",
-    ]
+    search_radius = 500
     days = DAYS_EN
 
     def parse_item(self, item, location):
         if item["name"] == "Attic Salt":
             item["brand"] = "Attic Salt"
             item["brand_wikidata"] = "Q108409773"
+
+        # "name" field contains:
+        #   - "Attic Salt"
+        #   - "Go! Games & Toys"
+        #   - "Go! Calendars Games & Toys"
+        #   - "Go! Calendars, Games and Toys"
+        #   - "Go!CalendarsGamesToys&Books"
+        #   - etc
+        # Due to the inconsistencies, we'll just drop the field completely
+        # so that the "brand" value is used instead. There is no branch name
+        # to extract from the "name" field.
+        item.pop("name", None)
 
         yield item
