@@ -8,7 +8,6 @@ class AlaskaCommercialCompanySpider(JSONBlobSpider):
     name = "alaska_commercial_company"
     item_attributes = {"brand": "Alaska Commercial Company", "brand_wikidata": "Q2637066"}
     allowed_domains = ["www.alaskacommercial.com"]
-    download_delay = 0.5
     start_urls = ("https://www.alaskacommercial.com/store-locator",)
 
     def extract_json(self, response):
