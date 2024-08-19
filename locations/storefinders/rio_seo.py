@@ -81,9 +81,12 @@ class RioSeoSpider(Spider):
         opening_hours = OpeningHours()
 
         for weekday, intervals in days.items():
-            for interval in intervals:
-                if not isinstance(interval, dict):
-                    continue
-                opening_hours.add_range(weekday, interval["open"], interval["close"])
+            if intervals == "open24":
+                opening_hours.add_range(weekday, "00:00", "23:59")
+            else:
+                for interval in intervals:
+                    if not isinstance(interval, dict):
+                        continue
+                    opening_hours.add_range(weekday, interval["open"], interval["close"])
 
         return opening_hours
