@@ -22,15 +22,16 @@ class AlphaPharmZASpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         # n.b. Name is used as the branding for the location, do not move it to brand
 
-        categories = location["categories"].split(",")
-        # Categories:
-        # 18: Pharmacy
-        # 20: AlphaDoc
-        # 21: Clinic
-        apply_yes_no(Extras.PHOTO_PRINTING, item, "22" in categories, False)  # Described as Kodak machine
-        # 23: AlphaREWARDS
-        # 24: Essence Stock
-        # 25: Covid19 Vaccine
+        if location["categories"] is not None:
+            categories = location["categories"].split(",")
+            # Categories:
+            # 18: Pharmacy
+            # 20: AlphaDoc
+            # 21: Clinic
+            apply_yes_no(Extras.PHOTO_PRINTING, item, "22" in categories, False)  # Described as Kodak machine
+            # 23: AlphaREWARDS
+            # 24: Essence Stock
+            # 25: Covid19 Vaccine
 
         location_hours = ast.literal_eval(location["open_hours"])
         oh = OpeningHours()
