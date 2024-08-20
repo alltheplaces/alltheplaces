@@ -25,7 +25,7 @@ class MiniBESpider(scrapy.Spider):
             pois = response.json().get("status", {}).get("data", {}).get("pois")
         for row in pois:
             item = DictParser.parse(row)
-            item["ref"] = row.get("attributes", {}).get("key")
+            item["ref"] = row.get("key")
             item["phone"] = row.get("attributes", {}).get("phone")
             item["email"] = row.get("attributes", {}).get("mail")
             item["website"] = row.get("attributes", {}).get("homepage")
