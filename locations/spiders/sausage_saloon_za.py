@@ -6,7 +6,7 @@ from scrapy import Spider
 from locations.dict_parser import DictParser
 
 
-class SausageSaloonZA(Spider):
+class SausageSaloonZASpider(Spider):
     name = "sausage_saloon_za"
     item_attributes = {"brand": "Sausage Saloon", "brand_wikidata": "Q116619342"}
 
