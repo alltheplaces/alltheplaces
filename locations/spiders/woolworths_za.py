@@ -7,7 +7,7 @@ from locations.hours import OpeningHours, sanitise_day
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class WoolWorthsZASpider(JSONBlobSpider):
+class WoolworthsZASpider(JSONBlobSpider):
     name = "woolworths_za"
     item_attributes = {"brand": "Woolworths", "brand_wikidata": "Q8033997"}
     locations_key = "stores"
