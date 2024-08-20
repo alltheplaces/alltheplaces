@@ -10,7 +10,9 @@ Many sites export clean [structured data](./STRUCTURED_DATA.md) or have a simple
 <script>var markers = [{....}, {....}]</script>
 ```
 
-Extend `JSONBlobSpider`, use xpath and `parse_js_object` to extract the content; suitable for `DictParser`.
+Extend `JSONBlobSpider`, use xpath and `parse_js_object` to extract the content. 
+This will get handed to `DictParser`, which does a lot of work to recognise common patterns.
+Optionally, `pre_process_data` to fix any keys or `post_process_item` to add extras. 
 
 Example: [claudia_strater_nl](../locations/spiders/claudia_strater_nl.py)
 ```
