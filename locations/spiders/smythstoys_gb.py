@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class SmythsToysGBSpider(Spider):
+class SmythstoysGBSpider(Spider):
     name = "smythstoys_gb"
     item_attributes = {"brand": "SmythsToys", "brand_wikidata": "Q7546779"}
     start_urls = ["https://www.smythstoys.com/uk/en-gb/store-finder/getAllStores"]

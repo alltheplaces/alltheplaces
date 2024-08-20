@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class RedCrossGBSpider(SitemapSpider):
+class RedcrossGBSpider(SitemapSpider):
     name = "redcross_gb"
     item_attributes = {"brand": "British Red Cross", "brand_wikidata": "Q4970966"}
     sitemap_urls = ["https://www.redcross.org.uk/sitemap.xml"]

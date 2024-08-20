@@ -9,7 +9,7 @@ from locations.items import Feature
 
 # Sitemap is incomplete - 534 shops but only 218 on sitemap
 # No location available
-class CancerResearchUKGBSpider(CrawlSpider):
+class CancerResearchUkGBSpider(CrawlSpider):
     name = "cancer_research_uk_gb"
     item_attributes = {"brand": "Cancer Research UK", "brand_wikidata": "Q326079"}
     allowed_domains = ["cancerresearchuk.org"]

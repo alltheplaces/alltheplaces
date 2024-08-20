@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.woosmap import WoosmapSpider
 
 
-class MBPLCGBSpider(WoosmapSpider):
+class MbplcGBSpider(WoosmapSpider):
     name = "mbplc_gb"
     key = "woos-19f74f73-0b20-3571-b9ef-706ad3dbad27"
     origin = "https://www.mbplc.com/"

@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class EEGBSpider(SitemapSpider):
+class EeGBSpider(SitemapSpider):
     name = "ee_gb"
     item_attributes = {"brand": "EE", "brand_wikidata": "Q5322942"}
     sitemap_urls = ["https://ee.co.uk/sitemap-pages.xml"]

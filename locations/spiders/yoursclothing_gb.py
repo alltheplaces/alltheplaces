@@ -4,7 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class YoursClothingGBSpider(CrawlSpider, StructuredDataSpider):
+class YoursclothingGBSpider(CrawlSpider, StructuredDataSpider):
     name = "yoursclothing_gb"
     item_attributes = {"brand": "YoursClothing", "brand_wikidata": "Q84163322"}
     allowed_domains = ["yoursclothing.co.uk"]

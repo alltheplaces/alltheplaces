@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class YorkshireBuildingSocietyGBSpider(Spider):
+class YbsGBSpider(Spider):
     name = "ybs_gb"
     item_attributes = {"brand": "Yorkshire Building Society", "brand_wikidata": "Q12073381"}
     start_urls = ["https://www.ybs.co.uk/assets/ybs-location-data.json"]
