@@ -1,4 +1,4 @@
-import json
+from json import loads
 
 from chompjs import parse_js_object
 from scrapy import Spider
@@ -33,7 +33,7 @@ class AheadworksSpider(Spider):
             item["website"] = self.start_urls[0] + location["slug"]
             item["street_address"] = item.pop("street")
             item["opening_hours"] = OpeningHours()
-            for day, hours in json.loads(location["hoursofoperation"])["hoursofoperation"].items():
+            for day, hours in loads(location["hoursofoperation"])["hoursofoperation"].items():
                 item["opening_hours"].add_range(day, hours[0], hours[1])
 
             yield from self.post_process_item(item, response, location) or []
