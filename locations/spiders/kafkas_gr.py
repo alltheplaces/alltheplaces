@@ -11,15 +11,13 @@ class KafkasGRSpider(LighthouseSpider):
         item["ref"] = item["lat"]
 
         item["name"] = location.xpath("div/*[contains(@class, 'name')]/text()").get()
-        item["street"] = location.xpath("div/div/ul/li/span[contains(@class, 'address')]/text()").get()
+        item["street"] = location.xpath('./div/div/ul/li/span[contains(@class, "address")]/text()').get()
 
-        city = location.xpath("div/div/ul/li/span[contains(@class, 'city')]/text()").get()
-        if city:
-            item["city"] = city.split(", ")[1]
+        if city := location.xpath('./div/div/ul/li/span[contains(@class, "city")]/text()').get(""):
+            item["city"] = city.split(", ")[1].strip()
 
-        postal = location.xpath("div/div/ul/li/span[contains(@class, 'postal-code')]/text()").get()
-        if postal:
-            item["postcode"] = postal.split(", ")[1]
+        if postcode := location.xpath('./div/div/ul/li/span[contains(@class, "postal-code")]/text()').get(""):
+            item["postcode"] = postcode.split(", ")[1].strip()
 
         item["street_address"] = None
 
