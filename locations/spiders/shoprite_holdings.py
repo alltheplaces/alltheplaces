@@ -98,7 +98,10 @@ class ShopriteHoldingsSpider(Spider):
             location = {k: v for k, v in location.items() if v != "null"}
 
             if "phoneInternationalCode" in location:
-                location["phoneNumber"] = "+" + location["phoneInternationalCode"] + " " + location["phoneNumber"]
+                if location["phoneInternationalCode"].startswith("00"):
+                    location["phoneNumber"] = "+" + location["phoneInternationalCode"].lstrip("00") + " " + location["phoneNumber"].lstrip("0")
+                else:
+                    location["phoneNumber"] = "+" + location["phoneInternationalCode"] + " " + location["phoneNumber"].lstrip("0")
 
             location["street-address"] = clean_address(
                 [location.get("physicalAdd1"), location.get("physicalAdd2"), location.get("physicalAdd3")]
