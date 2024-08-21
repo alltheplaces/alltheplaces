@@ -13,7 +13,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class KiboSpider(Spider):
     page_size: int = 1000
-    api_filter = None
+    api_filter: str = None
 
     def start_requests(self):
         if self.api_filter:
