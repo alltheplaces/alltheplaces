@@ -32,7 +32,6 @@ class TuiSpider(Spider):
                 self.logger.error(f"Unsupported country name in API response: {country_name}")
                 continue
 
-            country_code = self.countries[country_name]
             for region in country["regions"]:
                 for city in region["cities"]:
                     for office in city["offices"]:
