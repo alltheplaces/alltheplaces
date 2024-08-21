@@ -48,8 +48,8 @@ class TuiSpider(Spider):
         street_address_urlsafe = unidecode(re.sub(r"\W+", "-", office["street_address"].lower()))
         item["website"] = f"https://www.tui.pl/kontakt/biura-tui/{city_urlsafe}/{street_address_urlsafe}/{office['id']}"
 
-        if office.get("openingHours") and len(office["openingHours"]) >= 1:
-            hours_string = " ".join(office.get("openingHours", []))
+        if oh_array := office.get("openingHours"):
+            hours_string = " ".join(oh_array or [])
             for day_number, day_name in enumerate(DAYS):
                 hours_string = hours_string.replace(str(day_number), f"{day_name}:")
             item["opening_hours"] = OpeningHours()
