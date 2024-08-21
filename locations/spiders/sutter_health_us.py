@@ -126,7 +126,7 @@ class SutterHealthUSSpider(CrawlSpider, StructuredDataSpider):
                 apply_healthcare_specialities([CATEGORY_SPECIALTY_MAP[cat]], item)
         else:
             apply_category(Categories.CLINIC, item)
-            item["extras"]["type"] = cat
+            item["extras"]["object_type"] = cat
             self.crawler.stats.inc_value(f"atp/sutter_health/unmapped_category/{cat}")
 
         specialties = [

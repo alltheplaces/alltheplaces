@@ -1,48 +1,72 @@
-from scrapy import FormRequest, Spider
+import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
-
-COUNTRY_MAP = {101: "Botswana", 155: "Lesotho", 182: "Namibia", 73: "South Africa", 219: "Swaziland"}
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
-def add_times(opening_hours: OpeningHours, day, times):
-    if not times:
-        return
-    start_time, end_time = times.split(" - ")
-    if isinstance(day, list):
-        opening_hours.add_days_range(day, start_time, end_time, time_format="%I:%M%p")
-    else:
-        opening_hours.add_range(day, start_time, end_time, time_format="%I:%M%p")
-
-
-class LewisStoresSpider(Spider):
+class LewisStoresSpider(scrapy.Spider):
     name = "lewis_stores"
-    item_attributes = {"brand": "Lewis Stores", "brand_wikidata": "Q116474928"}
+    item_attributes = {"brand": "Lewis Stores", "brand_wikidata": "Q115117217"}
 
     def start_requests(self):
-        yield FormRequest(
-            url="https://lewisstores.co.za/controllers/get_locations.php", formdata={"param1": "Lewis Stores"}
+        yield scrapy.http.FormRequest(
+            url="https://lewisstores.co.za/controllers/get_locations.php",
+            formdata={"param1": "Lewis Stores"},
         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json():
-            for k, v in location.items():
-                if v == "NULL":
-                    location[k] = None
+            if "CLOSED" in location["StoreLocatorName"]:
+                continue
 
-            location["country"] = COUNTRY_MAP.get(location["CountryId"])
-            location["street_address"] = (
-                location.pop("Address").replace(location["City"], "").replace(location["country"], "")
-            )
-            location["phone"] = "; ".join(filter(None, [location.pop("Phone"), location["Phone2"], location["Phone3"]]))
-            location["name"] = location["StoreLocatorName"]
+            location["Phone"] = "; ".join([location["Phone"], location.pop("Phone2"), location.pop("Phone3")])
 
             item = DictParser.parse(location)
+            country_code_mapping = {
+                182: "NA",
+                73: "ZA",
+                219: "SZ",
+                155: "LS",
+                101: "BW",
+            }
+            item["branch"] = location["StoreLocatorName"]
+            item["email"] = item["email"].replace("NULL", "")
+            item["country"] = country_code_mapping[location["CountryId"]]
 
-            item["opening_hours"] = OpeningHours()
-            add_times(item["opening_hours"], DAYS[0:5], location["TradingMonFri"])
-            add_times(item["opening_hours"], "Sa", location["TradingSat"])
-            add_times(item["opening_hours"], "Su", location["TradingSunPub"])
+            if item["country"] != "ZA" and item["postcode"] in ["9000", "9999"]:
+                item.pop("postcode")
+
+            oh = OpeningHours()
+            time_format = "%I:%M%p" if "am" in location["TradingMonFri"] else "%H:%M"
+            if location["TradingMonFri"] == "CLOSED":
+                oh.set_closed(DAYS_WEEKDAY)
+            else:
+                for day in DAYS_WEEKDAY:
+                    oh.add_range(
+                        day,
+                        location["TradingMonFri"].split("-")[0].strip(),
+                        location["TradingMonFri"].split("-")[1].strip(),
+                        time_format=time_format,
+                    )
+            if location["TradingSat"] == "CLOSED":
+                oh.set_closed("Sat")
+            else:
+                oh.add_range(
+                    "Sat",
+                    location["TradingSat"].split("-")[0].strip(),
+                    location["TradingSat"].split("-")[1].strip(),
+                    time_format=time_format,
+                )
+            if location["TradingSunPub"] == "CLOSED":
+                oh.set_closed("Sun")
+            else:
+                oh.add_range(
+                    "Sun",
+                    location["TradingSunPub"].split("-")[0].strip(),
+                    location["TradingSunPub"].split("-")[1].strip(),
+                    time_format=time_format,
+                )
+
+            item["opening_hours"] = oh
 
             yield item

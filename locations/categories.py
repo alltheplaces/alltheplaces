@@ -198,6 +198,8 @@ class Categories(Enum):
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
 
     TOURISM_APARTMENT = {"tourism": "apartment"}
@@ -272,6 +274,7 @@ class Categories(Enum):
     VETERINARY = {"amenity": "veterinary"}
     WATER_RESCUE = {"emergency": "water_rescue"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
+    MORTUARY = {"amenity": "mortuary"}
 
     DATA_CENTRE = {"telecom": "data_center"}
 
@@ -447,6 +450,7 @@ class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
+    BACKUP_GENERATOR = "backup_generator"
     BARBEQUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
@@ -467,6 +471,7 @@ class Extras(Enum):
     ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
     KOSHER = "diet:kosher"
+    MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
@@ -474,6 +479,7 @@ class Extras(Enum):
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PETS_ALLOWED = "pets_allowed"
+    PHOTO_PRINTING = "service:photo_printing"
     PICNIC_TABLES = "picnic_table"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
@@ -773,6 +779,14 @@ def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelC
         variations.add(payment.name.replace("_", " ").lower())
         variations.add(payment.name.replace("_", " ").title())
         variations.add(payment.name.replace("_", " ").upper())
+
+        # Singularize for "cards" vs "card"
+        if payment.name.endswith("S"):
+            variations = variations | DictParser.get_variations(payment.name.replace("_", "-")[:-1])
+            variations.add(payment.name.replace("_", " ").lower()[:-1])
+            variations.add(payment.name.replace("_", " ").title()[:-1])
+            variations.add(payment.name.replace("_", " ").upper()[:-1])
+
         for variation in variations:
             map[variation] = payment.name
 
