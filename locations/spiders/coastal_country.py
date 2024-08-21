@@ -1,28 +1,14 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+
+# Storelocator on https://www.coastalcountry.com/about/store-locations
+# Individual pages have structured data
 
 
-class CoastalCountrySpider(scrapy.Spider):
+class CoastalCountrySpider(SitemapSpider, StructuredDataSpider):
     name = "coastal_country"
     item_attributes = {"brand": "Coastal"}
-    allowed_domains = ["www.coastalfarm.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    start_urls = ("https://www.coastalcountry.com/about/store-locations",)
-
-    def parse(self, response):
-        results = response.json()
-        for data in results:
-            properties = {
-                "city": data["city"],
-                "ref": data["id"],
-                "lon": data["lng"],
-                "lat": data["lat"],
-                "addr_full": data["address"],
-                "phone": data["phone"],
-                "state": data["state"],
-                "postcode": data["zip"],
-                "website": data["url"],
-            }
-
-            yield Feature(**properties)
+    allowed_domains = ["www.coastalcountry.com"]
+    sitemap_urls = ["https://www.coastalcountry.com/sitemap.xml"]
+    sitemap_rules = [(r"/store-locations/[\w-]+$", "parse_sd")]
