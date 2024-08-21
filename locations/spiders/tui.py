@@ -1,10 +1,9 @@
 import re
 from typing import Any
 
-from unidecode import unidecode
-
 from scrapy import Spider
 from scrapy.http import Response
+from unidecode import unidecode
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
@@ -21,7 +20,7 @@ class TuiSpider(Spider):
         "Litwa": "LT",
         "Polska": "PL",
         "Słowacja": "SK",
-        "Ukraina": "UA"
+        "Ukraina": "UA",
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
