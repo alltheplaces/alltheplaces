@@ -99,9 +99,16 @@ class ShopriteHoldingsSpider(Spider):
 
             if "phoneInternationalCode" in location:
                 if location["phoneInternationalCode"].startswith("00"):
-                    location["phoneNumber"] = "+" + location["phoneInternationalCode"].lstrip("00") + " " + location["phoneNumber"].lstrip("0")
+                    location["phoneNumber"] = (
+                        "+"
+                        + location["phoneInternationalCode"].lstrip("00")
+                        + " "
+                        + location["phoneNumber"].lstrip("0")
+                    )
                 else:
-                    location["phoneNumber"] = "+" + location["phoneInternationalCode"] + " " + location["phoneNumber"].lstrip("0")
+                    location["phoneNumber"] = (
+                        "+" + location["phoneInternationalCode"] + " " + location["phoneNumber"].lstrip("0")
+                    )
 
             location["street-address"] = clean_address(
                 [location.get("physicalAdd1"), location.get("physicalAdd2"), location.get("physicalAdd3")]
@@ -144,6 +151,8 @@ class ShopriteHoldingsSpider(Spider):
                 item["opening_hours"].set_closed(day_hours["TradingDay"])
             else:
                 item["opening_hours"].add_range(day_hours["TradingDay"], day_hours["StartTime"], day_hours["EndTime"])
+
+        item["extras"]["@source_uri"] = f"https://www.shopriteholdings.co.za/bin/stores.json?uid={item["ref"]}"
         yield item
 
     def get_website(self, item):
