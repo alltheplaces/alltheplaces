@@ -101,9 +101,10 @@ class WPStoreLocatorSpider(Spider):
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
 
-    def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours:
-        if not location.get("hours"):
-            return
+    def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours | None:
+        hours_raw = DictParser.get_first_key(location, DictParser.hours_keys)
+        if not hours_raw:
+            return None
         sel = Selector(text=location["hours"])
         oh = OpeningHours()
         for rule in sel.xpath("//tr"):

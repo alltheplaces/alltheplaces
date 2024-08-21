@@ -225,6 +225,8 @@ class DictParser:
         "location-url",
     ]
 
+    hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
+
     @staticmethod
     def parse(obj) -> Feature:
         item = Feature()
