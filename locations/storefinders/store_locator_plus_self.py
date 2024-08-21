@@ -1,5 +1,5 @@
 from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import FormRequest
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser

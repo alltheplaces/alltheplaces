@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
-from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
+from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 

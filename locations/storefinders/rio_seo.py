@@ -1,5 +1,5 @@
 import json
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
