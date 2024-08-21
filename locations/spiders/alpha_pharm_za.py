@@ -11,7 +11,6 @@ class AlphaPharmZASpider(JSONBlobSpider):
         "brand": "Alpha Pharm",
         "brand_wikidata": "Q116487265",
     }
-    allowed_domains = ["alphapharmacies.co.za"]
     start_urls = [
         "https://www.alphapharmacies.co.za/wp-admin/admin-ajax.php?action=asl_load_stores&nonce=8a9c5c9229&load_all=1&layout=1"
     ]
