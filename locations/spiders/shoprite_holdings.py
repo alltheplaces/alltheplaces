@@ -152,7 +152,7 @@ class ShopriteHoldingsSpider(Spider):
             else:
                 item["opening_hours"].add_range(day_hours["TradingDay"], day_hours["StartTime"], day_hours["EndTime"])
 
-        item["extras"]["@source_uri"] = f"https://www.shopriteholdings.co.za/bin/stores.json?uid={item["ref"]}"
+        item["extras"]["@source_uri"] = f"https://www.shopriteholdings.co.za/bin/stores.json?uid={item['ref']}"
         yield item
 
     def get_website(self, item):
