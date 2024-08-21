@@ -20,6 +20,9 @@ class JSONBlobSpider(Spider):
     # If set then use as a key into the JSON response to return the location data array.
     locations_key: str = None
 
+    # For passing to the subclass when iterating a JSON dict.
+    ATP_FEATURE_KEY = "atp:feature_key"
+
     def extract_json(self, response: Response):
         """
         Override this method to extract the main JSON content from the page. The default
@@ -57,11 +60,9 @@ class JSONBlobSpider(Spider):
             yield from self.post_process_item(item, response, feature) or []
 
     def parse_feature_dict(self, response: Response, feature_dict: dict, **kwargs):
-        for feature_id, feature in feature_dict.items():
-            if not feature.get("id"):
-                feature["id"] = feature_id
-            else:
-                feature["feature_id"] = feature_id
+        for feature_key, feature in feature_dict.items():
+            feature[self.ATP_FEATURE_KEY] = feature_key
+            self.pre_process_data(feature)
             item = DictParser.parse(feature)
             yield from self.post_process_item(item, response, feature) or []
 
