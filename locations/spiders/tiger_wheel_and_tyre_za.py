@@ -21,7 +21,7 @@ class TigerWheelAndTyreZASpider(CrawlSpider):
 
     def parse(self, response):
         properties = {
-            "ref": response.url,
+            "ref": response.url.lstrip("https://twt").split(".")[0],
             "addr_full": re.sub(
                 r"\s+",
                 " ",
