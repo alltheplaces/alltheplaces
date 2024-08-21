@@ -1,7 +1,6 @@
 from chompjs import parse_js_object
 
 from locations.categories import Categories
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -13,7 +12,13 @@ class WillscotCAUSSpider(JSONBlobSpider):
     start_urls = ["https://www.willscot.com/en/locations"]
 
     def extract_json(self, response):
-        branches_raw = response.xpath("//script[contains(text(), ',\\\"branches\\\":')]/text()").get().replace('\\"', '"').replace('\\\\n', " ").replace('\\', " ")
+        branches_raw = (
+            response.xpath("//script[contains(text(), ',\\\"branches\\\":')]/text()")
+            .get()
+            .replace('\\"', '"')
+            .replace("\\\\n", " ")
+            .replace("\\", " ")
+        )
         branches_raw = branches_raw.split(',"branches":', 1)[1]
         features_dict = parse_js_object(branches_raw)
         return features_dict
