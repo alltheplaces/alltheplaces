@@ -2,8 +2,6 @@ import re
 
 from chompjs import parse_js_object
 
-from scrapy import Selector
-
 from locations.categories import Categories, Clothes, apply_clothes
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -11,12 +9,21 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class HallensteinBrothersAUNZSpider(JSONBlobSpider):
     name = "hallenstein_brothers_au_nz"
-    item_attributes = {"brand": "Hallenstein Brothers", "brand_wikidata": "Q24189399", "extras": Categories.SHOP_CLOTHES.value}
+    item_attributes = {
+        "brand": "Hallenstein Brothers",
+        "brand_wikidata": "Q24189399",
+        "extras": Categories.SHOP_CLOTHES.value,
+    }
     allowed_domains = ["www.hallensteins.com"]
     start_urls = ["https://www.hallensteins.com/store-locations/all-stores-worldwide"]
 
     def extract_json(self, response):
-        js_blob = response.xpath('//script[contains(text(), "var ga_stores = ")]/text()').get().split("var ga_stores = ", 1)[1].split("; // all store data", 1)[0]
+        js_blob = (
+            response.xpath('//script[contains(text(), "var ga_stores = ")]/text()')
+            .get()
+            .split("var ga_stores = ", 1)[1]
+            .split("; // all store data", 1)[0]
+        )
         return parse_js_object(js_blob)
 
     def post_process_item(self, item, response, feature):
