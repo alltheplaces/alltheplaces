@@ -6,8 +6,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class RomansPizzaZASpider(Spider):
-    name = "romans_pizza_za"
+class RomansPizzaSpider(Spider):
+    name = "romans_pizza"
     start_urls = ["https://romanspizza.co.za/api"]
     item_attributes = {"brand_wikidata": "Q65079427"}
 
