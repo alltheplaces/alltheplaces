@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
 
-class XLBYGNOSpider(scrapy.Spider):
+class XlBygNOSpider(scrapy.Spider):
     name = "xl_byg_no"
     item_attributes = {"brand": "XL-BYG", "brand_wikidata": "Q10720798"}
     start_urls = [
