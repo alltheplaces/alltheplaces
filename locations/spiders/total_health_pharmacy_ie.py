@@ -11,7 +11,6 @@ class TotalHealthPharmacyIESpider(scrapy.Spider):
     start_urls = [
         "https://www.totalhealth.ie/store-locator",
     ]
-    no_refs = True
 
     def parse(self, response, **kwargs):
         data = chompjs.parse_js_object(
@@ -19,7 +18,7 @@ class TotalHealthPharmacyIESpider(scrapy.Spider):
         )
         for store in data:
             item = DictParser.parse(store)
-            item["website"] = "https://www.totalhealth.ie" + store.get("link")
+            item["ref"] = item["website"] = "https://www.totalhealth.ie" + store.get("link")
             item["phone"] = store.get("contactno")
             apply_category(Categories.PHARMACY, item)
             yield item
