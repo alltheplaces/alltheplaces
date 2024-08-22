@@ -2,7 +2,6 @@ from json import loads
 from typing import Iterable
 
 from chompjs import parse_js_object
-
 from scrapy import Spider
 from scrapy.http import Response
 
@@ -27,9 +26,9 @@ class AheadworksSpider(Spider):
         features_js = response.xpath(
             '//script[contains(text(), "Aheadworks_StoreLocator/js/view/location-list") and contains(text(), "locationRawItems")]/text()'
         ).get()
-        features = parse_js_object(features_js)["#aw-storelocator-navigation"]["Magento_Ui/js/core/app"][
-            "components"
-        ]["locationList"]["locationRawItems"]
+        features = parse_js_object(features_js)["#aw-storelocator-navigation"]["Magento_Ui/js/core/app"]["components"][
+            "locationList"
+        ]["locationRawItems"]
 
         for tab in features:
             feature = tab["tabs"][0]
