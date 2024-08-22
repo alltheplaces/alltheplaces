@@ -27,7 +27,7 @@ class AmpolAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["value"]:
-            address = location.pop("address")
+            address = location.pop("Address")
             item = DictParser.parse(location)
             item["geometry"] = location["Location"]
             item["street_address"] = address
