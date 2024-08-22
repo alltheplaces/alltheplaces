@@ -12,7 +12,7 @@ class FiatDKSpider(AgileStoreLocatorSpider):
     item_attributes = {"brand": "Fiat", "brand_wikidata": "Q27597", "extras": Categories.SHOP_CAR.value}
     allowed_domains = ["interaction.fiat.dk"]
 
-    def parse_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if " | " in item["name"]:
             item["name"] = item["name"].split(" | ")[1]
         yield item
