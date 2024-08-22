@@ -9,7 +9,12 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 class TerriblesUSSpider(AgileStoreLocatorSpider):
     name = "terribles_us"
-    item_attributes = {"name": "Terrible's", "brand": "Terrible's", "brand_wikidata": "Q7703648", "extras": Categories.CAR_WASH.value}
+    item_attributes = {
+        "name": "Terrible's",
+        "brand": "Terrible's",
+        "brand_wikidata": "Q7703648",
+        "extras": Categories.CAR_WASH.value,
+    }
     allowed_domains = ["www.terribles.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

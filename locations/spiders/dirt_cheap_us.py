@@ -9,7 +9,11 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 class DirtCheapUSSpider(AgileStoreLocatorSpider):
     name = "dirt_cheap_us"
-    item_attributes = {"brand": "Dirt Cheap", "brand_wikidata": "Q123013019", "extras": Categories.SHOP_VARIETY_STORE.value}
+    item_attributes = {
+        "brand": "Dirt Cheap",
+        "brand_wikidata": "Q123013019",
+        "extras": Categories.SHOP_VARIETY_STORE.value,
+    }
     allowed_domains = ["ilovedirtcheap.com"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

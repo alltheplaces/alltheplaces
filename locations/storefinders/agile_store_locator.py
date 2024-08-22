@@ -25,6 +25,7 @@ class AgileStoreLocatorSpider(Spider):
     (an ATP "Feature" class) and feature (a dict which is returned from the
     store locator JSON response for a particular feature).
     """
+
     time_format = "%I:%M%p"
 
     def start_requests(self) -> Iterable[JsonRequest]:
