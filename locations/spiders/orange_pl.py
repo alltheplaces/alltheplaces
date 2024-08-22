@@ -29,7 +29,7 @@ class OrangePLSpider(AlgoliaSpider):
         yield item
 
     def extract_opening_hours(self, feature: dict) -> OpeningHours:
-        if hours := poi.get("formatted_opening_hours"):
+        if hours := feature.get("formatted_opening_hours"):
             try:
                 oh = OpeningHours()
                 for day, hour in hours.items():
