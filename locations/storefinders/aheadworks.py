@@ -17,7 +17,7 @@ class AheadworksSpider(Spider):
     2. https://aheadworks.com/store-locator-extension-for-magento-2
 
     To use this spider, supply a 'start_url' for the store finder page that
-    contains embedded JavaScript with a complete store list. The 'parse_item'
+    contains embedded JavaScript with a complete store list. The 'post_process_item'
     method can be overridden if changes to extracted data is necessary, for
     example, to clean up location names.
     """
