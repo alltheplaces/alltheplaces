@@ -10,7 +10,12 @@ from locations.storefinders.algolia import AlgoliaSpider
 
 class DunelmGBSpider(AlgoliaSpider):
     name = "dunelm_gb"
-    item_attributes = {"name": "Dunelm", "brand": "Dunelm", "brand_wikidata": "Q5315020", "extras": Categories.SHOP_INTERIOR_DECORATION.value}
+    item_attributes = {
+        "name": "Dunelm",
+        "brand": "Dunelm",
+        "brand_wikidata": "Q5315020",
+        "extras": Categories.SHOP_INTERIOR_DECORATION.value,
+    }
     app_id = "FY8PLEBN34"
     api_key = "ae9bc9ca475f6c3d7579016da0305a33"
     index_name = "stores_prod"

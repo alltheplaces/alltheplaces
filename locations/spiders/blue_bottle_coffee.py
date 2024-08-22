@@ -24,9 +24,7 @@ class BlueBottleCoffeeSpider(AlgoliaSpider):
         item["image"] = feature.get("image", {}).get("source", {}).get("secure_url")
         item["ref"] = slug
         item["state"] = feature["address"]["district"]
-        item["street_address"] = merge_address_lines(
-            [feature["address"]["street"], feature["address"].get("extended")]
-        )
+        item["street_address"] = merge_address_lines([feature["address"]["street"], feature["address"].get("extended")])
         item["website"] = f"https://bluebottlecoffee.com/us/eng/cafes/{slug}"
 
         yield item

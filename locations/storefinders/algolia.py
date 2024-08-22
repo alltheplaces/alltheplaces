@@ -19,6 +19,7 @@ class AlgoliaSpider(Spider):
     Optionally set `referer` as the HTTP Referer header of the store search
     page.
     """
+
     dataset_attributes = {"source": "api", "api": "algolia"}
 
     api_key: str = ""
