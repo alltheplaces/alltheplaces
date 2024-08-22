@@ -40,8 +40,8 @@ class AheadworksSpider(Spider):
             item = DictParser.parse(feature)
             item["website"] = self.start_urls[0] + feature["slug"]
             item["street_address"] = item.pop("street")
+
             item["opening_hours"] = OpeningHours()
-            print(feature)
             if hours_dict := loads(feature["hoursofoperation"])["hoursofoperation"]:
                 for day, hours in hours_dict.items():
                     item["opening_hours"].add_range(day, hours[0], hours[1])
