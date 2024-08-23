@@ -13,7 +13,9 @@ class KroshkaKartoshkaRUSpider(scrapy.Spider):
         for shop in response.json()["features"]:
             item = Feature()
             item["ref"] = shop["id"]
-            item["geometry"] = shop["geometry"]
+            # Switched coordinates in geometry object
+            item["lat"] = shop["geometry"]["coordinates"][0]
+            item["lon"] = shop["geometry"]["coordinates"][1]
             item["name"] = shop["properties"]["balloonTitle"]
             item["street_address"] = shop["properties"]["balloonAddress"]
             item["phone"] = shop["properties"]["balloonPhone"]
