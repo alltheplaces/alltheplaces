@@ -31,6 +31,7 @@ class NettoDESpider(scrapy.Spider):
     item_attributes = NETTO_MARKEN
     allowed_domains = ["netto-online.de"]
     requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         yield scrapy.http.FormRequest(

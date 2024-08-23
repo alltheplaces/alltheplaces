@@ -479,6 +479,7 @@ class Extras(Enum):
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PETS_ALLOWED = "pets_allowed"
+    PHOTO_PRINTING = "service:photo_printing"
     PICNIC_TABLES = "picnic_table"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
