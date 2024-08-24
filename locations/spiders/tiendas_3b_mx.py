@@ -1,3 +1,7 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
@@ -12,7 +16,7 @@ class Tiendas3bMXSpider(AgileStoreLocatorSpider):
         "tiendas3b.com",
     ]
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         # See https://github.com/alltheplaces/alltheplaces/pull/9359#issuecomment-2272497115
         # Item names were very low quality
         item["name"] = None
