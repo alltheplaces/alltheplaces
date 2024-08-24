@@ -14,7 +14,7 @@ class EldiBESpider(AmastyStoreLocatorSpider):
     start_urls = ["https://www.eldi.be/nl/winkels"]
 
     def parse(self, response: Response):
-        yield from self.parse_items(
+        yield from self.parse_features(
             loads(
                 response.xpath('//script[contains(text(), "Amasty_Storelocator")]/text()').re_first(
                     r"jsonLocations: ({.+}),"

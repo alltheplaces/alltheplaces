@@ -14,9 +14,9 @@ class LibroATSpider(AmastyStoreLocatorSpider):
     start_urls = ["https://www.libro.at/rest/V1/mthecom/storelocator/locations"]
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        yield from self.parse_items(loads(response.xpath("/response/text()").get())["items"])
+        yield from self.parse_features(loads(response.xpath("/response/text()").get())["items"])
 
-    def parse_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["ref"], item["street_address"] = item.pop("name").split(": ", 1)
 
         yield item
