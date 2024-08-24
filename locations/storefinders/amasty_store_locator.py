@@ -27,6 +27,7 @@ class AmastyStoreLocatorSpider(Spider):
     overriding the pre_process_data and/or post_process_item functions of this
     spider.
     """
+
     def start_requests(self) -> Iterable[Request]:
         if len(self.start_urls) == 0:
             for domain in self.allowed_domains:

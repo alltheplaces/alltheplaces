@@ -44,9 +44,7 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
                 feature.xpath('.//a[@class="get-direction"]/@href').get().split("//", 2)[2]
             )
             item["phone"] = feature.xpath('.//div[@class="phone"]/text()').get().strip()
-            hours_string = " ".join(
-                feature.xpath('.//div[@class="amlocator-schedule-table"]/div/span/text()').getall()
-            )
+            hours_string = " ".join(feature.xpath('.//div[@class="amlocator-schedule-table"]/div/span/text()').getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             self.data_from_locator_page[response.meta["allowed_domain"]][ref] = item

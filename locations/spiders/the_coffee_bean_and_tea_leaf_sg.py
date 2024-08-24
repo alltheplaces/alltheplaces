@@ -1,4 +1,3 @@
-from typing import Iterable
 
 from scrapy import Selector
 
