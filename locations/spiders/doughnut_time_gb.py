@@ -1,8 +1,8 @@
 from locations.storefinders.stockist import StockistSpider
 
 
-class DoughnutTimeSpider(StockistSpider):
-    name = "doughnut_time"
+class DoughnutTimeGBSpider(StockistSpider):
+    name = "doughnut_time_gb"
     item_attributes = {
         "brand_wikidata": "Q117286917",
         "brand": "Doughnut Time",
