@@ -9,9 +9,14 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
+
 class TrucklineAUSpider(Spider):
     name = "truckline_au"
-    item_attributes = {"brand": "Truckline", "brand_wikidata": "Q126179590", "extras": Categories.SHOP_TRUCK_PARTS.value}
+    item_attributes = {
+        "brand": "Truckline",
+        "brand_wikidata": "Q126179590",
+        "extras": Categories.SHOP_TRUCK_PARTS.value,
+    }
     allowed_domains = ["api-v3.partsb2.com.au"]
     start_urls = ["https://api-v3.partsb2.com.au/api/Stores/GetStoresForClient"]
 
