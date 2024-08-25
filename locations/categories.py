@@ -182,6 +182,7 @@ class Categories(Enum):
     SHOP_TRADE = {"shop": "trade"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TRUCK = {"shop": "truck"}
+    SHOP_TRUCK_PARTS = {"shop": "truck_parts"}
     SHOP_TRUCK_REPAIR = {"shop": "truck_repair"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VACUUM_CLEANER = {"shop": "vacuum_cleaner"}
