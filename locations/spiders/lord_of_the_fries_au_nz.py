@@ -1,7 +1,7 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class LordoftheFriesAUNZSpider(WPStoreLocatorSpider):
+class LordOfTheFriesAUNZSpider(WPStoreLocatorSpider):
     name = "lord_of_the_fries_au_nz"
     item_attributes = {
         "brand_wikidata": "Q104088629",
