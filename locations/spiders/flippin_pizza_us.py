@@ -1,5 +1,6 @@
 from locations.json_blob_spider import JSONBlobSpider
 
+
 # A variant on the SuperStoreFinder plugin
 class FlippinPizzaUSSpider(JSONBlobSpider):
     name = "flippin_pizza_us"
@@ -11,6 +12,4 @@ class FlippinPizzaUSSpider(JSONBlobSpider):
     allowed_domains = [
         "flippinpizza.com",
     ]
-    start_urls = [
-        "https://flippinpizza.com/wp-content/uploads/ssf-wp-uploads/ssf-data.json"
-    ]
+    start_urls = ["https://flippinpizza.com/wp-content/uploads/ssf-wp-uploads/ssf-data.json"]
