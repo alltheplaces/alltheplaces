@@ -5,6 +5,7 @@ from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 
+
 # A variant on the SuperStoreFinder plugin
 class ChickenStreetSpider(Spider):
     name = "chicken_street"

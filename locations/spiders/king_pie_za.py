@@ -3,6 +3,7 @@ import re
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
+
 # A variant on the SuperStoreFinder plugin
 class KingPieZASpider(JSONBlobSpider):
     name = "king_pie_za"

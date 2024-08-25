@@ -22,7 +22,7 @@ from locations.items import Feature
 # "Selector" class that has selected the XML node for a particular
 # location).
 #
-# Note that some variants of this spider exist, where a url such as 
+# Note that some variants of this spider exist, where a url such as
 # https://flippinpizza.com/wp-content/uploads/ssf-wp-uploads/ssf-data.json
 # is available.
 
