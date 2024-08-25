@@ -3,11 +3,11 @@ import scrapy
 from locations.items import Feature
 
 
-class BeerStoreSpider(scrapy.Spider):
+class BeerStoreCASpider(scrapy.Spider):
     name = "beer_store"
     item_attributes = {"brand": "The Beer Store", "brand_wikidata": "Q16243674"}
     allowed_domains = ["www.thebeerstore.ca/"]
-    start_urls = ("http://www.thebeerstore.ca/storelocations.json",)
+    start_urls = ["http://www.thebeerstore.ca/storelocations.json"]
     requires_proxy = "CA"
 
     def parse(self, response):
