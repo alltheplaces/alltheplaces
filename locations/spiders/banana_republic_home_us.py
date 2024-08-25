@@ -8,7 +8,11 @@ from locations.storefinders.stockist import StockistSpider
 
 class BananaRepublicHomeUSSpider(StockistSpider):
     name = "banana_republic_home_us"
-    item_attributes = {"brand": "Banana Republic Home", "brand_wikidata": "Q129793169", "extras": Categories.SHOP_FURNITURE.value}
+    item_attributes = {
+        "brand": "Banana Republic Home",
+        "brand_wikidata": "Q129793169",
+        "extras": Categories.SHOP_FURNITURE.value,
+    }
     key = "u17439"
 
     def parse_item(self, item: Feature, feature: dict) -> Iterable[Feature]:
