@@ -168,3 +168,5 @@ REQUESTS_CACHE_BACKEND_SETTINGS = {
     "backend": "filesystem",
     "wal": True,
 }
+
+TEMPLATES_DIR = "templates/"
