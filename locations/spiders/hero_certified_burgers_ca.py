@@ -10,3 +10,4 @@ class HeroCertifiedBurgersCASpider(WPStoreLocatorSpider):
     allowed_domains = [
         "heroburgers.com",
     ]
+    time_format = "%I:%M %p"
