@@ -12,5 +12,6 @@ class ChaayosINSpider(StoreRocketSpider):
         item.pop("phone")
         item.pop("facebook")
         item.pop("twitter")
-        item["extras"].pop("instagram")
+        if "instagram" in item["extras"]:
+            item["extras"].pop("instagram")
         yield item
