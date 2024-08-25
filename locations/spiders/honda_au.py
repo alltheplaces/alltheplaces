@@ -28,7 +28,9 @@ class HondaAUSpider(Spider):
                     continue
 
                 item = DictParser.parse(feature)
-                item["ref"] = feature["DealerNo"] + "_" + feature["Type"]
+                item["ref"] = dealership["DealerNo"] + "_" + feature["Type"]
+                item.pop("name", None)
+                item["branch"] = dealership["Name"]
 
                 if feature["Type"] == "Sales":
                     apply_category(Categories.SHOP_CAR, item)
