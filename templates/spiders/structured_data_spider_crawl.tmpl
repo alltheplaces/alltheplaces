@@ -1,0 +1,20 @@
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.structured_data_spider import StructuredDataSpider
+
+
+class $classname(CrawlSpider, StructuredDataSpider):
+    name = "$name"
+    # item_attributes = {"brand": "$name", "brand_wikidata": "Add if known"}
+    allowed_domains = ["$domain"]
+    start_urls = ["$url"]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"YOUR URL PATTERN HERE"),
+            follow=True,
+        ),
+    ]
+
+    def post_process_item(self, item, response, ld_data):
+        yield item
