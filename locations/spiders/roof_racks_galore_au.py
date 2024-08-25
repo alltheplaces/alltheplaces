@@ -1,8 +1,6 @@
 import re
 from typing import Iterable
 
-from chompjs import parse_js_object
-
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Response
 
@@ -13,7 +11,11 @@ from locations.items import Feature
 
 class RoofRacksGaloreAUSpider(Spider):
     name = "roof_racks_galore_au"
-    item_attributes = {"brand": "Roof Racks Galore", "brand_wikidata": "Q126179662", "extras": Categories.SHOP_CAR_PARTS.value}
+    item_attributes = {
+        "brand": "Roof Racks Galore",
+        "brand_wikidata": "Q126179662",
+        "extras": Categories.SHOP_CAR_PARTS.value,
+    }
     allowed_domains = ["www.roofracksgalore.com.au"]
     start_urls = ["https://www.roofracksgalore.com.au/locations"]
 
@@ -29,10 +31,10 @@ class RoofRacksGaloreAUSpider(Spider):
                 yield JsonRequest(url=url, callback=self.parse_store)
 
     def parse_store(self, response: Response) -> Iterable[Feature]:
-        feature = Selector(text=response.json()["stores"]).xpath('(//li)[1]')
+        feature = Selector(text=response.json()["stores"]).xpath("(//li)[1]")
 
         properties = {
-            "ref": feature.xpath('//@data-store-id').get(),
+            "ref": feature.xpath("//@data-store-id").get(),
             "branch": feature.xpath('//label[contains(@class, "store-item-lable")]/text()').get().strip(),
             "addr_full": feature.xpath('//span[contains(@class, "address-location")]/text()').get().strip(),
             "phone": feature.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", ""),
@@ -40,7 +42,11 @@ class RoofRacksGaloreAUSpider(Spider):
             "opening_hours": OpeningHours(),
         }
 
-        hours_string = " ".join(filter(None, map(str.strip, feature.xpath('//div[contains(@class, "store-opening-hours")]//text()').getall())))
+        hours_string = " ".join(
+            filter(
+                None, map(str.strip, feature.xpath('//div[contains(@class, "store-opening-hours")]//text()').getall())
+            )
+        )
         properties["opening_hours"].add_ranges_from_string(hours_string)
 
         yield Feature(**properties)
