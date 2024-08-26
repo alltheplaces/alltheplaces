@@ -25,7 +25,7 @@ class KfcAUSpider(scrapy.Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            if location["code"] == "1000" or location["code"] == "1001":
+            if location["code"] == "1000" or location["code"] == "1001" or "testing" in location["name"]:
                 # Ignore dummy stores used for internal testing/development
                 continue
             item["ref"] = location["code"]
