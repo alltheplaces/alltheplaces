@@ -13,13 +13,16 @@ class BeerStoreCASpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield JsonRequest(url=url, data={
-                "currentDate": datetime.date.today().isoformat(),
-                "lat": "44.9064",
-                "lang": "-93.2406",
-                "take": 6,
-                "skip": 0,
-            })
+            yield JsonRequest(
+                url=url,
+                data={
+                    "currentDate": datetime.date.today().isoformat(),
+                    "lat": "44.9064",
+                    "lang": "-93.2406",
+                    "take": 6,
+                    "skip": 0,
+                },
+            )
 
     def parse(self, response):
         results = response.json()
