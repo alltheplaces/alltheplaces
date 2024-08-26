@@ -67,7 +67,7 @@ MUSEUM_TYPES = {
 class MkrfRUSpider(Spider):
     name = "mkrf_ru"
     allowed_domains = ["opendata.mkrf.ru"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 100}
     dataset_attributes = {
         "attribution": "required",
         "attribution:name": "Министерство культуры Российской Федерации",
