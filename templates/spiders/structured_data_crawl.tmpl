@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class $classname(CrawlSpider, StructuredDataSpider):
     name = "$name"
-    # item_attributes = {"brand": "$name", "brand_wikidata": "Add if known"}
+    # item_attributes = {"brand": "$name", "brand_wikidata": "Add if known", "extras": Categories.SHOP_XYZ.value}
     allowed_domains = ["$domain"]
     start_urls = ["$url"]
     rules = [
