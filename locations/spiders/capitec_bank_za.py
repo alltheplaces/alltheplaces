@@ -18,6 +18,7 @@ class CapitecBankZASpider(Spider):
     allowed_domains = ["capitecbank.co.za"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
+    requires_proxy = "ZA"
 
     def start_requests(self):
         # Maximum returned is 100, even with larger "Take"
