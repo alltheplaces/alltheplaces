@@ -10,7 +10,7 @@ class EuronicsATSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = RED_ZAC
     sitemap_urls = ["https://www.redzac.at/iconparc_static/seo/Frontend/sitemap_rzat.xml"]
     sitemap_rules = [(r"/info/Home", "parse_sd")]
-    custom_settings = {"COOKIES_ENABLED": False}
+    requires_proxy = True
 
     wanted_types = ["PostalAddress"]
 
