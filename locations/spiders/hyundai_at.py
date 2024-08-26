@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class HyundaiATSpyder(scrapy.Spider):
+class HyundaiATSpider(scrapy.Spider):
     name = "hyundai_at"
     item_attributes = {"brand": "Hyundai", "brand_wikidata": "Q55931"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -20,12 +20,15 @@ class HyundaiATSpyder(scrapy.Spider):
             item["city"] = dealer.get("Ort")
             item["state"] = dealer.get("Bundesland")
             item["website"] = "https://www.hyundai.at/partner-finden"
+
             if dealer.get("Verkauf"):
                 apply_category(Categories.SHOP_CAR, item)
             else:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
+
             if dealer.get("Werkstatt"):
                 item["extras"]["service"] = "dealer;repair"
+
             yield scrapy.Request(
                 url=f"https://www.hyundai.at/umbraco/Surface/PartnerFinden/PartnerDetails?motiondataId={dealer['MotiondataId']}&isSelectable=false&_=1692350353390",
                 callback=self.parse_more_details,
