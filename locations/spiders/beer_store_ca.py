@@ -4,7 +4,7 @@ from locations.items import Feature
 
 
 class BeerStoreCASpider(scrapy.Spider):
-    name = "beer_store"
+    name = "beer_store_ca"
     item_attributes = {"brand": "The Beer Store", "brand_wikidata": "Q16243674"}
     allowed_domains = ["www.thebeerstore.ca/"]
     start_urls = ["http://www.thebeerstore.ca/storelocations.json"]
