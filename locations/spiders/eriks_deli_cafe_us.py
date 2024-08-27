@@ -1,5 +1,5 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
-
+from locations.hours import DAYS_EN
 
 class EriksDeliCafeUSSpider(WPStoreLocatorSpider):
     name = "eriks_deli_cafe_us"
@@ -12,3 +12,4 @@ class EriksDeliCafeUSSpider(WPStoreLocatorSpider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     time_format = "%I:%M %p"
+    days = DAYS_EN
