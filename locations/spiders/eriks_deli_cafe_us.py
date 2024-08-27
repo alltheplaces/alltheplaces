@@ -1,3 +1,4 @@
+from locations.categories import Categories
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.hours import DAYS_EN
 
@@ -6,6 +7,7 @@ class EriksDeliCafeUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q116922917",
         "brand": "Erik's DeliCafé",
+        "extras": Categories.FAST_FOOD.value
     }
     allowed_domains = [
         "eriksdelicafe.com",
