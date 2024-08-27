@@ -10,7 +10,7 @@ from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class BarBurritoCASpider(WPStoreLocatorSpider):
+class BarburritoCASpider(WPStoreLocatorSpider):
     name = "barburrito_ca"
     item_attributes = {"brand": "BarBurrito", "brand_wikidata": "Q104844862", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["www.barburrito.ca"]
