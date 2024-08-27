@@ -1,8 +1,8 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class EriksDeliCafeSpider(WPStoreLocatorSpider):
-    name = "eriks_deli_cafe"
+class EriksDeliCafeUSSpider(WPStoreLocatorSpider):
+    name = "eriks_deli_cafe_us"
     item_attributes = {
         "brand_wikidata": "Q116922917",
         "brand": "Erik's DeliCafé",
