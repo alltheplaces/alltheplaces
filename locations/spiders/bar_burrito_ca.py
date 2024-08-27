@@ -1,6 +1,9 @@
 from html import unescape
+from typing import Iterable
 
 from phpserialize import unserialize
+
+from scrapy.http import Response
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
@@ -9,19 +12,18 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
 class BarBurritoCASpider(WPStoreLocatorSpider):
-    name = "bar_burrito_ca"
+    name = "barburrito_ca"
     item_attributes = {"brand": "BarBurrito", "brand_wikidata": "Q104844862", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["www.barburrito.ca"]
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = unescape(item.pop("name"))
-        del item["addr_full"]
-
+        item.pop("addr_full", None)
         yield item
 
-    def parse_opening_hours(self, location: dict, days: dict, **kwargs):
+    def parse_opening_hours(self, feature: dict, days: dict) -> OpeningHours:
         # Reference: https://www.php.net/manual/en/function.unserialize.php
-        php_serialized_string = location.get("hours", "").encode("utf-8")
+        php_serialized_string = feature.get("hours", "").encode("utf-8")
         unserialized_object = unserialize(php_serialized_string)
         unserialized_dict = {
             k.decode(): v.decode() if isinstance(v, bytes) else v for k, v in unserialized_object.items()

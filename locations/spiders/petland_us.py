@@ -1,3 +1,5 @@
+from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -6,8 +8,9 @@ class PetlandUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q17111474",
         "brand": "Petland",
+        "extras": Categories.SHOP_PET.value
     }
     allowed_domains = [
         "petland.com",
     ]
-    time_format = "%I:%M %p"
+    days = DAYS_EN
