@@ -16,3 +16,6 @@ class FreshslicePizzaCASpider(WPStoreLocatorSpider):
     ]
     time_format = "%I:%M %p"
     days = DAYS_EN
+    iseadgg_countries_list = ["CA"]
+    search_radius = 100
+    max_results = 50
