@@ -1,9 +1,7 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_yes_no, Extras
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class FlashCoffeeSpider(Spider):
