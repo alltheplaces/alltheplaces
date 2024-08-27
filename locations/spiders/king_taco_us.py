@@ -1,4 +1,5 @@
 from locations.hours import DAYS_EN
+from locations.categories import Categories
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -7,6 +8,7 @@ class KingTacoUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q6412104",
         "brand": "King Taco",
+        "extras": Categories.FAST_FOOD.value
     }
     allowed_domains = [
         "kingtaco.com",
