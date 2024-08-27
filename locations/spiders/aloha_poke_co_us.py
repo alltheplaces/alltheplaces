@@ -1,13 +1,17 @@
+from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class AlohaPokeCoSpider(WPStoreLocatorSpider):
-    name = "aloha_poke_co"
+class AlohaPokeCoUSSpider(WPStoreLocatorSpider):
+    name = "aloha_poke_co_us"
     item_attributes = {
         "brand_wikidata": "Q111231031",
         "brand": "Aloha Pokē Co",
+        "extras": Categories.FAST_FOOD.value
     }
     allowed_domains = [
         "www.alohapokeco.com",
     ]
     time_format = "%I:%M %p"
+    days = DAYS_EN
