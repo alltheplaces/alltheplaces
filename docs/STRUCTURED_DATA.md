@@ -66,8 +66,8 @@ The ATP tooling described here and on related pages can go a long way to giving 
 
 To get started quickly, try either of:
 
-`pipenv run scrapy genspider -t structured_data_spider_crawl your_spider_name https://www.your_spider_name.com/`
-`pipenv run scrapy genspider -t structured_data_spider_sitemap your_spider_name https://www.your_spider_name.com/`
+`pipenv run scrapy genspider -t structured_data_crawl your_spider_name https://www.your_spider_name.com/`
+`pipenv run scrapy genspider -t structured_data_sitemap your_spider_name https://www.your_spider_name.com/`
 
 Or to make an entire branch:
 `./contrib/new_spider structured_data_spider_sitemap your_spider_name https://www.your_spider_name.com/`
