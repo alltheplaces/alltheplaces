@@ -5,7 +5,7 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 
 
-class BoboliESIT(Spider):
+class BobaliESITSpider(Spider):
     name = "bobali_es_it"
     item_attributes = {"brand": "Boboli", "brand_wikidata": "Q39073733", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = ["https://www.boboli.es/es/tiendas?all=1"]
