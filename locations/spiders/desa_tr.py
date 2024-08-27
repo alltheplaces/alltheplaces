@@ -1,7 +1,7 @@
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class DesaTR(JSONBlobSpider):
+class DesaTRSpider(JSONBlobSpider):
     name = "desa_tr"
     item_attributes = {
         "brand": "Desa",
