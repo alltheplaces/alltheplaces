@@ -2,7 +2,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class Espacolaser(JSONBlobSpider):
+class EspacolaserSpider(JSONBlobSpider):
     name = "espacolaser"
     item_attributes = {
         "brand": "Espaçolaser",
