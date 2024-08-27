@@ -4,8 +4,8 @@ from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class FlashCoffeeSpider(Spider):
-    name = "flash_coffee"
+class FlashCoffeeIDSpider(Spider):
+    name = "flash_coffee_id"
     item_attributes = {
         "brand": "Flash Coffee",
         "brand_wikidata": "Q118627777",
