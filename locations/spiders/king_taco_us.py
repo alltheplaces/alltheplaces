@@ -1,8 +1,9 @@
+from locations.hours imports DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class KingTacoSpider(WPStoreLocatorSpider):
-    name = "king_taco"
+class KingTacoUSSpider(WPStoreLocatorSpider):
+    name = "king_taco_us"
     item_attributes = {
         "brand_wikidata": "Q6412104",
         "brand": "King Taco",
@@ -11,3 +12,4 @@ class KingTacoSpider(WPStoreLocatorSpider):
         "kingtaco.com",
     ]
     time_format = "%I:%M %p"
+    days = DAYS_EN
