@@ -5,10 +5,11 @@ from locations.categories import Categories
 class $classname(WpGoMapsSpider):
     name = "$name"
     item_attributes = {
-        "brand": "$brand",
-        "brand_wikidata": "$brand_wikidata",
-        "operator": "$operator",
-        "operator_wikidata": "$operator_wikidata",
-        "extras": Categories.SHOP_XYZ.value
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+        # "extras": Categories.SHOP_XYZ.value
     }
     allowed_domains = ["$domain"]
