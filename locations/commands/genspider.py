@@ -18,8 +18,6 @@ class Command(scrapy.commands.genspider.Command):
         "brand_wikidata": None,
         "operator": None,
         "operator_wikidata": None,
-        # "spider_key": "new_brand_zz",
-        # "spider_class_name": "NewBrandZZSpider",
     }
 
     def add_options(self, parser: argparse.ArgumentParser) -> None:
