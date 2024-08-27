@@ -1,8 +1,8 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class BobablasticSpider(WPStoreLocatorSpider):
-    name = "bobablastic"
+class BobablasticUSSpider(WPStoreLocatorSpider):
+    name = "bobablastic_us"
     item_attributes = {
         "brand_wikidata": "Q108499280",
         "brand": "Bobablastic",
