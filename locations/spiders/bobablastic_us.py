@@ -1,4 +1,5 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.hours import DAYS_EN
 
 
 class BobablasticUSSpider(WPStoreLocatorSpider):
@@ -14,3 +15,4 @@ class BobablasticUSSpider(WPStoreLocatorSpider):
     iseadgg_countries_list = ["US"]
     search_radius = 100
     max_results = 50
+    days = DAYS_EN
