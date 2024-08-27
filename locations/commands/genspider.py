@@ -1,16 +1,15 @@
 import argparse
 import os
 import shutil
-import string
 from importlib import import_module
 from pathlib import Path
-from typing import List, Optional, Union, cast
-from urllib.parse import urlparse
+from typing import Union
 
 import scrapy.commands.genspider
-from scrapy.commands.genspider import extract_domain, string_camelcase, render_templatefile
+from scrapy.commands.genspider import extract_domain, render_templatefile, string_camelcase
 
 from locations.name_suggestion_index import NSI
+
 
 class Command(scrapy.commands.genspider.Command):
     # TODO: Remove this when autospidergen is merged
@@ -106,7 +105,7 @@ class Command(scrapy.commands.genspider.Command):
         capitalized_module = "".join(s.capitalize() for s in module.split("_"))
 
         self.start_urls = [url]
-        automatically_set_parameters()
+        self.automatically_set_parameters()
 
         tvars = {
             "project_name": self.settings.get("BOT_NAME"),
@@ -118,7 +117,7 @@ class Command(scrapy.commands.genspider.Command):
             "classname": f"{capitalized_module}Spider",
         }
         # Flatten the parameters and merge with the other variables
-        return tvars + self.parameters
+        return tvars | self.parameters
 
     # TODO: If https://github.com/scrapy/scrapy/pull/6470 is merged, much of this can be removed
     def _genspider(
