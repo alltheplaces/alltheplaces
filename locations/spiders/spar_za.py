@@ -9,6 +9,7 @@ class SparZASpider(scrapy.Spider):
     name = "spar_za"
     item_attributes = {"brand": "SPAR", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value}
     start_urls = []
+    requires_proxy = "ZA"
 
     def start_requests(self):
         yield scrapy.http.JsonRequest(

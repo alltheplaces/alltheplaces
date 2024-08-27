@@ -9,4 +9,5 @@ class SelfastZASpider(WPStoreLocatorSpider):
 
     def parse_item(self, item, location):
         item.pop("street_address", None)
+        item["branch"] = item.pop("name")
         yield item

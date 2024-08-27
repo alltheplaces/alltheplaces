@@ -20,4 +20,9 @@ class AgataMeblePLSpider(scrapy.Spider):
             item.pop("name", None)
             item["website"] = urljoin("https://www.agatameble.pl/salon/", poi["Slug"])
 
-            yield item
+            # Make a request to the website so that we filter out closed stores that 404
+            yield scrapy.Request(item["website"], self.parse_store, meta={"item": item})
+
+    def parse_store(self, response, **kwargs):
+        item = response.meta["item"]
+        yield item

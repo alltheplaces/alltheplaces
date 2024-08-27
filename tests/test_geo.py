@@ -2,10 +2,76 @@ from locations.geo import (
     bbox_contains,
     bbox_to_geojson,
     city_locations,
+    country_iseadgg_centroids,
     make_subdivisions,
     point_locations,
     postal_regions,
 )
+
+
+def test_country_iseadgg_centroids():
+    centroids = country_iseadgg_centroids(["AU"], 94)
+    au94len = len(centroids)
+    assert au94len == 417
+
+    centroids = country_iseadgg_centroids("NZ", 94)
+    nz94len = len(centroids)
+    assert nz94len == 42
+
+    centroids = country_iseadgg_centroids(["AU", "NZ"], 94)
+    assert len(centroids) == au94len + nz94len
+
+    centroids = country_iseadgg_centroids(["AU", "AU"], 94)
+    assert len(centroids) == au94len
+
+    centroids = country_iseadgg_centroids(["FR", "IT", "CH", "ES", "PT", "DE", "BE", "AT", "NL", "CZ"], 458)
+    assert len(centroids) == 25
+
+    centroids = country_iseadgg_centroids("GB", 24)
+    gb24len = len(centroids)
+    assert gb24len == 267
+
+    centroids = country_iseadgg_centroids("GB", 48)
+    assert len(centroids) == 87
+
+    centroids = country_iseadgg_centroids("GB", 79)
+    assert len(centroids) == 38
+
+    centroids = country_iseadgg_centroids("GB", 94)
+    assert len(centroids) == 31
+
+    centroids = country_iseadgg_centroids("GB", 158)
+    assert len(centroids) == 15
+
+    centroids = country_iseadgg_centroids("GB", 315)
+    assert len(centroids) == 5
+
+    centroids = country_iseadgg_centroids("GB", 458)
+    assert len(centroids) == 5
+
+    try:
+        centroids = country_iseadgg_centroids("GB", 9999)
+        assert False
+    except ValueError:
+        assert True
+
+    try:
+        centroids = country_iseadgg_centroids("GB", 0)
+        assert False
+    except ValueError:
+        assert True
+
+    try:
+        centroids = country_iseadgg_centroids("XX", 24)
+        assert False
+    except ValueError:
+        assert True
+
+    try:
+        centroids = country_iseadgg_centroids(["GB", "XX"], 24)
+        assert False
+    except ValueError:
+        assert True
 
 
 def test_point_locations():

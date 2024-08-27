@@ -74,7 +74,7 @@ class BashZASpider(Spider):
     name = "bash_za"
     allowed_domains = ["bash.com"]
     start_urls = [
-        'https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"53e625f7c1d5013253fe27c99d9d0b4f9aba2545fffe7b5d8691efbe57ff419c","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}'
+        'https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"966dea829c724e7374c6287b93b15a9fce36b3126e09d32370e251e96738153d","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}'
     ]
 
     def start_requests(self):
@@ -94,7 +94,6 @@ class BashZASpider(Spider):
             ]:
                 continue
             item = DictParser.parse(location)
-            item["name"] = item.pop("name").replace("Sportcene", "Sportscene")
             item["lat"] = location["address"]["location"]["latitude"]
             item["lon"] = location["address"]["location"]["longitude"]
             item.pop("street")
@@ -118,5 +117,14 @@ class BashZASpider(Spider):
 
             if m := self.brand_name_regex.match(item["name"]):
                 item.update(BASH_BRANDS[m.group(1).upper()])
+                item["branch"] = (
+                    item["name"]
+                    .replace(self.brand_name_regex.match(item["name"]).group(1), "")
+                    .replace("Sportcene", "")
+                    .strip()
+                )
+            else:
+                item["branch"] = item["name"]
+            item.pop("name")
 
             yield item

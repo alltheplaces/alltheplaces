@@ -1,17 +1,17 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.open_graph_parser import OpenGraphParser
+from locations.open_graph_spider import OpenGraphSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import extract_phone
 
 
-class FrancoMancaGBSpider(SitemapSpider):
+class FrancoMancaGBSpider(SitemapSpider, OpenGraphSpider):
     name = "franco_manca_gb"
     item_attributes = {"brand": "Franco Manca", "brand_wikidata": "Q28404417"}
     sitemap_urls = ["https://www.francomanca.co.uk/restaurant-sitemap.xml"]
+    wanted_types = ["article"]
 
-    def parse(self, response, **kwargs):
-        item = OpenGraphParser.parse(response)
+    def post_process_item(self, item, response, **kwargs):
         item["name"] = "Franco Manca"
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()

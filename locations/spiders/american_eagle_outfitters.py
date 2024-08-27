@@ -5,11 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class AmericanEagleOutfittersSpider(SitemapSpider, StructuredDataSpider):
     name = "american_eagle_outfitters"
-    item_attributes = {
-        "brand": "American Eagle Outfitters",
-        "brand_wikidata": "Q2842931",
-    }
-    allowed_domains = ["ae.com"]
+    item_attributes = {"brand": "American Eagle Outfitters", "brand_wikidata": "Q2842931"}
     sitemap_urls = ["https://stores.aeostores.com/sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
     custom_settings = {"ROBOTSTXT_OBEY": False}

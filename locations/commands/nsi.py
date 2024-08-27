@@ -70,13 +70,8 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print("       -> " + str(item))
 
     def detect_missing(self, args):
-        codes = {}
-        for spider_name in self.crawler_process.spider_loader.list():
-            props = DuplicateWikidataCommand.spider_properties(spider_name)
-            for code in props["wikidata_codes"]:
-                code_spiders = codes.get(code, set())
-                code_spiders.add(props["filename"])
-                codes[code] = code_spiders
+
+        codes = DuplicateWikidataCommand.wikidata_spiders(self.crawler_process)
 
         # Fetch the category from NSI's github, and try to match to wikidata.
         # TODO: This assumes you are going for only one category, by wikidata ID.
