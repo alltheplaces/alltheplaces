@@ -1,8 +1,11 @@
+from typing import Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
@@ -41,6 +44,6 @@ class StorefrontgatewaySpider(Spider):
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item
