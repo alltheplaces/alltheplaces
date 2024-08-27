@@ -7,6 +7,14 @@ class $classname(XMLFeedSpider):
     start_urls = ["$url"]
     iterator = "iternodes"  # you can change this; see the docs
     itertag = "item"  # change it accordingly
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+        # "extras": Categories.SHOP_XYZ.value
+    }
 
     def parse_node(self, response, selector):
         item = {}
