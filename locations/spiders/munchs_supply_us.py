@@ -1,5 +1,9 @@
 import re
+from typing import Iterable
 
+from scrapy import Selector
+
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
@@ -9,7 +13,7 @@ class MunchsSupplyUSSpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Munch's Supply", "brand_wikidata": "Q117021522"}
     allowed_domains = ["www.munchsupply.com"]
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         contact_raw_parts = popup_html.xpath(
             '//div[contains(@class, "amlocator-title")]/following-sibling::text()'
         ).getall()
