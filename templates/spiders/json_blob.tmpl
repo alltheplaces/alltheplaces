@@ -5,10 +5,14 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class $classname(JSONBlobSpider):
     name = "$name"
-    # item_attributes = {
-    #    "brand_wikidata": "",
-    #    "brand": "",
-    # }
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+        # "extras": Categories.SHOP_XYZ.value
+    }
     start_urls = ["$url"]
     # no_refs = True
 
