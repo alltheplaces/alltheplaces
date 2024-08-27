@@ -8,7 +8,7 @@ class LordOfTheFriesAUNZSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q104088629",
         "brand": "Lord of the Fries",
-        "extras": Categories.FAST_FOOD.value
+        "extras": Categories.FAST_FOOD.value,
     }
     allowed_domains = [
         "www.lordofthefries.com.au",
