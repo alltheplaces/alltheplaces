@@ -5,11 +5,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class DaylightDonutsUSSpider(WPStoreLocatorSpider):
     name = "daylight_donuts_us"
-    item_attributes = {
-        "brand_wikidata": "Q48970508",
-        "brand": "Daylight Donuts",
-        "extras": Categories.FAST_FOOD.value
-    }
+    item_attributes = {"brand_wikidata": "Q48970508", "brand": "Daylight Donuts", "extras": Categories.FAST_FOOD.value}
     allowed_domains = [
         "daylightdonuts.com",
     ]

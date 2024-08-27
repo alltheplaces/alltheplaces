@@ -8,7 +8,7 @@ class JiffyMartUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q119592174",
         "brand": "Jiffy Mart",
-        "extras": Categories.SHOP_CONVENIENCE.value
+        "extras": Categories.SHOP_CONVENIENCE.value,
     }
     allowed_domains = [
         "jiffymartstores.com",

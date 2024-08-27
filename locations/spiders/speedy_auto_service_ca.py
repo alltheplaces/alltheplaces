@@ -8,7 +8,7 @@ class SpeedyAutoServiceCASpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q22318193",
         "brand": "Speedy Auto Service",
-        "extras": Categories.SHOP_CAR_REPAIR.value
+        "extras": Categories.SHOP_CAR_REPAIR.value,
     }
     allowed_domains = [
         "www.speedy.com",

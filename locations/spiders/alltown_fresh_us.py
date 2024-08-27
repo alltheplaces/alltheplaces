@@ -8,7 +8,7 @@ class AlltownFreshUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q119591365",
         "brand": "Alltown Fresh",
-        "extras": Categories.SHOP_CONVENIENCE.value
+        "extras": Categories.SHOP_CONVENIENCE.value,
     }
     allowed_domains = [
         "alltownfresh.com",

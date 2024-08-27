@@ -12,11 +12,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class LaserawayUSSpider(WPStoreLocatorSpider):
     name = "laseraway_us"
-    item_attributes = {
-        "brand_wikidata": "Q119982751",
-        "brand": "LaserAway",
-        "extras": Categories.SHOP_BEAUTY.value
-    }
+    item_attributes = {"brand_wikidata": "Q119982751", "brand": "LaserAway", "extras": Categories.SHOP_BEAUTY.value}
     allowed_domains = [
         "www.laseraway.com",
     ]

@@ -8,7 +8,7 @@ class BricksMinifigsCAUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q109329121",
         "brand": "Bricks & Minifigs",
-        "extras": Categories.SHOP_TOYS.value
+        "extras": Categories.SHOP_TOYS.value,
     }
     allowed_domains = [
         "bricksandminifigs.com",

@@ -5,11 +5,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class UnimarktATSpider(WPStoreLocatorSpider):
     name = "unimarkt_at"
-    item_attributes = {
-        "brand_wikidata": "Q1169599",
-        "brand": "Unimarkt",
-        "extras": Categories.SHOP_SUPERMARKET.value
-    }
+    item_attributes = {"brand_wikidata": "Q1169599", "brand": "Unimarkt", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = [
         "unimarkt.at",
     ]

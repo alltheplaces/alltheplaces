@@ -8,7 +8,7 @@ class MonsieurStoreFRSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q113686692",
         "brand": "Monsieur Store",
-        "extras": Categories.SHOP_WINDOW_BLIND.value
+        "extras": Categories.SHOP_WINDOW_BLIND.value,
     }
     allowed_domains = [
         "monsieurstore.com",

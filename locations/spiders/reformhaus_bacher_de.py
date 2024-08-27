@@ -8,7 +8,7 @@ class ReformhausBacherDESpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q19816424",
         "brand": "Reformhaus Bacher",
-        "extras": Categories.SHOP_HEALTH_FOOD.value
+        "extras": Categories.SHOP_HEALTH_FOOD.value,
     }
     allowed_domains = [
         "www.reformhaus-bacher.de",

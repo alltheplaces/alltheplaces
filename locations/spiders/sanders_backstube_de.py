@@ -8,7 +8,7 @@ class SandersBackstubeDESpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q66207337",
         "brand": "sander's backstube",
-        "extras": Categories.SHOP_BAKERY.value
+        "extras": Categories.SHOP_BAKERY.value,
     }
     allowed_domains = [
         "sanders-backstube.de",

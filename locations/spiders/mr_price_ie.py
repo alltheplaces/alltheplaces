@@ -8,7 +8,7 @@ class MrPriceIESpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q113197454",
         "brand": "Mr. Price",
-        "extras": Categories.SHOP_VARIETY_STORE.value
+        "extras": Categories.SHOP_VARIETY_STORE.value,
     }
     allowed_domains = [
         "www.mrprice.ie",

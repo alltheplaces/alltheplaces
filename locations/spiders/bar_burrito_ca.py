@@ -2,7 +2,6 @@ from html import unescape
 from typing import Iterable
 
 from phpserialize import unserialize
-
 from scrapy.http import Response
 
 from locations.categories import Categories

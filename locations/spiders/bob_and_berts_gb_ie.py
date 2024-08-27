@@ -5,11 +5,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class BobAndBertsGBIESpider(WPStoreLocatorSpider):
     name = "bob_and_berts_gb_ie"
-    item_attributes = {
-        "brand_wikidata": "Q113494662",
-        "brand": "Bob & Berts",
-        "extras": Categories.CAFE.value
-    }
+    item_attributes = {"brand_wikidata": "Q113494662", "brand": "Bob & Berts", "extras": Categories.CAFE.value}
     allowed_domains = [
         "bobandberts.co.uk",
     ]

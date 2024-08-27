@@ -13,7 +13,7 @@ class MarkgrafenGetraenkemarktDESpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q100324493",
         "brand": "Markgrafen Getränkemarkt",
-        "extras": Categories.SHOP_BEVERAGES.value
+        "extras": Categories.SHOP_BEVERAGES.value,
     }
     allowed_domains = [
         "www.markgrafen.com",

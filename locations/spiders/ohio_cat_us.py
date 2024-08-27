@@ -5,11 +5,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class OhioCatUSSpider(WPStoreLocatorSpider):
     name = "ohio_cat_us"
-    item_attributes = {
-        "brand_wikidata": "Q115486235",
-        "brand": "Ohio CAT",
-        "extras": Categories.SHOP_TRADE.value
-    }
+    item_attributes = {"brand_wikidata": "Q115486235", "brand": "Ohio CAT", "extras": Categories.SHOP_TRADE.value}
     allowed_domains = [
         "ohiocat.com",
     ]

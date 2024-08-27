@@ -11,7 +11,11 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class DayTodayGBSpider(WPStoreLocatorSpider):
     name = "day_today_gb"
-    item_attributes = {"brand": "Day-Today", "brand_wikidata": "Q121435331", "extras": Categories.SHOP_CONVENIENCE.value}
+    item_attributes = {
+        "brand": "Day-Today",
+        "brand_wikidata": "Q121435331",
+        "extras": Categories.SHOP_CONVENIENCE.value,
+    }
     allowed_domains = ["www.day-today.co.uk"]
     days = DAYS_EN
 

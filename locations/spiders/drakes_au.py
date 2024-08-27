@@ -10,11 +10,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class DrakesAUSpider(WPStoreLocatorSpider):
     name = "drakes_au"
-    item_attributes = {
-        "brand_wikidata": "Q48988077",
-        "brand": "Drakes",
-        "extras": Categories.SHOP_SUPERMARKET.value
-    }
+    item_attributes = {"brand_wikidata": "Q48988077", "brand": "Drakes", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = [
         "drakes.com.au",
     ]

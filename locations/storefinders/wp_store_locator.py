@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
-from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
+from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -202,7 +202,7 @@ class WPStoreLocatorSpider(Spider):
     def parse_opening_hours(self, feature: dict, days: dict) -> OpeningHours | None:
         hours_raw = DictParser.get_first_key(feature, DictParser.hours_keys)
         if hours_raw:
-            hours_raw = " ".join(filter(None, map(str.strip, Selector(text=hours_raw).xpath('//text()').getall())))
+            hours_raw = " ".join(filter(None, map(str.strip, Selector(text=hours_raw).xpath("//text()").getall())))
             oh = OpeningHours()
             oh.add_ranges_from_string(hours_raw, days=days)
             if oh.as_opening_hours():

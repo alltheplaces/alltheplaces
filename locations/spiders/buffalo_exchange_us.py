@@ -15,7 +15,7 @@ class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q4985721",
         "brand": "Buffalo Exchange",
-        "extras": Categories.SHOP_CLOTHES.value
+        "extras": Categories.SHOP_CLOTHES.value,
     }
     allowed_domains = [
         "buffaloexchange.com",

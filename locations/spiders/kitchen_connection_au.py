@@ -8,7 +8,7 @@ class KitchenConnectionAUSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q111081406",
         "brand": "Kitchen Connection",
-        "extras": Categories.SHOP_KITCHEN.value
+        "extras": Categories.SHOP_KITCHEN.value,
     }
     allowed_domains = [
         "kitchenconnection.com.au",

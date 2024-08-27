@@ -8,7 +8,7 @@ class FarmfoodsSKSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q116867227",
         "brand": "FARMFOODS",
-        "extras": Categories.SHOP_CONVENIENCE.value
+        "extras": Categories.SHOP_CONVENIENCE.value,
     }
     allowed_domains = [
         "predajne.farmfoods.sk",

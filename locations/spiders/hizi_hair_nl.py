@@ -8,7 +8,7 @@ class HiziHairNLSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q122903761",
         "brand": "Hizi Hair",
-        "extras": Categories.SHOP_HAIRDRESSER.value
+        "extras": Categories.SHOP_HAIRDRESSER.value,
     }
     allowed_domains = [
         "www.hizihair.nl",

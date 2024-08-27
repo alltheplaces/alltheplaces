@@ -8,7 +8,7 @@ class TheAthletesFootSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q7714792",
         "brand": "The Athlete's Foot",
-        "extras": Categories.SHOP_SHOES.value
+        "extras": Categories.SHOP_SHOES.value,
     }
     allowed_domains = [
         "www.theathletesfoot.com",

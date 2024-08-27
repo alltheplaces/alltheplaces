@@ -8,7 +8,7 @@ class ProcolorCollisionUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q120648778",
         "brand": "ProColor Collision",
-        "extras": Categories.SHOP_CAR_REPAIR.value
+        "extras": Categories.SHOP_CAR_REPAIR.value,
     }
     allowed_domains = [
         "www.procolor.com",

@@ -5,11 +5,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class RegalNailsUSSpider(WPStoreLocatorSpider):
     name = "regal_nails_us"
-    item_attributes = {
-        "brand_wikidata": "Q108918028",
-        "brand": "Regal Nails",
-        "extras": Categories.SHOP_BEAUTY.value
-    }
+    item_attributes = {"brand_wikidata": "Q108918028", "brand": "Regal Nails", "extras": Categories.SHOP_BEAUTY.value}
     allowed_domains = [
         "regalnails.com",
     ]

@@ -8,7 +8,7 @@ class NaszSklepPLSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q62070369",
         "brand": "Nasz Sklep",
-        "extras": Categories.SHOP_CONVENIENCE.value
+        "extras": Categories.SHOP_CONVENIENCE.value,
     }
     allowed_domains = [
         "nasz-sklep.pl",

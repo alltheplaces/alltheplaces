@@ -8,7 +8,7 @@ class SctGBSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q107463316",
         "brand": "Spitalfields Crypt Trust",
-        "extras": Categories.SHOP_CHARITY.value
+        "extras": Categories.SHOP_CHARITY.value,
     }
     allowed_domains = [
         "www.sct.org.uk",

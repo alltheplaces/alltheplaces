@@ -10,11 +10,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class PizzaPerfectZASpider(WPStoreLocatorSpider):
     name = "pizza_perfect_za"
-    item_attributes = {
-        "brand_wikidata": "Q116619227",
-        "brand": "Pizza Perfect",
-        "extras": Categories.FAST_FOOD.value
-    }
+    item_attributes = {"brand_wikidata": "Q116619227", "brand": "Pizza Perfect", "extras": Categories.FAST_FOOD.value}
     allowed_domains = [
         "pizzaperfect.co.za",
     ]

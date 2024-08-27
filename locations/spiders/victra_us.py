@@ -15,7 +15,7 @@ class VictraUSSpider(WPStoreLocatorSpider):
         "brand_wikidata": "Q919641",
         "operator": "Victra",
         "operator_wikidata": "Q118402656",
-        "extras": Categories.SHOP_MOBILE_PHONE.value
+        "extras": Categories.SHOP_MOBILE_PHONE.value,
     }
     allowed_domains = ["victra.com"]
     iseadgg_countries_list = ["US"]

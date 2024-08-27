@@ -8,7 +8,7 @@ class SloneczkoPLSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q113230439",
         "brand": "Słoneczko",
-        "extras": Categories.SHOP_CONVENIENCE.value
+        "extras": Categories.SHOP_CONVENIENCE.value,
     }
     allowed_domains = [
         "sloneczko.zgora.pl",

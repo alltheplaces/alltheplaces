@@ -13,7 +13,7 @@ class GoGamesToysUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q108312837",
         "brand": "Go! Games & Toys",
-        "extras": Categories.SHOP_TOYS.value
+        "extras": Categories.SHOP_TOYS.value,
     }
     allowed_domains = [
         "goretailgroup.com",

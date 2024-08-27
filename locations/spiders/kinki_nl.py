@@ -3,7 +3,6 @@ from urllib.parse import urljoin
 
 from scrapy.http import Response
 
-from locations.categories import Categories
 from locations.hours import DAYS_NL
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
