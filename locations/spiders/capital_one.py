@@ -106,9 +106,7 @@ class CapitalOneSpider(Spider):
 
         for feature in features:
             item = DictParser.parse(feature)
-            item["website"] = (
-                f'https://locations.capitalone.com/{feature["seoType"]}/{item["state"]}/{feature["slug"]}'
-            )
+            item["website"] = f'https://locations.capitalone.com/{feature["seoType"]}/{item["state"]}/{feature["slug"]}'
             item["street_address"] = clean_address(
                 [
                     feature["address"]["addressLine1"],
