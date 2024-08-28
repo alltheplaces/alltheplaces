@@ -9,7 +9,6 @@ class FreshslicePizzaCASpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.freshslice.com",
     ]
-    time_format = "%I:%M %p"
     days = DAYS_EN
     iseadgg_countries_list = ["CA"]
     search_radius = 100
