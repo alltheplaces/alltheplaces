@@ -1,3 +1,5 @@
+from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -6,8 +8,9 @@ class SpeedyAutoServiceCASpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q22318193",
         "brand": "Speedy Auto Service",
+        "extras": Categories.SHOP_CAR_REPAIR.value,
     }
     allowed_domains = [
         "www.speedy.com",
     ]
-    time_format = "%I:%M %p"
+    days = DAYS_EN
