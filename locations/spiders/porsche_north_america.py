@@ -23,6 +23,7 @@ class PorscheNorthAmericaSpider(scrapy.Spider):
             item = DictParser.parse(shop_info)
             item["country"] = country
             item["branch"] = item.pop("name")
+            item["street_address"] = item.pop("street")
             item["phone"] = shop_info.get("contactDetails", {}).get("phoneNumber")
             item["email"] = shop_info.get("contactDetails", {}).get("emailAddress")
             item["website"] = shop_info.get("contactDetails", {}).get("homepage")
