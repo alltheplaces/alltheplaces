@@ -261,6 +261,7 @@ class Categories(Enum):
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
+    POST_PARTNER = {"post_office": "post_partner"}
     PREP_SCHOOL = {"amenity": "prep_school"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
