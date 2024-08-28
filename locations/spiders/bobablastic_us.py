@@ -9,7 +9,6 @@ class BobablasticUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "bobablastic.com",
     ]
-    time_format = "%I:%M %p"
     iseadgg_countries_list = ["US"]
     search_radius = 100
     max_results = 50
