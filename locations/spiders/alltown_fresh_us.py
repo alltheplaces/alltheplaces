@@ -1,3 +1,5 @@
+from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -6,8 +8,9 @@ class AlltownFreshUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand_wikidata": "Q119591365",
         "brand": "Alltown Fresh",
+        "extras": Categories.SHOP_CONVENIENCE.value,
     }
     allowed_domains = [
         "alltownfresh.com",
     ]
-    time_format = "%I:%M %p"
+    days = DAYS_EN
