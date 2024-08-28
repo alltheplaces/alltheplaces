@@ -1,11 +1,10 @@
-import re
 from typing import Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.dict_parser import DictParser
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -14,7 +13,9 @@ class CanadaPostCASpider(Spider):
     name = "canada_post_ca"
     item_attributes = {"brand": "Canada Post", "brand_wikidata": "Q1032001"}
     allowed_domains = ["pub.geo.canadapost-postescanada.ca"]
-    start_urls = ["https://pub.geo.canadapost-postescanada.ca/server/rest/services/Hosted/FPO_FLEX_FACILITY_RETAIL_POINT/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&inSR=4326&outSR=4326&resultOffset=0"]
+    start_urls = [
+        "https://pub.geo.canadapost-postescanada.ca/server/rest/services/Hosted/FPO_FLEX_FACILITY_RETAIL_POINT/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&inSR=4326&outSR=4326&resultOffset=0"
+    ]
 
     def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], meta={"offset": 0})
@@ -64,7 +65,9 @@ class CanadaPostCASpider(Spider):
             # More features exist but have been truncated.
             # Request the next page of features.
             offset = response.meta["offset"] + 2000
-            yield JsonRequest(url=self.start_urls[0].replace("&resultOffset=0", f"&resultOffset={offset}"), meta={"offset": offset})
+            yield JsonRequest(
+                url=self.start_urls[0].replace("&resultOffset=0", f"&resultOffset={offset}"), meta={"offset": offset}
+            )
 
     def parse_opening_hours(self, feature: dict) -> OpeningHours():
         hours_keys_list = [
