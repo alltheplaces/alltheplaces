@@ -31,10 +31,11 @@ class LillyRSSpider(Spider):
                 }
             for day, hours in hours_data.items():
                 if hours:
-                    open, close = hours.split("-")
-                    oh.add_days_range(
-                        NAMED_DAY_RANGES_EN[day] if day == "Weekdays" else [day], open, close
-                            )
+                    hour = hours.split("-")
+                    if len(hour) == 2:
+                        oh.add_days_range(
+                            NAMED_DAY_RANGES_EN[day] if day == "Weekdays" else [day], hour[0].strip(), hour[1].strip()
+                                )
 
             item["opening_hours"] = oh
             yield item
