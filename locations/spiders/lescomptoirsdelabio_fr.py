@@ -9,7 +9,7 @@ from locations.storefinders.algolia import AlgoliaSpider
 
 
 class LesComptoirsDeLaBioFRSpider(AlgoliaSpider):
-    name = "lescomptoirsdelabio_fr"
+    name = "les_comptoirs_de_la_bio_fr"
     item_attributes = {"brand": "Les Comptoirs de la Bio", "brand_wikidata": "Q120801428"}
     api_key = "7a46160ed01bb0af2c2af8d14b97f3c5"
     app_id = "0KNEMTBXX3"
