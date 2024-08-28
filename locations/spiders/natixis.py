@@ -35,7 +35,6 @@ class NatixisSpider(scrapy.Spider):
             if shop_js.get("@type") == "WebSite" or shop_js.get("@type") is None:
                 continue
             item = DictParser.parse(shop_js)
-            item["extras"]["sources"] = [shop_js]
             item["country"] = country
             item["ref"] = shop_js.get("@id")
             item["street_address"] = shop_js.get("address", {}).get("streetAddress", "")
