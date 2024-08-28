@@ -9,5 +9,4 @@ class PretzelmakerUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.pretzelmaker.com",
     ]
-    time_format = "%I:%M %p"
     days = DAYS_EN
