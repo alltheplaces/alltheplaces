@@ -9,5 +9,4 @@ class KingTacoUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "kingtaco.com",
     ]
-    time_format = "%I:%M %p"
     days = DAYS_EN
