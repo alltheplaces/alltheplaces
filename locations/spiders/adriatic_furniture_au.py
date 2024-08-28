@@ -1,4 +1,5 @@
 from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -10,4 +11,4 @@ class AdriaticFurnitureAUSpider(WPStoreLocatorSpider):
         "extras": Categories.SHOP_FURNITURE.value,
     }
     allowed_domains = ["www.adriatic.com.au"]
-    time_format = "%I:%M %p"
+    days = DAYS_EN
