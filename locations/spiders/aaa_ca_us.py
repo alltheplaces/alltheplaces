@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 
 from scrapy import Request, Spider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.geo import country_iseadgg_centroids
 from locations.items import Feature
 
