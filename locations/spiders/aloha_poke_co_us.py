@@ -9,5 +9,4 @@ class AlohaPokeCoUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.alohapokeco.com",
     ]
-    time_format = "%I:%M %p"
     days = DAYS_EN
