@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 class PorscheNorthAmericaSpider(scrapy.Spider):
     name = "porsche_north_america"
     item_attributes = {"brand": "Porsche", "brand_wikidata": "Q40993"}
-    countries = ["ca"]
+    countries = ["us", "ca"]
 
     def start_requests(self):
         for country in self.countries:
