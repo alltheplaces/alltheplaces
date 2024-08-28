@@ -16,16 +16,19 @@ class LesComptoirsDeLaBioFRSpider(AlgoliaSpider):
     index_name = "CDLB_fr"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        # TODO: This spider shares most of its code with OrangePLSpider, only differing in website,
+        # branch, image, and time format. The storefinder websites also look the same. Consider
+        # refactoring if you find a third example, or figure out what common software they use.
+        item["street_address"] = clean_address([feature.pop("street1"), feature.pop("street2")])
         item["addr_full"] = clean_address(feature["formatted_address"])
-        item["branch"] = item.pop("name").removeprefix("Les Comptoirs de La Bio ")
-        item["city"] = feature["city"]["name"]
-        item["country"] = feature["country"]["code"]
-        item["image"] = feature["pictures"][0]
         item["lat"] = feature["_geoloc"]["lat"]
         item["lon"] = feature["_geoloc"]["lng"]
-        item["opening_hours"] = self.extract_opening_hours(feature)
-        item["street_address"] = clean_address([feature.pop("street1"), feature.pop("street2")])
+        item["country"] = feature["country"]["code"]
+        item["city"] = feature["city"]["name"]
         item["website"] = f"https://magasins.lescomptoirsdelabio.fr/fr/{feature['url_location']}"
+        item["branch"] = item.pop("name").removeprefix("Les Comptoirs de La Bio ")
+        item["opening_hours"] = self.extract_opening_hours(feature)
+        item["image"] = feature["pictures"][0]
         yield item
 
     def extract_opening_hours(self, feature: dict) -> OpeningHours:
