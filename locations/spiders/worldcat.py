@@ -4,6 +4,7 @@ import math
 import scrapy
 from scrapy.downloadermiddlewares.retry import get_retry_request
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -11,6 +12,7 @@ class WorldcatSpider(scrapy.Spider):
     name = "worldcat"
     allowed_domains = ["worldcat.org"]
     download_delay = 0.5
+    requires_proxy = True
 
     def get_page(self, offset):
         return scrapy.Request(
@@ -82,4 +84,6 @@ class WorldcatSpider(scrapy.Spider):
             "postcode": street_address.get("postalCode"),
             "country": street_address.get("countryDescription"),
         }
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.LIBRARY, item)
+        yield item
