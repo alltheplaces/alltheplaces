@@ -10,5 +10,4 @@ class EriksDeliCafeUSSpider(WPStoreLocatorSpider):
         "eriksdelicafe.com",
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    time_format = "%I:%M %p"
     days = DAYS_EN
