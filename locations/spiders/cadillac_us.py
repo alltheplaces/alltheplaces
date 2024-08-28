@@ -1,12 +1,12 @@
-import scrapy
+from scrapy import Request, Spider
 
-from locations.geo import point_locations
+from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class CadillacSpider(scrapy.Spider):
-    name = "cadillac"
+class CadillacUSSpider(Spider):
+    name = "cadillac_us"
     item_attributes = {
         "brand": "Cadillac",
         "brand_wikidata": "Q27436",
@@ -18,15 +18,31 @@ class CadillacSpider(scrapy.Spider):
             "clientapplicationid": "quantum",
             "locale": "en-US",
         }
-        point_files = "us_centroids_100mile_radius_state.csv"
-        for lat, lon in point_locations(point_files):
-            yield scrapy.Request(
-                url=f"https://www.cadillac.com/bypass/pcf/quantum-dealer-locator/v1/getDealers?desiredCount=1000&distance=1200&makeCodes=006&latitude={lat}&longitude={lon}&searchType=latLongSearch",
+        for lat, lon in country_iseadgg_centroids(["US"], 158):
+            yield Request(
+                url=f"https://www.cadillac.com/bypass/pcf/quantum-dealer-locator/v1/getDealers?desiredCount=1000&distance=100&makeCodes=006&latitude={lat}&longitude={lon}&searchType=latLongSearch",
                 headers=headers,
             )
 
     def parse(self, response):
-        for data in response.json().get("payload", {}).get("dealers"):
+        locations = response.json().get("payload", {}).get("dealers")
+
+        # A maximum of 50 locations are returned at once. The search radius is
+        # set to avoid receiving 50 locations in a single response. If 50
+        # locations were to be returned, it is a sign that some locations have
+        # most likely been truncated.
+        if len(locations) >= 50:
+            raise RuntimeError(
+                "Locations have probably been truncated due to 50 (or more) locations being returned by a single geographic radius search, and the API restricts responses to 50 results only. Use a smaller search radius."
+            )
+
+        if len(locations) > 0:
+            self.crawler.stats.inc_value("atp/geo_search/hits")
+        else:
+            self.crawler.stats.inc_value("atp/geo_search/misses")
+        self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+
+        for data in locations:
             item = Feature()
             item["ref"] = data.get("dealerCode")
             item["name"] = data.get("dealerName")

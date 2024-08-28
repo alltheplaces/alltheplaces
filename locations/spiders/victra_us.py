@@ -1,42 +1,29 @@
-import json
-import re
-from typing import Any
+from typing import Iterable
 
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class VictraUSSpider(SitemapSpider):
+class VictraUSSpider(WPStoreLocatorSpider):
     name = "victra_us"
     item_attributes = {
         "brand": "Verizon",
         "brand_wikidata": "Q919641",
         "operator": "Victra",
         "operator_wikidata": "Q118402656",
+        "extras": Categories.SHOP_MOBILE_PHONE.value,
     }
-    sitemap_urls = ["https://victra.com/robots.txt"]
-    sitemap_follow = ["stores-sitemap"]
+    allowed_domains = ["victra.com"]
+    iseadgg_countries_list = ["US"]
+    search_radius = 24
+    max_results = 50
+    days = DAYS_EN
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-
-        data = json.loads(re.search(r'"locations":\[(.+?)\]};', response.text).group(1))
-
-        branch = data["store"]
-        if "-" in branch:
-            branch = branch.split("-", 1)[1]
-
-        item["website"] = response.url
-        item["branch"] = branch
-        item["street_address"] = merge_address_lines([data["address"], data["address2"]])
-        item["city"] = data["city"]
-        item["state"] = data["state"]
-        item["postcode"] = data["zip"]
-        item["lat"] = data["lat"]
-        item["lon"] = data["lng"]
-        item["ref"] = str(data["id"])
-
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if branch_name := item.pop("name", None):
+            item["branch"] = branch_name.removeprefix(item.get("state", "") + "-")
         yield item
