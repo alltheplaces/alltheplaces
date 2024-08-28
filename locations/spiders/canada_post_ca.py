@@ -31,8 +31,8 @@ class CanadaPostCASpider(Spider):
             item["ref"] = attributes["site"]
             item.pop("name", None)
             item["branch"] = attributes["displaynameen"]
-            item["lat"] = feature["geometry"]["x"]
-            item["lon"] = feature["geometry"]["y"]
+            item["lat"] = feature["geometry"]["y"]
+            item["lon"] = feature["geometry"]["x"]
             item["street_address"] = attributes["structureaddress"]
             item["opening_hours"] = self.parse_opening_hours(feature)
 
