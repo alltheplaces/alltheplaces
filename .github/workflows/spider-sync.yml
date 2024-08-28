@@ -1,0 +1,58 @@
+name: Sync from Upstream Master
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
+  workflow_dispatch:  # Allows manual triggering
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/alltheplaces/alltheplaces.git
+          git fetch upstream
+      - name: Sync with upstream master
+        run: |
+          # Ensure we're on the master branch
+          git checkout master
+          
+          # Merge upstream master into local master
+          git merge upstream/master -X theirs
+          
+          # Check for changes
+          if git diff --quiet; then
+            echo "No changes to sync"
+          else
+            # Stage all changes
+            git add .
+            
+            # Commit if there are changes
+            if ! git diff --staged --quiet; then
+              git commit -m "Sync with upstream master"
+              git push origin master
+              echo "Changes from upstream master have been synced and pushed"
+            else
+              echo "No changes to commit after merge"
+            fi
+          fi
+        shell: /usr/bin/bash -e {0}
+      - name: Check for conflicts
+        run: |
+          if git status | grep -q "You have unmerged paths"; then
+            echo "::warning::There are merge conflicts. Please resolve them manually."
+            exit 1
+          fi
+      - name: Trigger Deploy Production workflow
+        if: success() && !contains(github.event.head_commit.message, 'skip ci')
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.PAT }}
+          event-type: deploy-production

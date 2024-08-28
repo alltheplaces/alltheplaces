@@ -1,0 +1,51 @@
+name: Deploy Production
+on:
+  push:
+    branches:
+      - master
+  repository_dispatch:
+    types: [deploy-production]
+jobs:
+  deploy:
+    name: Deploy to Zyte production project
+    runs-on: ubuntu-latest
+    env:
+      SHUB_APIKEY: ${{ secrets.scrapycloud_api_key }}
+      SHUB_PROJECTID: ${{ secrets.scrapycloud_project_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+      - name: Cache pipenv virtualenv
+        uses: actions/cache@v3
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pipenv-
+      - name: Install dependencies
+        run: |
+          pipenv install --dev
+      - name: Install shub
+        run: |
+          pipenv run pip install shub
+      - name: Deploy code to Scrapy Cloud
+        run: |
+          pipenv run shub deploy ${SHUB_PROJECTID} --version "master-${GITHUB_SHA}"
+        env:
+          SHUB_APIKEY: ${{ secrets.scrapycloud_api_key }}
+          SHUB_PROJECTID: ${{ secrets.scrapycloud_project_id }}
+      - name: Log trigger source
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "This deployment was triggered by the Sync from Upstream Master workflow"
+          else
+            echo "This deployment was triggered by a direct push to master"
+          fi
