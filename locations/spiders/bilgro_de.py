@@ -1,4 +1,5 @@
 from locations.categories import Categories
+from locations.hours import DAYS_DE
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -8,6 +9,4 @@ class BilgroDESpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.bilgro.de",
     ]
-    start_urls = [
-        "https://www.bilgro.de/wp-admin/admin-ajax.php?action=store_search&lat=50.969454&lng=13.122099&max_results=1000&search_radius=10000&autoload=1"
-    ]
+    days = DAYS_DE

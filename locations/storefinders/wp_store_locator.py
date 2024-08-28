@@ -1,11 +1,11 @@
-import logging
+from typing import Iterable
 
 from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
-from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
+from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -74,7 +74,6 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class WPStoreLocatorSpider(Spider):
     days: dict = None
-    time_format: str = "%H:%M"
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
     search_radius: int = 0
@@ -89,7 +88,7 @@ class WPStoreLocatorSpider(Spider):
         else:
             yield from self.start_requests_all_at_once_method()
 
-    def start_requests_all_at_once_method(self):
+    def start_requests_all_at_once_method(self) -> Iterable[JsonRequest]:
         """
         PREFERRED all-results-at-once method requiring only a
         single API call to the API endpoint. May be disabled
@@ -103,7 +102,7 @@ class WPStoreLocatorSpider(Spider):
             for url in self.start_urls:
                 yield JsonRequest(url=url)
 
-    def start_requests_geo_search_iseadgg_method(self):
+    def start_requests_geo_search_iseadgg_method(self) -> Iterable[JsonRequest]:
         """
         NONPREFERRED geographic radius search method with
         PREFERRED ISEADGG method of specifying centroids.
@@ -138,7 +137,7 @@ class WPStoreLocatorSpider(Spider):
                         url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
                     )
 
-    def start_requests_geo_search_manual_method(self):
+    def start_requests_geo_search_manual_method(self) -> Iterable[JsonRequest]:
         """
         NONPREFERRED geographic radius search method with
         NONPREFERRED searchable_points_file method of
@@ -157,65 +156,64 @@ class WPStoreLocatorSpider(Spider):
                             url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
                         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response) -> Iterable[Feature]:
         if response.text.strip():
-            locations = response.json()
+            features = response.json()
         else:
             # Empty pages are sometimes returned when there are no features
             # nearby a specified WGS84 coordinate.
-            locations = []
+            features = []
 
         if self.max_results > 0:
-            if len(locations) >= self.max_results:
-                raise RuntimeError(
-                    "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use a smaller search_radius."
-                )
-
-            if len(locations) > 0:
+            if len(features) > 0:
                 self.crawler.stats.inc_value("atp/geo_search/hits")
             else:
                 self.crawler.stats.inc_value("atp/geo_search/misses")
-            self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+            self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
 
-        for location in locations:
-            item = DictParser.parse(location)
+            if len(features) >= self.max_results:
+                raise RuntimeError(
+                    "Locations have probably been truncated due to max_results (or more) features being returned by a single geographic radius search. Use a smaller search_radius."
+                )
+
+        for feature in features:
+            self.pre_process_data(feature)
+            item = DictParser.parse(feature)
             item.pop("addr_full", None)
-            item["street_address"] = merge_address_lines([location.get("address"), location.get("address2")])
-            item["name"] = location["store"]
-            # If we have preconfigured the exact days to use, start there
-            if location.get("hours"):
-                if self.days is not None:
-                    item["opening_hours"] = self.parse_opening_hours(location, self.days)
-                else:
-                    # Otherwise, iterate over the possibilities until we get a first match
-                    logging.warning(
-                        "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
-                    )
-                    for days in self.possible_days:
-                        item["opening_hours"] = self.parse_opening_hours(location, days)
-                        if item["opening_hours"] is not None:
-                            self.days = days
-                            break
+            item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address2")])
+            item["name"] = feature["store"]
 
-            yield from self.parse_item(item, location) or []
+            if self.days is not None:
+                # If we have preconfigured the exact days to use, start there
+                item["opening_hours"] = self.parse_opening_hours(feature, self.days)
+            else:
+                # Otherwise, iterate over the possibilities until we get a first match
+                self.logger.warning(
+                    "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
+                )
+                for days in self.possible_days:
+                    item["opening_hours"] = self.parse_opening_hours(feature, days)
+                    if item["opening_hours"] is not None:
+                        self.days = days
+                        break
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+            yield from self.post_process_item(item, response, feature) or []
+
+    def parse_opening_hours(self, feature: dict, days: dict) -> OpeningHours | None:
+        hours_raw = DictParser.get_first_key(feature, DictParser.hours_keys)
+        if hours_raw:
+            hours_raw = " ".join(filter(None, map(str.strip, Selector(text=hours_raw).xpath("//text()").getall())))
+            oh = OpeningHours()
+            oh.add_ranges_from_string(hours_raw, days=days)
+            if oh.as_opening_hours():
+                # Opening hours ranges detected and extracted.
+                return oh
+        # No opening hours ranges were detected and extracted.
+        return
+
+    def pre_process_data(self, feature: dict) -> None:
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        """Override with any post-processing on the item."""
         yield item
-
-    def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours | None:
-        hours_raw = DictParser.get_first_key(location, DictParser.hours_keys)
-        if not hours_raw:
-            return None
-        sel = Selector(text=location["hours"])
-        oh = OpeningHours()
-        for rule in sel.xpath("//tr"):
-            day = sanitise_day(rule.xpath("./td/text()").get(), days)
-            times = rule.xpath("./td/time/text()").get()
-            if not day or not times:
-                continue
-            if times.lower() in ["closed"]:
-                continue
-            start_time, end_time = times.split("-")
-            oh.add_range(day, start_time.strip(), end_time.strip(), time_format=self.time_format)
-
-        return oh
