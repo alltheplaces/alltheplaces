@@ -26,7 +26,6 @@ class BnpParibasFRSpider(scrapy.Spider):
         item["street_address"] = result["adresse"]
         item["city"] = re.sub(r"(?i)\d+.*", "", result["ville"])
         item["postcode"] = result["cp"]
-        item["website"] = "https://mabanque.bnpparibas/"
         bank = deepcopy(item)
         apply_category(Categories.BANK, bank)
         yield bank
