@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, Fuel, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -19,4 +19,5 @@ class EngenSpider(scrapy.Spider):
             if postcode and postcode != "0":
                 i["postcode"] = postcode
             item = DictParser.parse(i)
+            apply_yes_no(Fuel.ADBLUE, item, "AdBlue" in i["rental_units"])
             yield item
