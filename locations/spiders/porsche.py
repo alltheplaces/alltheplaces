@@ -131,8 +131,6 @@ class PorscheSpider(scrapy.Spider):
 
             apply_category(Categories.SHOP_CAR, item)
 
-            self.crawler.stats.inc_value(f"zzzz/country/{country}")
-
             yield item
 
     def parse_hours(self, hours, item):
