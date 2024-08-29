@@ -37,7 +37,10 @@ class DhlExpressESSpider(Spider):
         self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
 
         for feature in features:
-            if feature.get("servicePointType") in ["STATION", "CITY"] and feature.get("address", {}).get("country") == "ES":
+            if (
+                feature.get("servicePointType") in ["STATION", "CITY"]
+                and feature.get("address", {}).get("country") == "ES"
+            ):
                 item = DictParser.parse(feature.get("address"))
 
                 item["ref"] = feature.get("facilityId")
