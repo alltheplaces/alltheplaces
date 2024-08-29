@@ -43,8 +43,11 @@ class Categories(Enum):
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
+    INDUSTRIAL_WAREHOUSE = {"industrial": "warehouse"}
+
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
+    LEISURE_PARK = {"leisure": "park"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -61,6 +64,7 @@ class Categories(Enum):
     SHOP_BICYCLE = {"shop": "bicycle"}
     SHOP_BOOKMAKER = {"shop": "bookmaker"}
     SHOP_BOOKS = {"shop": "books"}
+    SHOP_BOAT = {"shop": "boat"}
     SHOP_BUTCHER = {"shop": "butcher"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
@@ -179,6 +183,7 @@ class Categories(Enum):
     SHOP_TRADE = {"shop": "trade"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TRUCK = {"shop": "truck"}
+    SHOP_TRUCK_PARTS = {"shop": "truck_parts"}
     SHOP_TRUCK_REPAIR = {"shop": "truck_repair"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VACUUM_CLEANER = {"shop": "vacuum_cleaner"}
@@ -193,7 +198,10 @@ class Categories(Enum):
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_ENGINEER = {"office": "engineer"}
+    OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
 
     TOURISM_APARTMENT = {"tourism": "apartment"}
@@ -253,19 +261,23 @@ class Categories(Enum):
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
+    POST_PARTNER = {"post_office": "post_partner"}
     PREP_SCHOOL = {"amenity": "prep_school"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
     PUBLIC_BOOKCASE = {"amenity": "public_bookcase"}
     REHABILITATION = {"healthcare": "rehabilitation"}
+    RESCUE_BUOY = {"emergency": "rescue_buoy"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
     TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VETERINARY = {"amenity": "veterinary"}
+    WATER_RESCUE = {"emergency": "water_rescue"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
+    MORTUARY = {"amenity": "mortuary"}
 
     DATA_CENTRE = {"telecom": "data_center"}
 
@@ -441,9 +453,12 @@ class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
+    BACKUP_GENERATOR = "backup_generator"
     BARBEQUES = "bbq"
+    BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CAR_REPAIR = "service:vehicle:car_repair"
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
@@ -457,8 +472,10 @@ class Extras(Enum):
     FAXING = "service:fax"
     FEE = "fee"
     HALAL = "diet:halal"
+    ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
     KOSHER = "diet:kosher"
+    MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
@@ -466,6 +483,7 @@ class Extras(Enum):
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PETS_ALLOWED = "pets_allowed"
+    PHOTO_PRINTING = "service:photo_printing"
     PICNIC_TABLES = "picnic_table"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
@@ -478,6 +496,7 @@ class Extras(Enum):
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
+    TYRE_SERVICES = "service:vehicle:tyres"
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
@@ -765,6 +784,14 @@ def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelC
         variations.add(payment.name.replace("_", " ").lower())
         variations.add(payment.name.replace("_", " ").title())
         variations.add(payment.name.replace("_", " ").upper())
+
+        # Singularize for "cards" vs "card"
+        if payment.name.endswith("S"):
+            variations = variations | DictParser.get_variations(payment.name.replace("_", "-")[:-1])
+            variations.add(payment.name.replace("_", " ").lower()[:-1])
+            variations.add(payment.name.replace("_", " ").title()[:-1])
+            variations.add(payment.name.replace("_", " ").upper()[:-1])
+
         for variation in variations:
             map[variation] = payment.name
 

@@ -9,4 +9,5 @@ class BevmoUSSpider(FreshopSpider):
     def parse_item(self, item, location):
         if not location.get("has_pickup"):  # Virtual store / not a physical location
             return
+        item.pop("name", None)
         yield item

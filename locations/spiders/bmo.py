@@ -17,7 +17,7 @@ from locations.spiders.h_e_b_us import HEBUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.marcs import MarcsSpider
-from locations.spiders.market_basket import MarketBasketSpider
+from locations.spiders.market_basket_us import MarketBasketUSSpider
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.spiders.nordstrom import NordstromSpider
 from locations.spiders.piggly_wiggly_us import PigglyWigglyUSSpider
@@ -36,7 +36,7 @@ from locations.spiders.thrifty_foods_ca import ThriftyFoodsCASpider
 from locations.spiders.united_dairy_farmers_us import UnitedDairyFarmersUSSpider
 from locations.spiders.walgreens import WalgreensSpider
 from locations.spiders.wawa import WawaSpider
-from locations.spiders.wegmans import WegmansSpider
+from locations.spiders.wegmans_us import WegmansUSSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
@@ -149,8 +149,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = MarcsSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = MarcsSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Market Basket":
-                item["located_in"] = MarketBasketSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = MarketBasketSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = MarketBasketUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = MarketBasketUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Mcdonalds":
                 item["located_in"] = McdonaldsSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = McdonaldsSpider.item_attributes["brand_wikidata"]
@@ -221,8 +221,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = WawaSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = WawaSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Wegmans" or item["name"] == "Wegmans Food Market":
-                item["located_in"] = WegmansSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = WegmansSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = WegmansUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = WegmansUSSpider.item_attributes["brand_wikidata"]
         else:
             self.logger.error("Unknown location type: %s", location["grouptype"])
 

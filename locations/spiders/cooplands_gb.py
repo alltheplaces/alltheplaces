@@ -1,16 +1,13 @@
+from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
 class CooplandsGBSpider(WPStoreLocatorSpider):
     name = "cooplands_gb"
-    item_attributes = {"brand": "Cooplands", "brand_wikidata": "Q5167971"}
+    item_attributes = {"brand": "Cooplands", "brand_wikidata": "Q5167971", "extras": Categories.SHOP_BAKERY.value}
     allowed_domains = ["cooplands-bakery.co.uk"]
-    searchable_points_files = ["gb_centroids_iseadgg_48km_radius.csv"]
-    search_radius = 50
+    iseadgg_countries_list = ["GB"]
+    search_radius = 24
     max_results = 50
-    time_format = "%I:%M %p"
-
-    # def parse_item(self, item, location):
-    # item["addr_full"] = location["address"]
-    # item.pop("street_address", None)
-    # yield item
+    days = DAYS_EN

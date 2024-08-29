@@ -34,6 +34,6 @@ class MaisonDeLaLiterieFRSpider(Spider):
 
             # item["opening_hours"] = oh
 
-            item["website"] = "https://www.maisondelaliterie.fr/magasin/" + location["link_rewrite"]
+            item["website"] = location["meta"]["canonical"]
 
             yield item

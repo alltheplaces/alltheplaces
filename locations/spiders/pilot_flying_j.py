@@ -4,10 +4,14 @@ import scrapy
 
 from locations.items import Feature
 
+PILOT = {"brand": "Pilot", "brand_wikidata": "Q64128179"}
+FLYING_J = {"brand": "Flying J", "brand_wikidata": "Q64130592"}
+ONE9 = {"brand": "ONE9"}
+TOWN_PUMP = {"brand": "Town Pump", "brand_wikidata": "Q7830004"}
+
 
 class PilotFlyingJSpider(scrapy.Spider):
     name = "pilot_flying_j"
-    item_attributes = {"brand": "Pilot Flying J", "brand_wikidata": "Q1434601"}
     allowed_domains = ["pilotflyingj.com"]
 
     start_urls = ["https://locations.pilotflyingj.com/"]
@@ -22,6 +26,8 @@ class PilotFlyingJSpider(scrapy.Spider):
     def parse_store(self, response, item):
         jsdata = json.loads(item.xpath('.//script[@class="js-map-config"]/text()').get())
         store = jsdata["entities"][0]["profile"]
+        if "Dealer" in store["name"]:
+            return
         properties = {
             "ref": store["meta"]["id"],
             "lat": item.xpath('//*[@itemprop="latitude"]/@content').get(),
@@ -46,9 +52,12 @@ class PilotFlyingJSpider(scrapy.Spider):
         yield Feature(**properties)
 
     def brand_info(self, name):
-        if "Pilot" in name:
-            return {"brand": "Pilot", "brand_wikidata": "Q7194412"}
-        elif "Flying J" in name:
-            return {"brand": "Flying J", "brand_wikidata": "Q64130592"}
-        else:
-            return {"brand": name}
+        if name in ["Pilot Licensed Location", "Pilot Travel Center"]:
+            return PILOT
+        elif name in ["Flying J Licensed Location", "Flying J Travel Center"]:
+            return FLYING_J
+        elif name == "Pilot Licensed Location - Town Pump":
+            return TOWN_PUMP
+        elif name == "ONE9 Travel Center":
+            return ONE9
+        return {}

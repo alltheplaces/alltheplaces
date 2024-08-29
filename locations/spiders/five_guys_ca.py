@@ -12,6 +12,7 @@ class FiveGuysCASpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"^https://restaurants\.fiveguys\.ca\/[^/]+$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("Five Guys ")
+        if "name" in item:
+            item["branch"] = item.pop("name").removeprefix("Five Guys ")
 
         yield item

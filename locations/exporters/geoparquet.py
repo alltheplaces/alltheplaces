@@ -17,9 +17,21 @@ class GeoparquetExporter(BaseItemExporter):
             # self.write_dataset_attributes_table(item)
             self.first_item = False
 
-        self.features.append(item_to_geojson_feature(item))
+        # Convert the item to a GeoJSON feature
+        feature = item_to_geojson_feature(item)
+
+        # Convert all attributes to strings so that the Parquet output is of consistent type.
+        # Without this, the "global" Parquet file would have mixed types in the same column.
+        for key, value in feature["properties"].items():
+            feature["properties"][key] = str(value)
+
+        self.features.append(feature)
 
     def finish_exporting(self):
+        # Don't write an empty Parquet file
+        if not self.features:
+            return
+
         # Create a GeoDataFrame from the features
         gdf = geopandas.GeoDataFrame.from_features(self.features)
 

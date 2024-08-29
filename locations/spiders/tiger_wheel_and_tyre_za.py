@@ -18,11 +18,15 @@ class TigerWheelAndTyreZASpider(CrawlSpider):
         )
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    url_prefix = "twt"
 
     def parse(self, response):
         properties = {
-            "ref": response.url,
-            "name": response.xpath('//div[contains(@class, "content-wrapper")]/div[1]/h2/text()').get(),
+            "ref": response.url.lstrip("https://" + self.url_prefix).split(".")[0],
+            "branch": response.xpath('//div[@class="left-align-header"]/h2/text()')
+            .get()
+            .replace(self.item_attributes["brand"], "")
+            .strip(),
             "addr_full": re.sub(
                 r"\s+",
                 " ",

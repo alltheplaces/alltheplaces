@@ -14,7 +14,7 @@ class PaczkomatInpostPLSpider(Spider):
         "appkomat": {
             "brand": "Appkomat InPost",
             "brand_wikidata": "",
-            "extras": {"app_operated": "only", "not:brand:wikidata": "Q110970254"},
+            "extras": {"app_operated": "only", "not:brand:wikidata": "Q110970254", "amenity": "parcel_locker"},
         },
     }
 
@@ -25,7 +25,7 @@ class PaczkomatInpostPLSpider(Spider):
     def parse(self, response, **kwargs):
         for poi in response.json()["items"]:
             # Skip non-active locations and places which are not parcel lockers
-            if poi["s"] != 1 and poi["t"] != 1 or poi["n"].startswith("POP-"):
+            if poi["s"] != 1 and poi["t"] != 1 or poi["n"].startswith("POP-") or poi["c"] == "system":
                 continue
 
             item = Feature()
@@ -55,7 +55,7 @@ class PaczkomatInpostPLSpider(Spider):
                     item["street"] = "Pułkownika " + item["street"][4:].strip()
                 if item["street"].startswith("Pl."):
                     item["street"] = "Plac " + item["street"][3:].strip()
-                if item["street"].startswith("Plac "):
+                if item["street"].startswith("Plac ") or item["street"].startswith("Osiedle "):
                     item["extras"]["addr:place"] = item["street"]
                     item["street"] = ""
                 if item["street"] == item["city"]:

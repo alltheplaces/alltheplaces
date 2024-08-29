@@ -2,7 +2,7 @@ import json
 import os
 import pprint
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from zipfile import ZipFile
 
 import ijson
@@ -135,6 +135,12 @@ class InsightsCommand(ScrapyCommand):
             action="store_true",
             help="Check fields for html escaped content",
         )
+        parser.add_argument(
+            "--nsi-overrides",
+            dest="nsi_overrides",
+            action="store_true",
+            help="Check for feature tags that differ from the brand's NSI preset",
+        )
 
     def run(self, args, opts):
         if len(args) < 1:
@@ -153,6 +159,9 @@ class InsightsCommand(ScrapyCommand):
             return
         if opts.html_encoding:
             self.check_html_encoding(args, opts)
+            return
+        if opts.nsi_overrides:
+            self.nsi_overrides(args, opts)
             return
 
     def show_counter(self, msg, counter):
@@ -332,3 +341,33 @@ class InsightsCommand(ScrapyCommand):
         for_datatables = {"data": list(wikidata_dict.values())}
         with open(opts.outfile, "w") as f:
             json.dump(for_datatables, f)
+
+    def nsi_overrides(self, args, opts):
+        nsi = NSI()
+        nsi._ensure_loaded()
+        # Collect category properties like preserveTags for convenience, and create a quick lookup
+        # by ID
+        nsi_items = {}
+        for v in nsi.nsi_json.values():
+            for item in v["items"]:
+                nsi_items[item["id"]] = item | v["properties"]
+
+        counts = defaultdict(Counter)
+        for feature in iter_features(args, opts.filter_spiders):
+            properties = feature["properties"]
+
+            if "nsi_id" not in properties:
+                continue
+            if properties["nsi_id"] not in nsi_items:
+                print("No NSI preset with ID", properties["nsi_id"])
+                continue
+
+            match = nsi_items[properties["nsi_id"]]
+            for key, value in match["tags"].items():
+                if properties.get(key) != value and not any(
+                    re.match(pat, key) for pat in match.get("preserveTags", [])
+                ):
+                    counts[key][properties["@spider"]] += 1
+
+        for key, counter in counts.items():
+            self.show_counter(f"SPIDERS WITH MISMATCHED {key} TAG:", counter)
