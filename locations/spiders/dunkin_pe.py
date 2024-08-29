@@ -27,5 +27,4 @@ class DunkinPESpider(Spider):
             location["street_address"] = location.pop("address")
             location["lon"] = location["longtitude"]
             location["city"] = location["tag"]
-            location["website"] = "https://dunkin.pe/locales"
             yield DictParser.parse(location)
