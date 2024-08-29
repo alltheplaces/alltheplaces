@@ -28,7 +28,9 @@ jobs:
         run: pip --quiet install pipenv
       
       - name: Install dependencies
-        run: pipenv install --dev
+        run: |
+          pipenv install --dev
+          pipenv run pip install setuptools==73.0.1
       
       - name: Validate and run spiders
         id: run-spiders
