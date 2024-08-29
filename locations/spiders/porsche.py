@@ -6,8 +6,8 @@ from locations.geo import city_locations
 from locations.hours import DAYS, OpeningHours
 
 
-class PorscheNorthAmericaSpider(scrapy.Spider):
-    name = "porsche_north_america"
+class PorscheSpider(scrapy.Spider):
+    name = "porsche"
     item_attributes = {"brand": "Porsche", "brand_wikidata": "Q40993"}
     countries = [
         "AE",
