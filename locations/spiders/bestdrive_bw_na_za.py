@@ -4,8 +4,8 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BestDriveBWNAZASpider(SitemapSpider, StructuredDataSpider):
-    name = "best_drive_bw_na_za"
+class BestdriveBWNAZASpider(SitemapSpider, StructuredDataSpider):
+    name = "bestdrive_bw_na_za"
     item_attributes = {"brand": "BestDrive", "brand_wikidata": "Q63057183", "extras": Categories.SHOP_CAR_REPAIR.value}
     sitemap_urls = ["https://www.bestdrive.co.za/robots.txt"]
     sitemap_rules = [(r"https://www.bestdrive.co.za/fitment-centre/.*", "parse")]
