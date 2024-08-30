@@ -29,5 +29,5 @@ class BuildItSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
-        item["website"] = f"https://www.buildit.co.za/Stores/View/{location["Alias"]}"
+        item["website"] = f"https://www.buildit.co.za/Stores/View/{location['Alias']}"
         yield item
