@@ -8,6 +8,7 @@ class RossmannCZSpider(Spider):
     name = "rossmann_cz"
     item_attributes = {"brand": "Rossmann", "brand_wikidata": "Q316004"}
     start_urls = ["https://www.rossmann.cz/prodejny"]
+    custom_settings = {"COOKIES_ENABLED": False}
 
     def parse(self, response, **kwargs):
         for store in response.xpath('//div[@class="page-store--store-list"]/a'):
