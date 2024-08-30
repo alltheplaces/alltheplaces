@@ -31,7 +31,9 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
                 item.pop("name", None)
                 break
         if not item.get("brand"):
-            self.logger.error("Could not parse brand from store title: {}. Perhaps this is a new brand?".format(item["name"]))
+            self.logger.error(
+                "Could not parse brand from store title: {}. Perhaps this is a new brand?".format(item["name"])
+            )
 
         item["country"] = "CH"
         item["image"] = self.cleanup_image(item["image"])

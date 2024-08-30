@@ -561,6 +561,7 @@ class PaymentMethods(Enum):
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
 
+
 payment_method_aliases = {
     "Amex": PaymentMethods.AMERICAN_EXPRESS,
     "China UnionPay": PaymentMethods.UNIONPAY,
@@ -569,6 +570,7 @@ payment_method_aliases = {
     "MasterCard": PaymentMethods.MASTER_CARD,
     "PowerCard": PaymentMethods.POWERCARD,
 }
+
 
 class FuelCards(Enum):
     """
