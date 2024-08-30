@@ -28,14 +28,16 @@ class YogurtlandSpider(Spider):
             item["image"] = location["Image"]["uri"]
 
             hours = json.loads(location["Location"]["hours_json"])
-            try:
-                oh = OpeningHours()
-                for day, times in zip(DAYS_3_LETTERS_FROM_SUNDAY, hours):
-                    if times["isActive"]:
+            oh = OpeningHours()
+            for day, times in zip(DAYS_3_LETTERS_FROM_SUNDAY, hours):
+                if times["isActive"]:
+                    try:
                         oh.add_range(day, times["timeFrom"], times["timeTill"])
-                item["opening_hours"] = oh
-            except ValueError as e:
-                self.logger.exception(e)
+                    except ValueError as e:
+                        self.logger.exception(e)
+                        oh = None
+                        break
+            item["opening_hours"] = oh
 
             yield item
 
