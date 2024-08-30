@@ -196,6 +196,7 @@ class DictParser:
         "yext-display-lat",
         "map-latitude",
         "geo-lat",
+        "GPSLat",
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
@@ -212,6 +213,7 @@ class DictParser:
         "yext-display-lng",
         "map-longitude",
         "geo-lng",
+        "GPSLong",
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",
