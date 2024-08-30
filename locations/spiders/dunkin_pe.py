@@ -12,6 +12,11 @@ class DunkinPESpider(Spider):
     item_attributes = DunkinUSSpider.item_attributes
     start_urls = ["https://dunkin.pe/locales"]
 
+    custom_settings = {
+        "COOKIES_ENABLED": False,
+    }
+    requires_proxy = True
+
     def parse(self, response, **kwargs):
         token = re.search(r"sessionToken:\"(\w+)\"", response.text)
         yield JsonRequest(
