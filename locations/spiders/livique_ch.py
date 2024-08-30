@@ -21,6 +21,7 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
     search_for_phone = False
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True  # Data centre IP ranges appear to be blocked.
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         for brand_name, brand_wikidata in self.brands.items():
