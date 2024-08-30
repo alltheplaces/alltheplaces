@@ -287,8 +287,14 @@ class StructuredDataSpider(Spider):
         https://schema.org/paymentAccepted
         """
         if "paymentAccepted" in ld_item:
-            if "," in ld_item["paymentAccepted"]:
+            if isinstance(ld_item["paymentAccepted"], str) and "," in ld_item["paymentAccepted"]:
                 ld_item["paymentAccepted"] = ld_item["paymentAccepted"].split(", ")
+            if (
+                isinstance(ld_item["paymentAccepted"], list)
+                and len(ld_item["paymentAccepted"]) == 1
+                and "," in ld_item["paymentAccepted"][0]
+            ):
+                ld_item["paymentAccepted"] = ld_item["paymentAccepted"][0].split(", ")
             if len(ld_item["paymentAccepted"]) > 0:
                 for payment in ld_item["paymentAccepted"]:
                     if not map_payment(item, payment, PaymentMethods):
