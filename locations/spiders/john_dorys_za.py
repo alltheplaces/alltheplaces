@@ -18,6 +18,7 @@ class JohnDorysZASpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+        item.pop("image", None)
         if "JohnDorysSA" in item.get("facebook"):
             item.pop("facebook")
         if "johndoryssa" in item.get("twitter"):
