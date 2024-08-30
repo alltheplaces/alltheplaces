@@ -34,6 +34,8 @@ class JumboNLSpider(CrawlSpider):
         "USER_AGENT": BROWSER_DEFAULT,
     }
 
+    requires_proxy = True
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         data = chompjs.parse_js_object(html.unescape(re.search(r"stores=\"(\[.*\])\"", response.text).group(1)))
         for store in data:
