@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KFCHKSpider(scrapy.Spider):
+class KfcHKSpider(scrapy.Spider):
     name = "kfc_hk"
     item_attributes = KFC_SHARED_ATTRIBUTES
 
