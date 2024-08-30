@@ -7,6 +7,7 @@ class DunkinTHSpider(Spider):
     name = "dunkin_th"
     item_attributes = {"brand": "Dunkin'", "brand_wikidata": "Q847743"}
     start_urls = ["http://www.dunkindonuts.co.th/store"]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for store in response.xpath('//*[contains(@id,"store")]'):
