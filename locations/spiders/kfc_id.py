@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class KFCIDSpider(scrapy.Spider):
+class KfcIDSpider(scrapy.Spider):
     name = "kfc_id"
     item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
     no_refs = True
