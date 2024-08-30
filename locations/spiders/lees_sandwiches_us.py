@@ -1,5 +1,6 @@
 import re
 
+from locations.hours import OpeningHours
 from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
 
 branch_separator = re.compile(r"^\s*-\s*Lee&#039;s Sandwiches\s+")
@@ -23,4 +24,9 @@ class LeesSandwichesUSSpider(StoreLocatorPlusSelfSpider):
         item["extras"]["fax"] = location["fax"]
         item["image"] = location["image"]
         item["branch"] = branch_separator.sub("", item.pop("name").removeprefix(location["city"]))
+
+        oh = OpeningHours()
+        oh.add_ranges_from_string(location["hours"])
+        item["opening_hours"] = oh
+
         yield item
