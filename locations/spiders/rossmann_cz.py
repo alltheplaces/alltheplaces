@@ -25,11 +25,15 @@ class RossmannCZSpider(Spider):
             for rule in store.xpath('.//div[@class="page-store--opening-hours"]/div[@class="page-store--opening-day"]'):
                 day = rule.xpath("./strong/text()").get().replace(":", "").strip()
                 day = sanitise_day(day, DAYS_CZ)
+
                 if day is None:
                     continue
+
                 hours = "".join(rule.xpath("./text()").getall()).strip()
-                if not "-" in hours:
+
+                if "-" not in hours:
                     continue
+
                 open_time, close_time = hours.split(" - ")
                 oh.add_range(day, open_time, close_time)
             item["opening_hours"] = oh
