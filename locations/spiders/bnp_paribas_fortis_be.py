@@ -12,7 +12,7 @@ class BNPParibasFortisBESpider(scrapy.Spider):
     name = "bnp_paribas_fortis_be"
     item_attributes = {"brand": "BNP Paribas Fortis", "brand_wikidata": "Q796827"}
     start_urls = ["https://branch.bnpparibasfortis.be/engineV2/?enc=json&crit=agence&ag=allpoi"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "COOKIES_ENABLED": False}
     headers = {
         "Referer": "https://branch.bnpparibasfortis.be/m/nl/?crit=branch",
         "Cookie": "PHPSESSID=0rhuli6ja9kfdsto74ckamvrdj",
