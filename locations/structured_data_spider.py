@@ -223,7 +223,6 @@ class StructuredDataSpider(Spider):
         "PostalAddress",
         "RealEstateAgent",
         "SelfStorage",
-        # "Service",
         "ShoeStore",
         "ShoppingCenter",
         "SportsActivityLocation",
