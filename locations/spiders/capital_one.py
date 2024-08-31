@@ -1,18 +1,21 @@
-import scrapy
-from scrapy.http import JsonRequest
+from typing import Iterable
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class CapitalOneUSSpider(scrapy.Spider):
-    name = "capital_one_us"
+class CapitalOneSpider(Spider):
+    name = "capital_one"
     item_attributes = {"brand": "Capital One", "brand_wikidata": "Q1034654"}
     allowed_domains = ["api.capitalone.com"]
-    download_delay = 0.5
+    start_urls = ["https://api.capitalone.com/locations"]
 
     @staticmethod
     def parse_hours(rules: [dict]) -> OpeningHours:
@@ -24,17 +27,17 @@ class CapitalOneUSSpider(scrapy.Spider):
 
         return opening_hours
 
-    def start_requests(self):
-        for lat, lon in point_locations("us_centroids_50mile_radius.csv"):
+    def start_requests(self) -> Iterable[JsonRequest]:
+        for lat, lon in country_iseadgg_centroids(["PR", "US", "VI"], 24):  # ~= 15 miles
             yield JsonRequest(
-                url="https://api.capitalone.com/locations",
+                url=self.start_urls[0],
                 headers={"Accept": "application/json; v=1"},
                 data={
                     "variables": {
                         "input": {
                             "lat": float(lat),
                             "long": float(lon),
-                            "radius": 50,
+                            "radius": 15,  # miles
                             "locTypes": ["atm", "branch", "cafe"],
                             "servicesFilter": [],
                         }
@@ -87,31 +90,42 @@ class CapitalOneUSSpider(scrapy.Spider):
                 },
             )
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["data"]["geoSearch"]:
-            item = DictParser.parse(location)
-            item["website"] = (
-                f'https://locations.capitalone.com/{location["seoType"]}/{item["state"]}/{location["slug"]}'
+    def parse(self, response: Response) -> Iterable[Feature]:
+        features = response.json()["data"]["geoSearch"]
+
+        if len(features) > 0:
+            self.crawler.stats.inc_value("atp/geo_search/hits")
+        else:
+            self.crawler.stats.inc_value("atp/geo_search/misses")
+        self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
+
+        if len(features) >= 100:
+            raise RuntimeError(
+                "Locations have probably been truncated due to 100 features being returned by a single geographic radius search. Use a smaller search radius."
             )
+
+        for feature in features:
+            item = DictParser.parse(feature)
+            item["website"] = f'https://locations.capitalone.com/{feature["seoType"]}/{item["state"]}/{feature["slug"]}'
             item["street_address"] = clean_address(
                 [
-                    location["address"]["addressLine1"],
-                    location["address"]["addressLine2"],
-                    location["address"]["addressLine3"],
-                    location["address"]["addressLine4"],
+                    feature["address"]["addressLine1"],
+                    feature["address"]["addressLine2"],
+                    feature["address"]["addressLine3"],
+                    feature["address"]["addressLine4"],
                 ]
             )
-            item["image"] = location["photo"]
+            item["image"] = feature["photo"]
 
-            if location["locType"] == "atm":
+            if feature["locType"] == "atm":
                 apply_category(Categories.ATM, item)
-                if location["open24Hours"] == "true":
+                if feature["open24Hours"] == "true":
                     item["opening_hours"] = "24/7"
-            elif location["locType"] == "branch":
+            elif feature["locType"] == "branch":
                 apply_category(Categories.BANK, item)
-                item["opening_hours"] = self.parse_hours(location["lobbyHours"])
-            elif location["locType"] == "cafe":
+                item["opening_hours"] = self.parse_hours(feature["lobbyHours"])
+            elif feature["locType"] == "cafe":
                 apply_category(Categories.CAFE, item)
-                item["opening_hours"] = self.parse_hours(location["hours"])
+                item["opening_hours"] = self.parse_hours(feature["hours"])
 
             yield item
