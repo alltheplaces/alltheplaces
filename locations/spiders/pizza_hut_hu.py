@@ -4,11 +4,11 @@ from locations.categories import Categories
 from locations.storefinders.amrest_eu import AmrestEUSpider
 
 
-class PizzaHutPLSpider(AmrestEUSpider):
-    name = "pizza_hut_pl"
+class PizzaHutHUSpider(AmrestEUSpider):
+    name = "pizza_hut_hu"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615", "extras": Categories.FAST_FOOD.value}
     api_brand_key = "PH"
-    api_brand_country_key = "PH_PL"
+    api_brand_country_key = "PH_HU"
     api_source = "WEB"
     api_auth_source = "WEB_PH"
     api_channel = "TAKEAWAY"
@@ -16,7 +16,7 @@ class PizzaHutPLSpider(AmrestEUSpider):
     def parse_item(self, item, location):
         item["branch"] = item.pop("name").removeprefix("Pizza Hut ")
         item["website"] = (
-            "https://pizzahut.pl/en/restaurants/"
+            "https://pizzahut.hu/en/restaurants/"
             + item["ref"]
             + "-"
             + unidecode(location["name"]).lower().replace(" ", "-")
