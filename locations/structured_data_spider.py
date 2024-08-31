@@ -220,7 +220,6 @@ class StructuredDataSpider(Spider):
         "PetStore",
         "Pharmacy",
         "Physician",
-        "PostalAddress",
         "RealEstateAgent",
         "SelfStorage",
         "ShoeStore",
