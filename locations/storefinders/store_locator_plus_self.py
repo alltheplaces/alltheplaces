@@ -3,6 +3,7 @@ from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
+from locations.items import Feature
 
 # This store finder is a self-hosted WordPress plugin with a website
 # of https://wordpress.org/plugins/store-locator-le/ and source code
@@ -130,5 +131,5 @@ class StoreLocatorPlusSelfSpider(Spider):
                 item["website"] = f"https://{self.allowed_domains[0]}{item['website']}"
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
