@@ -1,8 +1,10 @@
-import json
+from json import loads
+from typing import Iterable
 
-from scrapy import Request
+from scrapy import Request, Selector
 
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -12,7 +14,7 @@ class BeaurepairesAUSpider(AmastyStoreLocatorSpider):
     allowed_domains = ["www.beaurepaires.com.au"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         for domain in self.allowed_domains:
             yield Request(
                 url=f"https://{domain}/amlocator/index/ajax/",
@@ -20,10 +22,10 @@ class BeaurepairesAUSpider(AmastyStoreLocatorSpider):
                 headers={"X-Requested-With": "XMLHttpRequest"},
             )
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["street_address"] = item.pop("addr_full")
-        oh = OpeningHours()
-        schedule = json.loads(location["schedule_string"])
+        item["opening_hours"] = OpeningHours()
+        schedule = loads(feature["schedule_string"])
         for day_name, day in schedule.items():
             if day[f"{day_name}_status"] != "1":
                 continue
@@ -32,10 +34,9 @@ class BeaurepairesAUSpider(AmastyStoreLocatorSpider):
             break_end = day["break_to"]["hours"] + ":" + day["break_to"]["minutes"]
             close_time = day["to"]["hours"] + ":" + day["to"]["minutes"]
             if break_start == break_end:
-                oh.add_range(day_name.title(), open_time, close_time)
+                item["opening_hours"].add_range(day_name.title(), open_time, close_time)
             else:
-                oh.add_range(day_name.title(), open_time, break_start)
-                oh.add_range(day_name.title(), break_end, close_time)
-        item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"].add_range(day_name.title(), open_time, break_start)
+                item["opening_hours"].add_range(day_name.title(), break_end, close_time)
 
         yield item

@@ -27,9 +27,10 @@ class AmpolAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["value"]:
+            address = location.pop("Address")
             item = DictParser.parse(location)
             item["geometry"] = location["Location"]
-            item["street_address"] = location["Address"]
+            item["street_address"] = address
 
             apply_category(Categories.FUEL_STATION, item)
             if location["Brand"] == "Eg Ampol":

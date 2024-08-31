@@ -13,7 +13,7 @@ class ELeclercSpider(WoosmapSpider):
         "Hyper": ({"brand": "E.Leclerc"}, Categories.SHOP_SUPERMARKET),
         "Super": ({"brand": "E.Leclerc"}, Categories.SHOP_SUPERMARKET),
         "Manège à Bijoux": ({"brand": "Manège à Bijoux"}, Categories.SHOP_JEWELRY),
-        "Drive": ({"brand": "E.Leclerc Drive"}, Categories.SHOP_SUPERMARKET),
+        "Drive": ({"brand": "E.Leclerc Drive"}, Categories.SHOP_OUTPOST),
         "Une Heure Pour Soi": ({"brand": "Une Heure Pour Soi"}, Categories.SHOP_PERFUMERY),
         "Station Service": ({"brand": "E.Leclerc"}, Categories.FUEL_STATION),
         "Auto": ({"brand": "E.Leclerc"}, Categories.SHOP_CAR_REPAIR),

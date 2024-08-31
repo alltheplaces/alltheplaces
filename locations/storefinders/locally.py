@@ -5,6 +5,13 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 
 class LocallySpider(scrapy.Spider):
+    """
+    Locally provides an embeddable storefinder.
+    https://support.locally.com/en/support/solutions/articles/14000098813-store-locator-overview
+
+    To use, specify `start_urls`
+    """
+
     allowed_domains = []
     start_urls = []
     api_key = None  # Later, will refactor to this
@@ -13,26 +20,27 @@ class LocallySpider(scrapy.Spider):
     # "https://crocs.locally.com/stores/conversion_data?has_data=true&company_id=1762&category=Store&inline=1&map_center_lat=46.661219&map_center_lng=2.587603&map_distance_diag=3000&sort_by=proximity&lang=en-gb",
 
     def parse(self, response):
-        for store in response.json()["markers"]:
+        for location in response.json()["markers"]:
             oh = OpeningHours()
-            item = DictParser.parse(store)
-            self.pre_process_item(item, store)
+            self.pre_process_data(location)
+            item = DictParser.parse(location)
             for day in DAYS_FULL:
                 open = f"{day[:3].lower()}_time_open"
                 close = f"{day[:3].lower()}_time_close"
-                if not store.get(open) or len(str(store.get(open))) < 3:
+                if not location.get(open) or len(str(location.get(open))) < 3:
                     continue
                 oh.add_range(
                     day=day,
-                    open_time=f"{str(store.get(open))[:-2]}:{str(store.get(open))[-2:]}",
-                    close_time=f"{str(store.get(close))[:-2]}:{str(store.get(close))[-2:]}",
+                    open_time=f"{str(location.get(open))[:-2]}:{str(location.get(open))[-2:]}",
+                    close_time=f"{str(location.get(close))[:-2]}:{str(location.get(close))[-2:]}",
                 )
             item["opening_hours"] = oh.as_opening_hours()
-            self.post_process_item(item, store)
-            yield item
 
-    def pre_process_item(self, item, store):
-        yield item
+            yield from self.post_process_item(item, response, location) or []
 
-    def post_process_item(self, item, store):
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(self, item, response, location):
+        """Override with any post-processing on the item."""
         yield item

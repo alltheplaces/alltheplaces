@@ -1,6 +1,9 @@
+from typing import Iterable
+
 from scrapy import Selector
 
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -11,17 +14,17 @@ class AussieDisposalsAUSpider(AmastyStoreLocatorSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "AU"
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["street_address"] = item.pop("addr_full")
         item.pop("state")
-        if location["state"] == "570":
+        if feature["state"] == "570":
             item["state"] = "NSW"
-        elif location["state"] == "571":
+        elif feature["state"] == "571":
             item["state"] = "VIC"
-        elif location["state"] == "573":
+        elif feature["state"] == "573":
             item["state"] = "SA"
         hours_string = " ".join(
-            filter(None, Selector(text=location["description"]).xpath("//./span[@style]/text()").getall())
+            filter(None, Selector(text=feature["description"]).xpath("//./span[@style]/text()").getall())
         )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
