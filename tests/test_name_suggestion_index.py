@@ -35,7 +35,7 @@ def test_generate_keys_from_nsi_attributes():
     keys_to_find = [
         ("mcdonalds", "McdonaldsSpider"),
         ("mcdonalds_fr", "McdonaldsFRSpider"),
-        ("mai_dang_lao_mcdonalds_hk_mo", "MaiDangLaoMcDonaldsHKMOSpider"),
+        ("mai_dang_lao_mcdonalds_hk_mo", "MaiDangLaoMcdonaldsHKMOSpider"),
     ]
     for match in matches:
         key, class_name = NSI.generate_keys_from_nsi_attributes(match)
