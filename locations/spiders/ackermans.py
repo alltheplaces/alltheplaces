@@ -87,8 +87,10 @@ class AckermansSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
-        if item["state"] == "Namibia":
+        if item["state"] in ["Namibia", "Botswana"]:
             item.pop("state")
+        if item["postcode"] in ["9000", "9999", "0000"] and location["countryCode"] in ["NA", "BW"]:
+            item.pop("postcode")
         item["website"] = (
             f"https://www.ackermans.co.za/store-directory/{location['countryNameUrlKey']}/{location['provinceUrlKey']}/{location['cityUrlKey']}/{location['branchNameUrlKey']}"
         )
