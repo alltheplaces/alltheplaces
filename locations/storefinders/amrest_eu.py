@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class AmrestEUSpider(Spider):
@@ -15,11 +16,12 @@ class AmrestEUSpider(Spider):
 
     This spider is specifically for the common functionality across all child brands.
     """
+    api_brand_key: str = None
+    api_brand_country_key: str = None
+    api_source: str = None
+    api_auth_source: str = None
+    api_channel: str = None
 
-    base_urls = ["https://api.amrest.eu/amdv/ordering-api/{}/"]
-    auth_url = "rest/v1/auth/get-token"
-    restaurants_url = "rest/v2/restaurants/"
-    base_headers = {"source": "WEB"}
     # following 'deviceUuid' is the default for BK and KFC. PH uses generated one, but seems to work
     # with default one as well
     auth_data = {
@@ -50,14 +52,22 @@ class AmrestEUSpider(Spider):
                 raise CloseSpider(f"Brand '{self.item_attributes['brand']}' not supported")
 
     def start_requests(self):
-        for root_url in self.base_urls:
-            yield JsonRequest(
-                url=(root_url + self.auth_url),
-                data=self.auth_data,
-                headers=self.base_headers,
-                callback=self.fetch_restaurants,
-                meta={"root_url": root_url},
-            )
+        headers = {
+            "Brand": self.api_brand_key,
+        }
+        if self.api_source:
+            headers.update({"Source": self.api_source})
+        data = {
+            "deviceUuid": "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF",
+            "deviceUuidSource": "FINGERPRINT",
+            "source": f"{self.api_auth_source}",
+        }
+        yield JsonRequest(
+            url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v1/auth/get-token",
+            headers=headers,
+            data=data,
+            callback=self.parse_auth_token,
+        )
 
     def fetch_restaurants(self, response):
         root_url = response.meta["root_url"]
@@ -92,10 +102,67 @@ class AmrestEUSpider(Spider):
 
         yield from self.parse_item(item, feature)
 
-    def parse_item(self, item, feature, **kwargs):
+    def parse_auth_token(self, response):
+        auth_token = response.json()["token"]
+        headers = {
+            "Authorization": f"Bearer {auth_token}",
+            "Brand": self.api_brand_key,
+        }
+        if self.api_source:
+            headers.update({"Source": self.api_source})
+        yield JsonRequest(
+            url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v3/restaurants/",
+            headers=headers,
+            callback=self.parse_restaurants_list,
+        )
+
+    def parse_restaurants_list(self, response):
+        headers = {
+            "Authorization": response.request.headers.get("Authorization"),
+            "Brand": self.api_brand_key,
+        }
+        if self.api_source:
+            headers.update({"Source": self.api_source})
+        for restaurant in response.json()["restaurants"]:
+            restaurant_id = restaurant["id"]
+            if self.api_channel:
+                yield JsonRequest(
+                    url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v2/restaurants/{restaurant_id}/{self.api_channel}",
+                    headers=headers,
+                    callback=self.parse_restaurant_details,
+                )
+            else:
+                yield JsonRequest(
+                    url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v2/restaurants/details/{restaurant_id}",
+                    headers=headers,
+                    callback=self.parse_restaurant_details,
+                )
+
+    def parse_restaurant_details(self, response):
+        location = response.json()["details"]
+        item = DictParser.parse(location)
+        item["ref"] = str(location["id"])
+        item["postcode"] = location["addressPostalCode"]
+        item["housenumber"] = location.get("addressStreetNo")
+        item["street"] = location["addressStreet"]
+        item["opening_hours"] = self.parse_hours(location["facilityOpenHours"])
+
+        apply_yes_no(Extras.DELIVERY, item, location.get("delivery"), False)
+        apply_yes_no(Extras.TAKEAWAY, item, location.get("takeaway"), False)
+        apply_yes_no(Extras.INDOOR_SEATING, item, location.get("dineIn"), False)
+        extra_features = [feature["key"] for feature in location.get("filters", {})]
+        if extra_features:
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "driveThru" in extra_features, False)
+            apply_yes_no(Extras.OUTDOOR_SEATING, item, location.get("garden"), False)
+            apply_yes_no(Extras.WIFI, item, "wifi" in extra_features, False)
+
+        yield from self.parse_item(item, location)
+
+    def parse_item(self, item: Feature, location: dict):
         yield item
 
-    def parse_hours(self, opening_hours) -> OpeningHours:
+    @staticmethod
+    def parse_hours(opening_hours: dict) -> OpeningHours:
         oh = OpeningHours()
         for day in [
             "openHoursMon",
