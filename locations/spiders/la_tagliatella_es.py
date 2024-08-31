@@ -1,3 +1,4 @@
+from locations.categories import Categories
 from locations.storefinders.amrest_eu import AmrestEUSpider
 
 
