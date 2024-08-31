@@ -24,7 +24,7 @@ class MathnasiumSpider(SitemapSpider, StructuredDataSpider):
         item["country"] = (center_page_regex.search(response.url).group("country") or "US").upper()
         item["ref"] = item["country"] + response.xpath("//input[@id='center_id']/@value").get()
 
-        if item.get("twitter").lower() == "mathnasium":
+        if item.get("twitter", "").lower() == "mathnasium":
             del item["twitter"]
 
         if item.get("facebook") == "https://www.facebook.com/mathnasium":
