@@ -1,17 +1,14 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class BuckleUSSpider(SitemapSpider, StructuredDataSpider):
+class BuckleUSSpider(RioSeoSpider):
     name = "buckle_us"
-    item_attributes = {"brand": "Buckle", "brand_wikidata": "Q4983306"}
-    allowed_domains = ["local.buckle.com"]
-    sitemap_urls = ["https://local.buckle.com/robots.txt"]
-    sitemap_rules = [(r"\/clothing-\d+\.html$", "parse")]
-    wanted_types = ["Clothing Store"]
+    item_attributes = {
+        "brand_wikidata": "Q4983306",
+        "brand": "Buckle",
+    }
+    end_point = "https://maps.local.buckle.com"
 
-    def post_process_item(self, item, response, ld_data):
-        item["name"] = item["name"].replace("`", "’")
-        item.pop("image", None)
-        yield item
+    def post_process_feature(self, feature, location):
+        feature["branch"] = feature.pop("name")
+        yield feature

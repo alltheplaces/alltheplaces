@@ -1,4 +1,5 @@
 from locations.categories import Categories
+from locations.hours import DAYS_DE
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -8,3 +9,4 @@ class EndlichOhneDESpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.endlich-ohne.de",
     ]
+    days = DAYS_DE

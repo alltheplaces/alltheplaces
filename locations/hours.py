@@ -54,6 +54,7 @@ DAYS_EN = {
 }
 
 DAYS_DE = {
+    # "Feiertag": "PH",
     "Montag": "Mo",
     "Mo": "Mo",
     "Dienstag": "Tu",
@@ -417,12 +418,22 @@ DAYS_PT = {
 }
 DAYS_SK = {
     "Po": "Mo",
+    "Pondelok": "Mo",
     "Ut": "Tu",
+    "Utorok": "Tu",
+    "Útorok": "Tu",
     "St": "We",
+    "Streda": "We",
     "Št": "Th",
+    "Štvrtok": "Th",
+    "Stvrtok": "Th",
     "Pi": "Fr",
+    "Piatok": "Fr",
     "So": "Sa",
+    "Sobota": "Sa",
     "Ne": "Su",
+    "Nedeľa": "Su",
+    "Nedela": "Su",
 }
 DAYS_RU = {
     "Пн": "Mo",

@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -16,7 +17,7 @@ class CoopNOSpider(Spider):
         "08": {"brand": "Matkroken", "brand_wikidata": "Q11988679"},
         "41": {"brand": "Coop Byggmix", "brand_wikidata": "Q12714075"},
         "43": {"brand": "Obs BYGG", "brand_wikidata": "Q5167707"},
-        "45": {"brand": "Coop Elektro", "brand_wikidata": "Q111534601"},
+        "45": {"brand": "Coop Elektro", "brand_wikidata": "Q111534601", "extras": Categories.SHOP_ELECTRONICS.value},
     }
     allowed_domains = ["www.coop.no"]
     start_urls = ["https://www.coop.no/api/content/butikker?skip=0&count=10000"]

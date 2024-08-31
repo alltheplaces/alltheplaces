@@ -2,7 +2,7 @@ from scrapy import Spider
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class SleepNumberUSSpider(Spider):
@@ -18,21 +18,11 @@ class SleepNumberUSSpider(Spider):
             item["ref"] = store["cid"]
             item["website"] = store["c_storePagesURLURL"]
 
-            # This structure appears in multiple other spiders, should refactor.
-            # carhartt_wip, nissan_europe, stbant, primark.
-            oh = OpeningHours()
-            day_data = store.get("hours") or {}
-            day_dict = dict(day_data)
-            for day, value in day_dict.items():
-                value = dict(value)
-                if value == {} or value.get("isClosed"):
+            item["opening_hours"] = OpeningHours()
+            for day_name, day_hours in store.get("hours", {}).items():
+                if not isinstance(day_hours, dict) or day_hours.get("isClosed") or day_name.title() not in DAYS_FULL:
                     continue
-                for interval in value.get("openIntervals"):
-                    oh.add_range(
-                        day=day.title()[:2],
-                        open_time=interval.get("start"),
-                        close_time=interval.get("end"),
-                        time_format="%H:%M",
-                    )
-            item["opening_hours"] = oh.as_opening_hours()
+                for time_period in day_hours["openIntervals"]:
+                    item["opening_hours"].add_range(day_name.title(), time_period["start"], time_period["end"])
+
             yield item

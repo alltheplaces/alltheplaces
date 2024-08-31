@@ -20,7 +20,8 @@ class AristocrazyESSpider(Spider):
             location = parse_js_object(unescape(location))
             item = DictParser.parse(location)
             item["street_address"] = clean_address([location["address1"], location["address2"]])
-            hours_string = location["storeHours"].replace("Sundays and Holidays from", "Sunday")
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
+            if "storeHours" in location:
+                hours_string = location["storeHours"].replace("Sundays and Holidays from", "Sunday")
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(hours_string)
             yield item

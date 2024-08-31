@@ -10,6 +10,7 @@ CATEGORY_MAPPING = {
     "muzei-i-galerei": Categories.MUSEUM,
     "biblioteki": Categories.LIBRARY,
     "dvorcy-kultury-i-kluby": Categories.COMMUNITY_CENTRE,
+    "parki": Categories.LEISURE_PARK,
 }
 
 MUSEUM_TYPES = {
@@ -66,9 +67,10 @@ MUSEUM_TYPES = {
 class MkrfRUSpider(Spider):
     name = "mkrf_ru"
     allowed_domains = ["opendata.mkrf.ru"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 100}
     dataset_attributes = {
         "attribution": "required",
+        "attribution:name": "Министерство культуры Российской Федерации",
         "attribution:name:en": "Ministry of Culture of the Russian Federation",
         "attribution:name:ru": "Министерство культуры Российской Федерации",
         "attribution:website": "https://opendata.mkrf.ru/",
@@ -76,7 +78,7 @@ class MkrfRUSpider(Spider):
         "use:commercial": "permit",
     }
     # TODO: add more datasets from https://opendata.mkrf.ru/item/api
-    datasets = ["museums", "cinema", "libraries", "culture_palaces_clubs"]
+    datasets = ["museums", "cinema", "libraries", "culture_palaces_clubs", "parks"]
 
     api_key = "be088ddb94bfd718a196c7ac7f67d32303ba69681948ec0a21744cdd4f78bd16"
 
@@ -108,6 +110,7 @@ class MkrfRUSpider(Spider):
         if poi_attributes:
             item = DictParser.parse(poi_attributes)
             item["ref"] = str(poi_attributes.get("id", "")) + "-" + dataset
+            self.crawler.stats.inc_value(f"atp/{self.name}/dataset/{dataset}")
             item["street"] = None
 
             # 'locale' is inconsistent, sometimes it's is city, sometimes it's region - skip it
@@ -145,7 +148,7 @@ class MkrfRUSpider(Spider):
                     oh.add_range(DAYS[int(k)], v.get("from"), v.get("to"), "%H:%M:%S")
                 item["opening_hours"] = oh.as_opening_hours()
             except:
-                self.crawler.stats.inc_value("atp/mkrf/failed_to_parse_hours")
+                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
 
     def parse_museum_types(self, item, poi_attributes):
         if poi_attributes.get("category", {}).get("sysName") == "muzei-i-galerei":
@@ -154,4 +157,4 @@ class MkrfRUSpider(Spider):
                     if value := MUSEUM_TYPES.get(type):
                         apply_category({"museum": value}, item)
                     else:
-                        self.crawler.stats.inc_value(f"atp/mkrf/museum_types/failed/{type}")
+                        self.crawler.stats.inc_value(f"atp/{self.name}/museum_types/failed/{type}")
