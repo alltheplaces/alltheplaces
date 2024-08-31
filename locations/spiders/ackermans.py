@@ -1,10 +1,8 @@
-import ast
 from scrapy.http import JsonRequest
-from locations.pipelines.address_clean_up import clean_address
-from locations.hours import OpeningHours
-from locations.categories import Extras, apply_yes_no
+
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AckermansSpider(JSONBlobSpider):
@@ -13,9 +11,7 @@ class AckermansSpider(JSONBlobSpider):
         "brand": "Ackermans",
         "brand_wikidata": "Q4674255",
     }
-    start_urls = [
-        "https://www.ackermans.co.za/graphql?operationName=ackStoresByLocation"
-    ]
+    start_urls = ["https://www.ackermans.co.za/graphql?operationName=ackStoresByLocation"]
 
     def start_requests(self):
         graphql_query = """query ackStoresByLocation($lon: Float!, $lat: Float!, $from: Int, $size: Int, $clickAndCollectOnly: Boolean, $radius: Int, $branchTypes: [String]) {
@@ -76,7 +72,7 @@ class AckermansSpider(JSONBlobSpider):
                 "size": 9999,
                 "clickAndCollectOnly": False,
                 "radius": 10000,
-                "branchTypes": None
+                "branchTypes": None,
             },
             "query": graphql_query,
         }
@@ -93,7 +89,9 @@ class AckermansSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         if item["state"] == "Namibia":
             item.pop("state")
-        item["website"] = f"https://www.ackermans.co.za/store-directory/{location['countryNameUrlKey']}/{location['provinceUrlKey']}/{location['cityUrlKey']}/{location['branchNameUrlKey']}"
+        item["website"] = (
+            f"https://www.ackermans.co.za/store-directory/{location['countryNameUrlKey']}/{location['provinceUrlKey']}/{location['cityUrlKey']}/{location['branchNameUrlKey']}"
+        )
         if location.get("businessHours") is not None:
             item["opening_hours"] = OpeningHours()
             for day_hours in location.get("businessHours"):
