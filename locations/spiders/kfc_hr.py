@@ -20,3 +20,4 @@ class KfcHRSpider(AmrestEUSpider):
             + "-"
             + item["ref"]
         )
+        yield item
