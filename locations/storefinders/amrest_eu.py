@@ -1,5 +1,5 @@
 from scrapy import Spider
-from scrapy.http import Response, JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
