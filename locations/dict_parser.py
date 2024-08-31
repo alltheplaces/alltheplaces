@@ -27,6 +27,7 @@ class DictParser:
         "branch-id",
         "BranchID",
         "branchID",
+        "branch-code",
     ]
 
     name_keys = [
@@ -39,6 +40,7 @@ class DictParser:
         "item-name",
         "location-name",
         "loc-name",
+        "branch-name",
         # ES
         "nombre",
     ]
@@ -183,6 +185,7 @@ class DictParser:
         "store-phone",
         "primary-phone",
         "main-phone",
+        "branch-phone"
         # ES
         "telefono",  # "phone"
     ]
