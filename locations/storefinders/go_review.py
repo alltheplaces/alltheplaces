@@ -3,14 +3,17 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class GoReviewSpider(CrawlSpider):
     """
     To use this spider, specify one or more start_urls,
-    normally something like "https://hlinfo.goreview.co.za/store-locator/store-information"
+    normally something like "https://hlinfo.goreview.co.za/store-locator"
+
+    Override days if something other than DAYS_EN is required
 
     Also known as socialplaces.io or Social Places
     """
@@ -22,6 +25,7 @@ class GoReviewSpider(CrawlSpider):
             callback="parse",
         )
     ]
+    days = DAYS_EN
 
     def parse(self, response):
         properties = {
@@ -30,20 +34,8 @@ class GoReviewSpider(CrawlSpider):
             .get()
             .replace(self.item_attributes["brand"], "")
             .strip(),
-            "addr_full": re.sub(
-                r"\s+",
-                " ",
-                ", ".join(
-                    filter(
-                        None,
-                        map(
-                            str.strip,
-                            response.xpath(
-                                '//div[contains(@class, "content-wrapper")]/div[2]/div[1]//p/text()'
-                            ).getall(),
-                        ),
-                    )
-                ),
+            "addr_full": merge_address_lines(
+                response.xpath('//div[contains(@class, "content-wrapper")]/div[2]/div[1]//p/text()').getall(),
             ),
             "phone": response.xpath(
                 '//div[contains(@class, "content-wrapper")]/div[2]/div[3]//a[contains(@href, "tel:")]/@href'
@@ -60,7 +52,7 @@ class GoReviewSpider(CrawlSpider):
             response.xpath('//div[contains(@class, "content-wrapper")]/div[2]/div[4]/p//text()').getall()
         )
         properties["opening_hours"] = OpeningHours()
-        properties["opening_hours"].add_ranges_from_string(hours_string)
+        properties["opening_hours"].add_ranges_from_string(hours_string, days=self.days)
         item = Feature(**properties)
         yield from self.post_process_item(item, response) or []
 
