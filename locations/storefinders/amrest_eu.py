@@ -94,7 +94,7 @@ class AmrestEUSpider(Spider):
             apply_yes_no(Extras.OUTDOOR_SEATING, item, location.get("garden"), False)
             apply_yes_no(Extras.WIFI, item, "wifi" in extra_features, False)
 
-        yield from self.parse_item(item, location)
+        yield from self.post_process_item(item, response, location)
 
     def post_process_item(self, item: Feature, response: Response, location: dict):
         yield item
