@@ -166,7 +166,7 @@ class StructuredDataSpider(Spider):
         "GroceryStore",
         "FastFoodRestaurant",
         "Hotel",
-        # "Place", # TODO: This is possibly too broad, but it asserts it has coordinates
+        "Place",
         "ClothingStore",
         "DepartmentStore",
         "HardwareStore",
