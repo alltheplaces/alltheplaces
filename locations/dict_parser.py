@@ -185,7 +185,8 @@ class DictParser:
         "store-phone",
         "primary-phone",
         "main-phone",
-        "branch-phone"
+        "branch-phone",
+        "branch-telephone",
         # ES
         "telefono",  # "phone"
     ]
