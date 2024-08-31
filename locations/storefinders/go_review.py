@@ -47,9 +47,7 @@ class GoReviewSpider(CrawlSpider):
             ),
             "phone": response.xpath(
                 '//div[contains(@class, "content-wrapper")]/div[2]/div[3]//a[contains(@href, "tel:")]/@href'
-            )
-            .get()
-            .replace("tel:", ""),
+            ).get(),
             "facebook": response.xpath(
                 '//div[contains(@class, "content-wrapper")]/div[2]/div[5]//a[contains(@href, "facebook.com")]/@href'
             ).get(),
