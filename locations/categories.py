@@ -33,6 +33,7 @@ class Categories(Enum):
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
     CRAFT_CARPENTER = {"craft": "carpenter"}
+    CRAFT_CATERER = {"craft": "caterer"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
@@ -454,6 +455,7 @@ class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     BACKUP_GENERATOR = "backup_generator"
+    BAR = "bar"
     BARBEQUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
