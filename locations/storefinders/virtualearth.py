@@ -1,9 +1,9 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
+
 
 class VirtualEarthSpider(Spider):
     """
