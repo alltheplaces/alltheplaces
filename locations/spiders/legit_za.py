@@ -1,4 +1,5 @@
 import chompjs
+
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -8,5 +9,4 @@ class LegitZASpider(JSONBlobSpider):
 
     def extract_json(self, response):
         chunks = response.text.split("SCASLWtb=")
-        return chompjs.parse_js_object(chunks[1])['locations']
-
+        return chompjs.parse_js_object(chunks[1])["locations"]
