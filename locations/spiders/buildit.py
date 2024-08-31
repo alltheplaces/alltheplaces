@@ -4,8 +4,8 @@ from scrapy.http import JsonRequest, Request
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BuildItSpider(JSONBlobSpider):
-    name = "build_it"
+class BuilditSpider(JSONBlobSpider):
+    name = "buildit"
     item_attributes = {"brand": "Build it", "brand_wikidata": "Q116755810"}
     start_urls = ["https://www.buildit.co.za/"]
     skip_auto_cc_spider_name = True
