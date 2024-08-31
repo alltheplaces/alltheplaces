@@ -213,7 +213,6 @@ class StructuredDataSpider(Spider):
         "LodgingBusiness",
         "MedicalBusiness",
         "MedicalClinic",
-        "MedicalOrganization",
         "MobilePhoneStore",
         "MovieTheater",
         "OutletStore",
