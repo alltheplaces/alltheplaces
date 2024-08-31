@@ -33,6 +33,7 @@ def test_generate_keys_from_nsi_attributes():
     nsi = NSI()
     matches = list(nsi.iter_nsi("Q38076"))
     keys_to_find = [
+        # NOTE: Spider naming convention tools ignore english naming conventions. While there are some inconsistencies in what humans would choose to do, that is acceptable.
         ("mcdonalds", "McdonaldsSpider"),
         ("mcdonalds_fr", "McdonaldsFRSpider"),
         ("mai_dang_lao_mcdonalds_hk_mo", "MaiDangLaoMcdonaldsHKMOSpider"),
