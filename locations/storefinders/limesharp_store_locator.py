@@ -30,7 +30,7 @@ class LimesharpStoreLocatorSpider(Spider):
             for url in self.start_urls:
                 yield JsonRequest(url=url)
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json():
             if (
                 not location["name"]
@@ -44,5 +44,5 @@ class LimesharpStoreLocatorSpider(Spider):
             item["street_address"] = location["address"]
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item

@@ -1,20 +1,14 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class GenghisGrillUSSpider(SitemapSpider, StructuredDataSpider):
+class GenghisGrillUSSpider(RioSeoSpider):
     name = "genghis_grill_us"
     item_attributes = {
-        "brand": "Genghis Grill",
         "brand_wikidata": "Q29470710",
-        "extras": {"amenity": "restaurant", "cuisine": "mongolian_grill"},
+        "brand": "Genghis Grill",
     }
-    sitemap_urls = ["https://locations.genghisgrill.com/robots.txt"]
-    sitemap_rules = [(r".html$", "parse_sd")]
+    end_point = "https://maps.genghisgrill.com"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = None
-        item["branch"] = response.xpath("//h2/text()").get()
-
-        yield item
+    def post_process_feature(self, feature, location):
+        feature["branch"] = feature.pop("name")
+        yield feature

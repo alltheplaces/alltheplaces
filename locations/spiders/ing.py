@@ -9,7 +9,10 @@ from locations.items import Feature
 class IngSpider(scrapy.Spider):
     name = "ing"
     item_attributes = {"brand": "ING", "brand_wikidata": "Q645708"}
-    start_urls = ["https://api.www.ing.nl/locator/offices"]
+    start_urls = [
+        "https://api.www.ing.nl/locator/offices",
+        "https://api.www.ing.be/locator/offices",
+    ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
@@ -26,7 +29,6 @@ class IngSpider(scrapy.Spider):
                     "street": address_details.get("street"),
                     "postcode": address_details.get("postalCode"),
                     "city": address_details.get("city"),
-                    "street_address": " ".join([address_details.get("number"), address_details.get("street")]),
                     "lat": store.get("latitude"),
                     "lon": store.get("longitude"),
                     "name": store.get("name"),
@@ -44,12 +46,10 @@ class IngSpider(scrapy.Spider):
         item = Feature(
             {
                 "ref": store.get("id"),
-                "name": response.meta.get("name"),
                 "street": response.meta.get("street"),
                 "housenumber": response.meta.get("housenumber"),
                 "postcode": response.meta.get("postcode"),
                 "city": response.meta.get("city"),
-                "street_address": response.meta.get("street_address"),
                 "country": store.get("country"),
                 "email": store.get("email"),
                 "phone": store.get("phone"),
@@ -59,7 +59,14 @@ class IngSpider(scrapy.Spider):
             }
         )
 
-        if store["type"] == "ING-kantoor":
+        if code := store.get("code"):
+            if code == "001":
+                item["branch"] = response.meta["name"].removeprefix("ING ")
+                apply_category(Categories.BANK, item)
+            else:
+                apply_category(Categories.ATM, item)
+        elif store["type"] == "ING-kantoor":
             apply_category(Categories.BANK, item)
+            item["branch"] = response.meta["name"]
 
         yield item

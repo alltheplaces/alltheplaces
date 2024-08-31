@@ -1,15 +1,14 @@
 import re
 
 import chompjs
-import scrapy
 
 from locations.categories import Categories
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class TheFreshGrocerUSSpider(scrapy.Spider):
+class TheFreshGrocerUSSpider(JSONBlobSpider):
     name = "the_fresh_grocer_us"
     item_attributes = {
         "brand": "The Fresh Grocer",
@@ -19,18 +18,22 @@ class TheFreshGrocerUSSpider(scrapy.Spider):
     start_urls = ["https://www.thefreshgrocer.com/"]
     requires_proxy = True
 
-    def parse(self, response, **kwargs):
-        for location in chompjs.parse_js_object(
+    def extract_json(self, response):
+        return chompjs.parse_js_object(
             response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').get()
-        )["stores"]["availablePlanningStores"]["items"]:
-            location["street_address"] = merge_address_lines(
-                [location["addressLine1"], location["addressLine2"], location["addressLine3"]]
-            )
-            location["state"] = location["countyProvinceState"]
-            item = DictParser.parse(location)
-            item["ref"] = location["retailerStoreId"]
-            item["website"] = f'https://www.thefreshgrocer.com/sm/planning/rsid/{item["ref"]}'
+        )["stores"]["availablePlanningStores"]["items"]
 
+    def pre_process_data(self, location):
+        location["street_address"] = merge_address_lines(
+            [location["addressLine1"], location["addressLine2"], location["addressLine3"]]
+        )
+        location["state"] = location["countyProvinceState"]
+
+    def post_process_item(self, item, response, location):
+        item["ref"] = location["retailerStoreId"]
+        item["website"] = f'https://www.thefreshgrocer.com/sm/planning/rsid/{item["ref"]}'
+
+        if "openingHours" in location and location["openingHours"] is not None:
             if m := re.search(
                 r"(\w+)(?: (?:-|thru) (\w+))?: (\d+)\s*([ap]m) (?:-|to) (\d+)\s*([ap]m)",
                 location["openingHours"],
@@ -48,4 +51,4 @@ class TheFreshGrocerUSSpider(scrapy.Spider):
                         time_format="%I%p",
                     )
 
-            yield item
+        yield item

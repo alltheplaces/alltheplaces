@@ -24,6 +24,9 @@ class DictParser:
         "item-id",
         "ItemID",
         "itemID",
+        "branch-id",
+        "BranchID",
+        "branchID",
     ]
 
     name_keys = [
@@ -36,6 +39,8 @@ class DictParser:
         "item-name",
         "location-name",
         "loc-name",
+        # ES
+        "nombre",
     ]
 
     house_number_keys = [
@@ -82,9 +87,11 @@ class DictParser:
         "address-locality",
         "city",
         "address-city",
+        "physical-city",
         "town",
         "locality",
         "suburb",
+        "physical-suburb",
         "city-name",
         "store-city",
         # JP
@@ -191,6 +198,7 @@ class DictParser:
         "geo-lat",
         # ES
         "coordenaday",  # "Coordinate Y"
+        "latitud",
     ]
 
     lon_keys = [
@@ -206,6 +214,7 @@ class DictParser:
         "geo-lng",
         # ES
         "coordenadax",  # "Coordinate X"
+        "longitud",
     ]
 
     website_keys = [
@@ -219,6 +228,8 @@ class DictParser:
         "websiteURL",
         "location-url",
     ]
+
+    hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
 
     @staticmethod
     def parse(obj) -> Feature:

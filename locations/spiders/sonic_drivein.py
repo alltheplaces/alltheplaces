@@ -1,14 +1,11 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class SonicDriveinSpider(SitemapSpider, StructuredDataSpider):
+class SonicDriveinSpider(RioSeoSpider):
     name = "sonic_drivein"
     item_attributes = {"brand": "Sonic Drive-In", "brand_wikidata": "Q7561808"}
-    sitemap_urls = ["https://locations.sonicdrivein.com/robots.txt"]
-    sitemap_rules = [(".html", "parse_sd")]
+    end_point = "https://maps.locations.sonicdrivein.com"
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["name"] = None
-        ld_data["image"] = None
+    def post_process_feature(self, feature, location):
+        feature["branch"] = feature.pop("name")
+        yield feature

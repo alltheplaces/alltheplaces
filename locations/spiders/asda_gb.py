@@ -16,8 +16,8 @@ class AsdaGBSpider(VirtualEarthSpider):
     item_attributes = {"brand": "Asda", "brand_wikidata": "Q297410"}
     dataset_id = "2c85646809c94468af8723dd2b52fcb1"
     dataset_name = "AsdaStoreLocator/asda_store"
-    key = "AtAs6PiQ3e0HE187rJgUEqvoKcKfTklRKTvCN1X1mpumYE-Z4VQFvx62X7ff13t6"
-    filter = "country Eq 'United Kingdom'"
+    api_key = "AtAs6PiQ3e0HE187rJgUEqvoKcKfTklRKTvCN1X1mpumYE-Z4VQFvx62X7ff13t6"
+    dataset_filter = "country Eq 'United Kingdom'"
 
     def parse_item(self, item: Feature, feature: dict, **kwargs):
         if feature["asda_store_type"] == "Collection Point":

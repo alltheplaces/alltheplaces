@@ -1,35 +1,51 @@
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class TjxSpider(scrapy.Spider):
+class TjxSpider(Spider):
     name = "tjx"
-    allowed_domains = ["tjx.com"]
+    allowed_domains = ["marketingsl.tjx.com"]
 
+    # Source of chain IDs is the JavaScript switch statement
+    # "switch (location['Chain']) {" within https://www.tjx.com/stores
     chains = {
         # USA chains
-        "08": {"brand": "TJ Maxx", "brand_wikidata": "Q10860683", "country": "USA"},
-        "10": {"brand": "Marshalls", "brand_wikidata": "Q15903261", "country": "USA"},
+        "08": ({"brand": "TJ Maxx", "brand_wikidata": "Q10860683"}, ["US"]),
+        "10": ({"brand": "Marshalls", "brand_wikidata": "Q15903261"}, ["US"]),
+        "28": ({"brand": "HomeGoods", "brand_wikidata": "Q5887941"}, ["US"]),
+        "29": ({"brand": "HomeSense", "brand_wikidata": "Q16844433"}, ["US"]),
+        "50": ({"brand": "Sierra", "brand_wikidata": "Q7511598"}, ["US"]),
         # Canada chains
-        "90": {"brand": "HomeSense", "brand_wikidata": "Q16844433", "country": "Canada"},
-        "91": {"brand": "Winners", "brand_wikidata": "Q845257", "country": "Canada"},
-        "93": {"brand": "Marshalls", "brand_wikidata": "Q15903261", "country": "Canada"},
-        # There are separate spiders for below brands that provide better data
-        "28": {"brand": "HomeGoods", "brand_wikidata": "Q5887941", "country": "USA"},
-        "50": {"brand": "Sierra", "brand_wikidata": "Q7511598", "country": "USA"},
+        "90": ({"brand": "HomeSense", "brand_wikidata": "Q16844433"}, ["CA"]),
+        "91": ({"brand": "Winners", "brand_wikidata": "Q845257"}, ["CA"]),
+        "93": ({"brand": "Marshalls", "brand_wikidata": "Q15903261"}, ["CA"]),
+        # Europe and Australia chains
+        "20": ({"brand": "TK Maxx", "brand_wikidata": "Q23823668"}, ["GB", "IE", "DE", "PL", "AT", "NL", "AU"]),
+        "21": ({"brand": "HomeSense", "brand_wikidata": "Q16844433"}, ["GB", "IE"]),
     }
 
-    countries = {"Canada": "ca_centroids_100mile_radius.csv", "USA": "us_centroids_50mile_radius.csv"}
+    iseadgg_search_config = {
+        "AU": 48,
+        "AT": 48,
+        "CA": 48,
+        "DE": 48,
+        "GB": 48,
+        "IE": 48,
+        "NL": 48,
+        "PL": 48,
+        "US": 48,
+    }
 
     def start_requests(self):
-        for country, centroids_file in self.countries.items():
-            chains = [k for k in self.chains.keys() if self.chains[k]["country"] == country]
-            self.logger.info(f"Found {len(chains)} chains for {country}")
-            for lat, lon in point_locations(centroids_file):
-                yield scrapy.http.FormRequest(
+        for country_code, search_radius in self.iseadgg_search_config.items():
+            chains = [k for k in self.chains.keys() if country_code in self.chains[k][1]]
+            for lat, lon in country_iseadgg_centroids([country_code], search_radius):
+                yield FormRequest(
                     url="https://marketingsl.tjx.com/storelocator/GetSearchResults",
                     formdata={
                         "chain": ",".join(chains),
@@ -40,26 +56,35 @@ class TjxSpider(scrapy.Spider):
                     headers={"Accept": "application/json"},
                 )
 
-    def parse_hours(self, item, store):
-        """Mon-Thu: 9am - 9pm, Black Friday: 8am - 10pm, Sat: 9am - 9pm, Sun: 10am - 8pm"""
-        if hours := store.get("Hours"):
-            try:
-                hours = hours.replace("Black Friday", "Fri")
-                opening_hours = OpeningHours()
-                opening_hours.add_ranges_from_string(hours)
-                item["opening_hours"] = opening_hours.as_opening_hours()
-            except Exception as e:
-                self.logger.warning(f"Couldn't parse hours for {item['ref']}: {hours}, {e}")
-
     def parse(self, response):
-        data = response.json()
-        for store in data["Stores"]:
-            if not self.chains.get(store["Chain"]):
-                self.logger.error(f"Unknown chain: {store['Chain']}")
-                continue
-            item = DictParser.parse(store)
-            item["ref"] = f'{store["Chain"]}{store["StoreID"]}'
-            item["brand"] = self.chains.get(store["Chain"], {}).get("brand")
-            item["brand_wikidata"] = self.chains.get(store["Chain"], {}).get("brand_wikidata")
-            self.parse_hours(item, store)
+        locations = response.json()["Stores"]
+
+        if len(locations) > 0:
+            self.crawler.stats.inc_value("atp/geo_search/hits")
+        else:
+            self.crawler.stats.inc_value("atp/geo_search/misses")
+        self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+
+        for location in response.json()["Stores"]:
+            item = DictParser.parse(location)
+            item["ref"] = location["Chain"] + location["StoreID"]
+
+            if location["Chain"] in self.chains.keys():
+                item["brand"] = self.chains[location["Chain"]][0]["brand"]
+                item["brand_wikidata"] = self.chains[location["Chain"]][0]["brand_wikidata"]
+
+            if branch_name := item.pop("name", None):
+                item["branch"] = branch_name
+
+            item["street_address"] = clean_address([location.get("Address"), location.get("Address2")])
+            item.pop("addr_full", None)
+            if location["Country"] not in ["CA", "US"]:
+                # Outside of CA and US, the "State" field is incorrectly the
+                # country name.
+                item.pop("state", None)
+
+            if location.get("Hours"):  # Hours can sometimes be None.
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(location.get("Hours"))
+
             yield item

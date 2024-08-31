@@ -13,10 +13,13 @@ class BiggbyCoffeeUSSpider(Spider):
     allowed_domains = ["www.biggby.com"]
     start_urls = ["https://www.biggby.com/locations/"]
 
-    def parse(self, response):
+    def extract_json(self, response):
         js_blob = response.xpath('//script[contains(text(), "locations: [{")]/text()').get()
         js_blob = "[{" + js_blob.split("locations: [{", 1)[1].split("}]", 1)[0] + "}]"
-        for location in parse_js_object(js_blob):
+        return parse_js_object(js_blob)
+
+    def parse(self, response):
+        for location in self.extract_json(response):
             if location["acf"]["store_coming_soon"]:
                 continue
             item = DictParser.parse(location["acf"])

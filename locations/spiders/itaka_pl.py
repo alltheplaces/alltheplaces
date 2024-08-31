@@ -33,11 +33,17 @@ class ItakaPLSpider(Spider):
                     item["image"] = ";".join([f"https://www.itaka.pl{url}" for url in details["fotos"]])
                 item["website"] = f"https://www.itaka.pl/{details['www']}"
 
-                opening_hours = OpeningHours()
-                for hours in details["opening_hours"]:
-                    days, hours_range = hours
-                    hours_range = hours_range.removesuffix("*")
-                    opening_hours.add_ranges_from_string(ranges_string=f"{days} {hours_range}", days=DAYS_PL)
-                item["opening_hours"] = opening_hours
+                if opening_hours_day_array := details.get("opening_hours"):
+                    opening_hours = OpeningHours()
+                    for hours in opening_hours_day_array:
+                        if len(hours) != 2:
+                            continue
+
+                        days, hours_range = hours
+                        hours_range = hours_range.removesuffix("*")
+                        opening_hours.add_ranges_from_string(ranges_string=f"{days} {hours_range}", days=DAYS_PL)
+                    item["opening_hours"] = opening_hours
+
+                item.pop("name", None)
 
                 yield item
