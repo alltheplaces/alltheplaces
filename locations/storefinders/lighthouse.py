@@ -9,6 +9,7 @@ from scrapy.http import Response
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 # Lighthouse e-commerce platform store finder, with official URL of
 # https://www.lighthouse.gr/
@@ -53,16 +54,8 @@ class LighthouseSpider(Spider):
                 .get("")
                 .strip()
             )
-            item["addr_full"] = re.sub(
-                r"\s+",
-                " ",
-                ", ".join(
-                    filter(
-                        None,
-                        map(str.strip, location.xpath('(.//*[contains(@class, "address-one")])[1]//text()').getall()),
-                    )
-                ),
-            )
+            item["addr_full"] = ", ".join(filter(None, map(clean_address, location.xpath('(.//*[contains(@class, "address-one")])[1]//text()').getall()),))
+            
             item["phone"] = location.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
             if not item["phone"]:
                 item["phone"] = (
