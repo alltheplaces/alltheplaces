@@ -16,6 +16,7 @@ class AmrestEUSpider(Spider):
 
     This spider is specifically for the common functionality across all child brands.
     """
+
     api_brand_key: str = None
     api_brand_country_key: str = None
     api_source: str = None
