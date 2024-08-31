@@ -21,7 +21,7 @@ class FoodLoversMarketZASpider(JSONBlobSpider):
         if location.get("store_type") in FOOD_LOVERS_STORE_TYPES:
             item.update(FOOD_LOVERS_STORE_TYPES[location.get("store_type")])
         else:
-            self.logger.warning(f"Unknown store type: {location.get("store_type")}")
+            self.logger.warning(f"Unknown store type: {location.get('store_type')}")
         item["branch"] = (
             item.pop("name").replace("&#8217;", "'").replace("&#8211;", "").replace(item.get("brand"), "").strip()
         )
