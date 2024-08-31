@@ -182,6 +182,7 @@ class DictParser:
         "contact-phone",
         "store-phone",
         "primary-phone",
+        "primaryNumber",
         "main-phone",
         # ES
         "telefono",  # "phone"
