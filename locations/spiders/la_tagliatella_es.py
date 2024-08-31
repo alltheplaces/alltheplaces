@@ -10,7 +10,7 @@ class LaTagliatellaESSpider(AmrestEUSpider):
     api_auth_source = "WEB_KFC"
     api_channel = "DINE_IN"
 
-    def parse_item(self, item, feature, **kwargs):
+    def post_process_item(self, item, response, feature):
         # storeLocatorUrl format vary for other Amrest brands
         item["website"] = feature.get("storeLocatorUrl")
         item["branch"] = item.pop("name")

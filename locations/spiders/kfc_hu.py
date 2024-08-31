@@ -12,7 +12,7 @@ class KfcHUSpider(AmrestEUSpider):
     api_source = "WEB"
     api_auth_source = "WEB_KFC"
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").removeprefix("KFC ")
         item["website"] = (
             "https://kfc.hu/en/restaurants/"
