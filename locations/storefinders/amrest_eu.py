@@ -1,5 +1,4 @@
 from scrapy import Spider
-from scrapy.exceptions import CloseSpider
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
@@ -23,35 +22,6 @@ class AmrestEUSpider(Spider):
     api_auth_source: str = None
     api_channel: str = None
 
-    # following 'deviceUuid' is the default for BK and KFC. PH uses generated one, but seems to work
-    # with default one as well
-    auth_data = {
-        "deviceUuid": "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF",
-        "deviceUuidSource": "FINGERPRINT",
-        "source": "WEB_KFC",
-    }
-
-    CHANNELS = {
-        "takeout": "TAKEOUT",
-        "takeaway": "TAKEAWAY",
-        "dineIn": "DINE_IN",
-        "delivery": "DELIVERY",
-    }
-
-    # Restaurants details endpoint url is different for different brands - for PH and BK involves channel.
-    # Usually it works out with TAKEOUT, but if it's not supported by restaurant, different channel was
-    # noticed to work fine.
-    def make_details_url(self, root_url, restaurant):
-        match self.item_attributes["brand"]:
-            case "KFC":
-                return f"{root_url}{self.restaurants_url}details/{restaurant['id']}"
-            case "Pizza Hut" | "Burger King" | "La Tagliatella":
-                for channel_key, channel in self.CHANNELS.items():
-                    if restaurant.get(channel_key):
-                        return f"{root_url}{self.restaurants_url}{restaurant['id']}/{channel}"
-            case _:
-                raise CloseSpider(f"Brand '{self.item_attributes['brand']}' not supported")
-
     def start_requests(self):
         headers = {
             "Brand": self.api_brand_key,
@@ -69,39 +39,6 @@ class AmrestEUSpider(Spider):
             data=data,
             callback=self.parse_auth_token,
         )
-
-    def fetch_restaurants(self, response):
-        root_url = response.meta["root_url"]
-        token = response.json()["token"]
-        yield JsonRequest(
-            url=(root_url + self.restaurants_url),
-            headers=self.base_headers | {"authorization": f"Bearer {token}"},
-            callback=self.fetch_details,
-            meta={"root_url": root_url, "token": token},
-        )
-
-    def fetch_details(self, response):
-        for restaurant in response.json()["restaurants"]:
-            yield JsonRequest(
-                url=self.make_details_url(response.meta["root_url"], restaurant),
-                headers=self.base_headers | {"authorization": f'Bearer {response.meta["token"]}'},
-            )
-
-    def parse(self, response):
-        feature = response.json()["details"]
-
-        item = DictParser.parse(feature)
-
-        item["postcode"] = feature["addressPostalCode"]
-        item["housenumber"] = feature.get("addressStreetNo")
-        item["street"] = feature["addressStreet"]
-        item["opening_hours"] = self.parse_hours(feature["facilityOpenHours"])
-
-        apply_yes_no(Extras.DRIVE_THROUGH, item, feature.get("driveThru"))
-        apply_yes_no(Extras.DELIVERY, item, feature.get("delivery"))
-        apply_yes_no(Extras.TAKEAWAY, item, feature.get("takeaway"))
-
-        yield from self.parse_item(item, feature)
 
     def parse_auth_token(self, response):
         auth_token = response.json()["token"]
