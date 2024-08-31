@@ -1,32 +1,36 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Iterable
 
-# from locations.categories import Extras, apply_yes_no
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
-# To use this store finder, specify the brand/application key using
-# the "app_key" attribute of this class. You may need to define a
-# parse_item function to extract additional location data and to
-# make corrections to automatically extracted location data.
-# Ensure you specify the base_url; typically the storefinder url, so you can generate website deep links.
+# To use this store finder, specify the brand/application key using the
+# "app_key" attribute of this class. Also specify a 'base_url' value which
+# is prefixed to store identifiers to generate a website field value for each
+# extracted feature.
+#
+# If required, override the 'parse_item' method to extract additional location
+# data or to clean up and modify extracted data.
 
 
 class SylinderSpider(Spider):
     dataset_attributes = {"source": "api", "api": "api.ngadata.no"}
-    app_key = ""
-    base_url = None
+    app_key: str = None
+    base_url: str = None
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         if self.base_url is None:
-            self.logger.warning("Specify self.base_url to detect websites")
+            self.logger.warning("Specify self.base_url to allow extraction of website values for each feature.")
         yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info?chainId={self.app_key}")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response) -> Iterable[Feature]:
         for location in response.json():
             yield from self.parse_location(location) or []
 
-    def parse_location(self, location):
+    def parse_location(self, location: dict) -> Iterable[Feature]:
         item = DictParser.parse(location["storeDetails"])
         item["ref"] = location["gln"]
 
@@ -62,5 +66,5 @@ class SylinderSpider(Spider):
 
         yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item
