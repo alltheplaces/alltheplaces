@@ -27,7 +27,6 @@ class StoreRocketSpider(Spider):
 
         for location in response.json()["results"]["locations"]:
             self.pre_process_data(location)
-
             item = DictParser.parse(location)
 
             item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))

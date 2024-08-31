@@ -14,7 +14,7 @@ class LaHalleFRSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(restrict_xpaths='//div[@id="store-locator-home-departements"]')),
         Rule(LinkExtractor(restrict_xpaths='//a[@class="store-details-link"]'), callback="parse_sd"),
     ]
-    wanted_types = [["LocalBusiness", "ClothingStore"]]
+    wanted_types = ["LocalBusiness", "ClothingStore"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if script := response.xpath('//script[contains(text(), "env_template")]/text()').get():
