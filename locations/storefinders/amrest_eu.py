@@ -1,5 +1,5 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response, JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -96,7 +96,7 @@ class AmrestEUSpider(Spider):
 
         yield from self.parse_item(item, location)
 
-    def parse_item(self, item: Feature, location: dict):
+    def post_process_item(self, item: Feature, response: Response, location: dict):
         yield item
 
     @staticmethod
