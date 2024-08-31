@@ -3,8 +3,8 @@ import chompjs
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class DunnsZASpider(JSONBlobSpider):
-    name = "dunns_za"
+class DunnsSpider(JSONBlobSpider):
+    name = "dunns"
     start_urls = ["https://amaicdn.com/storelocator-prod/wtb/dunnssa-1724934424.js"]
     item_attributes = {"brand": "Dunns", "brand_wikidata": "Q116619823"}
 
