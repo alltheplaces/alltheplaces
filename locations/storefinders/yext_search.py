@@ -47,6 +47,14 @@ class YextSearchSpider(Spider):
 
             item["website"] = location["profile"].get("websiteUrl", "").split("?", 1)[0]
 
+            phones = []
+            for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
+                phone = location["profile"].get(phone_type)
+                if phone:
+                    phones.append(phone.get("number"))
+            if len(phones) > 0:
+                item["phone"] = "; ".join(phones)
+
             emails = location["profile"].get("emails")
             if emails:
                 item["email"] = emails[0]
