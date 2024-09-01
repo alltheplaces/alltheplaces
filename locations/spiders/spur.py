@@ -31,6 +31,7 @@ class SpurSpider(CrawlSpider):
     no_refs = True
 
     def process_results(self, response, results):
+        # Doing this rather than sitemap because the sitemap only had ZA locations, not other countries
         yield from results
         if (next_url := response.xpath('.//a[@class="paginator-next active"]/@href').get()) is not None:
             yield response.follow(self.base_url + next_url)
