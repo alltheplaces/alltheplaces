@@ -14,7 +14,7 @@ class DominosPizzaGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.dominos.co.uk/pizza-near-me/sitemap.xml"]
     sitemap_rules = [
         (
-            r"https:\/\/www\.dominos\.co\.uk\/pizza-near-me\/[-.\w]+\/?\d+?\/([-.\w]+)$",
+            r"https:\/\/www\.dominos\.co\.uk\/pizza-near-me\/[-.\w]+\/([\/-.\w]+)$",
             "parse_sd",
         )
     ]
