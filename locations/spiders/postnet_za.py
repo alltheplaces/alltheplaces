@@ -21,6 +21,7 @@ class PostnetZASpider(Spider):
             item["branch"] = location["store_name"]
             item["street_address"] = location["physical_address"]
             item["city"] = location["town"]
+            item["state"] = location["region"]
             item["postcode"] = location["postal_code"]
             item["phone"] = location["telephone"]
             item["email"] = location["email"]

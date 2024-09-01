@@ -21,13 +21,17 @@ from locations.items import Feature
 # are passed, item (an ATP "Feature" class) and location (a Scrapy
 # "Selector" class that has selected the XML node for a particular
 # location).
+#
+# Note that some variants of this spider exist, where a url such as
+# https://flippinpizza.com/wp-content/uploads/ssf-wp-uploads/ssf-data.json
+# is available.
 
 
 class SuperStoreFinderSpider(Spider):
     """
-    Specify either:
-    - start_urls
-    - domain
+    To use, specify:
+      - `start_urls`: mandatory parameter if `allowed_domains` is unspecified
+      - `allowed_domains`: mandatory parameter if `start_urls` is unspecified
     """
 
     def start_requests(self):

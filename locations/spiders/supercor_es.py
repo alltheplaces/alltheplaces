@@ -23,6 +23,10 @@ class SupercorESSpider(JSONBlobSpider):
         if location["abierto"] != "1":
             return
 
+        # Coordinates are switched
+        item["lat"] = location["coordenadax"]
+        item["lon"] = location["coordenaday"]
+
         # Create a reference ID from the store address as this is the most
         # permanent identifier available to be used.
         item["ref"] = sha1(location["direccion"].encode("UTF-8")).hexdigest()

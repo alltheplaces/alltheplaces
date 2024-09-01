@@ -4,11 +4,13 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
     name = "livique_ch"
     brands = {
+        "Import Parfumerie": "Q1660352",
         "Livique": "Q15851221",
         "Lumimart": "Q111722218",
     }
@@ -16,26 +18,35 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.livique.ch/sitemap.xml"]
     sitemap_follow = ["/STORE-"]
     sitemap_rules = [(r"https://www\.[Ll]ivique\.ch/de/standorte/", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
+    wanted_types = ["Store"]
     search_for_phone = False
+    user_agent = BROWSER_DEFAULT
+    requires_proxy = True  # Data centre IP ranges appear to be blocked.
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        name = item["name"]
-        brand = name.split()[0].title()
-        brand_wikidata = self.brands[brand]
-        branch = " ".join(name.split()[1:])
+        for brand_name, brand_wikidata in self.brands.items():
+            if item["name"].title().startswith(brand_name):
+                item["brand"] = brand_name
+                item["brand_wikidata"] = brand_wikidata
+                item["branch"] = item["name"].title().removeprefix(brand_name).strip()
+                item.pop("name", None)
+                break
+        if not item.get("brand"):
+            self.logger.error(
+                "Could not parse brand from store title: {}. Perhaps this is a new brand?".format(item["name"])
+            )
 
-        item["brand"] = item["name"] = brand
-        item["brand_wikidata"] = brand_wikidata
         item["country"] = "CH"
-        item["branch"] = branch
         item["image"] = self.cleanup_image(item["image"])
-        item["lat"], item["lon"] = self.parse_lat_lon(response)
-        item["opening_hours"] = self.parse_hours(response)
         item["phone"] = self.cleanup_phone(item["phone"])
         item["ref"] = item["ref"].split("/")[-1].replace("_pos", "")
         item["street_address"] = self.cleanup_street(item["street_address"])
         item["website"] = item["website"].replace("_pos", "_POS")
+
+        if hours_string := ", ".join(filter(None, ld_data.get("openingHours", []))):
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_DE)
+
         yield item
 
     @staticmethod
@@ -52,19 +63,3 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
     @staticmethod
     def cleanup_street(street):
         return street.replace("\u00a0", " ")  # non-breaking space -> space
-
-    @staticmethod
-    def parse_hours(response):
-        oh = OpeningHours()
-        for o in response.xpath("//time/@datetime").extract():
-            m = re.match(r"^([A-Z][a-z]), (\d{2}:\d{2})-(\d{2}:\d{2})$", o)
-            if m:
-                day, open_time, close_time = m.groups()
-                oh.add_range(DAYS_DE.get(day), open_time, close_time)
-        return oh.as_opening_hours()
-
-    @staticmethod
-    def parse_lat_lon(response):
-        lat = response.xpath("//meta[@itemprop='latitude']/@content").extract()
-        lon = response.xpath("//meta[@itemprop='longitude']/@content").extract()
-        return (lat[0], lon[0]) if lat and lon else (None, None)
