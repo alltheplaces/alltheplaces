@@ -8,6 +8,7 @@ class FishawaysZASpider(YextSearchSpider):
     host = "https://location.fishaways.co.za"
 
     def parse_item(self, location, item):
+        item["branch"] = location["profile"].get("geomodifier")
         apply_yes_no(Extras.DELIVERY, item, location["profile"].get("c_delivery"))
         item["extras"]["website:menu"] = location["profile"].get("menuUrl")
         yield item
