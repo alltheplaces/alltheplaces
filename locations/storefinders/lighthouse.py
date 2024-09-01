@@ -54,7 +54,9 @@ class LighthouseSpider(Spider):
                 .get("")
                 .strip()
             )
-            item["addr_full"] = clean_address(location.xpath('(.//*[contains(@class, "address-one")])[1]//text()').getall())
+            item["addr_full"] = clean_address(
+                location.xpath('(.//*[contains(@class, "address-one")])[1]//text()').getall()
+            )
 
             item["phone"] = location.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
             if not item["phone"]:
