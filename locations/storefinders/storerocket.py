@@ -36,6 +36,7 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
             return
 
         for location in response.json()["results"]["locations"]:
+            self.pre_process_data(location)
             item = DictParser.parse(location)
 
             item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))
@@ -58,3 +59,6 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

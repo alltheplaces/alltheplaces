@@ -1,5 +1,5 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.categories import Extras, apply_yes_no
@@ -146,9 +146,9 @@ class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
             apply_yes_no(Extras.OUTDOOR_SEATING, item, location.get("garden"), False)
             apply_yes_no(Extras.WIFI, item, "wifi" in extra_features, False)
 
-        yield from self.parse_item(item, location)
+        yield from self.post_process_item(item, response, location)
 
-    def parse_item(self, item: Feature, location: dict):
+    def post_process_item(self, item: Feature, response: Response, location: dict):
         yield item
 
     @staticmethod

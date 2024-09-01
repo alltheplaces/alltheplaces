@@ -94,7 +94,6 @@ class BashZASpider(Spider):
             ]:
                 continue
             item = DictParser.parse(location)
-            item["name"] = item.pop("name").replace("Sportcene", "Sportscene")
             item["lat"] = location["address"]["location"]["latitude"]
             item["lon"] = location["address"]["location"]["longitude"]
             item.pop("street")
@@ -118,5 +117,14 @@ class BashZASpider(Spider):
 
             if m := self.brand_name_regex.match(item["name"]):
                 item.update(BASH_BRANDS[m.group(1).upper()])
+                item["branch"] = (
+                    item["name"]
+                    .replace(self.brand_name_regex.match(item["name"]).group(1), "")
+                    .replace("Sportcene", "")
+                    .strip()
+                )
+            else:
+                item["branch"] = item["name"]
+            item.pop("name")
 
             yield item

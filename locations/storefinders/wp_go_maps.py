@@ -33,8 +33,6 @@ from locations.items import Feature
 
 class WpGoMapsSpider(Spider, AutomaticSpiderGenerator):
     map_id: int = None
-    length: int = 10000
-    start: int = 0
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-json\/wpgmza\/v1\/features\/"

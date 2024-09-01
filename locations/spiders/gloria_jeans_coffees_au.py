@@ -1,8 +1,9 @@
-import html
+from html import unescape
+from typing import Iterable
 
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 
-from locations.geo import city_locations
+from locations.hours import DAYS_EN
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
@@ -10,14 +11,12 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 class GloriaJeansCoffeesAUSpider(WPStoreLocatorSpider):
     name = "gloria_jeans_coffees_au"
     item_attributes = {"brand": "Gloria Jean's Coffees", "brand_wikidata": "Q2666365"}
-    time_format = "%I:%M %p"
+    start_urls = ["https://www.gloriajeanscoffees.com.au/wp/wp-admin/admin-ajax.php?action=store_search"]
+    iseadgg_countries_list = ["AU"]
+    search_radius = 50
+    max_results = 50
+    days = DAYS_EN
 
-    def start_requests(self):
-        for city in city_locations("AU", 100000):
-            yield JsonRequest(
-                url=f'https://www.gloriajeanscoffees.com.au/wp/wp-admin/admin-ajax.php?action=store_search&lat={city["latitude"]}&lng={city["longitude"]}&autoload=1'
-            )
-
-    def parse_item(self, item: Feature, location: dict, **kwargs):
-        item["name"] = html.unescape(location["store"])
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["name"] = unescape(feature["store"])
         yield item

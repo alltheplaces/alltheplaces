@@ -22,7 +22,7 @@ class RioSeoSpider(Spider, AutomaticSpiderGenerator):
         `?template=search&level=search`
       - `template`: mandatory parameter, should be either "domain" or "search"
       - `radius`: optional parameter, default value is 10000
-      - `limit`: optional parameter, default valus is 3000
+      - `limit`: optional parameter, default valus is 10000
     """
 
     dataset_attributes = {"source": "api", "api": "rio_seo"}

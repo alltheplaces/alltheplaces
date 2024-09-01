@@ -27,6 +27,7 @@ class DictParser:
         "branch-id",
         "BranchID",
         "branchID",
+        "branch-code",
     ]
 
     name_keys = [
@@ -39,6 +40,7 @@ class DictParser:
         "item-name",
         "location-name",
         "loc-name",
+        "branch-name",
         # ES
         "nombre",
     ]
@@ -182,7 +184,10 @@ class DictParser:
         "contact-phone",
         "store-phone",
         "primary-phone",
+        "primaryNumber",
         "main-phone",
+        "branch-phone",
+        "branch-telephone",
         # ES
         "telefono",  # "phone"
     ]
@@ -196,6 +201,7 @@ class DictParser:
         "yext-display-lat",
         "map-latitude",
         "geo-lat",
+        "GPSLat",
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
@@ -212,6 +218,7 @@ class DictParser:
         "yext-display-lng",
         "map-longitude",
         "geo-lng",
+        "GPSLong",
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",

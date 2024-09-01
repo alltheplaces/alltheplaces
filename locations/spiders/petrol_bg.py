@@ -1,6 +1,10 @@
 import re
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
@@ -9,12 +13,12 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
     item_attributes = {"brand": "Petrol", "brand_wikidata": "Q24315"}
     allowed_domains = ["www.petrol.bg"]
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if m := re.match(r"^(\d+) (.+)$", item["name"]):
             item["ref"] = m.group(1)
             item["name"] = m.group(2)
 
-        categories = (location["categories"] or "").split(",")
+        categories = (feature["categories"] or "").split(",")
         if "31" in categories:
             charging_station_item = item.deepcopy()
             charging_station_item["ref"] = item.get("ref") + "-charging-station"
