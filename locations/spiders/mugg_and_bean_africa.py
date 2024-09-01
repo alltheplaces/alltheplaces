@@ -17,4 +17,6 @@ class MuggAndBeanAfricaSpider(YextSearchSpider):
             apply_yes_no(PaymentMethods.DEBIT_CARDS, item, "Card" in payment_methods, False)
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "Card" in payment_methods, False)
             apply_yes_no(PaymentMethods.MPESA, item, "Mpesa" in payment_methods, False)
+        if item["website"] == "https://location.muggandbean.africa/kenya":
+            item["website"] = location["profile"]["c_pagesURL"]
         yield item
