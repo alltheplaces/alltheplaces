@@ -13,11 +13,7 @@ class PizzaHutCZSpider(AmrestEUSpider):
     api_auth_source = "WEB_PH"
     api_channel = "TAKEAWAY"
 
-<<<<<<< HEAD
-    def parse_item(self, item, location):
-=======
     def post_process_item(self, item, response, location):
->>>>>>> master
         item["branch"] = item.pop("name").removeprefix("Pizza Hut ")
         item["website"] = (
             "https://pizzahut.cz/en/restaurants/"

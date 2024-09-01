@@ -202,17 +202,17 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
             item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address2")])
             item["name"] = feature["store"]
 
-            if location.get("hours"):
+            if feature.get("hours"):
                 # If we have preconfigured the exact days to use, start there
                 if self.days is not None:
-                    item["opening_hours"] = self.parse_opening_hours(location, self.days)
+                    item["opening_hours"] = self.parse_opening_hours(feature, self.days)
                 else:
                     # Otherwise, iterate over the possibilities until we get a first match
                     self.logger.warning(
                         "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
                     )
                     for days in self.possible_days:
-                        item["opening_hours"] = self.parse_opening_hours(location, days)
+                        item["opening_hours"] = self.parse_opening_hours(feature, days)
                         if item["opening_hours"] is not None:
                             self.days = days
                             break
