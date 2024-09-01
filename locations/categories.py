@@ -542,6 +542,7 @@ class PaymentMethods(Enum):
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
     MIR = "payment:mir"
+    MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
     PAYPAY = "payment:paypay"
