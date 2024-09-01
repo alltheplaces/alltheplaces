@@ -1,10 +1,12 @@
 from typing import Iterable
+
 <<<<<<< HEAD
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
+
 =======
 
 from scrapy import Spider

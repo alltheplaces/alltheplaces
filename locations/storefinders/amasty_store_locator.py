@@ -28,6 +28,7 @@ class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     overriding the pre_process_data and/or post_process_item functions of this
     spider.
     """
+
     detection_rules = [
         DetectionRequestRule(url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/amlocator\/index\/ajax\/?"),
         DetectionRequestRule(

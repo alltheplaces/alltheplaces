@@ -22,6 +22,7 @@ class AheadworksSpider(Spider, AutomaticSpiderGenerator):
     method can be overridden if changes to extracted data is necessary, for
     example, to clean up location names.
     """
+
     detection_rules = [
         DetectionResponseRule(
             url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+).*)$",
