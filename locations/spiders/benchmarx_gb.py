@@ -11,13 +11,10 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class BenchmarxGBSpider(Spider):
     name = "benchmarx_gb"
     item_attributes = {"brand": "Benchmarx", "brand_wikidata": "Q102181127"}
-    start_urls = ["https://api.live.benchmarxkitchens.co.uk/locations?pagination=false&locationPageStatus=active"]
+    start_urls = ["https://api.live.benchmarxkitchens.co.uk/locations?locationPageStatus=active"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["hydra:member"]:
-            if location["slug"] == "test-location":
-                continue
-
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = merge_address_lines(
@@ -28,7 +25,9 @@ class BenchmarxGBSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day, times in location["openingHours"].items():
-                if item.get("opening") and item.get("closing"):
-                    item["opening_hours"].add_range(day, times["opening"], times["closing"])
+                item["opening_hours"].add_range(day, times["opening"], times["closing"])
 
             yield item
+
+        if next_page := response.json()["hydra:view"].get("hydra:next"):
+            yield response.follow(next_page)
