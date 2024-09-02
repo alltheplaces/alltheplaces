@@ -22,7 +22,7 @@ class CapitecBankZASpider(JSONBlobSpider):
     def start_requests(self):
         # Maximum returned is 100, even with larger "Take"
         # Even with 48km radius, not all locations are returned, and it is making over 260 requests
-        for lat, lon in country_iseadgg_centroids("ZA", 24):
+        for lat, lon in country_iseadgg_centroids("ZA", 48):
             yield Request(
                 url="https://www.capitecbank.co.za/api/Branch",
                 body=f"Latitude={lat}&Longitude={lon}&Take=100",
