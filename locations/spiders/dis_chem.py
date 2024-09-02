@@ -33,11 +33,14 @@ class DisChemSpider(CrawlSpider):
             yield response.follow(next_url)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        title = response.xpath('.//h1[@class="page-title store-title"]/span/text()').get()
+        if "search results" in title.lower():
+            return
         item = Feature()
         item["addr_full"] = clean_address(
             response.xpath('.//div[@class="store-detail-block shop-contact-address"]/text()').get().split("Y:")[0]
         )
-        item["branch"] = response.xpath('.//h1[@class="page-title store-title"]/span/text()').get()
+        item["branch"] = title
         item["phone"] = response.xpath('.//div[contains(@class, "phone-number")]/div/span/text()').get()
         item["website"] = response.url
         extract_google_position(item, response)
