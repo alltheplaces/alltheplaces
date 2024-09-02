@@ -2,7 +2,6 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -12,7 +11,9 @@ class MilliesGBSpider(Spider):
     name = "millies_gb"
     item_attributes = {"brand": "Millie's", "brand_wikidata": "Q1935533"}
     allowed_domains = ["www.milliescookies.com"]
-    start_urls = ["https://www.milliescookies.com/api/n/bundle?requests=[{%22type%22:%22store%22,%22filter%22:{},%22verbosity%22:1,%22action%22:%22find%22,%22children%22:[{%22_reqId%22:0}]}]"]
+    start_urls = [
+        "https://www.milliescookies.com/api/n/bundle?requests=[{%22type%22:%22store%22,%22filter%22:{},%22verbosity%22:1,%22action%22:%22find%22,%22children%22:[{%22_reqId%22:0}]}]"
+    ]
 
     def parse(self, response):
         for location in response.json()["catalog"]:
