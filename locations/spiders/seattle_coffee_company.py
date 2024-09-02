@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class SeattleCoffeeCompanySpider(SitemapSpider):
-    download_delay = 0.2
     name = "seattle_coffee_company"
     item_attributes = {"brand": "Seattle Coffee Company", "brand_wikidata": "Q116646221"}
     sitemap_urls = [
