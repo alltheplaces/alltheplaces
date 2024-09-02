@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
+
 class ChargeUpSpider(scrapy.Spider):
     name = "charge_up"
     item_attributes = {"brand": "ChargeUp", "brand_wikidata": "Q109066768"}
@@ -32,7 +33,7 @@ class ChargeUpSpider(scrapy.Spider):
         yield JsonRequest(
             url="https://app.chargeup.cz/chargingPlace/listWithinPolygon",
             data={
-                "criteria": {"connectors": [], "onlyAvailable": False, "dataSources": ['chargeup'], "powerFrom": 0},
+                "criteria": {"connectors": [], "onlyAvailable": False, "dataSources": ["chargeup"], "powerFrom": 0},
                 "northEast": {"lat": 90, "lng": 180},
                 "southWest": {"lat": -90, "lng": -180},
             },
@@ -57,7 +58,7 @@ class ChargeUpSpider(scrapy.Spider):
         station = result["chargingStation"]
         item = Feature()
 
-        evse = [evseId for point in station["chargingPoints"] if (evseId := point['evseId']) is not None]
+        evse = [evseId for point in station["chargingPoints"] if (evseId := point["evseId"]) is not None]
         evse.sort()
         connectors = {}
         for connector in [point["connectors"]["types"][0] for point in station["chargingPoints"]]:
@@ -110,20 +111,36 @@ class ChargeUpSpider(scrapy.Spider):
 
         charge = []
         for point in station["chargingPoints"]:
-            if point['priceForEnergy'] and point['priceForEnergy']['price'] > 0:
-                charge.append(("%s %s/%s") % (point['priceForEnergy']['price'], point['priceForEnergy']['currency'], point['priceForEnergy']['unit']))
-            if point['priceForChargingTime'] and point['priceForChargingTime']['price'] > 0:
-                charge.append(("%s %s/%s") % (point['priceForChargingTime']['price'], point['priceForChargingTime']['currency'], point['priceForChargingTime']['unit']))
+            if point["priceForEnergy"] and point["priceForEnergy"]["price"] > 0:
+                charge.append(
+                    ("%s %s/%s")
+                    % (
+                        point["priceForEnergy"]["price"],
+                        point["priceForEnergy"]["currency"],
+                        point["priceForEnergy"]["unit"],
+                    )
+                )
+            if point["priceForChargingTime"] and point["priceForChargingTime"]["price"] > 0:
+                charge.append(
+                    ("%s %s/%s")
+                    % (
+                        point["priceForChargingTime"]["price"],
+                        point["priceForChargingTime"]["currency"],
+                        point["priceForChargingTime"]["unit"],
+                    )
+                )
         if charge:
             item["extras"]["fee"] = "yes"
             item["extras"]["charge"] = ";".join(sorted(set(charge)))
 
-        if 'chargingStationImages' in station and station['chargingStationImages']:
+        if "chargingStationImages" in station and station["chargingStationImages"]:
             for image in station["chargingStationImages"]:
-                if 'id' in image:
-                    item["image"] = ("https://app.chargeup.cz/portal/getImage?%s") % (urlencode({"id": image["id"], "providerId": result["providerId"]}))
+                if "id" in image:
+                    item["image"] = ("https://app.chargeup.cz/portal/getImage?%s") % (
+                        urlencode({"id": image["id"], "providerId": result["providerId"]})
+                    )
 
-        phone = [phone for point in station["chargingPoints"] if (phone := point['techSupportPhoneNumber']) is not None]
+        phone = [phone for point in station["chargingPoints"] if (phone := point["techSupportPhoneNumber"]) is not None]
         item["phone"] = ";".join(sorted(set(phone)))
 
         apply_category(Categories.CHARGING_STATION, item)
