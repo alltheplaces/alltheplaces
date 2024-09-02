@@ -19,7 +19,10 @@ class DunkinPESpider(Spider):
 
     def parse(self, response, **kwargs):
         token = re.search(r"sessionToken:\"(\w+)\"", response.text)
-        yield JsonRequest(
+       if token is None:
+           return
+           
+       yield JsonRequest(
             url="https://amyseo5s3g.execute-api.us-east-1.amazonaws.com/pro/api/stores/tags",
             headers={"x-api-key": "khvA1yr24D8ilyeHKLfpF6ICDiKyGaU1912fcDO9"},
             data={"section": "locales", "session_token": token.group(1)},
