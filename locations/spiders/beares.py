@@ -4,11 +4,11 @@ from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 BEARES_COUNTRIES = {
-    "101": "Botswana",
-    "155": "Lesotho",
-    "182": "Namibia",
-    "73": "South Africa",
-    "219": "Swaziland",
+    "101": "BW",
+    "155": "LS",
+    "182": "NA",
+    "73": "ZA",
+    "219": "SZ",
 }
 
 
@@ -32,6 +32,8 @@ class BearesSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["branch"] = location.get("StoreLocatorName")
         item["country"] = BEARES_COUNTRIES.get(location["CountryId"])
+        if item["postcode"] in ["9000", "9999"] and item["country"] != "ZA":
+            item.pop("postcode")
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string("Mon-Fri " + location.get("TradingMonFri"))
         item["opening_hours"].add_ranges_from_string("Sat " + location.get("TradingSat"))
