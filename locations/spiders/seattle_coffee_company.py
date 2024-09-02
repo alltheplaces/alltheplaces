@@ -5,17 +5,19 @@ from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
 
-class SeattleCoffeeZASpider(SitemapSpider):
-    name = "seattle_coffee_za"
+class SeattleCoffeeCompanySpider(SitemapSpider):
+    download_delay = 0.2
+    name = "seattle_coffee_company"
     item_attributes = {"brand": "Seattle Coffee Company", "brand_wikidata": "Q116646221"}
     sitemap_urls = [
         "https://www.seattlecoffeecompany.co.za/sitemap_index.xml",
     ]
     sitemap_follow = ["store"]
+    skip_auto_cc_domain = True
 
     def parse(self, response, **kwargs):
         item = Feature()
-        item["name"] = response.xpath("//title/text()").get().strip()
+        item["branch"] = response.xpath("//title/text()").get().replace(self.item_attributes["brand"], "").strip("- ")
         item["addr_full"] = response.xpath('//*[contains(@class,"jet-listing-dynamic-field__content")]/text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
