@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 
 
-class BNPParibasFortisBESpider(scrapy.Spider):
+class BnpParibasFortisBESpider(scrapy.Spider):
     name = "bnp_paribas_fortis_be"
     item_attributes = {"brand": "BNP Paribas Fortis", "brand_wikidata": "Q796827"}
     start_urls = ["https://branch.bnpparibasfortis.be/engineV2/?enc=json&crit=agence&ag=allpoi"]
