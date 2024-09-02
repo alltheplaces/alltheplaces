@@ -21,7 +21,7 @@ class BradlowsSpider(JSONBlobSpider):
         if location["virtual_store"] == "1" or location["store_closed"] == "1":
             return
         item["branch"] = item.pop("name")
-        item["website"] = f"https://www.bradlows.co.za/storelocator/store/index/id/{item["ref"]}"
+        item["website"] = f"https://www.bradlows.co.za/storelocator/store/index/id/{item['ref']}"
         item["country"] = location["country_id"]
         item["opening_hours"] = OpeningHours()
         try:
