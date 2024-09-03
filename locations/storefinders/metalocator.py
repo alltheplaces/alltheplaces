@@ -1,13 +1,14 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 # API documentation available at:
 # https://admin.metalocator.com/components/com_locator/assets/documents/api/classes/LocatorControllerAPI.html#method_search
 #
-# To use this spider, specify a brand_id (Itemid in API URLs)
+# To use this spider, specify a brand_id (Itemid in API URLs).
 
 
 class MetaLocatorSpider(Spider):
@@ -18,7 +19,7 @@ class MetaLocatorSpider(Spider):
     def start_requests(self):
         yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&limit=100000")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         for location in response.json():
             self.pre_process_data(location)
 
@@ -30,7 +31,7 @@ class MetaLocatorSpider(Spider):
                 item["opening_hours"].add_ranges_from_string(location["hours"].replace("|", " "))
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
 
     def pre_process_data(self, location, **kwargs):

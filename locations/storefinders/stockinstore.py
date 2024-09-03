@@ -1,13 +1,15 @@
 from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 # To use this store locator, you need to determine whether the brand
 # is using:
 # 1. Widget to locate stores on a map
-#    * Calls https://stockinstore.net/stores/getAllStores
+#    * Calls https://stockinstore.net/stores/getAllStoresLimited
+#    * or calls https://stockinstore.net/stores/getAllStores
 # 2. Widget to find stock available in nearby stores
 #    * Calls https://stockinstore.net/stores/getStoresForWidget
 #    * or calls https://stockinstore.net/stores/getStoresStock
@@ -26,10 +28,10 @@ from locations.hours import OpeningHours
 
 class StockInStoreSpider(Spider):
     dataset_attributes = {"source": "api", "api": "stockinstore.com"}
-    api_site_id = None
-    api_widget_id = None
-    api_widget_type = None
-    api_origin = None
+    api_site_id: str = None
+    api_widget_id: str = None
+    api_widget_type: str = None
+    api_origin: str = None
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
@@ -50,7 +52,7 @@ class StockInStoreSpider(Spider):
             formdata=data,
         )
 
-    def parse(self, response):
+    def parse(self, response: Response):
         for location in response.json()["response"]["stores_list"]:
             self.pre_process_data(location)
 
@@ -64,7 +66,7 @@ class StockInStoreSpider(Spider):
                 item["opening_hours"].add_range(day_name, hours["open"], hours["close"], "%I:%M%p")
             yield from self.parse_item(item, location)
 
-    def parse_item(self, item, location: {}, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
 
     def pre_process_data(self, location, **kwargs):

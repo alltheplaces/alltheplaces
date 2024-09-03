@@ -1,7 +1,8 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # This is an undocumented application forming part of the ShopApps
 # suite of Shopify apps mentioned at https://shopapps.in/
@@ -13,7 +14,7 @@ from locations.dict_parser import DictParser
 
 class ShopAppsSpider(Spider):
     dataset_attributes = {"source": "api", "api": "shopapps.site"}
-    key = ""
+    key: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
@@ -21,7 +22,7 @@ class ShopAppsSpider(Spider):
             url=f"https://stores.shopapps.site/front-end/get_surrounding_stores.php?shop={self.key}&latitude=0&longitude=0&max_distance=0&limit=10000"
         )
 
-    def parse(self, response):
+    def parse(self, response: Response):
         for location in response.json()["stores"]:
             self.pre_process_data(location)
 
@@ -32,7 +33,7 @@ class ShopAppsSpider(Spider):
             item["state"] = location.get("prov_state")
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
 
     def pre_process_data(self, location, **kwargs):
