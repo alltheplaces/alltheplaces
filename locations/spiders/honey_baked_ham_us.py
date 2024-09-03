@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -49,6 +49,8 @@ class HoneyBakedHamUSSpider(Spider):
             for day_hours in attributes["storeHours"]:
                 if day_hours["closed"]:
                     continue
-                item["opening_hours"].add_range(days_from_sunday[day_hours["dayOfTheWeek"]], day_hours["openTime"], day_hours["closeTime"])
+                item["opening_hours"].add_range(
+                    days_from_sunday[day_hours["dayOfTheWeek"]], day_hours["openTime"], day_hours["closeTime"]
+                )
 
             yield item
