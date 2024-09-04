@@ -25,7 +25,7 @@ presence of a common storefinder from either:
 To automatically attempt to detect a storefinder, pass in a start URL - either the top level domain, or
 the specific store page.
 Hint: You may wish to use the `pipenv run scrapy links http://example.com/` command to automatically look for
-probably storefinder pages if you are reviewing a number of top level domains.
+probable storefinder pages if you are reviewing a number of top level domains.
 
 Example:
 ```
