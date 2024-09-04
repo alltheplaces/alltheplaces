@@ -14,7 +14,6 @@ class StarbucksSGSpider(scrapy.Spider):
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
     }
-    requires_proxy = True
 
     def start_requests(self):
         yield JsonRequest(
