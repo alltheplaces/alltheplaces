@@ -14,7 +14,7 @@ When checking a large number of URLs, these tools can be chained together to hig
 
 Alltheplaces has a number of key storefinders which gather together common functionality.
 
-Going one step further, many of these store finders build in the capabilities to automatically detect the 
+Going one step further, many of these store finders build in the capabilities to automatically detect the
 presence of a common storefinder from either:
 
 - Request patterns made to API endpoints or
@@ -42,7 +42,7 @@ class SaveOnFoodsCASpider(StorefrontgatewaySpider):
     ]
 ```
 
-This tool will attempt to generate a useful class name, spider key name, and 
+This tool will attempt to generate a useful class name, spider key name, and
 all other attributes to get you started; however you should still run and adjust the generated code
 before opening a pull request.
 
@@ -87,5 +87,5 @@ In general, the detection rules attempt to not only detect a telltale pattern; b
 
 See `locations.automatic_spider_generator` for the full possibilities of the API.
 
-Once you have a pattern you think is right; add your newly empowered storefinder to `StorefinderDetectorSpider`'s lists of 
+Once you have a pattern you think is right; add your newly empowered storefinder to `StorefinderDetectorSpider`'s lists of
 automatic detections to attempt.
