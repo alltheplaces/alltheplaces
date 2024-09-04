@@ -60,7 +60,7 @@ For example, `pipenv run scrapy genspider my_spider_name http://example.com/robo
 
 ## Adding autodetection to a storefinder
 
-If you have identified a reliable pattern, to add auto detection use one or more of:
+If you have identified a reliable pattern and are creating a storefinder, to add auto detection use one or more of:
 
 - DetectionRequestRule
 - DetectionResponseRule
