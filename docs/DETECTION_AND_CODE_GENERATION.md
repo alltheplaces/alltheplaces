@@ -42,7 +42,7 @@ class SaveOnFoodsCASpider(StorefrontgatewaySpider):
     ]
 ```
 
-This tool will attempt to generate a useful class name, spider key name, and
+This tool will attempt to generate a useful class name, spider key name, by resolving the URL to many wikidata or name suggestion index entries it can. It will also extract
 all other attributes to get you started; however you should still run and adjust the generated code
 before opening a pull request.
 
