@@ -1,0 +1,28 @@
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.structured_data_spider import StructuredDataSpider
+from locations.categories import Categories
+
+
+class $classname(CrawlSpider, StructuredDataSpider):
+    name = "$name"
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+        # "extras": Categories.SHOP_XYZ.value
+    }
+    allowed_domains = ["$domain"]
+    start_urls = ["$url"]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"YOUR URL PATTERN HERE"),
+            follow=True,
+        ),
+    ]
+
+    def post_process_item(self, item, response, ld_data):
+        yield item

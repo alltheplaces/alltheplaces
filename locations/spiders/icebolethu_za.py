@@ -3,7 +3,6 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.settings import ITEM_PIPELINES
 
 ICEBOLETHU_CATEGORIES = {"branches": Categories.SHOP_FUNERAL_DIRECTORS, "mortuaryinformation": Categories.MORTUARY}
 
@@ -13,36 +12,38 @@ class IcebolethuZASpider(Spider):
     item_attributes = {"brand": "Icebolethu Funerals", "brand_wikidata": "Q122594408"}
     allowed_domains = ["www.icebolethugroup.co.za"]
     start_urls = ["https://www.icebolethugroup.co.za/contact/"]
-    custom_settings = {
-        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None}
-    }
     no_refs = True
 
     def parse(self, response):
         for id in ICEBOLETHU_CATEGORIES:
             for location in response.xpath(f'//*[@id="{id}"]//*[@class="question"]'):
-                properties = {
-                    "name": location.xpath('.//*[@class="title wpb_toggle"]/text()').get(),
-                    "phone": location.xpath('.//*[@class="wpb_toggle_content answer"]/p/text()').get(),
-                }
+                item = Feature()
+                name_or_branch = location.xpath('.//*[@class="title wpb_toggle"]/text()').get()
+                if id == "branches":
+                    item["branch"] = name_or_branch
+                else:
+                    item["name"] = name_or_branch
 
-                info = location.xpath('string(.//*[@class="wpb_toggle_content answer"])').get().split("\n")
+                info = [
+                    detail.strip()
+                    for detail in location.xpath('.//*[@class="wpb_toggle_content answer"]/p/text()').getall()
+                    if detail.strip() != ""
+                ]
 
-                # Free text, so typos mean this phrase may not be present
-                try:
-                    address_lines = info[1 : info.index("Open location in Google maps.")]
-                except:
-                    pass
-                properties["street_address"] = " ".join(address_lines).lstrip("Address:").strip()
+                for detail in info:
+                    if detail[0] == "0":
+                        item["phone"] = detail
+                    else:
+                        item["street_address"] = detail
 
                 # Some short maps.app.goo.gl links which can't be extracted from
                 try:
-                    properties["lat"], properties["lon"] = url_to_coords(
+                    item["lat"], item["lon"] = url_to_coords(
                         location.xpath('.//a[contains(@href, "google.com/maps")]/@href').get()
                     )
                 except:
                     pass
 
-                apply_category(ICEBOLETHU_CATEGORIES[id], properties)
+                apply_category(ICEBOLETHU_CATEGORIES[id], item)
 
-                yield Feature(**properties)
+                yield item
