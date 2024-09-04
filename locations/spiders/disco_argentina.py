@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class DiscoArgentinaSpider(scrapy.Spider):
     name = "disco_argentina"
-    item_attributes = {"brand": "Disco Argentina"}
+    item_attributes = {"brand": "Supermercados Disco", "brand_wikidata": "Q6135978"}
     allowed_domains = ["www.disco.com.ar"]
 
     def start_requests(self):
