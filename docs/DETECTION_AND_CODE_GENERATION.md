@@ -18,7 +18,7 @@ Going one step further, many of these store finders build in the capabilities to
 presence of a common software deployment from either:
 
 - Request patterns made to API endpoints or
-- Responses that contain xpath or JS Objects indicating the presence of a store locator.
+- Responses where the HTML matches xpath or creates JS Objects indicating the presence of a store locator.
 
 To automatically attempt to detection, pass in a start URL - either the top level domain, or
 the specific store page.
