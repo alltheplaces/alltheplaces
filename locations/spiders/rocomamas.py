@@ -33,12 +33,17 @@ SOCIAL_MEDIA_MAP = {
 class RocomamasSpider(JSONBlobSpider):
     name = "rocomamas"
     start_urls = ["https://rocomamas.com/api/proxy"]
+    base_url = "https://rocomamas.com/"
+    countries = ROCOMAMAS_COUNTRIES
+    brands = ROCOMAMAS_BRANDS
 
     def start_requests(self):
         for url in self.start_urls:
-            for country in ROCOMAMAS_COUNTRIES:
-                body_data = (
-                    '{"url":"restaurants?brandKey=ROCO,ROCOGO&countryCode='
+            for country in self.countries:
+                data = (
+                    '{"url":"restaurants?brandKey='
+                    + ",".join(self.brands.keys())
+                    + "&countryCode="
                     + country
                     + '&tradingStatus=Open&filterHidden=true&expand=channels","method":"GET"}'
                 )
@@ -46,7 +51,7 @@ class RocomamasSpider(JSONBlobSpider):
                     url=url,
                     headers={"Content-Type": "application/json"},
                     method="POST",
-                    body=body_data,
+                    body=data,
                 )
 
     def extract_json(self, response):
@@ -62,7 +67,7 @@ class RocomamasSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item.pop("name")
 
-        if brand_details := ROCOMAMAS_BRANDS.get(location["brand"].get("key")):
+        if brand_details := self.brands.get(location["brand"].get("key")):
             item.update(brand_details)
         else:
             self.crawler.stats.inc_value(f'atp/{self.name}/unknown_brand/{location["brand"].get("key")}')
@@ -73,11 +78,10 @@ class RocomamasSpider(JSONBlobSpider):
             item.pop("postcode")
 
         item["branch"] = location.get("displayName").replace(item.get("brand"), "").strip()
-        item[
-            "website"
-        ] = f"https://rocomamas.com/{location['countryCode']}/restaurants/{location['province']}/{location['displayName']}".lower().replace(
-            " ", "-"
+        website = (
+            f"{self.base_url}{location['countryCode']}/restaurants/{location['province']}/{location['displayName']}"
         )
+        item["website"] = website.lower().replace(" ", "-")
 
         apply_yes_no(Extras.KIDS_AREA, item, location.get("playArea"))
         apply_yes_no(Extras.WIFI, item, location.get("wireless"))
@@ -90,7 +94,7 @@ class RocomamasSpider(JSONBlobSpider):
 
         req_data = '{"url":"/restaurants/' + str(item["ref"]) + '?expand=all","method":"GET"}'
         yield JsonRequest(
-            url="https://rocomamas.com/api/proxy",
+            url=self.start_urls[0],
             headers={"Content-Type": "application/json"},
             method="POST",
             body=req_data,
