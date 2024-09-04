@@ -14,18 +14,16 @@ When checking a large number of URLs, these tools can be chained together to hig
 
 There exist numerous third-party software-as-a-service APIs or self-installed web application software which are used by brands for providing a store finder or stock finder page on brand websites. All The Places implements a "storefinder" as a generic pattern, allowing a spider for each brand to inherit this generic pattern without having to individually duplicate complex crawler code.
 
-Alltheplaces has a number of key storefinders which gather together common functionality.
-
 Going one step further, many of these store finders build in the capabilities to automatically detect the
-presence of a common storefinder from either:
+presence of a common software deployment from either:
 
 - Request patterns made to API endpoints or
 - Responses that contain xpath or JS Objects indicating the presence of a store locator.
 
-To automatically attempt to detect a storefinder, pass in a start URL - either the top level domain, or
+To automatically attempt to detection, pass in a start URL - either the top level domain, or
 the specific store page.
 Hint: You may wish to use the `pipenv run scrapy links http://example.com/` command to automatically look for
-probable storefinder pages if you are reviewing a number of top level domains.
+probable store location pages if you are reviewing a number of top level domains.
 
 Example:
 ```
