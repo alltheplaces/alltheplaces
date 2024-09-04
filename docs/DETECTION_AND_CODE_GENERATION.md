@@ -5,12 +5,14 @@
 Alltheplaces provides rudimentary tooling to inspect a site for common behaviours.
 
 * [Sitemap inspection](SITEMAP.md) - `pipenv run scrapy sitemap http://example.com/` to detect potential individual store URLs.
-* [Structured Data inspection](STRUCTURED_DATA.md) - `pipenv run scrapy sitemap http://example.com/` to detect potential individual store URLs.
+* [Structured Data inspection](STRUCTURED_DATA.md) - `pipenv run scrapy sd http://example.com/` to detect potential individual store URLs.
 * Links - `pipenv run scrapy links http://example.com/` to look for links with human language labels, such as "Find our stores".
 
 When checking a large number of URLs, these tools can be chained together to highlight potential candidates for spidering.
 
 ### Automatic detection from storefinder page
+
+There exist numerous third-party software-as-a-service APIs or self-installed web application software which are used by brands for providing a store finder or stock finder page on brand websites. All The Places implements a "storefinder" as a generic pattern, allowing a spider for each brand to inherit this generic pattern without having to individually duplicate complex crawler code.
 
 Alltheplaces has a number of key storefinders which gather together common functionality.
 
