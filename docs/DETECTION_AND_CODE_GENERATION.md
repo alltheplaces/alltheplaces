@@ -91,3 +91,33 @@ See `locations.automatic_spider_generator` for the full possibilities of the API
 
 Once you have a pattern you think is right; add your newly empowered storefinder to `StorefinderDetectorSpider`'s lists of
 automatic detections to attempt.
+
+#### Detection Rules - How do they work?
+
+Playwright with Firefox (Chromium not supported) is required and is used to load the requested URL in a Firefox headless session.
+
+The Playwright Firefox session is kept alive for 30 seconds to observe any dynamic requests made by the page after the DOM has finished loading.
+
+The Playwright Firefox session is configured to automatically deny any requests for browser permissions such as requests for geolocation. This is necessary to ensure that dynamic loading of content is not blocked by a browser permission request that is never responded to by a user.
+
+Automatic redirects are followed in the Playwright Firefox session.
+
+All detection rules are executed against all requests made in the Playwright Firefox session and all iframes which are loaded in the Playwright Firefox session.
+
+An unsuccessful detection can be caused by geoblocking, anti-bot detection and CAPTCHA challenges and blocking modal dialogs that brand websites may present requiring user interaction before the page loads. If a storefinder is not automatically detected, there could still be a storefinder in use that can be observed in a normal interactive web browser session using built-in browser debugging tools.
+
+##### Detection Behaviours 
+
+The following behaviours are supported:
+
+URL parameter extraction with PCRE named capture groups
+
+HTTP header parameter extraction with PCRE named capture group
+
+JavaScript lambda execution to return objects (after dynamic loading is complete)
+
+HTML XPATH query to extract strings from DOM objects (after dynamic loading is complete)
+
+JQ language query to extract objects from a JSON object (such as the body of a HTTP POST request)
+
+Additionally, attribute typing with use of the __list suffix is supported; as well as matching but not extracting with use of the __ prefix.
