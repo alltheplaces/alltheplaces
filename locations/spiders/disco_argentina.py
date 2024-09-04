@@ -1,46 +1,25 @@
-import json
+from scrapy import Request, Spider
 
-import scrapy
+from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
-from locations.items import Feature
 
-
-class DiscoArgentinaSpider(scrapy.Spider):
+class DiscoArgentinaSpider(Spider):
     name = "disco_argentina"
     item_attributes = {"brand": "Supermercados Disco", "brand_wikidata": "Q6135978"}
     allowed_domains = ["www.disco.com.ar"]
+    start_urls = [
+        "https://www.disco.com.ar/api/dataentities/NT/search?_fields=name,grouping,image_maps,geocoordinates,SellerName,id,country,city,neighborhood,number,postalCode,state,street,schedule,services,paymentMethods,opening,hasPickup,hasDelivery,address,url_image,phone"
+    ]
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
-        url = "https://www.disco.com.ar/Login/PreHomeService.aspx/TraerLocales"
-        headers = {
-            "Content-Type": "application/json",
-        }
-        form_data = {}
-
-        yield scrapy.http.FormRequest(
-            url=url,
-            method="POST",
-            formdata=form_data,
-            headers=headers,
-            callback=self.parse,
-        )
+        yield Request(url=self.start_urls[0], headers={"Accept": "application/json", "Rest-Range": "resources=0-999"})
 
     def parse(self, response):
-        result = response.text.replace("\\", "")
-        result = result[:5] + result[6:-2] + result[-1:]
-        data = json.loads(result)
-        ref = 0
-        for store in data["d"]["Locales"]:
-            properties = {
-                "ref": ref,
-                "name": store["Local"]["Nombre"].strip(),
-                "addr_full": store["Local"]["Direccion"].strip(),
-                "city": store["Local"]["Localidad"].strip(),
-                "state": store["Local"]["Provincia"].strip(),
-                "postcode": store["Local"]["CodigoPostal"].strip(),
-                "lat": float(store["Local"]["Latitud"].strip()),
-                "lon": float(store["Local"]["Longitud"].strip()),
-                "phone": store["Local"]["Telefono"].strip(),
-            }
-            ref += 1
-            yield Feature(**properties)
+        shops = response.json()
+        for shop in shops:
+            item = DictParser.parse(shop)
+            item["lat"] = shop["geocoordinates"].split(",")[0]
+            item["lon"] = shop["geocoordinates"].split(",")[1]
+            yield item
