@@ -40,18 +40,14 @@ class RocomamasSpider(JSONBlobSpider):
     def start_requests(self):
         for url in self.start_urls:
             for country in self.countries:
-                data = (
-                    '{"url":"restaurants?brandKey='
-                    + ",".join(self.brands.keys())
-                    + "&countryCode="
-                    + country
-                    + '&tradingStatus=Open&filterHidden=true&expand=channels","method":"GET"}'
-                )
                 yield JsonRequest(
                     url=url,
-                    headers={"Content-Type": "application/json"},
-                    method="POST",
-                    body=data,
+                    data={
+                        "url": "restaurants?brandKey={}&countryCode={}&tradingStatus=Open&filterHidden=true&expand=channels".format(
+                            ",".join(self.brands.keys()), country
+                        ),
+                        "method": "GET",
+                    },
                 )
 
     def extract_json(self, response):
@@ -85,19 +81,16 @@ class RocomamasSpider(JSONBlobSpider):
 
         apply_yes_no(Extras.KIDS_AREA, item, location.get("playArea"))
         apply_yes_no(Extras.WIFI, item, location.get("wireless"))
-        apply_yes_no(Extras.HALAL, item, location.get("halaal"), False)
+        apply_yes_no(Extras.HALAL, item, location.get("halaal") is True, "halaal" not in location)
         apply_yes_no(Extras.SMOKING_AREA, item, location.get("smokingSection"))
 
         fulfilment = [i["name"] for i in location["fulfilmentChannels"]]
         apply_yes_no(Extras.TAKEAWAY, item, "Take-away" in fulfilment)
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in fulfilment)
 
-        req_data = '{"url":"/restaurants/' + str(item["ref"]) + '?expand=all","method":"GET"}'
         yield JsonRequest(
             url=self.start_urls[0],
-            headers={"Content-Type": "application/json"},
-            method="POST",
-            body=req_data,
+            data={"url": "/restaurants/{}?expand=all".format(item["ref"]), "method": "GET"},
             meta={"item": item},
             callback=self.parse_store,
         )
