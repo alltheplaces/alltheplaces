@@ -16,7 +16,6 @@ BRANDS = {
 
 class CarrefourBRSpider(scrapy.Spider):
     name = "carrefour_br"
-    requires_proxy = True
 
     def start_requests(self):
         yield JsonRequest(
