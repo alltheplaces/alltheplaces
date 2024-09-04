@@ -21,7 +21,9 @@ class StorefrontgatewaySpider(Spider, AutomaticSpiderGenerator):
     api_key: str = ""
     detection_rules = [
         DetectionRequestRule(url=r"^https?:\/\/storefrontgateway\.[w\.-]+/api/stores"),
-        DetectionResponseRule(js_objects={"start_urls": r"[window.__PRELOADED_STATE__.settings.env.PUBLIC_API + 'stores']"}),
+        DetectionResponseRule(
+            js_objects={"start_urls": r"[window.__PRELOADED_STATE__.settings.env.PUBLIC_API + 'stores']"}
+        ),
     ]
 
     def start_requests(self):
