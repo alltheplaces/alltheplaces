@@ -14,6 +14,7 @@ class HuboNLSpider(JSONBlobSpider):
     allowed_domains = ["www.hubo.nl"]
     start_urls = ["https://www.hubo.nl/api/storelocator/stores"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["title"]
