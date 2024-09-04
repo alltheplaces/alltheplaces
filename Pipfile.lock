@@ -2069,12 +2069,12 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:00b577be74f157177a903f1d14547929de067327634db12a53e6b1606a514026",
-                "sha256:e4f55556e8b9b819f539b0595a1af8145d17a396b486250ade25c389969236ff"
+                "sha256:69fabc0e7e8b35c01e1e785ccfd843cec3db45983f508f9298f65ac76a02a3da",
+                "sha256:b87da612e18740e0aba0d6d9ff7c85a8786030fd63ec63127b9ea17ce6491c1d"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==1.34.5"
+            "version": "==1.34.10"
         },
         "black": {
             "hashes": [
@@ -2116,11 +2116,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:3a0086c7124cb3b0d9f98563d00ffd14a942c3f9e731d8d1ccf0d3a1ac7ed884",
-                "sha256:8116b72c7ae845c195146e437e2afd9d17538a37b3f3548dcf67c12c86ba0742"
+                "sha256:0d96d023b9b0cea99a0a428a431d011329d3a958730aee6ed6a6fec5d9bfbc03",
+                "sha256:6c8a1377b6636a0d80218115e1cd41bcceba0a2f050b79c206f4cf8d002c54d7"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.35.5"
+            "version": "==1.35.10"
         },
         "cfgv": {
             "hashes": [
