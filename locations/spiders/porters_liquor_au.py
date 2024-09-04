@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.storefrontgateway import StorefrontgatewaySpider
 
 
-class PortersLiquorAuSpider(StorefrontgatewaySpider):
+class PortersLiquorAUSpider(StorefrontgatewaySpider):
     name = "porters_liquor_au"
     start_urls = [
         "https://storefrontgateway.portersliquor.com.au/api/stores",
