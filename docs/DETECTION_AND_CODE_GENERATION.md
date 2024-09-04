@@ -106,7 +106,7 @@ All detection rules are executed against all requests made in the Playwright Fir
 
 An unsuccessful detection can be caused by geoblocking, anti-bot detection and CAPTCHA challenges and blocking modal dialogs that brand websites may present requiring user interaction before the page loads. If a storefinder is not automatically detected, there could still be a storefinder in use that can be observed in a normal interactive web browser session using built-in browser debugging tools.
 
-##### Detection Behaviours 
+##### Detection Behaviours
 
 The following behaviours are supported:
 
