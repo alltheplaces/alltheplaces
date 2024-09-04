@@ -2,7 +2,7 @@
 
 ### Inspection of site
 
-Alltheplaces provides rudimentary tooling to inspect a site for common behaviours.
+All The Places provides rudimentary tooling to inspect a site for common behaviours.
 
 * [Sitemap inspection](SITEMAP.md) - `pipenv run scrapy sitemap http://example.com/` to detect potential individual store URLs.
 * [Structured Data inspection](STRUCTURED_DATA.md) - `pipenv run scrapy sd http://example.com/` to detect potential individual store URLs.
