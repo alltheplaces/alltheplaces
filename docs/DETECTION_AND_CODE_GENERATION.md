@@ -12,15 +12,15 @@ When checking a large number of URLs, these tools can be chained together to hig
 
 ### Automatic detection from storefinder page
 
-There exist numerous third-party software-as-a-service APIs or self-installed web application software which are used by brands for providing a store finder or stock finder page on brand websites. All The Places implements a "storefinder" as a generic pattern, allowing a spider for each brand to inherit this generic pattern without having to individually duplicate complex crawler code.
+There exist numerous third-party software-as-a-service APIs or self-installed web application software which are used by brands for providing a locations finder or branch locator page on brand websites. All The Places provides reusable [storefinder](../locations/storefinders/) classes, allowing a spider for each brand to inherit common behaviour reducing having to add individually duplicate complex crawler code.
 
-Going one step further, many of these store finders build in the capabilities to automatically detect the
+Going one step further, many of these storefinders build in the capabilities to automatically detect the
 presence of a common software deployment from either:
 
 - Request patterns made to API endpoints or
 - Responses where the HTML matches xpath or creates JS Objects indicating the presence of a store locator.
 
-To automatically attempt to detection, pass in a start URL - either the top level domain, or
+To automatically attempt detection, pass in a start URL - either the top level domain, or
 the specific store page.
 Hint: You may wish to use the `pipenv run scrapy links http://example.com/` command to automatically look for
 probable store location pages if you are reviewing a number of top level domains.
@@ -42,11 +42,9 @@ class SaveOnFoodsCASpider(StorefrontgatewaySpider):
     ]
 ```
 
-This tool will attempt to generate a useful class name, spider key name, by resolving the URL to many wikidata or name suggestion index entries it can. It will also extract
-all other attributes to get you started; however you should still run and adjust the generated code
-before opening a pull request.
+This tool will attempt to generate a useful class name and spider key name by resolving the URL to any wikidata or name suggestion index entries it can. It will also extract all other attributes to get you started; however you should still run and adjust the generated code before opening a pull request.
 
-If known, you can specify extra arguments such as `--brand-wikidata`.
+If known, you can specify extra arguments such as `--brand-wikidata` or `--brand`
 
 For full usage, run `pipenv run scrapy sf`
 
@@ -57,6 +55,7 @@ use the `pipenv run scrapy genspider` command to generate a common template.
 
 For example, `pipenv run scrapy genspider my_spider_name http://example.com/robots.txt -t sitemap` generates a sitemap spider for example.com with the name my_spider_name.
 
+See the available [templates](../locations/templates) for more, or the [scrapy documentation](https://docs.scrapy.org/en/latest/topics/commands.html#genspider) for further details.
 
 ## Adding autodetection to a storefinder
 
