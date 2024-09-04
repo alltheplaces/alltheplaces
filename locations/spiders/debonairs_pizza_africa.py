@@ -2,7 +2,7 @@ from locations.categories import Extras, apply_yes_no
 from locations.storefinders.yext_search import YextSearchSpider
 
 
-class DebonairsAfricaSpider(YextSearchSpider):
+class DebonairsPizzaAfricaSpider(YextSearchSpider):
     name = "debonairs_pizza_africa"
     item_attributes = {"brand": "Debonairs Pizza", "brand_wikidata": "Q65079407"}
     host = "https://location.debonairspizza.africa"
