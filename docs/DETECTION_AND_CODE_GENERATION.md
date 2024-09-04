@@ -55,6 +55,8 @@ For full usage, run `pipenv run scrapy sf`
 Where a storefinder isn't detected but you still wish to get a jump start on writing a spider to a common pattern,
 use the `pipenv run scrapy genspider` command to generate a common template.
 
+For example, `pipenv run scrapy genspider my_spider_name http://example.com/robots.txt -t sitemap` generates a sitemap spider for example.com with the name my_spider_name.
+
 
 ## Adding autodetection to a storefinder
 
