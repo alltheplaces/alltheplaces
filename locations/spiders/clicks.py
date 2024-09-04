@@ -14,6 +14,7 @@ class ClicksSpider(CrawlSpider, SitemapSpider):
     allowed_domains = ["clicks.co.za"]
     sitemap_urls = ["https://clicks.co.za/sitemap.xml"]
     sitemap_rules = [(r"/store/", "parse")]
+    skip_auto_cc_domain = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
