@@ -2,7 +2,6 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
 
 
 class MediamarktDESpider(scrapy.Spider):
