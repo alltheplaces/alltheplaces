@@ -10,21 +10,12 @@ shame as most brands invest a great deal of energy in getting
 it right on *their own website*.
 
 What if there was a way to take the effort invested in
-your website and in a lightweight (no infrastructure needed)
-manner and provide it, in a *one stop shop*, to others as you wish it
-to be shown? Change your data and watch it
-filter through into others maps and applications!
+your website and in a lightweight manner provide it to others
+as you would wish it to be shown on digital maps? Change your data
+and watch it filter through into others maps and applications!
 There is now a frictionless way to do this. Simply [add a small piece
 of software](../README.md#contributing-code) to this project that talks to your website or brand
 marketing partner ([we interface to many of these](../locations/storefinders/README.md)).
-It's a trivial piece of work for major improvements in the ability of people to
-find and travel to your locations.
-
-You may well find that a member of the open source community has
-already written a spider for your brand. If so why don't you
-take on the [task of maintaining it?](#take-ownership) This way when you change your
-website / API / details you can give your brand the best chance of
-maintaining a solid digital mapping presence.
 
 ### How much effort?
 
@@ -42,7 +33,8 @@ Part of your digital brand presence, although you may not know it, are your
 [Wikidata](../docs/WIKIDATA.md#wikidata) and possibly
 [name suggestion index](../docs/WIKIDATA.md#name-suggestion-index--nsi-) entries.
 Publishing your location data as part of the _All The Places_ project gives you
-and others more of a chance to spot and correct any mistakes in this area.
+and others more of a chance to spot and correct any mistakes
+with you information in these datasets.
 
 ### Take ownership
 
