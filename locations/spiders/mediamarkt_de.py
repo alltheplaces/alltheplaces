@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MediamarktDESpider(StructuredDataSpider):
+class MediamarktDESpider(scrapy.Spider):
     name = "mediamarkt_de"
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
 
