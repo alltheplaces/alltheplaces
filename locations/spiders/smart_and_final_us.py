@@ -1,17 +1,17 @@
 from locations.categories import Categories
-from locations.storefinders.wakefern import WakefernSpider
+from locations.storefinders.storefrontgateway import StorefrontgatewaySpider
 
 
-# Not owned by Wakefern (as far as I can tell), but seems to use the same software
-class SmartAndFinalUSSpider(WakefernSpider):
+class SmartAndFinalUSSpider(StorefrontgatewaySpider):
     name = "smart_and_final_us"
     item_attributes = {
         "brand": "Smart & Final",
         "brand_wikidata": "Q7543916",
         "extras": Categories.SHOP_SUPERMARKET.value,
     }
-    start_urls = ["https://www.smartandfinal.com/"]
+    start_urls = ["https://storefrontgateway.smartandfinal.com/api/stores"]
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").removeprefix(f"{location['retailerStoreId']} - ")
-        yield from super().post_process_item(item, response, location)
+        item["website"] = f"https://www.smartandfinal.com/sm/planning/rsid/{item['ref']}"
+        yield item
