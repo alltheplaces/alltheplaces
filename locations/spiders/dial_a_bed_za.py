@@ -1,4 +1,3 @@
-from html import unescape
 from typing import Iterable
 
 from scrapy import Request, Selector
@@ -21,23 +20,15 @@ class DialABedZASpider(AmastyStoreLocatorSpider):
             yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
-        item["street_address"] = unescape(
-            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
-            .split("   Address:", 1)[1]
-            .split("   ", 1)[0]
-            .strip()
-        )
-        item["city"] = unescape(
-            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
-            .split("City:", 1)[1]
-            .split("   ", 1)[0]
-            .strip()
-        )
-        item["phone"] = unescape(
-            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
-            .split("   Phone:", 1)[1]
-            .split("   ", 1)[0]
-            .strip()
-        )
+        for line in popup_html.xpath('.//div[@class="amlocator-info-popup"]/text()').getall():
+            if line.strip().startswith("City:"):
+                item["city"] = line.replace("City:", "").strip()
+            elif line.strip().startswith("Postal Code:"):
+                item["postcode"] = line.replace("Postal Code:", "").strip()
+            elif line.strip().startswith("Address:"):
+                item["street_address"] = line.replace("Address:", "").strip()
+        if "city" in item and "street_address" in item:
+            if item["city"] in item["street_address"]:
+                item["addr_full"] = item.pop("street_address")
         item["branch"] = item.pop("name").replace("Dial a Bed", "").strip()
         yield item
