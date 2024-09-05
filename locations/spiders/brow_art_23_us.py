@@ -19,7 +19,7 @@ class BrowArt23USSpider(JSONBlobSpider):
         item = Feature()
         item["ref"] = feature["id"]
         item["branch"] = feature["name"]
-        item["website"] = f"https://browart23.com/store-locator/{feature["slug"]}/"
+        item["website"] = f"https://browart23.com/store-locator/{feature['slug']}/"
 
         sel = Selector(text=feature["pin_modal"])
         item["addr_full"] = merge_address_lines(sel.xpath('//p[@class="store-address"]/text()').getall())
