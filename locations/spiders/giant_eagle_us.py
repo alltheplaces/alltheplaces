@@ -22,7 +22,7 @@ TYPE_CODE_MAPPING = {
 
 
 class GiantEagleUSSpider(Spider):
-    name = "giant_eagle"
+    name = "giant_eagle_us"
     API_URL = "https://www.gianteagle.com/api/sitecore/locations/getlocationlistvm?q=&orderBy=geo.distance(storeCoordinate,%20geography%27POINT(-97.68%2030.27)%27)%20asc&skip={}"
     items_per_page = 12  # api limit
 
