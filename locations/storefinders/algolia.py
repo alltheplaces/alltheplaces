@@ -3,11 +3,12 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class AlgoliaSpider(Spider):
+class AlgoliaSpider(Spider, AutomaticSpiderGenerator):
     """
     Documentation of the Algolia API is available at:
     https://www.algolia.com/doc/rest-api/search/
@@ -26,6 +27,18 @@ class AlgoliaSpider(Spider):
     app_id: str = ""
     index_name: str = ""
     referer: str | None = None
+
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?:[a-z0-9]+)-dsn\.algolia\.net\/1\/indexes\/(?P<index_name>[^/*]+)\/(?:browse|objects|queries|query)(?:\?|$)",
+            headers='{api_key: .["x-algolia-api-key"], app_id: .["x-algolia-application-id"]}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?:[a-z0-9]+)-dsn\.algolia\.net\/1\/indexes\/\*\/(?:browse|objects|queries|query)(?:\?|$)",
+            headers='{api_key: .["x-algolia-api-key"], app_id: .["x-algolia-application-id"]}',
+            data='keys[] | capture("\\"indexName\\":\\"(?<index_name>[^\\"]*)\\"")',
+        ),
+    ]
 
     def _make_request(self, page: int | None = None) -> JsonRequest:
         params = "hitsPerPage=1000"
