@@ -28,7 +28,7 @@ other brands.
 ### Is my open data correct?
 
 The gold standard in _open_ mapping data is
-[OpenStreetMap (OSM)](https://www.openstreetmap.org/#map=4/49.43/12.87).
+[OpenStreetMap (OSM)](https://www.openstreetmap.org/).
 Part of your digital brand presence, although you may not know it, are your
 [Wikidata](../docs/WIKIDATA.md#wikidata) and possibly
 [name suggestion index](../docs/WIKIDATA.md#name-suggestion-index-nsi) entries.
@@ -42,9 +42,5 @@ For the most part a single brand has a single spider. A spider is a simple piece
 of code but who should maintain it? If not the brand itself, then who?
 We use a simple convention to claim _"ownership"_ by [adding a contact email
 to the spider code itself](https://github.com/alltheplaces/alltheplaces/blob/master/locations/spiders/tomtom.py#L7).
-
-In the future, the contact email could be used to notify for when there was a change to
-the spider code in GitHub or when the output behaviour changes significantly.
-For now the `contacts` field is not used in any automated manner but rather as a beacon
-of responsibility and point of potential query to others.
-
+The `contacts` field serves a dual purpose, both as a beacon
+of responsibility and a place for potential queries to be sent.
