@@ -37,6 +37,7 @@ from locations.storefinders.stockinstore import StockInStoreSpider
 from locations.storefinders.stockist import StockistSpider
 from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
 from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
+from locations.storefinders.storefrontgateway import StorefrontgatewaySpider
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 from locations.storefinders.storemapper import StoremapperSpider
 from locations.storefinders.storepoint import StorepointSpider
@@ -213,6 +214,7 @@ class StorefinderDetectorSpider(Spider):
             ShopAppsSpider,
             StockInStoreSpider,
             StockistSpider,
+            StorefrontgatewaySpider,
             StoreLocatorPlusCloudSpider,
             StoreLocatorPlusSelfSpider,
             StoreLocatorWidgetsSpider,

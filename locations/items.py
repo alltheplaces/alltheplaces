@@ -130,6 +130,6 @@ def set_closed(item: Feature, end_date: datetime = None):
     item["extras"]["end_date"] = end_date.strftime("%Y-%m-%d") if end_date else "yes"
 
 
-class GeneratedSpider(scrapy.Item):
+class GeneratedSpider(Feature):
     storefinder_url = scrapy.Field()
     spider = scrapy.Field()
