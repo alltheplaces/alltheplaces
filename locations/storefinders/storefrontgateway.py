@@ -19,7 +19,7 @@ class StorefrontgatewaySpider(Spider, AutomaticSpiderGenerator):
 
     start_urls = []
     detection_rules = [
-        DetectionRequestRule(url=r"^(?P<start_urls__list>https?:\/\/storefrontgateway(?:\.[\w\-]+)+\/api\/stores)\/?$")
+        DetectionRequestRule(url=r"^(?P<start_urls__list>https?:\/\/storefrontgateway(?:\.[\w\-]+)+\/api\/stores)\/?$"),
         DetectionResponseRule(
             js_objects={"start_urls": r"[window.__PRELOADED_STATE__.settings.env.PUBLIC_API + 'stores']"}
         ),
