@@ -1,9 +1,10 @@
 from typing import Any
 
 from scrapy import Spider
-from scrapy.http import Response, JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+
 
 class LonghornSteakhouseSpider(Spider):
     name = "longhorn_steakhouse"
@@ -20,11 +21,8 @@ class LonghornSteakhouseSpider(Spider):
             item["ref"] = location["restaurantNumber"]
             item["branch"] = location["restaurantName"]
             item["phone"] = location["phoneDetail"][0].get("phoneNumber")
-            item["street_address"] =  location["address"].get("street1")
+            item["street_address"] = location["address"].get("street1")
             item["lat"] = location["address"]["coordinates"]["latitude"]
             item["lon"] = location["address"]["coordinates"]["longitude"]
- 
+
             yield item
-
-
-   
