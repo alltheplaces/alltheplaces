@@ -1,7 +1,9 @@
 from html import unescape
+from typing import Iterable
 
-from scrapy import Request
+from scrapy import Request, Selector
 
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -10,7 +12,7 @@ class DialABedZASpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Dial-a-Bed", "brand_wikidata": "Q116429178"}
     allowed_domains = ["www.dialabed.co.za"]
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         # The request won't work without the headers supplied below.
         headers = {
             "X-Requested-With": "XMLHttpRequest",
@@ -18,7 +20,7 @@ class DialABedZASpider(AmastyStoreLocatorSpider):
         for domain in self.allowed_domains:
             yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["street_address"] = unescape(
             " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
             .split("   Address:", 1)[1]

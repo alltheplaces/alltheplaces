@@ -134,3 +134,12 @@ def test_map_payment():
     item = Feature()
     map_payment(item, "American_Express", PaymentMethods)
     assert not item["extras"].get("payment:american_express")
+
+    # Test aliases for payment methods in the PaymentMethods enum
+    item = Feature()
+    map_payment(item, "Amex", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    invalid_alias_result = map_payment(item, "AllThePlaces Payment Card", PaymentMethods)
+    assert not invalid_alias_result
