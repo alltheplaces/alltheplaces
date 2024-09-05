@@ -29,9 +29,9 @@ from locations.items import Feature
 
 class SuperStoreFinderSpider(Spider):
     """
-    Specify either:
-    - start_urls
-    - domain
+    To use, specify:
+      - `start_urls`: mandatory parameter if `allowed_domains` is unspecified
+      - `allowed_domains`: mandatory parameter if `start_urls` is unspecified
     """
 
     def start_requests(self):

@@ -95,13 +95,25 @@ class TotalEnergiesSpider(WoosmapSpider):
         # TODO: other cards: proficard bonjour mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
         # Extras
         "atm": Extras.ATM,
+        "absaatm": Extras.ATM,
+        "bankafrica": Extras.ATM,
+        "capitecatm": Extras.ATM,
+        "fdhbankatm": Extras.ATM,
+        "fnbatm": Extras.ATM,
+        "nationalbankatm": Extras.ATM,
+        "nedbank": Extras.ATM,
+        "standardbank": Extras.ATM,
+        "standardchartered": Extras.ATM,
         "carwash": Extras.CAR_WASH,
         "restroom": Extras.TOILETS,
+        "toilets": Extras.TOILETS,
+        "showers": Extras.SHOWERS,
         "freewifi": Extras.WIFI,
         "accessibility": Extras.WHEELCHAIR,
         "truckfriendly": Access.HGV,
         "oilchange": Extras.OIL_CHANGE,
         "carglass": "service:vehicle:glass",
+        "generator": Extras.BACKUP_GENERATOR,
     }
 
     def parse_item(self, item, feature, **kwargs):

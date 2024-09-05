@@ -47,6 +47,14 @@ class YextSearchSpider(Spider):
 
             item["website"] = location["profile"].get("websiteUrl", "").split("?", 1)[0]
 
+            phones = []
+            for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
+                phone = location["profile"].get(phone_type)
+                if phone:
+                    phones.append(phone.get("number"))
+            if len(phones) > 0:
+                item["phone"] = "; ".join(phones)
+
             emails = location["profile"].get("emails")
             if emails:
                 item["email"] = emails[0]
@@ -63,6 +71,7 @@ class YextSearchSpider(Spider):
                 apply_yes_no(PaymentMethods.VISA, item, "Visa" in payment_methods, False)
                 apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_methods, False)
                 apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in payment_methods, False)
+                apply_yes_no(PaymentMethods.CONTACTLESS, item, "Contactless Payment" in payment_methods, False)
 
             item["opening_hours"] = self.parse_opening_hours(location)
 
