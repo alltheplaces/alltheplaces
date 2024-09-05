@@ -31,7 +31,7 @@ The gold standard in _open_ mapping data is
 [OpenStreetMap (OSM)](https://www.openstreetmap.org/#map=4/49.43/12.87).
 Part of your digital brand presence, although you may not know it, are your
 [Wikidata](../docs/WIKIDATA.md#wikidata) and possibly
-[name suggestion index](../docs/WIKIDATA.md#name-suggestion-index--nsi-) entries.
+[name suggestion index](../docs/WIKIDATA.md#name-suggestion-index-nsi) entries.
 Publishing your location data as part of the _All The Places_ project gives you
 and others more of a chance to spot and correct any mistakes
 with you information in these datasets.
