@@ -1,7 +1,6 @@
 from scrapy import Selector
 
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -16,9 +15,7 @@ class BrowArt23USSpider(JSONBlobSpider):
     locations_key = "markers"
 
     def post_process_item(self, item, response, feature):
-        item = Feature()
-        item["ref"] = feature["id"]
-        item["branch"] = feature["name"]
+        item["branch"] = item.pop("name")
         item["website"] = f"https://browart23.com/store-locator/{feature['slug']}/"
 
         sel = Selector(text=feature["pin_modal"])
