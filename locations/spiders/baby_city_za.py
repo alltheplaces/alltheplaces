@@ -4,7 +4,7 @@ from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class BabyCityZA(AmastyStoreLocatorSpider):
+class BabyCityZASpider(AmastyStoreLocatorSpider):
     name = "baby_city_za"
     item_attributes = {"brand": "Baby City", "brand_wikidata": "Q116732888"}
     allowed_domains = ["www.babycity.co.za"]
