@@ -1,30 +1,40 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import re
+from scrapy import Spider
+import urllib.parse
+from locations.dict_parser import DictParser
 
-from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class KirklandsSpider(CrawlSpider, StructuredDataSpider):
+class KirklandsSpider(Spider):
     name = "kirklands"
     item_attributes = {
         "brand": "Kirkland's",
         "brand_wikidata": "Q6415714",
     }
-    start_urls = ["https://www.kirklands.com/custserv/locate_store.cmd"]
-    rules = [Rule(LinkExtractor(allow=["/store.jsp?"]), callback="parse")]
-    wanted_types = ["Store"]
+    start_urls = ["https://www.kirklands.com/js/dyn/store_locator_all_stores.js"]
+    ROBOTSTXT_OBEY = False
 
     def parse(self, response):
-        response.css(".NearbyStores").remove()
-        response.css('a[href=""][itemprop="telephone"]').remove()
-        yield from self.parse_sd(response)
+        location_objects = re.split(r'allStores\[\d+\] = ', response.text)[1:]
+        location_list = []
+        for location_obj in location_objects:
+            loc_info = {}
+            matches = re.findall(r"store\.(.*?) = (.*?);", location_obj)
+            for key, value in matches:
+                loc_info[key.strip()] = value.strip().strip("'").replace('"', '')
+            location_list.append(loc_info)
+        
+        for location in location_list:
+            if location:
+                item = DictParser.parse(location)
+                item["branch"] = item.pop("name")
+                item["street_address"] = " ".join([location["ADDRESS_LINE_1"], location["ADDRESS_LINE_2"]])
+                item["website"] = "https://www.kirklands.com/custserv/store.jsp?storeName=" + urllib.parse.quote(location["STORE_NAME"])
+                
+                yield item
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        oh = OpeningHours()
-        for row in response.css("#inStoreDiv .hours tr"):
-            day, interval = row.css("td ::text").extract()
-            open_time, close_time = interval.split(" - ")
-            oh.add_range(day[:2], open_time, close_time, "%I %p")
-        item["opening_hours"] = oh.as_opening_hours()
-        yield item
+
+
+
+
+
