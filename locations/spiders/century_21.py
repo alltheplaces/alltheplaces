@@ -1,39 +1,30 @@
-import re
-
 import scrapy
+from scrapy.http import JsonRequest
 
-from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.dict_parser import DictParser
 
 
-class Century21Spider(scrapy.spiders.SitemapSpider):
+class Century21Spider(scrapy.Spider):
     name = "century_21"
     item_attributes = {"brand": "Century 21", "brand_wikidata": "Q1054480"}
-    allowed_domains = ["century21global.com"]
-    sitemap_urls = ["https://www.century21global.com/sitemap.xml"]
-    sitemap_rules = [("/real-estate-offices/", "parse")]
 
-    def parse(self, response):
-        country = response.url.split("?")[0].split("/")[-1].replace("-", " ")
-        agences = response.xpath('//div[contains(@class,"search-col-results")]/div[contains(@class,"search-result")]')
-        for agence in agences:
-            url = agence.xpath('.//a[contains(@class, "search-result-info")]/@href').get()
-            id = re.findall("id=[0-9]*", url)[0].replace("id=", "")
-            name = agence.xpath('.//span[contains(@class, "name-label")]/text()').get()
-            address = merge_address_lines(agence.xpath("./a/span[2]/text()").getall())
-            lat = agence.xpath(".//@data-lat").get()
-            lon = agence.xpath(".//@data-lng").get()
+    def make_request(self, offset: int) -> JsonRequest:
+        return JsonRequest(
+            url="https://www.century21global.com/api/aggregator-service/aggregator/office",
+            headers={"Content-Type": "application/json"},
+            data={"offset": offset, "max": 40, "includeListings": False, "language": "EN"},
+            cb_kwargs={"offset": offset},
+        )
 
-            yield Feature(
-                name=name,
-                ref=id,
-                addr_full=address,
-                country=country,
-                lat=lat,
-                lon=lon,
-                website=f"https://www.{self.allowed_domains[0]}{url}",
-            )
+    def start_requests(self):
+        yield self.make_request(0)
 
-        # Pagination next page
-        if next := response.xpath('//a[contains(@aria-label, "Next")]/@href').get():
-            yield scrapy.Request(url=response.urljoin(next), callback=self.parse)
+    def parse(self, response, **kwargs):
+        if response.json()["result"]:
+            for office in response.json()["result"]:
+                item = DictParser.parse(office)
+                item["street_address"] = item.pop("street")
+                item["website"] = "https://www.century21global.com/"
+                yield item
+            current_offeset = kwargs["offset"] + 40
+            yield self.make_request(current_offeset)
