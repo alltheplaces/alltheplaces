@@ -57,7 +57,7 @@ class YextSearchSpider(Spider):
 
             emails = location["profile"].get("emails")
             if emails:
-                item["email"] = emails[0]
+                item["email"] = "; ".join(emails)
 
             item["facebook"] = location["profile"].get("facebookPageUrl")
 

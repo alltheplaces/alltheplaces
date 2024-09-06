@@ -61,6 +61,7 @@ class DictParser:
         "store-address",
         "physical-address",
         "full-address",
+        "formattedAddress",
         # ES
         "direccion",  # "address"
     ]
