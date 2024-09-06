@@ -1,12 +1,12 @@
 import re
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from chompjs import parse_js_object
+from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories
-from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
 BASH_BRANDS = {
@@ -70,61 +70,112 @@ BASH_BRANDS = {
 }
 
 
-class BashZASpider(Spider):
-    name = "bash_za"
+class BashSpider(JSONBlobSpider):
+    name = "bash"
     allowed_domains = ["bash.com"]
-    start_urls = [
-        'https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"966dea829c724e7374c6287b93b15a9fce36b3126e09d32370e251e96738153d","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}'
-    ]
+    start_urls = ["https://bash.com/store-finder"]
 
     def start_requests(self):
         self.brand_name_regex = re.compile(r"^(" + "|".join(BASH_BRANDS) + r") ", re.IGNORECASE)
         for url in self.start_urls:
-            yield JsonRequest(url=url)
+            yield Request(url=url, callback=self.fetch_json)
 
-    def parse(self, response):
-        for location in response.json()["data"]["getStores"]["items"]:
-            location["name"] = location["name"].strip()
-            if not location["isActive"] or location["name"] in [
-                "TFG Money Account Payment",
-                "MARKRAND",
-                "T B A",
-                "DIEPSLOOT",
-                "ELIM MALL",
-            ]:
-                continue
-            item = DictParser.parse(location)
-            item["lat"] = location["address"]["location"]["latitude"]
-            item["lon"] = location["address"]["location"]["longitude"]
-            item.pop("street")
-            item["street_address"] = clean_address([location["address"]["street"], location["address"]["complement"]])
-            item["website"] = (
-                "https://bash.com/store/"
-                + item["name"].lower().replace(" ", "-")
-                + "-"
-                + item["postcode"]
-                + "/"
-                + item["ref"]
+    def fetch_json(self, response):
+        cache_hints = parse_js_object(
+            response.xpath('.//script[contains(text(), "thefoschini.store-locator@0.x")]/text()').get()
+        )["cacheHints"]
+        url_hash = [h for h in cache_hints if cache_hints[h].get("provider") == "thefoschini.store-locator@0.x"][0]
+        yield JsonRequest(
+            url='https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"'
+            + url_hash
+            + '","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}',
+            callback=self.parse,
+        )
+
+    def extract_json(self, response):
+        return response.json()["data"]["getStores"]["items"]
+
+    def post_process_item(self, item, response, location):
+        location["name"] = location["name"].strip()
+        if not location["isActive"] or location["name"] in [
+            "TFG Money Account Payment",
+            "MARKRAND",
+            "T B A",
+            "DIEPSLOOT",
+            "ELIM MALL",
+        ]:
+            return
+        if " (CLOSED) " in item["name"]:
+            set_closed(item)
+
+        item["lat"] = location["address"]["location"]["latitude"]
+        item["lon"] = location["address"]["location"]["longitude"]
+        item.pop("street")
+        item["street_address"] = clean_address([location["address"]["street"], location["address"]["complement"]])
+        item["state"], item["country"] = self.clean_state(item["state"])
+
+        item["website"] = (
+            "https://bash.com/store/"
+            + item["name"].lower().replace(" ", "-")
+            + "-"
+            + item["postcode"]
+            + "/"
+            + item["ref"]
+        )
+
+        item["opening_hours"] = OpeningHours()
+        for hours_range in location["businessHours"]:
+            item["opening_hours"].add_range(
+                DAYS[hours_range["dayOfWeek"]], hours_range["openingTime"], hours_range["closingTime"], "%H:%M:%S"
             )
-            item["opening_hours"] = OpeningHours()
-            for hours_range in location["businessHours"]:
-                item["opening_hours"].add_range(
-                    DAYS[hours_range["dayOfWeek"]], hours_range["openingTime"], hours_range["closingTime"], "%H:%M:%S"
-                )
 
-            if " (CLOSED) " in item["name"]:
-                set_closed(item)
+        if m := self.brand_name_regex.match(item["name"]):
+            item.update(BASH_BRANDS[m.group(1).upper()])
+            item["branch"] = (
+                item["name"]
+                .replace(self.brand_name_regex.match(item["name"]).group(1), "")
+                .replace("Sportcene", "")
+                .strip()
+            )
+        else:
+            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{item['name']}")
+            item["branch"] = item["name"]
+        item.pop("name")
 
-            if m := self.brand_name_regex.match(item["name"]):
-                item.update(BASH_BRANDS[m.group(1).upper()])
-                item["branch"] = (
-                    item["name"]
-                    .replace(self.brand_name_regex.match(item["name"]).group(1), "")
-                    .replace("Sportcene", "")
-                    .strip()
-                )
-            else:
-                item["branch"] = item["name"]
-            item.pop("name")
+        yield item
 
-            yield item
+    def clean_state(self, state: str) -> tuple:
+        actually_countries = {
+            "BOTSWANA": "BW",
+            "NAMIBIA": "NA",
+            "SWAZILAND": "SZ",
+        }
+        ZA_PROVINCES = [
+            "Eastern Cape",
+            "Free State",
+            "Gauteng",
+            "KwaZulu-Natal",
+            "Limpopo",
+            "Mpumalanga",
+            "North West",
+            "Northern Cape",
+            "Western Cape",
+        ]
+        other_states = {
+            "Butha-Buthe": ("Butha-Buthe", "LS"),
+            "Leribe": ("Leribe", "LS"),
+            "Lusaka": (None, "ZM"),
+            "Maseru": ("Maseru", "LS"),
+            "Mohale's Hoek": ("Mohale's Hoek", "LS"),
+            "NAIROBI": (None, "KE"),
+        }
+        if state in actually_countries:
+            return (None, actually_countries[state])
+        if state in other_states:
+            return other_states[state]
+        for province in ZA_PROVINCES:
+            if state.lower().replace("-", " ") == province.lower().replace("-", " "):
+                return (province, "ZA")
+
+        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_state/{state}")
+        return (state, None)
