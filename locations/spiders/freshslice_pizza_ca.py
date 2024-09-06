@@ -10,4 +10,3 @@ class FreshslicePizzaCASpider(WPStoreLocatorSpider):
         "www.freshslice.com",
     ]
     days = DAYS_EN
-
