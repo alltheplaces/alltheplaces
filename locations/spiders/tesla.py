@@ -1,6 +1,6 @@
-import json
 import re
 
+import chompjs
 import scrapy
 
 from locations.categories import Categories, apply_category
@@ -39,7 +39,7 @@ class TeslaSpider(scrapy.Spider):
 
     def parse_location(self, response):
         # Many responses have false error message appended to the json data, clean them to get a proper json
-        location_data = json.loads(response.text.removesuffix("Error: 400"))
+        location_data = chompjs.parse_js_object(response.text)
         if isinstance(location_data, list):
             return
         feature = DictParser.parse(location_data)
