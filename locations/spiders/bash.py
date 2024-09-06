@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
-from locations.items import set_closed
+from locations.items import get_lat_lon, set_closed
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
@@ -137,7 +137,9 @@ class BashSpider(JSONBlobSpider):
                 .replace("Sportcene", "")
                 .strip()
             )
-        else:
+        # If it's at null island it will get dropped anyway
+        # There are a number of non-real locations with 0,0 coordinates
+        elif get_lat_lon(item) != (float(0), float(0)):
             self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{item['name']}")
             item["branch"] = item["name"]
         item.pop("name")
