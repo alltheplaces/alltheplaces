@@ -24,6 +24,7 @@ class KiboSpider(Spider):
 
     def parse(self, response: Response):
         for location in response.json()["items"]:
+            self.pre_process_data(location)
             item = DictParser.parse(location)
 
             item["ref"] = location["code"]
@@ -59,3 +60,6 @@ class KiboSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

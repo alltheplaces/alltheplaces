@@ -180,8 +180,53 @@ class StructuredDataSpider(Spider):
         "LiquorStore",
         "BikeStore",
         "Optician",
+        "Bakery",
         "InsuranceAgency",
         "ElectronicsStore",
+        "Accommodation",
+        "AccountingService",
+        "AutoDealer",
+        "AutoGlass",
+        "AutomatedTeller",
+        "AutoRepair",
+        "AutoWash",
+        "BagsStore",
+        "BeautySalon",
+        "CafeOrCoffeeShop",
+        "Campground",
+        "ChildCare",
+        "EmergencyService",
+        "ExerciseGym",
+        "FinancialService",
+        "FoodEstablishment",
+        "FurnitureStore",
+        "HairSalon",
+        "HealthAndBeautyBusiness",
+        "HealthClub",
+        "HobbyShop",
+        "HomeAndConstructionBusiness",
+        "HomeGoodsStore",
+        "IceCreamShop",
+        "JewelryStore",
+        "LegalService",
+        "LodgingBusiness",
+        "MedicalBusiness",
+        "MedicalClinic",
+        "MobilePhoneStore",
+        "MovieTheater",
+        "OutletStore",
+        "PetStore",
+        "Pharmacy",
+        "Physician",
+        "RealEstateAgent",
+        "SelfStorage",
+        "ShoeStore",
+        "ShoppingCenter",
+        "SportsActivityLocation",
+        "StadiumOrArena",
+        "TrainStation",
+        "TravelAgency",
+        "VeterinaryCare",
     ]
     search_for_email = True
     search_for_phone = True
@@ -287,8 +332,14 @@ class StructuredDataSpider(Spider):
         https://schema.org/paymentAccepted
         """
         if "paymentAccepted" in ld_item:
-            if "," in ld_item["paymentAccepted"]:
+            if isinstance(ld_item["paymentAccepted"], str) and "," in ld_item["paymentAccepted"]:
                 ld_item["paymentAccepted"] = ld_item["paymentAccepted"].split(", ")
+            if (
+                isinstance(ld_item["paymentAccepted"], list)
+                and len(ld_item["paymentAccepted"]) == 1
+                and "," in ld_item["paymentAccepted"][0]
+            ):
+                ld_item["paymentAccepted"] = ld_item["paymentAccepted"][0].split(", ")
             if len(ld_item["paymentAccepted"]) > 0:
                 for payment in ld_item["paymentAccepted"]:
                     if not map_payment(item, payment, PaymentMethods):

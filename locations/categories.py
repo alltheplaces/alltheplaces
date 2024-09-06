@@ -476,6 +476,7 @@ class Extras(Enum):
     HALAL = "diet:halal"
     ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
+    KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
@@ -542,9 +543,11 @@ class PaymentMethods(Enum):
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
     MIR = "payment:mir"
+    MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
     PAYPAY = "payment:paypay"
+    POWERCARD = "payment:powercard"
     QUICPAY = "payment:quicpay"
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
@@ -559,6 +562,16 @@ class PaymentMethods(Enum):
     V_PAY = "payment:v_pay"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
+
+
+payment_method_aliases = {
+    "Amex": PaymentMethods.AMERICAN_EXPRESS,
+    "China UnionPay": PaymentMethods.UNIONPAY,
+    "Diners": PaymentMethods.DINERS_CLUB,
+    "Maestro (Ausland)": PaymentMethods.MAESTRO,
+    "MasterCard": PaymentMethods.MASTER_CARD,
+    "PowerCard": PaymentMethods.POWERCARD,
+}
 
 
 class FuelCards(Enum):
@@ -768,7 +781,7 @@ def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: 
     overwriting existing healthcare specialities. When appending,
     the list of healthcare specialities is sorted and then each
     value is separated with a semi-colon.
-    :param clothes: array of HealthcareSpecialities Enum members
+    :param specialities: array of HealthcareSpecialities Enum members
     :param item: Feature which should have healthcare specialities applied.
     """
     for s in specialities:
@@ -776,27 +789,34 @@ def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: 
 
 
 # TODO: something similar for fuel types
-def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelCards):
+def map_payment(item: Feature, source_payment_method_name: str, enum: PaymentMethods | FuelCards):
     """Apply appropriate payment method tag to an item if given string is found in an enum."""
-    if not payment_method:
+    if not source_payment_method_name:
         return
-    map = {}
-    for payment in enum:
-        variations = DictParser.get_variations(payment.name.replace("_", "-"))
-        variations.add(payment.name.replace("_", " ").lower())
-        variations.add(payment.name.replace("_", " ").title())
-        variations.add(payment.name.replace("_", " ").upper())
+    payment_method_names: list[str] = [pm.name for pm in enum] + list(payment_method_aliases.keys())
+    mapping = {}
+    for payment_method_name in payment_method_names:
+        variations = DictParser.get_variations(payment_method_name.replace("_", "-"))
+        variations.add(payment_method_name.replace("_", " ").lower())
+        variations.add(payment_method_name.replace("_", " ").title())
+        variations.add(payment_method_name.replace("_", " ").upper())
 
         # Singularize for "cards" vs "card"
-        if payment.name.endswith("S"):
-            variations = variations | DictParser.get_variations(payment.name.replace("_", "-")[:-1])
-            variations.add(payment.name.replace("_", " ").lower()[:-1])
-            variations.add(payment.name.replace("_", " ").title()[:-1])
-            variations.add(payment.name.replace("_", " ").upper()[:-1])
+        if payment_method_name.endswith("S"):
+            variations = variations | DictParser.get_variations(payment_method_name.replace("_", "-")[:-1])
+            variations.add(payment_method_name.replace("_", " ").lower()[:-1])
+            variations.add(payment_method_name.replace("_", " ").title()[:-1])
+            variations.add(payment_method_name.replace("_", " ").upper()[:-1])
 
         for variation in variations:
-            map[variation] = payment.name
+            mapping[variation] = payment_method_name
 
-    if payment := map.get(payment_method):
-        apply_yes_no(enum[payment], item, True)
-        return True
+    if payment_method_name := mapping.get(source_payment_method_name):
+        if payment_method_name in [pm.name for pm in enum]:
+            apply_yes_no(enum[payment_method_name], item, True)
+            return True
+        elif payment_method_name in payment_method_aliases.keys():
+            apply_yes_no(payment_method_aliases[payment_method_name], item, True)
+            return True
+
+    return False
