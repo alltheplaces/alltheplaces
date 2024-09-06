@@ -1,3 +1,4 @@
+import json
 import re
 
 import scrapy
@@ -37,7 +38,8 @@ class TeslaSpider(scrapy.Spider):
             )
 
     def parse_location(self, response):
-        location_data = response.json()
+        # Many responses have false error message appended to the json data, clean them to get a proper json
+        location_data = json.loads(response.text.removesuffix("Error: 400"))
         if isinstance(location_data, list):
             return
         feature = DictParser.parse(location_data)
