@@ -1,9 +1,10 @@
-
 from typing import Any
+
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+
 
 class LivingSpacesSpider(Spider):
     name = "living_spaces"
@@ -18,4 +19,3 @@ class LivingSpacesSpider(Spider):
             item["branch"] = item.pop("name")
             item["website"] = "https://www.livingspaces.com" + location["storePageUrl"]
             yield item
-
