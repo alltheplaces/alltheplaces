@@ -1,5 +1,6 @@
-from scrapy.http import JsonRequest, Response
 import scrapy
+from scrapy.http import JsonRequest, Response
+
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
