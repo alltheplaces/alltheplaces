@@ -2,8 +2,8 @@ from locations.hours import OpeningHours
 from locations.storefinders.wordpress_heron_foods_spider import WordpressHeronFoodsSpider
 
 
-class HeronFoodsSpider(WordpressHeronFoodsSpider):
-    name = "heron_foods"
+class HeronFoodsGBSpider(WordpressHeronFoodsSpider):
+    name = "heron_foods_gb"
     item_attributes = {"brand": "Heron Foods", "brand_wikidata": "Q5743472"}
     domain = "heronfoods.com"
     radius = 600
@@ -25,7 +25,6 @@ class HeronFoodsSpider(WordpressHeronFoodsSpider):
         oh.add_range("Su", store["op"]["12"].replace(".", ":"), store["op"]["13"].replace(".", ":"))
 
         item["opening_hours"] = oh.as_opening_hours()
-        item["country"] = "GB"
 
         if item["name"].endswith(" (B&M Express)"):
             item["name"] = item["name"].replace(" (B&M Express)", "")
