@@ -1,4 +1,3 @@
-from locations.hours import OpeningHours
 from locations.storefinders.wordpress_heron_foods_spider import WordpressHeronFoodsSpider
 
 
