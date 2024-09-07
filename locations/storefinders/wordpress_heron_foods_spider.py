@@ -20,6 +20,7 @@ class WordpressHeronFoodsSpider(Spider):
     radius = 600
     lat = None
     lon = None
+    detected_rules = [] # DetectionRequestRule(https://{self.domain}/wp-admin/admin-ajax.php, but its a POST and has get_stores), or DetectionResponseRule(jsblob with na zp lng lon ID)
 
     def start_requests(self):
         yield scrapy.FormRequest(
