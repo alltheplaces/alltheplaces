@@ -33,9 +33,10 @@ class PumaSpider(JSONBlobSpider):
         if m := self.brand_name_regex.match(item["name"]):
             item.update(PUMA_BRANDS[m.group(1).upper()])
             item["branch"] = item["name"].replace(self.brand_name_regex.match(item["name"]).group(1), "").strip()
-            item.pop("name")
+            item["name"] = item["brand"]
         else:
             item.update(PUMA_BRANDS["PUMA STORE"])
+            # Not moving name to branch because of locations in scripts I don't know. Leave given name as name for now
         item["street_address"] = item.pop("street")
         # Can't tell what the channel does, but it is required.
         # May be different by default for different countries, and only seems to change the image info very slightly
