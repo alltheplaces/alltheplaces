@@ -1,6 +1,3 @@
-import scrapy
-
-from locations.items import Feature
 from locations.storefinders.wordpress_heron_foods_spider import WordpressHeronFoodsSpider
 
 
@@ -14,4 +11,3 @@ class MikuchaTHSpider(WordpressHeronFoodsSpider):
     domain = "mikucha.co.th"
     lat = 13.7563309
     lon = 100.5017651
-
