@@ -99,7 +99,7 @@ class NSI(metaclass=Singleton):
     def iter_country(self, country_code=None):
         """
         Lookup by country code match in the NSI.
-        :param country_code: 2-letter country code to search for
+        :param country_code: country code or NSI location to search for
         :return: iterator of matching NSI wikidata.json entries
         """
         self._ensure_loaded()

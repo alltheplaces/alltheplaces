@@ -70,12 +70,6 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print("       -> " + str(item))
 
     def detect_missing(self, args):
-        # Exit early if the argument is in the wrong format
-        # Allow 3 letter country code in case of providing "001"
-        if not ("/" in args[0] or len(args[0]) in [2, 3]):
-            print(f"Unknown search option: {args[0]}. Provide a category from NSI or a 2-letter country code")
-            return
-
         codes = DuplicateWikidataCommand.wikidata_spiders(self.crawler_process)
 
         missing = []
@@ -91,7 +85,8 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 if "brand:wikidata" in item["tags"]:
                     if not item["tags"]["brand:wikidata"] in codes.keys():
                         missing.append(item)
-        elif len(args[0]) in [2, 3]:
+        # Assume we are searching by location, either country code or some state geojson string
+        else:
             for item in self.nsi.iter_country(args[0]):
                 if "brand:wikidata" in item["tags"]:
                     if not item["tags"]["brand:wikidata"] in codes.keys():
