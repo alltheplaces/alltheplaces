@@ -99,22 +99,8 @@ class VolkswagenBWNAZASpider(JSONBlobSpider):
             self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{location['brand']}")
 
         # Some provided states are actually countries, where one country's search gives results for other nearby countries
-        if (
-            item["state"] is not None
-            and response.meta["country"] not in COUNTRIES_NOT_TO_CHANGE_STATES
-            and {item["country"]: item["state"]} not in STATES_NOT_TO_CHANGE
-        ):
-            try:
-                possible_countries = [c.alpha_2 for c in pycountry.countries.search_fuzzy(item["state"])]
-                if response.meta["country"] not in possible_countries:
-                    matched_country = possible_countries[0]
-                    self.crawler.stats.inc_value(
-                        f"atp/{self.name}/corrected_country/{response.meta['country']} to {matched_country}/{item['state']}"
-                    )
-                    item["country"] = matched_country
-                    item.pop("state")
-            except LookupError:
-                pass
+        if item["state"] in ["Botswana", "Namibia"]:
+            item["country"] = item.pop("state")
 
         if "features" in location:
             for feature in location["features"]:
