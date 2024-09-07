@@ -17,7 +17,7 @@ SERVICES_MAPPING = {
 }
 
 
-class VolkswagenBWNAZASpider(JSONBlobSpider):
+class VolkswagenSpider(JSONBlobSpider):
     download_timeout = 30
     name = "volkswagen"
     item_attributes = {"brand": "Volkswagen", "brand_wikidata": "Q246"}
