@@ -16,12 +16,6 @@ SERVICES_MAPPING = {
     "MOT": "service:vehicle:mot",
 }
 
-COUNTRIES_NOT_TO_CHANGE_STATES = ["AU", "AUS", "BR", "BRA", "CA", "CAN", "CH", "CHE", "IT", "ITA", "US", "USA"]
-
-STATES_NOT_TO_CHANGE = {
-    "ZA": "North West",
-}
-
 
 class VolkswagenBWNAZASpider(JSONBlobSpider):
     download_timeout = 30
