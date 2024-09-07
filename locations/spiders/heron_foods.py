@@ -6,7 +6,6 @@ class HeronFoodsSpider(WordpressHeronFoodsSpider):
     name = "heron_foods"
     item_attributes = {"brand": "Heron Foods", "brand_wikidata": "Q5743472"}
     domain = "heronfoods.com"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
     radius = 600
     lat = 51.5072178
     lon = -0.1275862
