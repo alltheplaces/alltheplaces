@@ -1,7 +1,4 @@
-import scrapy
-
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.storefinders.wordpress_heron_foods_spider import WordpressHeronFoodsSpider
 
 
