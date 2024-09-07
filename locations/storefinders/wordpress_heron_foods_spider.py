@@ -1,14 +1,10 @@
 from typing import Iterable
 
 import scrapy
-from scrapy import Selector, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
-from locations.geo import country_iseadgg_centroids, point_locations
-from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 # A less common wordpress based storefinder, characterised by
 # - POST of search params to "action": "get_stores",
@@ -57,7 +53,6 @@ class WordpressHeronFoodsSpider(Spider):
 
             item = Feature(**properties)
             yield from self.post_process_item(item, response, store)
-
 
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the item."""
