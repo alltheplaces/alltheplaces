@@ -70,20 +70,33 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print("       -> " + str(item))
 
     def detect_missing(self, args):
+        # Exit early if the argument is in the wrong format
+        # Allow 3 letter country code in case of providing "001"
+        if not ("/" in args[0] or len(args[0]) in [2, 3]):
+            print(f"Unknown search option: {args[0]}. Provide a category from NSI or a 2-letter country code")
+            return
 
         codes = DuplicateWikidataCommand.wikidata_spiders(self.crawler_process)
+
+        missing = []
 
         # Fetch the category from NSI's github, and try to match to wikidata.
         # TODO: This assumes you are going for only one category, by wikidata ID.
         #       Is it worth having this just check all of the wikidata entries and printing out what is missing globally?
-        response = self.nsi._request_file(f"data/{args[0]}.json")
-        print(f"Fetched {len(response['items'])} {response['properties']['path']} from NSI")
+        if "/" in args[0]:
+            response = self.nsi._request_file(f"data/{args[0]}.json")
+            print(f"Fetched {len(response['items'])} {response['properties']['path']} from NSI")
 
-        missing = []
-        for item in response["items"]:
-            if "brand:wikidata" in item["tags"]:
-                if not item["tags"]["brand:wikidata"] in codes.keys():
-                    missing.append(item)
+            for item in response["items"]:
+                if "brand:wikidata" in item["tags"]:
+                    if not item["tags"]["brand:wikidata"] in codes.keys():
+                        missing.append(item)
+        elif len(args[0]) in [2, 3]:
+            for item in self.nsi.iter_country(args[0]):
+                if "brand:wikidata" in item["tags"]:
+                    if not item["tags"]["brand:wikidata"] in codes.keys():
+                        missing.append(item)
+
         print(f"Missing by wikidata: {len(missing)}")
         for brand in missing:
             wikidata = self.nsi.lookup_wikidata(brand["tags"]["brand:wikidata"])

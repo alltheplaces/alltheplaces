@@ -96,6 +96,20 @@ class NSI(metaclass=Singleton):
                 if s in NSI.normalise(label):
                     yield k, v
 
+    def iter_country(self, country_code=None):
+        """
+        Lookup by country code match in the NSI.
+        :param country_code: 2-letter country code to search for
+        :return: iterator of matching NSI wikidata.json entries
+        """
+        self._ensure_loaded()
+        for v in self.nsi_json.values():
+            for item in v["items"]:
+                if not country_code:
+                    yield item
+                elif country_code.lower() in item["locationSet"].get("include"):
+                    yield item
+
     def iter_nsi(self, wikidata_code=None):
         """
         Iterate NSI for all items in nsi.json with a matching wikidata code
