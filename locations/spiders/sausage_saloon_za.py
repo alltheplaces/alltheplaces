@@ -1,9 +1,5 @@
-from typing import Any
-
-import scrapy
-from scrapy import Spider
-
 from locations.storefinders.wordpress_heron_foods_spider import WordpressHeronFoodsSpider
+
 
 class SausageSaloonZASpider(WordpressHeronFoodsSpider):
     name = "sausage_saloon_za"
