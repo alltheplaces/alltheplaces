@@ -14,7 +14,9 @@ class AlnaturaDESpider(Spider):
     name = "alnatura_de"
     item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.alnatura.de"]
-    start_urls = ["https://www.alnatura.de/api/sitecore/stores/FindStoresforMap?ElementsPerPage=10000&lat=49.878708&lng=8.646927&radius=10000&Tradepartner=1"]
+    start_urls = [
+        "https://www.alnatura.de/api/sitecore/stores/FindStoresforMap?ElementsPerPage=10000&lat=49.878708&lng=8.646927&radius=10000&Tradepartner=1"
+    ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self) -> Iterable[JsonRequest]:
@@ -24,7 +26,11 @@ class AlnaturaDESpider(Spider):
     def parse(self, response: Response) -> Iterable[JsonRequest]:
         for feature in response.json()["Payload"]:
             feature_id = feature["Id"]
-            yield JsonRequest(url=f"https://www.alnatura.de/api/sitecore/stores/StoreDetails?storeid={feature_id}", meta={"lat": feature.get("Lat"), "lon": feature.get("Lng")}, callback=self.parse_feature)
+            yield JsonRequest(
+                url=f"https://www.alnatura.de/api/sitecore/stores/StoreDetails?storeid={feature_id}",
+                meta={"lat": feature.get("Lat"), "lon": feature.get("Lng")},
+                callback=self.parse_feature,
+            )
 
     def parse_feature(self, response: Response) -> Iterable[Feature]:
         feature = response.json()["Payload"]
