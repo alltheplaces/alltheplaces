@@ -12,9 +12,8 @@ SUNGLASS_HUT_4_COUNTRIES = {
 }
 
 
-class Sunglasshut4Spider(JSONBlobSpider):
-    download_timeout = 60  # TODO remove
-    name = "sunglass_hut_4"
+class SunglassHut2Spider(JSONBlobSpider):
+    name = "sunglass_hut_2"
     item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
     locations_key = "contentlets"
 

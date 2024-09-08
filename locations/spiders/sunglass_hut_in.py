@@ -4,7 +4,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.sunglass_hut_1 import SUNGLASS_HUT_SHARED_ATTRIBUTES
 
 
-class SunglasshutINSpider(JSONBlobSpider):
+class SunglassHutINSpider(JSONBlobSpider):
     name = "sunglass_hut_in"
     item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
     start_urls = ["https://sunglasshut.in/api/service/application/catalog/v1.0/locations/?page_size=100000"]
