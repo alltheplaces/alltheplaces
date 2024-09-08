@@ -20,6 +20,7 @@ class SunglassHut3Spider(JSONBlobSpider):
     name = "sunglass_hut_3"
     item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
     user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         country_coords = country_coordinates(return_lookup=True)

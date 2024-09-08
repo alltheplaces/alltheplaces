@@ -14,6 +14,7 @@ class SunglassHutLatamSpider(Spider):
     item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
     start_urls = [f"https://latam.sunglasshut.com/{cc}/tienda.php" for cc in LATAM_COUNTRIES]
     user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
 
     def start_requests(self):
