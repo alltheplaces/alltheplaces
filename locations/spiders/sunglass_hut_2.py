@@ -4,7 +4,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.sunglass_hut_1 import SUNGLASS_HUT_SHARED_ATTRIBUTES
 
-SUNGLASS_HUT_4_COUNTRIES = {
+SUNGLASS_HUT_2_COUNTRIES = {
     "HK": 8,
     "PT": 4,
     "TR": 6,
@@ -18,7 +18,7 @@ class SunglassHut2Spider(JSONBlobSpider):
     locations_key = "contentlets"
 
     def start_requests(self):
-        for cc, lang_id in SUNGLASS_HUT_4_COUNTRIES.items():
+        for cc, lang_id in SUNGLASS_HUT_2_COUNTRIES.items():
             yield JsonRequest(
                 url=f"https://{cc}.sunglasshut.com/api/content/render/false/limit/9999/type/json/query/+contentType:SghStoreLocator%20+languageId:{lang_id}",
                 callback=self.parse,
