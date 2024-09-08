@@ -9,6 +9,7 @@ class HarveysSupermarketsUSSpider(WinnDixieUSSpider):
     who reuse the same store finder method for their other brand
     Winn-Dixie (spider: winn_dixie_us).
     """
+
     name = "harveys_supermarkets_us"
     item_attributes = {
         "brand": "Harveys Supermarkets",
@@ -16,5 +17,7 @@ class HarveysSupermarketsUSSpider(WinnDixieUSSpider):
         "extras": Categories.SHOP_SUPERMARKET.value,
     }
     allowed_domains = ["www.harveyssupermarkets.com"]
-    start_urls = ["https://www.harveyssupermarkets.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter="]
+    start_urls = [
+        "https://www.harveyssupermarkets.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter="
+    ]
     user_agent = BROWSER_DEFAULT
