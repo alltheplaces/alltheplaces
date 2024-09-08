@@ -19,15 +19,10 @@ class SunglassHutINSpider(JSONBlobSpider):
             )
 
     def post_process_item(self, item, response, location):
-        item["lat"], item["lon"] = location["lat_long"]["coordinates"]
+        item["lon"], item["lat"] = location["lat_long"]["coordinates"]
         item["branch"] = item.pop("name")
         item["postcode"] = location.get("pincode")
         item["street_address"] = item.pop("addr_full")
         phone = [i for i in location["contacts"] if "number" in i.keys()][0]
         item["phone"] = f"+{phone['country_code']} {phone['number']}"
         yield item
-
-
-# curl 'https://sunglasshut.in/api/service/application/catalog/v1.0/locations/?page_size=100000' \
-#   -H 'accept: application/json, text/plain, */*' \
-#   -H 'authorization: Bearer NjJlYjM3NTM1Zjk2NzkyOWRhY2EwM2UzOkZLX0dnVll3NA=='
