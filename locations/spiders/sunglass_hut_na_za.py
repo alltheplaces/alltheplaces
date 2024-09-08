@@ -15,6 +15,7 @@ class SunglassHutNAZASpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = location["store_title"].replace(self.item_attributes["brand"], "").strip()
+        item.pop("name")
         item["addr_full"] = item["addr_full"].split("<br/>")[-1]
         item["phone"] = Selector(text=location["store_name"]).xpath('.//a[contains(@href, "tel")]/@href').get()
         yield item
