@@ -15,7 +15,9 @@ class SunglassHut1Spider(SitemapSpider, StructuredDataSpider):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
         if "image" in item:
             item.pop("image")
-        location = parse_js_object(response.xpath('.//script[contains(text(), "__INITIAL__DATA__")]/text()').get())
+        if item["state"] in ["United Kingdom"]:
+            item.pop("state")
+        data = parse_js_object(response.xpath('.//script[contains(text(), "__INITIAL__DATA__")]/text()').get())
         item["extras"]["ref:google"] = data["document"].get("googlePlaceId")
         item["lat"] = data["document"]["yextDisplayCoordinate"]["latitude"]
         item["lon"] = data["document"]["yextDisplayCoordinate"]["longitude"]
