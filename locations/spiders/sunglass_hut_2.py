@@ -1,52 +1,50 @@
-from scrapy import Spider
+from scrapy.http import JsonRequest
 
-from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
+from locations.spiders.sunglass_hut_1 import SUNGLASS_HUT_SHARED_ATTRIBUTES
+
+SUNGLASS_HUT_4_COUNTRIES = {
+    "HK": 8,
+    "PT": 4,
+    "TR": 6,
+    "MENA": 11,  # Algeria, Bahrain, Cyprus, Egypt, Jordan, KSA, Kuwait, Lebanon, Oman, Qatar, UAE
+}
 
 
-class SunglassHut2Spider(Spider):
-    name = "sunglass_hut_2"
-    allowed_domains = [
-        "mena.sunglasshut.com",
-        "nl.sunglasshut.com",
-        "pt.sunglasshut.com",
-        "tr.sunglasshut.com",
-        "hk.sunglasshut.com",
-    ]
+class Sunglasshut4Spider(JSONBlobSpider):
+    download_timeout = 60  # TODO remove
+    name = "sunglass_hut_4"
+    item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
+    locations_key = "contentlets"
 
-    item_attributes = {"brand": "Sunglass Hut", "brand_wikidata": "Q136311"}
-
-    start_urls = [
-        "https://mena.sunglasshut.com/api/content/render/false/limit/9999/type/json/query/+contentType:SghStoreLocator%20+languageId:11%20+deleted:false%20+working:true/orderby/modDate%20desc",
-        "https://nl.sunglasshut.com/api/content/render/false/limit/9999/type/json/query/+contentType:SghStoreLocator%20+languageId:3%20+deleted:false%20+working:true/orderby/modDate%20desc",
-        "https://pt.sunglasshut.com/api/content/render/false/limit/9999/type/json/query/+contentType:SghStoreLocator%20+languageId:4%20+deleted:false%20+working:true/orderby/modDate%20desc",
-        "https://tr.sunglasshut.com/api/content/render/false/limit/9999/type/json/query/+contentType:SghStoreLocator%20+languageId:4%20+deleted:false%20+working:true/orderby/modDate%20desc",
-        "https://hk.sunglasshut.com/api/content/render/false/limit/9999/type/json/query/+contentType:SghStoreLocator%20+languageId:8%20+deleted:false%20+working:true/orderby/modDate%20desc",
-    ]
-
-    def parse(self, response):
-        for data in response.json()["contentlets"]:
-            item = DictParser.parse(data)
-            region = response.url.split("https://", 1)[1].split(".", 1)[0].lower()
-
-            if data["innerCountry"]:
-                item["country"] = data["innerCountry"]
-            else:
-                item["country"] = region.upper()
-                item["country"] = None if (item["country"] == "MENA") else item["country"]
-
-            item["ref"] = f"{region}-{data['seoUrl']}"
-
-            item["website"] = "https://{}.sunglasshut.com/{}/store-locator/{}".format(
-                region, ("en" if region == "mena" else region), data["seoUrl"]
+    def start_requests(self):
+        for cc, lang_id in SUNGLASS_HUT_4_COUNTRIES.items():
+            yield JsonRequest(
+                url=f"https://{cc}.sunglasshut.com/api/content/render/false/limit/9999/type/json/query/+contentType:SghStoreLocator%20+languageId:{lang_id}",
+                callback=self.parse,
+                meta={"country": cc},
             )
 
-            item["lat"] = data["geographicCoordinatesLatitude"]
-            item["lon"] = data["geographicCoordinatesLongitude"]
+    def post_process_item(self, item, response, location):
+        if response.meta["country"] == "MENA":
+            item["country"] = location.get("innerCountry")
+        else:
+            item["country"] = response.meta["country"]
+        url_code = response.meta["country"].lower()
+        if url_code == "mena":
+            item["website"] = f"https://{url_code}.sunglasshut.com/en/store-locator/{location['seoUrl']}"
+        else:
+            item["website"] = f"https://{url_code}.sunglasshut.com/{url_code}/store-locator/{location['seoUrl']}"
 
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(
-                " ".join(["{}: {}".format(day, data[day.lower()]) for day in DAYS_FULL]), delimiters=[" : "]
-            )
+        if item.get("state") is not None and item["state"].title() == "Namibia":
+            item["country"] = item.pop("state")
+        if item.get("state") is not None and item["state"].title() == "Portugal":
+            item.pop("state")
 
-            yield item
+        item["city"] = item["city"].replace("(China)", "").strip()
+        item["branch"] = item.pop("name")
+        item["opening_hours"] = OpeningHours()
+        for day in DAYS_FULL:
+            item["opening_hours"].add_ranges_from_string(day + " " + location.get(day.lower()).replace(" : ", " - "))
+        yield item

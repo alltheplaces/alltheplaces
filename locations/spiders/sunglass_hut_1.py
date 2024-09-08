@@ -3,11 +3,13 @@ from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
 
+SUNGLASS_HUT_SHARED_ATTRIBUTES = {"brand": "Sunglass Hut", "brand_wikidata": "Q136311"}
+
 
 # AU, CA, GB, GU, IE, NL, NZ, PR, US, VI
 class SunglassHut1Spider(SitemapSpider, StructuredDataSpider):
     name = "sunglass_hut_1"
-    item_attributes = {"brand": "Sunglass Hut", "brand_wikidata": "Q136311"}
+    item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
     allowed_domains = ["stores.sunglasshut.com"]
     sitemap_urls = ["https://stores.sunglasshut.com/robots.txt"]
 
