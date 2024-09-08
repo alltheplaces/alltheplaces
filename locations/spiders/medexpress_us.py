@@ -1,5 +1,6 @@
 import re
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -20,13 +21,12 @@ class MedexpressUSSpider(JSONBlobSpider):
         if "displayWebsiteUrl" in location:
             item["website"] = location["displayWebsiteUrl"].split("?")[0]
 
-        # All of the Medexpress locations' hours are Mo-Su 08:00-20:00.
-        if (
-            "hours" in location
-            and location["hours"]
-            and location["hours"]
-            == "1:8:00:20:00,2:8:00:20:00,3:8:00:20:00,4:8:00:20:00,5:8:00:20:00,6:8:00:20:00,7:8:00:20:00"
-        ):
-            item["opening_hours"] = "Mo-Su 08:00-20:00"
+        if location.get("hours"):
+            item["opening_hours"] = OpeningHours()
+            for rule in location.get("hours").split(","):
+                day, start_hour, start_min, end_hour, end_min = rule.split(":")
+                item["opening_hours"].add_range(
+                    DAYS[int(day) - 2], "{}:{}".format(start_hour, start_min), "{}:{}".format(end_hour, end_min)
+                )
 
         yield item
