@@ -1,100 +1,40 @@
-import json
-import re
+from typing import Iterable
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
-
-DAY_MAPPING = {
-    1: "Mo",
-    2: "Tu",
-    3: "We",
-    4: "Th",
-    5: "Fr",
-    6: "Sa",
-    7: "Su",
-    "Mo": 1,
-    "Tu": 2,
-    "We": 3,
-    "Th": 4,
-    "Fr": 5,
-    "Sa": 6,
-    "Su": 7,
-}
+from locations.pipelines.address_clean_up import clean_address
 
 
-class AlnaturaDESpider(scrapy.Spider):
+class AlnaturaDESpider(Spider):
     name = "alnatura_de"
-    item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811"}
+    item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.alnatura.de"]
-    start_urls = (
-        "https://www.alnatura.de/api/sitecore/stores/FindStoresforMap?"
-        "ElementsPerPage=10000&lat=50.99820058296841"
-        "&lng=7.811966062500009&radius=1483"
-        "&Tradepartner=Alnatura%20Super%20Natur%20Markt",
-    )
+    start_urls = ["https://www.alnatura.de/api/sitecore/stores/FindStoresforMap?ElementsPerPage=10000&lat=49.878708&lng=8.646927&radius=10000&Tradepartner=1"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse_hours(self, store_hours):
-        opening_hours = OpeningHours()
-        match = re.match(r"(.+?)-(.+?) +(\d.*?)-(.+?) Uhr", store_hours)
-        if match:
-            from_day = match.group(1).strip()
-            to_day = match.group(2).strip()
-            from_time = match.group(3).strip().replace(":", ".")
-            to_time = match.group(4).strip().replace(":", ".")
+    def start_requests(self) -> Iterable[JsonRequest]:
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
-            fhours = int(float(from_time))
-            fminutes = (float(from_time) * 60) % 60
-            fmt_from_time = "%d:%02d" % (fhours, fminutes)
-            thours = int(float(to_time))
-            tminutes = (float(to_time) * 60) % 60
-            fmt_to_time = "%d:%02d" % (thours, tminutes)
+    def parse(self, response: Response) -> Iterable[JsonRequest]:
+        for feature in response.json()["Payload"]:
+            feature_id = feature["Id"]
+            yield JsonRequest(url=f"https://www.alnatura.de/api/sitecore/stores/StoreDetails?storeid={feature_id}", meta={"lat": feature.get("Lat"), "lon": feature.get("Lng")}, callback=self.parse_feature)
 
-            for day in range(DAY_MAPPING[from_day], DAY_MAPPING[to_day] + 1):
-                opening_hours.add_range(
-                    day=DAY_MAPPING[day],
-                    open_time=fmt_from_time,
-                    close_time=fmt_to_time,
-                    time_format="%H:%M",
-                )
-
-        return opening_hours.as_opening_hours()
-
-    def parse_stores(self, response):
-        store = json.loads(response.text)
-        store = store["Payload"]
-
-        properties = {
-            "lat": response.meta.get("lat"),
-            "lon": response.meta.get("lng"),
-            "name": store["StoreName"],
-            "street": store["Street"],
-            "city": store["City"],
-            "postcode": store["PostalCode"],
-            "phone": store["Tel"],
-            "country": store["Country"],
-            "ref": response.meta.get("id"),
-        }
-
-        if store["OpeningTime"]:
-            hours = self.parse_hours(store.get("OpeningTime"))
-            if hours:
-                properties["opening_hours"] = hours
-
-        yield Feature(**properties)
-
-    def parse(self, response):
-        data = json.loads(response.text)
-
-        for stores in data["Payload"]:
-            yield scrapy.Request(
-                f"https://www.alnatura.de/api/sitecore/stores/StoreDetails" f"?storeid={stores['Id']}",
-                callback=self.parse_stores,
-                meta={
-                    "lat": stores["Lat"].replace(",", "."),
-                    "lng": stores["Lng"].replace(",", "."),
-                    "id": stores["Id"],
-                },
-            )
+    def parse_feature(self, response: Response) -> Iterable[Feature]:
+        feature = response.json()["Payload"]
+        feature["lat"] = response.meta["lat"]
+        feature["lon"] = response.meta["lon"]
+        item = DictParser.parse(feature)
+        item["street_address"] = clean_address([feature.get("Street"), feature.get("AddressExtension")])
+        item.pop("street", None)
+        if feature.get("StoreDetailPage"):
+            item["website"] = "https://www.alnatura.de" + feature["StoreDetailPage"]
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(feature.get("OpeningTime", ""))
+        yield item
