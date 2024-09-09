@@ -1,7 +1,8 @@
 import re
+from typing import Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -33,6 +34,7 @@ class LocationBankSpider(Spider):
                 detail_view_key = "id"
 
         for location in data["locations"]:
+            self.pre_process_data(location)
             location["phone"] = location.pop("primaryPhone")
             if location["additionalPhone1"]:
                 location["phone"] += "; " + location.pop("additionalPhone1")
@@ -58,7 +60,11 @@ class LocationBankSpider(Spider):
             # so that is being left unimplemented for now:
             # f"https://api.locationbank.net/storelocator/StoreLocatorAPI/locationDetails?LocationID={location['id']}&ClientID={self.client_id}"
 
-            yield from self.parse_item(item, location)
+            yield from self.post_process_item(item, response, location)
 
-    def parse_item(self, item: Feature, location: dict):
+    def pre_process_data(self, feature: dict) -> None:
+        """Override with any pre-processing on the data"""
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        """Override with any post process on the item"""
         yield item
