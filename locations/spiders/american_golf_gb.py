@@ -12,6 +12,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class AmericanGolfGBSpider(Spider):
     name = "american_golf_gb"
     item_attributes = {"brand": "American Golf", "brand_wikidata": "Q62657494"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [
         "https://www.americangolf.co.uk/on/demandware.store/Sites-AmericanGolf-GB-Site/en_GB/Stores-GetAllStores"
     ]
