@@ -1,4 +1,9 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.storefinders.algolia import AlgoliaSpider
 
 
@@ -13,16 +18,16 @@ class IowaUniversityUSSpider(AlgoliaSpider):
     index_name = "uihc_locations"
     referer = "https://uihc.org/locations"
 
-    def post_process_item(self, item, response, location):
-        item["ref"] = location["objectID"]
-        item["street_address"] = location["field_address:thoroughfare"]
-        item["city"] = location["field_address:locality"]
-        item["state"] = location["field_address:administrative_area"]
-        item["postcode"] = location["field_address:postal_code"]
-        item["lat"] = location["field_geolocation:lat"]
-        item["lon"] = location["field_geolocation:lon"]
-        item["phone"] = location.get("field_location_phone")
-        if services := location.get("services"):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["objectID"]
+        item["street_address"] = feature["field_address:thoroughfare"]
+        item["city"] = feature["field_address:locality"]
+        item["state"] = feature["field_address:administrative_area"]
+        item["postcode"] = feature["field_address:postal_code"]
+        item["lat"] = feature["field_geolocation:lat"]
+        item["lon"] = feature["field_geolocation:lon"]
+        item["phone"] = feature.get("field_location_phone")
+        if services := feature.get("services"):
             if "Same-Day Care" in services:
                 apply_category(Categories.CLINIC, item)
             else:

@@ -1,15 +1,13 @@
 import scrapy
 import xmltodict
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.spiders.crocs_eu import CrocsEUSpider
 
 
 class CrocsESSpider(scrapy.Spider):
     name = "crocs_es"
-    item_attributes = {
-        "brand": "Crocs",
-        "brand_wikidata": "Q926699",
-    }
+    item_attributes = CrocsEUSpider.item_attributes
 
     def start_requests(self):
         yield scrapy.Request(
@@ -20,14 +18,10 @@ class CrocsESSpider(scrapy.Spider):
     def parse(self, response):
         json_data = xmltodict.parse(response.text)
         for data in json_data["markers"]["marker"]:
-            properties = {
-                "name": data["@name"],
-                "addr_full": data["@addressNoHtml"],
-                "email": data["@email"],
-                "ref": data["@id_store"],
-                "lat": data["@lat"],
-                "lon": data["@lng"],
-                "website": data["@link"],
-            }
-
-            yield Feature(**properties)
+            for k in list(data.keys()):
+                data[k[1:]] = data.pop(k)
+            item = DictParser.parse(data)
+            item["ref"] = data["id_store"]
+            item["addr_full"] = data["addressNoHtml"]
+            item["website"] = data["link"]
+            yield item

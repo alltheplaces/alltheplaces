@@ -2,22 +2,14 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
+from locations.hours import DAYS_EN
 from locations.items import Feature
-
-day_formats = {
-    "Mon": "Mo",
-    "Tues": "Tu",
-    "Wed": "We",
-    "Thur": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su",
-}
 
 
 class TopsSpider(scrapy.Spider):
     name = "tops"
-    item_attributes = {"brand": "Tops", "brand_wikidata": "Q7825137"}
+    item_attributes = {"brand": "Tops", "brand_wikidata": "Q7825137", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.topsmarkets.com"]
 
     start_urls = ("http://www.topsmarkets.com/StoreLocator/Store_MapLocation_S.las?State=all",)
@@ -62,7 +54,7 @@ class TopsSpider(scrapy.Spider):
         m = []
         for day in days:
             d_split = day.split(": ")
-            d_split[0] = day_formats[d_split[0]]
+            d_split[0] = DAYS_EN[d_split[0]]
             m.append((d_split[0], d_split[1]))
             # Now we have something like: ("Mo", "10AM-9PM")
             #                         OR: ("Mo", "10:30AM-9:30PM")

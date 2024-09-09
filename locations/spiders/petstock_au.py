@@ -1,5 +1,10 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.algolia import AlgoliaSpider
 
@@ -12,29 +17,29 @@ class PetstockAUSpider(AlgoliaSpider):
     index_name = "location_prod"
     referer = "https://www.petstock.com.au/"
 
-    def pre_process_data(self, location):
-        location["ref"] = location.pop("handle")
-        location["coordinates"] = location.pop("_geoloc")
-        location["address"] = clean_address([location.pop("addressLine1"), location.pop("addressLine2")])
-        location["website"] = "https://www.petstock.com.au/store/" + location["ref"]
+    def pre_process_data(self, feature: dict):
+        feature["ref"] = feature.pop("handle")
+        feature["coordinates"] = feature.pop("_geoloc")
+        feature["address"] = clean_address([feature.pop("addressLine1"), feature.pop("addressLine2")])
+        feature["website"] = "https://www.petstock.com.au/store/" + feature["ref"]
 
-    def post_process_item(self, item, response, location):
-        if location["isActive"] is not True:
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature["isActive"] is not True:
             # Ignore closed locations.
             return
 
         if item["name"].startswith("Petstock "):
             item["branch"] = item.pop("name").removeprefix("Petstock ")
 
-        if location["services"]["isStore"] is True:
+        if feature["services"]["isStore"] is True:
             apply_category(Categories.SHOP_PET, item)
-        elif location["services"]["isVetClinic"] is True:
+        elif feature["services"]["isVetClinic"] is True:
             apply_category(Categories.VETERINARY, item)
 
         hours_string = " ".join(
             [
                 day_hours["day"] + ": " + day_hours["openHours"]["open"] + "-" + day_hours["openHours"]["close"]
-                for day_hours in location["openingHours"]
+                for day_hours in feature["openingHours"]
             ]
         )
         day_pairs = [
