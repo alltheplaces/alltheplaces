@@ -1,9 +1,13 @@
-from scrapy import Request, Spider
+from typing import Iterable
+
+from scrapy import Request
+from scrapy.http import Response
 
 from locations.categories import Categories, FuelCards, PaymentMethods, apply_yes_no
 from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 PAYMENT_MAP = {
@@ -30,57 +34,55 @@ PAYMENT_MAP = {
 }
 
 
-class HertzSpider(Spider):
+class HertzSpider(JSONBlobSpider):
     name = "hertz"
     item_attributes = {"extras": Categories.CAR_RENTAL.value}  # "brand" is applied in code
+    locations_key = "data"
+    custom_settings = {"CONCURRENT_REQUESTS": 4}  # Let's be more gentle with the API
 
     def start_requests(self):
         for lat, lon in point_locations("earth_centroids_iseadgg_346km_radius.csv"):
             yield Request(
-                f"https://ecom.mss.hertz.io/mdm-locations/internal-lookup/geo-search/hertz/?lat={lat}&long={lon}&radius=347"
+                f"https://ecom.mss.hertz.io/mdm-locations/internal-lookup/geo-search/hertz/?lat={lat}&long={lon}&radius=1000&locationTypes=AP,HT,LC,FB,CR,RA,BT,BS,DL,AT,TF"
             )
 
-    def parse(self, response):
-        for location in response.json()["data"]:
-            item = Feature()
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("address") or {})
+        feature.update(feature.pop("contact_info") or {})
+        feature["name"].removeprefix("Hertz Car Rental - ").removeprefix("Hertz Truck Rental - ")
 
-            name = location["name"].removeprefix("Hertz Car Rental - ").removeprefix("Hertz Truck Rental - ")
-            if location.get("ownership_type") == "CORPORATE":
-                # Only apply brand tags to "Corporate" type locations
-                item["brand"] = "Hertz"
-                item["brand_wikidata"] = "Q1543874"
-                item["branch"] = name
-            else:
-                item["name"] = name
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["oag"]
 
-            item["extras"]["fax"] = location["contact_info"]["fax"]
-            item["email"] = location["contact_info"]["email"]
-            item["website"] = location["website_urls"]["full_url"]
-            item["ref"] = location["oag"]
+        self.crawler.stats.inc_value(f"atp/{self.name}/ownership_type/{feature.get('ownership_type')}")
 
-            item["street_address"] = merge_address_lines(
-                [location["address"]["address1"], location["address"]["address2"]]
-            )
-            item["city"] = location["address"]["city"]
-            item["lat"] = location["address"]["latitude"]
-            item["country"] = location["address"]["country_short"]
-            item["postcode"] = location["address"]["postal_code"]
-            item["state"] = location["address"]["state_short"]
-            item["lon"] = location["address"]["longitude"]
+        if feature.get("ownership_type", "").lower() in ["corporate", "licensee"]:
+            # Only apply the brand for corporate and licensee locations
+            item["brand"] = "Hertz"
+            item["brand_wikidata"] = "Q1543874"
+            item["branch"] = item.pop("name")
 
-            if location["contact_info"]["phone"]:
-                item["phone"] = location["contact_info"]["phone"]["international_phone_number"]
+        item["extras"]["fax"] = feature.get("fax")
+        if feature.get("phone"):
+            item["phone"] = feature.get("phone", {}).get("international_phone_number")
 
-            oh = OpeningHours()
-            for day_idx, day_hours in location["curated_days"].items():
-                day = DAYS[int(day_idx) - 1]
-                for hours in day_hours:
-                    oh.add_range(day, hours["start_time"], hours["end_time"])
-            item["opening_hours"] = oh
+        item["website"] = feature["website_urls"]["full_url"]
 
-            if location.get("allowed_payment_methods"):
-                for payment in location["allowed_payment_methods"]:
-                    if payment_tag := PAYMENT_MAP.get(payment):
-                        apply_yes_no(payment_tag, item, True)
+        item["street_address"] = merge_address_lines([feature["address1"], feature["address2"]])
+        item["country"] = feature["country_short"]
+        item["state"] = feature["state_short"]
+        self.crawler.stats.inc_value(f"atp/{self.name}/country/{item['country']}")
 
-            yield item
+        oh = OpeningHours()
+        for day_idx, day_hours in feature["curated_days"].items():
+            day = DAYS[int(day_idx) - 1]
+            for hours in day_hours:
+                oh.add_range(day, hours["start_time"], hours["end_time"])
+        item["opening_hours"] = oh
+
+        if payment_methods := feature.get("allowed_payment_methods"):
+            for payment in payment_methods:
+                if payment_tag := PAYMENT_MAP.get(payment):
+                    apply_yes_no(payment_tag, item, True)
+
+        yield item
