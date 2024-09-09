@@ -476,6 +476,7 @@ class Extras(Enum):
     HALAL = "diet:halal"
     ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
+    KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
