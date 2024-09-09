@@ -355,17 +355,12 @@ class GbfsSpider(CSVFeedSpider):
             item["ref"] = item["extras"]["ref:gbfs"] = "{}:{}".format(kwargs["System ID"], station["station_id"])
             item["extras"]["ref:gbfs:{}".format(kwargs["System ID"])] = str(station["station_id"])
 
-            item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
             if "capacity" in station:
                 item["extras"]["capacity"] = str(station["capacity"])
             # This URL isn't POI specific, but it is Network specific
             item["website"] = kwargs["URL"]
 
-            # TODO: we could do with the vehicles types, then add OSM tags
-            # eg amenity=bicycle_rental, amenity=kick-scooter_rental, amenity=motorcycle_rental, amenity=car_rental
-            # but until then, we can do a white lie and call it public transit
-            # item["extras"]["public_transport"] = "stop_position"
-
+            # TODO: Map all brands/names
             brand_mapped = False
             for brand in BRAND_MAPPING:
                 if kwargs["Name"] in BRAND_MAPPING[brand]["names"]:
@@ -375,6 +370,7 @@ class GbfsSpider(CSVFeedSpider):
                     brand_mapped = True
                     break
             if not brand_mapped:
+                item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
                 if "bike" in kwargs["Name"].lower() or "cycle" in kwargs["Name"].lower():
                     apply_category(Categories.BICYCLE_RENTAL, item)
                 else:
