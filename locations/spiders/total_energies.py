@@ -92,7 +92,8 @@ class TotalEnergiesSpider(WoosmapSpider):
         "ffc": "payment:fleet_fuel_card",
         "eurotrafic": "payment:eurotrafic",
         "carteclubtotal": "payment:club_total_card",
-        # TODO: other cards: proficard bonjour mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
+        "mpesa": PaymentMethods.MPESA,
+        # TODO: other cards: proficard mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
         # Extras
         "atm": Extras.ATM,
         "absaatm": Extras.ATM,
@@ -106,6 +107,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         "standardchartered": Extras.ATM,
         "carwash": Extras.CAR_WASH,
         "restroom": Extras.TOILETS,
+        "restroom_tn": Extras.TOILETS,
         "toilets": Extras.TOILETS,
         "showers": Extras.SHOWERS,
         "freewifi": Extras.WIFI,
@@ -115,12 +117,54 @@ class TotalEnergiesSpider(WoosmapSpider):
         "carglass": "service:vehicle:glass",
         "generator": Extras.BACKUP_GENERATOR,
     }
+    FOOD_TAGS = [
+        "burgerking",
+        "debonairspizza",
+        "fishaways",
+        "greggs",
+        "hot_dog",
+        "hotsnacks",
+        "kfc",
+        "mcdonalds",
+        "pizzahut",
+        "restaurant",
+        "restaurant_be",
+        "restaurantfr",
+        "spur",
+        "steers",
+    ]
 
     def parse_item(self, item, feature, **kwargs):
         if feature["properties"]["user_properties"]["status"] != "2":
             return
         if feature["properties"]["user_properties"]["brand"] == "partners":
             return
+
+        # Some locations have flipped coordinates - all gas stations of certain brands (Agip) and
+        # some, but not all stations of other brands (Cepsa).
+
+        lat, lon = get_lat_lon(item)
+        coords_country = reverse_geocoder.get((lat, lon), mode=1, verbose=False)["cc"]
+        flipped_coords_country = reverse_geocoder.get((lon, lat), mode=1, verbose=False)["cc"]
+        expected_country = item["country"]
+
+        if expected_country == flipped_coords_country and expected_country != coords_country:
+            set_lat_lon(item, lon, lat)
+
+        # As we know the name of the shop attached we create its own POI
+        if "bonjour" in feature["properties"]["tags"] or "cafebonjour" in feature["properties"]["tags"]:
+            bonjour_shop_item = item.deepcopy()
+            bonjour_shop_item["ref"] = item.get("ref") + "-attached-shop"
+            bonjour_shop_item["name"] = "Bonjour"
+            bonjour_shop_item["brand"] = "Bonjour"
+            bonjour_shop_item["brand_wikidata"] = "Q110278299"
+            apply_category(Categories.SHOP_CONVENIENCE, bonjour_shop_item)
+            yield bonjour_shop_item
+
+        # As we do not know the name of shop/restaurant attached, we apply to main item
+        if "shop" in feature["properties"]["tags"]:
+            apply_yes_no("shop", item, True)
+
         if feature["properties"]["user_properties"]["poiType"] == "t002":
             if "be_borne_electrique" in feature["properties"]["tags"]:
                 apply_category(Categories.CHARGING_STATION, item)
@@ -134,9 +178,6 @@ class TotalEnergiesSpider(WoosmapSpider):
 
         self.apply_services(item, feature)
 
-        if "shop" in feature["properties"]["tags"]:
-            apply_category(Categories.SHOP_CONVENIENCE, item)
-
         if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):
             item.update(brand)
         else:
@@ -144,16 +185,7 @@ class TotalEnergiesSpider(WoosmapSpider):
                 f'atp/{self.name}/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
             )
 
-        # Some locations have flipped coordinates - all gas stations of certain brands (Agip) and
-        # some, but not all stations of other brands (Cepsa).
-
-        lat, lon = get_lat_lon(item)
-        coords_country = reverse_geocoder.get((lat, lon), mode=1, verbose=False)["cc"]
-        flipped_coords_country = reverse_geocoder.get((lon, lat), mode=1, verbose=False)["cc"]
-        expected_country = item["country"]
-
-        if expected_country == flipped_coords_country and expected_country != coords_country:
-            set_lat_lon(item, lon, lat)
+        item["branch"] = item.pop("name")
 
         yield item
 
@@ -164,5 +196,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         for tag in tags:
             if match := self.SERVICES_MAPPING.get(tag):
                 apply_yes_no(match, item, True)
+            elif tag in self.FOOD_TAGS:
+                apply_yes_no("food", item, True)
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/unknown_tag/{tag}")
