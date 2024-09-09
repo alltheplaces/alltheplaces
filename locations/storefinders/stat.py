@@ -33,3 +33,6 @@ class StatSpider(Spider):
             item["opening_hours"] = oh
 
             yield from self.post_process_item(item, response, store)
+
+    def post_process_item(self, item, response, store):
+        yield item
