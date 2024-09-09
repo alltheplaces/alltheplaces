@@ -5,14 +5,12 @@ from scrapy.linkextractors import LinkExtractor
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 
 
 class ToyotaUSSpider(scrapy.Spider):
     name = "toyota_us"
-    item_attributes = {
-        "brand": "Toyota",
-        "brand_wikidata": "Q53268",
-    }
+    item_attributes = TOYOTA_SHARED_ATTRIBUTES
     allowed_domains = ["www.toyota.com"]
     start_urls = ["https://www.toyota.com/dealers/directory/"]
 
