@@ -4,10 +4,10 @@ from urllib.parse import urljoin
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from locations.items import Feature
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
+
 
 class AmericanGolfGBSpider(Spider):
     name = "american_golf_gb"
@@ -31,13 +31,10 @@ class AmericanGolfGBSpider(Spider):
             item["email"] = location["email"]
 
             if location.get("storeHours"):
-               item["opening_hours"] = OpeningHours()
-               for day in map(str.lower, DAYS_FULL):
-                   day_hours=location["storeHours"][format(day)].strip()
-                   if "CLOSED" in day_hours.upper():
-                       continue
-                   item["opening_hours"].add_range(
-                       day,
-                       day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1]
-                   )
+                item["opening_hours"] = OpeningHours()
+                for day in map(str.lower, DAYS_FULL):
+                    day_hours = location["storeHours"][format(day)].strip()
+                    if "CLOSED" in day_hours.upper():
+                        continue
+                    item["opening_hours"].add_range(day, day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1])
             yield item
