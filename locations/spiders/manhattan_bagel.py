@@ -1,8 +1,8 @@
-
 from typing import Any
 
-from scrapy import Spider, FormRequest
+from scrapy import FormRequest, Spider
 from scrapy.http import Response
+
 from locations.dict_parser import DictParser
 
 
@@ -11,7 +11,6 @@ class ManhattanBagelSpider(Spider):
 
     name = "manhattan_bagel"
     item_attributes = {"brand": "Manhattan Bagel", "brand_wikidata": "Q64517333"}
-
 
     def start_requests(self):
         url = "https://www.manhattanbagel.com/wp-admin/admin-ajax.php"
