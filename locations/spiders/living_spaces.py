@@ -1,47 +1,21 @@
-import json
-import re
+from typing import Any
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Response
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
-class LivingSpacesSpider(scrapy.Spider):
+class LivingSpacesSpider(Spider):
     name = "living_spaces"
     item_attributes = {"brand": "Living Spaces", "brand_wikidata": "Q63626177"}
-    allowed_domains = ["livingspaces.com"]
-    start_urls = ("https://www.livingspaces.com/stores",)
+    start_urls = ["https://www.livingspaces.com/api/navigationapi/getStores"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response):
-        urls = response.xpath('//div[@class="st-detail"]/a/@href').extract()
-
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
-
-    def parse_location(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-        ).extract_first()
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-
-        if data:
-            store_data = json.loads(data)
-
-            properties = {
-                "ref": ref,
-                "name": response.xpath('//h1[@class="page-title"]/text()').extract_first().strip(),
-                "addr_full": store_data["address"]["streetAddress"],
-                "city": store_data["address"]["addressLocality"],
-                "state": store_data["address"]["addressRegion"],
-                "postcode": store_data["address"]["postalCode"],
-                "country": store_data["address"]["addressCountry"],
-                "phone": store_data.get("telephone"),
-                "lat": float(store_data["geo"]["latitude"]),
-                "lon": float(store_data["geo"]["longitude"]),
-                "website": store_data.get("url"),
-            }
-
-            yield Feature(**properties)
-
-        else:
-            pass
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["data"]:
+            item = DictParser.parse(location)
+            item["ref"] = location["code"]
+            item["branch"] = item.pop("name")
+            item["website"] = "https://www.livingspaces.com" + location["storePageUrl"]
+            yield item

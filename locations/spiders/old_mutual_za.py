@@ -1,4 +1,5 @@
 from chompjs import parse_js_object
+from scrapy import Request
 
 from locations.categories import Categories
 from locations.hours import DAYS_FULL, OpeningHours
@@ -22,8 +23,19 @@ OLD_MUTUAL_BRANDS = {
 
 class OldMutualZASpider(JSONBlobSpider):
     name = "old_mutual_za"
-    start_urls = ["https://www.oldmutual.co.za/om-assets/js/page--src--templates--branch-locator-page-vue.ae9beb3b.js"]
+    start_urls = ["https://www.oldmutual.co.za/about/branch-locator/"]
     no_refs = True
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield Request(url=url, callback=self.fetch_js)
+
+    def fetch_js(self, response):
+        yield Request(
+            url="https://www.oldmutual.co.za"
+            + response.xpath('.//script[contains(@src, "/page--src--templates--branch-locator-page-vue")]/@src').get(),
+            callback=self.parse,
+        )
 
     def extract_json(self, response):
         data = parse_js_object(response.text[response.text.index("allBranch:{") :])["edges"]
