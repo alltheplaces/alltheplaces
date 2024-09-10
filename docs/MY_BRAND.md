@@ -15,7 +15,7 @@ as you would wish it to be shown on digital maps? Change your data
 and watch it filter through into others maps and applications!
 There is now a frictionless way to do this. Simply [add a small piece
 of software](../README.md#contributing-code) to this project that talks to your website or brand
-marketing partner ([we interface to many of these](../locations/storefinders/README.md)).
+marketing partner ([we interface to many of these](../locations/storefinders/README.md)). Failing that, publish your store locations as https://schema.org/LocalBusiness data.
 
 ### How much effort?
 
