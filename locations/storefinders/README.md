@@ -8,7 +8,7 @@ There is no need to duplicate the code to talk these store finder companies acro
 multiple spiders. Rather a [common spider is written in this directory](./rio_seo.py)
 which can then be called on by brand specific code e.g.
 
-* [United Band](../spiders/united_bank_us.py#L5)
+* [United Bank](../spiders/united_bank_us.py#L5)
 * [Pandora](../spiders/pandora.py#L7)
 
 In most cases the brand specific code will link the brand to a
