@@ -28,15 +28,15 @@ class AlnaturaDESpider(Spider):
             feature_id = feature["Id"]
             yield JsonRequest(
                 url=f"https://www.alnatura.de/api/sitecore/stores/StoreDetails?storeid={feature_id}",
-                meta={"lat": feature.get("Lat"), "lon": feature.get("Lng")},
+                meta={"lat": feature.get("Lat").replace(",", "."), "lon": feature.get("Lng").replace(",", ".")},
                 callback=self.parse_feature,
             )
 
     def parse_feature(self, response: Response) -> Iterable[Feature]:
         feature = response.json()["Payload"]
-        feature["lat"] = response.meta["lat"]
-        feature["lon"] = response.meta["lon"]
         item = DictParser.parse(feature)
+        item["lat"] = response.meta["lat"]
+        item["lon"] = response.meta["lon"]
         item["street_address"] = clean_address([feature.get("Street"), feature.get("AddressExtension")])
         item.pop("street", None)
         if feature.get("StoreDetailPage"):
