@@ -57,8 +57,14 @@ class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
                     item["name"] = " ".join(
                         popup_html.xpath('//div[contains(@class, "amlocator-title")]//text()').get().split()
                     )
-                if not item["website"]:
-                    item["website"] = popup_html.xpath('//a[contains(@class, "amlocator-link")]/@href').get()
+                links = popup_html.xpath('//a[contains(@class, "amlocator-link")]/@href').getall()
+                for link in links:
+                    if link.startswith("http") and not item["website"]:
+                        item["website"] = link
+                    elif link.startswith("tel:") and not item["phone"]:
+                        item["phone"] = link
+                    elif link.startswith("mailto:") and not item["email"]:
+                        item["email"] = link
             else:
                 popup_html = None
             yield from self.post_process_item(item, feature, popup_html)

@@ -57,7 +57,7 @@ class YextSearchSpider(Spider):
 
             emails = location["profile"].get("emails")
             if emails:
-                item["email"] = emails[0]
+                item["email"] = "; ".join(emails)
 
             item["facebook"] = location["profile"].get("facebookPageUrl")
 
@@ -71,6 +71,7 @@ class YextSearchSpider(Spider):
                 apply_yes_no(PaymentMethods.VISA, item, "Visa" in payment_methods, False)
                 apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_methods, False)
                 apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in payment_methods, False)
+                apply_yes_no(PaymentMethods.CONTACTLESS, item, "Contactless Payment" in payment_methods, False)
 
             item["opening_hours"] = self.parse_opening_hours(location)
 

@@ -25,17 +25,21 @@ DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa
 
 DAYS_EN = {
     "Monday": "Mo",
+    "Mondays": "Mo",
     "Mon": "Mo",
     "Mo": "Mo",
     "Tuesday": "Tu",
+    "Tuesdays": "Tu",
     "Tues": "Tu",
     "Tue": "Tu",
     "Tu": "Tu",
     "Wednesday": "We",
+    "Wednesdays": "We",
     "Weds": "We",
     "Wed": "We",
     "We": "We",
     "Thursday": "Th",
+    "Thursdays": "Th",
     "Thu": "Th",
     "Thr": "Th",
     "Thur": "Th",
@@ -43,12 +47,15 @@ DAYS_EN = {
     "Thurs": "Th",
     "Th": "Th",
     "Friday": "Fr",
+    "Fridays": "Fr",
     "Fri": "Fr",
     "Fr": "Fr",
     "Saturday": "Sa",
+    "Saturdays": "Sa",
     "Sat": "Sa",
     "Sa": "Sa",
     "Sunday": "Su",
+    "Sundays": "Su",
     "Sun": "Su",
     "Su": "Su",
 }
@@ -773,6 +780,8 @@ class OpeningHours:
                 return
             if close_time == "24:00" or close_time == "00:00":
                 close_time = "23:59"
+            if close_time == "24:00:00" or close_time == "00:00:00":
+                close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):

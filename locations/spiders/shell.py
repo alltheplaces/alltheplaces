@@ -29,6 +29,8 @@ class ShellSpider(GeoMeSpider):
             select_shop_item["name"] = "Shell Select"
             select_shop_item["brand"] = "Shell Select"
             select_shop_item["brand_wikidata"] = "Q124359752"
+            if item.get("shop_open_status") == "twenty_four_hour":
+                item["opening_hours"] = "Mo-Su 00:00-24:00"
             apply_category(Categories.SHOP_CONVENIENCE, select_shop_item)
             yield select_shop_item
 

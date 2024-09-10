@@ -83,14 +83,6 @@ class YextAnswersSpider(Spider, AutomaticSpiderGenerator):
                 else:
                     item["website"] = website_url_dict.get("url")
 
-            if (
-                not isinstance(item["lat"], float)
-                or not isinstance(item["lon"], float)
-                and location["data"].get("yextDisplayCoordinate")
-            ):
-                item["lat"] = location["data"]["yextDisplayCoordinate"].get("latitude")
-                item["lon"] = location["data"]["yextDisplayCoordinate"].get("longitude")
-
             item["opening_hours"] = self.parse_opening_hours(location)
 
             yield from self.parse_item(location, item) or []

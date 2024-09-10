@@ -61,6 +61,7 @@ class DictParser:
         "store-address",
         "physical-address",
         "full-address",
+        "formattedAddress",
         # ES
         "direccion",  # "address"
     ]
@@ -257,6 +258,7 @@ class DictParser:
                 "geo-position",
                 "position",
                 "display-coordinate",
+                "yextDisplayCoordinate",
             ],
         )
         # If not a good location object then use the parent
