@@ -25,6 +25,18 @@ Making the small effort to do this is saying to the wider community that this
 is the place to pick up my location data presented in a standard format alongside
 other brands.
 
+### Do I hide my own location data?
+
+Many brands go to great lengths to block access to
+their website by robots from anywhere (and even browsers from
+outside their local territory). There can be many reasons for
+this e.g. stopping price comparison sites pulling data.
+
+Your store location pages are often caught in the crossfire
+of this activity which is not what you intended. Using this
+project to publish your data is one way to make sure this
+is not happening.
+
 ### Is my open data correct?
 
 The gold standard in _open_ mapping data is
