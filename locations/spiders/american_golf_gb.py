@@ -20,17 +20,10 @@ class AmericanGolfGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = Feature()
-            item["ref"] = location["ID"]
-            item["lat"] = location["latitude"]
-            item["lon"] = location["longitude"]
-            item["branch"] = location["name"]
+            item = DictParser.parse(location)
             item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
-            item["city"] = location["city"]
-            item["postcode"] = location["postalCode"]
             url = "/stores?store=" + location["ID"]
             item["website"] = urljoin("https://www.americangolf.co.uk", url)
-            item["phone"] = location["phone"]
-            item["email"] = location["email"]
 
             if location.get("storeHours"):
                 item["opening_hours"] = OpeningHours()
