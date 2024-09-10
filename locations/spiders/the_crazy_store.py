@@ -10,6 +10,7 @@ class TheCrazyStoreSpider(Spider):
     name = "the_crazy_store"
     item_attributes = {"brand": "The Crazy Store", "brand_wikidata": "Q116620808"}
     start_urls = ["https://www.crazystore.co.za/store-finder"]
+    skip_auto_cc_domain = True
 
     def parse(self, response):
         for location in response.xpath('.//div[contains(@class,"geolocation-location")]'):
