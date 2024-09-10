@@ -246,7 +246,11 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        if obj.get("geometry") and obj["geometry"].get("type") == "Point":
+        if (
+            obj.get("geometry")
+            and obj["geometry"].get("type") is not None
+            and obj["geometry"].get("coordinates") is not None
+        ):
             item["geometry"] = obj["geometry"]
         else:
             location = DictParser.get_first_key(
