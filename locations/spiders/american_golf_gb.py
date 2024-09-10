@@ -1,6 +1,7 @@
 from typing import Any
 from urllib.parse import urljoin
 
+from locations.dict_parser import DictParser
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
