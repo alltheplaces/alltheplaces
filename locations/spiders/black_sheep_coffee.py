@@ -8,6 +8,7 @@ class BlackSheepCoffeeSpider(YextSpider):
     wanted_types = ["restaurant"]
 
     def parse_item(self, item, location, **kwargs):
-        item["website"] = item["website"].split("?")[0]  # Strip yext trackers
+        if item.get("website") is not None:
+            item["website"] = item["website"].split("?")[0]  # Strip yext trackers
 
         yield item
