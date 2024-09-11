@@ -1,8 +1,11 @@
 from scrapy.http import JsonRequest
 from scrapy.spiders import CSVFeedSpider
+from scrapy.utils.defer import maybe_deferred_to_future
+from twisted.internet.defer import DeferredList
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # General Bikeshare Feed Specification
 # https://gbfs.mobilitydata.org/
@@ -13,310 +16,220 @@ from locations.dict_parser import DictParser
 # are dockless.
 
 BRAND_MAPPING = {
-    "Bay Wheels": {
-        "names": ["Bay Wheels"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q16971391",
-    },
-    "BiciMAD": {
-        "names": ["bicimad", "BiciMAD (unofficial)"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q17402113",
-    },
-    "Bicing": {
-        "names": ["Bicing"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q1833385",
-    },
-    "Bike Share Toronto": {
-        "names": ["Bike Share Toronto"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q17018523",
-    },
-    "Bird": {
-        "names": [
-            "Bird Bordeaux",
-            "Bird Cascais",
-            "Bird Chalonsenchampagne",
-            "Bird Draguignan",
-            "Bird Larochesuryon",
-            "Bird Laval",
-            "Bird Millau",
-            "Bird Montlucon",
-            "Bird Sarreguemines",
-            "Bird Vichy",
-        ],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {"amenity": "bicycle_rental"},
-        "wikidata": "",
-    },
-    "Biki": {
-        "names": ["BIXI Montr\u00e9al"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q386",
-    },
-    "Bolt": {
-        "names": ["Bolt Technology O\u00dc"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
-        "wikidata": "Q20529164",
-    },
-    "Call a Bike": {
-        "names": ["Call a Bike"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q1060525",
-    },
-    "Capital Bikeshare": {
-        "names": ["Capital Bike Share"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q1034635",
-    },
-    "Citi Bike": {
-        "names": ["Citi Bike"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q2974438",
-    },
-    "Docomo Bike Share": {
-        "names": ["docomo bike share service"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q55533296",
-    },
-    "Donkey Republic": {
-        "names": [
-            "Donkey Republic Aalborg",
-            "Donkey Republic Aarhus",
-            "Donkey Republic Amsterdam",
-            "Donkey Republic Antwerp",
-            "Donkey Republic Ballerup",
-            "Donkey Republic Bamberg",
-            "Donkey Republic Budapest",
-            "Donkey Republic Cheltenham Spa",
-            "Donkey Republic Cirencester",
-            "Donkey Republic Copenhagen",
-            "Donkey Republic Den Haag",
-            "Donkey Republic Dordrecht",
-            "Donkey Republic Frederikshavn",
-            "Donkey Republic Geneva",
-            "Donkey Republic Ghent",
-            "Donkey Republic Glostrup",
-            "Donkey Republic Gorinchem",
-            "Donkey Republic Hiller\u00f8d",
-            "Donkey Republic Iisalmi",
-            "Donkey Republic Imatra",
-            "Donkey Republic Kiel",
-            "Donkey Republic Kingham",
-            "Donkey Republic Klampenborg",
-            "Donkey Republic Kotka",
-            "Donkey Republic Kouvola",
-            "Donkey Republic Kreuzlingen",
-            "Donkey Republic Lappeenranta",
-            "Donkey Republic Le Locle",
-            "Donkey Republic Liechtenstein",
-            "Donkey Republic Malm\u00f6",
-            "Donkey Republic M\u00e4nts\u00e4l\u00e4",
-            "Donkey Republic Mikkeli",
-            "Donkey Republic Moreton In Marsh",
-            "Donkey Republic Munich",
-            "Donkey Republic Neuch\u00e2tel",
-            "Donkey Republic Odense",
-            "Donkey Republic Oxford",
-            "Donkey Republic Porvoo",
-            "Donkey Republic Raasepori",
-            "Donkey Republic Regensburg",
-            "Donkey Republic Reykjavik",
-            "Donkey Republic Riihim\u00e4ki",
-            "Donkey Republic Rotterdam",
-            "Donkey Republic Rotterdam/Den Haag",
-            "Donkey Republic Store Heddinge",
-            "Donkey Republic The Cotswold Water Park",
-            "Donkey Republic Thun",
-            "Donkey Republic Turku",
-            "Donkey Republic Utrecht",
-            "Donkey Republic Valenciennes",
-            "Donkey Republic Worthing",
-            "Donkey Republic Yverdon-les-Bains",
-        ],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q63753939",
-    },
-    "Dott": {
-        "names": ["Dott Stockholm"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
-        "wikidata": "Q107463014",
-    },
-    "Ecobici": {
-        "names": ["Ecobici"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q5817067",
-    },
-    "HELLO CYCLING": {
-        "names": ["HELLO CYCLING"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q91231927",
-    },
-    "Lyft": {
-        "names": ["Lyft Scooters Chicago", "Lyft Scooters Denver"],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {},
-        "wikidata": "Q17077936",
-    },
-    "Metrorower": {
-        "names": ["METROROWER"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q123507620",
-    },
-    "Mevo": {
-        "names": ["MEVO"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q60860236",
-    },
-    "Neuron Mobility": {
-        "names": ["Neuron Mobility"],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {"amenity": "bicycle_rental"},
-        "wikidata": "",
-    },
-    "Nextbike": {
-        "names": [
-            "nextbike Bene\u0161ov",
-            "nextbike Bergamo",
-            "nextbike Berlin",
-            "nextbike Berounsko",
-            "nextbike BIH",
-            "nextbike Brno",
-            "nextbike Bulgaria",
-            "nextbike Burgenland Austria",
-            "nextbike \u010cesk\u00e1 T\u0159ebov\u00e1",
-            "nextbike Croatia",
-            "nextbike Cyprus",
-            "nextbike D\u00fcsseldorf",
-            "nextbike Dv\u016fr Kr\u00e1lov\u00e9",
-            "nextbike Frankfurt",
-            "nextbike Fr\u00fddek-M\u00edstek",
-            "nextbike Gie\u00dfen",
-            "nextbike G\u00fctersloh",
-            "nextbike Hav\u00ed\u0159ov",
-            "nextbike Hodon\u00edn",
-            "nextbike Ho\u0159ice",
-            "nextbike Hradec Kr\u00e1lov\u00e9",
-            "nextbike Jablonec",
-            "nextbike Ji\u010d\u00edn",
-            "nextbike Jihlava",
-            "nextbike Kassel",
-            "nextbike Kiev",
-            "nextbike Kladno",
-            "nextbike Klagenfurt Austria",
-            "nextbike Kl\u00e1\u0161terec nad Oh\u0159\u00ed",
-            "nextbike Konya",
-            "nextbike Kop\u0159ivnice",
-            "nextbike Leipzig",
-            "nextbike Le\u00f3n",
-            "nextbike Liberec",
-            "nextbike Lippstadt",
-            "nextbike LV",
-            "nextbike Marburg",
-            "nextbike Mladoboleslavsko",
-            "nextbike Moravsk\u00e1 T\u0159ebov\u00e1",
-            "nextbike Most",
-            "nextbike Nieder\u00f6sterreich Austria",
-            "nextbike Norderstedt",
-            "nextbike OlbramoviceVotice",
-            "nextbike Olomouc",
-            "nextbike Opava",
-            "nextbike Ostrava",
-            "nextbike Pelh\u0159imov",
-            "nextbike P\u00edsek",
-            "nextbike Praha",
-            "nextbike P\u0159erov",
-            "nextbike Romania",
-            "nextbike R\u00fcsselsheim am Main",
-            "nextbike Rychnovsko",
-            "nextbike Stirling",
-            "nextbike Switzerland",
-            "nextbike T\u0159eb\u00ed\u010d",
-            "nextbike Trutnov",
-            "nextbike Uhersk\u00e9 Hradi\u0161t\u011b",
-            "nextbike Vinnitsa (Ukraine)",
-            "nextbike Vrchlab\u00ed",
-            "nextbike Wiesbaden",
-            "nextbike Zl\u00edn",
-        ],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q2351279",
-    },
-    "Pony": {
-        "names": [
-            "Pony Angers",
-            "Pony Basque Country",
-            "Pony Beauvais",
-            "Pony Beziers",
-            "Pony Bordeaux",
-            "Pony Bourges",
-            "Pony Brussels",
-            "Pony Charleroi",
-            "Pony Evry",
-            "Pony Herouville",
-            "Pony La Roche-sur-Yon",
-            "Pony Li\u00e8ge",
-            "Pony Limoges",
-            "Pony Lorient",
-            "Pony Nice",
-            "Pony Olivet",
-            "Pony Paris",
-            "Pony Perpignan",
-            "Pony Poitiers",
-        ],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
-        "wikidata": "",
-    },
-    "PubliBike": {
-        "names": ["PubliBike"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q3555363",
-    },
-    "Shared Mobility": {"names": ["sharedmobility.ch"], "category": {}, "secondary_category": {}, "wikidata": ""},
-    "TIER": {
-        "names": ["TIER Basel", "TIER Bern", "TIER Paris", "TIER Stgallen", "TIER Winterthur", "TIER Zurich"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
-        "wikidata": "Q63386916",
-    },
-    "V\u00e9lib' Metropole": {
-        "names": ["V\u00e9lib' Metropole"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q1120762",
-    },
-    "Velospot": {
-        "names": ["Velospot"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
-        "wikidata": "Q56314221",
-    },
-    "Voi": {
-        "names": ["Voi Marseille", "Voi Switzerland"],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {},
-        "wikidata": "Q61650427",
-    },
+    "BA": {"brand": "Bay Wheels", "brand_wikidata": "Q16971391"},
+    "bcycle_bublr": {"brand": "Bublr Bikes", "brand_wikidata": "Q108789295"},
+    "bcycle_indego": {"brand": "Indego", "brand_wikidata": "Q19876452"},
+    "bcycle_memphis": {"brand": "Explore Bike Share", "brand_wikidata": "Q86706492"},
+    "bergen-city-bike": {"brand": "Bergen Bysykkel", "brand_wikidata": "Q109288835"},
+    "bicimad_madrid": {"brand": "BiciMAD", "brand_wikidata": "Q17402113"},
+    "bici_madrid": {"brand": "BiciMAD", "brand_wikidata": "Q17402113"},
+    "bike_barcelona": {"brand": "Bicing", "brand_wikidata": "Q1833385"},
+    "bike_buenosaires": {"brand": "BA Ecobici", "brand_wikidata": "Q18419538"},
+    "bike_share_toronto": {"brand": "Bike Share Toronto", "brand_wikidata": "Q17018523"},
+    "biketobike": {"brand": "Mi Bici Tu Bici", "brand_wikidata": "Q100272303"},
+    "BIKI_valladolid": {"brand": "Biki", "brand_wikidata": "Q111760142"},
+    "bird-bordeaux": {"brand": "Bird"},
+    "bird-cascais": {"brand": "Bird"},
+    "bird-chalonsenchampagne": {"brand": "Bird"},
+    "bird-draguignan": {"brand": "Bird"},
+    "bird-larochesuryon": {"brand": "Bird"},
+    "bird-laval": {"brand": "Bird"},
+    "bird-millau": {"brand": "Bird"},
+    "bird-montlucon": {"brand": "Bird"},
+    "bird-sarreguemines": {"brand": "Bird"},
+    "bird-vichy": {"brand": "Bird"},
+    "Bixi_MTL": {"brand": "Bixi", "brand_wikidata": "Q4919302"},
+    "bluebike": {"brand": "Blue-bike", "brand_wikidata": "Q17332642"},
+    "bluebikes": {"brand": "Bluebikes", "brand_wikidata": "Q3142157"},
+    "BoltEU_Brussels": {"brand": "Bolt", "brand_wikidata": "Q20529164"},
+    "cabi": {"brand": "Capital Bikeshare", "brand_wikidata": "Q1034635"},
+    "callabike": {"brand": "Call a Bike", "brand_wikidata": "Q1060525"},
+    "callabike_ice": {"brand": "Call a Bike", "brand_wikidata": "Q1060525"},
+    "cc_smartbike_antwerp": {"brand": "Velo", "brand_wikidata": "Q2413118"},
+    "cogo": {"brand": "CoGo Bike Share", "brand_wikidata": "Q91342219"},
+    "docomo-cycle-tokyo": {"brand": "Docomo Bike Share", "brand_wikidata": "Q55533296"},
+    "donkey_aalborg": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_aarhus": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_am": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_antwerp": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_ballerup": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_bamberg": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_budapest": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_cheltenham_spa": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_cirencester": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_copenhagen": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_den_haag": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_dordrecht": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_frederikshavn": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_ge": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_gh": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_glostrup": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_gorinchem": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_hillerod": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_iisalmi": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_imatra": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_kiel": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_kingham": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_klampenborg": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_kotka": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_kouvola": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_kreuzlingen": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_lappeenranta": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_le_locle": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_li": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_maentsaelae": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_malmoe": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_mikkeli": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_moreton_in_marsh": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_munich": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_neuchatel": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_odense": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_oxford": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_porvoo": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_raasepori": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_regensburg": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_reykjavik": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_riihimaki": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_rotterdam_den_haag": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_rt": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_store_heddinge": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_the_cotswold_water_park": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_thun": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_turku": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_ut": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_valenciennes": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_worthing": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "donkey_yverdon-les-bains": {"brand": "Donkey Republic", "brand_wikidata": "Q63753939"},
+    "dott-stockholm": {"brand": "Dott", "brand_wikidata": "Q107463014"},
+    "go_biki": {"brand": "Biki", "brand_wikidata": "Q98337927"},
+    "hellocycling": {"brand": "HELLO CYCLING", "brand_wikidata": "Q91231927"},
+    "inurba-gdansk": {"brand": "Mevo", "brand_wikidata": "Q60860236"},
+    "lyft_dca": {"brand": "Capital Bikeshare", "brand_wikidata": "Q1034635"},
+    "MEX": {"brand": "Ecobici", "brand_wikidata": "Q5817067"},
+    "netbike_bg": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "neuron_dud": {"brand": "Neuron Mobility"},
+    "nextbike_ba": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_bh": {"brand": "MOL Bubi", "brand_wikidata": "Q16971969"},
+    "nextbike_bn": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_bu": {"brand": "Belfast Bikes", "brand_wikidata": "Q19843240"},
+    "nextbike_ch": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_co": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_cq": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_cu": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_cy": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_dd": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_dj": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_dk": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_do": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ff": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_gg": {"brand": "OVO Bikes", "brand_wikidata": "Q120450856"},
+    "nextbike_hr": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ib": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ka": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_kn": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ko": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_la": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_le": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_li": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_lv": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_mz": {"brand": "MVGmeinRad", "brand_wikidata": "Q14541300"},
+    "nextbike_na": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nc": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ng": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nh": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nk": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nm": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nn": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nr": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nt": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nu": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_nw": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_pj": {"brand": "SRM Jaskółka", "brand_wikidata": "Q119107871"},
+    "nextbike_sl": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_td": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_te": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tf": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tg": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_th": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ti": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tj": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tk": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tl": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_to": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tq": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ts": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tt": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tu": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tv": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tx": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ty": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_tz": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_ud": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_uf": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_uk": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_uo": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_uv": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_vr": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_wn": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_wr": {"brand": "WienMobil Rad", "brand_wikidata": "Q111794110"},
+    "nextbike_xa": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_xb": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_xc": {"brand": "Nextbike", "brand_wikidata": "Q2351279"},
+    "nextbike_zz": {"brand": "Metrorower", "brand_wikidata": "Q123507620"},
+    "NYC": {"brand": "Citi Bike", "brand_wikidata": "Q2974438"},
+    "openvelo_aachen_velocity": {"brand": "Velocity Aachen", "brand_wikidata": "Q102348696"},
+    "oslobysykkel": {"brand": "Oslo Bysykkel", "brand_wikidata": "Q7107010"},
+    "Paris": {"brand": "Vélib' Metropole", "brand_wikidata": "Q1120762"},
+    "peacehealth_rides": {"brand": "PeaceHealth Rides", "brand_wikidata": "Q115393175"},
+    "pony_Angers": {"brand": "Pony"},
+    "pony_Basque_Country": {"brand": "Pony"},
+    "pony_Beauvais": {"brand": "Pony"},
+    "pony_Beziers": {"brand": "Pony"},
+    "pony_bordeaux": {"brand": "Pony"},
+    "pony_Bourges": {"brand": "Pony"},
+    "pony_brussels": {"brand": "Pony"},
+    "pony_Charleroi": {"brand": "Pony"},
+    "pony_Evry": {"brand": "Pony"},
+    "pony_Herouville": {"brand": "Pony"},
+    "pony_La_Roche_Sur_Yon": {"brand": "Pony"},
+    "pony_liège": {"brand": "Pony"},
+    "pony_Limoges": {"brand": "Pony"},
+    "pony_Lorient": {"brand": "Pony"},
+    "pony_Nice": {"brand": "Pony"},
+    "pony_Olivet": {"brand": "Pony"},
+    "pony_paris": {"brand": "Pony"},
+    "pony_Perpignan": {"brand": "Pony"},
+    "pony_poitiers": {"brand": "Pony"},
+    "publibike": {"brand": "PubliBike", "brand_wikidata": "Q3555363"},
+    "regiorad_stuttgart": {"brand": "RegioRad Stuttgart", "brand_wikidata": "Q57274085"},
+    "relay_bike_share": {"brand": "Relay Bike Share", "brand_wikidata": "Q48798195"},
+    "sharedmobility.ch": {"brand": "Shared Mobility"},
+    "stadtrad_hamburg": {"brand": "StadtRAD Hamburg", "brand_wikidata": "Q2326366"},
+    "tier_basel": {"brand": "TIER", "brand_wikidata": "Q63386916"},
+    "tier_bern": {"brand": "TIER", "brand_wikidata": "Q63386916"},
+    "tier_paris": {"brand": "TIER", "brand_wikidata": "Q63386916"},
+    "tier_stgallen": {"brand": "TIER", "brand_wikidata": "Q63386916"},
+    "tier_winterthur": {"brand": "TIER", "brand_wikidata": "Q63386916"},
+    "tier_zurich": {"brand": "TIER", "brand_wikidata": "Q63386916"},
+    "velospot_ch": {"brand": "Velospot", "brand_wikidata": "Q56314221"},
+    "voi_ch": {"brand": "Voi", "brand_wikidata": "Q61650427"},
+    "voi_Marseille": {"brand": "Voi", "brand_wikidata": "Q61650427"},
+}
+
+FORM_FACTOR_MAP = {
+    "bicycle": {"amenity": "bicycle_rental"},
+    "cargo_bicycle": {"amenity": "bicycle_rental", "rental": "cargo_bike"},
+    "car": {"amenity": "car_sharing"},
+    "moped": {},
+    "scooter_standing": {"amenity": "kick-scooter_rental"},
+    "scooter_seated": {"amenity": "kick-scooter_rental"},
+}
+
+PARKING_TYPE_MAP = {
+    "parking_lot": "surface",
+    "street_parking": "lane",
+    "underground_parking": "underground",
+    "sidewalk_parking": "on_kerb",
 }
 
 
@@ -329,54 +242,217 @@ class GbfsSpider(CSVFeedSpider):
     def parse_row(self, response, row):
         yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
 
-    def parse_gbfs(self, response, **kwargs):
-        try:
-            data = response.json()
-        except:
+    def set_localized_name(self, item, itemkey, station, stationkey):
+        if stationkey not in station:
             return
+        value = station[stationkey]
+        if isinstance(value, str):
+            if itemkey in ("name", "brand", "operator"):
+                item[itemkey] = value
+            else:
+                item["extras"][itemkey] = value
+        elif isinstance(value, list):
+            for translation in value:
+                item["extras"][f"{itemkey}:{translation['language']}"] = translation["text"]
+        else:
+            self.logger.error(f"Can't handle a localized {stationkey!r} of type {type(value)}")
 
-        for feed in DictParser.get_nested_key(data, "feeds") or []:
-            if feed["name"] == "station_information":
-                yield JsonRequest(url=feed["url"], cb_kwargs=kwargs, callback=self.parse_stations)
+    def defer_request_feed(self, all_feeds, feed_name, deferreds):
+        # List feeds by name.
+        feeds = [feed for feed in all_feeds if feed["name"] == feed_name]
 
-    def parse_stations(self, response, **kwargs):
-        try:
-            data = response.json()
-        except:
-            return
+        if len(feeds) > 0:
+            # If any feeds by that name exist, request the first.
+            deferreds.append(self.crawler.engine.download(JsonRequest(url=feeds[0]["url"])))
+            return True
+        else:
+            return False
 
-        for station in DictParser.get_nested_key(data, "stations") or []:
-            if station.get("address"):
-                station["street_address"] = station.pop("address")
-            station["country"] = kwargs["Country Code"]
+    def get_next_json(self, has_feed, responses):
+        if has_feed:
+            success, response = responses.pop(0)
+            if success:
+                try:
+                    return response.json()
+                except ValueError as e:
+                    self.logger.exception(e)
+        return None
 
-            item = DictParser.parse(station)
+    def get_shared_attributes_from_row(self, **kwargs):
+        shared_attributes = {"country": kwargs["Country Code"], "extras": {"network": kwargs["Name"]}}
 
-            item["ref"] = item["extras"]["ref:gbfs"] = "{}:{}".format(kwargs["System ID"], station["station_id"])
-            item["extras"]["ref:gbfs:{}".format(kwargs["System ID"])] = str(station["station_id"])
+        # TODO: Map all brands/names
+        if kwargs["System ID"] in BRAND_MAPPING:
+            shared_attributes.update(BRAND_MAPPING[kwargs["System ID"]])
+        else:
+            # In the absence of a known brand mapping, use the network name.
+            shared_attributes["brand"] = kwargs["Name"]
 
-            if "capacity" in station:
-                item["extras"]["capacity"] = str(station["capacity"])
-            # This URL isn't POI specific, but it is Network specific
-            item["website"] = kwargs["URL"]
+        return shared_attributes
 
-            # TODO: Map all brands/names
-            brand_mapped = False
-            for brand in BRAND_MAPPING:
-                if kwargs["Name"] in BRAND_MAPPING[brand]["names"]:
-                    apply_category(BRAND_MAPPING[brand]["category"], item)
-                    item["brand"] = brand
-                    item["brand_wikidata"] = BRAND_MAPPING[brand]["wikidata"]
-                    brand_mapped = True
-                    break
-            if not brand_mapped:
-                item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
-                if "bike" in kwargs["Name"].lower() or "cycle" in kwargs["Name"].lower():
-                    apply_category(Categories.BICYCLE_RENTAL, item)
+    def update_attributes_from_system_information(self, system_information, shared_attributes):
+        system_information = system_information.get("data", system_information)
+
+        self.set_localized_name(shared_attributes, "network", system_information, "name")
+
+        if "opening_hours" in system_information:
+            shared_attributes["opening_hours"] = system_information["opening_hours"]
+
+        self.set_localized_name(shared_attributes, "network:short", system_information, "short_name")
+        self.set_localized_name(shared_attributes, "operator", system_information, "operator")
+
+    def get_vehicle_types_categories(self, vehicle_types):
+        # Map from vehicle_type ID to OSM category
+        vehicle_types_categories = {}
+        for vehicle_type in DictParser.get_nested_key(vehicle_types, "vehicle_types") or []:
+            cat = dict(FORM_FACTOR_MAP.get(vehicle_type["form_factor"], {}))
+            if vehicle_type.get("propulsion_type") == "electric_assist":
+                if "rental" in cat:
+                    cat["rental"] += ";ebike"
                 else:
-                    apply_category({"public_transport": "stop_position"}, item)
+                    cat["rental"] = "ebike"
+            vehicle_types_categories[vehicle_type["vehicle_type_id"]] = cat
+        return vehicle_types_categories
 
-            if station.get("is_virtual_station"):
-                item["extras"]["physically_present"] = "no"
+    def get_station_status_categories(self, station_status, vehicle_types_categories):
+        # If a station in station_information doesn't have vechicle_type tags, get it from the station_status feed.
+        station_status_categories = {}
+        for station in DictParser.get_nested_key(station_status, "stations") or []:
+            station_status_categories[station["station_id"]] = [
+                vehicle_types_categories.get(vehicle_type["vehicle_type_id"], {})
+                for vehicle_type in station.get("vehicle_types_available", [])
+            ]
+        return station_status_categories
 
-            yield item
+    async def parse_gbfs(self, response, **kwargs):
+        try:
+            data = response.json()
+        except ValueError as e:
+            self.logger.exception(e)
+            return
+
+        feeds = DictParser.get_nested_key(data, "feeds") or []
+        deferreds = []
+
+        # Network and operator information
+        has_system_information = self.defer_request_feed(feeds, "system_information", deferreds)
+
+        # Vehicle types, used to determine feature category
+        has_vehicle_types = self.defer_request_feed(feeds, "vehicle_types", deferreds)
+
+        # Information about each docking station
+        has_station_information = self.defer_request_feed(feeds, "station_information", deferreds)
+
+        # Current status of each docking station.
+        # Only needed as fallback if station_information doesn't have vehicle type tags.
+        has_station_status = self.defer_request_feed(feeds, "station_status", deferreds)
+
+        if not has_station_information:
+            # Can't proceed without station locations.
+            self.logger.info(f"{kwargs['Name']}/{kwargs['System ID']} has no station locations")
+            return
+
+        # Send off all requests in parallel.
+        responses = await maybe_deferred_to_future(DeferredList(deferreds))
+
+        system_information = self.get_next_json(has_system_information, responses)
+        vehicle_types = self.get_next_json(has_vehicle_types, responses)
+        station_information = self.get_next_json(has_station_information, responses)
+        station_status = self.get_next_json(has_station_status, responses)
+
+        # Build a list of attributes common to all stations in this system.
+        # "network" is a better place than "brand" for the "system name," since a brand can have many non-interoperable networks
+        shared_attributes = self.get_shared_attributes_from_row(**kwargs)
+
+        if isinstance(system_information, dict):
+            self.update_attributes_from_system_information(system_information, shared_attributes)
+
+        if vehicle_types is None:
+            vehicle_types_categories = {}
+        else:
+            vehicle_types_categories = self.get_vehicle_types_categories(vehicle_types)
+
+        if station_status is None:
+            station_status_categories = {}
+        else:
+            station_status_categories = self.get_station_status_categories(station_status, vehicle_types_categories)
+
+        # Now scrape the stations.
+        for station in DictParser.get_nested_key(station_information, "stations") or []:
+            yield self.parse_station(
+                station, shared_attributes, vehicle_types_categories, station_status_categories, **kwargs
+            )
+
+    def parse_station(self, station, shared_attributes, vehicle_types_categories, station_status_categories, **kwargs):
+        item = Feature(**shared_attributes)
+
+        item["ref"] = item["extras"]["ref:gbfs"] = f"{kwargs['System ID']}:{station['station_id']}"
+        item["extras"][f"ref:gbfs:{kwargs['System ID']}"] = str(station["station_id"])
+
+        self.set_localized_name(item, "name", station, "name")
+        self.set_localized_name(item, "short_name", station, "short_name")
+
+        item["lat"] = station["lat"]
+        item["lon"] = station["lon"]
+
+        if "address" in station:
+            item["street_address"] = station["address"]
+
+        if "post_code" in station:
+            item["postcode"] = station["post_code"]
+
+        if "station_opening_hours" in station:
+            item["opening_hours"] = station["station_opening_hours"]
+
+        rental_methods = set(station.get("rental_methods", []))
+        apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "creditcard" in rental_methods)
+        apply_yes_no(PaymentMethods.APPLE_PAY, item, "applepay" in rental_methods)
+        apply_yes_no(PaymentMethods.GOOGLE_PAY, item, "androidpay" in rental_methods)
+
+        if station.get("is_virtual_station", None) is False:
+            # If true, "the station is a location *without* smart docking infrastructure."
+            # So, if true or absent, it could be a drop-off location, or a purely virtual station.
+            # If false, it must be a docking station.
+            item["extras"]["bicycle_rental"] = "docking_station"
+
+        if "station_area" in station:
+            item["geometry"] = station["station_area"]
+
+        if "parking_type" in station:
+            item["extras"]["parking"] = PARKING_TYPE_MAP.get(station["parking_type"])
+
+        if "contact_phone" in station:
+            item["phone"] = station["contact_phone"]
+
+        if "capacity" in station:
+            item["extras"]["capacity"] = str(station["capacity"])
+
+        vehicle_types_capacity = station.get("vehicle_types_capacity", [])
+        vehicle_docks_capacity = station.get("vehicle_docks_capacity", [])
+        total_vehicle_capacity = vehicle_types_capacity + vehicle_docks_capacity
+        if len(total_vehicle_capacity) > 0:
+            for vehicle_capacity in total_vehicle_capacity:
+                for vehicle_type_id in vehicle_capacity["vehicle_type_ids"]:
+                    cat = vehicle_types_categories.get(vehicle_type_id, {})
+                    apply_category(cat, item)
+                    if "rental" in cat and vehicle_capacity.get("count") is not None:
+                        for biketype in cat["rental"].split(";"):
+                            capacity_key = f"capacity:{biketype}"
+                            capacity = item["extras"].get(capacity_key, 0)
+                            capacity += vehicle_capacity["count"]
+                            item["extras"][capacity_key] = capacity
+        elif station["station_id"] in station_status_categories:
+            for cat in station_status_categories[station["station_id"]]:
+                apply_category(cat, item)
+
+        if station.get("is_charging_station"):
+            apply_category(Categories.CHARGING_STATION, item)
+
+        if "rental_uris" in station and "web" in station["rental_uris"]:
+            item["website"] = station["rental_uris"]["web"]
+
+        # If neither the vehicle type nor a brand preset were available, set a fallback category.
+        if "amenity" not in item["extras"] and not item.get("brand_wikidata"):
+            apply_category({"public_transport": "platform"}, item)
+
+        return item
