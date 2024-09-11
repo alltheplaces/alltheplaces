@@ -279,6 +279,7 @@ class GbfsSpider(CSVFeedSpider):
         return None
 
     def get_shared_attributes_from_row(self, **kwargs):
+        # "network" is a better place than "brand" for the "system name," since a brand can have many non-interoperable networks
         shared_attributes = {"country": kwargs["Country Code"], "extras": {"network": kwargs["Name"]}}
 
         # TODO: Map all brands/names
@@ -361,7 +362,6 @@ class GbfsSpider(CSVFeedSpider):
         station_status = self.get_next_json(has_station_status, responses)
 
         # Build a list of attributes common to all stations in this system.
-        # "network" is a better place than "brand" for the "system name," since a brand can have many non-interoperable networks
         shared_attributes = self.get_shared_attributes_from_row(**kwargs)
 
         if isinstance(system_information, dict):
