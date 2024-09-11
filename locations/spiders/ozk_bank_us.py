@@ -25,9 +25,6 @@ class OzkBankUSSpider(CrawlSpider, StructuredDataSpider):
         if item["phone"] == "+17702928000":
             return  # Duplicate ld json on every page
 
-        apply_category(Categories.BANK, item)
-        yield item
-
         if data := response.xpath('//div[@class="store-hours drive hours-box"]//astro-island/@props').get():
             atm = Feature()
             atm["opening_hours"] = self.parse_opening_hours(json.loads(data))
@@ -39,6 +36,9 @@ class OzkBankUSSpider(CrawlSpider, StructuredDataSpider):
             apply_yes_no(Extras.DRIVE_THROUGH, atm, True)
 
             yield atm
+
+        apply_category(Categories.BANK, item)
+        yield item
 
     def parse_opening_hours(self, data: dict) -> OpeningHours:
         oh = OpeningHours()
