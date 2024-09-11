@@ -1,10 +1,10 @@
 from typing import Iterable
 
+import geonamescache
 from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, FuelCards, PaymentMethods, apply_yes_no
-from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -39,11 +39,28 @@ class HertzSpider(JSONBlobSpider):
     item_attributes = {"extras": Categories.CAR_RENTAL.value}  # "brand" is applied in code
     locations_key = "data"
     custom_settings = {"CONCURRENT_REQUESTS": 4}  # Let's be more gentle with the API
+    gc = geonamescache.GeonamesCache()
 
     def start_requests(self):
-        for lat, lon in point_locations("earth_centroids_iseadgg_346km_radius.csv"):
+        yield Request("https://api.hertz.com/rest/geography/country", callback=self.get_cities)
+
+    def get_cities(self, response: Response):
+        for country in response.json()["data"]["model"]:
+            country_code = country["value"]
+            self.logger.info(f"Fetching cities for {country_code}")
             yield Request(
-                f"https://ecom.mss.hertz.io/mdm-locations/internal-lookup/geo-search/hertz/?lat={lat}&long={lon}&radius=1000&locationTypes=AP,HT,LC,FB,CR,RA,BT,BS,DL,AT,TF"
+                f"https://api.hertz.com/rest/geography/city/country/{country_code}",
+                callback=self.get_pois,
+                meta={"country": country_code},
+            )
+
+    def get_pois(self, response: Response) -> Iterable[dict]:
+        for city in response.json()["data"]["model"]:
+            self.logger.info(f"Fetching POIs for {city['name']}, {response.meta['country']}")
+            query = ", ".join([city["name"], response.meta["country"]])
+            yield Request(
+                f"https://ecom.mss.hertz.io/mdm-locations/internal-lookup/geo-search/hertz/?locationTypes=AP,HT,LC,FB,CR,RA,BT,BS,DL,AT,TF&radius=10000&search={query}",
+                callback=self.parse,
             )
 
     def pre_process_data(self, feature: dict) -> None:
@@ -53,8 +70,6 @@ class HertzSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["oag"]
-
-        self.crawler.stats.inc_value(f"atp/{self.name}/ownership_type/{feature.get('ownership_type')}")
 
         if feature.get("ownership_type", "").lower() in ["corporate", "licensee"]:
             # Only apply the brand for corporate and licensee locations
@@ -71,8 +86,6 @@ class HertzSpider(JSONBlobSpider):
         item["street_address"] = merge_address_lines([feature["address1"], feature["address2"]])
         item["country"] = feature["country_short"]
         item["state"] = feature["state_short"]
-        self.crawler.stats.inc_value(f"atp/{self.name}/country/{item['country']}")
-
         oh = OpeningHours()
         for day_idx, day_hours in feature["curated_days"].items():
             day = DAYS[int(day_idx) - 1]
