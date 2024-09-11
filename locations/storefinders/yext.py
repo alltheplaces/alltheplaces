@@ -47,9 +47,6 @@ class YextSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["meta"]["id"]
-            if not item["lat"] and not item["lon"] and "yextDisplayCoordinate" in location:
-                item["lat"] = location["yextDisplayCoordinate"]["latitude"]
-                item["lon"] = location["yextDisplayCoordinate"]["longitude"]
             item["street_address"] = " ".join(
                 filter(None, [location["address"].get("line1"), location["address"].get("line2")])
             )

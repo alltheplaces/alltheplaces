@@ -73,6 +73,13 @@ Missing by wikidata: 619
        -> https://www.wikidata.org/wiki/Special:EntityData/Q7797310.json
 ```
 
+You can also search by a location code such as "za" or "us-ct.geojson":
+```
+$ pipenv run scrapy nsi --detect-missing za
+Missing by wikidata: 66
+...
+```
+
 Check carefully if this is simply a scraper missing a wikidata entry, or if it is truely missing a scraper.
 
 ### Automatic POI categorisation

@@ -265,6 +265,7 @@ class DictParser:
                     "geo-position",
                     "position",
                     "display-coordinate",
+                    "yextDisplayCoordinate",
                 ],
             )
             # If not a good location object then use the parent
