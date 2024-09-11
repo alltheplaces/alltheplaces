@@ -1,101 +1,98 @@
+from datetime import datetime
 from typing import Iterable
 
-import geonamescache
-from scrapy import Request
+from scrapy import FormRequest, Request, Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, FuelCards, PaymentMethods, apply_yes_no
-from locations.hours import DAYS, OpeningHours
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import merge_address_lines
-
-PAYMENT_MAP = {
-    "AMEX": PaymentMethods.AMERICAN_EXPRESS,
-    "AMX": PaymentMethods.AMERICAN_EXPRESS,
-    "AXP": PaymentMethods.AMERICAN_EXPRESS,
-    "CHINAUNIONPAY": PaymentMethods.UNIONPAY,
-    "CHQ": PaymentMethods.CHEQUE,
-    "CSH": PaymentMethods.CASH,
-    "CUP": PaymentMethods.UNIONPAY,
-    "DC": PaymentMethods.DISCOVER_CARD,
-    "DINERS": PaymentMethods.DINERS_CLUB,
-    "DISC": PaymentMethods.DISCOVER_CARD,
-    "DISCOVER": PaymentMethods.DISCOVER_CARD,
-    "DKV": FuelCards.DKV,
-    "JCB": PaymentMethods.JCB,
-    "MASTER": PaymentMethods.MASTER_CARD,
-    "MASTERDEBIT": PaymentMethods.MASTER_CARD_DEBIT,
-    "MC": PaymentMethods.MASTER_CARD,
-    "UTA": FuelCards.UTA,
-    "VISA": PaymentMethods.VISA,
-    "VISADEBIT": PaymentMethods.VISA_DEBIT,
-    # TODO: CRQ, DB, ECH, FCH, HCC, VCH
-}
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class HertzSpider(JSONBlobSpider):
+# TODO: Hertz also owns Dollar and Thrifty (https://en.wikipedia.org/wiki/Hertz_Global_Holdings
+#       check if below spider can be re-used for those brands.
+class HertzSpider(Spider):
     name = "hertz"
-    item_attributes = {"extras": Categories.CAR_RENTAL.value}  # "brand" is applied in code
-    locations_key = "data"
-    custom_settings = {"CONCURRENT_REQUESTS": 4}  # Let's be more gentle with the API
-    gc = geonamescache.GeonamesCache()
+    item_attributes = {"brand": "Hertz", "brand_wikidata": "Q1543874"}
+    custom_settings = {"CONCURRENT_REQUESTS": 1}  # Let's be more gentle with the API
+    token = None
+    user_agent = BROWSER_DEFAULT
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "user-agent": BROWSER_DEFAULT,
+            "accept": "*/*",
+            "accept-language": "en-US",
+            "origin": "https://www.hertz.com",
+            "referer": "https://www.hertz.com/",
+        }
+    }
 
     def start_requests(self):
-        yield Request("https://api.hertz.com/rest/geography/country", callback=self.get_cities)
+        url = "https://api.hertz.io/api/login/token"
+        headers = {
+            "authorization": "Basic NjM5U0pXeTVUM2xJOXdpeHdVOUE3Q1JRUXpzQVpsT0RqclJ6dDdQeU1FRTpfYUR4UlA3ZVFORGNHLWt5LWY1MDhHSjlaQVdvRHoyMll2YjNqREZKZ2lv",
+            "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+        }
 
-    def get_cities(self, response: Response):
-        for country in response.json()["data"]["model"]:
-            country_code = country["value"]
-            self.logger.info(f"Fetching cities for {country_code}")
-            yield Request(
-                f"https://api.hertz.com/rest/geography/city/country/{country_code}",
-                callback=self.get_pois,
-                meta={"country": country_code},
-            )
+        formdata = {
+            "grant_type": "client_credentials",
+        }
+        yield FormRequest(url, headers=headers, formdata=formdata, callback=self.parse_token)
 
-    def get_pois(self, response: Response) -> Iterable[dict]:
-        for city in response.json()["data"]["model"]:
-            self.logger.info(f"Fetching POIs for {city['name']}, {response.meta['country']}")
-            query = ", ".join([city["name"], response.meta["country"]])
-            yield Request(
-                f"https://ecom.mss.hertz.io/mdm-locations/internal-lookup/geo-search/hertz/?locationTypes=AP,HT,LC,FB,CR,RA,BT,BS,DL,AT,TF&radius=10000&search={query}",
-                callback=self.parse,
-            )
+    def parse_token(self, response: Response):
+        self.token = response.json().get("access_token")
+        yield from self.get_locations_page(url="https://api.hertz.io/v1/locations/HERTZ?_page=1&_size=1000")
 
-    def pre_process_data(self, feature: dict) -> None:
-        feature.update(feature.pop("address") or {})
-        feature.update(feature.pop("contact_info") or {})
-        feature["name"].removeprefix("Hertz Car Rental - ").removeprefix("Hertz Truck Rental - ")
+    def get_locations_page(self, url: str):
+        yield Request(
+            url,
+            headers={
+                "authorization": f"Bearer {self.token}",
+                "correlation-id": "2eb91a71-31da-48e7-901d-a9437a9b3975",
+            },
+            callback=self.parse,
+        )
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["oag"]
-
-        if feature.get("ownership_type", "").lower() in ["corporate", "licensee"]:
-            # Only apply the brand for corporate and licensee locations
-            item["brand"] = "Hertz"
-            item["brand_wikidata"] = "Q1543874"
+    def parse(self, response: Response) -> Iterable[Feature]:
+        response = response.json()
+        for poi in response["data"]:
+            poi = poi["data"]
+            item = DictParser.parse(poi)
+            item["ref"] = poi.get("oag")
+            item["country"] = poi.get("countryCode")
             item["branch"] = item.pop("name")
+            item["extras"]["check_date"] = (
+                datetime.strptime(poi.get("lastUpdated"), "%a %b %d %H:%M:%S UTC %Y").strftime("%Y-%m-%d")
+                if poi.get("lastUpdated")
+                else None
+            )
+            item["extras"]["fax"] = poi.get("fax")
 
-        item["extras"]["fax"] = feature.get("fax")
-        if feature.get("phone"):
-            item["phone"] = feature.get("phone", {}).get("international_phone_number")
+            item["website"] = (
+                (
+                    "https://www.hertz.com/rentacar/location/"
+                    + (poi["country"] + "/" if poi["country"] else "")
+                    + (item["state"] + "/" if item["state"] else "")
+                    + (item["city"] + "/" if item["city"] else "")
+                    + (item["ref"] if item["ref"] else "")
+                )
+                .lower()
+                .replace(" ", "")
+            )
 
-        item["website"] = feature["website_urls"]["full_url"]
-
-        item["street_address"] = merge_address_lines([feature["address1"], feature["address2"]])
-        item["country"] = feature["country_short"]
-        item["state"] = feature["state_short"]
-        oh = OpeningHours()
-        for day_idx, day_hours in feature["curated_days"].items():
-            day = DAYS[int(day_idx) - 1]
-            for hours in day_hours:
-                oh.add_range(day, hours["start_time"], hours["end_time"])
-        item["opening_hours"] = oh
-
-        if payment_methods := feature.get("allowed_payment_methods"):
-            for payment in payment_methods:
-                if payment_tag := PAYMENT_MAP.get(payment):
-                    apply_yes_no(payment_tag, item, True)
-
-        yield item
+            item["street_address"] = poi.get("address2")
+            oh = OpeningHours()
+            for day, day_hours in poi.get("openHours", {}).items():
+                day = DAYS_EN.get(day.title())
+                if not day_hours:
+                    oh.set_closed(day)
+                    continue
+                for hours in day_hours:
+                    oh.add_range(day, hours["start"], hours["end"])
+            item["opening_hours"] = oh
+            apply_category(Categories.CAR_RENTAL, item)
+            yield item
+        if next_page := response["_links"].get("next", {}).get("href"):
+            yield from self.get_locations_page(next_page)
