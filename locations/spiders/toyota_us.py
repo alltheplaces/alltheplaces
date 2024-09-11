@@ -29,13 +29,17 @@ class ToyotaUSSpider(JSONBlobSpider):
         "Pinterest": SocialMedia.PINTEREST,
         "LinkedIn": SocialMedia.LINKEDIN,
     }
-
     CONTACT_TYPES = {
         "Main Dealer": "dealer",
         "Service": "service",
         "Parts": "parts",
         "Sales": "sales",
         "Parts and Service Departments": "service",
+    }
+    HOURS_TYPES = {
+        "General": "general",
+        "Service": "service",
+        "Parts": "parts",
     }
 
     def start_requests(self):
@@ -50,13 +54,8 @@ class ToyotaUSSpider(JSONBlobSpider):
 
     def fetch_cities(self, response):
         for city in response.xpath(".//li[@data-city-name]/@data-city-name").getall():
-            # self.crawler.stats.inc_value(f"atp/{self.name}/cities")
-            # self.crawler.stats.inc_value(f"atp/{self.name}/{response.meta['state']}/cities")
-            # 29500 cities in total
-
-            # This got 1216 items crawling 23565 pages before being killed. Most of the US, but a few bits missing
             yield Request(
-                url=f"https://www.toyota.com/service/tcom/dealerRefresh/city/{city.lower().replace(".","")}/state/{response.meta['state'].lower()}",
+                url=f"https://www.toyota.com/service/tcom/dealerRefresh/city/{city.lower().replace(".", "")}/state/{response.meta['state'].lower()}",
                 callback=self.parse,
             )
 
@@ -92,78 +91,75 @@ class ToyotaUSSpider(JSONBlobSpider):
                 contact = [contact for contact in contacts if contact["departmentName"]["value"] == contact_type][0]
             except IndexError:
                 continue
+            if "postalAddress" in contact:
+                self.parse_address(item, contact.get("postalAddress"))
+            self.parse_contact(item, contact, prefix)
 
-            if address := contact.get("postalAddress"):
-                for key, location_value in {
-                    "city": address["cityName"]["value"],
-                    "street_address": address["lineOne"]["value"],
-                    "country": address["countryID"],
-                    "postcode": address["postcode"]["value"],
-                    "state": address["stateOrProvinceCountrySubDivisionID"]["value"],
-                }.items():
-                    if item.get(key) is None:
-                        item[key] = location_value
-
-            phones = []
-            faxes = []
-            for number in contact["telephoneCommunication"]:
-                if number["channelCode"]["value"] == "Phone":
-                    phones.append(number["completeNumber"]["value"])
-                elif number["channelCode"]["value"] == "Fax":
-                    phones.append(number["completeNumber"]["value"])
-                else:
-                    self.crawler.stats.inc_value(
-                        f"atp/{self.name}/unknown_contact_type/{number['channelCode']['value']}"
-                    )
-            if item.get("phone") is None and phones != []:
-                item["phone"] = "; ".join(phones)
-            elif phones != []:
-                item["extras"][prefix + ":phone"] = "; ".join(phones)
-            if item["extras"].get("fax") is None and faxes != []:
-                item["extras"]["fax"] = "; ".join(faxes)
-            elif faxes != []:
-                item["extras"][prefix + ":fax"] = "; ".join(faxes)
-
-            for uri in contact["uricommunication"]:
-                if match := self.URI_MAPPING.get(uri["channelCode"]["value"]):
-                    if get_social_media(item, match) is None:
-                        set_social_media(item, match, uri["uriid"]["value"])
-                else:
-                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_uri/{uri['channelCode']['value']}")
-
-        hours_types = {
-            "General": "general",
-            "Service": "service",
-            "Parts": "parts",
-        }
         for hours_type in location["hoursOfOperation"]:
-            oh = OpeningHours()
-
-            for day_times in hours_type["daysOfWeek"]:
-                if "availabilityStartTimeMeasure" in day_times:
-                    units_start = day_times["availabilityStartTimeMeasure"]["unitCode"]
-                    units_end = day_times["availabilityEndTimeMeasure"]["unitCode"]
-                    oh.add_range(
-                        day_times["dayOfWeekCode"],
-                        str(timedelta(minutes=day_times["availabilityStartTimeMeasure"]["value"])),
-                        str(timedelta(minutes=day_times["availabilityEndTimeMeasure"]["value"])),
-                        time_format="%H:%M:%S",
-                    )
-                    if units_start != "MINUTE":
-                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_start}")
-                    if units_end != "MINUTE":
-                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_end}")
-                else:
-                    oh.set_closed(day_times["dayOfWeekCode"])
-
-            if suffix := hours_types.get(hours_type["hoursTypeCode"]):
-                if item.get("opening_hours") is None:
-                    item["opening_hours"] = oh.as_opening_hours()
-                else:
-                    item["extras"]["opening:hours:" + suffix] = oh.as_opening_hours()
-            else:
-                self.crawler.stats.inc_value(
-                    f"atp/{self.name}/unknown_opening_hours_type/{uri['channelCode']['value']}"
-                )
+            self.parse_hours(item, hours_type)
 
         yield item
+
+    def parse_address(self, item, address):
+        for key, location_value in {
+            "city": address["cityName"]["value"],
+            "street_address": address["lineOne"]["value"],
+            "country": address["countryID"],
+            "postcode": address["postcode"]["value"],
+            "state": address["stateOrProvinceCountrySubDivisionID"]["value"],
+        }.items():
+            if item.get(key) is None:
+                item[key] = location_value
+
+    def parse_contact(self, item, contact, prefix):
+        phones = []
+        faxes = []
+        for number in contact["telephoneCommunication"]:
+            if number["channelCode"]["value"] == "Phone":
+                phones.append(number["completeNumber"]["value"])
+            elif number["channelCode"]["value"] == "Fax":
+                phones.append(number["completeNumber"]["value"])
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/unknown_contact_type/{number['channelCode']['value']}")
+        if item.get("phone") is None and phones != []:
+            item["phone"] = "; ".join(phones)
+        elif phones != []:
+            item["extras"][prefix + ":phone"] = "; ".join(phones)
+        if item["extras"].get("fax") is None and faxes != []:
+            item["extras"]["fax"] = "; ".join(faxes)
+        elif faxes != []:
+            item["extras"][prefix + ":fax"] = "; ".join(faxes)
+
+        for uri in contact["uricommunication"]:
+            if match := self.URI_MAPPING.get(uri["channelCode"]["value"]):
+                if get_social_media(item, match) is None:
+                    set_social_media(item, match, uri["uriid"]["value"])
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/unknown_uri/{uri['channelCode']['value']}")
+
+    def parse_hours(self, item, hours_type):
+        oh = OpeningHours()
+        for day_times in hours_type["daysOfWeek"]:
+            if "availabilityStartTimeMeasure" in day_times:
+                units_start = day_times["availabilityStartTimeMeasure"]["unitCode"]
+                units_end = day_times["availabilityEndTimeMeasure"]["unitCode"]
+                oh.add_range(
+                    day_times["dayOfWeekCode"],
+                    str(timedelta(minutes=day_times["availabilityStartTimeMeasure"]["value"])),
+                    str(timedelta(minutes=day_times["availabilityEndTimeMeasure"]["value"])),
+                    time_format="%H:%M:%S",
+                )
+                if units_start != "MINUTE":
+                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_start}")
+                if units_end != "MINUTE":
+                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_end}")
+            else:
+                oh.set_closed(day_times["dayOfWeekCode"])
+
+        if suffix := self.HOURS_TYPES.get(hours_type["hoursTypeCode"]):
+            if item.get("opening_hours") is None:
+                item["opening_hours"] = oh.as_opening_hours()
+            else:
+                item["extras"]["opening:hours:" + suffix] = oh.as_opening_hours()
+        else:
+            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_opening_hours_type/{hours_type["hoursTypeCode"]}")
