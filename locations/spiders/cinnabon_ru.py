@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CinnabonRuSpider(JSONBlobSpider):
+class CinnabonRUSpider(JSONBlobSpider):
     name = "cinnabon_ru"
     item_attributes = {"brand": "Cinnabon", "brand_wikidata": "Q1092539", "extras": Categories.FAST_FOOD.value}
     start_urls = ["https://cinnabonrussia.com/locations/"]
