@@ -61,15 +61,15 @@ class HertzSpider(Spider):
             poi = poi["data"]
             item = DictParser.parse(poi)
             item["ref"] = poi.get("oag")
-            item["country"] = poi.get("countryCode")
             item["branch"] = item.pop("name")
+            item["country"] = poi.get("countryCode")
+            item["street_address"] = poi.get("address2")
             item["extras"]["check_date"] = (
                 datetime.strptime(poi.get("lastUpdated"), "%a %b %d %H:%M:%S UTC %Y").strftime("%Y-%m-%d")
                 if poi.get("lastUpdated")
                 else None
             )
             item["extras"]["fax"] = poi.get("fax")
-
             item["website"] = (
                 (
                     "https://www.hertz.com/rentacar/location/"
@@ -81,8 +81,8 @@ class HertzSpider(Spider):
                 .lower()
                 .replace(" ", "")
             )
+            item["extras"]["type"] = poi.get("type")
 
-            item["street_address"] = poi.get("address2")
             oh = OpeningHours()
             for day, day_hours in poi.get("openHours", {}).items():
                 day = DAYS_EN.get(day.title())
@@ -92,7 +92,9 @@ class HertzSpider(Spider):
                 for hours in day_hours:
                     oh.add_range(day, hours["start"], hours["end"])
             item["opening_hours"] = oh
+
             apply_category(Categories.CAR_RENTAL, item)
             yield item
+
         if next_page := response["_links"].get("next", {}).get("href"):
             yield from self.get_locations_page(next_page)
