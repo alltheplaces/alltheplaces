@@ -5,6 +5,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class KaporalFRSpider(Spider):
@@ -21,6 +22,7 @@ class KaporalFRSpider(Spider):
             if obj["__typename"] != "KaporalShop":
                 continue
             item = DictParser.parse(obj)
+            item["street_address"] = merge_address_lines([obj["street1"], obj["street2"]])
             item["website"] = item["extras"]["website:fr"] = "https://www.kaporal.com/fr_fr{}".format(obj["url"])
             item["extras"]["website:en"] = "https://www.kaporal.com/en_fr{}".format(obj["url"])
 
