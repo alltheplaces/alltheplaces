@@ -1,7 +1,7 @@
 from scrapy.http import JsonRequest
 
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.sunglass_hut_1 import SUNGLASS_HUT_SHARED_ATTRIBUTES
+from locations.spiders.sunglass_hut import SUNGLASS_HUT_SHARED_ATTRIBUTES
 
 
 class SunglassHutINSpider(JSONBlobSpider):
