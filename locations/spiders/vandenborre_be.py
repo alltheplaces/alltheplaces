@@ -9,7 +9,3 @@ class VandenBorreBESpider(StructuredDataSpider):
     def parse(self, response, **kwargs):
         for store in response.json()["markers"]:
             yield response.follow(store["url"], self.parse_sd)
-
-
-#
-#            print(store["url"])
