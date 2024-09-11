@@ -55,7 +55,7 @@ class ToyotaUSSpider(JSONBlobSpider):
     def fetch_cities(self, response):
         for city in response.xpath(".//li[@data-city-name]/@data-city-name").getall():
             yield Request(
-                url=f"https://www.toyota.com/service/tcom/dealerRefresh/city/{city.lower().replace(".", "")}/state/{response.meta['state'].lower()}",
+                url=f"https://www.toyota.com/service/tcom/dealerRefresh/city/{city.lower().replace('.', '')}/state/{response.meta['state'].lower()}",
                 callback=self.parse,
             )
 
