@@ -1,3 +1,4 @@
+import pycountry
 import scrapy
 
 from locations.categories import Categories, apply_category
@@ -12,49 +13,51 @@ class ToyotaEUSpider(JSONBlobSpider):
     name = "toyota_eu"
     item_attributes = TOYOTA_SHARED_ATTRIBUTES
     locations_key = "dealers"
-    available_countries = {
-        "am": "",
-        "at": "",
-        "az": "",
-        "ba": "",
-        "be": "",
-        "bg": "",
-        "ch": "",
-        "cy": "",
-        "cz": "",
-        "de": "",
-        "dk": "",
-        "ee": "",
-        "es": "",
-        "fi": "",
-        "fr": "MC",
-        "gb": "je|im|gg",
-        "ge": "",
-        "gr": "",
-        "hr": "",
-        "hu": "",
-        "is": "",
-        "it": "",
-        "lt": "",
-        "lv": "",
-        "nl": "",
-        "no": "",
-        "pl": "",
-        "pt": "",
-        "ro": "",
-        "rs": "",
-        "ru": "",
-        "se": "",
-        "si": "",
-        "sk": "",
-        "tr": "",
-        "ua": "",
-    }
+
+    all_countries = [country.alpha_2.lower() for country in pycountry.countries]
+    exclude_countries = [
+        "bf",  # toyota_africa
+        "bj",
+        "cd",
+        "cf",
+        "cg",
+        "ci",
+        "cm",
+        "gm",
+        "gn",
+        "gq",
+        "gw",
+        "ke",
+        "lr",
+        "mg",
+        "ml",
+        "mr",
+        "mz",
+        "ne",
+        "ng",
+        "rw",
+        "sl",
+        "sn",
+        "td",
+        "tg",
+        "ug",
+        "zw",
+        "au",  # toyota_au
+        "br",  # toyota_br
+        "nz",  # toyota_nz
+        "bw",  # toyota_sacu
+        "ls",
+        "na",
+        "sz",
+        "za",
+        "us",  # toyota_us
+    ]
 
     def start_requests(self):
-        for country, extra_countries in self.available_countries.items():
+        available_countries = [c for c in self.all_countries if c not in self.exclude_countries]
+        for country in available_countries:
             yield scrapy.Request(
-                f"https://kong-proxy-intranet.toyota-europe.com/dxp/dealers/api/toyota/{country}/en/all?extraCountries={extra_countries}",
+                f"https://kong-proxy-intranet.toyota-europe.com/dxp/dealers/api/toyota/{country}/en/all",
                 callback=self.parse,
             )
 
