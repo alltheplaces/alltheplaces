@@ -19,6 +19,7 @@ class FedexSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {  # Disable NSI matching
         "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None}
     }
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["email"] = response.xpath('//a[@class="Hero-emailLink Link--primary"]/@href').extract_first()

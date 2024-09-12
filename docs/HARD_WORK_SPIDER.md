@@ -10,19 +10,32 @@ Many sites export clean [structured data](./STRUCTURED_DATA.md) or have a simple
 <script>var markers = [{....}, {....}]</script>
 ```
 
-Use xpath and `parse_js_object` to extract the content; suitable for `DictParser`.
+Extend `JSONBlobSpider`, use xpath and `parse_js_object` to extract the content.
+This will get handed to `DictParser`, which does a lot of work to recognise common patterns.
+Optionally, `pre_process_data` to fix any keys or `post_process_item` to add extras.
 
-Example: [a1_rs](../locations/spiders/a1_rs.py)
+Example: [claudia_strater_nl](../locations/spiders/claudia_strater_nl.py)
 ```
-    def parse(self, response):
-        cities_js = (
-            response.xpath('//script[contains(text(), "var cities_json = ")]/text()')
-            .get()
-            .split("var cities_json = ", 1)[1]
-            .split("}];", 1)[0]
-            + "}]"
+class ClaudiaStraterNLSpider(JSONBlobSpider):
+    name = "claudia_strater_nl"
+    item_attributes = {
+        "brand_wikidata": "Q52903369",
+        "brand": "Claudia Sträter",
+    }
+    start_urls = ["https://www.claudiastrater.com/over-ons/winkels/"]
+    no_refs = True
+
+    def extract_json(self, response):
+        return chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "map.markers = ")]/text()').get().split("map.markers = ")[1]
         )
-        cities_dict = parse_js_object(cities_js)
+
+    def post_process_item(self, item, response, location):
+        item["name"] = item["name"].strip()
+        item["website"] = location["url"].replace("~/", "https://www.claudiastrater.com/")
+        item["image"] = location["imageurl"].replace("~/", "https://www.claudiastrater.com/")
+
+        yield item
 ```
 
 #### Coordinates as google urls

@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -11,8 +12,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class DanMurphysAUSpider(Spider):
     name = "dan_murphys_au"
-    item_attributes = {"brand": "Dan Murphy's", "brand_wikidata": "Q5214075"}
-    allowed_domains = ["store.danmurphys.com.au"]
+    item_attributes = {"brand": "Dan Murphy's", "brand_wikidata": "Q5214075", "extras": Categories.SHOP_ALCOHOL.value}
+    allowed_domains = ["api.danmurphys.com.au"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
 
@@ -27,8 +28,10 @@ class DanMurphysAUSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Stores"]:
             item = DictParser.parse(location)
-            item["street_address"] = merge_address_lines([location["AddressLine1"], location["AddressLine2"]])
             item["ref"] = location["Id"]
+            if branch_name := item.pop("name", None):
+                item["branch"] = branch_name
+            item["street_address"] = merge_address_lines([location["AddressLine1"], location["AddressLine2"]])
             slug = "{}-{}-{}".format(location["State"], location["Suburb"].replace(" ", "-"), item["ref"])
             item["website"] = urljoin("https://danmurphys.com.au/stores/", slug)
 

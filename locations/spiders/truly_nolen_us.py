@@ -7,7 +7,4 @@ class TrulyNolenUSSpider(RioSeoSpider):
         "brand_wikidata": "Q7847671",
         "brand": "Truly Nolen",
     }
-    allowed_domains = [
-        "maps.locations.trulynolen.com",
-    ]
-    end_point = "https://maps.locations.trulynolen.com/api/getAsyncLocations?template=search&level=search&lat=0&lng=0"
+    end_point = "https://maps.locations.trulynolen.com"

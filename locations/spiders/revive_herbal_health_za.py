@@ -33,7 +33,7 @@ class ReviveHerbalHealthZASpider(scrapy.Spider):
             properties = {
                 "lat": store["lat"],
                 "lon": store["lng"],
-                "name": store["na"],
+                "branch": store["na"],
                 "street_address": store["st"].strip(" ,"),
                 "city": store["ct"].strip(),
                 "country": "ZA",

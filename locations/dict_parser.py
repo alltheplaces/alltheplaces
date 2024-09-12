@@ -27,6 +27,7 @@ class DictParser:
         "branch-id",
         "BranchID",
         "branchID",
+        "branch-code",
     ]
 
     name_keys = [
@@ -39,6 +40,9 @@ class DictParser:
         "item-name",
         "location-name",
         "loc-name",
+        "branch-name",
+        # ES
+        "nombre",
     ]
 
     house_number_keys = [
@@ -57,6 +61,7 @@ class DictParser:
         "store-address",
         "physical-address",
         "full-address",
+        "formattedAddress",
         # ES
         "direccion",  # "address"
     ]
@@ -180,7 +185,10 @@ class DictParser:
         "contact-phone",
         "store-phone",
         "primary-phone",
+        "primaryNumber",
         "main-phone",
+        "branch-phone",
+        "branch-telephone",
         # ES
         "telefono",  # "phone"
     ]
@@ -194,8 +202,11 @@ class DictParser:
         "yext-display-lat",
         "map-latitude",
         "geo-lat",
+        "GPSLat",
+        "geographicCoordinatesLatitude",
         # ES
         "coordenaday",  # "Coordinate Y"
+        "latitud",
     ]
 
     lon_keys = [
@@ -209,8 +220,11 @@ class DictParser:
         "yext-display-lng",
         "map-longitude",
         "geo-lng",
+        "GPSLong",
+        "geographicCoordinatesLongitude",
         # ES
         "coordenadax",  # "Coordinate X"
+        "longitud",
     ]
 
     website_keys = [
@@ -225,6 +239,8 @@ class DictParser:
         "location-url",
     ]
 
+    hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
+
     @staticmethod
     def parse(obj) -> Feature:
         item = Feature()
@@ -232,25 +248,34 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(
-            obj,
-            [
-                "location",
-                "geo-location",
-                "geo",
-                "geo-point",
-                "geocoded-coordinate",
-                "coordinates",
-                "geo-position",
-                "position",
-                "display-coordinate",
-            ],
-        )
-        # If not a good location object then use the parent
-        if not location or not isinstance(location, dict):
-            location = obj
-        item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
-        item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+        if (
+            obj.get("geometry")
+            and obj["geometry"].get("type") is not None
+            and obj["geometry"].get("coordinates") is not None
+        ):
+            item["geometry"] = obj["geometry"]
+        else:
+            location = DictParser.get_first_key(
+                obj,
+                [
+                    "location",
+                    "geo-location",
+                    "geo",
+                    "geo-point",
+                    "geocoded-coordinate",
+                    "coordinates",
+                    "geo-position",
+                    "position",
+                    "positions",
+                    "display-coordinate",
+                    "yextDisplayCoordinate",
+                ],
+            )
+            # If not a good location object then use the parent
+            if not location or not isinstance(location, dict):
+                location = obj
+            item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+            item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 

@@ -1,10 +1,12 @@
 import re
 from html import unescape
+from typing import Iterable
 
-from scrapy import Selector
+from scrapy.http import Response
 
 from locations.categories import Categories
-from locations.hours import DAYS_DE, OpeningHours
+from locations.hours import DAYS_DE
+from locations.items import Feature
 from locations.spiders.galeria_de import GaleriaDESpider
 from locations.spiders.hit_de import HitDESpider
 from locations.spiders.kaufland import KauflandSpider
@@ -20,8 +22,9 @@ class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
         "extras": Categories.SHOP_BAKERY.value,
     }
     allowed_domains = ["heberer.de"]
+    days = DAYS_DE
 
-    def parse_item(self, item, location):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("addr_full", None)
 
         item["name"] = unescape(item["name"])
@@ -42,11 +45,5 @@ class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
                 item["located_in_wikidata"] = KauflandSpider.item_attributes["brand_wikidata"]
             else:
                 item["name"] = old_name
-
-        hours_string = " ".join(
-            filter(None, map(str.strip, Selector(text=location["description"]).xpath("//text()").getall()))
-        )
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_DE)
 
         yield item

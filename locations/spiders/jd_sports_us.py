@@ -1,17 +1,14 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class JdSportsUSSpider(SitemapSpider, StructuredDataSpider):
+class JdSportsUSSpider(RioSeoSpider):
     name = "jd_sports_us"
-    item_attributes = {"brand": "JD Sports", "brand_wikidata": "Q6108019"}
-    sitemap_urls = ["https://stores.jdsports.com/robots.txt"]
-    sitemap_rules = [(r"com/\w\w/[^/]+/[^/]+.html$", "parse")]
-    wanted_types = ["ShoeStore"]
+    item_attributes = {
+        "brand_wikidata": "Q6108019",
+        "brand": "JD Sports",
+    }
+    end_point = "https://maps.stores.jdsports.com"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = None
-        item["branch"] = response.xpath("normalize-space(//h2/text())").get()
-
-        yield item
+    def post_process_feature(self, feature, location):
+        feature["branch"] = location["location_display_name"]
+        yield feature

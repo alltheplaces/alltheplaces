@@ -25,17 +25,21 @@ DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa
 
 DAYS_EN = {
     "Monday": "Mo",
+    "Mondays": "Mo",
     "Mon": "Mo",
     "Mo": "Mo",
     "Tuesday": "Tu",
+    "Tuesdays": "Tu",
     "Tues": "Tu",
     "Tue": "Tu",
     "Tu": "Tu",
     "Wednesday": "We",
+    "Wednesdays": "We",
     "Weds": "We",
     "Wed": "We",
     "We": "We",
     "Thursday": "Th",
+    "Thursdays": "Th",
     "Thu": "Th",
     "Thr": "Th",
     "Thur": "Th",
@@ -43,17 +47,21 @@ DAYS_EN = {
     "Thurs": "Th",
     "Th": "Th",
     "Friday": "Fr",
+    "Fridays": "Fr",
     "Fri": "Fr",
     "Fr": "Fr",
     "Saturday": "Sa",
+    "Saturdays": "Sa",
     "Sat": "Sa",
     "Sa": "Sa",
     "Sunday": "Su",
+    "Sundays": "Su",
     "Sun": "Su",
     "Su": "Su",
 }
 
 DAYS_DE = {
+    # "Feiertag": "PH",
     "Montag": "Mo",
     "Mo": "Mo",
     "Dienstag": "Tu",
@@ -417,12 +425,22 @@ DAYS_PT = {
 }
 DAYS_SK = {
     "Po": "Mo",
+    "Pondelok": "Mo",
     "Ut": "Tu",
+    "Utorok": "Tu",
+    "Útorok": "Tu",
     "St": "We",
+    "Streda": "We",
     "Št": "Th",
+    "Štvrtok": "Th",
+    "Stvrtok": "Th",
     "Pi": "Fr",
+    "Piatok": "Fr",
     "So": "Sa",
+    "Sobota": "Sa",
     "Ne": "Su",
+    "Nedeľa": "Su",
+    "Nedela": "Su",
 }
 DAYS_RU = {
     "Пн": "Mo",
@@ -762,6 +780,8 @@ class OpeningHours:
                 return
             if close_time == "24:00" or close_time == "00:00":
                 close_time = "23:59"
+            if close_time == "24:00:00" or close_time == "00:00:00":
+                close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):

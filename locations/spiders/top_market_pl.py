@@ -1,3 +1,7 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
@@ -5,8 +9,8 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 class TopMarketPLSpider(AgileStoreLocatorSpider):
     name = "top_market_pl"
     item_attributes = {"brand": "Top Market", "brand_wikidata": "Q9360044"}
-    start_urls = ["https://www.topmarkety.pl/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1&layout=1"]
+    allowed_domains = ["www.topmarkety.pl"]
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         del item["website"]
         yield item

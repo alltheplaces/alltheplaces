@@ -20,10 +20,10 @@ class UltraLiquorsZASpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for data in response.json()["Data"]:
-            data["name"] = data.pop("CompanyName")
             data["address"] = data.pop("CompanyAddress")
             data["phone"] = data.pop("CompanyPhoneNumber")
             item = DictParser.parse(data)
+            item["branch"] = item.pop("name")
 
             apply_yes_no(Extras.DELIVERY, item, data.get("IsDeliveryAvailable"))
 

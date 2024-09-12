@@ -13,7 +13,7 @@ class TacototeSpider(SitemapSpider, WpGoMapsSpider):
         "extras": Categories.RESTAURANT.value,
     }
     allowed_domains = ["tacotote.com"]
-    sitemap_urls = ("https://tacotote.com/wp-sitemap-posts-page-1.xml",)
+    sitemap_urls = ["https://tacotote.com/wp-sitemap-posts-page-1.xml"]
     sitemap_rules = [(r"/locations-old/.*$", "parse_city")]
 
     def parse_city(self, response):
