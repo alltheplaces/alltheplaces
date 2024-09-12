@@ -203,6 +203,7 @@ class DictParser:
         "map-latitude",
         "geo-lat",
         "GPSLat",
+        "geographicCoordinatesLatitude",
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
@@ -220,6 +221,7 @@ class DictParser:
         "map-longitude",
         "geo-lng",
         "GPSLong",
+        "geographicCoordinatesLongitude",
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",
@@ -264,6 +266,7 @@ class DictParser:
                     "coordinates",
                     "geo-position",
                     "position",
+                    "positions",
                     "display-coordinate",
                     "yextDisplayCoordinate",
                 ],
