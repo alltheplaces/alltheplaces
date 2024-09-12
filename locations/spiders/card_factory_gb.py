@@ -23,6 +23,6 @@ class CardFactoryGBSpider(Spider):
         for store in response.json()["stores"]["stores"]:
             item = DictParser.parse(store)
             item["country"] = country
-            if 'phone' in item and item['phone'] is not None and item['phone'].replace(' ', '').startswith('+443'):
-                item.pop('phone', None)
+            if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+                item.pop("phone", None)
             yield item
