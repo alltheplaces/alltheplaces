@@ -567,7 +567,9 @@ class PaymentMethods(Enum):
 
 payment_method_aliases = {
     "Amex": PaymentMethods.AMERICAN_EXPRESS,
+    "Check": PaymentMethods.CHEQUE,
     "China UnionPay": PaymentMethods.UNIONPAY,
+    "Discover": PaymentMethods.DISCOVER_CARD,
     "Diners": PaymentMethods.DINERS_CLUB,
     "Maestro (Ausland)": PaymentMethods.MAESTRO,
     "MasterCard": PaymentMethods.MASTER_CARD,
