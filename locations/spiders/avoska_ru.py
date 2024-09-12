@@ -1,4 +1,4 @@
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -6,8 +6,7 @@ class AvoskaRUSpider(JSONBlobSpider):
     name = "avoska_ru"
     item_attributes = {
         "brand": "Авоська",
-        "extras": Categories.SHOP_SUPERMARKET.value
-        | {
+        "extras": {
             "brand:en": "Avoska",
             "brand:ru": "Авоська",
         },
@@ -21,4 +20,5 @@ class AvoskaRUSpider(JSONBlobSpider):
         item["lat"] = location["geometry"]["coordinates"][0]
         item["lon"] = location["geometry"]["coordinates"][1]
         item["street_address"] = location["properties"]["hintContent"]
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
