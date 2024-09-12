@@ -679,6 +679,8 @@ DELIMITERS_ES = [
     "de",
 ]
 
+DELIMITERS_FR = ["-", "–", "—", "―", "‒", "au", "à", "de"]
+
 DELIMITERS_PT = [
     "-",
     "a",
