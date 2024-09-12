@@ -10,7 +10,7 @@ class AvoskaRUSpider(JSONBlobSpider):
         | {
             "brand:en": "Avoska",
             "brand:ru": "Авоська",
-        }
+        },
         # TODO: add wikidata
     }
     start_urls = ["https://www.avoska.ru/api/get_shops.php?map=1"]
