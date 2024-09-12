@@ -4,7 +4,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class UnicreditBulbankSpider(JSONBlobSpider):
+class UnicreditBulbankBGSpider(JSONBlobSpider):
     name = "unicredit_bulbank_bg"
     item_attributes = {"brand": "UniCredit Bulbank", "brand_wikidata": "Q7884635"}
     start_urls = [
