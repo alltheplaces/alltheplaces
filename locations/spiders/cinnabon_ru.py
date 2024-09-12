@@ -14,6 +14,6 @@ class CinnabonRUSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["ref"] = location.get("number")
-        item["lat"], item["lon"] = location.get("center")
+        item["lat"], item["lon"] = location.get("center") or (None, None)
         item["addr_full"] = item.pop("name")
         yield item
