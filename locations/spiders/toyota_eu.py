@@ -1,7 +1,7 @@
 import pycountry
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import SocialMedia, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
@@ -10,47 +10,49 @@ from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 
 
 class ToyotaEUSpider(JSONBlobSpider):
+    download_timeout = 60
     name = "toyota_eu"
     item_attributes = TOYOTA_SHARED_ATTRIBUTES
     locations_key = "dealers"
 
     all_countries = [country.alpha_2.lower() for country in pycountry.countries]
     exclude_countries = [
-        "bf",  # toyota_africa
-        "bj",
-        "cd",
-        "cf",
-        "cg",
-        "ci",
-        "cm",
-        "gm",
-        "gn",
-        "gq",
-        "gw",
-        "ke",
-        "lr",
-        "mg",
-        "ml",
-        "mr",
-        "mz",
-        "ne",
-        "ng",
-        "rw",
-        "sl",
-        "sn",
-        "td",
-        "tg",
-        "ug",
-        "zw",
         "au",  # toyota_au
+        "bf",  # toyota_africa
+        "bj",  # toyota_africa
         "br",  # toyota_br
-        "nz",  # toyota_nz
         "bw",  # toyota_sacu
-        "ls",
-        "na",
-        "sz",
-        "za",
+        "cd",  # toyota_africa
+        "cf",  # toyota_africa
+        "cg",  # toyota_africa
+        "ci",  # toyota_africa
+        "cm",  # toyota_africa
+        "gm",  # toyota_africa
+        "gn",  # toyota_africa
+        "gq",  # toyota_africa
+        "gw",  # toyota_africa
+        "ke",  # toyota_africa
+        "lr",  # toyota_africa
+        "ls",  # toyota_sacu
+        "mg",  # toyota_africa
+        "ml",  # toyota_africa
+        "mr",  # toyota_africa
+        "mz",  # toyota_africa
+        "na",  # toyota_sacu
+        "ne",  # toyota_africa
+        "ng",  # toyota_africa
+        "nz",  # toyota_nz
+        "rw",  # toyota_africa
+        "sl",  # toyota_africa
+        "sn",  # toyota_africa
+        "sz",  # toyota_sacu
+        "td",  # toyota_africa
+        "tg",  # toyota_africa
+        "tw",  # toyota_tw
+        "ug",  # toyota_africa
         "us",  # toyota_us
+        "za",  # toyota_sacu
+        "zw",  # toyota_africa
     ]
 
     def start_requests(self):
@@ -66,7 +68,26 @@ class ToyotaEUSpider(JSONBlobSpider):
         feature["email"] = feature.pop("eMail")
 
     def post_process_item(self, item, response, location):
-        apply_category(Categories.SHOP_CAR, item)
+        services = [i["service"] for i in location["services"]]
+        for service in services:
+            self.crawler.stats.inc_value(f"atp/{self.name}/services/{service}")
+        if "ShowRoom" in services:
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.CAR_REPAIR, item, "WorkShop" in services, False)
+            apply_yes_no(Extras.USED_CAR_SALES, item, "UsedCars" in services, False)
+            apply_yes_no(Extras.CAR_PARTS, item, "PartsShop" in services)
+        elif "UsedCars" in services:
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.USED_CAR_SALES, item, True)
+            apply_yes_no(Extras.NEW_CAR_SALES, item, False, False)
+            apply_yes_no(Extras.CAR_REPAIR, item, "WorkShop" in services, False)
+        elif "WorkShop" in services:
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
+        elif "PartsShop" in services:
+            apply_category(Categories.SHOP_CAR_PARTS, item)
+        else:  # Some locations have no services listed, so fall back to shop=car
+            apply_category(Categories.SHOP_CAR, item)
+
         item["country"] = location["country"]
         item["street_address"] = clean_address(
             [location["address"].get("address1"), location["address"].get("address")]
