@@ -1,9 +1,9 @@
-from typing import Iterable
+from typing import Any, Iterable
 
-import scrapy
-from scrapy import Spider
+from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 # A less common wordpress based storefinder, characterised by
@@ -15,7 +15,6 @@ from locations.items import Feature
 
 
 class WordpressHeronFoodsSpider(Spider):
-    custom_settings = {"ROBOTSTXT_OBEY": False}
     domain = None
     radius = 600
     lat = None
@@ -25,7 +24,7 @@ class WordpressHeronFoodsSpider(Spider):
     )  # DetectionRequestRule(https://{self.domain}/wp-admin/admin-ajax.php, but its a POST and has get_stores), or DetectionResponseRule(jsblob with na zp lng lon ID)
 
     def start_requests(self):
-        yield scrapy.FormRequest(
+        yield FormRequest(
             url=f"https://{self.domain}/wp-admin/admin-ajax.php",
             formdata={
                 "action": "get_stores",
@@ -37,25 +36,43 @@ class WordpressHeronFoodsSpider(Spider):
             headers={"Referer": f"https://{self.domain}/storelocator/"},
         )
 
-    def parse(self, response):
-        stores = response.json()
-        for i in range(0, len(stores)):
-            store = stores[str(i)]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json().values():
             self.pre_process_data(store)
 
-            properties = {
-                "lat": store["lat"],
-                "lon": store["lng"],
-                "name": store["na"],
-                "street_address": store["st"].strip(" ,"),
-                "city": store["ct"].strip(),
-                "postcode": store["zp"].strip(),
-                "website": store["gu"],
-                "ref": store["ID"],
-            }
+            item = Feature(
+                ref=store["ID"],
+                lat=store["lat"],
+                lon=store["lng"],
+                branch=store["na"],
+                street_address=store["st"].replace("<br>", ", "),
+                city=store["ct"].strip(),
+                postcode=store["zp"].strip(),
+                website=store["gu"],
+            )
 
-            item = Feature(**properties)
+            try:
+                item["opening_hours"] = self.pares_opening_hours(store)
+            except:
+                self.logger.error("Error parsing opening hours")
+                self.crawler.stats.inc_value("{}/opening_hours/parse_error".format(self.name))
+
             yield from self.post_process_item(item, response, store)
+
+    def pares_opening_hours(self, feature: dict) -> OpeningHours | None:
+        if not feature.get("op"):
+            return None
+        oh = OpeningHours()
+
+        for day in range(0, 7):
+            start_time = feature["op"][str(day * 2)]
+            end_time = feature["op"][str(day * 2 + 1)]
+            if start_time in ["Fermé"]:
+                oh.set_closed(DAYS[day])
+            else:
+                oh.add_range(DAYS[day], start_time.replace(".", ":"), end_time.replace(".", ":"))
+
+        return oh
 
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the item."""

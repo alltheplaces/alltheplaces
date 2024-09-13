@@ -1,10 +1,10 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
-KFC_SHARED_ATTRIBUTES = {"brand": "KFC", "brand_wikidata": "Q524757"}
+KFC_SHARED_ATTRIBUTES = {"brand": "KFC", "brand_wikidata": "Q524757", "extras": Categories.FAST_FOOD.value}
 
 
 class KfcUSSpider(SitemapSpider, StructuredDataSpider):

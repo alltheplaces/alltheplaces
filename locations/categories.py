@@ -282,6 +282,7 @@ class Categories(Enum):
 
     DATA_CENTRE = {"telecom": "data_center"}
 
+    VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
@@ -566,7 +567,9 @@ class PaymentMethods(Enum):
 
 payment_method_aliases = {
     "Amex": PaymentMethods.AMERICAN_EXPRESS,
+    "Check": PaymentMethods.CHEQUE,
     "China UnionPay": PaymentMethods.UNIONPAY,
+    "Discover": PaymentMethods.DISCOVER_CARD,
     "Diners": PaymentMethods.DINERS_CLUB,
     "Maestro (Ausland)": PaymentMethods.MAESTRO,
     "MasterCard": PaymentMethods.MASTER_CARD,
