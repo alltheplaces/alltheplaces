@@ -1,5 +1,8 @@
+from typing import Any
+
 from chompjs import parse_js_object
 from scrapy import Selector, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories
 from locations.items import Feature
@@ -14,7 +17,7 @@ class NsriBasesZASpider(Spider):
     }
     start_urls = ["https://www.nsri.org.za/rescue/base-finder"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data_raw = response.xpath('.//script[contains(text(), "window._gmData.infoWindows")]/text()').get()
         locations = parse_js_object(data_raw.split("['base-finder']")[1])
 
