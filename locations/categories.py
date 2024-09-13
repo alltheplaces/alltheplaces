@@ -32,6 +32,8 @@ class Categories(Enum):
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
+    CLUB_SCOUT = {"club": "scout"}
+
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
