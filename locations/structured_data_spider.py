@@ -331,23 +331,28 @@ class StructuredDataSpider(Spider):
         """
         https://schema.org/paymentAccepted
         """
-        if "paymentAccepted" in ld_item:
-            if isinstance(ld_item["paymentAccepted"], str) and "," in ld_item["paymentAccepted"]:
-                ld_item["paymentAccepted"] = ld_item["paymentAccepted"].split(", ")
-            if (
-                isinstance(ld_item["paymentAccepted"], list)
-                and len(ld_item["paymentAccepted"]) == 1
-                and "," in ld_item["paymentAccepted"][0]
-            ):
-                ld_item["paymentAccepted"] = ld_item["paymentAccepted"][0].split(", ")
-            if len(ld_item["paymentAccepted"]) > 0:
-                for payment in ld_item["paymentAccepted"]:
-                    if not map_payment(item, payment, PaymentMethods):
-                        self.logger.info(
-                            "Found paymentAccepted data that could not be mapped, implement `extract_payment_accepted` or set `search_for_payment_accepted` to suppress this message"
-                        )
-                        self.logger.debug(payment)
-                        self.crawler.stats.inc_value("atp/structured_data/unmapped/payment_accepted")
+        if "paymentAccepted" not in ld_item:
+            return
+        if isinstance(ld_item["paymentAccepted"], str) and "," in ld_item["paymentAccepted"]:
+            ld_item["paymentAccepted"] = ld_item["paymentAccepted"].split(",")
+        if (
+            isinstance(ld_item["paymentAccepted"], list)
+            and len(ld_item["paymentAccepted"]) == 1
+            and "," in ld_item["paymentAccepted"][0]
+        ):
+            ld_item["paymentAccepted"] = ld_item["paymentAccepted"][0].split(",")
+        if isinstance(ld_item["paymentAccepted"], str):
+            ld_item["paymentAccepted"] = [ld_item["paymentAccepted"]]
+        for payment in ld_item["paymentAccepted"]:
+            payment = payment.strip()
+            if not payment:
+                continue
+            if not map_payment(item, payment, PaymentMethods):
+                self.logger.info(
+                    "Found paymentAccepted data that could not be mapped, implement `extract_payment_accepted` or set `search_for_payment_accepted` to suppress this message"
+                )
+                self.logger.debug(payment)
+                self.crawler.stats.inc_value("atp/structured_data/unmapped/payment_accepted/{}".format(payment))
 
     def get_ref(self, url: str, response: Response) -> str:
         if hasattr(self, "rules"):  # Attempt to pull a match from CrawlSpider.rules
