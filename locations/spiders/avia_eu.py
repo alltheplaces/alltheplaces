@@ -3,7 +3,7 @@ from typing import Any, Iterable
 from scrapy import FormRequest, Request, Selector, Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -68,6 +68,22 @@ class AviaEUSpider(Spider):
                     item.update(self.BRANDS_MAPPING[brand])
                     break
             apply_category(Categories.FUEL_STATION, item)
+
+            # Avia fuels: https://avia.nl/avia-brandstoffen
+            if fuels := location.xpath('.//*[@class="fuels-list"]//span/text()').getall():
+                fuels = [fuel.strip().strip(",").replace("AdBlue shop", "AdBlue") for fuel in fuels]
+                apply_yes_no(Fuel.ADBLUE, item, "AdBlue" in fuels)
+                apply_yes_no(Fuel.DIESEL, item, "Diesel" in fuels or "Multipower Diesel" in fuels)
+                apply_yes_no(Fuel.GTL_DIESEL, item, "GTL diesel" in fuels)
+                apply_yes_no(Fuel.LPG, item, "LPG" in fuels)
+                apply_yes_no(Fuel.LNG, item, "LNG" in fuels)
+                apply_yes_no(Fuel.CNG, item, "CNG Aardgas" in fuels)
+                apply_yes_no(Fuel.E5, item, "Super 98 Ongelood" in fuels)
+                apply_yes_no(Fuel.E10, item, "Euro 95 E10" in fuels)
+                apply_yes_no(Fuel.ELECTRIC, item, "AC Laden" in fuels or "DC Laden" in fuels)
+                apply_yes_no(Fuel.BIODIESEL, item, "HVO 100 Ecosave Diesel" in fuels)
+                apply_yes_no("fuel:hvo20", item, "HVO 20 Ecosave Diesel" in fuels)
+                apply_yes_no(Fuel.OCTANE_95, item, "Petroleum" in fuels)
             yield item
 
         if response.meta["page"] < response.json()["number_of_pages"]:
