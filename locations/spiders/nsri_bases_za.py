@@ -1,5 +1,6 @@
 from typing import Any
 
+from chompjs import parse_js_object
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
@@ -17,15 +18,15 @@ class NsriBasesZASpider(Spider):
     start_urls = ["https://www.nsri.org.za/rescue/base-finder"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        script = [s for s in response.xpath("//script") if "window._gmData.infoWindows['base-finder']" in s.get()][0]
-        locations = script.re(r".*\'[0-9]+-baseLocation\':\s\{\"content\":\"(.+)\"\},")
+        data_raw = response.xpath('.//script[contains(text(), "window._gmData.infoWindows")]/text()').get()
+        locations = parse_js_object(data_raw.split("['base-finder']")[1])
 
-        for location in locations:
-            selector = Selector(text=location.replace("\\/", "/").replace('\\"', '"'))
+        for location in locations.values():
+            selector = Selector(text=location["content"])
             item = Feature()
             item["name"] = selector.xpath("//h3/text()").get()
             item["ref"] = selector.xpath('//p/strong[contains(text(),"Station number:")]/../text()').get()
-            item["phone"] = selector.xpath('//a[contains(@href, "tel:")]/text()').get()
+            item["phone"] = selector.xpath('//a[contains(@href, "tel:")]/@href').get()
             item["website"] = selector.xpath('//a[contains(@href, "nsri.org.za")]/@href').get()
 
             coordinates = selector.xpath('//p/strong[contains(text(),"Coordinates:")]/../text()').get().split(",")
