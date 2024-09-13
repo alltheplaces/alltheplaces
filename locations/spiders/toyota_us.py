@@ -173,6 +173,6 @@ class ToyotaUSSpider(JSONBlobSpider):
             if item.get("opening_hours") is None:
                 item["opening_hours"] = oh.as_opening_hours()
             elif item["opening_hours"] != oh.as_opening_hours():
-                item["extras"]["opening:hours:" + suffix] = oh.as_opening_hours()
+                item["extras"]["opening_hours:" + suffix] = oh.as_opening_hours()
         else:
             self.crawler.stats.inc_value(f"atp/{self.name}/unknown_opening_hours_type/{hours_type['hoursTypeCode']}")
