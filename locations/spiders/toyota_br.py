@@ -1,6 +1,6 @@
 from chompjs import parse_js_object
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import SocialMedia, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
@@ -27,7 +27,12 @@ class ToyotaBRSpider(JSONBlobSpider):
         location["website"] = location.pop("site")
 
     def post_process_item(self, item, response, location):
+        services = [service["title"] for service in location["services"]]
+        for service in services:
+            self.crawler.stats.inc_value(f"atp/{self.name}/services/{service}")
+        # There don't seem to be many interesting categories to apply
         apply_category(Categories.SHOP_CAR, item)
+        apply_yes_no(Extras.TYRE_SERVICES, item, "Menu de pneus" in services)
 
         emails = [location.get("contactEmail"), location.get("salesEmail")]
         item["email"] = "; ".join([e for e in emails if e is not None])
