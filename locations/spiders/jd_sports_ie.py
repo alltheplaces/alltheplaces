@@ -1,6 +1,7 @@
-from locations.structured_data_spider import StructuredDataSpider
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class JdSportsIESpider(CrawlSpider, StructuredDataSpider):
