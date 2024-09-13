@@ -56,7 +56,7 @@ class ToyotaMXSpider(JSONBlobSpider):
             "domingo": "Su",
         }.items():
             if times := location.get(key):
-                item["opening_hours"].add_ranges_from_string(f"{days} {times.replace("a.m.", "").replace("p.m.", "")}")
+                item["opening_hours"].add_ranges_from_string(f'{days} {times.replace("a.m.", "").replace("p.m.", "")}')
             else:
                 try:
                     item["opening_hours"].set_closed(days)
