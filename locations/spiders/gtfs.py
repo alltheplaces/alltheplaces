@@ -8,6 +8,70 @@ from scrapy.utils.iterators import csviter
 from locations.categories import Extras, apply_category, apply_yes_no
 from locations.items import Feature
 
+BRAND_MAPPING = {
+    "Calgary Transit": {
+        "network": "CTrain",
+        "network:wikidata": "Q1022321",
+        "operator": "Calgary Transit",
+        "operator:wikidata": "Q143630",
+    },
+    "Casco Bay Lines": {
+        "network": "Casco Bay Lines",
+        "network:wikidata": "Q5048264",
+        "operator": "Casco Bay Lines",
+        "operator:wikidata": "Q5048264",
+    },
+    "Fertagus": {"operator": "Fertagus", "operator:wikidata": "Q1408210"},
+    "Grand River Transit": {
+        "network": "Ion",
+        "network:wikidata": "Q106676138",
+        "operator": "Grand River Transit",
+        "operator:wikidata": "Q3459117",
+    },
+    "Metro Transit": {
+        "network": "Metro Transit",
+        "network:wikidata": "Q3307442",
+        "operator": "Metro Transit",
+        "operator:wikidata": "Q3307442",
+    },
+    "Société de transport de Montréal": {
+        "network": "Métro de Montréal",
+        "network:wikidata": "Q392377",
+        "operator": "Société de transport de Montréal",
+        "operator:wikidata": "Q1817151",
+    },
+    "South Shore Line": {
+        "network": "NICTD",
+        "network:wikidata": "Q31313",
+        "operator": "NICTD",
+        "operator:wikidata": "Q31313",
+    },
+    "Taichung": {
+        "network": "臺中捷運",
+        "network:wikidata": "Q5972247",
+        "operator": "臺中捷運公司",
+        "operator:wikidata": "Q17370558",
+    },
+    "Toronto Transit Commission": {
+        "network": "Toronto subway",
+        "network:wikidata": "Q20379",
+        "operator": "Toronto Transit Commission",
+        "operator:wikidata": "Q17978",
+    },
+    "Trenes Argentinos": {
+        "network": "Mitre",
+        "network:wikidata": "Q3239158",
+        "operator": "Trenes Argentinos Operadora Ferroviaria",
+        "operator:wikidata": "Q6116255",
+    },
+    "Warrington's Own Buses": {
+        "network": "Warrington's Own Buses",
+        "network:wikidata": "Q7000937",
+        "operator": "Warrington's Own Buses",
+        "operator:wikidata": "Q7000937",
+    },
+}
+
 
 class GTFSSpider(CSVFeedSpider):
     name = "gtfs"
@@ -15,19 +79,30 @@ class GTFSSpider(CSVFeedSpider):
     no_refs = True
 
     def parse_row(self, response, row):
-        if row.get("status", "") not in ("active", ""):
+        if row["status"] not in ("active", ""):
             return
-        if row.get("data_type") != "gtfs":
+        if row["data_type"] != "gtfs":
             return
         feed_attributes = {
-            "country": row.get("location.country_code"),
-            "state": row.get("location.subdivision_name"),
-            "city": row.get("location.municipality"),
-            "operator": row.get("provider"),
+            "country": row["location.country_code"],
+            "state": row["location.subdivision_name"],
+            "city": row["location.municipality"],
+            "operator": row["provider"],
             "extras": {},
         }
-        url = row.get("urls.latest") or row.get("urls.direct_download")
-        self.logger.info("Provider: %s URL: %s", row.get("provider"), url)
+
+        brand_tags = BRAND_MAPPING.get(row["provider"], {})
+        if "operator" in brand_tags:
+            feed_attributes["operator"] = brand_tags["operator"]
+        if "operator:wikidata" in brand_tags:
+            feed_attributes["operator_wikidata"] = brand_tags["operator:wikidata"]
+        if "network" in brand_tags:
+            feed_attributes["extras"]["network"] = brand_tags["network"]
+        if "network:wikidata" in brand_tags:
+            feed_attributes["extras"]["network_wikidata"] = brand_tags["network:wikidata"]
+
+        url = row["urls.latest"] or row["urls.direct_download"]
+        self.logger.info("Provider: %s URL: %s", row["provider"], url)
         if url is not None:
             yield Request(url, self.parse_zip, cb_kwargs={"feed_attributes": feed_attributes})
 
