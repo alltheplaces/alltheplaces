@@ -1,4 +1,4 @@
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
@@ -15,7 +15,22 @@ class ToyotaCASpider(JSONBlobSpider):
         location["name"] = location["name_dict"].get("en")
 
     def post_process_item(self, item, response, location):
-        apply_category(Categories.SHOP_CAR, item)
+        departments = [d["name"]["en"] for d in location["departments"]]
+        if "New Vehicle Sales" in departments:
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.USED_CAR_SALES, item, "Pre-owned Vehicle Sales" in departments)
+            apply_yes_no(Extras.USED_CAR_PARTS, item, "Parts" in departments)
+            apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments)
+        elif "Pre-owned Vehicle Sales" in departments:
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.USED_CAR_PARTS, item, "Parts" in departments)
+            apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments)
+        elif "Service" in departments:
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
+            apply_yes_no(Extras.USED_CAR_PARTS, item, "Parts" in departments)
+        elif "Parts" in departments:
+            apply_category(Categories.SHOP_CAR_PARTS, item)
+
         if location["name_dict"].get("en") != location["name_dict"].get("fr"):
             item["extras"]["name:en"] = location["name_dict"].get("en")
             item["extras"]["name:fr"] = location["name_dict"].get("fr")
