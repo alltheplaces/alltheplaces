@@ -10,7 +10,6 @@ class ToyotaTWSpider(JSONBlobSpider):
     locations_key = "DATA"
 
     def post_process_item(self, item, response, location: dict):
-        item["website"] = "https://www.toyota.com.tw/"
         if location["TYPE"] == "1":
             item["ref"] = "-".join([location["KEY"], "Dealer"])
             apply_category(Categories.SHOP_CAR, item)
