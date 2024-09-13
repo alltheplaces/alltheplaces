@@ -33,7 +33,7 @@ class ToyotaMXXSpider(JSONBlobSpider):
         location["ref"] = location.pop("tid")
 
     def post_process_item(self, item, response, location):
-        apply_category(Categories.SHOP_CAR, item)
+        apply_category(Categories.SHOP_CAR, item)  # No data available on different category/extra features
         item["state"] = response.meta["state"]
         item["image"] = location["uri"]
         item["addr_full"] = clean_address(location["description"]).replace("<p>", "").replace("</p>", "")
