@@ -19,7 +19,7 @@ class FreshopSpider(Spider):
     def start_requests(self):
         yield JsonRequest(url=f"https://api.freshop.com/1/stores?app_key={self.app_key}")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json()["items"]:
             if location.get("type_id") not in self.location_type_ids or not location.get("has_address"):
                 continue
@@ -44,5 +44,5 @@ class FreshopSpider(Spider):
 
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item, location):
         yield item

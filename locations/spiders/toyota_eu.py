@@ -2,14 +2,12 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 
 
 class ToyotaEUSpider(scrapy.Spider):
     name = "toyota_eu"
-    item_attributes = {
-        "brand": "Toyota",
-        "brand_wikidata": "Q53268",
-    }
+    item_attributes = TOYOTA_SHARED_ATTRIBUTES
     available_countries = [
         "tr",
         "az",

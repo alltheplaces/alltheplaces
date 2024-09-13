@@ -10,9 +10,13 @@ class TacoCabanaUSSpider(Spider):
     allowed_domains = ["www.tacocabana.com"]
     start_urls = ["https://www.tacocabana.com/locations/"]
 
+    def extract_json(self, response):
+        js_blob = response.xpath('//script[contains(text(), "let locations_meta = [")]/text()').get()
+        return parse_js_object(js_blob)
+
     def parse(self, response):
-        js_blob = response.xpath('//script[contains(text(), "var locations_meta = [")]/text()').get()
-        for location in parse_js_object(js_blob):
+        locations = self.extract_json(response)
+        for location in locations:
             item = DictParser.parse(location["map_pin"])
             item["name"] = item["street"] = None
             item["website"] = location["order_now_link"]
