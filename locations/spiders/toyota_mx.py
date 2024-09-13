@@ -7,7 +7,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 
 
-class ToyotaMXXSpider(JSONBlobSpider):
+class ToyotaMXSpider(JSONBlobSpider):
     name = "toyota_mx"
     item_attributes = TOYOTA_SHARED_ATTRIBUTES
     start_urls = ["https://www.toyota.mx/distribuidores"]
