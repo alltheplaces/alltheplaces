@@ -203,6 +203,7 @@ class DictParser:
         "map-latitude",
         "geo-lat",
         "GPSLat",
+        "geographicCoordinatesLatitude",
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
@@ -220,6 +221,7 @@ class DictParser:
         "map-longitude",
         "geo-lng",
         "GPSLong",
+        "geographicCoordinatesLongitude",
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",
@@ -246,26 +248,34 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(
-            obj,
-            [
-                "location",
-                "geo-location",
-                "geo",
-                "geo-point",
-                "geocoded-coordinate",
-                "coordinates",
-                "geo-position",
-                "position",
-                "display-coordinate",
-                "yextDisplayCoordinate",
-            ],
-        )
-        # If not a good location object then use the parent
-        if not location or not isinstance(location, dict):
-            location = obj
-        item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
-        item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+        if (
+            obj.get("geometry")
+            and obj["geometry"].get("type") is not None
+            and obj["geometry"].get("coordinates") is not None
+        ):
+            item["geometry"] = obj["geometry"]
+        else:
+            location = DictParser.get_first_key(
+                obj,
+                [
+                    "location",
+                    "geo-location",
+                    "geo",
+                    "geo-point",
+                    "geocoded-coordinate",
+                    "coordinates",
+                    "geo-position",
+                    "position",
+                    "positions",
+                    "display-coordinate",
+                    "yextDisplayCoordinate",
+                ],
+            )
+            # If not a good location object then use the parent
+            if not location or not isinstance(location, dict):
+                location = obj
+            item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+            item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 

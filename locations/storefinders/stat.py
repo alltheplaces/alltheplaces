@@ -14,6 +14,8 @@ class StatSpider(Spider):
     because of the "stat" in the API path.
     """
 
+    dataset_attributes = {"source": "api", "api": "stat"}
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["locations"]:
             store.update(store.pop("businessAddress"))
