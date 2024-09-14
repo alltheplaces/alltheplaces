@@ -13,4 +13,4 @@ class DreamsGBSpider(scrapy.spiders.SitemapSpider):
 
     def parse(self, response):
         if "store-finder" not in response.url:
-            return LinkedDataParser.parse(response, "LocalBusiness")
+            return LinkedDataParser.parse(response, "FurnitureStore")
