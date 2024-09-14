@@ -3,8 +3,8 @@ from scrapy.http import JsonRequest
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class ScoutsGBSpider(JSONBlobSpider):
-    name = "scouts_gb"
+class ScoutsGGGBIMJESpider(JSONBlobSpider):
+    name = "scouts_gg_gb_im_je"
     item_attributes = {
         "brand": "The Scout Association",
         "brand_wikidata": "Q849740",
