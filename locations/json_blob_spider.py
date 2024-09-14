@@ -89,6 +89,7 @@ class JSONBlobSpider(Spider):
                 feature["id"] = feature_id
             else:
                 feature["feature_id"] = feature_id
+            self.pre_process_data(feature)
             item = DictParser.parse(feature)
             yield from self.post_process_item(item, response, feature) or []
 
