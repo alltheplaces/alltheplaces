@@ -19,15 +19,15 @@ class ToyotaCASpider(JSONBlobSpider):
         if "New Vehicle Sales" in departments:
             apply_category(Categories.SHOP_CAR, item)
             apply_yes_no(Extras.USED_CAR_SALES, item, "Pre-owned Vehicle Sales" in departments)
-            apply_yes_no(Extras.USED_CAR_PARTS, item, "Parts" in departments)
+            apply_yes_no(Extras.CAR_PARTS, item, "Parts" in departments)
             apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments)
         elif "Pre-owned Vehicle Sales" in departments:
             apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.USED_CAR_PARTS, item, "Parts" in departments)
+            apply_yes_no(Extras.CAR_PARTS, item, "Parts" in departments)
             apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments)
         elif "Service" in departments:
             apply_category(Categories.SHOP_CAR_REPAIR, item)
-            apply_yes_no(Extras.USED_CAR_PARTS, item, "Parts" in departments)
+            apply_yes_no(Extras.CAR_PARTS, item, "Parts" in departments)
         elif "Parts" in departments:
             apply_category(Categories.SHOP_CAR_PARTS, item)
 
