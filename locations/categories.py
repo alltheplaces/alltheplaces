@@ -32,6 +32,8 @@ class Categories(Enum):
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
+    CLUB_SCOUT = {"club": "scout"}
+
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
@@ -461,6 +463,7 @@ class Extras(Enum):
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CAR_PARTS = "service:vehicle:car_parts"
     CAR_REPAIR = "service:vehicle:car_repair"
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
@@ -481,6 +484,7 @@ class Extras(Enum):
     KOSHER = "diet:kosher"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
+    NEW_CAR_SALES = "service:vehicle:new_car_sales"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
     PARCEL_PICKUP = "parcel_pickup"
@@ -501,7 +505,6 @@ class Extras(Enum):
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     TYRE_SERVICES = "service:vehicle:tyres"
-    USED_CAR_PARTS = "service:vehicle:used_car_parts"
     USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
