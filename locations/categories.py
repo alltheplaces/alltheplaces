@@ -17,6 +17,9 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     PARKING = {"amenity": "parking"}
+    SCHOOL = {"amenity": "school"}
+    UNIVERSITY = {"amenity": "university"}
+    COLLEGE = {"amenity": "college"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
