@@ -501,6 +501,8 @@ class Extras(Enum):
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     TYRE_SERVICES = "service:vehicle:tyres"
+    USED_CAR_PARTS = "service:vehicle:used_car_parts"
+    USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
