@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from scrapy import Spider
 from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, DAYS_PT, DELIMITERS_EN, DELIMITERS_PT, OpeningHours
 from locations.items import Feature, merge_items
 from locations.spiders.nedbank_za import NEDBANK_SHARED_ATTRIBUTES
@@ -22,6 +23,7 @@ class NedbankMZSpider(Spider):
         for location in response.xpath('.//div[@class="balcao_morada"]'):
             item = Feature()
 
+            apply_category(Categories.BANK, item)
             item["branch"] = location.xpath('.//span[@class="titulo"][contains(@onclick, "javascript")]/text()').get()
 
             item["lat"] = (
