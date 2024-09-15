@@ -10,6 +10,7 @@ class RedLobsterUSSpider(scrapy.Spider):
     name = "red_lobster_us"
     item_attributes = {"brand": "Red Lobster", "brand_wikidata": "Q846301", "country": "US"}
     start_urls = ["https://www.redlobster.com/api/location/GetLocations?latitude=0&longitude=0&radius=150000"]
+    requires_proxy = True
 
     @staticmethod
     def parse_hours(hours: [dict]) -> OpeningHours:
