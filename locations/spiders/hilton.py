@@ -158,19 +158,19 @@ class HiltonSpider(Spider):
         data = {
             "operationName": "hotelSummaryOptions",
             "query": """
-                query
-                    hotelSummaryOptions($language: String!, $input: HotelSummaryOptionsInput) {
-                        hotelSummaryOptions(language: $language, input: $input) {
-                            hotels {
-                                ctyhocn
-                                amenityIds
-                                brandCode
-                                facilityOverview { allowAdultsOnly homeUrlTemplate }
-                                name
-                                display { open openDate preOpenMsg resEnabled resEnabledDate treatments }
-                                contactInfo { phoneNumber }
-                                address { addressLine1 city country countryName state stateName _id }
-                                localization { currencyCode coordinate { latitude longitude } }
+                query 
+                    hotelSummaryOptions($language: String!, $input: HotelSummaryOptionsInput) { 
+                        hotelSummaryOptions(language: $language, input: $input) { 
+                            hotels { 
+                                ctyhocn 
+                                amenityIds 
+                                brandCode 
+                                facilityOverview { allowAdultsOnly homeUrlTemplate } 
+                                name 
+                                display { open openDate preOpenMsg resEnabled resEnabledDate treatments } 
+                                contactInfo { phoneNumber } 
+                                address { addressLine1 city country countryName state stateName _id } 
+                                localization { currencyCode coordinate { latitude longitude } } 
                                 images { master(ratios: [threeByTwo]) { altText ratios { size url } } carousel(ratios: [threeByTwo]) { altText ratios { url size } } } } } }
                     """,
             "variables": {"input": {"guestLocationCountry": "HU", "quadrantId": f"{quadrant_id}"}, "language": "en"},
