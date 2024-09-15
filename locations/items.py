@@ -145,12 +145,14 @@ def merge_items(language_dict: dict, main_language: str, matching_key="ref") -> 
         for language, items in language_dict.items():
             if language == main_language:
                 continue
-            for lang_item in items.values():
-                if item[matching_key] == lang_item[matching_key]:
-                    lang_item["extras"]["merge_language"] = language
-                    matched_items.append(lang_item)
-                    language_dict[language].pop(item[matching_key])
-                    break
+            if item[matching_key] in items.keys():
+                match = items.pop(item[matching_key])
+                match["extras"]["merge_language"] = language
+                matched_items.append(match)
+            else:
+                logger.warning(
+                    f"No matches found for '{matching_key}': '{item[matching_key]}' in language '{language}'"
+                )
 
         if len(matched_items) == 0:
             logger.warning(f"No matches found for '{matching_key}': '{item[matching_key]}'")
