@@ -11,7 +11,7 @@ class KiaTWSpider(KiaAUSpider):
     name = "kia_tw"
     start_urls = ["https://www.kia.com/api/kia_tw/base/fd01/findDealer.selectFindDealerAllList?isAll=true"]
 
-    def post_process_feature(self, item, feature):
+    def post_process_item(self, item, feature):
         if "0" not in item["phone"] or item["phone"].startswith("00"):
             item.pop("phone", None)
         if feature.get("openHours"):

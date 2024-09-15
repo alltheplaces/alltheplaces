@@ -124,6 +124,7 @@ class StoreLocatorPlusSelfSpider(Spider):
             self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
 
         for location in locations:
+            self.pre_process_data(location)
             item = DictParser.parse(location)
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
@@ -133,3 +134,6 @@ class StoreLocatorPlusSelfSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

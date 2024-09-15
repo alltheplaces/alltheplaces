@@ -7,7 +7,7 @@ class UnitedBankUSSpider(RioSeoSpider):
     item_attributes = {"brand": "United Bank", "brand_wikidata": "Q16920636"}
     end_point = "https://maps.locations.bankwithunited.com"
 
-    def post_process_feature(self, feature, location):
+    def post_process_item(self, feature, location):
         if location["location_type_cs"] == "Branch":
             apply_category(Categories.BANK, feature)
         elif location["location_type_cs"] == "Branch & ATM":

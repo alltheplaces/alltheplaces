@@ -27,6 +27,7 @@ class UberallSpider(Spider):
 
         for feature in response.json()["response"]["locations"]:
             self.pre_process_data(feature)
+
             if self.business_id_filter:
                 if feature["businessId"] != self.business_id_filter:
                     continue

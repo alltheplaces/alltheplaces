@@ -31,6 +31,8 @@ class SylinderSpider(Spider):
             yield from self.parse_location(location) or []
 
     def parse_location(self, location: dict) -> Iterable[Feature]:
+        self.pre_process_data(location)
+
         item = DictParser.parse(location["storeDetails"])
         item["ref"] = location["gln"]
 
@@ -68,3 +70,6 @@ class SylinderSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

@@ -42,6 +42,7 @@ class StockistSpider(Spider):
 
     def parse_all_locations(self, response: Response):
         for location in response.json():
+            self.pre_process_data(location)
             yield from self.parse_item(self.parse_location(location), location) or []
 
     @staticmethod
@@ -94,3 +95,6 @@ class StockistSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

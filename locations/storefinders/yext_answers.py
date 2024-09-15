@@ -52,6 +52,7 @@ class YextAnswersSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["results"]:
+            self.pre_process_data(location)
             item = DictParser.parse(location["data"])
             item["branch"] = location["data"].get("geomodifier")
             item["extras"]["ref:google"] = location["data"].get("googlePlaceId")
@@ -89,3 +90,6 @@ class YextAnswersSpider(Spider):
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

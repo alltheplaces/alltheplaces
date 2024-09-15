@@ -9,6 +9,6 @@ class SpencersCAUSSpider(RioSeoSpider):
     }
     end_point = "https://maps.spencersonline.com"
 
-    def post_process_feature(self, feature, location):
+    def post_process_item(self, feature, location):
         feature["branch"] = feature.pop("name")
         yield feature

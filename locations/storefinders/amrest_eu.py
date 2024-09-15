@@ -114,3 +114,6 @@ class AmrestEUSpider(Spider):
             for times in opening_hours[day]:
                 oh.add_range(day[-3:], times["openFrom"], times["openTo"])
         return oh
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

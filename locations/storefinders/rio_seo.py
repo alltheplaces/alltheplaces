@@ -52,6 +52,8 @@ class RioSeoSpider(Spider):
             self.logger.warning(f"Received {len(data)} entries, the limit may need to be raised")
 
         for location in data:
+            self.pre_process_data(location)
+
             feature = DictParser.parse(location)
             feature["street_address"] = merge_address_lines([location["address_1"], location["address_2"]])
             feature["ref"] = location["fid"]
@@ -66,9 +68,12 @@ class RioSeoSpider(Spider):
             if location.get("location_closure_message"):
                 set_closed(feature)
 
-            yield from self.post_process_feature(feature, location) or []
+            yield from self.post_process_item(feature, location) or []
 
-    def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(self, feature: Feature, location: dict) -> Iterable[Feature]:
         yield feature
 
     def parse_hours(self, hours: dict | str) -> OpeningHours | None:

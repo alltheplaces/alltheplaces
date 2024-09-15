@@ -6,7 +6,7 @@ class KiaSGSpider(KiaAUSpider):
     name = "kia_sg"
     start_urls = ["https://www.kia.com/api/kia_singapore/base/fd01/findDealer.selectFindDealerAllList?isAll=true"]
 
-    def post_process_feature(self, item, feature):
+    def post_process_item(self, item, feature):
         if feature["dealerNm"] == "test test":
             return
         if "Authorised Service Centre" in feature["dealerNm"]:

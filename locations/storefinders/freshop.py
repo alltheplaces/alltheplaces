@@ -21,6 +21,7 @@ class FreshopSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["items"]:
+            self.pre_process_data(location)
             if location.get("type_id") not in self.location_type_ids or not location.get("has_address"):
                 continue
             if "COMING SOON" in location.get("hours_md", "").upper():
@@ -46,3 +47,6 @@ class FreshopSpider(Spider):
 
     def parse_item(self, item, location):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

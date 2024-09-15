@@ -41,10 +41,13 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class LighthouseSpider(Spider):
-    days: dict = None
+     days: dict = None
+
 
     def parse(self, response: Response):
-        for location in response.xpath('//article[@data-control="box"]'):
+        for location in response.xpath("//article[@data-control='box']"):
+            self.pre_process_data(location)
+
             item = Feature()
             item["ref"] = location.xpath("@id").get()
             item["lat"] = location.xpath("@data-latitude").get()
@@ -117,3 +120,6 @@ class LighthouseSpider(Spider):
 
     def parse_item(self, item: Feature, location: Selector) -> Iterable[Feature]:
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

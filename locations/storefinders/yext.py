@@ -42,6 +42,8 @@ class YextSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["entities"]:
+            self.pre_process_data(location)
+
             if location["meta"].get("entityType") and location["meta"].get("entityType") not in self.wanted_types:
                 continue
             if location.get("closed") or "CLOSED" in location["name"].upper():
@@ -107,3 +109,6 @@ class YextSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

@@ -29,6 +29,8 @@ class WoosmapSpider(Spider):
     def parse(self, response: Response):
         if features := response.json()["features"]:
             for feature in features:
+                self.pre_process_data(feature)
+
                 item = DictParser.parse(feature["properties"])
 
                 item["street_address"] = clean_address(feature["properties"]["address"]["lines"])
@@ -60,3 +62,6 @@ class WoosmapSpider(Spider):
 
     def parse_item(self, item: Feature, feature: dict):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

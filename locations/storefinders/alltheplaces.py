@@ -16,6 +16,7 @@ class AllThePlacesSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for feature in response.json().get("features", []):
             properties = feature.get("properties", {})
+            self.pre_process_data(properties)
 
             item = Feature()
 
@@ -27,9 +28,10 @@ class AllThePlacesSpider(Spider):
             item["geometry"] = feature.get("geometry", {})
             item["extras"] = properties
 
-            yield from self.post_process_feature(item, feature, response) or []
+            yield from self.post_process_item(item, feature, response) or []
 
-    def post_process_feature(
-        self, item: Feature, source_feature: dict, response: Response, **kwargs
-    ) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, source_feature: dict, response: Response, **kwargs) -> Iterable[Feature]:
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

@@ -71,6 +71,7 @@ class GeoMeSpider(Spider):
 
     def parse_locations(self, response):
         for location in response.json()["locations"]:
+            self.pre_process_data(location)
             # Remove found location from the list of locations which
             # are still waiting to be found.
             if self._locations_found.get(location["id"]):
@@ -127,3 +128,6 @@ class GeoMeSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

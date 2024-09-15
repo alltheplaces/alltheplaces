@@ -24,6 +24,7 @@ class YextSearchSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["entities"]:
+            self.pre_process_data(location)
             item = Feature()
 
             item["ref"] = location["url"]
@@ -100,3 +101,6 @@ class YextSearchSpider(Spider):
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

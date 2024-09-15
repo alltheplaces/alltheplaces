@@ -7,7 +7,7 @@ class CommerceBankUSSpider(RioSeoSpider):
     item_attributes = {"brand": "Commerce Bank", "brand_wikidata": "Q5152411"}
     end_point = "https://maps.locations.commercebank.com"
 
-    def post_process_feature(self, feature, location):
+    def post_process_item(self, feature, location):
         if location["Location Type_CS"] == "ATM":
             apply_category(Categories.ATM, feature)
         elif location["Location Type_CS"] == "Branch":

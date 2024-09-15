@@ -77,6 +77,10 @@ class WpGoMapsSpider(Spider):
 
     def parse_stores(self, response: Response) -> Iterable[Feature]:
         for marker in response.json()["markers"]:
+            self.pre_process_data(marker)
             location = self.pre_process_marker(marker)
             item = DictParser.parse(location)
             yield self.post_process_item(item, location)
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

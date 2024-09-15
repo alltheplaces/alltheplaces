@@ -68,6 +68,7 @@ class MapsMarkerProSpider(Spider):
         )
 
     def parse_popups(self, response: Response):
+
         features = response.meta["features"]
         popups = {popup["id"]: popup for popup in response.json()["data"]}
         for feature in features:
@@ -106,3 +107,6 @@ class MapsMarkerProSpider(Spider):
 
     def parse_item(self, item: Feature, feature: dict, popup: dict) -> Iterable[Feature]:
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""
