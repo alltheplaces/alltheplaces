@@ -138,7 +138,7 @@ def set_closed(item: Feature, end_date: datetime = None):
 
 def merge_items(language_dict: dict, main_language: str, matching_key="ref") -> Iterable[Feature]:
     if any([len(items) == 0 for items in language_dict.values()]):
-        logger.debug(f"Incomplete dict, skipping merge")
+        logger.debug("Incomplete dict, skipping merge")
         return
     for item in language_dict[main_language].values():
         matched_items = []
