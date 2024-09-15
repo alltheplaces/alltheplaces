@@ -2,7 +2,6 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours, day_range
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import FIREFOX_LATEST
 
 
 class ReiUSSpider(SitemapSpider, StructuredDataSpider):
@@ -10,9 +9,8 @@ class ReiUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "REI", "brand_wikidata": "Q3414933", "country": "US"}
     sitemap_urls = ["https://www.rei.com/sitemap-stores.xml"]
     sitemap_rules = [(r"^https://www.rei.com/stores/([^/]+)$", "parse_sd")]
-    user_agent = FIREFOX_LATEST
-    download_delay = 2.5
     wanted_types = ["Store"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url
