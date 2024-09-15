@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -31,11 +31,15 @@ class WinmartVNSpider(JSONBlobSpider):
         else:
             raise ValueError("Unknown brand detected: {}".format(feature["chainId"]))
 
-        item["branch"] = item.pop("name", "").removeprefix("WM ").removeprefix("WM+ ").removeprefix("{} ".format(feature.get("provinceCode", "")))
+        item["branch"] = (
+            item.pop("name", "")
+            .removeprefix("WM ")
+            .removeprefix("WM+ ")
+            .removeprefix("{} ".format(feature.get("provinceCode", "")))
+        )
         item["addr_full"] = feature.get("officeAddress")
         item["state"] = feature.get("provinceCode")
         item["city"] = feature.get("wardName").removeprefix("P. ").removeprefix("TT. ").removeprefix("X. ")
         item["phone"] = feature.get("contactMobile")
 
         yield item
-

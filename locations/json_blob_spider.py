@@ -50,7 +50,7 @@ class JSONBlobSpider(Spider):
     data array. This can either be specified as a single string if a single
     dictionary contains the location data array, or as an ordered list of
     strings if a nested set of dictionaries exists.
-    
+
     Example 1:
     locations_key = "data"
 
