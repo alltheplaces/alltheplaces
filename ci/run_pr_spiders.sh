@@ -64,6 +64,7 @@ do
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
     PARQUETFILE="${SPIDER_RUN_DIR}/output.parquet"
+    STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
     timeout -k 5s 90s \
@@ -74,7 +75,7 @@ do
         --logfile="${LOGFILE}" \
         -s CLOSESPIDER_TIMEOUT=60 \
         -s CLOSESPIDER_ERRORCOUNT=1 \
-        -s LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats.json \
+        -s LOGSTATS_FILE="${STATSFILE}" \
         $spider
 
     if [ ! $? -eq 0 ]; then
@@ -132,7 +133,12 @@ do
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "parquet copy to s3 failed with exit code ${retval}")
-            exit 1
+        fi
+
+        aws s3 cp --only-show-errors ${STATSFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            (>&2 echo "stats copy to s3 failed with exit code ${retval}")
         fi
 
         PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
