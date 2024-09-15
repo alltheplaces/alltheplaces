@@ -141,6 +141,58 @@ do
             (>&2 echo "stats copy to s3 failed with exit code ${retval}")
         fi
 
+        # Check the stats JSON to look for things that we consider warnings or errors
+        if [ ! -f "${STATSFILE}" ]; then
+            (>&2 echo "stats file not found")
+        else
+            STATS_WARNINGS=""
+            STATS_ERRORS=""
+
+            # We expect items to have a category
+            missing_category=$(jq 'atp/category/missing' "${STATSFILE}")
+            if [ $missing_category -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
+            fi
+
+            # Warn if items are missing a lat/lon
+            missing_lat=$(jq 'atp/field/lat/missing' "${STATSFILE}")
+            missing_lon=$(jq 'atp/field/lon/missing' "${STATSFILE}")
+            if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
+            fi
+
+            # Error if items have invalid lat/lon
+            invalid_lat=$(jq 'atp/field/lat/invalid' "${STATSFILE}")
+            invalid_lon=$(jq 'atp/field/lon/invalid' "${STATSFILE}")
+            if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
+            fi
+
+            # Warn if items were fetched using Zyte
+            zyte_fetched=$(jq 'scrapy-zyte-api/success' "${STATSFILE}")
+            if [ $zyte_fetched -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${zyte_fetched} requests were made using Zyte</li>"
+            fi
+
+            # Warn if more than 30% of the items scraped were dropped by the dupe filter
+            dupe_dropped=$(jq 'dupefilter/filtered' "${STATSFILE}")
+            total_scraped=$(jq 'item_scraped_count' "${STATSFILE}")
+            dupe_percent=$(echo "scale=2; ${dupe_dropped} / ${total_scraped} * 100" | bc)
+            if [ $(echo "${dupe_percent} > 30" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
+            fi
+
+            if [ -n "${STATS_ERRORS}" ]; then
+                FAILURE_REASON="stats"
+                EXIT_CODE=1
+            fi
+
+            num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
+            num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
+            PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+            continue
+        fi
+
         PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
     else
         echo "${spider} has no output"
