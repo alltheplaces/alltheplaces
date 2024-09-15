@@ -1,6 +1,7 @@
 import json
 
 import requests
+from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -11,7 +12,7 @@ from locations.user_agents import CHROME_LATEST
 
 class HiltonSpider(Spider):
     name = "hilton"
-
+    start_urls = ["https://www.hilton.com/en/locations/hilton-hotels/"]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
@@ -92,12 +93,15 @@ class HiltonSpider(Spider):
         "tennisCourt": None,
     }
 
-    def start_requests(self):
+    def parse(self, response: Response):
+        config = parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        app_id = config["runtimeConfig"]["DX_AUTH_API_CUSTOMER_APP_ID"]
+
         url = "https://www.hilton.com/dx-customer/auth/applications/token?appName=dx_shop_search_app"
         headers = {
             "x-dtpc": "ignore",
         }
-        data = {"app_id": "096a02c6-e844-41b4-bebf-ec74e3ca3cd4"}
+        data = {"app_id": app_id}
         yield JsonRequest(url, headers=headers, data=data, callback=self.parse_token)
 
     def parse_token(self, response: Response):
