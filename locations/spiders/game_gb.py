@@ -30,6 +30,7 @@ class GameGBSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow="store-[\d]+$"), callback="parse_sd")]
     download_delay = 2
     custom_settings = {"DOWNLOAD_TIMEOUT": 10}
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "street_address" in item:
