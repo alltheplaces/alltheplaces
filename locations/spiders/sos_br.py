@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class SosBRSpider(Spider):
     name = "sos_br"
-    item_attributes = {"brand": "SOS Technologia e Educação", "brand_wikidata": "Q129847471"}
+    item_attributes = {"brand": "SOS Tecnologia e Educação", "brand_wikidata": "Q129847471"}
     requires_proxy = True
 
     def start_requests(self) -> Iterable[FormRequest]:
