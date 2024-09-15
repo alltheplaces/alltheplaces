@@ -65,3 +65,11 @@ def test_join_different_phones():
         "phone": "+27 1234; +27 5678",
         "extras": {},
     }
+
+
+def test_no_match_yields_anyway():
+    item_en = {}
+    item_en["ref"] = "1"
+    item_en["name"] = "Shop"
+    item_en["extras"] = {}
+    assert [item for item in merge_items({"en": {"1": item_en}}, "en")][0] == {"ref": "1", "name": "Shop", "extras": {}}
