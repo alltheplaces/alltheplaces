@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class RedLobsterUSSpider(scrapy.Spider):
     name = "red_lobster_us"
     item_attributes = {"brand": "Red Lobster", "brand_wikidata": "Q846301", "country": "US"}
-    start_urls = ["https://www.redlobster.com/api/location/GetLocations?latitude=0&longitude=0&radius=150000"]
+    start_urls = ["https://www.redlobster.com/api/location/GetLocations?latitude=0&longitude=0&radius=150000&limit=1000"]
     requires_proxy = True
 
     @staticmethod
