@@ -26,7 +26,7 @@ class GameGBSpider(CrawlSpider, StructuredDataSpider):
     #     )
     # ]
     # Option 2:
-    start_urls = [" https://www.game.co.uk/stores/all"]
+    start_urls = ["https://www.game.co.uk/stores/all"]
     rules = [Rule(LinkExtractor(allow="-ga-store-[\d]+"), callback="parse_sd")]
     download_delay = 2
     custom_settings = {"DOWNLOAD_TIMEOUT": 10}
