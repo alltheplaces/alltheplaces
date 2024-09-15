@@ -182,14 +182,19 @@ do
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
             fi
 
-            if [ -n "${STATS_ERRORS}" ]; then
+            num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
+            num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
+            if [ $num_errors -gt 0 ]; then
                 FAILURE_REASON="stats"
                 EXIT_CODE=1
             fi
 
-            num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
-            num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
-            PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+            if [ $num_errors -gt 0 ] || [ $num_warnings -gt 0 ]; then
+                # Include details in an expandable section if there are warnings or errors
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+            else
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}|\\n"
+            fi
             continue
         fi
 
