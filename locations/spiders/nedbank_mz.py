@@ -76,7 +76,7 @@ class NedbankMZSpider(Spider):
                 delimiters=delimiters,
             )
 
-            item["ref"] = f"{item["lat"]},{item["lon"]}"
+            item["ref"] = f"{item['lat']},{item['lon']}"
 
             if "/en/" in response.url:
                 self.saved_items["en"][item["ref"]] = item
