@@ -1,8 +1,8 @@
 from json import loads
 from typing import Iterable
-from unidecode import unidecode
 
 from scrapy.http import Response
+from unidecode import unidecode
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
