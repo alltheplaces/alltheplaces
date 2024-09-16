@@ -189,17 +189,7 @@ TRANSLATABLE_PREFIXES = [
 
 def get_merged_item(item: dict, matched_items: dict, main_language: str, matching_key: str) -> dict:
     # Do extras first before we add language keys to it
-    extras_keys = set([key for match in matched_items.values() for key in match["extras"].keys()])
-    for extras_key, extras_value in {key: item["extras"].get(key) for key in extras_keys}.items():
-        if all([extras_value == match["extras"].get(extras_key) for match in matched_items.values()]):
-            continue
-        if extras_key in TRANSLATABLE_EXTRA_KEYS:
-            for language, match in matched_items.items():
-                item["extras"][f"{extras_key}:{language}"] = match["extras"].get(extras_key)
-        for prefix in TRANSLATABLE_PREFIXES:
-            if extras_key.startswith(prefix):
-                for language, match in matched_items.items():
-                    item["extras"][f"{extras_key}:{language}"] = match["extras"].get(extras_key)
+    item = get_merged_extras(item, matched_items, main_language, matching_key)
 
     all_keys = set([key for match in matched_items.values() for key in match.keys()])
     for key, value in {key: item.get(key) for key in all_keys}.items():
@@ -240,4 +230,19 @@ def get_merged_item(item: dict, matched_items: dict, main_language: str, matchin
                 logger.warning(f"Key '{key}' does not match in all items")
             for language, match in matched_items.items():
                 item["extras"][f"{key}:{language}"] = match.get(key)
+    return item
+
+
+def get_merged_extras(item: dict, matched_items: dict, main_language: str, matching_key: str) -> dict:
+    extras_keys = set([key for match in matched_items.values() for key in match["extras"].keys()])
+    for extras_key, extras_value in {key: item["extras"].get(key) for key in extras_keys}.items():
+        if all([extras_value == match["extras"].get(extras_key) for match in matched_items.values()]):
+            continue
+        if extras_key in TRANSLATABLE_EXTRA_KEYS:
+            for language, match in matched_items.items():
+                item["extras"][f"{extras_key}:{language}"] = match["extras"].get(extras_key)
+        for prefix in TRANSLATABLE_PREFIXES:
+            if extras_key.startswith(prefix):
+                for language, match in matched_items.items():
+                    item["extras"][f"{extras_key}:{language}"] = match["extras"].get(extras_key)
     return item
