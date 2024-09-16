@@ -12,7 +12,11 @@ from locations.items import Feature
 
 class BigBrandTireAndServiceUSSpider(Spider):
     name = "big_brand_tire_and_service_us"
-    item_attributes = {"brand": "Big Brand Tire & Service", "brand_wikidata": "Q120784816", "extras": Categories.SHOP_TYRES.value}
+    item_attributes = {
+        "brand": "Big Brand Tire & Service",
+        "brand_wikidata": "Q120784816",
+        "extras": Categories.SHOP_TYRES.value,
+    }
     allowed_domains = ["www.bigbrandtire.com"]
     start_urls = ["https://www.bigbrandtire.com/api/publicWeb/getLocations"]
 
@@ -36,6 +40,8 @@ class BigBrandTireAndServiceUSSpider(Spider):
                 for day_hours in hours_dict:
                     if day_hours.get("storeClosed"):
                         continue
-                    item["opening_hours"].add_range(DAYS_EN[day_hours["dayName"]], *day_hours["displayHours"].split(" - ", 1), "%I:%M%p")
+                    item["opening_hours"].add_range(
+                        DAYS_EN[day_hours["dayName"]], *day_hours["displayHours"].split(" - ", 1), "%I:%M%p"
+                    )
 
             yield item
