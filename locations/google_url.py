@@ -12,6 +12,12 @@ def _get_possible_links(response: Response | Selector):
     yield from response.xpath('.//iframe[contains(@src, "maps/embed")]/@src').getall()
     yield from response.xpath(".//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
     yield from response.xpath(".//a[contains(@href, 'maps.apple.com')]/@href").getall()
+    yield from [
+        onclick.replace("'", "")
+        for onclick in response.xpath(
+            ".//button[contains(@onclick, 'google')][contains(@onclick, 'maps')]/@onclick"
+        ).getall()
+    ]
 
 
 def extract_google_position(item: Feature, response: Response | Selector):
