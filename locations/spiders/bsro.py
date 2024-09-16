@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 
@@ -55,4 +56,6 @@ class BSROSpider(CrawlSpider):
             if store_type := store.get("storeType"):
                 if brand_info := self.BRANDS.get(store_type.replace("TPL", "TP")):  # TPL: Tires Plus Licensee
                     item.update(brand_info)
+                if store_type == "HTP":
+                    apply_category(Categories.SHOP_TYRES, item)
             yield item
