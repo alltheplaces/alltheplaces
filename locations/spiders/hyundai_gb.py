@@ -51,6 +51,8 @@ class HyundaiGBSpider(JSONBlobSpider):
                 continue
             elif service["serviceId"] == "dealership-nexo":
                 continue
+            elif service["serviceId"] == "fcev-sales" or service["serviceId"] == "fcev-aftersales":
+                continue
             else:
                 raise ValueError("Unknown feature type: {} ({})".format(service["serviceTitle"], service["serviceId"]))
 
