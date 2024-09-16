@@ -32,16 +32,26 @@ class HyundaiGBSpider(JSONBlobSpider):
 
         services = feature["dealerProperties"][0].get("services")
         for service in services:
-            if service["serviceId"] == "sales":
+            if service["serviceId"] == "sales" or service["serviceId"] == "predaj":
+                # Features where new (and sometimes used) vehicles can be purchased.
+                # "Predaj" is "Sales" in Slovak.
                 sales_feature = item.copy()
                 sales_feature["ref"] = sales_feature["ref"] + "_Sales"
                 apply_category(Categories.SHOP_CAR, sales_feature)
                 yield sales_feature
-            elif service["serviceId"] == "service":
+            elif service["serviceId"] == "service" or service["serviceId"] == "servis":
+                # Features where vehicles can be serviced and repaired.
+                # "Servis" is "Service" in Slovak.
                 service_feature = item.copy()
                 service_feature["ref"] = service_feature["ref"] + "_Service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_feature)
                 yield service_feature
+            elif service["serviceId"] == "parts":
+                # Features where vehicle parts can be purchased.
+                parts_feature = item.copy()
+                parts_feature["ref"] = service_feature["ref"] + "_Parts"
+                apply_category(Categories.SHOP_CAR_PARTS, parts_feature)
+                yield parts_feature
             elif (
                 service["serviceId"] == "certified-used-car-program"
                 or service["serviceId"] == "HyundaiPromiseApprovedUsedCars"
@@ -52,6 +62,23 @@ class HyundaiGBSpider(JSONBlobSpider):
             elif service["serviceId"] == "dealership-nexo":
                 continue
             elif service["serviceId"] == "fcev-sales" or service["serviceId"] == "fcev-aftersales":
+                # Dealerships selling hydrogen cars.
+                continue
+            elif (
+                service["serviceId"] == "electric-vehicle-sales"
+                or service["serviceId"] == "electric-vehicle-aftersales"
+            ):
+                # Dealerships selling electric cars.
+                continue
+            elif service["serviceId"] == "lpg-sales" or service["serviceId"] == "lpg-aftersales":
+                # Dealerships selling LPG powered cars.
+                continue
+            elif service["serviceId"] == "lcv-sales" or service["serviceId"] == "lcv-aftersalesales":
+                # Dealerships selling "light commercial vehicles".
+                continue
+            elif service["serviceId"] == "disinfection-ozonation":
+                continue
+            elif service["serviceId"] == "door-to-door":
                 continue
             else:
                 raise ValueError("Unknown feature type: {} ({})".format(service["serviceTitle"], service["serviceId"]))
@@ -79,10 +106,10 @@ class HyundaiGBSpider(JSONBlobSpider):
                     continue
 
                 # Handle one or two openings on a given day or day range.
-                open_time = hours_range.split("-", 1)[0].strip().replace(".", ":")
+                open_time = hours_range.split("-", 1)[0].strip().replace(".", ":").split(" ", 1)[0]
                 if not re.match(r"^\d{1,2}:\d{2}$", open_time):
                     continue
-                close_time = hours_range.split("-", 1)[1].strip().replace(".", ":")
+                close_time = hours_range.split("-", 1)[1].strip().replace(".", ":").split(" ", 1)[0]
                 if not re.match(r"^\d{1,2}:\d{2}$", close_time):
                     continue
                 if day_abbrev != "MoFr":
