@@ -23,7 +23,6 @@ class HyundaiGBSpider(JSONBlobSpider):
         return json_dict["dealers"]["gb"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        print(feature)
         item["branch"] = feature.get("fullDealerName")
         item["street_address"] = clean_address([feature.get("addressLine1"), feature.get("addressLine2")])
         item["website"] = feature.get("webSite")
@@ -45,9 +44,11 @@ class HyundaiGBSpider(JSONBlobSpider):
                 service_feature["ref"] = service_feature["ref"] + "_Service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_feature)
                 yield service_feature
-            elif service["serviceId"] == "certified-used-car-program":
+            elif service["serviceId"] == "certified-used-car-program" or service["serviceId"] == "HyundaiPromiseApprovedUsedCars":
                 continue
             elif service["serviceId"] == "hyundai-business-centre":
+                continue
+            elif service["serviceId"] == "dealership-nexo":
                 continue
             else:
                 raise ValueError("Unknown feature type: {} ({})".format(service["serviceTitle"], service["serviceId"]))
