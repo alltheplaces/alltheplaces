@@ -1,5 +1,6 @@
 from json import loads
 from typing import Iterable
+from unidecode import unidecode
 
 from scrapy.http import Response
 
@@ -26,11 +27,7 @@ class HyundaiGBSpider(JSONBlobSpider):
         item["branch"] = feature.get("fullDealerName")
         item["street_address"] = clean_address([feature.get("addressLine1"), feature.get("addressLine2")])
         item["website"] = feature.get("webSite")
-        item["opening_hours"] = OpeningHours()
-        for day_abbrev in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sa", "Su"]:
-            item["opening_hours"].add_range(
-                DAYS_EN[day_abbrev], *feature.get(f"openingHours{day_abbrev}", "").split("-", 1), "%H:%M"
-            )
+        item["opening_hours"] = self.parse_opening_hours(feature)
 
         services = feature["dealerProperties"][0].get("services")
         for service in services:
@@ -55,3 +52,34 @@ class HyundaiGBSpider(JSONBlobSpider):
                 continue
             else:
                 raise ValueError("Unknown feature type: {} ({})".format(service["serviceTitle"], service["serviceId"]))
+
+    def parse_opening_hours(self, feature: dict) -> OpeningHours | None:
+        oh = OpeningHours()
+        for day_abbrev in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sa", "Su", "MoFr"]:
+            hours_ranges = feature.get(f"openingHours{day_abbrev}", "").split("/", 1)
+            for hours_range in hours_ranges:
+                hours_range = unidecode(hours_range.strip())
+
+                # Handle closure on given day or day range.
+                if hours_range.upper() == "CLOSED":
+                    if day_abbrev != "MoFr":
+                        oh.set_closed(DAYS_EN[day_abbrev])
+                    else:
+                        oh.set_closed(["Mo", "Tu", "We", "Th", "Fr"])
+                    continue
+
+                # Ignore days with no specified hours.
+                if not hours_range:
+                    continue
+
+                # Handle one or two openings on a given day or day range.
+                open_time = hours_range.split("-", 1)[0].strip()
+                close_time = hours_range.split("-", 1)[1].strip()
+                if not hours_range.strip():
+                    continue
+                if day_abbrev != "MoFr":
+                    oh.add_range(DAYS_EN[day_abbrev], open_time, close_time)
+                else:
+                    oh.add_days_range(["Mo", "Tu", "We", "Th", "Fr"], open_time, close_time)
+
+        return oh
