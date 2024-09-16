@@ -1,4 +1,5 @@
 from json import loads
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -59,6 +60,13 @@ class HyundaiGBSpider(JSONBlobSpider):
             hours_ranges = feature.get(f"openingHours{day_abbrev}", "").split("/", 1)
             for hours_range in hours_ranges:
                 hours_range = unidecode(hours_range.strip())
+                if "(" in hours_range:  # Delete trailing comments.
+                    hours_range = hours_range.split("(", 1)[0]
+
+                # Ignore days with no specified hours.
+                # "ETTER AVTALE" is "Open upon request/negotiation" in Norewegian.
+                if not hours_range or hours_range.upper() == "ETTER AVTALE":
+                    continue
 
                 # Handle closure on given day or day range.
                 if hours_range.upper() == "CLOSED":
@@ -68,14 +76,12 @@ class HyundaiGBSpider(JSONBlobSpider):
                         oh.set_closed(["Mo", "Tu", "We", "Th", "Fr"])
                     continue
 
-                # Ignore days with no specified hours.
-                if not hours_range:
-                    continue
-
                 # Handle one or two openings on a given day or day range.
-                open_time = hours_range.split("-", 1)[0].strip()
-                close_time = hours_range.split("-", 1)[1].strip()
-                if not hours_range.strip():
+                open_time = hours_range.split("-", 1)[0].strip().replace(".", ":")
+                if not re.match(r"^\d{1,2}:\d{2}$", open_time):
+                    continue
+                close_time = hours_range.split("-", 1)[1].strip().replace(".", ":")
+                if not re.match("^\d{1,2}:\d{2}$", close_time):
                     continue
                 if day_abbrev != "MoFr":
                     oh.add_range(DAYS_EN[day_abbrev], open_time, close_time)
