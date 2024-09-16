@@ -594,6 +594,16 @@ DAYS_SR = {
     "Недеља": "Su",
 }
 
+DAYS_TR = {
+    "Pazartesi": "Mo",
+    "Salı": "Tu",
+    "Çarşamba": "We",
+    "Perşembe": "Th",
+    "Cuma": "Fr",
+    "Cumartesi": "Sa",
+    "Pazar": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
@@ -606,7 +616,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_FR,
     DAYS_PT,
     DAYS_IT,
-    # Turkish missing
+    DAYS_TR,
     DAYS_DK,
     DAYS_PL,
     # Persian
@@ -678,6 +688,8 @@ DELIMITERS_ES = [
     "y",
     "de",
 ]
+
+DELIMITERS_FR = ["-", "–", "—", "―", "‒", "au", "à", "de"]
 
 DELIMITERS_PT = [
     "-",

@@ -51,7 +51,7 @@ class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
         for feature in features:
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
-            if "popup_html" in feature:
+            if "popup_html" in feature and feature["popup_html"] is not None:
                 popup_html = Selector(text=feature["popup_html"])
                 if not item["name"]:
                     item["name"] = " ".join(

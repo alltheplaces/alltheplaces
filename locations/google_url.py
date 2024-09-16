@@ -94,7 +94,10 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
 
     if "/maps.google.com/" in url:
         for ll in get_query_param(url, "ll"):
-            lat, lon = ll.split(",")
+            lat_lon = ll.split(",")
+            if len(lat_lon) == 3:  # Zoom value can be included in ll options
+                lat_lon = [val for val in lat_lon if "z" not in val]
+            lat, lon = lat_lon
             return float(lat), float(lon)
 
     for center in get_query_param(url, "center"):
