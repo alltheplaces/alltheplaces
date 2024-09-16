@@ -124,7 +124,7 @@ def test_no_match_yields_anyway_other_language():
     assert return_first_merged({"fr": {}, "en": {"1": item_en}}, "fr") == {"ref": "1", "name": "Shop", "extras": {}}
 
 
-def test_translatable_prefix():
+def test_translatable_extra():
     item_en = {}
     item_en["ref"] = "1"
     item_en["extras"] = {"alt_name": "Alty"}
@@ -133,7 +133,7 @@ def test_translatable_prefix():
     item_fr["extras"] = {"alt_name": "Le Altie"}
     assert return_first_merged({"en": {"1": item_en}, "fr": {"1": item_fr}}, "en") == {
         "ref": "1",
-        "extras": {"alt_name": "Alty", "alt_name:fr": "Alty", "alt_name:fr": "Le Altie"},
+        "extras": {"alt_name": "Alty", "alt_name:en": "Alty", "alt_name:fr": "Le Altie"},
     }
 
 
