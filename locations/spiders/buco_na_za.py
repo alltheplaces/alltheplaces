@@ -14,6 +14,7 @@ class BucoNAZASpider(Spider):
     allowed_domains = ["buco.co.za"]
     start_urls = ["https://www.buco.co.za/find-a-store"]
     skip_auto_cc_domain = True
+    requires_proxy = "ZA"
     no_refs = True
 
     def parse(self, response):
