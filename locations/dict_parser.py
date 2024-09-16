@@ -238,6 +238,7 @@ class DictParser:
         "website-url",
         "websiteURL",
         "location-url",
+        "web-address",
     ]
 
     hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
