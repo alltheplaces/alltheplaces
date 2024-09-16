@@ -64,7 +64,10 @@ class HyundaiGBSpider(JSONBlobSpider):
             elif service["serviceId"] == "fcev-sales" or service["serviceId"] == "fcev-aftersales":
                 # Dealerships selling hydrogen cars.
                 continue
-            elif service["serviceId"] == "electric-vehicle-sales" or service["serviceId"] == "electric-vehicle-aftersales":
+            elif (
+                service["serviceId"] == "electric-vehicle-sales"
+                or service["serviceId"] == "electric-vehicle-aftersales"
+            ):
                 # Dealerships selling electric cars.
                 continue
             elif service["serviceId"] == "lpg-sales" or service["serviceId"] == "lpg-aftersales":
