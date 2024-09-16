@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.hyundai_kr import HYUNDAI_SHARED_ATTRIBUTES
@@ -14,7 +14,6 @@ class HyundaiAUSpider(JSONBlobSpider):
     allowed_domains = ["www.hyundai.com"]
     start_urls = ["https://www.hyundai.com/au/services/v1/findadealer?postcode=0"]
     locations_key = ["allDealers", "dealers"]
-
 
     def parse(self, response: Response) -> Iterable[Feature]:
         yield from self.parse_feature_array(response, response.json()["allDealers"]["dealers"]) or []
