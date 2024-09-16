@@ -29,7 +29,9 @@ class HyundaiGBSpider(JSONBlobSpider):
         item["website"] = feature.get("webSite")
         item["opening_hours"] = OpeningHours()
         for day_abbrev in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sa", "Su"]:
-            item["opening_hours"].add_range(DAYS_EN[day_abbrev], *feature.get(f"openingHours{day_abbrev}", "").split("-", 1), "%H:%M")
+            item["opening_hours"].add_range(
+                DAYS_EN[day_abbrev], *feature.get(f"openingHours{day_abbrev}", "").split("-", 1), "%H:%M"
+            )
 
         services = feature["dealerProperties"][0].get("services")
         for service in services:
