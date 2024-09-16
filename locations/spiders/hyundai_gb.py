@@ -83,7 +83,7 @@ class HyundaiGBSpider(JSONBlobSpider):
                 if not re.match(r"^\d{1,2}:\d{2}$", open_time):
                     continue
                 close_time = hours_range.split("-", 1)[1].strip().replace(".", ":")
-                if not re.match("^\d{1,2}:\d{2}$", close_time):
+                if not re.match(r"^\d{1,2}:\d{2}$", close_time):
                     continue
                 if day_abbrev != "MoFr":
                     oh.add_range(DAYS_EN[day_abbrev], open_time, close_time)
