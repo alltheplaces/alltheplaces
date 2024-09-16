@@ -44,7 +44,10 @@ class HyundaiGBSpider(JSONBlobSpider):
                 service_feature["ref"] = service_feature["ref"] + "_Service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_feature)
                 yield service_feature
-            elif service["serviceId"] == "certified-used-car-program" or service["serviceId"] == "HyundaiPromiseApprovedUsedCars":
+            elif (
+                service["serviceId"] == "certified-used-car-program"
+                or service["serviceId"] == "HyundaiPromiseApprovedUsedCars"
+            ):
                 continue
             elif service["serviceId"] == "hyundai-business-centre":
                 continue
