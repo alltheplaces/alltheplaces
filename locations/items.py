@@ -137,37 +137,25 @@ def set_closed(item: Feature, end_date: datetime = None):
 
 
 def merge_items(language_dict: dict, main_language: str, matching_key="ref") -> Iterable[Feature]:
-    if any([len(items) == 0 for items in language_dict.values()]):
-        logger.debug("Incomplete dict, skipping merge")
-        return
+    all_item_refs = {language: [ref for ref in items.keys()] for language, items in language_dict.items()}
     for item in language_dict[main_language].values():
-        matched_items = []
+        matched_items = {}
         for language, items in language_dict.items():
-            if language == main_language:
-                continue
             if item[matching_key] in items.keys():
-                match = items.pop(item[matching_key])
-                match["extras"]["merge_language"] = language
-                matched_items.append(match)
+                matched_items[language] = items[item[matching_key]]
+                all_item_refs[language].remove(item[matching_key])
             else:
                 logger.warning(
                     f"No matches found for '{matching_key}': '{item[matching_key]}' in language '{language}'"
                 )
 
-        if len(matched_items) == 0:
-            logger.warning(f"No matches found for '{matching_key}': '{item[matching_key]}'")
-            yield item
-            continue
-
         item = get_merged_item(item, matched_items, main_language, matching_key)
         yield item
-    for language, items in language_dict.items():
-        if language == main_language:
-            continue
-        if len(items) > 0:
-            logger.warning(f"Failed to match {len(items)} for language: {language}")
-        for item in items.values():
-            yield item
+    for language, refs in all_item_refs.items():
+        if len(refs) > 0:
+            logger.warning(f"Failed to match {len(refs)} for language: {language}")
+        for ref in refs:
+            yield language_dict[language][ref]
 
 
 KEYS_THAT_SHOULD_MATCH = [
@@ -188,28 +176,50 @@ KEYS_THAT_SHOULD_MATCH = [
     "nsi_id",
 ]
 
+TRANSLATABLE_EXTRA_KEYS = [
+    "alt_name",
+    "wheelchair:description",
+]
 
-def get_merged_item(item: dict, matched_items: [dict], main_language: str, matching_key: str) -> dict:
-    for key, value in item.items():
-        if value is None or value == "" or key == "extras":
+TRANSLATABLE_PREFIXES = [
+    "website",
+    "contact",
+]
+
+
+def get_merged_item(item: dict, matched_items: dict, main_language: str, matching_key: str) -> dict:
+    # Do extras first before we add language keys to it
+    extras_keys = set([key for match in matched_items.values() for key in match["extras"].keys()])
+    for extras_key, extras_value in {key: item["extras"].get(key) for key in extras_keys}.items():
+        if all([extras_value == match["extras"].get(extras_key) for match in matched_items.values()]):
             continue
-        if all([value == match.get(key) for match in matched_items]):
+        if extras_key in TRANSLATABLE_EXTRA_KEYS:
+            for language, match in matched_items.items():
+                item["extras"][f"{extras_key}:{language}"] = match["extras"].get(extras_key)
+        for prefix in TRANSLATABLE_PREFIXES:
+            if extras_key.startswith(prefix):
+                for language, match in matched_items.items():
+                    item["extras"][f"{extras_key}:{language}"] = match["extras"].get(extras_key)
+
+    all_keys = set([key for match in matched_items.values() for key in match.keys()])
+    for key, value in {key: item.get(key) for key in all_keys}.items():
+        if key == "extras":
+            continue
+        if all([value == match.get(key) for match in matched_items.values()]):
             continue
         if key == "addr_full":
-            item["extras"]["addr:full" + main_language] = value
-            for match in matched_items:
-                item["extras"]["addr:full" + match["extras"]["merge_language"]] = match.get(key)
+            for language, match in matched_items.items():
+                item["extras"]["addr:full" + language] = match.get(key)
         elif key in ["city", "postcode", "state", "street", "street_address"]:
-            item["extras"][f"addr:{key}:{main_language}"] = value
-            for match in matched_items:
-                item["extras"][f"addr:{key}:{match['extras']['merge_language']}"] = match.get(key)
+            for language, match in matched_items.items():
+                item["extras"][f"addr:{key}:{language}"] = match.get(key)
         elif key == "opening_hours":
-            if isinstance(item["opening_hours"], OpeningHours):
-                item_oh = item["opening_hours"].as_opening_hours()
+            if isinstance(value, OpeningHours):
+                item_oh = value.as_opening_hours()
             else:
-                item_oh = item["opening_hours"]
+                item_oh = value
             match_oh_list = []
-            for match in matched_items:
+            for match in matched_items.values():
                 if isinstance(match["opening_hours"], OpeningHours):
                     match_oh_list.append(match["opening_hours"].as_opening_hours())
                 else:
@@ -219,16 +229,15 @@ def get_merged_item(item: dict, matched_items: [dict], main_language: str, match
                     f"Opening hours do not match in all items for '{matching_key}': '{item[matching_key]}', using hours from '{main_language}'"
                 )
         elif key == "phone":
-            matched_phones = [match["phone"] for match in matched_items]
-            if not all([item["phone"] == matched_phone for matched_phone in matched_phones]):
+            matched_phones = [match["phone"] for match in matched_items.values()]
+            if not all([value == matched_phone for matched_phone in matched_phones]):
                 logger.info(
                     f"Phone numbers do not all match, returning all numbers for '{matching_key}': '{item[matching_key]}'"
                 )
-                item["phone"] = "; ".join([item["phone"]] + matched_phones)
+                item["phone"] = "; ".join(matched_phones)
         else:
             if key in KEYS_THAT_SHOULD_MATCH:
                 logger.warning(f"Key '{key}' does not match in all items")
-            item["extras"][f"{key}:{main_language}"] = value
-            for match in matched_items:
-                item["extras"][f"{key}:{match['extras']['merge_language']}"] = match.get(key)
+            for language, match in matched_items.items():
+                item["extras"][f"{key}:{language}"] = match.get(key)
     return item
