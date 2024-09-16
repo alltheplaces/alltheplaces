@@ -2,19 +2,23 @@ from typing import Any
 
 from scrapy import Selector
 from scrapy.http import Response
-from scrapy.spiders import CrawlSpider, SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class ClicksSpider(CrawlSpider, SitemapSpider):
+class ClicksSpider(CrawlSpider):
     name = "clicks"
     item_attributes = {"brand": "Clicks", "brand_wikidata": "Q62563622"}
     allowed_domains = ["clicks.co.za"]
-    sitemap_urls = ["https://clicks.co.za/sitemap.xml"]
-    sitemap_rules = [(r"/store/", "parse")]
+    start_urls = [
+        "https://clicks.co.za/sitemap/stores",
+    ]
+    rules = [Rule(LinkExtractor(allow=r"/store/"), callback="parse")]
     skip_auto_cc_domain = True
+    download_delay = 10  # as requested by robots.txt
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
@@ -27,7 +31,9 @@ class ClicksSpider(CrawlSpider, SitemapSpider):
             './/div[contains(@class, "title-bar")]/p/strong[contains(text(), "Address")]/../span/text()'
         ).get()
         item["phone"] = "; ".join(response.xpath('.//span[contains(@class, "phone_num")]/text()').getall())
+
         item["opening_hours"] = OpeningHours()
-        for day in response.xpath('.//div[contains(@class, "openingHoursWrap")]/.//dl').getall():
-            item["opening_hours"].add_ranges_from_string(Selector(text=day).xpath("string(.//dl)").get())
+        days = response.xpath('.//div[contains(@class, "openingHoursWrap")]').get()
+        for day in Selector(text=days).xpath(".//dl"):
+            item["opening_hours"].add_ranges_from_string(day.xpath("string()").get())
         yield item
