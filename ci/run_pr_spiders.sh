@@ -149,34 +149,34 @@ do
             STATS_ERRORS=""
 
             # We expect items to have a category
-            missing_category=$(jq 'atp/category/missing' "${STATSFILE}")
+            missing_category=$(jq '."atp/category/missing"' "${STATSFILE}")
             if [ $missing_category -gt 0 ]; then
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
             fi
 
             # Warn if items are missing a lat/lon
-            missing_lat=$(jq 'atp/field/lat/missing' "${STATSFILE}")
-            missing_lon=$(jq 'atp/field/lon/missing' "${STATSFILE}")
+            missing_lat=$(jq '."atp/field/lat/missing"' "${STATSFILE}")
+            missing_lon=$(jq '."atp/field/lon/missing"' "${STATSFILE}")
             if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
             fi
 
             # Error if items have invalid lat/lon
-            invalid_lat=$(jq 'atp/field/lat/invalid' "${STATSFILE}")
-            invalid_lon=$(jq 'atp/field/lon/invalid' "${STATSFILE}")
+            invalid_lat=$(jq '."atp/field/lat/invalid"' "${STATSFILE}")
+            invalid_lon=$(jq '."atp/field/lon/invalid"' "${STATSFILE}")
             if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
             fi
 
             # Warn if items were fetched using Zyte
-            zyte_fetched=$(jq 'scrapy-zyte-api/success' "${STATSFILE}")
+            zyte_fetched=$(jq '."scrapy-zyte-api/success"' "${STATSFILE}")
             if [ $zyte_fetched -gt 0 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${zyte_fetched} requests were made using Zyte</li>"
             fi
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
-            dupe_dropped=$(jq 'dupefilter/filtered' "${STATSFILE}")
-            total_scraped=$(jq 'item_scraped_count' "${STATSFILE}")
+            dupe_dropped=$(jq '."dupefilter/filtered"' "${STATSFILE}")
+            total_scraped=$(jq '."item_scraped_count"' "${STATSFILE}")
             dupe_percent=$(echo "scale=2; ${dupe_dropped} / ${total_scraped} * 100" | bc)
             if [ $(echo "${dupe_percent} > 30" | bc) -eq 1 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
