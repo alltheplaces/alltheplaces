@@ -1,6 +1,6 @@
-from chompjs import parse_js_object
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy import Request
 from scrapy.http import Response
 
@@ -12,16 +12,24 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class AsianPaintsBeautifulHomesINSpider(JSONBlobSpider):
     name = "asian_paints_beautiful_homes_in"
-    item_attributes = {"brand": "Asian Paints Beautiful Homes", "brand_wikidata": "Q130310105", "extras": Categories.SHOP_INTERIOR_DECORATION.value}
+    item_attributes = {
+        "brand": "Asian Paints Beautiful Homes",
+        "brand_wikidata": "Q130310105",
+        "extras": Categories.SHOP_INTERIOR_DECORATION.value,
+    }
     allowed_domains = ["www.beautifulhomes.asianpaints.com"]
-    start_urls = ["https://www.beautifulhomes.asianpaints.com/content/asianpaintsbeautifulhomes/asianpaintsbeautifulhomesapi/storespostapi.json"]
+    start_urls = [
+        "https://www.beautifulhomes.asianpaints.com/content/asianpaintsbeautifulhomes/asianpaintsbeautifulhomesapi/storespostapi.json"
+    ]
     locations_keys = "result"
 
     def start_requests(self) -> Iterable[Request]:
         # Scrapy doens't support multipart/form-data which this API requires.
         # Reference: https://github.com/scrapy/scrapy/issues/1897
-        multipart_data = "-----------------------------524311191360322593742077878\r\nContent-Disposition: form-data; name=\"data\"\r\n\r\n{\"data\":{\"searchpath\":\"/content/asianpaintsbeautifulhomes/us/en/store-locator\",\"limit\":\"\"},\"headerJson\":{}}\r\n-----------------------------524311191360322593742077878--\r\n"
-        headers = {"Content-Type": "multipart/form-data; boundary=---------------------------524311191360322593742077878"}
+        multipart_data = '-----------------------------524311191360322593742077878\r\nContent-Disposition: form-data; name="data"\r\n\r\n{"data":{"searchpath":"/content/asianpaintsbeautifulhomes/us/en/store-locator","limit":""},"headerJson":{}}\r\n-----------------------------524311191360322593742077878--\r\n'
+        headers = {
+            "Content-Type": "multipart/form-data; boundary=---------------------------524311191360322593742077878"
+        }
         yield Request(url=self.start_urls[0], headers=headers, body=multipart_data, method="POST")
 
     def extract_json(self, response: Response) -> list:
