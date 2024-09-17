@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HirebaseGbSpider(SitemapSpider, StructuredDataSpider):
+class HirebaseGBSpider(SitemapSpider, StructuredDataSpider):
     name = "hirebase_gb"
     item_attributes = {
         "brand": "Hirebase",
