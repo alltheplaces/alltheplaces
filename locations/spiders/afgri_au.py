@@ -8,3 +8,4 @@ class AfgriAUSpider(StorepointSpider):
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").replace(" - ", "")
+        yield item
