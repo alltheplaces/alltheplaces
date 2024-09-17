@@ -1,4 +1,9 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
@@ -12,11 +17,11 @@ class HipermaxiBOSpider(AgileStoreLocatorSpider):
         "hipermaxi.com",
     ]
 
-    def parse_item(self, item, location):
-        if location["slug"].startswith("farmacia-"):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature["slug"].startswith("farmacia-"):
             apply_category(Categories.PHARMACY, item)
-        if location["slug"].startswith("drugstore-"):
+        if feature["slug"].startswith("drugstore-"):
             apply_category(Categories.SHOP_CHEMIST, item)
-        if location["slug"].startswith("hipermaxi-"):
+        if feature["slug"].startswith("hipermaxi-"):
             apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

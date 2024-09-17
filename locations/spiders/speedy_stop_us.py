@@ -10,3 +10,7 @@ class SpeedyStopUSSpider(ClosebySpider):
         "extras": Categories.FUEL_STATION.value,
     }
     api_key = "c9271c9124f5bdd13fc0258d3453ed6f"
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("name", None)
+        yield item

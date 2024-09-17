@@ -13,6 +13,7 @@ class ProvidenceUSSpider(StructuredDataSpider):
     allowed_domains = ["www.providence.org"]
     start_urls = ["https://www.providence.org/locations?postal=66102&latlng=39.103,-94.666&radius=100000&page=1"]
     wanted_types = ["MedicalOrganization", "MedicalClinic", "Hospital"]
+    requires_proxy = True
 
     def parse(self, response):
         self.parse_location_results(response)

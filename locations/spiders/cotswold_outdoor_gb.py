@@ -14,7 +14,7 @@ class CotswoldOutdoorGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https:\/\/www\.cotswoldoutdoor\.com\/stores\/([-\w]+)\.html$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         for exclude in ["closed", "test"]:
             if exclude in item["name"].lower():
                 return

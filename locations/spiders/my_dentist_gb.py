@@ -27,7 +27,7 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
     ]
     wanted_types = ["LocalBusiness"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath('//input[@name="Latitude"]/@value').get()
         item["lon"] = response.xpath('//input[@name="Longitude"]/@value').get()
 

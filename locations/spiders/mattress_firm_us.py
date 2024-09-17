@@ -1,7 +1,6 @@
 import json
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
@@ -24,6 +23,8 @@ class MattressFirmUSSpider(Where2GetItSpider):
             item["brand"] = "Mattress Firm"
             item["brand_wikidata"] = "Q6791878"
 
+        item["branch"] = item.pop("name").removeprefix(item["brand"]).strip()
+
         # Store attributes
         # (also includes payment methods, but that's not shown on the website)
         attributes = {kv["id"]: kv["value"] for kv in json.loads(location["attributes"])}
@@ -34,11 +35,7 @@ class MattressFirmUSSpider(Where2GetItSpider):
         project_meta = json.loads(location["project_meta"])
         item["facebook"] = project_meta.get("Facebook URL")
         apply_category(
-            {
-                "contact:sms": PhoneCleanUpPipeline().normalize_numbers(
-                    project_meta.get("SMS Phone Number", ""), item["country"], self
-                )
-            },
+            {"contact:sms": project_meta.get("SMS Phone Number", "")},
             item,
         )
 

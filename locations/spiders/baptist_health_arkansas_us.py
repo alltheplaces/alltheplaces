@@ -1,4 +1,9 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.algolia import AlgoliaSpider
 
@@ -13,20 +18,13 @@ class BaptistHealthArkansasUSSpider(AlgoliaSpider):
     app_id = "6EH1IB012D"
     index_name = "wp_posts_location"
 
-    def parse_item(self, item, location):
-        item["name"] = location["post_title"]
-        item["ref"] = location["permalink"]
-        item["website"] = location["permalink"]
-        item["image"] = location["image"]
-        item["street_address"] = merge_address_lines([location["address_1"], location["address_2"]])
-        item["city"] = location["city"]
-        item["state"] = location["state"]
-        item["postcode"] = location["zip_code"]
-        item["country"] = "US"
-        item["phone"] = location["phone_number"]
-        item["lat"] = float(location["_geoloc"]["lat"])
-        item["lon"] = -abs(float(location["_geoloc"]["lng"]))
-        if facility_type := location.get("facility_type"):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["name"] = feature["post_title"]
+        item["ref"] = feature["permalink"]
+        item["street_address"] = merge_address_lines([feature["address_1"], feature["address_2"]])
+        item["lat"] = float(feature["_geoloc"]["lat"])
+        item["lon"] = -abs(float(feature["_geoloc"]["lng"]))
+        if facility_type := feature.get("facility_type"):
             if "Hospitals" in facility_type:
                 apply_category(Categories.HOSPITAL, item)
             elif "Urgent Care" in facility_type:

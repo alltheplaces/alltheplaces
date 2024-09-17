@@ -4,6 +4,8 @@ The web is full of information. A lot you can see, it is rendered by your browse
 
 More information can be found at [schema.org](https://schema.org/). Various online resources are available such as the [schema validation tool](https://validator.schema.org/) to help you extract structured data on an ad-hoc basis from a URL. For example, the web page for this [smashburger location](https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/) decodes to [yield this structured data](https://validator.schema.org/#url=https%3A%2F%2Fsmashburger.com%2Flocations%2Fus%2Fco%2Flafayette%2F2755-dagny-way%2F).
 
+See also [open graph protocol](docs/OPEN_GRAPH_PROTOCOL.md)
+
 ### StructuredDataSpider
 
 The ATP project has custom library code which helps with the creation of spiders for sites which provide structured data in their pages. One key class provided is [StructuredDataSpider](../locations/structured_data_spider.py).
@@ -59,3 +61,13 @@ Note that the [ATP pipeline](../locations/pipelines/apply_nsi_categories.py) cod
 The `smashburger.geojson` file can be examined in any number of tools, a popular choice here is [geojson.io](https://geojson.io/).
 
 The ATP tooling described here and on related pages can go a long way to giving you confidence in your end spider before writing any code!
+
+## Code generators
+
+To get started quickly, try either of:
+
+`pipenv run scrapy genspider -t structured_data_crawl your_spider_name https://www.your_spider_name.com/`
+`pipenv run scrapy genspider -t structured_data_sitemap your_spider_name https://www.your_spider_name.com/`
+
+Or to make an entire branch:
+`./contrib/new_spider structured_data_spider_sitemap your_spider_name https://www.your_spider_name.com/`

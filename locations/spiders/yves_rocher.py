@@ -9,7 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class YvesRocherSpider(CrawlSpider):
@@ -17,8 +16,7 @@ class YvesRocherSpider(CrawlSpider):
     item_attributes = {"brand": "Yves Rocher", "brand_wikidata": "Q28496595"}
     start_urls = ["https://www.yves-rocher.es/encuentra-tu-tienda/SL"]
     rules = [Rule(LinkExtractor(allow=r"https://www.yves.+?/.+?/SL", tags="link"), callback="parse")]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"REDIRECT_ENABLED": False}
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         data = json.loads(

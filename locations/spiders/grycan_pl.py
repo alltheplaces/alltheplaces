@@ -41,4 +41,5 @@ class GrycanPLSpider(WpGoMapsSpider):
                     opens, closes = custom_field_data[key].split("-")
                     item["opening_hours"].add_range(DAYS_PL[day_name], opens, closes, "%H")
 
+        item.pop("name", None)
         return item

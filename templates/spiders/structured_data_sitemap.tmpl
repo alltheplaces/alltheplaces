@@ -1,0 +1,24 @@
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
+from locations.categories import Categories
+
+
+class $classname(SitemapSpider, StructuredDataSpider):
+    name = "$name"
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+        # "extras": Categories.SHOP_XYZ.value
+    }
+    sitemap_urls = ["$domain/robots.txt"]
+    sitemap_rules = [
+        (r"YOUR_PATTERN_HERE", "parse"),
+    ]
+    # wanted_types = ["GroceryStore"]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        yield item

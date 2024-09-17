@@ -21,7 +21,8 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | Name                  | Description |
 |-----------------------|---|
 | `ref`                 | A unique identifier for this feature inside this spider. The code that generates the output will remove duplicates based on the value of this key.
-| `@spider`             | The name of the spider that produced this feature. It is [specified in each spider](https://github.com/alltheplaces/alltheplaces/blob/11d9be56515ef0f6419e001b1950f69d28d4f400/locations/spiders/apple.py#L9), so it isn't necessarily related to the file name of the spider.
+| `@spider`             | The name of the spider that produced this feature. It is [specified in each spider](https://github.com/alltheplaces/alltheplaces/blob/11d9be56515ef0f6419e001b1950f69d28d4f400/locations/spiders/apple.py#L9), so it isn't necessarily related to the file name/class name of the spider, for example [99_bikes_au](https://github.com/alltheplaces/alltheplaces/blob/master/locations/spiders/99_bikes_au.py)
+| `@source_uri`         | A URI describing where this feature was obtained. This is not guranteed to be viewable in a web browser.
 | `branch`              | This is often the location specific part of a chain location's name, like the name of the mall or city it is in, without the brand name included.
 | `name`                | The name of the feature. Ideally the fascia, however this is often a combination of the brand and the branch.
 | **Brand**             | _Information about the brand for the venue_
@@ -40,7 +41,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `addr:postcode`       | The postcode part of the address.
 | `addr:country`        | The country part of the address.
 | **Contact**           | _Contact information for the venue_
-| `phone`               | The telephone number for the venue. Note that this is usually pulled from a website assuming local visitors, so it probably doesn't include the country code.
+| `phone`               | The telephone number(s) for the venue, separated by `;` if there is more than one number. These numbers are cleaned using the [phonenumbers library](https://pypi.org/project/phonenumbers/), however invalid numbers will still be returned as-is if they cannot be parsed.
 | `website`             | The website for the venue. We try to make this a URL specific to the venue and not a generic URL for the brand that is operating the venue.
 | `email`               | The email address for the venue. We try to make this an email specific to the venue and not a generic email for the brand that is operating the venue.
 | `contact:twitter`     | The twitter account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
@@ -51,7 +52,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `located_in`          | The name of the feature that this feature is located in.
 | `located_in:wikidata` | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readable identifier counterpart for the human-readable `located_in` above.
 | `nsi_id`              | The [Name Suggestion Index](https://nsi.guide/) (NSI) ID for the feature. NSI IDs aren't stable, so you may require [old NSI data](https://github.com/osmlab/name-suggestion-index/tree/main/dist) if you are working with old ATP data.
-| `end_date`            | `end_date=yes` is applied when given location is closed at unknown date and can be assumed to not operate right now, `end_date` may also have values in year-month-day format, including future dates for planned closures.
+| `end_date`            | `end_date=yes` is applied when given location is closed at unknown date and can be assumed to not operate right now, `end_date` may also have values in year-month-day format, including future dates for planned closures. If the POI has been deleted entirely in the source data, ATP will stop returning the former POI.
 
 ### Extras
 
@@ -67,6 +68,7 @@ When we can, the format for opening hours follows [OpenStreetMap's `opening_hour
 * In some cases only some days of week can be parsed. The unparseable days are omitted from the opening hours while not actually be closed. It is impossible to distinguish between a parsing error and the store being closed, as described in [this issue](https://github.com/alltheplaces/alltheplaces/issues/6943).
 * Opening hours provided by a source and recorded in All the Places may be special for the week due to presence of public holidays within the week at the time of parsing. As a result, the day may be omitted from opening hours output. Also for this reason, some days may have unusually short or unusually long opening hours. Data captured from previous All the Places builds can be checked to find the most common (regular) opening hours for a location.
 * Opening hours format does not match OSM syntax exactly [when time ranges extend across midnight](https://github.com/alltheplaces/alltheplaces/discussions/4959).
+* `Mo-Su closed` typically indicates POI closed temporarily for reasons of maintenance and refurbishment. POIs that are permanently closed but listed by source data are returned with the `end_date` field (see `end_date` specification for details).
 
 ## Categories
 

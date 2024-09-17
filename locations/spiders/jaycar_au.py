@@ -12,6 +12,7 @@ class JaycarAUSpider(SitemapSpider):
     sitemap_urls = ["https://www.jaycar.com.au/sitemap.xml"]
     sitemap_follow = ["/Store-en-aud-"]
     sitemap_rules = [("/store/", "parse")]
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:

@@ -1,5 +1,6 @@
 name: New Spider
 description: Request a new spider
+labels: new-spider
 body:
   - type: input
     attributes:
@@ -13,10 +14,57 @@ body:
       placeholder: Q38076
       description: >-
         If possible get the ID from
-        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page).
+        Bonus points: Add the storefinder link as a `Location information url` claim
   - type: textarea
     attributes:
       label: Store finder url(s)
       placeholder: >-
         https://www.mcdonalds.com/gb/en-gb/restaurant-locator.html
         https://www.mcdonalds.com.hk/find-a-restaurant/
+  - type: input
+    attributes:
+      label: Sample store page url
+      description: Add a sample store page url if applicable
+  - type: input
+    attributes:
+      label: Countries?
+      placeholder: AU,CA
+      description: Does this spider cover one or two specific countries? Or is it a worldwide brand?
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty?
+      description: How similar to existing code is this spider? See [API SPIDER](../../docs/API_SPIDER.md) and [HARD WORK SPIDER](../../docs/HARD_WORK_SPIDER.md)
+      options:
+        - Easy - existing storefinders and no customisation
+        - Medium - some customisation or data cleansing
+        - Hard - Hard work spider / Bespoke HTML parsing
+        - Extreme - Obsfucated, brittle behaviour
+  - type: dropdown
+    id: size
+    attributes:
+      label: Number of POI?
+      description: Approximately how many points/locations/branches?
+      options:
+        - 0-10
+        - 10-20
+        - 20-50
+        - 50-100
+        - 100+
+  - type: checkboxes
+    id: behaviour
+    attributes:
+      label: Behaviours
+      description: How does the storefinder appear to work? See [API SPIDER](../../docs/API_SPIDER.md) and [HARD WORK SPIDER](../../docs/HARD_WORK_SPIDER.md)
+      options:
+        - label: Has coordinates?
+        - label: Has opening hours?
+        - label: JSON API?
+        - label: Embedded JSON?
+        - label: HTML markup?
+        - label: Structured Data? (`pipenv run scrapy sd (specific page url)`) or [validator](https://validator.schema.org/) has content
+        - label: Open Graph Data? # Disabled until https://github.com/alltheplaces/alltheplaces/pull/9426 - (`pipenv run scrapy og (specific page url)`)
+        - label: Sitemap? (`pipenv run scrapy sitemap (url)`)
+        - label: Requires proxy?
+        - label: Has 'bot protection' (Cloudflare, etc)?

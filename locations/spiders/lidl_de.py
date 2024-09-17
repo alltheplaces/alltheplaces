@@ -11,11 +11,9 @@ class LidlDESpider(VirtualEarthSpider):
 
     dataset_id = "ab055fcbaac04ec4bc563e65ffa07097"
     dataset_name = "Filialdaten-SEC/Filialdaten-SEC"
-    key = "AnTPGpOQpGHsC_ryx9LY3fRTI27dwcRWuPrfg93-WZR2m-1ax9e9ghlD4s1RaHOq"
+    api_key = "AnTPGpOQpGHsC_ryx9LY3fRTI27dwcRWuPrfg93-WZR2m-1ax9e9ghlD4s1RaHOq"
 
     def parse_item(self, item, feature, **kwargs):
-        item["name"] = feature["ShownStoreName"]
-
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
             r"(\w{2} ?- ?\w{2}|\w{2}) (\d{2}:\d{2})\*?-(\d{2}:\d{2})",

@@ -5,7 +5,7 @@ from locations.storefinders.momentfeed import MomentFeedSpider
 class StewartsShopsSpider(MomentFeedSpider):
     name = "stewarts_shops"
     item_attributes = {"brand_wikidata": "Q7615690"}
-    id = "ZGRQTRLWHXDMDNUO"
+    api_key = "ZGRQTRLWHXDMDNUO"
 
     def parse_item(self, item, feature, store_info, **kwargs):
         item["website"] = f'https://locations.stewartsshops.com{feature["llp_url"]}'

@@ -33,6 +33,11 @@ class StarbucksEUSpider(scrapy.Spider):
             except:
                 street, addr_2, postal_city = place["address"].strip().split("\n")
 
+            # https://github.com/alltheplaces/alltheplaces/pull/8993#issuecomment-2254338471
+            # starbucks_eu.geojson has "addr:full": "undefined, BA11 4QE Frome", "addr:street_address": "undefined"
+            if street.lower() == "undefined":
+                street = None
+
             try:
                 city_hold = re.search(
                     r"\s([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)(\s|,\s)([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)\s([0-9]*)$",

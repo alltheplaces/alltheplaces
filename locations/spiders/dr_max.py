@@ -1,8 +1,12 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 import scrapy
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class DrMaxSpider(scrapy.Spider):
@@ -46,4 +50,41 @@ class DrMaxSpider(scrapy.Spider):
             apply_yes_no(Extras.WHEELCHAIR, item, "WHEELCHAIR_ACCESS" in service_ids)
             root_url = self.website_roots[self.start_urls.index(response.url)]
             item["website"] = root_url + location["urlKey"]
+
+            item["opening_hours"] = OpeningHours()
+            opening_days = location["openingHours"]
+            for day in opening_days:
+                if not day["open"]:
+                    continue
+                # day in the format: "2009-01-02T00:00:00Z"
+                day_date_str = day["date"]
+                weekday = datetime.strptime(day_date_str, "%Y-%m-%dT%H:%M:%SZ").strftime("%A")
+                if day["nonstop"]:
+                    item["opening_hours"].add_range(weekday, "00:00", "23:59")
+                    continue
+                for opening_hours in day["openingHour"]:
+                    if not opening_hours["open"]:
+                        continue
+
+                    open_time = self.calculate_local_time(opening_hours["from"], item)
+                    close_time = self.calculate_local_time(opening_hours["to"], item)
+                    if open_time and close_time:
+                        item["opening_hours"].add_range(weekday, open_time, close_time)
+
             yield item
+
+    def calculate_local_time(self, date_string, item) -> str:
+        local_timezone = None
+        if item["country"].lower() == "cz":
+            local_timezone = "Europe/Prague"
+        elif item["country"].lower() == "sk":
+            local_timezone = "Europe/Bratislava"
+        elif item["country"].lower() == "it":
+            local_timezone = "Europe/Rome"
+        elif item["country"].lower() == "pl":
+            local_timezone = "Europe/Warsaw"
+        else:
+            return None
+        local_timezone = ZoneInfo(local_timezone)
+        local_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ").astimezone(local_timezone)
+        return local_time.strftime("%H:%M")

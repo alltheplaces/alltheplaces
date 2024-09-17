@@ -20,6 +20,6 @@ class EasyHotelGBSpider(SitemapSpider, StructuredDataSpider):
             entry["loc"] = entry["loc"].replace("www.www.", "www.")
             yield entry
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item["state"] = None
         yield item

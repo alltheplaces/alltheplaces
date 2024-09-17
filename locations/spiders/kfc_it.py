@@ -17,4 +17,5 @@ class KfcITSpider(Spider):
         for store in locations:
             store.update(store.pop("labels"))
             item = DictParser.parse(store)
+            item.pop("name", None)
             yield item

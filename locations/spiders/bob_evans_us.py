@@ -26,6 +26,7 @@ class BobEvansUSSpider(SitemapSpider):
         item = DictParser.parse(data)
         item["website"] = f'https://www.bobevans.com/locations/{data["slug"]}'
         item["opening_hours"] = self.parse_hours(data["businessHours"])
+        item.pop("name", None)
         yield item
 
     @staticmethod

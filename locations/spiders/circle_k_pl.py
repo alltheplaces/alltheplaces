@@ -51,7 +51,6 @@ class CircleKPLSpider(Spider):
                 continue
             item = Feature()
             item["ref"] = str(location["/sites/{siteId}"]["id"])
-            item["name"] = location["/sites/{siteId}"]["name"]
             item["lat"] = location["/sites/{siteId}/location"]["lat"]
             item["lon"] = location["/sites/{siteId}/location"]["lng"]
             item["street_address"] = location["/sites/{siteId}/addresses"]["PHYSICAL"]["street"]

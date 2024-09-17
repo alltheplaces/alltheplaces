@@ -79,7 +79,7 @@ class SystemeUSpider(scrapy.Spider):
         if m := re.search(r"/(magasin|station)/(uexpress|superu|marcheu|hyperu)-\w+", response.url):
             if m.group(1) == "magasin":
                 apply_category(Categories.SHOP_SUPERMARKET, properties)
-                hours_xpath = '//div[@class="u-horaire"]//tr[@class="u-horaire__line-day"]'
+                hours_xpath = '//div[@id="magasin-tab"]//div[@class="u-horaire"]//tr[@class="u-horaire__line-day"]'
             else:
                 apply_category(Categories.FUEL_STATION, properties)
                 hours_xpath = '//div[@class="u-station__magasin"]/p[2]/text()'

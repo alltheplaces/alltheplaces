@@ -26,7 +26,9 @@ class PhoneCleanUpPipeline:
 
     @staticmethod
     def is_phone_key(tag):
-        return tag in ("phone", "fax") or tag.endswith(":phone") or tag.endswith(":fax")
+        return (
+            tag in ("phone", "fax", "contact:sms", "contact:whatsapp") or tag.endswith(":phone") or tag.endswith(":fax")
+        )
 
     def normalize_numbers(self, phone, country, spider):
         numbers = [self.normalize(p, country, spider) for p in re.split(r"[;/]\s", str(phone))]
@@ -34,6 +36,8 @@ class PhoneCleanUpPipeline:
 
     def normalize(self, phone, country, spider):
         phone = re.sub(r"tel:", "", phone, flags=re.IGNORECASE)
+        phone = re.sub(r"undefined", "", phone, flags=re.IGNORECASE)
+        phone = re.sub(r"n/a", "", phone, flags=re.IGNORECASE)
         phone = phone.strip()
         if not phone:
             return None

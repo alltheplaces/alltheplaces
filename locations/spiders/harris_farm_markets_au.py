@@ -1,11 +1,9 @@
-import json
-import re
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HarrisFarmMarketsAUSpider(CrawlSpider):
@@ -18,7 +16,7 @@ class HarrisFarmMarketsAUSpider(CrawlSpider):
             LinkExtractor(
                 allow=r"^https:\/\/www\.harrisfarm\.com\.au\/pages\/[\w\-]+$",
                 deny=r"-butcher$",
-                restrict_xpaths='//div[contains(@class, "HF-new-blockstyle-card-UI")]',
+                restrict_xpaths='//div[contains(@class, "multicolumn-card__info")]',
             ),
             callback="parse",
         )
@@ -28,8 +26,8 @@ class HarrisFarmMarketsAUSpider(CrawlSpider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[@class="child"]/h1[@class="title"]/a/text()').get(),
-            "addr_full": re.sub(
-                r"\s+", " ", ", ".join(filter(None, response.xpath('//div[@id="contacts"]/p//text()').getall()))
+            "addr_full": clean_address(
+                response.xpath('//div[@class="metafield-rich_text_field"]/p[1]//text()').getall()
             ),
             "phone": response.xpath(
                 '//text()[contains(., "Telephone:")]/ancestor::*[self::strong][1]/ancestor::*[self::li][1]/text()'
@@ -46,10 +44,7 @@ class HarrisFarmMarketsAUSpider(CrawlSpider):
         }
         if properties["email"] == "hello@harrisfarm.com.au":
             properties.pop("email")
-        hours_js = response.xpath('//script[contains(text(), "var openingHours = {")]/text()').get()
-        hours_js = "{" + hours_js.split("var openingHours = {", 1)[1].split("}", 1)[0] + "}"
-        hours_dict = json.loads(hours_js)
-        hours_string = " ".join([f"{day}: {hour_range}" for day, hour_range in hours_dict.items()])
+        hours_string = " ".join(response.xpath('//span[@class="metafield-multi_line_text_field"]//text()').getall())
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_string)
         latlng = response.xpath('//script[contains(text(), "google.maps.LatLng(")]/text()').get()

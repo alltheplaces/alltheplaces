@@ -14,7 +14,7 @@ class ShoeZoneGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https:\/\/www\.shoezone\.com\/Stores\/[-._\w]+-(\d+)$", "parse_sd")]
     wanted_types = ["ShoeStore"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         # lat/lon are both parsed into lat, separate them
         (item["lat"], item["lon"]) = item["lat"]
         yield item

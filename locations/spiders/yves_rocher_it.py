@@ -10,3 +10,7 @@ class YvesRocherITSpider(UberallSpider):
         "extras": Categories.SHOP_BEAUTY.value,
     }
     key = "HLGRPp968JZaR0D235dXJa5fMRPHuA"
+
+    def post_process_item(self, item, response, locaton):
+        item.pop("name", None)
+        yield item

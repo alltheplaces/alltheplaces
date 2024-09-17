@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 class Mitre10NZSpider(Spider):
     name = "mitre_10_nz"
     item_attributes = {"brand": "Mitre 10", "brand_wikidata": "Q6882394", "extras": Categories.SHOP_DOITYOURSELF.value}
-    allowed_domains = ["www.mitre10.co.nz"]
+    allowed_domains = ["ccapi.mitre10.co.nz"]
     start_urls = [
         "https://ccapi.mitre10.co.nz/mitre10webservices/v2/mitre10/geolocation/store-locator?fields=FULL&page=0&pageSize=1000&storeCode=28&lang=en&curr=NZD"
     ]

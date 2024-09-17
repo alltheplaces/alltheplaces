@@ -7,7 +7,7 @@ class BarrysSpider(StoremapperSpider):
         "brand_wikidata": "Q96373178",
         "brand": "Barry's",
     }
-    key = "5809"
+    company_id = "5809"
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")

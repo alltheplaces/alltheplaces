@@ -1,14 +1,9 @@
 import json
-import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
-
-
-def am_pm(s):
-    return re.sub(r" ?([ap])\.*m\.*", lambda x: x[1] + "m", s)
 
 
 class ErieInsuranceSpider(SitemapSpider):
@@ -19,44 +14,28 @@ class ErieInsuranceSpider(SitemapSpider):
         "country": "US",
     }
     allowed_domains = ["www.erieinsurance.com"]
-    sitemap_urls = ["https://www.erieinsurance.com/robots.txt"]
+    sitemap_urls = ["https://www.erieinsurance.com/sitemap.xml"]
     sitemap_rules = [(r"^https://www.erieinsurance.com/agencies/.", "parse")]
 
     def parse(self, response):
-        script = response.xpath('//script/text()[contains(.,"agencyInformation")]').get()
-        if not script:
-            return
-        data = json.decoder.JSONDecoder().raw_decode(script, script.index("{", script.index("agencyInformation =")))[0]
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').get())
+        if data["@type"] == "InsuranceAgency":
+            item = DictParser.parse(data)
 
-        opening_hours = None
-        hours_obj = data["agencyInfo"]["businessHoursOperationDescription"]
-        if hours_obj.startswith('{"'):
-            hours = json.loads(hours_obj)
-            opening_hours = OpeningHours()
-            for row in hours["HoursOfOperation"]:
-                if any(t in ["Closed", None, ""] for t in [row["StartTime"], row["EndTime"]]):
-                    continue
-                open_time = am_pm(row["StartTime"])
-                close_time = am_pm(row["EndTime"])
-                day = row["DayName"][:2]
-                opening_hours.add_range(day, open_time, close_time, "%I:%M%p")
+            item["ref"] = response.url
+            item["website"] = response.url
 
-        agent_contact = {x["type"]: x["value"] for x in data["agentContact"]}
-        if ("Fax", "0") in agent_contact.items():
-            del agent_contact["Fax"]
+            try:
+                hours_string = data["openingHours"]
+                opening_hours = OpeningHours()
+                for day_hours in hours_string.replace(" ", "").split(","):
+                    if not day_hours:
+                        continue
+                    day = day_hours[:2]
+                    open, close = day_hours[2:].split("-")
+                    opening_hours.add_range(day, open, close)
+                item["opening_hours"] = opening_hours.as_opening_hours()
+            except:
+                self.crawler.stats.inc_value("failed_to_parse_hours")
 
-        properties = {
-            "ref": response.url,
-            "lat": data["address"]["geoCode"]["latitude"],
-            "lon": data["address"]["geoCode"]["longitude"],
-            "name": data["agencyName"],
-            "street_address": data["address"]["line1"],
-            "city": data["address"]["city"],
-            "state": data["address"]["state"],
-            "postcode": data["address"]["zip"],
-            "website": agent_contact.get("Website"),
-            "phone": agent_contact.get("Phone"),
-            "extras": {"fax": agent_contact.get("Fax")},
-            "opening_hours": opening_hours and opening_hours.as_opening_hours() or None,
-        }
-        yield Feature(**properties)
+            yield item

@@ -34,12 +34,12 @@ class VodafoneDESpider(scrapy.Spider):
                         close_time=f"{end[:2]}:{end[2:]}",
                     )
 
-        if name := response.xpath('//h1[@id="location-name"]/span[1]/text()').get():
+        if response.xpath('//h1[@id="location-name"]/span[1]/text()').get():
             if email := response.xpath('//a[@class="Hero-email"]/@href').get():
                 email = email.replace("mailto:", "")
+
             properties = {
                 "ref": response.url,
-                "name": name,
                 "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').get(),
                 "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').get(),
                 "city": response.xpath('//span[@class="c-address-city"]/text()').get(),

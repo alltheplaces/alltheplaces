@@ -10,6 +10,7 @@ from locations.country_utils import CountryUtils, get_locale
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.subway import SubwaySpider
 
 
@@ -75,12 +76,16 @@ class SubwayWorldwideSpider(Spider):
         current, total = pages.split("/")
 
         for poi in data.get("ResultData", []):
-            if poi.get("Address", {}).get("CountryCode", "").upper() != response.meta["country_code"]:
+            address = poi.get("Address", {})
+            if address.get("CountryCode", "").upper() != response.meta["country_code"]:
                 # API can give POIs for nearby countries, filter them out for less confusion
                 # TODO: revisit this at some point?
                 continue
             item = DictParser.parse(poi)
             item["ref"] = poi["LocationId"]["StoreNumber"]
+            item["street_address"] = clean_address(
+                [address.get("Address1"), address.get("Address2"), address.get("Address3")]
+            )
             yield item
 
         if int(current) < int(total):

@@ -1,18 +1,18 @@
-import scrapy
+from typing import Iterable
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from scrapy.http import Response
+
+from locations.categories import Categories
+from locations.items import Feature
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
-class FiatDKSpider(scrapy.Spider):
+class FiatDKSpider(AgileStoreLocatorSpider):
     name = "fiat_dk"
-    item_attributes = {"brand": "Fiat", "brand_wikidata": "Q27597"}
-    start_urls = [
-        "https://interaction.fiat.dk/wp-admin/admin-ajax.php?action=asl_load_stores&nonce=f01f079120&lang=&load_all=1&layout=1"
-    ]
+    item_attributes = {"brand": "Fiat", "brand_wikidata": "Q27597", "extras": Categories.SHOP_CAR.value}
+    allowed_domains = ["interaction.fiat.dk"]
 
-    def parse(self, response, **kwargs):
-        for dealer in response.json():
-            item = DictParser.parse(dealer)
-            apply_category(Categories.SHOP_CAR, item)
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if " | " in item["name"]:
+            item["name"] = item["name"].split(" | ")[1]
+        yield item

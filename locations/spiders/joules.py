@@ -1,23 +1,25 @@
-import re
+from typing import Any
+from urllib.parse import urljoin
 
-from scrapy.spiders import SitemapSpider
+from scrapy.http import Response
+from scrapy.spiders import Spider
 
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
 
 
-class JoulesSpider(SitemapSpider, StructuredDataSpider):
+class JoulesSpider(Spider):
     name = "joules"
     item_attributes = {"brand": "Joules", "brand_wikidata": "Q25351738"}
-    sitemap_urls = ["https://www.joules.com/sitemap-index.xml"]
-    sitemap_follow = ["Joules-GB-EN-Store"]
-    sitemap_rules = [("/storelocator/", "parse_sd")]
+    start_urls = ["https://www.joules.com/storelocator/data/stores"]
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["url"] = None
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        coordinates = re.findall(r"(-?\d+\.\d+)", re.search(r"var directionsUrl = (.+);", response.text).group(1))
-        item["lat"] = coordinates[0]
-        item["lon"] = coordinates[1]
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["Stores"]:
+            item = Feature()
+            item["ref"] = location["BR"]
+            item["lat"] = location["LT"]
+            item["lon"] = location["LN"]
+            item["branch"] = location["NA"]
+            s = location["NA"]
+            name = "".join(s.split()).lower() + "/" + location["BR"]
+            item["website"] = urljoin("https://www.joules.com/storelocator/", name)
+            yield item
