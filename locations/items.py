@@ -149,7 +149,7 @@ def merge_items(language_dict: dict, main_language: str, matching_key="ref") -> 
                     f"No matches found for '{matching_key}': '{item[matching_key]}' in language '{language}'"
                 )
 
-        item = get_merged_item(item, matched_items, main_language, matching_key)
+        item = get_merged_item(matched_items, main_language, matching_key)
         yield item
     for language, refs in all_item_refs.items():
         if len(refs) > 0:
@@ -187,9 +187,9 @@ TRANSLATABLE_PREFIXES = [
 ]
 
 
-def get_merged_item(item: dict, matched_items: dict, main_language: str, matching_key: str) -> dict:
+def get_merged_item(matched_items: dict, main_language: str, matching_key: str) -> dict:
     # Do extras first before we add language keys to it
-    item = get_merged_extras(item, matched_items, main_language, matching_key)
+    item = get_merged_extras(matched_items, main_language, matching_key)
 
     all_keys = set([key for match in matched_items.values() for key in match.keys()])
     for key, value in {key: item.get(key) for key in all_keys}.items():
@@ -233,7 +233,8 @@ def get_merged_item(item: dict, matched_items: dict, main_language: str, matchin
     return item
 
 
-def get_merged_extras(item: dict, matched_items: dict, main_language: str, matching_key: str) -> dict:
+def get_merged_extras(matched_items: dict, main_language: str, matching_key: str) -> dict:
+    item = matched_items[main_language]
     extras_keys = set([key for match in matched_items.values() for key in match["extras"].keys()])
     for extras_key, extras_value in {key: item["extras"].get(key) for key in extras_keys}.items():
         if all([extras_value == match["extras"].get(extras_key) for match in matched_items.values()]):
