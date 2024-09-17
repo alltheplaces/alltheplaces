@@ -39,7 +39,6 @@ class AsianPaintsBeautifulHomesINSpider(JSONBlobSpider):
         return json_data["result"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        print(feature)
         item["ref"] = feature["pincode"]
         if branch_name := item.pop("name", None):
             item["branch"] = branch_name.strip().removesuffix(" | Beautiful Homes").removeprefix("AP Beautiful Homes ")
