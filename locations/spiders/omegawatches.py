@@ -23,7 +23,7 @@ class OmegawatchesSpider(scrapy.Spider):
         data = self.find_between(response.text, "var stores = ", "; var pm_countries = ").replace("];[", ",")
         json_data = json.loads(data)
         for storeid in json_data:
-            data=json_data.get(storeid)
+            data = json_data.get(storeid)
             item = DictParser.parse(data)
             item["email"] = data.get("contacts", {}).get("email")
             item["phone"] = data.get("contacts", {}).get("phone")
