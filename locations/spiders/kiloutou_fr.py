@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from locations.storefinders.woosmap import WoosmapSpider
 
 
@@ -8,7 +10,7 @@ class KiloutouFRSpider(WoosmapSpider):
     origin = "https://www.kiloutou.fr/"
 
     def parse_item(self, item, feature, **kwargs):
-        item["branch"] = item.pop("name")
-        item["website"] = f'https://www.kiloutou.fr{item["website"]}'
+        item["branch"] = item.pop("name").removeprefix("Kiloutou").strip(" -")
+        item["website"] = urljoin(self.origin, item["website"])
 
         yield item
