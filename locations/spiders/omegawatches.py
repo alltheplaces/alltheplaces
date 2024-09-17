@@ -25,9 +25,10 @@ class OmegawatchesSpider(scrapy.Spider):
         for storeid in json_data:
             data = json_data.get(storeid)
             item = DictParser.parse(data)
-            item["email"] = data.get("contacts", {}).get("email")
-            item["phone"] = data.get("contacts", {}).get("phone")
-            item["street_address"] = data.get("adr").replace("<br />", " ")
-            item["website"] = f'https://{self.allowed_domains[0]}/{data.get("websiteUrl")}'
+            if data.get("is_boutique"):
+                item["email"] = data.get("contacts", {}).get("email")
+                item["phone"] = data.get("contacts", {}).get("phone")
+                item["street_address"] = data.get("adr").replace("<br />", " ")
+                item["website"] = f'https://{self.allowed_domains[0]}/{data.get("websiteUrl")}'
 
-            yield item
+                yield item
