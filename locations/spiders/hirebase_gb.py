@@ -8,7 +8,6 @@ class HirebaseGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Hirebase",
         "brand_wikidata": "Q100297859",
-        # "extras": Categories.SHOP_XYZ.value
     }
     sitemap_urls = ["https://www.hirebase.uk/robots.txt"]
     sitemap_rules = [
