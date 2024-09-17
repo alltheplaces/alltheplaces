@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import apply_yes_no, Categories, Extras
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -47,10 +47,12 @@ class HealiusAUSpider(JSONBlobSpider):
             "brand": "Western Diagnostic Pathology",
             "brand_wikidata": "Q126165699",
             "extras": Categories.SAMPLE_COLLECTION.value,
-        }
+        },
     }
     allowed_domains = ["api.apps.healius.com.au"]
-    start_urls = ["https://api.apps.healius.com.au/entity/location/location/filtered?fields=ID,ADDRESS,ADDRESS2,BROCHURE,CC_ID,CLOSURES,DAYS,EMAIL,FACILITIES,FAX,GALLERY_IMAGES,HERO_IMAGE,IS_ADF_SITE,IS_ADF_SITE,LOGO,MODALITIES,MODALITIES,NAME,NEXT_OPEN,OPEN_DAYS,OPEN_EARLY_DAYS,OPEN_LATE_DAYS,PHONE,POSITION,SERVICE_TYPE,SPECIAL_TESTS,STATE,STATUS,TODAY_SHIFTS,NOTICE_EXTERNAL,NOTICE_EXTERNAL_TITLE&serviceType=ALL&includeAdfSites=true"]
+    start_urls = [
+        "https://api.apps.healius.com.au/entity/location/location/filtered?fields=ID,ADDRESS,ADDRESS2,BROCHURE,CC_ID,CLOSURES,DAYS,EMAIL,FACILITIES,FAX,GALLERY_IMAGES,HERO_IMAGE,IS_ADF_SITE,IS_ADF_SITE,LOGO,MODALITIES,MODALITIES,NAME,NEXT_OPEN,OPEN_DAYS,OPEN_EARLY_DAYS,OPEN_LATE_DAYS,PHONE,POSITION,SERVICE_TYPE,SPECIAL_TESTS,STATE,STATUS,TODAY_SHIFTS,NOTICE_EXTERNAL,NOTICE_EXTERNAL_TITLE&serviceType=ALL&includeAdfSites=true"
+    ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if brand_code := feature.get("logo"):
