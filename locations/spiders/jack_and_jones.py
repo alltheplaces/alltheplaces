@@ -24,6 +24,7 @@ class JackAndJonesSpider(scrapy.Spider):
         "https://www.jackjones.com/api/stores/en-at?city=&type=json&redirect=false",
         "https://www.jackjones.com/api/stores/en-no?city=&type=json&redirect=false",
         "https://www.jackjones.com/api/stores/en-ch?city=&type=json&redirect=false",
+        "https://www.jackjones.com/api/stores/en-gb?city=&type=json&redirect=false",
     ]
 
     def parse(self, response):

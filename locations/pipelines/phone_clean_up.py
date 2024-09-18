@@ -32,7 +32,9 @@ class PhoneCleanUpPipeline:
 
     def normalize_numbers(self, phone, country, spider):
         numbers = [self.normalize(p, country, spider) for p in re.split(r"[;/]\s", str(phone))]
-        return ";".join(filter(None, numbers))
+        phones = []
+        [phones.append(p) for p in filter(None, numbers) if p not in phones]
+        return ";".join(phones)
 
     def normalize(self, phone, country, spider):
         phone = re.sub(r"tel:", "", phone, flags=re.IGNORECASE)

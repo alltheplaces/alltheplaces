@@ -1,4 +1,7 @@
-from locations.google_url import url_to_coords
+from scrapy import Selector
+
+from locations.google_url import extract_google_position, url_to_coords
+from locations.items import Feature
 
 
 def test_embed():
@@ -100,3 +103,12 @@ def test_search():
 def test_apple_maps():
     assert url_to_coords("http://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)
     assert url_to_coords("https://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)
+
+
+def test_onclick():
+    item = Feature()
+    button = Selector(
+        text="<button onclick=\"window.location.href='https://maps.google.com/?saddr=&daddr=-26.105640858464167,28.23227355940527'\">Get Directions </button>"
+    )
+    extract_google_position(item, button)
+    assert item == {"extras": {}, "lat": -26.105640858464167, "lon": 28.23227355940527}

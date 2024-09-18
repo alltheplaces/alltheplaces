@@ -252,6 +252,9 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MEDICAL_IMAGING = {
+        "healthcare": "medical_imaging"
+    }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MOTEL = {"tourism": "motel"}
