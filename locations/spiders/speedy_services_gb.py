@@ -9,7 +9,6 @@ class SpeedyServicesGBSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Speedy",
         "brand_wikidata": "Q7575722",
-        # "extras": Categories.SHOP_XYZ.value
     }
     start_urls = ["https://www.speedyservices.com/depot/a-z"]
     rules = [
