@@ -20,7 +20,7 @@ class HirebaseGBSpider(SitemapSpider, StructuredDataSpider):
         """Override with any post-processing on the item."""
         js_blob = response.xpath("//script[contains(text(),'initializeSimple')]/text()").get()
         if js_blob:
-            item["lat"] = js_blob.split('initializeSimple(')[1].split(', ')[1]
-            item["lon"] = js_blob.split('initializeSimple(')[1].split(', ')[2].split(")")[0]
+            item["lat"] = js_blob.split("initializeSimple(")[1].split(", ")[1]
+            item["lon"] = js_blob.split("initializeSimple(")[1].split(", ")[2].split(")")[0]
 
         yield item
