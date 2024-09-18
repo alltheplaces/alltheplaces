@@ -140,6 +140,7 @@ class GeneratedSpider(Feature):
     storefinder_url = scrapy.Field()
     spider = scrapy.Field()
 
+
 def merge_items(language_dict: dict, main_language: str, matching_key="ref") -> Iterable[Feature]:
     all_item_refs = {language: [ref for ref in items.keys()] for language, items in language_dict.items()}
     for item in language_dict[main_language].values():
