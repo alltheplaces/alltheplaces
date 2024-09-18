@@ -48,7 +48,7 @@ class LandiCHSpider(SitemapSpider):
         "zweiradtechnik": Categories.SHOP_MOTORCYCLE_REPAIR,
         "zweiradwerkstatt": Categories.SHOP_MOTORCYCLE_REPAIR,
     }
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60}
 
     def parse(self, response):
         lat, lon = self.parse_lat_lon(response)
