@@ -18,9 +18,9 @@ class HirebaseGBSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         """Override with any post-processing on the item."""
-        js_blob = response.xpath("//script[contains(text(),'DefaultLat')]/text()").get()
+        js_blob = response.xpath("//script[contains(text(),'initializeSimple')]/text()").get()
         if js_blob:
-            item["lat"] = js_blob.split('DefaultLat":"')[1].split('","')[0]
-            item["lon"] = js_blob.split('DefaultLng":"')[1].split('","')[0]
+            item["lat"] = js_blob.split('initializeSimple(')[1].split(', ')[1]
+            item["lon"] = js_blob.split('initializeSimple(')[1].split(', ')[2].split(")")[0]
 
         yield item
