@@ -15,11 +15,12 @@ class HirebaseGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"https://www.hirebase.uk/storefinder/store/[\w-]+-\d+", "parse"),
     ]
-    def post_process_item(self, item, response, ld_data, **kwargs): 
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
         """Override with any post-processing on the item."""
         js_blob = response.xpath("//script[contains(text(),'DefaultLat')]/text()").get()
         if js_blob:
-            item['lat'] = js_blob.split('DefaultLat":"')[1].split('","')[0]
-            item['lon'] = js_blob.split('DefaultLng":"')[1].split('","')[0]
+            item["lat"] = js_blob.split('DefaultLat":"')[1].split('","')[0]
+            item["lon"] = js_blob.split('DefaultLng":"')[1].split('","')[0]
 
         yield item
