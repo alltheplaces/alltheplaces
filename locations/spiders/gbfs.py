@@ -220,7 +220,7 @@ FORM_FACTOR_MAP = {
     "bicycle": {"amenity": "bicycle_rental"},
     "cargo_bicycle": {"amenity": "bicycle_rental", "rental": "cargo_bike"},
     "car": {"amenity": "car_sharing"},
-    "moped": {},
+    "moped": {"amenity": "motorcycle_rental"},
     "scooter_standing": {"amenity": "kick-scooter_rental"},
     "scooter_seated": {"amenity": "kick-scooter_rental"},
 }
@@ -240,9 +240,11 @@ class GbfsSpider(CSVFeedSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_row(self, response, row):
+        """Queues downloads for every GBFS system manifest"""
         yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
 
     def set_localized_name(self, item, itemkey, station, stationkey):
+        """Utility function to set localized tags"""
         if stationkey not in station:
             return
         value = station[stationkey]
@@ -258,6 +260,8 @@ class GbfsSpider(CSVFeedSpider):
             self.logger.error(f"Can't handle a localized {stationkey!r} of type {type(value)}")
 
     def defer_request_feed(self, all_feeds, feed_name, deferreds):
+        """Given the name of a GBFS feed, look for it in the feeds list, and
+        queue an asynchronous download"""
         # List feeds by name.
         feeds = [feed for feed in all_feeds if feed["name"] == feed_name]
 
@@ -269,6 +273,7 @@ class GbfsSpider(CSVFeedSpider):
             return False
 
     def get_next_json(self, has_feed, responses):
+        """Get a feed from the list of responses, if we requested that feed"""
         if has_feed:
             success, response = responses.pop(0)
             if success:
@@ -279,6 +284,7 @@ class GbfsSpider(CSVFeedSpider):
         return None
 
     def get_shared_attributes_from_row(self, **kwargs):
+        """Shared attributes for every item in a system, given the system's row in the CSV"""
         # "network" is a better place than "brand" for the "system name," since a brand can have many non-interoperable networks
         shared_attributes = {"country": kwargs["Country Code"], "extras": {"network": kwargs["Name"]}}
 
@@ -292,6 +298,7 @@ class GbfsSpider(CSVFeedSpider):
         return shared_attributes
 
     def update_attributes_from_system_information(self, system_information, shared_attributes):
+        """Shared attributes for every item in a system, given the system's "system_information" feed"""
         system_information = system_information.get("data", system_information)
 
         self.set_localized_name(shared_attributes, "network", system_information, "name")
@@ -303,7 +310,7 @@ class GbfsSpider(CSVFeedSpider):
         self.set_localized_name(shared_attributes, "operator", system_information, "operator")
 
     def get_vehicle_types_categories(self, vehicle_types):
-        # Map from vehicle_type ID to OSM category
+        """Create a map from vehicle_type ID to OSM category using the system's "vehicle_types" feed"""
         vehicle_types_categories = {}
         for vehicle_type in DictParser.get_nested_key(vehicle_types, "vehicle_types") or []:
             cat = dict(FORM_FACTOR_MAP.get(vehicle_type["form_factor"], {}))
@@ -316,7 +323,7 @@ class GbfsSpider(CSVFeedSpider):
         return vehicle_types_categories
 
     def get_station_status_categories(self, station_status, vehicle_types_categories):
-        # If a station in station_information doesn't have vechicle_type tags, get it from the station_status feed.
+        """If a station in station_information doesn't have vechicle_type tags, get it from the "station_status" feed."""
         station_status_categories = {}
         for station in DictParser.get_nested_key(station_status, "stations") or []:
             station_status_categories[station["station_id"]] = [
@@ -326,6 +333,7 @@ class GbfsSpider(CSVFeedSpider):
         return station_status_categories
 
     async def parse_gbfs(self, response, **kwargs):
+        """Process one GBFS system."""
         try:
             data = response.json()
         except ValueError as e:
@@ -356,6 +364,7 @@ class GbfsSpider(CSVFeedSpider):
         # Send off all requests in parallel.
         responses = await maybe_deferred_to_future(DeferredList(deferreds))
 
+        # Retrieve the responses in the same order.
         system_information = self.get_next_json(has_system_information, responses)
         vehicle_types = self.get_next_json(has_vehicle_types, responses)
         station_information = self.get_next_json(has_station_information, responses)
@@ -367,15 +376,12 @@ class GbfsSpider(CSVFeedSpider):
         if isinstance(system_information, dict):
             self.update_attributes_from_system_information(system_information, shared_attributes)
 
-        if vehicle_types is None:
-            vehicle_types_categories = {}
-        else:
-            vehicle_types_categories = self.get_vehicle_types_categories(vehicle_types)
-
-        if station_status is None:
-            station_status_categories = {}
-        else:
-            station_status_categories = self.get_station_status_categories(station_status, vehicle_types_categories)
+        vehicle_types_categories = {} if vehicle_types is None else self.get_vehicle_types_categories(vehicle_types)
+        station_status_categories = (
+            {}
+            if station_status is None
+            else self.get_station_status_categories(station_status, vehicle_types_categories)
+        )
 
         # Now scrape the stations.
         for station in DictParser.get_nested_key(station_information, "stations") or []:
@@ -384,49 +390,43 @@ class GbfsSpider(CSVFeedSpider):
             )
 
     def parse_station(self, station, shared_attributes, vehicle_types_categories, station_status_categories, **kwargs):
+        """Process an individual GBFS station."""
         item = Feature(**shared_attributes)
-
         item["ref"] = item["extras"]["ref:gbfs"] = f"{kwargs['System ID']}:{station['station_id']}"
         item["extras"][f"ref:gbfs:{kwargs['System ID']}"] = str(station["station_id"])
+        item["lat"] = station["lat"]
+        item["lon"] = station["lon"]
+        item["street_address"] = station.get("address")
+        item["postcode"] = station.get("post_code")
+        item["opening_hours"] = station.get("station_opening_hours")
+        item["geometry"] = station.get("station_area")
+        item["extras"]["parking"] = PARKING_TYPE_MAP.get(station.get("parking_type"))
+        item["phone"] = station.get("contact_phone")
+        item["website"] = station.get("rental_uris", {}).get("web")
 
         self.set_localized_name(item, "name", station, "name")
         self.set_localized_name(item, "short_name", station, "short_name")
 
-        item["lat"] = station["lat"]
-        item["lon"] = station["lon"]
+        if "capacity" in station:
+            item["extras"]["capacity"] = str(station["capacity"])
 
-        if "address" in station:
-            item["street_address"] = station["address"]
+        if station.get("is_charging_station"):
+            apply_category(Categories.CHARGING_STATION, item)
 
-        if "post_code" in station:
-            item["postcode"] = station["post_code"]
+        if station.get("is_virtual_station", None) is False:
+            # If true, "the station is a location *without* smart docking
+            # infrastructure." (emphasis added)
+            # So, if true or absent, it could be a drop-off location, or a
+            # purely virtual station.
+            # If false, it must be a docking station.
+            item["extras"]["bicycle_rental"] = "docking_station"
 
-        if "station_opening_hours" in station:
-            item["opening_hours"] = station["station_opening_hours"]
-
-        rental_methods = set(station.get("rental_methods", []))
+        rental_methods = station.get("rental_methods", [])
         apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "creditcard" in rental_methods)
         apply_yes_no(PaymentMethods.APPLE_PAY, item, "applepay" in rental_methods)
         apply_yes_no(PaymentMethods.GOOGLE_PAY, item, "androidpay" in rental_methods)
 
-        if station.get("is_virtual_station", None) is False:
-            # If true, "the station is a location *without* smart docking infrastructure."
-            # So, if true or absent, it could be a drop-off location, or a purely virtual station.
-            # If false, it must be a docking station.
-            item["extras"]["bicycle_rental"] = "docking_station"
-
-        if "station_area" in station:
-            item["geometry"] = station["station_area"]
-
-        if "parking_type" in station:
-            item["extras"]["parking"] = PARKING_TYPE_MAP.get(station["parking_type"])
-
-        if "contact_phone" in station:
-            item["phone"] = station["contact_phone"]
-
-        if "capacity" in station:
-            item["extras"]["capacity"] = str(station["capacity"])
-
+        # Try to determine the feature type based on its capacity of vehicle types
         vehicle_types_capacity = station.get("vehicle_types_capacity", [])
         vehicle_docks_capacity = station.get("vehicle_docks_capacity", [])
         total_vehicle_capacity = vehicle_types_capacity + vehicle_docks_capacity
@@ -435,21 +435,17 @@ class GbfsSpider(CSVFeedSpider):
                 for vehicle_type_id in vehicle_capacity["vehicle_type_ids"]:
                     cat = vehicle_types_categories.get(vehicle_type_id, {})
                     apply_category(cat, item)
+                    # Additionally, specify the capacity of each vehicle type
                     if "rental" in cat and vehicle_capacity.get("count") is not None:
                         for biketype in cat["rental"].split(";"):
                             capacity_key = f"capacity:{biketype}"
                             capacity = item["extras"].get(capacity_key, 0)
                             capacity += vehicle_capacity["count"]
                             item["extras"][capacity_key] = capacity
+        # If it doesn't specify the vehicle capacity, check if the "station_status" feed has the current vehicles stored
         elif station["station_id"] in station_status_categories:
             for cat in station_status_categories[station["station_id"]]:
                 apply_category(cat, item)
-
-        if station.get("is_charging_station"):
-            apply_category(Categories.CHARGING_STATION, item)
-
-        if "rental_uris" in station and "web" in station["rental_uris"]:
-            item["website"] = station["rental_uris"]["web"]
 
         # If neither the vehicle type nor a brand preset were available, set a fallback category.
         if "amenity" not in item["extras"] and not item.get("brand_wikidata"):
