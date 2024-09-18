@@ -252,4 +252,3 @@ def get_merged_extras(matched_items: dict, main_language: str, matching_key: str
                 for language, match in matched_items.items():
                     item["extras"][f"{extras_key}:{language}"] = match["extras"].get(extras_key)
     return item
->>>>>>> master
