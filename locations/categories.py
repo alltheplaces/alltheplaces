@@ -17,6 +17,9 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     PARKING = {"amenity": "parking"}
+    SCHOOL = {"amenity": "school"}
+    UNIVERSITY = {"amenity": "university"}
+    COLLEGE = {"amenity": "college"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -31,6 +34,8 @@ class Categories(Enum):
     ENFORCEMENT_AVERAGE_SPEED = {"enforcement": "average_speed"}
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
+
+    CLUB_SCOUT = {"club": "scout"}
 
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
@@ -247,6 +252,9 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MEDICAL_IMAGING = {
+        "healthcare": "medical_imaging"
+    }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MOTEL = {"tourism": "motel"}
@@ -282,6 +290,7 @@ class Categories(Enum):
 
     DATA_CENTRE = {"telecom": "data_center"}
 
+    VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
@@ -460,6 +469,7 @@ class Extras(Enum):
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CAR_PARTS = "service:vehicle:car_parts"
     CAR_REPAIR = "service:vehicle:car_repair"
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
@@ -480,6 +490,7 @@ class Extras(Enum):
     KOSHER = "diet:kosher"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
+    NEW_CAR_SALES = "service:vehicle:new_car_sales"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
     PARCEL_PICKUP = "parcel_pickup"
@@ -500,6 +511,7 @@ class Extras(Enum):
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     TYRE_SERVICES = "service:vehicle:tyres"
+    USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
@@ -566,7 +578,9 @@ class PaymentMethods(Enum):
 
 payment_method_aliases = {
     "Amex": PaymentMethods.AMERICAN_EXPRESS,
+    "Check": PaymentMethods.CHEQUE,
     "China UnionPay": PaymentMethods.UNIONPAY,
+    "Discover": PaymentMethods.DISCOVER_CARD,
     "Diners": PaymentMethods.DINERS_CLUB,
     "Maestro (Ausland)": PaymentMethods.MAESTRO,
     "MasterCard": PaymentMethods.MASTER_CARD,

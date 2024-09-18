@@ -7,5 +7,5 @@ class LidlHUSpider(LidlATSpider):
 
     dataset_id = "4c781cd459b444558df3d574f082358d"
     dataset_name = "Filialdaten-HU/Filialdaten-HU"
-    key = "Ao1GqKj4R8CqJrqpewEs49enx3QSzeWBPtSei353drKi3WWHOzPad_qzp3Fn7qs0"
+    api_key = "Ao1GqKj4R8CqJrqpewEs49enx3QSzeWBPtSei353drKi3WWHOzPad_qzp3Fn7qs0"
     days = DAYS_HU

@@ -35,6 +35,7 @@ class ShellSpider(GeoMeSpider):
             yield select_shop_item
 
         apply_category(Categories.FUEL_STATION, item)
+        item.pop("name", None)
 
         # As we do not know the name of shop/restaurant attached, we apply to main item
         if "shop" in amenities:

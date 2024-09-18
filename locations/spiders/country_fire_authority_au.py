@@ -14,7 +14,7 @@ class CountryFireAuthorityAUSpider(Spider):
     }
     allowed_domains = ["services-ap1.arcgis.com"]
     start_urls = [
-        "https://services-ap1.arcgis.com/vh59f3ZyAEAhnejO/arcgis/rest/services/Fire_Stations/FeatureServer/0/query?where=1%3D1&outFields=site_id%2Cfs_name%2Clabel%2Cstreet%2Csuburb%2Cpcode%2Cadd_src%2Cfs_type%2Cpersonnel%2Cfs_st_date%2Cimage&returnGeometry=true&f=pgeojson"
+        "https://services-ap1.arcgis.com/vh59f3ZyAEAhnejO/arcgis/rest/services/CFA_Fire_Stations/FeatureServer/0/query?where=1%3D1&outFields=site_id%2Cfs_name%2Clabel%2Cstreet%2Csuburb%2Cpcode%2Cadd_src%2Cfs_type%2Cpersonnel%2Cfs_st_date%2Cimage&returnGeometry=true&f=pgeojson"
     ]
 
     def start_requests(self):
