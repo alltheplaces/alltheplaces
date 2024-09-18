@@ -17,6 +17,3 @@ class SpeedyServicesGBSpider(CrawlSpider, StructuredDataSpider):
             callback="parse",
         ),
     ]
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        yield item
