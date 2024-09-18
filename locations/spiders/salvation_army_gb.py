@@ -11,7 +11,7 @@ class SalvationArmyGBSpider(SitemapSpider):
     name = "salvation_army_gb"
     item_attributes = {"brand": "Salvation Army", "brand_wikidata": "Q188307"}
     sitemap_urls = ["https://www.salvationarmy.org.uk/robots.txt"]
-    sitemap_rules = [(r"/[^/]+\-charity-shop(?:\-\d+)?$", "parse")]
+    sitemap_rules = [(r"^https:\/\/www\.salvationarmy\.org\.uk\/[^/]+-charity-shop(?:-\d+)?$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
