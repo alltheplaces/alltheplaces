@@ -3,8 +3,8 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HssSpider(SitemapSpider, StructuredDataSpider):
-    name = "hss"
+class HssHireGBSpider(SitemapSpider, StructuredDataSpider):
+    name = "hss_hire_gb"
     item_attributes = {
         "brand": "HSS Hire",
         "brand_wikidata": "Q5636000",
