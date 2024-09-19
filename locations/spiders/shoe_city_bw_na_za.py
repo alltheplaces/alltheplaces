@@ -12,6 +12,6 @@ class ShoeCityBWNAZASpider(AmaiPromapSpider):
         item.pop("email")
         if description := feature.get("description"):
             item["opening_hours"] = OpeningHours()
-            for day in schedule.split("<br>"):
+            for day in description.split("<br>"):
                 item["opening_hours"].add_ranges_from_string(day)
         yield item
