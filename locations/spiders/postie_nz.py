@@ -1,4 +1,5 @@
 import re
+
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -22,12 +23,13 @@ class PostieNZSpider(CrawlSpider, StructuredDataSpider):
             callback="parse",
         ),
     ]
+    time_format = "%I:%M%p"
 
     def pre_process_data(self, ld_data, **kwargs):
         new_hours = []
         for day in ld_data["openingHours"]:
-            new_day = re.sub(r"^(\d{1,2})am", r"\1:00am", day)
-            re.sub(r"\s(\d{1,2})pm$", r"\1:00pm", day)
-            re.sub(r"(\d)\.(\d)", r"\1:\2", day)
-            new_hours.append(new_dayday)
+            new_day = re.sub(r"(\s\d{1,2})am", r"\1:00am", day)
+            new_day = re.sub(r"([-\s–]\d{1,2})pm", r"\1:00pm", new_day)
+            new_day = re.sub(r"(\d)\.(\d)", r"\1:\2", new_day)
+            new_hours.append(new_day.strip())
         ld_data["openingHours"] = new_hours
