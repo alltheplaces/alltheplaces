@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -16,8 +16,6 @@ class HabitBurgerSpider(SitemapSpider, StructuredDataSpider):
         opening_hours = []
         for days, hours in zip(rules[::2], rules[1::2]):
             opening_hours.extend(f"{day} {hours}" for day in days.split(","))
-        oh = OpeningHours()
-        oh.from_linked_data({"openingHours": opening_hours}, "%I:%M%p")
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = LinkedDataParser.parse_opening_hours({"openingHours": opening_hours}, "%I:%M%p")
 
         yield item

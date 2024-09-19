@@ -2,7 +2,7 @@ import scrapy
 from scrapy import FormRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 
 
 class OlliesBargainOutletSpider(scrapy.Spider):
@@ -60,8 +60,6 @@ class OlliesBargainOutletSpider(scrapy.Spider):
             open_hours = data.get("OpenHours").split("<br />")
             if "COMING SOON" not in open_hours[0].upper():
                 open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
-                oh = OpeningHours()
-                oh.from_linked_data({"openingHours": open_hour_filtered}, "%I%p")
-                item["opening_hours"] = oh.as_opening_hours()
+                oh = LinkedDataParser.parse_opening_hours({"openingHours": open_hour_filtered}, "%I%p")
 
                 yield item
