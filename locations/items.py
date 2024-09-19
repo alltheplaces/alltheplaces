@@ -156,7 +156,7 @@ def merge_items(language_dict: dict, main_language: str, matching_key: str = "re
                     f"No matches found for '{matching_key}': '{item[matching_key]}' in language '{language}'"
                 )
 
-        item = get_merged_item(matched_items, main_language, matching_key)
+        item = get_merged_item(matched_items, main_language)
         yield item
     for language, refs in all_item_refs.items():
         if len(refs) > 0:

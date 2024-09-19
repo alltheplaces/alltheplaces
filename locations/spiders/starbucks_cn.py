@@ -25,12 +25,7 @@ class StarbucksCNSpider(JSONBlobSpider):
     download_timeout = 30
     name = "starbucks_cn"
     item_attributes = {"brand": "星巴克", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
-    custom_settings = {
-        "CONCURRENT_REQUESTS": 1,  # Ensure that EN processing happens before ZH items are fetched,
-        "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
-    }
     locations_key = "data"
-    en_items = {}
 
     def start_requests(self):
         for lat, lon in country_iseadgg_centroids(["CN"], 79):
@@ -38,10 +33,6 @@ class StarbucksCNSpider(JSONBlobSpider):
                 url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={lat}&lon={lon}&limit=1000&locale=EN&features=&radius=100000",
                 meta={"lat": lat, "lon": lon, "locale": "EN"},
             )
-            # yield JsonRequest(
-            #     url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={lat}&lon={lon}&limit=1000&locale=ZH&features=&radius=100000",
-            #     meta={"locale": "ZH"},
-            # )
 
     def parse(self, response: Response) -> Iterable[Feature]:
         features = self.extract_json(response)
@@ -73,8 +64,3 @@ class StarbucksCNSpider(JSONBlobSpider):
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_feature/{feature}")
         yield item
-        # if response.meta["locale"] == "EN":
-        #     self.en_items[item["ref"]] = item
-        # else:
-        #     en_item = self.en_items.pop(item["ref"])
-        #     yield get_merged_item({"en": en_item, "zh": item}, "zh")
