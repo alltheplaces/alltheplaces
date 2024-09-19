@@ -122,7 +122,6 @@ class LinkedDataParser:
         item["website"] = LinkedDataParser.get_case_insensitive(ld, "url")
 
         try:
-            oh = OpeningHours()
             item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld, time_format=time_format)
         except ValueError as e:
             # Explicitly handle a ValueError, which is likely time_format related

@@ -2,7 +2,6 @@ import json
 
 from scrapy.http import HtmlResponse
 
-from locations.hours import OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -258,7 +257,6 @@ def test_ld_opening_hours_specification_as_list():
 
 
 def test_ld_parse_opening_hours():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -297,7 +295,6 @@ def test_ld_parse_opening_hours():
 
 
 def test_ld_parse_opening_hours_string():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -316,7 +313,6 @@ def test_ld_parse_opening_hours_string():
         == "Mo-Th 09:00-12:00"
     )
 
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -335,7 +331,6 @@ def test_ld_parse_opening_hours_string():
         == "Mo-Th 09:00-12:00"
     )
 
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -356,7 +351,6 @@ def test_ld_parse_opening_hours_string():
 
 
 def test_ld_parse_opening_hours_days_3_chars():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -375,7 +369,6 @@ def test_ld_parse_opening_hours_days_3_chars():
         == "Mo-Th 09:00-12:00"
     )
 
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -394,7 +387,6 @@ def test_ld_parse_opening_hours_days_3_chars():
         == "Mo-Th 09:00-12:00"
     )
 
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -412,7 +404,6 @@ def test_ld_parse_opening_hours_days_3_chars():
 
 
 def test_ld_parse_opening_hours_array():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -436,7 +427,6 @@ def test_ld_parse_opening_hours_array():
 
 
 def test_ld_parse_opening_hours_day_range():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -453,7 +443,6 @@ def test_ld_parse_opening_hours_day_range():
 
 
 def test_ld_parse_opening_hours_array_with_commas():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -470,7 +459,6 @@ def test_ld_parse_opening_hours_array_with_commas():
 
 
 def test_ld_parse_opening_hours_closed():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -495,7 +483,6 @@ def test_ld_parse_opening_hours_closed():
 
 
 def test_ld_parse_opening_hours_closed_range():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -512,7 +499,6 @@ def test_ld_parse_opening_hours_closed_range():
 
 
 def test_ld_parse_opening_hours_no_commas():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -529,7 +515,6 @@ def test_ld_parse_opening_hours_no_commas():
 
 
 def test_ld_parse_opening_hours_no_commas_closed():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
@@ -546,7 +531,6 @@ def test_ld_parse_opening_hours_no_commas_closed():
 
 
 def test_ld_parse_time_format():
-    o = OpeningHours()
     assert (
         LinkedDataParser.parse_opening_hours(
             json.loads(
