@@ -13,11 +13,11 @@ class PostieNZSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.postie.co.nz/stores/all"]
     rules = [
         Rule(
-            LinkExtractor(allow=r"https://www.postie.co.nz/store-details/southern/[\w-]+"),
+            LinkExtractor(allow=r"https:\/\/www\.postie\.co\.nz\/store-details\/southern\/[\w-]+"),
             callback="parse",
         ),
         Rule(
-            LinkExtractor(allow=r"https://www.postie.co.nz/store-details/northern/[\w-]+"),
+            LinkExtractor(allow=r"https:\/\/www\.postie\.co\.nz\/store-details\/northern\/[\w-]+"),
             callback="parse",
         ),
     ]
