@@ -1,6 +1,7 @@
 import json
 
 import scrapy
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -16,7 +17,7 @@ class CharlesTyrwhittSpider(scrapy.Spider):
     allowed_domains = ["www.charlestyrwhitt.com"]
     start_urls = ["https://www.charlestyrwhitt.com/uk/stores"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         mapdata = response.xpath('//div[@id="map-data"]//text()').get()
         data = json.loads(mapdata)
         for location in data:
