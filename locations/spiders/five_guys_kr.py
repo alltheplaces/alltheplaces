@@ -1,9 +1,14 @@
-from locations.spiders.five_guys_ca import FiveGuysCASpider
-from locations.spiders.five_guys_us import FiveGuysUSSpider
+from locations.spiders.five_guys_au import FiveGuysAUSpider
 
 
-class FiveGuysKRSpider(FiveGuysCASpider):
+class FiveGuysKRSpider(FiveGuysAUSpider):
     name = "five_guys_kr"
-    item_attributes = FiveGuysUSSpider.item_attributes
-    sitemap_urls = ["https://restaurants.fiveguys.co.kr/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.co\.kr\/en\/(?!search$)[^/]+$", "parse_sd")]
+    experience_key = "search-backend-kr"
+    locale = (
+        "en-KR"  # Using en because it has google attributes which gives lots of extra details (not present in kr-KR)
+    )
+
+    def process_websites(self, item) -> None:
+        item["extras"]["website:en"] = item["website"]
+        item["extras"]["website:kr"] = item["website"].replace("/en_kr/", "/")
+        item["website"] = item["extras"]["website:kr"]

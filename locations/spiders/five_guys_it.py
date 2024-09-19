@@ -1,9 +1,14 @@
-from locations.spiders.five_guys_ca import FiveGuysCASpider
-from locations.spiders.five_guys_us import FiveGuysUSSpider
+from locations.spiders.five_guys_au import FiveGuysAUSpider
 
 
-class FiveGuysITSpider(FiveGuysCASpider):
+class FiveGuysITSpider(FiveGuysAUSpider):
     name = "five_guys_it"
-    item_attributes = FiveGuysUSSpider.item_attributes
-    sitemap_urls = ["https://restaurants.fiveguys.it/robots.txt"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.it\/en_it\/[^/]+$", "parse_sd")]
+    experience_key = "search-backend-it"
+    locale = (
+        "en-IT"  # Using en because it has google attributes which gives lots of extra details (not present in it-IT)
+    )
+
+    def process_websites(self, item) -> None:
+        item["extras"]["website:en"] = item["website"]
+        item["extras"]["website:it"] = item["website"].replace("/en_it/", "/")
+        item["website"] = item["extras"]["website:it"]
