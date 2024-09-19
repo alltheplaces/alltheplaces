@@ -25,12 +25,12 @@ class NSI(metaclass=Singleton):
     """
 
     def __init__(self):
-        self.loaded = False
-        self.wikidata_json = None
-        self.nsi_json = None
+        self.loaded: bool = False
+        self.wikidata_json: dict = None
+        self.nsi_json: dict = None
 
     @staticmethod
-    def _request_file(file) -> dict:
+    def _request_file(file: str) -> dict:
         resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/" + file)
         if not resp.status_code == 200:
             raise Exception("NSI load failure")
@@ -91,12 +91,12 @@ class NSI(metaclass=Singleton):
         label_to_find_fuzzy = re.sub(r"[^\w ]+", "", unidecode(label_to_find)).lower().strip()
         for k, v in self.wikidata_json.items():
             if not label_to_find_fuzzy:
-                yield k, v
+                yield (k, v)
                 continue
             if nsi_label := v.get("label"):
                 nsi_label_fuzzy = re.sub(r"[^\w ]+", "", unidecode(nsi_label)).lower().strip()
                 if label_to_find_fuzzy in nsi_label_fuzzy:
-                    yield k, v
+                    yield (k, v)
 
     def iter_country(self, location_code: str = None) -> Iterable[dict]:
         """

@@ -53,7 +53,7 @@ from locations.pipelines.address_clean_up import clean_address
 # }
 #
 # As filters are complex to understand, it is best to search spiders
-# using "api_query" to see other examples of filters being used.
+# using "api_filter" to see other examples of filters being used.
 
 # Instead of Where2GetIt being provided as a service, it is also
 # possible for brands to self-host the software at a custom domain
