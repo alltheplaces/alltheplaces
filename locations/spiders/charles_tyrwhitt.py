@@ -23,6 +23,7 @@ class CharlesTyrwhittSpider(scrapy.Spider):
         data = json.loads(mapdata)
         for location in data:
             item = DictParser.parse(location)
+            apply_category(Categories.SHOP_CLOTHES, item)
             item["branch"] = item["name"]
             item["name"] = "Charles Tyrwhitt"
             location["address1"] = location["address1"].replace("Charles Tyrwhitt", "")
