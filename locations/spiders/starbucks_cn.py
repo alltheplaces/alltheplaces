@@ -1,7 +1,10 @@
-from scrapy.http import JsonRequest
+from typing import Iterable
+
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_yes_no
 from locations.geo import country_iseadgg_centroids
+from locations.items import Feature, merge_items
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
@@ -33,12 +36,24 @@ class StarbucksCNSpider(JSONBlobSpider):
         for lat, lon in country_iseadgg_centroids(["CN"], 79):
             yield JsonRequest(
                 url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={lat}&lon={lon}&limit=1000&locale=EN&features=&radius=100000",
-                meta={"locale": "EN"},
+                meta={"lat": lat, "lon": lon, "locale": "EN"},
             )
+            # yield JsonRequest(
+            #     url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={lat}&lon={lon}&limit=1000&locale=ZH&features=&radius=100000",
+            #     meta={"locale": "ZH"},
+            # )
+
+    def parse(self, response: Response) -> Iterable[Feature]:
+        features = self.extract_json(response)
+        if response.meta["locale"] == "EN":
+            en_items = {item["ref"]: item for item in self.parse_feature_array(response, features)}
             yield JsonRequest(
-                url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={lat}&lon={lon}&limit=1000&locale=ZH&features=&radius=100000",
-                meta={"locale": "ZH"},
+                url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={response.meta['lat']}&lon={response.meta['lon']}&limit=1000&locale=ZH&features=&radius=100000",
+                meta={"locale": "ZH", "item_dict": en_items},
             )
+        else:
+            zh_items = {item["ref"]: item for item in self.parse_feature_array(response, features)}
+            yield from merge_items({"en": response.meta["item_dict"], "zh": zh_items}, "zh")
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
@@ -57,23 +72,9 @@ class StarbucksCNSpider(JSONBlobSpider):
                 apply_yes_no(match, item, True)
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_feature/{feature}")
-        if response.meta["locale"] == "EN":
-            self.en_items[item["ref"]] = item
-        else:
-            for key, value in self.en_items[item["ref"]].items():
-                if value is None or value == "":
-                    continue
-                if value == item.get(key):
-                    continue
-                if key == "extras":
-                    continue
-                if key in ["city", "postcode", "street_address"]:
-                    item["extras"]["addr:" + key + ":en"] = value
-                    item["extras"]["addr:" + key + ":zh"] = item.get(key)
-                elif key == "addr_full":
-                    item["extras"]["addr:full:en"] = value
-                    item["extras"]["addr:full:zh"] = item.get(key)
-                else:
-                    item["extras"][key + ":en"] = value
-                    item["extras"][key + ":zh"] = item.get(key)
-            yield item
+        yield item
+        # if response.meta["locale"] == "EN":
+        #     self.en_items[item["ref"]] = item
+        # else:
+        #     en_item = self.en_items.pop(item["ref"])
+        #     yield get_merged_item({"en": en_item, "zh": item}, "zh")
