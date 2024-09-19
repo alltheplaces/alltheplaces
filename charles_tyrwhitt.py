@@ -1,5 +1,6 @@
 import json
 from typing import Any
+
 import scrapy
 from scrapy.http import Response
 
