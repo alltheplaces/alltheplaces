@@ -3,7 +3,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -27,8 +27,7 @@ class RiteAidUSSpider(SitemapSpider, StructuredDataSpider):
                 pharmacy = item.deepcopy()
                 pharmacy["ref"] = "{}-pharmacy".format(item["ref"])
                 pharmacy["phone"] = department["telephone"]
-                pharmacy["opening_hours"] = OpeningHours()
-                pharmacy["opening_hours"].from_linked_data(department)
+                pharmacy["opening_hours"] = LinkedDataParser.parse_opening_hours(department)
                 apply_category(Categories.PHARMACY, pharmacy)
                 yield pharmacy
                 break

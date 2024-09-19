@@ -1,7 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,6 +20,5 @@ class FuzzysTacoShopUSSpider(CrawlSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item, response, ld_data):
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].from_linked_data(ld_data, time_format="%H:%M:%S")
+        item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld_data, time_format="%H:%M:%S")
         yield item
