@@ -17,7 +17,7 @@ class PostieNZSpider(CrawlSpider, StructuredDataSpider):
             callback="parse",
         ),
         Rule(
-              LinkExtractor(allow=r"https://www.postie.co.nz/store-details/northern/[\w-]+"),
-              callback="parse",
-          ),
+            LinkExtractor(allow=r"https://www.postie.co.nz/store-details/northern/[\w-]+"),
+            callback="parse",
+        ),
     ]
