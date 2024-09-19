@@ -5,8 +5,8 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SpeedyServicesGBSpider(CrawlSpider, StructuredDataSpider):
-    name = "speedy_services_gb"
+class SpeedyServicesGBIESpider(CrawlSpider, StructuredDataSpider):
+    name = "speedy_services_gb_ie"
     item_attributes = {
         "brand": "Speedy",
         "brand_wikidata": "Q7575722",
