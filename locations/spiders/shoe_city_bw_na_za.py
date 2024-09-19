@@ -1,5 +1,5 @@
-from locations.storefinders.amai_promap import AmaiPromapSpider
 from locations.hours import OpeningHours
+from locations.storefinders.amai_promap import AmaiPromapSpider
 
 
 class ShoeCityBWNAZASpider(AmaiPromapSpider):
