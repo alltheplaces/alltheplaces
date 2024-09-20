@@ -12,7 +12,7 @@ class EatnParkSpider(SitemapSpider, StructuredDataSpider):
     name = "eatn_park"
     item_attributes = {"brand": "Eat'n Park", "brand_wikidata": "Q5331211"}
     sitemap_urls = ["https://locations.eatnpark.com/robots.txt"]
-    sitemap_rules = [(r"/restaurants-", "parse_sd")]
+    sitemap_rules = [("/restaurants-", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
         opening_hours = OpeningHours()
