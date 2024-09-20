@@ -1,9 +1,6 @@
-import json
-
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -18,7 +15,7 @@ class SkylineChiliSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://locations.skylinechili.com/sitemap.xml"]
 
     def post_process_item(self, item, response, ld_data):
-        item['opening_hours'] = self.parse_hours(ld_data['openingHoursSpecification'])
+        item["opening_hours"] = self.parse_hours(ld_data["openingHoursSpecification"])
         yield item
 
     def parse_hours(self, hours):
