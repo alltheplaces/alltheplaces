@@ -2,8 +2,8 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PenzeysUSSpider(Spider):
