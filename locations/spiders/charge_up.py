@@ -9,7 +9,9 @@ from locations.items import Feature
 
 
 class ChargeUpSpider(scrapy.Spider):
-    start_urls = ["https://app.chargeup.cz/chargingPlace/listNearest?criteria.powerFrom=0&criteria.dataSources%5B0%5D=chargeup&criteria.onlyAvailable=false&midpoint.lat=0&midpoint.lng=0&fastCountTotal=true&pageInfo.pageIndex=0&pageInfo.pageSize=10000"]
+    start_urls = [
+        "https://app.chargeup.cz/chargingPlace/listNearest?criteria.powerFrom=0&criteria.dataSources%5B0%5D=chargeup&criteria.onlyAvailable=false&midpoint.lat=0&midpoint.lng=0&fastCountTotal=true&pageInfo.pageIndex=0&pageInfo.pageSize=10000"
+    ]
     name = "charge_up"
     item_attributes = {"brand": "ChargeUp", "brand_wikidata": "Q109066768"}
     providers = {
