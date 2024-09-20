@@ -177,9 +177,9 @@ class YextAnswersSpider(Spider):
                 if key in google_attributes:
                     apply_yes_no(attribute, item, google_attributes[key][0] == "true", False)
             wheelchair_keys_present = [key for key in GOOGLE_WHEELCHAIR_KEYS if key in google_attributes]
-            if all([google_attributes[key][0] for key in wheelchair_keys_present]):
+            if all([google_attributes[key][0] == "true" for key in wheelchair_keys_present]):
                 apply_yes_no(Extras.WHEELCHAIR, item, True, False)
-            elif any([google_attributes[key][0] for key in wheelchair_keys_present]):
+            elif any([google_attributes[key][0] == "true" for key in wheelchair_keys_present]):
                 apply_yes_no(Extras.WHEELCHAIR_LIMITED, item, True, False)
             else:
                 apply_yes_no(Extras.WHEELCHAIR, item, True, False)
