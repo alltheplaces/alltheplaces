@@ -4,6 +4,7 @@ import scrapy
 
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
+from locations.user_agents import BROWSER_DEFAULT
 
 BRAND_MAPPING = {
     "KFC": "KFC",
@@ -34,7 +35,7 @@ class KbpFoodsSpider(scrapy.Spider):
             "accept": "application/json, text/javascript, */*; q=0.01",
             "x-requested-with": "XMLHttpRequest",
             "sec-ch-ua-mobile": "?0",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36",
+            "user-agent": BROWSER_DEFAULT,
             "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
             "origin": "https://kbp-foods.com",
             "sec-fetch-site": "same-origin",
@@ -73,7 +74,7 @@ class KbpFoodsSpider(scrapy.Spider):
                     "accept": "text/plain, */*; q=0.01",
                     "x-requested-with": "XMLHttpRequest",
                     "sec-ch-ua-mobile": "?0",
-                    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36",
+                    "user-agent": BROWSER_DEFAULT,
                     "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                     "origin": "https://kbp-foods.com",
                     "sec-fetch-site": "same-origin",
