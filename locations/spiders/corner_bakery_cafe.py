@@ -1,10 +1,8 @@
-import json
 import re
 
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
