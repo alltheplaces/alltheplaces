@@ -1,5 +1,4 @@
 from locations.storefinders.storepoint import StorepointSpider
-from locations.hours import OpeningHours
 
 
 class PowerFashionLSSZZASpider(StorepointSpider):
