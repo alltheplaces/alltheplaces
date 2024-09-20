@@ -5,8 +5,8 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MicroCenterSpider(CrawlSpider, StructuredDataSpider):
-    name = "micro_center"
+class MicroCenterUSSpider(CrawlSpider, StructuredDataSpider):
+    name = "micro_center_us"
     item_attributes = {"brand": "Micro Center", "brand_wikidata": "Q6839153"}
     allowed_domains = ["www.microcenter.com"]
     start_urls = ["https://www.microcenter.com/site/stores/default.aspx"]
