@@ -180,7 +180,7 @@ class YextAnswersSpider(Spider):
             if all([google_attributes[key][0] for key in wheelchair_keys_present]):
                 apply_yes_no(Extras.WHEELCHAIR, item, True, False)
             elif any([google_attributes[key][0] for key in wheelchair_keys_present]):
-                item["extras"][Extras.WHEELCHAIR] = "limited"
+                apply_yes_no(Extras.WHEELCHAIR_LIMITED, item, True, False)
             else:
                 apply_yes_no(Extras.WHEELCHAIR, item, True, False)
 
