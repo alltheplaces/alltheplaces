@@ -3,10 +3,11 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import PaymentMethods, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class YextSearchSpider(Spider):
@@ -25,53 +26,40 @@ class YextSearchSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["entities"]:
             item = Feature()
-
-            item["ref"] = location["url"]
-            item["name"] = location["profile"]["name"]
+            location = location["profile"]
+            item = DictParser.parse(location)
+            item["ref"] = location["meta"]["uid"]
+            item["branch"] = location.get("geomodifier")
 
             item["street_address"] = merge_address_lines(
                 [
-                    location["profile"]["address"]["line1"],
-                    location["profile"]["address"]["line2"],
-                    location["profile"]["address"]["line3"],
+                    location["address"]["line1"],
+                    location["address"]["line2"],
+                    location["address"]["line3"],
                 ]
             )
-            item["city"] = location["profile"]["address"]["city"]
-            item["state"] = location["profile"]["address"]["region"]
-            item["country"] = location["profile"]["address"]["countryCode"]
-            item["postcode"] = location["profile"]["address"]["postalCode"]
 
-            coords = location["profile"].get("displayCoordinate") or location["profile"].get("yextDisplayCoordinate")
-            item["lat"] = coords["lat"]
-            item["lon"] = coords["long"]
-
-            item["website"] = location["profile"].get("websiteUrl", "").split("?", 1)[0]
+            item["website"] = location.get("websiteUrl", "").split("?", 1)[0]
+            item["extras"]["website:menu"] = location.get("menuUrl", "")
 
             phones = []
             for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
-                phone = location["profile"].get(phone_type)
+                phone = location.get(phone_type)
                 if phone:
                     phones.append(phone.get("number"))
             if len(phones) > 0:
                 item["phone"] = "; ".join(phones)
 
-            emails = location["profile"].get("emails")
+            emails = location.get("emails")
             if emails:
                 item["email"] = "; ".join(emails)
 
-            item["facebook"] = location["profile"].get("facebookPageUrl")
+            item["facebook"] = location.get("facebookPageUrl")
 
-            if location["profile"].get("googlePlaceId"):
-                item["extras"]["ref:google"] = location["profile"].get("googlePlaceId")
+            if location.get("googlePlaceId"):
+                item["extras"]["ref:google"] = location.get("googlePlaceId")
 
-            if payment_methods := location["profile"].get("paymentOptions"):
-                apply_yes_no(PaymentMethods.CASH, item, "Cash" in payment_methods, False)
-                apply_yes_no(PaymentMethods.CHEQUE, item, "Check" in payment_methods, False)
-                apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in payment_methods, False)
-                apply_yes_no(PaymentMethods.VISA, item, "Visa" in payment_methods, False)
-                apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_methods, False)
-                apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in payment_methods, False)
-                apply_yes_no(PaymentMethods.CONTACTLESS, item, "Contactless Payment" in payment_methods, False)
+            YextAnswersSpider.parse_payment_methods(self, location, item)
 
             item["opening_hours"] = self.parse_opening_hours(location)
 
@@ -85,7 +73,7 @@ class YextSearchSpider(Spider):
 
     def parse_opening_hours(self, location: dict, **kwargs: Any) -> OpeningHours | None:
         oh = OpeningHours()
-        hours = location["profile"].get("hours")
+        hours = location.get("hours")
         if not hours:
             return None
         normal_hours = hours.get("normalHours")

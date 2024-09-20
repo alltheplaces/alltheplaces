@@ -18,7 +18,7 @@ class Phillips66Conoco76Spider(scrapy.Spider):
     BRANDS = {
         "76": {"brand": "U76", "brand_wikidata": "Q1658320"},
         "U76": {"brand": "U76", "brand_wikidata": "Q1658320"},
-        "CON": {"brand": "Conoco", "brand_wikidata": "Q1126518"},
+        "CON": {"brand": "Conoco", "brand_wikidata": "Q214763"},
         "COP": None,
         "P66": {"brand": "Phillips 66", "brand_wikidata": "Q1656230"},
     }
@@ -57,6 +57,8 @@ class Phillips66Conoco76Spider(scrapy.Spider):
             )
             if brand := self.BRANDS.get(station["Brand"]):
                 item.update(brand)
+            else:
+                self.crawler.stats.inc_value(f'atp/{self.name}/brand/fail/{station["Brand"]}')
 
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.E85, item, station["e85"])
