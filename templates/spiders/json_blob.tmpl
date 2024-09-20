@@ -1,0 +1,25 @@
+import chompjs
+
+from locations.json_blob_spider import JSONBlobSpider
+
+
+class $classname(JSONBlobSpider):
+    name = "$name"
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+        # "extras": Categories.SHOP_XYZ.value
+    }
+    start_urls = ["$url"]
+    # no_refs = True
+
+    def extract_json(self, response):
+        return chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "var locations = ")]/text()').get()
+        )
+
+    def post_process_item(self, item, response, location):
+        yield item

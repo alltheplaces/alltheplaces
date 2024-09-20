@@ -60,14 +60,11 @@ POSTALS = [
 class DishSpider(scrapy.Spider):
     name = "dish"
     item_attributes = {"brand": "Dish", "brand_wikidata": "Q1199757"}
-    allowed_domains = ["www.dish.com"]
-    start_urls = [
-        "https://www.dish.com/find-retailer",
-    ]
+    allowed_domains = ["webapps.dish.com"]
 
-    def parse(self, response):
+    def start_requests(self):
         for postal in POSTALS:
-            url = "https://www.dish.com/find-retailer/getretailershandler.ashx?Zip=" + postal + "&Miles=1000"
+            url = "https://webapps.dish.com/find-retailer/getretailershandler.ashx?Zip=" + postal + "&Miles=1000"
 
             yield scrapy.http.FormRequest(
                 url,

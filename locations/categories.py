@@ -17,6 +17,9 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     PARKING = {"amenity": "parking"}
+    SCHOOL = {"amenity": "school"}
+    UNIVERSITY = {"amenity": "university"}
+    COLLEGE = {"amenity": "college"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -32,7 +35,10 @@ class Categories(Enum):
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
+    CLUB_SCOUT = {"club": "scout"}
+
     CRAFT_CARPENTER = {"craft": "carpenter"}
+    CRAFT_CATERER = {"craft": "caterer"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
@@ -281,6 +287,7 @@ class Categories(Enum):
 
     DATA_CENTRE = {"telecom": "data_center"}
 
+    VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
@@ -454,10 +461,12 @@ class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     BACKUP_GENERATOR = "backup_generator"
+    BAR = "bar"
     BARBEQUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CAR_PARTS = "service:vehicle:car_parts"
     CAR_REPAIR = "service:vehicle:car_repair"
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
@@ -474,9 +483,11 @@ class Extras(Enum):
     HALAL = "diet:halal"
     ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
+    KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
+    NEW_CAR_SALES = "service:vehicle:new_car_sales"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
     PARCEL_PICKUP = "parcel_pickup"
@@ -497,6 +508,7 @@ class Extras(Enum):
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     TYRE_SERVICES = "service:vehicle:tyres"
+    USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
@@ -540,9 +552,11 @@ class PaymentMethods(Enum):
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
     MIR = "payment:mir"
+    MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
     PAYPAY = "payment:paypay"
+    POWERCARD = "payment:powercard"
     QUICPAY = "payment:quicpay"
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
@@ -557,6 +571,18 @@ class PaymentMethods(Enum):
     V_PAY = "payment:v_pay"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
+
+
+payment_method_aliases = {
+    "Amex": PaymentMethods.AMERICAN_EXPRESS,
+    "Check": PaymentMethods.CHEQUE,
+    "China UnionPay": PaymentMethods.UNIONPAY,
+    "Discover": PaymentMethods.DISCOVER_CARD,
+    "Diners": PaymentMethods.DINERS_CLUB,
+    "Maestro (Ausland)": PaymentMethods.MAESTRO,
+    "MasterCard": PaymentMethods.MASTER_CARD,
+    "PowerCard": PaymentMethods.POWERCARD,
+}
 
 
 class FuelCards(Enum):
@@ -766,7 +792,7 @@ def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: 
     overwriting existing healthcare specialities. When appending,
     the list of healthcare specialities is sorted and then each
     value is separated with a semi-colon.
-    :param clothes: array of HealthcareSpecialities Enum members
+    :param specialities: array of HealthcareSpecialities Enum members
     :param item: Feature which should have healthcare specialities applied.
     """
     for s in specialities:
@@ -774,27 +800,34 @@ def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: 
 
 
 # TODO: something similar for fuel types
-def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelCards):
+def map_payment(item: Feature, source_payment_method_name: str, enum: PaymentMethods | FuelCards):
     """Apply appropriate payment method tag to an item if given string is found in an enum."""
-    if not payment_method:
+    if not source_payment_method_name:
         return
-    map = {}
-    for payment in enum:
-        variations = DictParser.get_variations(payment.name.replace("_", "-"))
-        variations.add(payment.name.replace("_", " ").lower())
-        variations.add(payment.name.replace("_", " ").title())
-        variations.add(payment.name.replace("_", " ").upper())
+    payment_method_names: list[str] = [pm.name for pm in enum] + list(payment_method_aliases.keys())
+    mapping = {}
+    for payment_method_name in payment_method_names:
+        variations = DictParser.get_variations(payment_method_name.replace("_", "-"))
+        variations.add(payment_method_name.replace("_", " ").lower())
+        variations.add(payment_method_name.replace("_", " ").title())
+        variations.add(payment_method_name.replace("_", " ").upper())
 
         # Singularize for "cards" vs "card"
-        if payment.name.endswith("S"):
-            variations = variations | DictParser.get_variations(payment.name.replace("_", "-")[:-1])
-            variations.add(payment.name.replace("_", " ").lower()[:-1])
-            variations.add(payment.name.replace("_", " ").title()[:-1])
-            variations.add(payment.name.replace("_", " ").upper()[:-1])
+        if payment_method_name.endswith("S"):
+            variations = variations | DictParser.get_variations(payment_method_name.replace("_", "-")[:-1])
+            variations.add(payment_method_name.replace("_", " ").lower()[:-1])
+            variations.add(payment_method_name.replace("_", " ").title()[:-1])
+            variations.add(payment_method_name.replace("_", " ").upper()[:-1])
 
         for variation in variations:
-            map[variation] = payment.name
+            mapping[variation] = payment_method_name
 
-    if payment := map.get(payment_method):
-        apply_yes_no(enum[payment], item, True)
-        return True
+    if payment_method_name := mapping.get(source_payment_method_name):
+        if payment_method_name in [pm.name for pm in enum]:
+            apply_yes_no(enum[payment_method_name], item, True)
+            return True
+        elif payment_method_name in payment_method_aliases.keys():
+            apply_yes_no(payment_method_aliases[payment_method_name], item, True)
+            return True
+
+    return False

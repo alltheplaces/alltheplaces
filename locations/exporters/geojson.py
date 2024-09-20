@@ -5,9 +5,9 @@ import io
 import json
 import logging
 import uuid
-from typing import Any
+from typing import Any, Generator, Type
 
-from scrapy import Item
+from scrapy import Item, Spider
 from scrapy.exporters import JsonItemExporter
 from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
@@ -114,12 +114,17 @@ def compute_hash(item: Item) -> str:
 def find_spider_class(spider_name: str):
     if not spider_name:
         return None
+    for spider_class in iter_spider_classes_in_all_modules():
+        if spider_name == spider_class.name:
+            return spider_class
+    return None
+
+
+def iter_spider_classes_in_all_modules() -> Generator[Type[Spider], Any, None]:
     for mod in SPIDER_MODULES:
         for module in walk_modules(mod):
             for spider_class in iter_spider_classes(module):
-                if spider_name == spider_class.name:
-                    return spider_class
-    return None
+                yield spider_class
 
 
 def get_dataset_attributes(spider_name) -> {}:

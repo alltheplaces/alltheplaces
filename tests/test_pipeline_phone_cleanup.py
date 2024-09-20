@@ -31,7 +31,7 @@ def test_handle():
     pipeline.process_item(item, spider)
     assert item.get("phone") == "+32 2 633 17 59"
 
-    for key in ["fax", "operator:phone", "operator:fax"]:
+    for key in ["fax", "operator:phone", "operator:fax", "contact:whatsapp"]:
         assert pipeline.is_phone_key(key)
         item, pipeline, spider = get_objects(None, "TR")
         item["extras"] = {key: "+904441442"}

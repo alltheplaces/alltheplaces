@@ -25,17 +25,21 @@ DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa
 
 DAYS_EN = {
     "Monday": "Mo",
+    "Mondays": "Mo",
     "Mon": "Mo",
     "Mo": "Mo",
     "Tuesday": "Tu",
+    "Tuesdays": "Tu",
     "Tues": "Tu",
     "Tue": "Tu",
     "Tu": "Tu",
     "Wednesday": "We",
+    "Wednesdays": "We",
     "Weds": "We",
     "Wed": "We",
     "We": "We",
     "Thursday": "Th",
+    "Thursdays": "Th",
     "Thu": "Th",
     "Thr": "Th",
     "Thur": "Th",
@@ -43,12 +47,15 @@ DAYS_EN = {
     "Thurs": "Th",
     "Th": "Th",
     "Friday": "Fr",
+    "Fridays": "Fr",
     "Fri": "Fr",
     "Fr": "Fr",
     "Saturday": "Sa",
+    "Saturdays": "Sa",
     "Sat": "Sa",
     "Sa": "Sa",
     "Sunday": "Su",
+    "Sundays": "Su",
     "Sun": "Su",
     "Su": "Su",
 }
@@ -587,6 +594,16 @@ DAYS_SR = {
     "Недеља": "Su",
 }
 
+DAYS_TR = {
+    "Pazartesi": "Mo",
+    "Salı": "Tu",
+    "Çarşamba": "We",
+    "Perşembe": "Th",
+    "Cuma": "Fr",
+    "Cumartesi": "Sa",
+    "Pazar": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
@@ -599,7 +616,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_FR,
     DAYS_PT,
     DAYS_IT,
-    # Turkish missing
+    DAYS_TR,
     DAYS_DK,
     DAYS_PL,
     # Persian
@@ -671,6 +688,8 @@ DELIMITERS_ES = [
     "y",
     "de",
 ]
+
+DELIMITERS_FR = ["-", "–", "—", "―", "‒", "au", "à", "de"]
 
 DELIMITERS_PT = [
     "-",
@@ -773,6 +792,8 @@ class OpeningHours:
                 return
             if close_time == "24:00" or close_time == "00:00":
                 close_time = "23:59"
+            if close_time == "24:00:00" or close_time == "00:00:00":
+                close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
