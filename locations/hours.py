@@ -218,6 +218,17 @@ DAYS_GR = {
     "Κυ": "Su",
     "Κυριακή": "Su",
 }
+
+DAYS_HR = {
+    "Ponedjeljak": "Mo",
+    "Utorak": "Tu",
+    "Srijeda": "We",
+    "Četvrtak": "Th",
+    "Petak": "Fr",
+    "Subota": "Sa",
+    "Nedjelja": "Su",
+}
+
 DAYS_HU = {
     "Hétfő": "Mo",
     "Hé": "Mo",
@@ -627,6 +638,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_CH,
     DAYS_FI,
     DAYS_GR,
+    DAYS_HR,
     DAYS_HU,
     DAYS_IL,
     DAYS_NL,
