@@ -8,6 +8,7 @@ FACILITIES_MAP = {
     "Deposit Taking ATM": Extras.ATM,
     "Non-Deposit Taking ATM": Extras.ATM,
     "Wheel Chair Friendly": Extras.WHEELCHAIR,
+    "Wheel Chair Friendly with Staff Assistance*": Extras.WHEELCHAIR_LIMITED,
     "Wi-Fi": Extras.WIFI,
 }
 NEDBANK_SHARED_ATTRIBUTES = {
@@ -42,14 +43,14 @@ class NedbankZASpider(JSONBlobSpider):
             self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_type/{location['type']}")
             return
         item["ref"] = location["code"]
-        for facility in location["facilities"]:
-            if match := FACILITIES_MAP.get(facility["name"]):
+        facilities = [facility["name"] for facility in location["facilities"]]
+        for facility in facilities:
+            if match := FACILITIES_MAP.get(facility):
                 apply_yes_no(match, item, True)
-            elif facility["name"] == "Wheel Chair Friendly with Staff Assistance*":
-                item["extras"]["wheelchair"] = "limited"
-                item["extras"]["wheelchair:description"] = "With staff assistance"
             else:
-                self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_facility/{facility['name']}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_facility/{facility}")
+        if "Wheel Chair Friendly with Staff Assistance*" in facilities:
+            item["extras"]["wheelchair:description"] = "With staff assistance"
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
         yield Request(
             url=f"https://api.nedsecure.co.za/nedbank/channeldistribution/v2/branches/{item['ref']}",
