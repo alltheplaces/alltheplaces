@@ -56,6 +56,7 @@ COUNTRYCODE_COMPONENTS = {
     "KR",
     "KW",
     "KZ",
+    "LS",
     "LT",
     "LU",
     "LV",
