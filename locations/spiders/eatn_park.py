@@ -2,7 +2,6 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 HOURS_RE = re.compile(r"(?P<day>\w+) (?P<open_time>\S+) - (?P<close_time>\S+)")
