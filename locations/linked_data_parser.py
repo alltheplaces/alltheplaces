@@ -1,11 +1,12 @@
 import json
 import logging
+import re
 import traceback
 
 import chompjs
 import json5
 
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature, add_social_media
 
 logger = logging.getLogger(__name__)
@@ -61,19 +62,23 @@ class LinkedDataParser:
     def parse_ld(ld, time_format: str = "%H:%M") -> Feature:  # noqa: C901
         item = Feature()
 
-        if (geo := ld.get("geo")) or "location" in ld and (geo := ld["location"].get("geo")):
+        if (
+            (geo := LinkedDataParser.get_case_insensitive(ld, "geo"))
+            or "location" in [key.lower() for key in ld]
+            and (geo := LinkedDataParser.get_case_insensitive(ld["location"], "geo"))
+        ):
             if isinstance(geo, list):
                 geo = geo[0]
 
             if LinkedDataParser.check_type(geo.get("@type"), "GeoCoordinates"):
-                item["lat"] = LinkedDataParser.clean_float(LinkedDataParser.get_clean(geo, "latitude"))
-                item["lon"] = LinkedDataParser.clean_float(LinkedDataParser.get_clean(geo, "longitude"))
+                item["lat"] = LinkedDataParser.clean_float(LinkedDataParser.get_case_insensitive(geo, "latitude"))
+                item["lon"] = LinkedDataParser.clean_float(LinkedDataParser.get_case_insensitive(geo, "longitude"))
 
-        item["name"] = LinkedDataParser.get_clean(ld, "name")
+        item["name"] = LinkedDataParser.get_case_insensitive(ld, "name")
         if isinstance(item["name"], list):
             item["name"] = item["name"][0]
 
-        if addr := LinkedDataParser.get_clean(ld, "address"):
+        if addr := LinkedDataParser.get_case_insensitive(ld, "address"):
             if isinstance(addr, list):
                 addr = addr[0]
 
@@ -95,13 +100,13 @@ class LinkedDataParser:
                         item["country"] = country
                     elif isinstance(country, dict):
                         if LinkedDataParser.check_type(country.get("@type"), "Country"):
-                            item["country"] = country.get("name")
+                            item["country"] = LinkedDataParser.get_case_insensitive(country, "name")
 
                     # Common mistake to put "telephone" in "address"
-                    item["phone"] = LinkedDataParser.get_clean(addr, "telephone")
+                    item["phone"] = LinkedDataParser.get_case_insensitive(addr, "telephone")
 
         if item.get("phone") is None:
-            item["phone"] = LinkedDataParser.get_clean(ld, "telephone")
+            item["phone"] = LinkedDataParser.get_case_insensitive(ld, "telephone")
 
         if isinstance(item["phone"], list):
             item["phone"] = item["phone"][0]
@@ -109,17 +114,15 @@ class LinkedDataParser:
         if isinstance(item["phone"], str):
             item["phone"] = item["phone"].replace("tel:", "")
 
-        item["email"] = LinkedDataParser.get_clean(ld, "email")
+        item["email"] = LinkedDataParser.get_case_insensitive(ld, "email")
 
         if isinstance(item["email"], str):
             item["email"] = item["email"].replace("mailto:", "")
 
-        item["website"] = ld.get("url")
+        item["website"] = LinkedDataParser.get_case_insensitive(ld, "url")
 
         try:
-            oh = OpeningHours()
-            oh.from_linked_data(ld, time_format=time_format)
-            item["opening_hours"] = oh
+            item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld, time_format=time_format)
         except ValueError as e:
             # Explicitly handle a ValueError, which is likely time_format related
             logger.warning(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
@@ -127,7 +130,7 @@ class LinkedDataParser:
             logger.warning(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
             logger.debug(traceback.print_exc())
 
-        if image := ld.get("image"):
+        if image := LinkedDataParser.get_case_insensitive(ld, "image"):
             if isinstance(image, list):
                 image = image[0]
 
@@ -135,11 +138,11 @@ class LinkedDataParser:
                 item["image"] = image
             elif isinstance(image, dict):
                 if LinkedDataParser.check_type(image.get("@type"), "ImageObject"):
-                    item["image"] = image.get("contentUrl")
+                    item["image"] = LinkedDataParser.get_case_insensitive(image, "contentUrl")
 
-        item["ref"] = ld.get("branchCode")
+        item["ref"] = LinkedDataParser.get_case_insensitive(ld, "branchCode")
         if item["ref"] is None or item["ref"] == "":
-            item["ref"] = ld.get("@id")
+            item["ref"] = LinkedDataParser.get_case_insensitive(ld, "@id")
 
         if item["ref"] == "":
             item["ref"] = None
@@ -171,10 +174,102 @@ class LinkedDataParser:
 
             return item
 
+    # Parses an openingHoursSpecification dict
+    # e.g.:
+    # {
+    #  "@type": "OpeningHoursSpecification",
+    #  "closes":  "17:00:00",
+    #  "dayOfWeek": "https://schema.org/Sunday",
+    #  "opens":  "09:00:00"
+    # }
+    # See https://schema.org/OpeningHoursSpecification for further examples.
+    def _parse_opening_hours_specification(oh: OpeningHours, rule: dict, time_format: str):
+        if (
+            not type(LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")) in [list, str]
+            or not type(LinkedDataParser.get_case_insensitive(rule, "opens")) == str
+            or not type(LinkedDataParser.get_case_insensitive(rule, "closes")) == str
+        ):
+            return
+
+        days = LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")
+        if not isinstance(days, list):
+            days = [days]
+
+        for day in days:
+            oh.add_range(
+                day=day.strip(),
+                open_time=LinkedDataParser.get_case_insensitive(rule, "opens").strip(),
+                close_time=LinkedDataParser.get_case_insensitive(rule, "closes").strip(),
+                time_format=time_format,
+            )
+        return oh
+
+    # Parse an individual https://schema.org/openingHours property value such as
+    # "Mo,Tu,We,Th 09:00-12:00"
+    # "Mo-Fr 10:00-19:00"
+    def _parse_opening_hours(oh: OpeningHours, rule: str, time_format: str):
+        days, time_ranges = rule.split(" ", 1)
+
+        for time_range in time_ranges.split(","):
+            if time_ranges.lower() in ["closed", "off"]:
+                start_time = end_time = "closed"
+            else:
+                start_time, end_time = time_range.split("-")
+
+            start_time = start_time.strip()
+            end_time = end_time.strip()
+
+            if "-" in days:
+                start_day, end_day = days.split("-")
+
+                start_day = sanitise_day(start_day)
+                end_day = sanitise_day(end_day)
+
+                for day in day_range(start_day, end_day):
+                    oh.add_range(day, start_time, end_time, time_format)
+            else:
+                for day in days.split(","):
+                    if d := sanitise_day(day):
+                        oh.add_range(d, start_time, end_time, time_format)
+        return oh
+
     @staticmethod
     def parse_opening_hours(linked_data, time_format: str = "%H:%M") -> OpeningHours:
         oh = OpeningHours()
-        oh.from_linked_data(linked_data, time_format)
+        if spec := LinkedDataParser.get_case_insensitive(linked_data, "openingHoursSpecification"):
+            if isinstance(spec, list):
+                for rule in spec:
+                    if not isinstance(rule, dict):
+                        continue
+                    oh = LinkedDataParser._parse_opening_hours_specification(oh, rule, time_format)
+            elif isinstance(spec, dict):
+                oh = LinkedDataParser._parse_opening_hours_specification(oh, spec, time_format)
+            else:
+                logger.info("Unknown openingHoursSpecification structure, ignoring")
+                logger.debug(LinkedDataParser.get_case_insensitive(linked_data, "openingHoursSpecification"))
+
+        elif rules := LinkedDataParser.get_case_insensitive(linked_data, "openingHours"):
+            if not isinstance(rules, list):
+                rules = re.findall(
+                    r"""((
+                        \w{2,3}                 # Day
+                        |\w{2,3}\s?\-\s?\w{2,3} # Day - Day
+                        |(\w{2,3},)+\w{2,3}     # Day,Day
+                    )\s(
+                        (\d\d:\d\d)\s?\-\s?(\d\d:\d\d) # time - range
+                        |(?i:closed) # ignoring case
+                    ))""",
+                    rules,
+                    re.X,
+                )
+                rules = [r[0] for r in rules]
+
+            for rule in rules:
+                if not rule:
+                    continue
+
+                oh = LinkedDataParser._parse_opening_hours(oh, rule, time_format)
+
         return oh
 
     @staticmethod
@@ -226,11 +321,11 @@ class LinkedDataParser:
 
     @staticmethod
     def parse_enhanced_hotel(ld: dict, item: Feature):
-        if stars := LinkedDataParser.get_clean(ld, "starRating"):
+        if stars := LinkedDataParser.get_case_insensitive(ld, "starRating"):
             if isinstance(stars, str):
                 item["extras"]["stars"] = stars
             elif isinstance(stars, dict):
-                item["extras"]["stars"] = stars.get("ratingValue")
+                item["extras"]["stars"] = LinkedDataParser.get_case_insensitive(stars, "ratingValue")
 
     @staticmethod
     def parse_same_as(ld: dict, item: Feature):
