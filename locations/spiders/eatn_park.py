@@ -20,6 +20,6 @@ class EatnParkSpider(SitemapSpider, StructuredDataSpider):
             g = m.groupdict()
             opening_hours.add_range(g["day"], g["open_time"], g["close_time"])
         item["opening_hours"] = opening_hours
-        item["name"] = (response.css("span.location-name::text").get(),)
+        item["name"] = response.css("span.location-name::text").get()
         item["ref"] = re.search(r"-(\d+)\.html", response.url).group(1)
         yield item
