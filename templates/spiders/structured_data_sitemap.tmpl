@@ -14,7 +14,7 @@ class $classname(SitemapSpider, StructuredDataSpider):
         # "operator_wikidata": "$operator_wikidata",
         # "extras": Categories.SHOP_XYZ.value
     }
-    sitemap_urls = ["$domain/robots.txt"]
+    sitemap_urls = ["https://$domain/robots.txt"]
     sitemap_rules = [
         (r"YOUR_PATTERN_HERE", "parse"),
     ]
