@@ -8,3 +8,4 @@ class PowerFashionLSSZZASpider(StorepointSpider):
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")
+        yield item
