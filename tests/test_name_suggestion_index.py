@@ -16,6 +16,14 @@ def test_iter_wikidata():
     assert found
 
 
+def test_iter_wikidata_all():
+    for k, v in NSI().iter_wikidata():
+        if k == "Q38076":
+            break
+    else:
+        assert False
+
+
 def test_iter_nsi():
     nsi = NSI()
     # McDonald's has identities in a number of locationSet's (countries)

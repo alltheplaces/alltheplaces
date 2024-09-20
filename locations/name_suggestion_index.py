@@ -88,15 +88,17 @@ class NSI(metaclass=Singleton):
         :return: iterator of matching NSI wikidata.json entries
         """
         self._ensure_loaded()
-        label_to_find_fuzzy = re.sub(r"[^\w ]+", "", unidecode(label_to_find)).lower().strip()
-        for k, v in self.wikidata_json.items():
-            if not label_to_find_fuzzy:
+        if not label_to_find:
+            for k, v in self.wikidata_json.items():
                 yield (k, v)
-                continue
-            if nsi_label := v.get("label"):
-                nsi_label_fuzzy = re.sub(r"[^\w ]+", "", unidecode(nsi_label)).lower().strip()
-                if label_to_find_fuzzy in nsi_label_fuzzy:
-                    yield (k, v)
+        else:
+            normalize_re = re.compile(r"[^\w ]+")
+            label_to_find_fuzzy = re.sub(normalize_re, "", unidecode(label_to_find)).lower().strip()
+            for k, v in self.wikidata_json.items():
+                if nsi_label := v.get("label"):
+                    nsi_label_fuzzy = re.sub(normalize_re, "", unidecode(nsi_label)).lower().strip()
+                    if label_to_find_fuzzy in nsi_label_fuzzy:
+                        yield (k, v)
 
     def iter_country(self, location_code: str = None) -> Iterable[dict]:
         """
