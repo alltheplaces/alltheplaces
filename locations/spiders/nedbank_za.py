@@ -8,7 +8,7 @@ FACILITIES_MAP = {
     "Deposit Taking ATM": Extras.ATM,
     "Non-Deposit Taking ATM": Extras.ATM,
     "Wheel Chair Friendly": Extras.WHEELCHAIR,
-    "Wheel Chair Friendly with Staff Assistance": Extras.WHEELCHAIR_LIMITED
+    "Wheel Chair Friendly with Staff Assistance": Extras.WHEELCHAIR_LIMITED,
     "Wi-Fi": Extras.WIFI,
 }
 NEDBANK_SHARED_ATTRIBUTES = {
