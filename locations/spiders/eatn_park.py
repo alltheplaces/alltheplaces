@@ -14,6 +14,6 @@ class EatnParkSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/restaurants-", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
-        item["name"] = response.css("span.location-name::text").get()
+        item["branch"] = response.css("span.location-name::text").get()
         item["ref"] = re.search(r"-(\d+)\.html", response.url).group(1)
         yield item
