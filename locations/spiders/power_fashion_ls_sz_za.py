@@ -1,4 +1,5 @@
 from locations.storefinders.storepoint import StorepointSpider
+from locations.hours import OpeningHours
 
 
 class PowerFashionLSSZZASpider(StorepointSpider):
@@ -8,4 +9,6 @@ class PowerFashionLSSZZASpider(StorepointSpider):
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")
+        for day_hours in location["description"].split("\n"):
+            item["opening_hours"].add_ranges_from_string(day_hours)
         yield item
