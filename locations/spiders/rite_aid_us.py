@@ -24,13 +24,17 @@ class RiteAidUSSpider(SitemapSpider, StructuredDataSpider):
 
         for department in ld_data.get("department", []):
             if department.get("@type") == "Pharmacy":
-                pharmacy = item.deepcopy()
-                pharmacy["ref"] = "{}-pharmacy".format(item["ref"])
-                pharmacy["phone"] = department["telephone"]
-                pharmacy["opening_hours"] = LinkedDataParser.parse_opening_hours(department)
-                apply_category(Categories.PHARMACY, pharmacy)
-                yield pharmacy
+                item["extras"]["opening_hours:pharmacy"] = LinkedDataParser.parse_opening_hours(
+                    department
+                ).as_opening_hours()
                 break
 
-        apply_category(Categories.SHOP_CHEMIST, item)
+        # If there is no retail opening_hours, use the pharmacy hours
+        # If there is a default retail opening_hours, add that to extras
+        if not item.get("opening_hours") and item["extras"].get("opening_hours:pharmacy"):
+            item["opening_hours"] = item["extras"]["opening_hours:pharmacy"]
+        else:
+            item["extras"]["opening_hours:retail"] = item["opening_hours"].as_opening_hours()
+
+        apply_category(Categories.PHARMACY, item)
         yield item
