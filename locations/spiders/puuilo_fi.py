@@ -16,7 +16,8 @@ class PuuiloFISpider(Spider):
         for location in json.loads(
             response.xpath('//script[@type="text/x-magento-init"][contains(text(), "storeslist")]/text()').get()
         )["*"]["Magento_Ui/js/core/app"]["components"]["storeslist"]["agents"]:
-            self.crawler.stats.inc_value("zx/enabled/{}".format(location["enabled"]))
+            if location["enabled"] != "1":
+                continue
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street")
