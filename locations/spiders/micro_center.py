@@ -1,31 +1,25 @@
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MicroCenterSpider(StructuredDataSpider):
+class MicroCenterSpider(CrawlSpider, StructuredDataSpider):
     name = "micro_center"
-    item_attributes = {"brand": "Micro Center", "brand_wikidata": "Q6839153", "extras": Categories.SHOP_COMPUTER.value}
+    item_attributes = {"brand": "Micro Center", "brand_wikidata": "Q6839153"}
     allowed_domains = ["www.microcenter.com"]
     start_urls = ["https://www.microcenter.com/site/stores/default.aspx"]
+    rules = [Rule(LinkExtractor("/site/stores/"), "parse")]
     wanted_types = ["ComputerStore"]
+    time_format = "%H"
 
-    def parse(self, response):
-        for url in response.xpath('//div[@class="location-container"]//a/@href').extract():
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)
-
-    def post_process_item(self, item, response, ld_data):
-        if "openingHoursSpecification" in ld_data:
-            opening_hours = OpeningHours()
-            for spec in ld_data["openingHoursSpecification"]:
-                day = spec["dayOfWeek"][:2]
-                open_time = spec["opens"] + ":00"
-                close_time = spec["closes"] + ":00"
-                opening_hours.add_range(day, open_time, close_time)
-
-            item["opening_hours"] = opening_hours
-        item["ref"] = response.url
-
-        yield item
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if item["ref"] == "https://www.microcenter.com/site/stores/default.aspx":
+            return None
+        if (item.get("name") or "").startswith("Micro Center - "):
+            item["branch"] = item.pop("name").removeprefix("Micro Center - ")
+            apply_category(Categories.SHOP_COMPUTER, item)
+            yield item
+        else:
+            pass  # Duplicate Micro data on every page
