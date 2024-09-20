@@ -15,11 +15,6 @@ class EatnParkSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/restaurants-", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
-        opening_hours = OpeningHours()
-        for m in HOURS_RE.finditer(ld_data["openingHours"]):
-            g = m.groupdict()
-            opening_hours.add_range(g["day"], g["open_time"], g["close_time"])
-        item["opening_hours"] = opening_hours
         item["name"] = response.css("span.location-name::text").get()
         item["ref"] = re.search(r"-(\d+)\.html", response.url).group(1)
         yield item
