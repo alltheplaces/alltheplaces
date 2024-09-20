@@ -1,13 +1,13 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories
 
 
 class MicroCenterSpider(StructuredDataSpider):
     name = "micro_center"
-    item_attributes = {"brand": "Micro Center", "brand_wikidata": "Q6839153", "extras": Categories.SHOP_COMPUTER.value }
+    item_attributes = {"brand": "Micro Center", "brand_wikidata": "Q6839153", "extras": Categories.SHOP_COMPUTER.value}
     allowed_domains = ["www.microcenter.com"]
     start_urls = ["https://www.microcenter.com/site/stores/default.aspx"]
     wanted_types = ["ComputerStore"]
