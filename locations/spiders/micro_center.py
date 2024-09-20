@@ -1,9 +1,6 @@
-import json
-
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -28,6 +25,6 @@ class MicroCenterSpider(StructuredDataSpider):
                 opening_hours.add_range(day, open_time, close_time)
 
             item["opening_hours"] = opening_hours
-        item['ref'] = response.url
-        
+        item["ref"] = response.url
+
         yield item
