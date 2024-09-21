@@ -66,9 +66,8 @@ class YextSearchSpider(Spider):
             YextAnswersSpider.parse_payment_methods(self, location, item)
 
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
-            item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(
-                location.get("deliveryHours")
-            ).as_opening_hours()
+            if oh := self.parse_opening_hours(location.get("deliveryHours")):
+                item["extras"]["opening_hours:delivery"] = oh.as_opening_hours()
 
             yield from self.parse_item(location, item) or []
 
