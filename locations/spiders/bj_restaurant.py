@@ -21,10 +21,12 @@ class BjRestaurantSpider(SitemapSpider):
 
     def parse(self, response):
         f = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').extract_first())
+        restaurant_data = f["props"]["pageProps"]["model"][":items"]["root"][":items"]["responsivegrid"][":items"][
+            "restaurantdetails"
+        ]["restaurant"]
         nested_json = json.loads(
-            f["props"]["pageProps"]["model"][":items"]["root"][":items"]["responsivegrid"][":items"][
-                "restaurantdetails"
-            ]["restaurant"]["seoScript"]
+            restaurant_data["seoScript"]
         )
-        item = LinkedDataParser.parse_ld(nested_json)
+        item = LinkedDataParser.parse_ld(nested_json, time_format="%H:%M:%S"))
+        item["ref"] = restaurant_data["restaurantId"]
         yield item
