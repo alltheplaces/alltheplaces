@@ -4,10 +4,10 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class HomeDepotCASpider(SitemapSpider):
+class HomeDepotCASpider(SitemapSpider, StructuredDataSpider):
     name = "home_depot_ca"
     item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
     allowed_domains = ["homedepot.ca"]
@@ -15,38 +15,23 @@ class HomeDepotCASpider(SitemapSpider):
     sitemap_rules = [
         (
             r"https:\/\/stores\.homedepot\.ca\/([\w]{2})\/([-\w]+)\/([-\w]+)([\d]+)\.html$",
-            "parse_store",
+            "parse_sd",
         ),
     ]
 
-    def parse_store(self, response):
-        script = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-            ).extract_first()
-        )
-        data = script[0]
-        ref = re.search(r".+/.+?([0-9]+).html", response.url).group(1)
+    def post_process_item(self, item, response, ld_data):
+        item["ref"] =  re.search(r".+/.+?([0-9]+).html", response.url).group(1)
+        item["branch"] = item.pop("name").replace("The Home Depot: ", "").replace("Home Improvement & Hardware Store in ", ""
+        ).replace("Home Depot : Magasin spécialisé en amélioration domiciliaire et en quincaillerie à ", "").replace(".", "")
 
-        properties = {
-            "name": data["name"],
-            "ref": ref,
-            "street_address": data["address"]["streetAddress"].strip(),
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "phone": data.get("address").get("telephone"),
-            "website": data.get("url") or response.url,
-            "lat": float(data["geo"]["latitude"]),
-            "lon": float(data["geo"]["longitude"]),
-        }
 
-        hours = self.parse_hours(data.get("openingHours"))
+        hours = self.parse_hours(ld_data.get("openingHours"))
         if hours:
-            properties["opening_hours"] = hours
+            item["opening_hours"] = hours
 
-        yield Feature(**properties)
+        yield item
 
+    # NOTE: This appears to have a higher success rate than the standard one from cursory review, so have left this behaviour
     def parse_hours(self, open_hours):
         opening_hours = OpeningHours()
         location_hours = re.findall(r"([a-zA-Z]*)\s(.*?)\s-\s(.*?)\s", open_hours)
