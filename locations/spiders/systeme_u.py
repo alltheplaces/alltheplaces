@@ -14,9 +14,7 @@ class SystemeUSpider(SitemapSpider):
     sitemap_urls = [
         "https://www.magasins-u.com/sitemap.xml",
     ]
-    sitemap_rules = [
-        (r"com\/(magasin|station)\/", "parse_stores")
-    ]
+    sitemap_rules = [(r"com\/(magasin|station)\/", "parse_stores")]
     requires_proxy = "FR"  # Proxy or other captcha drama?
     brands = {
         "uexpress": {"brand": "U Express", "brand_wikidata": "Q2529029"},
@@ -99,4 +97,3 @@ class SystemeUSpider(SitemapSpider):
             pass
 
         yield Feature(**properties)
-
