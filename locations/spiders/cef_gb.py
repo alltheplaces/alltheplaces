@@ -1,11 +1,8 @@
-import json
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
-from locations.linked_data_parser import LinkedDataParser
-from locations.structured_data_spider import StructuredDataSpider 
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class CefGBSpider(CrawlSpider, StructuredDataSpider):
@@ -18,7 +15,6 @@ class CefGBSpider(CrawlSpider, StructuredDataSpider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
-
 
     def post_process_item(self, item, response, ld_data):
         extract_google_position(item, response)
