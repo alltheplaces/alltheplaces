@@ -27,6 +27,6 @@ class BjRestaurantSpider(SitemapSpider):
         nested_json = json.loads(
             restaurant_data["seoScript"]
         )
-        item = LinkedDataParser.parse_ld(nested_json, time_format="%H:%M:%S"))
+        item = LinkedDataParser.parse_ld(nested_json, time_format="%H:%M:%S")
         item["ref"] = restaurant_data["restaurantId"]
         yield item
