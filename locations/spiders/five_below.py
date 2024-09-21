@@ -1,29 +1,17 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class FiveBelowSpider(scrapy.Spider):
+class FiveBelowSpider(SitemapSpider):
     name = "five_below"
     item_attributes = {"brand": "Five Below", "brand_wikidata": "Q5455836"}
     allowed_domains = ["locations.fivebelow.com"]
-    start_urls = ("https://locations.fivebelow.com/sitemap.xml",)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        store_urls = response.xpath("//url/loc/text()").extract()
-        regex = re.compile(r"https://locations.fivebelow.com/\S+")
-        for path in store_urls:
-            if re.search(regex, path):
-                yield scrapy.Request(
-                    path.strip(),
-                    callback=self.parse_store,
-                )
-            else:
-                pass
+    sitemap_urls = ["https://locations.fivebelow.com/sitemap.xml"]
+    sitemap_rules = [(r"https://locations.fivebelow.com/\S+", "parse_store")]
 
     def parse_store(self, response):
         store = response.xpath('//*[@itemtype="http://schema.org/Store"]')
