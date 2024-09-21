@@ -9,7 +9,7 @@ from locations.items import Feature
 class YmcaSpider(SitemapSpider):
     name = "ymca"
     item_attributes = {"brand": "YMCA", "brand_wikidata": "Q157169"}
-    allowed_domains = ["ymca.org"]
+    allowed_domains = ["www.ymca.org"]
     sitemap_urls = [
         "https://www.ymca.org/sitemap.xml",
     ]
