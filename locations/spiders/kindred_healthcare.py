@@ -16,10 +16,6 @@ class KindredHealthcareSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Hospital"]
 
     def post_process_item(self, item, response, ld_data):
-        is_location_page = response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-        )
-
         facility_type = ld_data["@type"]
         if facility_type == "Hospital":  # Keep refs consistent
             ref = re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1)
