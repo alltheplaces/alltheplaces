@@ -14,6 +14,7 @@ class TexasRoadhouseSpider(scrapy.Spider):
     }
     allowed_domains = ["www.texasroadhouse.com"]
     start_urls = ("https://www.texasroadhouse.com/sitemap.xml",)
+    requires_proxy = True
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
