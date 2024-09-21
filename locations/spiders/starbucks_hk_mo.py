@@ -3,7 +3,7 @@ from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class StarbucksHKMO(JSONBlobSpider):
+class StarbucksHKMOSpider(JSONBlobSpider):
     name = "starbucks_hk_mo"
     item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
     start_urls = ["https://www.starbucks.com.hk/rest/V1/mxstarbucks-getSBStoreList"]
