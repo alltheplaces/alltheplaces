@@ -56,6 +56,7 @@ class SideStepSpider(Spider):
             item["branch"] = branch_raw.strip()
             addr_all = location.xpath(".//address/span//text()").getall()
             addr_all.remove(branch_raw)
+            addr_all = [i.replace("\\n", ",") for i in addr_all]
             item["addr_full"] = clean_address(addr_all)
             yield item
             # Could now hit https://www.side-step.co.za/store_locator/location/locationdetail?_={new_req_time}&id={item['ref']}&current_page=cms_page_view
