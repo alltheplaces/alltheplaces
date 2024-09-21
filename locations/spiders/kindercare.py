@@ -1,11 +1,12 @@
 import json
 
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class KindercareSpider(scrapy.Spider):
+class KindercareSpider(CrawlSpider, StructuredDataSpider):
     name = "kindercare"
     item_attributes = {
         "brand": "KinderCare Learning Centers",
@@ -16,32 +17,12 @@ class KindercareSpider(scrapy.Spider):
         "https://www.kindercare.com/our-centers",
     ]
     download_delay = 0.5
-
-    def parse_location(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-            ).extract_first()
+    rules = [
+        Rule(
+            LinkExtractor(
+                restrict_xpaths = ['//div[contains(@class, "link-index-results")]//li']
+            ),
+            callback="parse_sd",
+            follow=True,
         )
-
-        properties = {
-            "name": data["name"],
-            "ref": data["@id"],
-            "street_address": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "country": data["address"]["addressCountry"],
-            "phone": data.get("telephone"),
-            "website": response.url,
-            "lat": float(data["geo"]["latitude"]),
-            "lon": float(data["geo"]["longitude"]),
-        }
-
-        yield Feature(**properties)
-
-    def parse(self, response):
-        urls = response.xpath('//div[contains(@class, "link-index-results")]//li/a/@href').extract()
-
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
+    ]
