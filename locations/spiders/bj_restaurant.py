@@ -13,6 +13,7 @@ class BjRestaurantSpider(scrapy.Spider):
     }
     allowed_domains = ["www.bjsrestaurants.com"]
     start_urls = ("https://www.bjsrestaurants.com/sitemap",)
+    requires_proxy = True
 
     def extract_location_url(self, response):
         return response.xpath('//a[contains(@href, "locations")]/@href').extract()
