@@ -3,8 +3,8 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.items import Feature
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class CrashChampionsUSSpider(SitemapSpider):
@@ -28,7 +28,6 @@ class CrashChampionsUSSpider(SitemapSpider):
         item["opening_hours"] = OpeningHours()
         for day_range in response.xpath("//*[@class='about-center__timings']/p/text()").getall():
             item["opening_hours"].add_ranges_from_string(day_range)
-        
 
         extract_google_position(item, response)
         yield item
