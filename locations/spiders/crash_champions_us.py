@@ -9,10 +9,13 @@ from locations.items import Feature
 
 class CrashChampionsUSSpider(SitemapSpider):
     name = "crash_champions_us"
+    item_attributes = {
+        "brand_wikidata": "Q121435028",
+        "brand": "Crash Champions",
+    }
     sitemap_urls = [
         "https://www.crashchampions.com/sitemap.xml",
     ]
-
     sitemap_rules = [(r"/locations/", "parse_store")]
 
     def parse_store(self, response):
