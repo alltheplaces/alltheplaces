@@ -8,7 +8,6 @@ class VallartaSpider(SitemapSpider):
     name = "vallarta"
     item_attributes = {"brand": "Vallarta Supermarkets", "brand_wikidata": "Q7911833"}
     allowed_domains = ["vallartasupermarkets.com"]
-    download_delay = 0.2
     sitemap_urls = ("https://vallartasupermarkets.com/store-sitemap.xml",)
     sitemap_rules = [(r"https://vallartasupermarkets.com/store-locations/[\w-]+/", "parse_store")]
 
