@@ -12,7 +12,9 @@ class SbarroSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://sbarro.com/locations/?user_search=78749&radius=50000&count=5000"]
     rules = (
         Rule(
-            LinkExtractor(restrict_xpaths='//*[@class="location-name "]', process_value=lambda store_url: store_url + '/'),
+            LinkExtractor(
+                restrict_xpaths='//*[@class="location-name "]', process_value=lambda store_url: store_url + "/"
+            ),
             follow=True,
             callback="parse_sd",
         ),
