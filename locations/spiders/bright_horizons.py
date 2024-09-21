@@ -5,10 +5,10 @@ import time
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BrightHorizonsSpider(SitemapSpider):
+class BrightHorizonsSpider(SitemapSpider, StructuredDataSpider):
     name = "bright_horizons"
     item_attributes = {
         "brand": "Bright Horizons",
@@ -20,9 +20,10 @@ class BrightHorizonsSpider(SitemapSpider):
     sitemap_rules = [
         (
             r"https:\/\/child-care-preschool\.brighthorizons\.com\/(\w{2})\/(\w+)\/([-\w]+)$",
-            "parse_store",
+            "parse_sd",
         )
     ]
+    wanted_types = ["ChildCare"]
 
     def sitemap_filter(self, entries):
         for entry in entries:
@@ -33,42 +34,19 @@ class BrightHorizonsSpider(SitemapSpider):
                     continue
                 yield entry
 
-    def parse_store(self, response):
-        linked_data = response.xpath('//script[@type="application/ld+json"]/text()').getall()
-        for ld in linked_data:
-            item = json.loads(ld)
+    def post_process_item(self, item, response, ld_data):
+        oh = ld_data["openingHours"]
+        if oh != "Not Available":
+            days, times = oh.split(": ")
 
-            if item["@type"] != "ChildCare":
-                continue
+            if days != "M-F":
+                logging.error("Unexpected days: " + days)
+            else:
+                start_time, end_time = times.replace("a.m.", "AM").replace("p.m.", "PM").split(" to ")
 
-            if not item.get("name"):
-                continue
+                start_time = time.strftime("%H:%M", time.strptime(start_time, "%I:%M %p"))
+                end_time = time.strftime("%H:%M", time.strptime(end_time, "%I:%M %p"))
 
-            properties = {
-                "lat": item["geo"].get("latitude"),
-                "lon": item["geo"].get("longitude"),
-                "name": item["name"],
-                "street_address": item["address"]["streetAddress"],
-                "city": item["address"]["addressLocality"],
-                "state": item["address"]["addressRegion"],
-                "postcode": item["address"]["postalCode"],
-                "phone": item.get("telephone"),
-                "website": response.request.url,
-                "ref": item["@id"],
-            }
+                item["opening_hours"] = f"Mo-Fr {start_time}-{end_time}"
 
-            oh = item["openingHours"]
-            if oh != "Not Available":
-                days, times = oh.split(": ")
-
-                if days != "M-F":
-                    logging.error("Unexpected days: " + days)
-                else:
-                    start_time, end_time = times.replace("a.m.", "AM").replace("p.m.", "PM").split(" to ")
-
-                    start_time = time.strftime("%H:%M", time.strptime(start_time, "%I:%M %p"))
-                    end_time = time.strftime("%H:%M", time.strptime(end_time, "%I:%M %p"))
-
-                    properties["opening_hours"] = f"Mo-Fr {start_time}-{end_time}"
-
-            yield Feature(**properties)
+            yield item
