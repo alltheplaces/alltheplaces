@@ -17,6 +17,7 @@ class SbarroSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     )
+    REDIRECT_ENABLED = True
 
     def post_process_item(self, item, response, ld_data):
         item["name"] = response.xpath('//*[@class="location-name "]/text()').extract_first()
