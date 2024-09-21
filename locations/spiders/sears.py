@@ -8,7 +8,7 @@ class SearsSpider(scrapy.spiders.SitemapSpider):
     name = "sears"
     item_attributes = {"brand": "Sears", "brand_wikidata": "Q6499202"}
     allowed_domains = ["www.sears.com"]
-    sitemap_urls = ["https://www.sears.com/Sitemap_Local.xml.gz"]
+    sitemap_urls = ["https://www.sears.com/Sitemap.xml"]
     sitemap_rules = [
         (r"\d+\.html$", "parse"),
     ]
