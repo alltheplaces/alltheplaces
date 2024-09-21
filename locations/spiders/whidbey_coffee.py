@@ -23,7 +23,9 @@ class WhidbeyCoffeeSpider(SitemapSpider, StructuredDataSpider):
 
         item["lat"], item["lon"] = re.search(r".*@(-?[\d.]+),(-?[\d.]+).*", map_link).groups()
         item["name"] = response.xpath("//h1/text()").extract_first().strip()
-        item["opening_hours"] = self.parse_hours(response.xpath('//p[strong[contains(text(), "Hours")]]//text()').extract())
+        item["opening_hours"] = self.parse_hours(
+            response.xpath('//p[strong[contains(text(), "Hours")]]//text()').extract()
+        )
         yield item
 
     def parse_hours(self, hours):
