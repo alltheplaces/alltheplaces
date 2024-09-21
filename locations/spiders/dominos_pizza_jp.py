@@ -1,8 +1,7 @@
 import re
 
-import scrapy
-
 from scrapy.spiders import SitemapSpider
+
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
