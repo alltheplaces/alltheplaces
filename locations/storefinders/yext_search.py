@@ -66,7 +66,7 @@ class YextSearchSpider(Spider):
             YextAnswersSpider.parse_payment_methods(self, location, item)
 
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
-            item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(location.get("deliveryHours"))
+            item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(location.get("deliveryHours")).as_opening_hours()
 
             yield from self.parse_item(location, item) or []
 
@@ -91,7 +91,7 @@ class YextSearchSpider(Spider):
                 oh.set_closed(day["day"].title())
             for interval in day.get("intervals", []):
                 oh.add_range(day["day"].title(), str(interval["start"]).zfill(4), str(interval["end"]).zfill(4), "%H%M")
-        return oh.as_opening_hours()
+        return oh
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         yield item
