@@ -1,5 +1,3 @@
-import json
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -20,6 +18,5 @@ class SbarroSpider(CrawlSpider, StructuredDataSpider):
     )
 
     def post_process_item(self, item, response, ld_data):
-       item["name"] = response.xpath('//*[@class="location-name "]/text()').extract_first()
-       yield item
-
+        item["name"] = response.xpath('//*[@class="location-name "]/text()').extract_first()
+        yield item
