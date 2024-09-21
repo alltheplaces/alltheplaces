@@ -1,5 +1,3 @@
-import json
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -19,9 +17,7 @@ class KindercareSpider(CrawlSpider, StructuredDataSpider):
     download_delay = 0.5
     rules = [
         Rule(
-            LinkExtractor(
-                restrict_xpaths = ['//div[contains(@class, "link-index-results")]//li']
-            ),
+            LinkExtractor(restrict_xpaths=['//div[contains(@class, "link-index-results")]//li']),
             callback="parse_sd",
             follow=True,
         )
