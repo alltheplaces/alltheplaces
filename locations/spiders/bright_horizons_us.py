@@ -37,15 +37,15 @@ class BrightHorizonsUSSpider(SitemapSpider, StructuredDataSpider):
             oh = ld_data["openingHours"]
             if oh != "Not Available":
                 days, times = oh.split(": ")
-    
+
                 if days != "M-F":
                     logging.error("Unexpected days: " + days)
                 else:
                     start_time, end_time = times.replace("a.m.", "AM").replace("p.m.", "PM").split(" to ")
-    
+
                     start_time = time.strftime("%H:%M", time.strptime(start_time, "%I:%M %p"))
                     end_time = time.strftime("%H:%M", time.strptime(end_time, "%I:%M %p"))
-    
+
                     item["opening_hours"] = f"Mo-Fr {start_time}-{end_time}"
 
             yield item
