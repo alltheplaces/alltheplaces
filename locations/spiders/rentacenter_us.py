@@ -3,8 +3,8 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class RentacenterSpider(SitemapSpider, StructuredDataSpider):
-    name = "rentacenter"
+class RentacenterUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "rentacenter_us"
     item_attributes = {"brand": "Rent-A-Center", "brand_wikidata": "Q7313497"}
     allowed_domains = ["rentacenter.com"]
 
