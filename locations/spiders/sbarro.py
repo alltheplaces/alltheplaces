@@ -1,6 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -19,4 +20,8 @@ class SbarroSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["name"] = response.xpath('//*[@class="location-name "]/text()').extract_first()
+        oh = OpeningHours()
+        for day in response.xpath('//*[@id="location-content-details"]/meta[@itemprop="openingHours"]').getall():
+            oh.add_ranges_from_string(day)
+        item["opening_hours"] = oh
         yield item
