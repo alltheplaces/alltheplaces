@@ -1,25 +1,20 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class RonaSpider(scrapy.Spider):
+class RonaSpider(SitemapSpider):
     name = "rona"
     item_attributes = {"brand": "RONA", "brand_wikidata": "Q3415283"}
     allowed_domains = ["www.rona.ca"]
-    start_urls = ["https://www.rona.ca/sitemap-stores-en.xml"]
+    sitemap_urls = ["https://www.rona.ca/sitemap-stores-en.xml"]
+    sitemap_rules = [("/store/", "parse_store")]
     user_agent = BROWSER_DEFAULT
-    download_delay = 30
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        locations = response.xpath("//url/loc/text()").extract()
-        for location in locations:
-            yield scrapy.Request(location, callback=self.parse_store)
+    requires_proxy = True
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
