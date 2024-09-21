@@ -1,19 +1,19 @@
 import json
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider 
 
 from locations.items import Feature
 
 
-class KindredHealthcareSpider(scrapy.Spider):
+class KindredHealthcareSpider(SitemapSpider):
     name = "kindred_healthcare"
     item_attributes = {"brand": "Kindred Healthcare", "brand_wikidata": "Q921363"}
     allowed_domains = ["www.kindredhospitals.com"]
-    start_urls = [
+    sitemap_urls = [
         "https://www.kindredhospitals.com/sitemap/sitemap.xml",
     ]
-    download_delay = 0.3
+    sitemap_rules = [(r"https://www.kindredhospitals.com/locations/ltac/[\w-]+/contact-us", "parse_location")]
 
     def parse_location(self, response):
         is_location_page = response.xpath(
@@ -49,17 +49,3 @@ class KindredHealthcareSpider(scrapy.Spider):
             }
 
             yield Feature(**properties)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        locations = response.xpath('//url/loc/text()[contains(., "locations")]').extract()
-
-        for location_url in locations:
-            # For transitional care hospitals, reduce redundant requests by using just the contact-us pages
-            if "transitional-care-hospitals" in location_url and "contact-us" not in location_url:
-                continue
-            # Do the same thing for the behavioral health pages
-            if "behavioral-health" in location_url and "contact-us" not in location_url:
-                continue
-
-            yield scrapy.Request(location_url, callback=self.parse_location)
