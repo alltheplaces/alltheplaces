@@ -7,12 +7,11 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BrightHorizonsSpider(SitemapSpider, StructuredDataSpider):
-    name = "bright_horizons"
+class BrightHorizonsUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "bright_horizons_us"
     item_attributes = {
         "brand": "Bright Horizons",
         "brand_wikidata": "Q4967421",
-        "country": "US",
     }
     allowed_domains = ["brighthorizons.com"]
     sitemap_urls = ["https://child-care-preschool.brighthorizons.com/sitemap.xml"]
