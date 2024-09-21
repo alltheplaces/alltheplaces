@@ -9,11 +9,17 @@ from locations.items import Feature
 class YmcaSpider(SitemapSpider):
     name = "ymca"
     item_attributes = {"brand": "YMCA", "brand_wikidata": "Q157169"}
-    allowed_domains = ["www.ymca.org"]
+    allowed_domains = ["ymca.org"]
     sitemap_urls = [
         "https://www.ymca.org/sitemap.xml",
     ]
     sitemap_rules = [(r"locations/", "parse_location")]
+
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            # To avoid constant redirects
+            entry["loc"] = entry["loc"].replace("https://ymca.org/", "https://www.ymca.org/")
+            yield entry
 
     def parse_location(self, response):
         geo = response.xpath('//div[contains(@class, "geolocation-location")]')
