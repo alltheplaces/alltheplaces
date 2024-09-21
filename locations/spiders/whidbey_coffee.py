@@ -1,24 +1,20 @@
 import re
 from datetime import datetime
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 
 
-class WhidbeyCoffeeSpider(scrapy.Spider):
+class WhidbeyCoffeeSpider(SitemapSpider):
     name = "whidbey_coffee"
     item_attributes = {"brand": "Whidbey Coffee", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.whidbeycoffee.com"]
-    start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)
+    sitemap_urls = ("https://www.whidbeycoffee.com/sitemap.xml",)
+    sitemap_rules = [(r"/pages/", "parse_store")]
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-        for url in urls:
-            yield scrapy.Request(url.strip(), callback=self.parse_store)
 
     def parse_store(self, response):
         map_link = response.xpath('//div[@itemprop="address"]/p/a/@href').extract_first()
