@@ -1,12 +1,6 @@
-import json
-import re
-
 from scrapy.spiders import SitemapSpider
-from scrapy.selector import Selector
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
-
 
 
 class RentacenterSpider(SitemapSpider, StructuredDataSpider):
