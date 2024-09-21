@@ -21,7 +21,7 @@ class StarbucksJPSpider(JSONBlobSpider):
 
     def parse_js(self, response):
         for line in response.text.split("getPrefData()")[1].split("return $pref_data")[0].split("\n"):
-            if not "pref_data.push" in line:
+            if "pref_data.push" not in line:
                 continue
             prefecture = parse_js_object(line.split("pref_data.push(")[1])
             if prefecture["pref_code"] == "":
