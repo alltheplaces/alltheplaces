@@ -13,8 +13,7 @@ class SbarroSpider(CrawlSpider, StructuredDataSpider):
     rules = (
         Rule(
             LinkExtractor(
-                restrict_xpaths='//*[@class="location-name "]',
-                process_value=lambda store_url: store_url + "/"
+                restrict_xpaths='//*[@class="location-name "]', process_value=lambda store_url: store_url + "/"
             ),
             follow=True,
             callback="parse_sd",
