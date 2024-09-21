@@ -6,8 +6,8 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class HuntingtonBankSpider(SitemapSpider, StructuredDataSpider):
-    name = "huntington_bank"
+class HuntingtonBankUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "huntington_bank_us"
     item_attributes = {"brand": "Huntington Bank", "brand_wikidata": "Q798819", "extras": Categories.BANK.value}
     allowed_domains = ["www.huntington.com"]
     sitemap_urls = ["https://www.huntington.com/~/media/SEO_Files/sitemap.xml"]
