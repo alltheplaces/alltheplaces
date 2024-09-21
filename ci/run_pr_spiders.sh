@@ -168,6 +168,12 @@ do
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
             fi
 
+            # Error if items have invalid website
+            invalid_website=$(jq '."atp/field/website/invalid"' "${STATSFILE}")
+            if [ $invalid_website -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Website is invalid on ${invalid_website} items</li>"
+            fi
+
             # Warn if items were fetched using Zyte
             zyte_fetched=$(jq '."scrapy-zyte-api/success"' "${STATSFILE}")
             if [ $zyte_fetched -gt 0 ]; then
