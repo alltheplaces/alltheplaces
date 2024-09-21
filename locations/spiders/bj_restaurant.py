@@ -1,6 +1,5 @@
 import json
 
-import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
@@ -46,4 +45,3 @@ class BjRestaurantSpider(SitemapSpider):
 
     def parse_store_hours(self, store_dict):
         return ";".join(store_dict["openingHours"])
-
