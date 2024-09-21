@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.linked_data_parser import LinkedDataParser
 
 
 class BjRestaurantSpider(SitemapSpider):
@@ -25,5 +26,5 @@ class BjRestaurantSpider(SitemapSpider):
                 "restaurantdetails"
             ]["restaurant"]["seoScript"]
         )
-        item = LinkedDataParser.parse(nested_json)
+        item = LinkedDataParser.parse(nested_json, "Restaurant")
         yield item
