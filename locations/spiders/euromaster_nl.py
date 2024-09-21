@@ -22,11 +22,7 @@ class EuromasterNLSpider(scrapy.Spider):
             yield scrapy.Request(url="https://www.euromaster.nl" + city, callback=self.parse_city)
 
     def parse_city(self, response):
-        shops = set(
-            response.xpath(
-                "//a[text()='Meer informatie']/@href"
-            ).getall()
-        )
+        shops = set(response.xpath("//a[text()='Meer informatie']/@href").getall())
         for shop in shops:
             yield scrapy.Request(url="https://www.euromaster.nl" + shop, callback=self.parse_shop)
 
