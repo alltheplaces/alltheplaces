@@ -1,30 +1,24 @@
 import json
 
 import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
 
 
-class BjRestaurantSpider(scrapy.Spider):
+class BjRestaurantSpider(SitemapSpider):
     name = "bj_restaurant"
     item_attributes = {
         "brand": "BJ's Restaurant & Brewery",
         "brand_wikidata": "Q4835755",
     }
-    allowed_domains = ["www.bjsrestaurants.com"]
-    start_urls = ("https://www.bjsrestaurants.com/sitemap",)
-    requires_proxy = True
-
-    def extract_location_url(self, response):
-        return response.xpath('//a[contains(@href, "locations")]/@href').extract()
-
-    def parse_state(self, response):
-        # Iterate over locations in each state
-        for url in self.extract_location_url(response):
-            yield scrapy.Request(
-                response.urljoin(url),
-                callback=self.parse_store,
-            )
+    sitemap_urls = ("https://www.bjsrestaurants.com/sitemap.xml",)
+    sitemap_rules = [
+        (
+            r"https://www.bjsrestaurants.com/locations/\w\w/\w+",
+            "parse_store",
+        )
+    ]
 
     def parse_store(self, response):
         # Store data is in two locations.
@@ -53,10 +47,3 @@ class BjRestaurantSpider(scrapy.Spider):
     def parse_store_hours(self, store_dict):
         return ";".join(store_dict["openingHours"])
 
-    def parse(self, response):
-        # Iterate over all the state location pages
-        for url in self.extract_location_url(response):
-            yield scrapy.Request(
-                response.urljoin(url),
-                callback=self.parse_state,
-            )
