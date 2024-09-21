@@ -2,7 +2,6 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import Feature
 
 
 class BjRestaurantSpider(SitemapSpider):
@@ -21,6 +20,10 @@ class BjRestaurantSpider(SitemapSpider):
 
     def parse(self, response):
         f = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').extract_first())
-        nested_json = json.loads(f['props']['pageProps']['model'][':items']['root'][':items']['responsivegrid'][':items']['restaurantdetails']['restaurant']['seoScript'])
+        nested_json = json.loads(
+            f["props"]["pageProps"]["model"][":items"]["root"][":items"]["responsivegrid"][":items"][
+                "restaurantdetails"
+            ]["restaurant"]["seoScript"]
+        )
         item = LinkedDataParser.parse(nested_json)
         yield item
