@@ -1,12 +1,7 @@
-import json
-import re
-
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
 
 class SonestaSpider(SitemapSpider, StructuredDataSpider):
     download_delay = 0.2
