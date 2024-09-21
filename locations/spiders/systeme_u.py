@@ -1,18 +1,21 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 
 
-class SystemeUSpider(scrapy.Spider):
+class SystemeUSpider(SitemapSpider):
     name = "systeme_u"
     item_attributes = {"brand": "Systeme U", "brand_wikidata": "Q2529029"}
     allowed_domains = ["magasins-u.com"]
-    start_urls = [
+    sitemap_urls = [
         "https://www.magasins-u.com/sitemap.xml",
+    ]
+    sitemap_rules = [
+        (r"com\/(magasin|station)\/", "parse_stores")
     ]
     requires_proxy = "FR"  # Proxy or other captcha drama?
     brands = {
@@ -97,15 +100,3 @@ class SystemeUSpider(scrapy.Spider):
 
         yield Feature(**properties)
 
-    def parse(self, response):
-        xml = scrapy.selector.Selector(response)
-        xml.remove_namespaces()
-
-        urls = xml.xpath("//loc/text()").extract()
-        for url in urls:
-            try:
-                type = re.search(r"com\/(.*?)\/", url).group(1)
-                if type in ["magasin", "station"]:
-                    yield scrapy.Request(url, callback=self.parse_stores)
-            except:
-                pass
