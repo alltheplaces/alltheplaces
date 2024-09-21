@@ -1,4 +1,3 @@
-import json
 import re
 
 from scrapy.spiders import SitemapSpider
@@ -20,10 +19,14 @@ class HomeDepotCASpider(SitemapSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item, response, ld_data):
-        item["ref"] =  re.search(r".+/.+?([0-9]+).html", response.url).group(1)
-        item["branch"] = item.pop("name").replace("The Home Depot: ", "").replace("Home Improvement & Hardware Store in ", ""
-        ).replace("Home Depot : Magasin spécialisé en amélioration domiciliaire et en quincaillerie à ", "").replace(".", "")
-
+        item["ref"] = re.search(r".+/.+?([0-9]+).html", response.url).group(1)
+        item["branch"] = (
+            item.pop("name")
+            .replace("The Home Depot: ", "")
+            .replace("Home Improvement & Hardware Store in ", "")
+            .replace("Home Depot : Magasin spécialisé en amélioration domiciliaire et en quincaillerie à ", "")
+            .replace(".", "")
+        )
 
         hours = self.parse_hours(ld_data.get("openingHours"))
         if hours:
