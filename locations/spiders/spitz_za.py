@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class SpitzZA(Spider):
+class SpitzZASpider(Spider):
     name = "spitz_za"
     allowed_domains = ["www.spitz.co.za"]
     start_urls = ["https://www.spitz.co.za/stores"]
