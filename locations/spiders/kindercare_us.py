@@ -4,8 +4,8 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class KindercareSpider(CrawlSpider, StructuredDataSpider):
-    name = "kindercare"
+class KindercareUSSpider(CrawlSpider, StructuredDataSpider):
+    name = "kindercare_us"
     item_attributes = {
         "brand": "KinderCare Learning Centers",
         "brand_wikidata": "Q6410551",
