@@ -14,7 +14,6 @@ class KindercareSpider(CrawlSpider, StructuredDataSpider):
     start_urls = [
         "https://www.kindercare.com/our-centers",
     ]
-    download_delay = 0.5
     rules = [
         Rule(
             LinkExtractor(restrict_xpaths=['//div[contains(@class, "link-index-results")]//li']),
