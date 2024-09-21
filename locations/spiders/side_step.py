@@ -14,6 +14,7 @@ class SideStepSpider(Spider):
     name = "side_step"
     allowed_domains = ["www.side-step.co.za"]
     item_attributes = {"brand": "Side Step", "brand_wikidata": "Q116894527"}
+    requires_proxy = "ZA"
 
     def start_requests(self):
         form_key = self.get_form_key()
