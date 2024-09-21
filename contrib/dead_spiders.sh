@@ -7,4 +7,8 @@ for RUN in $(curl https://data.alltheplaces.xyz/runs/history.json | jq -r ".[].s
 done
 
 # grep -w -f <(grep -w -o -e . dead_spiders.txt | sort | uniq -d) dead_spiders.txt
-sort dead_spiders.txt | uniq -c | grep "$N " |  sed -E "s/      $N (.*)/\1/"
+FILES=$(sort dead_spiders.txt | uniq -c | grep "$N " |  sed -E "s/      $N (.*)/\1/")
+for FILE in $FILES; do
+    PR_NAME=$(echo $FILE |  sed -E "s/locations\/spiders\/(.*)\.py/\1/"))
+    echo "git checkout upstream/master && git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push -u origin $PR_NAME" 
+done
