@@ -2,28 +2,23 @@ import re
 
 import scrapy
 
+from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DominosPizzaJPSpider(scrapy.Spider):
+class DominosPizzaJPSpider(SitemapSpider):
     name = "dominos_pizza_jp"
     item_attributes = {
         "brand_wikidata": "Q839466",
         "country": "JP",
     }
     allowed_domains = ["dominos.jp"]
-    start_urls = [
+    sitemap_urls = [
         "https://www.dominos.jp/sitemap.aspx",
     ]
-    download_delay = 0.3
+    sitemap_rules = [(r"/store", "parse_store")]
     user_agent = BROWSER_DEFAULT
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        store_urls = response.xpath('//url/loc/text()[contains(.,"/store/")]').extract()
-        for url in store_urls:
-            yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
