@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
 
-class RageZA(JSONBlobSpider):
+class RageZASpider(JSONBlobSpider):
     name = "rage_za"
     item_attributes = {
         "brand": "Rage",
