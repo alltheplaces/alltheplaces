@@ -1,4 +1,3 @@
-import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS, OpeningHours
