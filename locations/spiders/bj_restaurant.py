@@ -26,5 +26,5 @@ class BjRestaurantSpider(SitemapSpider):
                 "restaurantdetails"
             ]["restaurant"]["seoScript"]
         )
-        item = LinkedDataParser.parse(nested_json, "Restaurant")
+        item = LinkedDataParser.parse_ld(nested_json)
         yield item
