@@ -1,24 +1,18 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class LowesFoodsSpider(scrapy.Spider):
+class LowesFoodsSpider(SitemapSpider):
     name = "lowes_foods"
     item_attributes = {"brand": "Lowes Foods", "brand_wikidata": "Q6693991"}
     allowed_domains = ["lowesfoods.com"]
     download_delay = 0.2
-    start_urls = ("https://www.lowesfoods.com/sitemap.xml",)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-        for url in urls:
-            if re.match(r".*store-locator/store-\d+$", url):
-                yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
+    sitemap_urls = ["https://www.lowesfoods.com/sitemap.xml"]
+    sitemap_rules = [(r".*store-locator/store-\d+$", "parse_store")]
 
     def parse_store(self, response):
         city_state_zip = (
