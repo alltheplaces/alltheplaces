@@ -24,7 +24,7 @@ class EuromasterNLSpider(scrapy.Spider):
     def parse_city(self, response):
         shops = set(
             response.xpath(
-                "//*[@onclick=\"euromaster_eshop.gtm.pushActionOnDealerCart(this, 'viewDealerDetail', true);\"]/@href"
+                "//a[text()='Meer informatie']/@href"
             ).getall()
         )
         for shop in shops:
