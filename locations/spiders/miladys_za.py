@@ -26,7 +26,12 @@ class MiladysZASpider(Spider):
         item = Feature()
         item["ref"] = response.url
         item["website"] = response.url
-        item["branch"] = response.xpath('.//h1[@class="page-title"]/span/text()').get().replace("Miladys", "").strip()
+        item["branch"] = (
+            response.xpath('.//h1[@class="page-title"]/span/text()')
+            .get()
+            .replace(self.item_attributes["brand"], "")
+            .strip()
+        )
         item["addr_full"] = clean_address(response.xpath('.//div[@class="address-line"]/text()').get())
         item["phone"] = response.xpath('.//div[contains(@class,"phone-number")]/div/text()').get()
         extract_google_position(item, response)
