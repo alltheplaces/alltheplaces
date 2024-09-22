@@ -21,7 +21,7 @@ for FILE in $FILES; do
 
     # Ensure we have the stats for the latest build for this spider
     if [ ! -f "${BUILD_ID}/${PR_NAME}.json" ]; then
-        echo "Gathering stats for https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/${PR_NAME}.json to ${BUILD_ID}/${PR_NAME}.json" 
+        echo "Gathering stats for https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/${PR_NAME}.json to ${BUILD_ID}/${PR_NAME}.json"
         curl -s "https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/${PR_NAME}.json" | jq > "${BUILD_ID}/${PR_NAME}.json"
     fi
 
@@ -53,21 +53,21 @@ for FILE in $FILES; do
     elif [ $NUM_OFFSITE -ge 1 ]; then
         echo "Spider $PR_NAME finished with a $NUM_OFFSITE offsite requests - domain changed?"
     elif [ $NUM_HTTP_ERRORS -ge 1 ] || [ $NUM_400_ERRORS -ge 1 ] || [ $NUM_404_ERRORS -ge 1 ] || [ $NUM_403_ERRORS -ge 1 ]; then
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with a $NUM_HTTP_ERRORS HTTP errors (400: $NUM_400_ERRORS, 404: $NUM_404_ERRORS, 403: $NUM_403_ERRORS) - remove?' $FILE && git push --force -u origin $PR_NAME" 
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with a $NUM_HTTP_ERRORS HTTP errors (400: $NUM_400_ERRORS, 404: $NUM_404_ERRORS, 403: $NUM_403_ERRORS) - remove?' $FILE && git push --force -u origin $PR_NAME"
     elif [ $NUM_301_ERRORS -ge 1 ] || [ $NUM_307_ERRORS -ge 1 ] || [ $NUM_308_ERRORS -ge 1 ]; then
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_301_ERRORS 301 redirects, $NUM_307_ERRORS 307 redirects, $NUM_308_ERRORS 308 redirects' $FILE && git push --force -u origin $PR_NAME" 
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_301_ERRORS 301 redirects, $NUM_307_ERRORS 307 redirects, $NUM_308_ERRORS 308 redirects' $FILE && git push --force -u origin $PR_NAME"
     elif [ $NUM_ERRORS -ge 1 ]; then
         DNS_LOOKUP_FAILURES=$(curl https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt | grep DNSLookupError)
 
         if [ DNS_LOOKUP_FAILURES ]; then
-            echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME has DNS Lookup Issues' $FILE && git push --force -u origin $PR_NAME" 
+            echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME has DNS Lookup Issues' $FILE && git push --force -u origin $PR_NAME"
         else
             echo "$BROWSER \"https://github.com/alltheplaces/alltheplaces/issues/new?title=$PR_NAME+broken&body=https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt\""
         fi
     else
         echo "Spider $PR_NAME broken silently"
         # echo "$BROWSER \"https://github.com/alltheplaces/alltheplaces/issues/new?title=$PR_NAME+broken&body=https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt\'"
-        # echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push --force -u origin $PR_NAME" 
+        # echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push --force -u origin $PR_NAME"
 
     fi
 done
