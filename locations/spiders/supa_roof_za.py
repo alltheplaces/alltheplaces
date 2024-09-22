@@ -12,11 +12,11 @@ class SupaRoofZASpider(Spider):
         "brand": "Supa-Roof",
         "brand_wikidata": "Q116474839",
     }
-    no_refs = True
 
     def parse(self, response):
         for location in response.xpath('.//div[contains(@id, "suparoof-")]'):
             item = Feature()
+            item["ref"] = location.xpath("./@id").get()
             item["branch"] = location.xpath(".//h3/strong/text()").get().replace("Supa-Roof", "").strip()
             item["addr_full"] = (
                 location.xpath('string(.//i[contains(@class, "fa-address-card")]/../../..)').get().strip()
