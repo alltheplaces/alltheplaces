@@ -9,7 +9,7 @@ class CavaSpider(scrapy.Spider):
     allowed_domains = ["cava.com", "www.cava.com"]
     item_attributes = {"brand": "Cava", "brand_wikidata": "Q85751038"}
     start_urls = ("https://cava.com/locations/",)
-    requires_proxy = True # Cloudflare
+    requires_proxy = True  # Cloudflare
 
     def parse(self, response):
         state_selectors = response.xpath('.//div[@class="menu-panel-wrapper"]/div[@class="menu-content"]')
