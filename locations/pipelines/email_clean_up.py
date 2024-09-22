@@ -11,8 +11,12 @@ class EmailCleanUpPipeline:
 
         normalized_emails = []
         for email in emails.split("; "):
-            normalized_emails.append(self.normalize(email, spider))
-        item["email"] = ";".join(normalized_emails)
+            if normalized_email := self.normalize(email, spider):
+                normalized_emails.append(normalized_email)
+        if normalized_emails == []:
+            item["email"] = None
+        else:
+            item["email"] = ";".join(normalized_emails)
         return item
 
     def normalize(self, email, spider):
