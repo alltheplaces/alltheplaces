@@ -63,7 +63,7 @@ for FILE in $FILES; do
             echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME has DNS Lookup Issues' $FILE && git push --force -u origin $PR_NAME" 
         else
             echo "$BROWSER \"https://github.com/alltheplaces/alltheplaces/issues/new?title=$PR_NAME+broken&body=https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt\""
-        end
+        fi
     else
         echo "Spider $PR_NAME broken silently"
         # echo "$BROWSER \"https://github.com/alltheplaces/alltheplaces/issues/new?title=$PR_NAME+broken&body=https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt\'"
