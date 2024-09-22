@@ -10,3 +10,4 @@ class IsportMOSpider(StoreifySpider):
         "extras": Categories.SHOP_SPORTS.value,
     }
     api_key = "isportmo.myshopify.com"
+    domain = "https://www.isport.com.mo/"

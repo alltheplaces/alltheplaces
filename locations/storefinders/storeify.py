@@ -11,10 +11,11 @@ class StoreifySpider(JSONBlobSpider):
 
     Detectable via `https://sl.storeify.app/js/stores/{api_key}/storeifyapps-storelocator-geojson.js`
 
-    To use, specify `api_key`
+    To use, specify `api_key` and `domain`
     """
 
     api_key = None
+    domain = None
 
     # TODO: Autodetection
 
@@ -29,13 +30,9 @@ class StoreifySpider(JSONBlobSpider):
         for feature in feature_array:
             self.pre_process_data(feature)
             item = DictParser.parse(feature["properties"])
-            # "category": "store",
 
             item["image"] = feature["properties"]["thumbnail"]
-
-            # TODO: Work out full URL or extract from 'web' ?
-            # "url": "/a/store-locator/melton-central-ufs-pharmacy.html",
-            # "web": "<a class=\"storeify-storelocator-web\" target=\"_blank\" href=\"https://www.medadvisor.com.au/Network/MeltonCentralUFSPharmacy\" rel=\"nofollow\">Appointment Bookings</a>",
+            item["url"] = self.domain + item["url"]
 
             # TODO: Parse hours
             # "schedule": "<div class=\"title-store-info\">{{ store_operation }}</div><div class=\"content-store-info\"><table class=\"work-time table\"><tr class=\"row-mon\"><th class=\"dayname\">{{ mon }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-tue\"><th class=\"dayname\">{{ tue }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-wed\"><th class=\"dayname\">{{ wed }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-thu\"><th class=\"dayname\">{{ thu }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-fri\"><th class=\"dayname\">{{ fri }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-sat\"><th class=\"dayname\">{{ sat }}</th><td>09:00 {{ am }} - 03:00 {{ pm }}</td></tr><tr class=\"row-sun\"><th class=\"dayname\">{{ sun }}</th><td>{{ closed }}</td></tr></table></div>",

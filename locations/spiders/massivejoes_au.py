@@ -10,3 +10,4 @@ class MassivejoesAUSpider(StoreifySpider):
         "extras": Categories.SHOP_NUTRITION_SUPPLEMENTS.value,
     }
     api_key = "58d7df-3.myshopify.com"
+    domain = "https://mjfitness.au/"

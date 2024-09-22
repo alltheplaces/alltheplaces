@@ -10,3 +10,4 @@ class NutritionHouseCASpider(StoreifySpider):
         "extras": Categories.SHOP_NUTRITION_SUPPLEMENTS.value,
     }
     api_key = "nutrition-house-canada.myshopify.com"
+    domain = "https://nutritionhouse.com/"
