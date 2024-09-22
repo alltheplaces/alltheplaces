@@ -32,7 +32,7 @@ class StoreifySpider(JSONBlobSpider):
             item = DictParser.parse(feature["properties"])
 
             item["image"] = feature["properties"]["thumbnail"]
-            item["url"] = self.domain + item["url"]
+            item["website"] = self.domain + item["website"]
 
             # TODO: Parse hours
             # "schedule": "<div class=\"title-store-info\">{{ store_operation }}</div><div class=\"content-store-info\"><table class=\"work-time table\"><tr class=\"row-mon\"><th class=\"dayname\">{{ mon }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-tue\"><th class=\"dayname\">{{ tue }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-wed\"><th class=\"dayname\">{{ wed }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-thu\"><th class=\"dayname\">{{ thu }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-fri\"><th class=\"dayname\">{{ fri }}</th><td>09:00 {{ am }} - 06:00 {{ pm }}</td></tr><tr class=\"row-sat\"><th class=\"dayname\">{{ sat }}</th><td>09:00 {{ am }} - 03:00 {{ pm }}</td></tr><tr class=\"row-sun\"><th class=\"dayname\">{{ sun }}</th><td>{{ closed }}</td></tr></table></div>",
