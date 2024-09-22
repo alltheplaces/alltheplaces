@@ -15,6 +15,7 @@ class TillysSpider(scrapy.Spider):
         "https://www.tillys.com/on/demandware.store/Sites-tillys-Site/default/Stores-FindStores?showMap=false&isAjax=false&location=66952&radius=10000"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    required_proxy = True
 
     def parse(self, response):
         results = response.json()
