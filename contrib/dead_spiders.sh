@@ -29,22 +29,38 @@ for FILE in $FILES; do
     # Cloudflare or akamai 403? Requires proxy perhaps
     # HTTP 500? DNS failure? Dead
 
+    NUM_AKAMAI_BAD_REQUEST=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["atp/cdn/akamai/response_status_count/400"]')))
     NUM_AKAMAI_FORBIDDEN=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["atp/cdn/akamai/response_status_count/403"]')))
     NUM_CLOUDFLARE_FORBIDDEN=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["/cdn/cloudflare/response_status_count/403"]')))
-
-    if [ $NUM_AKAMAI_FORBIDDEN -ge 1 ]; then
-        echo "Spider $PR_NAME finished with $NUM_AKAMAI_FORBIDDEN forbidden - flag as requires proxy?"
-    fi
-
-    if [ $NUM_CLOUDFLARE_FORBIDDEN -ge 1 ]; then
-        echo "Spider $PR_NAME finished with $NUM_CLOUDFLARE_FORBIDDEN forbidden - flag as requires proxy??"
-    fi
-
-
     NUM_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["log_count/ERROR"]')))
-    if [ $NUM_ERRORS -ge 1 ]; then
-        echo "Spider $PR_NAME finished with $NUM_ERRORS errors - remove?"
-        echo "git checkout upstream/master && git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push -u origin $PR_NAME" 
-        echo ""
+    NUM_OFFSITE=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["offsite/filtered"]')))
+
+    NUM_HTTP_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["httperror/response_ignored_status_count"]')))
+    NUM_404_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["httperror/response_ignored_status_count/404"]')))
+    NUM_400_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["httperror/response_ignored_status_count/400"]')))
+    NUM_403_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["httperror/response_ignored_status_count/403"]')))
+
+    NUM_301_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["downloader/response_status_count/301"]')))
+    NUM_307_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["downloader/response_status_count/307"]')))
+    NUM_308_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["downloader/response_status_count/308"]')))
+
+
+
+    if [ $NUM_AKAMAI_FORBIDDEN -ge 1 ] || [ $NUM_AKAMAI_BAD_REQUEST -ge 1 ]; then
+        echo "Spider $PR_NAME finished with $NUM_AKAMAI_FORBIDDEN forbidden, $NUM_AKAMAI_BAD_REQUEST - flag as requires proxy?"
+    elif [ $NUM_CLOUDFLARE_FORBIDDEN -ge 1 ]; then
+        echo "Spider $PR_NAME finished with $NUM_CLOUDFLARE_FORBIDDEN forbidden - flag as requires proxy??"
+    elif [ $NUM_OFFSITE -ge 1 ]; then
+        echo "Spider $PR_NAME finished with a $NUM_OFFSITE offsite requests - domain changed?"
+    elif [ $NUM_HTTP_ERRORS -ge 1 ] || [ $NUM_400_ERRORS -ge 1 ] || [ $NUM_404_ERRORS -ge 1 ] || [ $NUM_403_ERRORS -ge 1 ]; then
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with a $NUM_HTTP_ERRORS HTTP errors (400: $NUM_400_ERRORS, 404: $NUM_404_ERRORS, 403: $NUM_403_ERRORS) - remove?' $FILE && git push -u origin $PR_NAME" 
+    elif [ $NUM_301_ERRORS -ge 1 ] || [ $NUM_307_ERRORS -ge 1 ] || [ $NUM_308_ERRORS -ge 1 ]; then
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_301_ERRORS 301 redirects, $NUM_307_ERRORS 307 redirects, $NUM_308_ERRORS 308 redirects' $FILE && git push -u origin $PR_NAME" 
+    elif [ $NUM_ERRORS -ge 1 ]; then
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_ERRORS errors - remove?' $FILE && git push -u origin $PR_NAME" 
+    else
+        echo "Spider $PR_NAME broken some other way. Check or remove"
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push -u origin $PR_NAME" 
+
     fi
 done
