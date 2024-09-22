@@ -53,14 +53,14 @@ for FILE in $FILES; do
     elif [ $NUM_OFFSITE -ge 1 ]; then
         echo "Spider $PR_NAME finished with a $NUM_OFFSITE offsite requests - domain changed?"
     elif [ $NUM_HTTP_ERRORS -ge 1 ] || [ $NUM_400_ERRORS -ge 1 ] || [ $NUM_404_ERRORS -ge 1 ] || [ $NUM_403_ERRORS -ge 1 ]; then
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with a $NUM_HTTP_ERRORS HTTP errors (400: $NUM_400_ERRORS, 404: $NUM_404_ERRORS, 403: $NUM_403_ERRORS) - remove?' $FILE && git push -u origin $PR_NAME" 
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with a $NUM_HTTP_ERRORS HTTP errors (400: $NUM_400_ERRORS, 404: $NUM_404_ERRORS, 403: $NUM_403_ERRORS) - remove?' $FILE && git push --force -u origin $PR_NAME" 
     elif [ $NUM_301_ERRORS -ge 1 ] || [ $NUM_307_ERRORS -ge 1 ] || [ $NUM_308_ERRORS -ge 1 ]; then
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_301_ERRORS 301 redirects, $NUM_307_ERRORS 307 redirects, $NUM_308_ERRORS 308 redirects' $FILE && git push -u origin $PR_NAME" 
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_301_ERRORS 301 redirects, $NUM_307_ERRORS 307 redirects, $NUM_308_ERRORS 308 redirects' $FILE && git push --force -u origin $PR_NAME" 
     elif [ $NUM_ERRORS -ge 1 ]; then
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_ERRORS errors - remove?' $FILE && git push -u origin $PR_NAME" 
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_ERRORS errors - remove?' $FILE && git push --force -u origin $PR_NAME" 
     else
         echo "Spider $PR_NAME broken some other way. Check or remove"
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push -u origin $PR_NAME" 
+        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push --force -u origin $PR_NAME" 
 
     fi
 done
