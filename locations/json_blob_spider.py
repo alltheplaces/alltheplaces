@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -58,6 +58,15 @@ class JSONBlobSpider(Spider):
     locations_key = ["data", "locationData", "stores"]
     """
     locations_key: str | list[str] = None
+    needs_json_request = False
+
+    def start_requests(self) -> Iterable[Request]:
+        if self.needs_json_request:
+            for url in self.start_urls:
+                yield JsonRequest(url)
+        else:
+            for url in self.start_urls:
+                yield Request(url)
 
     def extract_json(self, response: Response) -> dict | list:
         """

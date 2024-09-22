@@ -1,21 +1,17 @@
 import json
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
 
 
-class RitasItalianIceSpider(scrapy.Spider):
+class RitasItalianIceSpider(SitemapSpider):
     name = "ritas_italian_ice"
     item_attributes = {"brand": "Rita's Italian Ice", "brand_wikidata": "Q7336456"}
     allowed_domains = ["ritasice.com"]
 
-    start_urls = ["https://www.ritasice.com/wpsl_stores-sitemap.xml"]
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for url in response.xpath("//loc/text()").extract():
-            yield scrapy.Request(url, callback=self.parse_store)
+    sitemap_urls = ["https://www.ritasice.com/wpsl_stores-sitemap.xml"]
+    sitemap_rules = [(r"/location/([^/]+)/$", "parse_store")]
 
     def parse_store(self, response):
         script = response.xpath('//script/text()[contains(.,"wpslMap_0")]').get()
