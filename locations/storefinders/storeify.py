@@ -1,6 +1,6 @@
 import chompjs
-
 from scrapy import Request
+
 from locations.dict_parser import DictParser
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -13,14 +13,13 @@ class StoreifySpider(JSONBlobSpider):
 
     To use, specify `api_key`
     """
+
     api_key = None
 
     # TODO: Autodetection
 
     def start_requests(self):
-        yield Request(
-            url=f"https://sl.storeify.app/js/stores/{self.api_key}/storeifyapps-storelocator-geojson.js"
-        )
+        yield Request(url=f"https://sl.storeify.app/js/stores/{self.api_key}/storeifyapps-storelocator-geojson.js")
 
     # API returns a geojson feature collection
     def extract_json(self, response):
