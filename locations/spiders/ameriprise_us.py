@@ -31,7 +31,7 @@ class AmeripriseUSSpider(SitemapSpider):
                 "email": response.css("[id$=AddressEmail] ::text").get(),
             }
         )
-        properties["opening_hours"].from_linked_data(
+        properties["opening_hours"] = LinkedDataParser.parse_opening_hours(
             {"openingHours": response.css('[itemprop="openingHours"]::attr(content)').getall()}
         )
         yield Feature(properties)

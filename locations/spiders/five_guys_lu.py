@@ -1,9 +1,13 @@
-from locations.spiders.five_guys_ca import FiveGuysCASpider
-from locations.spiders.five_guys_us import FiveGuysUSSpider
+from locations.spiders.five_guys_au import FiveGuysAUSpider
 
 
-class FiveGuysLUSpider(FiveGuysCASpider):
+class FiveGuysLUSpider(FiveGuysAUSpider):
     name = "five_guys_lu"
-    item_attributes = FiveGuysUSSpider.item_attributes
-    sitemap_urls = ["https://restaurants.fiveguys.lu/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.lu\/en_lu\/[^/]+$", "parse_sd")]
+    experience_key = "search-backend-lu"
+    locale = (
+        "fr-LU"  # Using fr because it has google attributes which gives lots of extra details (not present in en-LU)
+    )
+
+    def process_websites(self, item) -> None:
+        item["extras"]["website:fr"] = item["website"]
+        item["extras"]["website:en"] = item["website"].replace("fiveguys.lu/", "fiveguys.lu/en_lu/")
