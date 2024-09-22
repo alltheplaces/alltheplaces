@@ -8,8 +8,8 @@ from locations.items import Feature
 class HalloweenCitySpider(scrapy.Spider):
     name = "halloween_city"
     item_attributes = {"brand": "Halloween City", "brand_wikidata": "Q7140896"}
-    allowed_domains = ("stores.halloweencity.com",)
-    start_urls = ("http://stores.halloweencity.com/",)
+    allowed_domains = ["stores.partycity.com"]
+    start_urls = ["https://stores.partycity.com/"]
 
     def parse_stores(self, response):
         app_json = json.loads(
