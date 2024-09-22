@@ -57,10 +57,17 @@ for FILE in $FILES; do
     elif [ $NUM_301_ERRORS -ge 1 ] || [ $NUM_307_ERRORS -ge 1 ] || [ $NUM_308_ERRORS -ge 1 ]; then
         echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_301_ERRORS 301 redirects, $NUM_307_ERRORS 307 redirects, $NUM_308_ERRORS 308 redirects' $FILE && git push --force -u origin $PR_NAME" 
     elif [ $NUM_ERRORS -ge 1 ]; then
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME finished with $NUM_ERRORS errors - remove?' $FILE && git push --force -u origin $PR_NAME" 
+        DNS_LOOKUP_FAILURES=$(curl https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt | grep DNSLookupError)
+
+        if [ DNS_LOOKUP_FAILURES ]; then
+            echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider: $PR_NAME has DNS Lookup Issues' $FILE && git push --force -u origin $PR_NAME" 
+        else
+            echo "$BROWSER \"https://github.com/alltheplaces/alltheplaces/issues/new?title=$PR_NAME+broken&body=https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt\""
+        end
     else
-        echo "Spider $PR_NAME broken some other way. Check or remove"
-        echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push --force -u origin $PR_NAME" 
+        echo "Spider $PR_NAME broken silently"
+        # echo "$BROWSER \"https://github.com/alltheplaces/alltheplaces/issues/new?title=$PR_NAME+broken&body=https://alltheplaces-data.openaddresses.io/runs/$BUILD_ID/logs/$PR_NAME.txt\'"
+        # echo "git checkout upstream/master && git branch -D $PR_NAME ; git checkout -b $PR_NAME && git rm $FILE && git commit -m 'Remove dead spider' $FILE && git push --force -u origin $PR_NAME" 
 
     fi
 done
