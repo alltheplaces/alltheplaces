@@ -29,6 +29,18 @@ for FILE in $FILES; do
     # Cloudflare or akamai 403? Requires proxy perhaps
     # HTTP 500? DNS failure? Dead
 
+    NUM_AKAMAI_FORBIDDEN=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["atp/cdn/akamai/response_status_count/403"]')))
+    NUM_CLOUDFLARE_FORBIDDEN=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["/cdn/cloudflare/response_status_count/403"]')))
+
+    if [ $NUM_AKAMAI_FORBIDDEN -ge 1 ]; then
+        echo "Spider $PR_NAME finished with $NUM_AKAMAI_FORBIDDEN forbidden - flag as requires proxy?"
+    fi
+
+    if [ $NUM_CLOUDFLARE_FORBIDDEN -ge 1 ]; then
+        echo "Spider $PR_NAME finished with $NUM_CLOUDFLARE_FORBIDDEN forbidden - flag as requires proxy??"
+    fi
+
+
     NUM_ERRORS=$(($(cat "${BUILD_ID}/${PR_NAME}.json" | jq '.["log_count/ERROR"]')))
     if [ $NUM_ERRORS -ge 1 ]; then
         echo "Spider $PR_NAME finished with $NUM_ERRORS errors - remove?"
