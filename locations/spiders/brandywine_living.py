@@ -11,7 +11,7 @@ class BrandywineLivingSpider(scrapy.Spider):
     start_urls = [
         "https://www.brandycare.com/our-communities/",
     ]
-    requires_proxy = True # Imperva
+    requires_proxy = True  # Imperva
 
     def parse(self, response):
         urls = response.xpath('//*[@class="card communities-archive__card"]/a/@href').extract()
