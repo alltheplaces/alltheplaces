@@ -19,6 +19,7 @@ class CountdownNZSpider(Spider):
     # present a TLS fingerprint of a real web browser.
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
     is_playwright_spider = True
+    requires_proxy = "NZ"
 
     def start_requests(self):
         for url in self.start_urls:
