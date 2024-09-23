@@ -78,6 +78,9 @@ class WalmartUSSpider(SitemapSpider):
 
             apply_category(self.CATEGORIES[service["name"]], poi)
 
+            if service["name"] == "GAS_STATION":
+                poi["brand_wikidata"] = "Q62606411"
+
             yield poi
 
         item["extras"]["type"] = store.get("type")

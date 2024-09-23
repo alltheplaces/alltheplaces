@@ -1,7 +1,10 @@
-from scrapy import Request
-from scrapy.http import FormRequest
+from typing import Iterable
+
+from scrapy import Request, Selector
+from scrapy.http import FormRequest, Response
 
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -10,7 +13,7 @@ class PaperSourceUSSpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Paper Source", "brand_wikidata": "Q25000269"}
     start_urls = ["https://www.papersource.com/amlocator/index/ajax/"]
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[FormRequest]:
         formdata = {
             "lat": "0",
             "lng": "0",
@@ -26,11 +29,11 @@ class PaperSourceUSSpider(AmastyStoreLocatorSpider):
         for url in self.start_urls:
             yield FormRequest(url=url, formdata=formdata, headers={"X-Requested-With": "XMLHttpRequest"}, method="POST")
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
         item["website"] = popup_html.xpath('//a[contains(@class, "amlocator-link")]/@href').get()
-        yield Request(url=item["website"], meta={"item": item}, callback=self.add_location_details)
+        yield Request(url=item["website"], meta={"item": item}, callback=self.parse_location_details)
 
-    def add_location_details(self, response):
+    def parse_location_details(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
         item["ref"] = response.xpath(
             '//div[contains(@data-amlocator-js, "location-attributes")]/div[2]/div[3]/div/span/text()'

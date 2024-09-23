@@ -1,7 +1,11 @@
-from scrapy import Request
+from typing import Iterable
+
+from scrapy import Request, Selector
+from scrapy.http import Response
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -14,7 +18,7 @@ class PaddyPallinAUSpider(AmastyStoreLocatorSpider):
     }
     allowed_domains = ["www.paddypallin.com.au"]
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         # The request won't work without the headers supplied below.
         headers = {
             "X-Requested-With": "XMLHttpRequest",
@@ -23,7 +27,21 @@ class PaddyPallinAUSpider(AmastyStoreLocatorSpider):
         for domain in self.allowed_domains:
             yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
-    def add_hours(self, response):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
+        item["image"] = popup_html.xpath('//div[contains(@class, "amlocator-image")]/img/@src').get()
+        address_fields = list(
+            filter(
+                lambda field: field.strip(),
+                popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall(),
+            )
+        )
+        item["city"] = address_fields[0].strip().replace("City: ", "")
+        item["postcode"] = address_fields[1].strip().replace("Zip: ", "")
+        item["addr_full"] = address_fields[2].strip().replace("Address: ", "")
+        item["state"] = address_fields[3].strip().replace("State: ", "")
+        yield Request(url=item["website"], meta={"item": item}, callback=self.parse_opening_hours)
+
+    def parse_opening_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
         if response.xpath('//div[contains(@class, "amlocator-location-info")]').get():
             item["email"] = (
@@ -44,17 +62,3 @@ class PaddyPallinAUSpider(AmastyStoreLocatorSpider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
-
-    def parse_item(self, item, location, popup_html):
-        item["image"] = popup_html.xpath('//div[contains(@class, "amlocator-image")]/img/@src').get()
-        address_fields = list(
-            filter(
-                lambda field: field.strip(),
-                popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall(),
-            )
-        )
-        item["city"] = address_fields[0].strip().replace("City: ", "")
-        item["postcode"] = address_fields[1].strip().replace("Zip: ", "")
-        item["addr_full"] = address_fields[2].strip().replace("Address: ", "")
-        item["state"] = address_fields[3].strip().replace("State: ", "")
-        yield Request(url=item["website"], meta={"item": item}, callback=self.add_hours)

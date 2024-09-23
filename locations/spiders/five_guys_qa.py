@@ -1,9 +1,11 @@
-from locations.spiders.five_guys_ca import FiveGuysCASpider
-from locations.spiders.five_guys_us import FiveGuysUSSpider
+from locations.spiders.five_guys_au import FiveGuysAUSpider
 
 
-class FiveGuysQASpider(FiveGuysCASpider):
+class FiveGuysQASpider(FiveGuysAUSpider):
     name = "five_guys_qa"
-    item_attributes = FiveGuysUSSpider.item_attributes
-    sitemap_urls = ["https://restaurants.fiveguys.qa/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.qa\/en_qa\/[^/]+$", "parse_sd")]
+    experience_key = "search-backend-qa"
+    locale = "ar-QA"
+
+    def process_websites(self, item) -> None:
+        item["extras"]["website:ar"] = item["website"]
+        item["extras"]["website:en"] = item["website"].replace("fiveguys.qa/", "fiveguys.qa/en_qa/")

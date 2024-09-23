@@ -12,7 +12,7 @@ class CenexSpider(scrapy.Spider):
 
     def start_requests(self):
         yield scrapy.http.JsonRequest(
-            "https://www.cenex.com/Common/Services/InteractiveMap.svc/GetLocations",
+            "https://www.cenex.com/getlocationsearch",
             method="POST",
             data={
                 "SearchRequest": {

@@ -2,6 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
 class VirtualEarthSpider(Spider):
@@ -40,7 +41,7 @@ class VirtualEarthSpider(Spider):
             callback=self.pages,
         )
 
-    def pages(self, response, **kwargs):
+    def pages(self, response: Response):
         total_count = int(response.json()["d"]["__count"])
         offset = 0
 
@@ -65,5 +66,5 @@ class VirtualEarthSpider(Spider):
 
             yield from self.parse_item(item, feature) or []
 
-    def parse_item(self, item, feature, **kwargs):
+    def parse_item(self, item: Feature, feature: dict):
         yield item

@@ -1,8 +1,13 @@
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.categories import Categories
+from locations.storefinders.storeify import StoreifySpider
 
 
-class MassivejoesAUSpider(WPStoreLocatorSpider):
+class MassivejoesAUSpider(StoreifySpider):
     name = "massivejoes_au"
-    item_attributes = {"brand": "MassiveJoes", "brand_wikidata": "Q117746887"}
-    allowed_domains = ["massivejoes.com"]
-    time_format = "%I:%M %p"
+    item_attributes = {
+        "brand": "MassiveJoes",
+        "brand_wikidata": "Q117746887",
+        "extras": Categories.SHOP_NUTRITION_SUPPLEMENTS.value,
+    }
+    api_key = "58d7df-3.myshopify.com"
+    domain = "https://mjfitness.au/"

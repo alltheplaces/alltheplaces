@@ -19,18 +19,18 @@ class BeevGBSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            if location["Status"] == 4:
+            if location["status"] == 4:
                 continue  # Upcoming
 
             item = Feature()
-            item["ref"] = location["SiteId"]
-            item["lat"] = location["Coordinates"]["Lat"]
-            item["lon"] = location["Coordinates"]["Long"]
-            item["name"] = location["Name"]
-            item["postcode"] = location["FormattedAddress"]["PostCode"]
+            item["ref"] = location["siteId"]
+            item["lat"] = location["coordinates"]["lat"]
+            item["lon"] = location["coordinates"]["long"]
+            item["name"] = location["name"]
+            item["postcode"] = location["formattedAddress"]["postCode"]
 
-            apply_yes_no(Extras.FEE, item, location["Tariff"]["Amount"] == "0.00", False)
-            item["extras"]["charge"] = "{} {}/kWh".format(location["Tariff"]["Amount"], location["Tariff"]["Currency"])
+            apply_yes_no(Extras.FEE, item, location["tariff"]["amount"] == "0.00", False)
+            item["extras"]["charge"] = "{} {}/kWh".format(location["tariff"]["amount"], location["tariff"]["currency"])
 
             apply_category(Categories.CHARGING_STATION, item)
 
