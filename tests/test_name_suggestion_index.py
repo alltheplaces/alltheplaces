@@ -31,6 +31,8 @@ def test_normalise_label():
     assert NSI.normalise_label("McDonald, McDonald & McDonald") == "mcdonaldmcdonaldandmcdonald"
     # Punctuation (including spaces but excluding ampersands) are removed.
     assert NSI.normalise_label("Mac Donald") == "macdonald"
+    assert NSI.normalise_label("Mc_Donald") == "mcdonald"
+    assert NSI.normalise_label(" Mc Donald ") == "mcdonald"
     # The label is converted to lower case.
     assert NSI.normalise_label("McDonalds") == "mcdonalds"
 
