@@ -11,6 +11,7 @@ from locations.pipelines.address_clean_up import clean_address
 class GovDfeGiasGBSpider(CSVFeedSpider):
     download_timeout = 400
     name = "gov_dfe_gias_gb"
+    # Using yesterday because it may run early in the morning and 'today' may not be ready
     yesterday = datetime.today() - timedelta(1)
     start_urls = [
         f"https://ea-edubase-api-prod.azurewebsites.net/edubase/downloads/public/edubasealldata{yesterday.year}{yesterday.month:02d}{yesterday.day:02d}.csv"
