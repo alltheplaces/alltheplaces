@@ -3,10 +3,10 @@ import json
 
 from scrapy.http import HtmlResponse
 from scrapy.spiders import Spider
+from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 from urllib.parse import urljoin
 from scrapy.http import Response
-from locations.items import Feature
 
 class SweatyBettySpider(Spider):
     name = "Sweaty Betty"
@@ -18,29 +18,14 @@ class SweatyBettySpider(Spider):
         data = json.loads(content)
         for area in data["__PRELOADED_STATE__"]["pageProps"]["allShops"]:
           for location in area["stores"]:
-
-            item = Feature()
-            item["ref"] = location["storeId"]
-            item["branch"] = location["name"]
-#            item["lat"] = location["addressLocation"]["lat"]
-#            item["lon"] = location["addressLocation"]["lon"]
-            item["branch"] = location["title"]
-            item["street_address"] = merge_address_lines([location["address1"], location["address2"], location["city"]])
-            item["city"] = location["city"]
-            item["postcode"] = location["postalCode"]
-            item["phone"] = location["phone"]
-
-#            if location.get("storeHours"):
-#               item["opening_hours"] = OpeningHours()
-#               for day in map(str.lower, DAYS_FULL):
-#                  item["opening_hours"].add_range(
-#                      day,
-#                      location["storeHours"]["{}Open".format(day)].strip(),
-#                      location["storeHours"]["{}Close".format(day)].strip(),
-#                  )
-
+            item = DictParser.parse(location)
+            item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
             s=location["name"]
             slug="".join(s.split()).lower() + "-" + location["storeId"]
             item["website"] = urljoin("https://www.sweatybetty.com/shop-details/", slug)
-
+            #if location.get("storeHours"):
+            #   item["opening_hours"] = OpeningHours()
+            #     xpath("./@data-day").get()+ " "
+            #    xpath("./@data-open").get()+ "-"
+            #    xpath("./@data-close").get()
             yield item
