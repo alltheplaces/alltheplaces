@@ -92,23 +92,10 @@ class NSI(metaclass=Singleton):
             for k, v in self.wikidata_json.items():
                 yield (k, v)
         else:
-            # Normalise candidate brand/operator labels approximately
-            # according to NSI's brand/operator label normalisation code at
-            # https://github.com/osmlab/name-suggestion-index/blob/main/lib/simplify.js
-            #
-            # Key steps for normalisation:
-            # - Diacritics are replaced with their closest ASCII equivalent.
-            # - Punctuation (including spaces) are removed.
-            # - Ampersand chracters are replaced with the word "and".
-            # - The label is converted to lower case.
-            #
-            # After candidate labels are normalised, a match can then attempt
-            # to be found.
-            normalize_re = re.compile(r"[^\w_ ]+")
-            label_to_find_fuzzy = re.sub(normalize_re, "", unidecode(label_to_find).replace("&", "and")).lower().strip()
+            label_to_find_fuzzy = self.normalise_label(label_to_find)
             for k, v in self.wikidata_json.items():
                 if nsi_label := v.get("label"):
-                    nsi_label_fuzzy = re.sub(normalize_re, "", unidecode(nsi_label).replace("&", "and")).lower().strip()
+                    nsi_label_fuzzy = self.normalise_label(nsi_label)
                     if label_to_find_fuzzy in nsi_label_fuzzy:
                         yield (k, v)
 
@@ -141,6 +128,25 @@ class NSI(metaclass=Singleton):
                     yield item
                 elif wikidata_code == item["tags"].get("operator:wikidata"):
                     yield item
+
+    @staticmethod
+    def normalise_label(self, original_label: str) -> str:
+        """
+        Normalise candidate brand/operator labels approximately according to
+        NSI's brand/operator label normalisation code at:
+        https://github.com/osmlab/name-suggestion-index/blob/main/lib/simplify.js
+
+        NSI label normalisation requires these changes:
+        - Diacritics are replaced with their closest ASCII equivalent.
+        - Ampersand chracters are replaced with the word "and".
+        - Punctuation (including spaces but excluding ampersands) are removed.
+        - The label is converted to lower case.
+
+        :param original_label: original label which requires normalisation
+        :return: normalised label
+        """
+        normalise_re = re.compile(r"[^\w_ ]+")
+        return re.sub(normalise_re, "", unidecode(original_label).replace("&", "and")).lower().strip()
 
     @staticmethod
     def generate_keys_from_nsi_attributes(nsi_attributes: dict) -> tuple[str, str] | None:
