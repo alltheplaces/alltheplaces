@@ -47,7 +47,7 @@ class YextSearchSpider(Spider):
             item["extras"]["website:orders"] = location.get("orderUrl")
 
             phones = []
-            for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
+            for phone_type in ["localPhone", "mainPhone", "mobilePhone", "alternatePhone"]:
                 phone = location.get(phone_type)
                 if phone:
                     phones.append(phone.get("number"))
