@@ -12,7 +12,7 @@ from locations.structured_data_spider import clean_facebook
 class TgiFridaysAUSpider(Spider):
     name = "tgi_fridays_au"
     item_attributes = TgiFridaysUSSpider.item_attributes
-    allowed_domains = ["www.tgifridays.com.au", "goo.gl"]
+    allowed_domains = ["www.tgifridays.com.au", "goo.gl", "google.com"]
     start_urls = ["https://www.tgifridays.com.au/page-data/book/page-data.json"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Ignore www.google.com robots.txt
 

@@ -44,5 +44,6 @@ class AmaiPromapSpider(JSONBlobSpider):
                     item["opening_hours"].add_ranges_from_string(day)
 
             item["image"] = feature.get("store_image")
+            item.pop("addr_full")
             item["street_address"] = clean_address([feature.get("address"), feature.get("address2")])
             yield from self.post_process_item(item, response, feature) or []

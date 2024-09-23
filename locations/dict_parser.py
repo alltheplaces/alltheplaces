@@ -266,6 +266,7 @@ class DictParser:
                     "geo-point",
                     "geocoded-coordinate",
                     "coordinates",
+                    "coords",
                     "geo-position",
                     "position",
                     "positions",
