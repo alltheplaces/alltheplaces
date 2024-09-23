@@ -17,5 +17,5 @@ class SparALSpider(Spider):
         for location in response.xpath('//select[@id="toPMAddressPlgPM1"]/option'):
             item = Feature()
             item["lat"], item["lon"] = location.xpath("@value").get().split(",")[:2]
-            # location.xpath("/text()") # branch? address
+            # location.xpath("/text()") # not a branch nor address
             yield item
