@@ -145,7 +145,7 @@ class NSI(metaclass=Singleton):
         :param original_label: original label which requires normalisation
         :return: normalised label
         """
-        return re.sub(r"[^\w_ ]+", "", unidecode(original_label).replace("&", "and")).lower().strip()
+        return re.sub(r"[\W_]+", "", unidecode(original_label).replace("&", "and"), flags=re.ASCII).lower().strip()
 
     @staticmethod
     def generate_keys_from_nsi_attributes(nsi_attributes: dict) -> tuple[str, str] | None:
