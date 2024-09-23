@@ -24,7 +24,6 @@ class MatalanGBSpider(CrawlSpider, StructuredDataSpider):
         ld = response.xpath('//script[@type="application/ld+json"]/text()').get()
         ld_item = json.loads(ld)
 
-        item = LinkedDataParser.parse_ld(ld_item, time_format="%H:%M:%S")
         storedata = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         store = json.loads(storedata)
         item["lat"] = store["props"]["pageProps"]["store"]["latitude"]
