@@ -138,7 +138,7 @@ class NSI(metaclass=Singleton):
 
         NSI label normalisation requires these changes:
         - Diacritics are replaced with their closest ASCII equivalent.
-        - Ampersand chracters are replaced with the word "and".
+        - Ampersand characters are replaced with the word "and".
         - Punctuation (including spaces but excluding ampersands) are removed.
         - The label is converted to lower case.
 
