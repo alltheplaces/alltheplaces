@@ -1,16 +1,28 @@
-from locations.storefinders.yext import YextSpider
+import json
 
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-class MatalanGBSpider(YextSpider):
+from locations.structured_data_spider import StructuredDataSpider
+from locations.linked_data_parser import LinkedDataParser
+
+class MatalanGBSpider(CrawlSpider,StructuredDataSpider):
     name = "matalan_gb"
     item_attributes = {"brand": "Matalan", "brand_wikidata": "Q12061509"}
-    api_key = "50f6010c48792a06524b4fe3471d7840"
+    allowed_domains = ["www.matalan.co.uk"]
+    start_urls = ['https://www.matalan.co.uk/stores/uk']
+    rules = [
+        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/stores/uk/[-\w]+$")),
+        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/stores/uk/[-\w]+/[-\w]+$")),
+        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/store/[-\/\w]+$"), "parse_sd"),
+    ]
+    download_delay = 0.5
+    time_format = "%H:%M:%S"
 
-    def parse_item(self, item, location):
-        if not location.get("c_open_for_shopping"):
-            return
-        if not location["c_open_for_shopping"].get("availability"):
-            return
-        item["website"] = "https://store.matalan.co.uk/" + location["slug"]
-        item.pop("twitter")
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        ld = response.xpath('//script[@type="application/ld+json"]/text()').get()
+        ld_item = json.loads(ld)
+
+        item = LinkedDataParser.parse_ld(ld_item,time_format="%H:%M:%S")
+        item["ref"]=ld_item["url"]
         yield item
