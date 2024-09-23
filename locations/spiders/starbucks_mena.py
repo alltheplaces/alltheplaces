@@ -39,24 +39,25 @@ class StarbucksMenaSpider(YextSearchSpider):
                 )
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        if location["address"]["countryCode"] == "TR":  # Covered by starbucks_eu
+        profile = location["profile"]
+        if profile["address"]["countryCode"] == "TR":  # Covered by starbucks_eu
             return
-        if amenities := location.get("c_storeAmenities"):
+        if amenities := profile.get("c_storeAmenities"):
             for amenity in amenities:
                 if tag := AMENITIES_MAP.get(amenity):
                     apply_yes_no(tag, item, True)
                 else:
                     self.crawler.stats.inc_value(f"atp/{self.name}/unknown_amenity/{amenity}")
-        item["branch"] = location.get("c_siteLocation")
+        item["branch"] = profile.get("c_siteLocation")
         if item["branch"] is None:
-            item["branch"] = location.get("c_storeNameInternal")
+            item["branch"] = profile.get("c_storeNameInternal")
         if item["ref"] in self.stored_items:
             other_item = self.stored_items.pop(item["ref"])
-            if location["address"]["countryCode"] == "MA":
+            if profile["address"]["countryCode"] == "MA":
                 other_language = "fr"
             else:
                 other_language = "en"
-            if location["meta"]["language"] == "ar":
+            if profile["meta"]["language"] == "ar":
                 yield get_merged_item({other_language: other_item, "ar": item}, "ar")
             else:
                 yield get_merged_item({other_language: item, "ar": other_item}, "ar")
