@@ -29,5 +29,5 @@ class MatalanGBSpider(CrawlSpider, StructuredDataSpider):
         store = json.loads(storedata)
         item["lat"] = store["props"]["pageProps"]["store"]["latitude"]
         item["lon"] = store["props"]["pageProps"]["store"]["longitude"]
-        item["ref"] = store["id"]
+        item["ref"] = store["props"]["pageProps"]["store"]["id"]
         yield item
