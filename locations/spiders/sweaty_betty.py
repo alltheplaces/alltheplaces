@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SweatyBettySpider(Spider):
-    name = "Sweaty Betty"
+    name = "sweaty_betty"
     item_attributes = {"brand": "Sweaty Betty", "brand_wikidata": "Q7654224"}
     start_urls = ["https://www.sweatybetty.com/shop-finder"]
 
