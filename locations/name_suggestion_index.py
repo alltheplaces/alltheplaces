@@ -92,11 +92,23 @@ class NSI(metaclass=Singleton):
             for k, v in self.wikidata_json.items():
                 yield (k, v)
         else:
-            normalize_re = re.compile(r"[^\w ]+")
-            label_to_find_fuzzy = re.sub(normalize_re, "", unidecode(label_to_find)).lower().strip()
+            # Normalise candidate brand/operator labels approximately
+            # according to NSI's brand/operator label normalisation code at
+            # https://github.com/osmlab/name-suggestion-index/blob/main/lib/simplify.js
+            #
+            # Key steps for normalisation:
+            # - Diacritics are replaced with their closest ASCII equivalent.
+            # - Punctuation (including spaces) are removed.
+            # - Ampersand chracters are replaced with the word "and".
+            # - The label is converted to lower case.
+            #
+            # After candidate labels are normalised, a match can then attempt
+            # to be found.
+            normalize_re = re.compile(r"[^\w_ ]+")
+            label_to_find_fuzzy = re.sub(normalize_re, "", unidecode(label_to_find).replace("&", "and")).lower().strip()
             for k, v in self.wikidata_json.items():
                 if nsi_label := v.get("label"):
-                    nsi_label_fuzzy = re.sub(normalize_re, "", unidecode(nsi_label)).lower().strip()
+                    nsi_label_fuzzy = re.sub(normalize_re, "", unidecode(nsi_label).replace("&", "and")).lower().strip()
                     if label_to_find_fuzzy in nsi_label_fuzzy:
                         yield (k, v)
 
