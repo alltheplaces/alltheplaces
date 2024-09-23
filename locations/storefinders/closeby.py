@@ -14,7 +14,7 @@ class ClosebySpider(Spider):
 
     To use this spider, supply a `api_key` for a brand or operator's store
     locator which is hosted by Closeby. API keys are a 32 character long
-    hexademical value (regex: [\da-f]{32}).
+    hexademical value (regex: "[\\da-f]{32}").
     """
 
     dataset_attributes = {"source": "api", "api": "closeby.co"}
