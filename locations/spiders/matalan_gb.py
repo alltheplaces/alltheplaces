@@ -3,6 +3,7 @@ import json
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.dict_parser import DictParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,12 +21,7 @@ class MatalanGBSpider(CrawlSpider, StructuredDataSpider):
     time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        ld = response.xpath('//script[@type="application/ld+json"]/text()').get()
-        ld_item = json.loads(ld)
-
         storedata = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        store = json.loads(storedata)
-        item["lat"] = store["props"]["pageProps"]["store"]["latitude"]
-        item["lon"] = store["props"]["pageProps"]["store"]["longitude"]
-        item["ref"] = store["props"]["pageProps"]["store"]["id"]
+        store = json.loads(storedata)["props"]["pageProps"]["store"]
+        item = DictParser.parse(store)
         yield item
