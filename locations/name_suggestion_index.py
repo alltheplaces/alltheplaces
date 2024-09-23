@@ -130,7 +130,7 @@ class NSI(metaclass=Singleton):
                     yield item
 
     @staticmethod
-    def normalise_label(self, original_label: str) -> str:
+    def normalise_label(original_label: str) -> str:
         """
         Normalise candidate brand/operator labels approximately according to
         NSI's brand/operator label normalisation code at:
