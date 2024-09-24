@@ -1,9 +1,9 @@
 from locations.storefinders.storemapper import StoremapperSpider
-
+from locations.categories import Categories
 
 class ToysRUsGB(StoremapperSpider):
     name = "toys_r_us_gb"
-    item_attributes = {"brand": "Toys R Us UK", "brand_wikidata": "Q125186363"}
+    item_attributes = {"brand": "Toys R Us UK", "brand_wikidata": "Q125186363","extras": Categories.SHOP_TOYS.value}
     company_id: str = "26714-C1AzPSOgcoRLNRqU"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
