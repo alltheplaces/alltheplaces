@@ -1,4 +1,4 @@
-from locations.spiders.debonairs_za import DebonairsPizzaZASpider
+from locations.spiders.debonairs_pizza_za import DebonairsPizzaZASpider
 
 
 class DebonairsPizzaAfricaSpider(DebonairsPizzaZASpider):
