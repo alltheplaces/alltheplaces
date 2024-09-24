@@ -5,10 +5,7 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SeasaltSpider(scrapy.Spider):
@@ -24,17 +21,17 @@ class SeasaltSpider(scrapy.Spider):
         mapdata = response.xpath('//script[contains(text(), "lng")]/text()').get()
         data1 = json.loads(mapdata)
         for value in data1:
-            data=data1[value]["amLocator"]["jsonStoreLocations"]["items"]
+            data = data1[value]["amLocator"]["jsonStoreLocations"]["items"]
 
         for location in data:
-            temp=location["popup_html"]
-            result=re.search(
+            temp = location["popup_html"]
+            result = re.search(
                 r"locator.title[^>]+>([^<]+)</div>(?:</a>)*</h3>\s+([^<]+)\s+<br><span",
                 temp,
             )
-            location["name"]=result.group(1)
-            location["address"]=result.group(2)
-            location["url"]=re.search(r'<a href="([^"]+)"',temp).group(1)
+            location["name"] = result.group(1)
+            location["address"] = result.group(2)
+            location["url"] = re.search(r'<a href="([^"]+)"', temp).group(1)
             item = DictParser.parse(location)
 
             yield item
