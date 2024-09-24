@@ -9,9 +9,7 @@ class FairwayMarketSpider(scrapy.Spider):
     name = "fairway_market"
     item_attributes = {"brand": "Fairway Market", "brand_wikidata": "Q5430911"}
     allowed_domains = ["http://www.fairwaymarkets.com/"]
-    start_urls = (
-        "https://www.fairwaymarkets.com/victoria---quadra-village"
-    )
+    start_urls = "https://www.fairwaymarkets.com/victoria---quadra-village"
 
     def parse(self, response):
         data = response.xpath('//div[@class="art-content-wide"]')
