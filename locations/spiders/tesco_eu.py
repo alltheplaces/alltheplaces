@@ -21,6 +21,7 @@ class TescoEUSpider(scrapy.Spider):
         "sk": "https://www.tesco.sk/obchody/",
     }
     BRANDING_WORDS = ["tesco", "expres", "extra", "expressz"]  # lowercase
+    requires_proxy = "CZ"
 
     def start_requests(self):
         for country, website in self.COUNTRY_WEBSITE_MAP.items():
