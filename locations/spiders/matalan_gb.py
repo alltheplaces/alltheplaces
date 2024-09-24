@@ -3,7 +3,6 @@ import json
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.dict_parser import DictParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
