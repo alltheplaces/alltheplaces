@@ -10,10 +10,7 @@ class FairwayMarketSpider(scrapy.Spider):
     item_attributes = {"brand": "Fairway Market", "brand_wikidata": "Q5430911"}
     allowed_domains = ["http://www.fairwaymarkets.com/"]
     start_urls = (
-        "http://www.fairwaymarkets.com/index.php/store-locations/victoria",
-        "http://www.fairwaymarkets.com/index.php/store-locations/sidney",
-        "http://www.fairwaymarkets.com/index.php/store-locations/brentwood",
-        "http://www.fairwaymarkets.com/index.php/store-locations/nanaimo",
+        "https://www.fairwaymarkets.com/victoria---quadra-village"
     )
 
     def parse(self, response):
