@@ -10,6 +10,7 @@ from locations.items import Feature
 def _get_possible_links(response: Response | Selector):
     yield from response.xpath('.//img[contains(@src, "maps/api/staticmap")]/@src').getall()
     yield from response.xpath('.//iframe[contains(@src, "maps/embed")]/@src').getall()
+    yield from response.xpath('.//iframe[contains(@src, "google")][contains(@src, "maps")]/@src').getall()
     yield from response.xpath(".//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
     yield from response.xpath(".//a[contains(@href, 'maps.apple.com')]/@href").getall()
     yield from [
