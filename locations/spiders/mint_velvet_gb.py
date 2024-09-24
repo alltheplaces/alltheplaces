@@ -1,4 +1,3 @@
-
 from locations.categories import Categories
 from locations.storefinders.stockist import StockistSpider
 
