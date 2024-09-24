@@ -3,7 +3,7 @@ from scrapy.spiders import Spider
 
 from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.spiders.debonairs_za import DEBONAIRS_SHARED_ATTRIBUTES
+from locations.spiders.debonairs_pizza_za import DEBONAIRS_SHARED_ATTRIBUTES
 
 
 class DebonairsPizzaNASpider(Spider):
