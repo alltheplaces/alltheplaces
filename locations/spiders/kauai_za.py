@@ -20,3 +20,7 @@ class KauaiZASpider(GoReviewSpider):
         for link in links:
             store_page_url = link.url.replace("goreview.co.za/goreview/default", "goreview.co.za/store-information")
             yield Request(url=store_page_url, callback=self.parse)
+
+    def post_process_item(self, item, response):
+        item["branch"] = item["branch"].replace("KAUAI ", "")
+        yield item
