@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.items import Feature, get_merged_item
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 from locations.storefinders.yext_search import YextSearchSpider
 
 AMENITIES_MAP = {"Drive Through": Extras.DRIVE_THROUGH, "WiFi": Extras.WIFI}
@@ -12,7 +13,7 @@ AMENITIES_MAP = {"Drive Through": Extras.DRIVE_THROUGH, "WiFi": Extras.WIFI}
 
 class StarbucksMenaSpider(YextSearchSpider):
     name = name = "starbucks_mena"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     stored_items = {}
 
     def start_requests(self) -> Iterable[Request]:
