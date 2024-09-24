@@ -17,7 +17,6 @@ class MatalanGBSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/stores/uk/[-\w]+/[-\w]+$")),
         Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/store/[-\/\w]+$"), "parse_sd"),
     ]
-    download_delay = 0.5
     time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
