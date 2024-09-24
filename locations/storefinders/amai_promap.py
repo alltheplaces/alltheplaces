@@ -36,9 +36,14 @@ class AmaiPromapSpider(JSONBlobSpider):
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
 
-            # Hours may (also) be in "operating_hours", but this has not yet been
-            # encountered in the limited number of these found.
-            if schedule := feature.get("schedule"):
+            if hours_raw := feature.get("operating_hours"):
+                item["opening_hours"] = OpeningHours()
+                hours_dict = parse_js_object(hours_raw)
+                for day_key, day_value in hours_dict.items():
+                    for time in day_value["slot"]:
+                        item["opening_hours"].add_range(day_value["name"], time["from"], time["to"])
+
+            elif schedule := feature.get("schedule"):
                 item["opening_hours"] = OpeningHours()
                 for day in schedule.split("\n"):
                     item["opening_hours"].add_ranges_from_string(day)
