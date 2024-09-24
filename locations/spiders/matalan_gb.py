@@ -22,5 +22,6 @@ class MatalanGBSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         storedata = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         store = json.loads(storedata)["props"]["pageProps"]["store"]
-        item = DictParser.parse(store)
+        item["lat"] = store["latitude"]
+        item["lon"] = store["longitude"]
         yield item
