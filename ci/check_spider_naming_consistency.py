@@ -37,6 +37,7 @@ COUNTRYCODE_COMPONENTS = {
     "FI",
     "FJ",
     "FR",
+    "GA",
     "GB",
     "GG",
     "GR",

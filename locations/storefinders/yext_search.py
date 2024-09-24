@@ -43,8 +43,10 @@ class YextSearchSpider(Spider):
                 item["website"] = profile.get("websiteUrl", "").split("?", 1)[0]
             else:
                 item["website"] = profile.get("websiteUrl")
-            item["extras"]["website:menu"] = profile.get("menuUrl")
-            item["extras"]["website:orders"] = profile.get("orderUrl")
+            if menu_url := profile.get("menuUrl"):
+                item["extras"]["website:menu"] = menu_url
+            if order_url := profile.get("orderUrl"):
+                item["extras"]["website:orders"] = order_url
 
             phones = []
             for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
