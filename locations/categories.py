@@ -356,6 +356,7 @@ top_level_tags = [
     "emergency",
     "healthcare",
     "highway",
+    "industrial",
     "landuse",
     "leisure",
     "man_made",
