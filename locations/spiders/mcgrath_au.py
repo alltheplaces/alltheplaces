@@ -3,7 +3,7 @@ import re
 from locations.storefinders.algolia import AlgoliaSpider
 
 
-class McGrathAUSpider(AlgoliaSpider):
+class McgrathAUSpider(AlgoliaSpider):
     name = "mcgrath_au"
     item_attributes = {
         "brand_wikidata": "Q105290661",
