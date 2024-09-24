@@ -23,7 +23,7 @@ class GovGorivaSISpider(Spider):
         "98": "octane_98",
         "100": "octane_100",
         "dizel-premium": None,
-        "avtoplin-lpg": None,
+        "avtoplin-lpg": "lpg",
         "KOEL": None,
         "hvo": "biodiesel",
         "cng": "cng",
