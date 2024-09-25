@@ -24,7 +24,6 @@ class EcontBGSpider(Spider):
                 continue
             item = Feature()
             item["ref"] = location["id"]
-            item["name"] = location["name"]
             item["city"] = location["address"]["city"]["name"]
             item["phone"] = ";".join(location["phones"])
             item["email"] = ";".join(location["emails"])
@@ -54,9 +53,12 @@ class EcontBGSpider(Spider):
                     sunday_end_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursTo"])
                     item["opening_hours"].add_range("Su", sunday_start_time, sunday_end_time)
 
+            name_or_branch = location["name"]
             if location["isAPS"]:
+                item["name"] = name_or_branch
                 apply_category(Categories.PARCEL_LOCKER, item)
             else:
+                item["branch"] = name_or_branch
                 apply_category(Categories.POST_OFFICE, item)
 
             yield item
