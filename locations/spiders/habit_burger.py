@@ -1,6 +1,7 @@
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -23,4 +24,6 @@ class HabitBurgerSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["name"] = None
         item["branch"] = response.xpath('//h1[@class="loc_title bebas"]/text()').get()
+        item["extras"]["website:orders"] = response.xpath('//a[contains(@class, "order_now")]/@href').get()
+        apply_yes_no(Extras.DRIVE_THROUGH, item, response.xpath('//div[@class="info_icon drive_thru dt"]'))
         yield item
