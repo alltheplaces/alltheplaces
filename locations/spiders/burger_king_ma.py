@@ -11,7 +11,6 @@ class BurgerKingMASpider(JSONBlobSpider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0"]
     locations_key = "data"
-    stored_items = {}
 
     def start_requests(self):
         for url in self.start_urls:
