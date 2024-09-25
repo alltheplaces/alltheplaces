@@ -179,6 +179,7 @@ class DictParser:
         "phone",
         "telephone",
         "tel",
+        "tel-no",
         "telephone-number",
         "telephone1",
         "contact-number",
