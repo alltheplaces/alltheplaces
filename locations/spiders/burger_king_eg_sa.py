@@ -7,7 +7,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingEGSA(JSONBlobSpider):
+class BurgerKingEGSASpider(JSONBlobSpider):
     name = "burger_king_eg_sa"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0"]
