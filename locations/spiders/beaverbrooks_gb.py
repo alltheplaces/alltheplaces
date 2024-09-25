@@ -1,19 +1,21 @@
-from urllib.parse import urljoin
-
 import scrapy
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BeaverbrooksGBSpider(StructuredDataSpider):
+class BeaverbrooksGBSpider(CrawlSpider,StructuredDataSpider):
     name = "beaverbrooks_gb"
     item_attributes = {"brand": "Beaverbrooks", "brand_wikidata": "Q4878226"}
     start_urls = [
         "https://www.beaverbrooks.co.uk/stores",
     ]
+    rules = [
+        Rule(LinkExtractor(r"https://www.beaverbrooks.co.uk/stores/([-\w]+)$"), "parse"),
+    ]
 
-    def parse(self, response):
-        locations = response.xpath('//li[contains(@class, "stores-list__store  ")]/@data-store-link').getall()
-        for location in locations:
-            url = urljoin("https://www.beaverbrooks.co.uk", location)
-            yield scrapy.Request(url=url, callback=self.parse_sd)
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["lat"]=response.xpath('//div[@id="map_canvas"]/@data-lat').get()
+        item["lon"]=response.xpath('//div[@id="map_canvas"]/@data-long').get()
+        yield item
