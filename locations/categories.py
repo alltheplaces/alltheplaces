@@ -292,6 +292,7 @@ class Categories(Enum):
 
     VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
+    VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
 
@@ -355,6 +356,7 @@ top_level_tags = [
     "emergency",
     "healthcare",
     "highway",
+    "industrial",
     "landuse",
     "leisure",
     "man_made",

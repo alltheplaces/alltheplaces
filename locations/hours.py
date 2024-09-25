@@ -218,6 +218,17 @@ DAYS_GR = {
     "Κυ": "Su",
     "Κυριακή": "Su",
 }
+
+DAYS_HR = {
+    "Ponedjeljak": "Mo",
+    "Utorak": "Tu",
+    "Srijeda": "We",
+    "Četvrtak": "Th",
+    "Petak": "Fr",
+    "Subota": "Sa",
+    "Nedjelja": "Su",
+}
+
 DAYS_HU = {
     "Hétfő": "Mo",
     "Hé": "Mo",
@@ -292,18 +303,25 @@ DAYS_SE = {
 DAYS_SI = {
     "Po": "Mo",
     "Pon": "Mo",
+    "Ponedeljek": "Mo",
     "To": "Tu",
     "Tor": "Tu",
+    "Torek": "Tu",
     "Sr": "We",
     "Sre": "We",
+    "Sreda": "We",
     "Če": "Th",
     "Čet": "Th",
+    "Četrtek": "Th",
     "Pe": "Fr",
     "Pet": "Fr",
+    "Petek": "Fr",
     "So": "Sa",
     "Sob": "Sa",
+    "Sobota": "Sa",
     "Ne": "Su",
     "Ned": "Su",
+    "Nedelja": "Su",
 }
 DAYS_IT = {
     "Lunedì": "Mo",
@@ -627,6 +645,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_CH,
     DAYS_FI,
     DAYS_GR,
+    DAYS_HR,
     DAYS_HU,
     DAYS_IL,
     DAYS_NL,
