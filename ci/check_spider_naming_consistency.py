@@ -40,6 +40,7 @@ COUNTRYCODE_COMPONENTS = {
     "GA",
     "GB",
     "GG",
+    "GH",
     "GR",
     "GT",
     "HK",
