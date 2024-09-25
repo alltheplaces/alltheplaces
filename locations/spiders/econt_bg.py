@@ -35,7 +35,7 @@ class EcontBGSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
 
-            if "24/7" in item["name"]:
+            if "24/7" in location["name"]:
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             else:
                 timezone = ZoneInfo("Europe/Sofia")
