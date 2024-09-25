@@ -7,8 +7,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingEGSASpider(JSONBlobSpider):
-    name = "burger_king_eg_sa"
+class BurgerKingEGSpider(JSONBlobSpider):
+    name = "burger_king_eg"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0"]
     locations_key = "data"
@@ -42,7 +42,7 @@ class BurgerKingEGSASpider(JSONBlobSpider):
         item["phone"] = location["attributes"]["telephone"]
         item["email"] = location["attributes"]["email"]
         item["addr_full"] = location["attributes"]["line1"]
-        item["country"] = location["attributes"]["country"]
+        # item["country"] = location["attributes"]["country"] # Incorrect country (SA) reported for some locations
         apply_yes_no(Extras.DELIVERY, item, location["attributes"]["delivery-enabled"] == 1, False)
         apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"]["is-drive-thru-enabled"], False)
         item["opening_hours"] = OpeningHours()
