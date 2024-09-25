@@ -7,7 +7,8 @@ class NaptanGBSpider(Spider):
     name = "naptan_gb"
     # Smaller areas can be tested: eg "&atcoAreaCodes=010"
     start_urls = ["https://naptan.api.dft.gov.uk/v1/access-nodes?dataFormat=xml"]
-
+    requires_proxy = True
+    
     def parse(self, response, **kwargs):
         response.selector.remove_namespaces()
 
