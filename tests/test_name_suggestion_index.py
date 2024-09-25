@@ -16,6 +16,27 @@ def test_iter_wikidata():
     assert found
 
 
+def test_iter_wikidata_all():
+    for k, v in NSI().iter_wikidata():
+        if k == "Q38076":
+            break
+    else:
+        assert False
+
+
+def test_normalise_label():
+    # Diacritics are replaced with their closest ASCII equivalent.
+    assert NSI.normalise_label("McDónalds") == "mcdonalds"
+    # Ampersand characters are replaced with the word "and".
+    assert NSI.normalise_label("McDonald, McDonald & McDonald") == "mcdonaldmcdonaldandmcdonald"
+    # Punctuation (including spaces but excluding ampersands) are removed.
+    assert NSI.normalise_label("Mac Donald") == "macdonald"
+    assert NSI.normalise_label("Mc_Donald") == "mcdonald"
+    assert NSI.normalise_label(" Mc Donald ") == "mcdonald"
+    # The label is converted to lower case.
+    assert NSI.normalise_label("McDonalds") == "mcdonalds"
+
+
 def test_iter_nsi():
     nsi = NSI()
     # McDonald's has identities in a number of locationSet's (countries)

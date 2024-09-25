@@ -88,15 +88,16 @@ class NSI(metaclass=Singleton):
         :return: iterator of matching NSI wikidata.json entries
         """
         self._ensure_loaded()
-        label_to_find_fuzzy = re.sub(r"[^\w ]+", "", unidecode(label_to_find)).lower().strip()
-        for k, v in self.wikidata_json.items():
-            if not label_to_find_fuzzy:
+        if not label_to_find:
+            for k, v in self.wikidata_json.items():
                 yield (k, v)
-                continue
-            if nsi_label := v.get("label"):
-                nsi_label_fuzzy = re.sub(r"[^\w ]+", "", unidecode(nsi_label)).lower().strip()
-                if label_to_find_fuzzy in nsi_label_fuzzy:
-                    yield (k, v)
+        else:
+            label_to_find_fuzzy = self.normalise_label(label_to_find)
+            for k, v in self.wikidata_json.items():
+                if nsi_label := v.get("label"):
+                    nsi_label_fuzzy = self.normalise_label(nsi_label)
+                    if label_to_find_fuzzy in nsi_label_fuzzy:
+                        yield (k, v)
 
     def iter_country(self, location_code: str = None) -> Iterable[dict]:
         """
@@ -127,6 +128,24 @@ class NSI(metaclass=Singleton):
                     yield item
                 elif wikidata_code == item["tags"].get("operator:wikidata"):
                     yield item
+
+    @staticmethod
+    def normalise_label(original_label: str) -> str:
+        """
+        Normalise candidate brand/operator labels approximately according to
+        NSI's brand/operator label normalisation code at:
+        https://github.com/osmlab/name-suggestion-index/blob/main/lib/simplify.js
+
+        NSI label normalisation requires these changes:
+        - Diacritics are replaced with their closest ASCII equivalent.
+        - Ampersand characters are replaced with the word "and".
+        - Punctuation (including spaces but excluding ampersands) are removed.
+        - The label is converted to lower case.
+
+        :param original_label: original label which requires normalisation
+        :return: normalised label
+        """
+        return re.sub(r"[\W_]+", "", unidecode(original_label).replace("&", "and"), flags=re.ASCII).lower().strip()
 
     @staticmethod
     def generate_keys_from_nsi_attributes(nsi_attributes: dict) -> tuple[str, str] | None:

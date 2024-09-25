@@ -1,13 +1,12 @@
-import json
 import re
 
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CornerBakeryCafeSpider(scrapy.Spider):
+class CornerBakeryCafeSpider(StructuredDataSpider):
     name = "corner_bakery_cafe"
     item_attributes = {"brand": "Corner Bakery Cafe", "brand_wikidata": "Q5171598"}
     allowed_domains = ["cornerbakerycafe.com"]
@@ -20,7 +19,7 @@ class CornerBakeryCafeSpider(scrapy.Spider):
         for path in place_urls:
             yield scrapy.Request(
                 url=response.urljoin(path),
-                callback=self.parse_store,
+                callback=self.parse_sd,
             )
 
     def parse_hours(self, hours):
@@ -48,30 +47,14 @@ class CornerBakeryCafeSpider(scrapy.Spider):
 
         return opening_hours.as_opening_hours()
 
-    def parse_store(self, response):
-        data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()').extract_first().replace("\r\n", "")
-        )
-
-        properties = {
-            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": data["name"],
-            "street_address": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "country": data["address"]["addressCountry"],
-            "lat": data["geo"]["latitude"],
-            "lon": data["geo"]["longitude"],
-            "phone": data["telephone"],
-            "website": data["url"],
-        }
+    def post_process_item(self, item, response, ld_data):
+        item["ref"] = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
 
         try:
-            hours = self.parse_hours(data["openingHours"])
+            hours = self.parse_hours(ld_data["openingHours"])
             if hours:
-                properties["opening_hours"] = hours
+                item["opening_hours"] = hours
         except:
             pass
 
-        yield Feature(**properties)
+        yield item

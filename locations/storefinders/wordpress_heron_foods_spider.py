@@ -23,18 +23,21 @@ class WordpressHeronFoodsSpider(Spider):
         []
     )  # DetectionRequestRule(https://{self.domain}/wp-admin/admin-ajax.php, but its a POST and has get_stores), or DetectionResponseRule(jsblob with na zp lng lon ID)
 
-    def start_requests(self):
-        yield FormRequest(
+    def make_request(self, lat: float, lon: float, radius: int):
+        return FormRequest(
             url=f"https://{self.domain}/wp-admin/admin-ajax.php",
             formdata={
                 "action": "get_stores",
-                "lat": str(self.lat),
-                "lng": str(self.lon),
-                "radius": str(self.radius),
+                "lat": str(lat),
+                "lng": str(lon),
+                "radius": str(radius),
             },
             callback=self.parse,
             headers={"Referer": f"https://{self.domain}/storelocator/"},
         )
+
+    def start_requests(self):
+        yield self.make_request(self.lat, self.lon, self.radius)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json().values():

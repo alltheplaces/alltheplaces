@@ -15,6 +15,7 @@ def slugify(s):
 class YardHouseSpider(Spider):
     name = "yard_house"
     item_attributes = {"brand": "Yard House", "brand_wikidata": "Q21189156"}
+    requires_proxy = True
 
     def start_requests(self):
         yield JsonRequest("https://www.yardhouse.com/api/restaurants", headers={"x-source-channel": "WEB"})

@@ -12,7 +12,7 @@ class BurgerKingRUSpider(Spider):
     allowed_domains = ["orderapp.burgerkingrus.ru"]
     start_urls = ["https://orderapp.burgerkingrus.ru/api/v3/restaurant/list"]
     user_agent = BROWSER_DEFAULT
-    requires_proxy = True  # Qrator bot blocking in use
+    requires_proxy = "RU"  # Qrator bot blocking in use
 
     def start_requests(self):
         for url in self.start_urls:

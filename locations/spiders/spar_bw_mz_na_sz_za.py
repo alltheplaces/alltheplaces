@@ -1,8 +1,11 @@
-import scrapy
+from typing import Iterable
+
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories
-from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 SPAR_ZA_BRANDS = {
     "SPAR": {"brand": "SPAR", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value},
@@ -14,39 +17,36 @@ SPAR_ZA_BRANDS = {
 }
 
 
-class SparBWMZNASZZASpider(scrapy.Spider):
+class SparBWMZNASZZASpider(JSONBlobSpider):
+    download_timeout = 30
     name = "spar_bw_mz_na_sz_za"
     start_urls = []
     skip_auto_cc_domain = True
 
     def start_requests(self):
-        yield scrapy.http.JsonRequest(
+        yield JsonRequest(
             url="https://www.spar.co.za/api/stores/search",
             data={"Types": ["SPAR", "SUPERSPAR", "KWIKSPAR", "SPAR Express", "Savemor", "Pharmacy"]},
         )
 
-    def parse(self, response, **kwargs):
-        for store in response.json():
-            store["lat"] = store.pop("GPSLat")
-            store["lon"] = store.pop("GPSLong")
-            store["website"] = "https://www.spar.co.za/Home/Store-View/" + store.pop("Alias")
-            item = DictParser.parse(store)
-            item["branch"] = item.pop("name")
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        item["website"] = "https://www.spar.co.za/Home/Store-View/" + location.pop("Alias")
+        item["branch"] = item.pop("name")
+        if item.get("addr_full") is not None:
+            item["street_address"] = item.pop("addr_full")
 
-            item.update(SPAR_ZA_BRANDS.get(store["Type"]))
+        item.update(SPAR_ZA_BRANDS.get(location["Type"]))
 
-            oh = OpeningHours()
-            try:
-                for day in DAYS_WEEKDAY:
-                    self._add_range(oh, store, day, "TradingHoursMonToFriOpen", "TradingHoursClose")
-                self._add_range(oh, store, "Sat", "TradingHoursSatOpen", "TradingHoursSatClose")
-                self._add_range(oh, store, "Sun", "TradingHoursSunOpen", "TradingHoursSunClose")
-            except ValueError:
-                pass
+        item["opening_hours"] = OpeningHours()
+        try:
+            for day in DAYS_WEEKDAY:
+                self._add_range(item["opening_hours"], location, day, "TradingHoursMonToFriOpen", "TradingHoursClose")
+            self._add_range(item["opening_hours"], location, "Sat", "TradingHoursSatOpen", "TradingHoursSatClose")
+            self._add_range(item["opening_hours"], location, "Sun", "TradingHoursSunOpen", "TradingHoursSunClose")
+        except ValueError:
+            pass
 
-            item["opening_hours"] = oh
-
-            yield item
+        yield item
 
     @staticmethod
     def _add_range(oh: OpeningHours, store: dict, day: str, open_key: str, close_key: str):

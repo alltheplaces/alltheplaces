@@ -3,11 +3,12 @@ import re
 from scrapy import FormRequest, Selector, Spider
 
 from locations.items import Feature
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksTWSpider(Spider):
     name = "starbucks_tw"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     start_urls = ["https://www.starbucks.com.tw/stores/storesearch.jspx"]
     requires_proxy = True
 

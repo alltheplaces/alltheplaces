@@ -9,7 +9,7 @@ from locations.items import Feature
 # cannot be done through NSI related pipeline magic then a spider is free to apply any
 # categories and attributes itself. This file provides some help in that area. It certainly
 # reduces the number of finger fumble mistypes which are the inevitable by-product
-# of lots of string bashing. If ever NSI / ATP where to change / augment the category scheme
+# of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
@@ -292,6 +292,7 @@ class Categories(Enum):
 
     VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
+    VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
 
@@ -355,6 +356,7 @@ top_level_tags = [
     "emergency",
     "healthcare",
     "highway",
+    "industrial",
     "landuse",
     "leisure",
     "man_made",
@@ -478,16 +480,19 @@ class Extras(Enum):
     COMPUTING = "service:computer"
     COPYING = "service:copy"
     DELIVERY = "delivery"
+    DOG = "dog"
     DRINKING_WATER = "drinking_water"
     DRIVE_THROUGH = "drive_through"
     FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
     HALAL = "diet:halal"
+    HIGH_CHAIR = "highchair"
     ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
+    LIVE_MUSIC = "live_music"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
     NEW_CAR_SALES = "service:vehicle:new_car_sales"
@@ -500,6 +505,8 @@ class Extras(Enum):
     PHOTO_PRINTING = "service:photo_printing"
     PICNIC_TABLES = "picnic_table"
     PRINTING = "service:print"
+    RESERVATION = "reservation"
+    RESERVATION_REQUIRED = "reservation=required"
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
     SHOWERS = "shower"
@@ -513,7 +520,10 @@ class Extras(Enum):
     TYRE_SERVICES = "service:vehicle:tyres"
     USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
+    VEGAN = "diet:vegan"
+    VEGETARIAN = "diet:vegetarian"
     WHEELCHAIR = "wheelchair"
+    WHEELCHAIR_LIMITED = "wheelchair=limited"
     WIFI = "internet_access=wlan"
 
 
@@ -531,6 +541,7 @@ class PaymentMethods(Enum):
     BLIK = "payment:blik"
     CARDS = "payment:cards"
     CASH = "payment:cash"
+    CASH_ONLY = "payment:cash=only"
     CHEQUE = "payment:cheque"
     COINS = "payment:coins"
     CONTACTLESS = "payment:contactless"
@@ -800,6 +811,29 @@ def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: 
     """
     for s in specialities:
         apply_category({"healthcare:speciality": s.value}, item)
+
+
+class Drink(Enum):
+    """
+    Drink categories per https://wiki.openstreetmap.org/wiki/Key:drink:*
+    """
+
+    BEER = "drink:beer"
+    CIDER = "drink:cider"
+    COCKTAIL = "drink:cocktail"
+    COFFEE = "drink:coffee"
+    COLA = "drink:cola"
+    CRAFT_BEER = "drink:craft_beer"
+    ESPRESSO = "drink:espresso"
+    JUICE = "drink:juice"
+    LIQUOR = "drink:liquor"
+    SOFT_DRINK = "drink:soft_drink"
+    SPARKLING_WINE = "drink:sparkling_wine"
+    TEA = "drink:tea"
+    VODKA = "drink:vodka"
+    WATER = "drink:water"
+    WHISKY = "drink:whisky"
+    WINE = "drink:wine"
 
 
 # TODO: something similar for fuel types

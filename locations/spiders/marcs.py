@@ -4,8 +4,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 
 
 class MarcsSpider(CrawlSpider):
@@ -28,8 +28,7 @@ class MarcsSpider(CrawlSpider):
         lmjson = response.xpath('//script[@type="text/javascript"]/text()[contains(.,"initMap()")]').get()
 
         open_hour_filtered = [row for row in data.get("openingHours") if ":" in row]
-        oh = OpeningHours()
-        oh.from_linked_data({"openingHours": open_hour_filtered})
+        oh = LinkedDataParser.parse_opening_hours({"openingHours": open_hour_filtered})
 
         properties = {
             "ref": response.url,

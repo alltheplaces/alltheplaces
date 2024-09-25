@@ -5,7 +5,6 @@ import urllib.parse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -33,8 +32,6 @@ class FcbankingSpider(SitemapSpider):
         path = urllib.parse.urlsplit(response.url).path
         item["ref"] = path.removeprefix("/branch-locations")
         hours_fixed = [re.sub(r"([ap])\.m\.?", r"\1m", row).replace("\u2013", "-") for row in data["openingHours"]]
-        oh = OpeningHours()
-        oh.from_linked_data({"openingHours": hours_fixed}, "%I:%M %p")
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = LinkedDataParser.parse_opening_hours({"openingHours": hours_fixed}, "%I:%M %p")
         apply_category(Categories.BANK, item)
         yield item

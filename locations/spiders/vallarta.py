@@ -1,23 +1,15 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class VallartaSpider(scrapy.Spider):
+class VallartaSpider(SitemapSpider):
     name = "vallarta"
     item_attributes = {"brand": "Vallarta Supermarkets", "brand_wikidata": "Q7911833"}
     allowed_domains = ["vallartasupermarkets.com"]
-    download_delay = 0.2
-    start_urls = ("https://vallartasupermarkets.com/store-sitemap.xml",)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-        for url in urls:
-            if url == "https://vallartasupermarkets.com/store-locations/":
-                continue
-            yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
+    sitemap_urls = ("https://vallartasupermarkets.com/store-sitemap.xml",)
+    sitemap_rules = [(r"https://vallartasupermarkets.com/store-locations/[\w-]+/", "parse_store")]
 
     def parse_store(self, response):
         address = response.xpath("//div[@class='blade store-location']/div/div/div[2]/p[1]/text()").extract()
