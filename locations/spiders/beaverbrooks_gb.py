@@ -1,5 +1,7 @@
-import scrapy
 from urllib.parse import urljoin
+
+import scrapy
+
 from locations.structured_data_spider import StructuredDataSpider
 
 
