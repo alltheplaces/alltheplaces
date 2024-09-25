@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingCN(JSONBlobSpider):
+class BurgerKingCNSpider(JSONBlobSpider):
     name = "burger_king_cn"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://www.bkchina.cn/website/new/js/area.js"]
