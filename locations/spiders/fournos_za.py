@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class Fournos(scrapy.Spider):
+class FournosZASpider(scrapy.Spider):
     name = "fournos_za"
     start_urls = ["https://www.fournos.co.za/find-us.php"]
     item_attributes = {
