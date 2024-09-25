@@ -13,6 +13,7 @@ COUNTRYCODE_COMPONENTS = {
     "AR",
     "AT",
     "AU",
+    "BD",
     "BE",
     "BG",
     "BH",
