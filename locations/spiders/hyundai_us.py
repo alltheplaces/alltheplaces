@@ -24,6 +24,7 @@ class HyundaiUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = feature.get("dealerNm")
         item["street_address"] = clean_address([feature.get("address1"), feature.get("address2")])
+        item["postcode"] = feature.get("zipCd")
         item["email"] = feature.get("dealerEmail")
         item["website"] = feature.get("dealerUrl")
         if item["website"] and item["website"].startswith("www."):
