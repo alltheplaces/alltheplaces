@@ -1,11 +1,9 @@
-from locations.storefinders.elfsight import ElfsightSpider
 from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.storefinders.elfsight import ElfsightSpider
 
 
 class BootleggerCoffeeCompanySpider(ElfsightSpider):
