@@ -1,5 +1,7 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -13,6 +15,7 @@ class BensonsForBedsGBSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
     search_for_twitter = False
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Bensons for Beds ")
+        item["website"] = response.url
         yield item
