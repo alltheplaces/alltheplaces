@@ -28,9 +28,8 @@ class TmobileCZSpider(JSONBlobSpider):
         feature["postcode"] = feature["a_psc"]
 
     def post_process_item(self, item, response, feature: dict):
-        item["name"] = "T-Mobile {}, {}".format(feature["street_address"], feature["city"])
         oh = OpeningHours()
         for hrs in feature["openinghrs"]:
             oh.add_ranges_from_string(hrs, DAYS_CZ)
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
         yield item
