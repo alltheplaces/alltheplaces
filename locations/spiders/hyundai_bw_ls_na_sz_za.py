@@ -8,8 +8,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.hyundai_kr import HYUNDAI_SHARED_ATTRIBUTES
 
 
-class HyundaiZASpider(JSONBlobSpider):
-    name = "hyundai_za"
+class HyundaiBWLSNASZZASpider(JSONBlobSpider):
+    name = "hyundai_bw_ls_na_sz_za"
     item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["api.hyundai.co.za"]
     start_urls = ["https://api.hyundai.co.za/api/Dealers"]
