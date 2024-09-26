@@ -1,4 +1,11 @@
 from locations.storefinders.elfsight import ElfsightSpider
+from typing import Iterable
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
+
+from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
 class BootleggerCoffeeCompanySpider(ElfsightSpider):
@@ -9,7 +16,7 @@ class BootleggerCoffeeCompanySpider(ElfsightSpider):
     api_key = "8212fde6-c29c-44b5-bc63-5ebddf7f3b40"
     no_refs = True  # not all locations seem to have an id
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = location.pop("infoTitle")
         if "COMING SOON" not in item["branch"]:
             yield item
