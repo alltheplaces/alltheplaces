@@ -17,7 +17,7 @@ class DuluthTradingSpider(CrawlSpider):
     rules = [Rule(LinkExtractor(allow="/locations/"), callback="parse", follow=True)]
 
     def parse(self, response):
-        
+
         url = "https://www.duluthtrading.com/mobify/proxy/ocapi/s/DTC/api/store/detail/?id={}"
         id_store = re.findall("[0-9]+", response.url)[0]
         yield scrapy.Request(url=url.format(id_store), method="POST", callback=self.parse_store)
