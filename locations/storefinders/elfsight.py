@@ -43,4 +43,3 @@ class ElfsightSpider(JSONBlobSpider):
         location["phone"] = location.pop("infoPhone")
         location["email"] = location.pop("infoEmail")
         location["lat"], location["lon"] = location.get("coordinates").split(", ", 1)
-
