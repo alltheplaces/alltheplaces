@@ -3,7 +3,7 @@ from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
 
-from locations.hours import OpeningHours, DAYS_3_LETTERS_FROM_SUNDAY
+from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.meny_no import MenyNOSpider
@@ -18,11 +18,9 @@ class MenyDKSpider(JSONBlobSpider):
 
     def start_requests(self) -> Iterable[JsonRequest]:
         data = {
-            "params": {
-                "wt": "json"
-            },
+            "params": {"wt": "json"},
             "filter": [],
-            "query": "ss_search_api_datasource:\"entity:node\" AND bs_status:true AND ss_type:\"store\"",
+            "query": 'ss_search_api_datasource:"entity:node" AND bs_status:true AND ss_type:"store"',
             "limit": 1000,
         }
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
@@ -40,5 +38,10 @@ class MenyDKSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["opening_hours"] = OpeningHours()
         for day_hours in loads(feature["sm_solr_opening_hours"][0]):
-            item["opening_hours"].add_range(DAYS_3_LETTERS_FROM_SUNDAY[day_hours["day"]], str(day_hours["starthours"]).zfill(4), str(day_hours["endhours"]).zfill(4), "%H%M")
+            item["opening_hours"].add_range(
+                DAYS_3_LETTERS_FROM_SUNDAY[day_hours["day"]],
+                str(day_hours["starthours"]).zfill(4),
+                str(day_hours["endhours"]).zfill(4),
+                "%H%M",
+            )
         yield item
