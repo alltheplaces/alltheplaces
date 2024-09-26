@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -23,5 +23,7 @@ class JoeAndTheJuiceSpider(JSONBlobSpider):
             if day_hours["closed"]:
                 item["opening_hours"].set_closed(DAYS[day_hours["day"]])
             else:
-                item["opening_hours"].add_range(DAYS[day_hours["day"]], day_hours["openTime"], day_hours["closeTime"], "%H%M")
+                item["opening_hours"].add_range(
+                    DAYS[day_hours["day"]], day_hours["openTime"], day_hours["closeTime"], "%H%M"
+                )
         yield item
