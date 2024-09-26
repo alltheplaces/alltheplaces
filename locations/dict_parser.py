@@ -159,6 +159,7 @@ class DictParser:
         "store-zip",
         "store-zip-code",
         "store-zipcode",
+        "zipCd",
         # JP
         "郵便番号",  # "post code"
         # DE
