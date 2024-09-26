@@ -128,7 +128,7 @@ class LinkedDataParser:
             logger.warning(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
         except Exception as e:
             logger.warning(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
-            logger.debug(traceback.print_exc())
+            logger.debug(traceback.format_exc())
 
         if image := LinkedDataParser.get_case_insensitive(ld, "image"):
             if isinstance(image, list):
