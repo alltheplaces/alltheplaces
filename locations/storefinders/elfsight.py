@@ -2,7 +2,7 @@ from typing import Iterable
 from urllib.parse import unquote
 
 import chompjs
-from scrapy.http import JsonRequest, Request
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.json_blob_spider import JSONBlobSpider
 
