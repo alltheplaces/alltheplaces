@@ -3,6 +3,7 @@ from typing import Iterable
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
@@ -125,5 +126,5 @@ class MigrosTRSpider(scrapy.Spider):
             item["street_address"] = store["addressDetail"]
             item["addr_full"] = clean_address([store["addressDetail"], store["townName"], store["cityName"]])
             item["phone"] = store.get("fixedPhoneNumber")
-
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item

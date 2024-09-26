@@ -30,6 +30,9 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
         .replace("\r", ",")
         .replace("\t", ",")
         .replace("\f", ",")
+        .replace("<br>", ",")
+        .replace("<br/>", ",")
+        .replace("<br />", ",")
         .split(",")
     )
 
