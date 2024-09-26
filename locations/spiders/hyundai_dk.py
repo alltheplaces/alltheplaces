@@ -31,7 +31,9 @@ class HyundaiDKSpider(JSONBlobSpider):
             if not day_hours.get("open_time") or day_hours["open_time"] == "Lukket":
                 item["opening_hours"].set_closed(days_list)
             else:
-                item["opening_hours"].add_days_range(days_list, day_hours["open_time"], day_hours["close_time"], "%H:%M")
+                item["opening_hours"].add_days_range(
+                    days_list, day_hours["open_time"], day_hours["close_time"], "%H:%M"
+                )
 
         if "category=retail" in response.url:
             apply_category(Categories.SHOP_CAR, item)
