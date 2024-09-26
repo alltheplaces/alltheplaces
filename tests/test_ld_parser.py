@@ -294,6 +294,35 @@ def test_ld_parse_opening_hours():
     )
 
 
+def test_ld_parse_oh_empty_rule():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            {
+                "@context": "https://schema.org",
+                "@type": "Store",
+                "name": "Middle of Nowhere Foods",
+                "openingHoursSpecification": [
+                    {},
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "closes": "16:30:00",
+                        "dayOfWeek": "https://schema.org/Wednesday",
+                        "opens": "08:30:00",
+                    },
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "closes": "16:30:00",
+                        "dayOfWeek": "https://schema.org/Thursday",
+                        "opens": "08:30:00",
+                    },
+                ],
+            },
+            "%H:%M:%S",
+        ).as_opening_hours()
+        == "We-Th 08:30-16:30"
+    )
+
+
 def test_ld_parse_opening_hours_string():
     assert (
         LinkedDataParser.parse_opening_hours(

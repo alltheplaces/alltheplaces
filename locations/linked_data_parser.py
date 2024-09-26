@@ -183,13 +183,14 @@ class LinkedDataParser:
     #  "opens":  "09:00:00"
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
+    @staticmethod
     def _parse_opening_hours_specification(oh: OpeningHours, rule: dict, time_format: str):
         if (
             not type(LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")) in [list, str]
             or not type(LinkedDataParser.get_case_insensitive(rule, "opens")) == str
             or not type(LinkedDataParser.get_case_insensitive(rule, "closes")) == str
         ):
-            return
+            return oh
 
         days = LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")
         if not isinstance(days, list):
@@ -207,6 +208,7 @@ class LinkedDataParser:
     # Parse an individual https://schema.org/openingHours property value such as
     # "Mo,Tu,We,Th 09:00-12:00"
     # "Mo-Fr 10:00-19:00"
+    @staticmethod
     def _parse_opening_hours(oh: OpeningHours, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 
