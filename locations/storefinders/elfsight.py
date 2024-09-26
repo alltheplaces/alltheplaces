@@ -47,7 +47,8 @@ class ElfsightSpider(JSONBlobSpider):
             ]
 
     def pre_process_data(self, location: dict):
-        location["name"] = location.pop("infoTitle")
+        if "infoTitle" in location:
+            location["name"] = location.pop("infoTitle")
         location["addr"] = location.pop("infoAddress")
         location["phone"] = location.pop("infoPhone")
         location["email"] = location.pop("infoEmail")
