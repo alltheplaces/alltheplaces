@@ -46,7 +46,7 @@ class ElfsightSpider(JSONBlobSpider):
                 "markers"
             ]
 
-    def pre_process_data(self, location):
+    def pre_process_data(self, location: dict):
         location["name"] = location.pop("infoTitle")
         location["addr"] = location.pop("infoAddress")
         location["phone"] = location.pop("infoPhone")
