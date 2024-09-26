@@ -6,7 +6,7 @@ from locations.items import Feature
 class VeaSpider(scrapy.Spider):
     name = "vea"
     item_attributes = {"brand": "Vea Cencosud"}
-    allowed_domains = ["www.supermercadosvea.com"]
+    allowed_domains = ["www.supermercadosvea.com.ar"]
     start_urls = ("http://www.supermercadosvea.com.ar/sucursales-obtener.html",)
     requires_proxy = True
 
