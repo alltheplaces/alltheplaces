@@ -1,9 +1,8 @@
 from typing import Iterable
+from urllib.parse import unquote
 
 import chompjs
 from scrapy.http import JsonRequest, Request
-
-from urllib.parse import unquote
 
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -15,6 +14,7 @@ class ElfsightSpider(JSONBlobSpider):
     - https://core.service.elfsight.com/p/boot/?w=(api_key)
     - Or embedded in data-elfsight-google-maps-options
     """
+
     host = None
     shop = None
     api_key = None
@@ -33,7 +33,9 @@ class ElfsightSpider(JSONBlobSpider):
             data = chompjs.parse_js_object(response.text)
             return data["data"]["widgets"][self.api_key]["data"]["settings"]["markers"]
         else:
-            return chompjs.parse_js_object(unquote(response.xpath("//@data-elfsight-google-maps-options").get()))["markers"]
+            return chompjs.parse_js_object(unquote(response.xpath("//@data-elfsight-google-maps-options").get()))[
+                "markers"
+            ]
 
     def pre_process_data(self, location):
         location["addr"] = location.pop("infoAddress")

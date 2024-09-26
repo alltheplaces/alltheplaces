@@ -1,8 +1,3 @@
-import json
-
-from scrapy import Spider
-
-from locations.items import Feature
 from locations.storefinders.elfsight import ElfsightSpider
 
 
