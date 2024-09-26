@@ -15,6 +15,16 @@ class ElfsightSpider(JSONBlobSpider):
     - Or embedded in data-elfsight-google-maps-options
     """
 
+    # detection_rules = [
+    #     DetectionRequestRule(
+    #         url=r"^https?:\/\/shy\.elfsight\.com/p/boot/?callback=.*&shop=(?P<shop>.*)&w=(?P<api_key>[\w-]+)$",
+    #     ),
+    #     DetectionRequestRule(
+    #         url=r"^https?:\/\/core\.service\.elfsight\.com/p/boot/?w=(?P<api_key>[\w-]+)$",
+    #     ),
+    # }
+
+
     host = None
     shop = None
     api_key = None
