@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
@@ -14,7 +14,9 @@ class HyundaiUSSpider(JSONBlobSpider):
     name = "hyundai_us"
     item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["www.hyundaiusa.com"]
-    start_urls = ["https://www.hyundaiusa.com/var/hyundai/services/dealer/dealersByZip.json?brand=hyundai&model=all&lang=en-us&zip=90210&maxdealers=1000"]
+    start_urls = [
+        "https://www.hyundaiusa.com/var/hyundai/services/dealer/dealersByZip.json?brand=hyundai&model=all&lang=en-us&zip=90210&maxdealers=1000"
+    ]
     locations_key = "dealers"
     needs_json_request = True
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Referer": "https://www.hyundaiusa.com/us/en/dealer-locator"}}
