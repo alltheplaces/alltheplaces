@@ -15,6 +15,7 @@ class BootleggerCoffeeCompanySpider(ElfsightSpider):
     no_refs = True  # not all locations seem to have an id
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
-        item["branch"] = location.pop("infoTitle")
+        if "infoTitle" in location:
+            item["branch"] = location.pop("infoTitle")
         if "COMING SOON" not in item["branch"]:
             yield item
