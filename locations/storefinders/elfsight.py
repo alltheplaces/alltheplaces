@@ -1,10 +1,9 @@
-import chompjs
-
-from locations.json_blob_spider import JSONBlobSpider
 from typing import Iterable
 
-from scrapy.http import JsonRequest, Request, Response
+import chompjs
+from scrapy.http import JsonRequest, Request
 
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class ElfsightSpider(JSONBlobSpider):
