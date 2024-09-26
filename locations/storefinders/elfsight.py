@@ -24,12 +24,11 @@ class ElfsightSpider(JSONBlobSpider):
     #     ),
     # }
 
-
     host = None
-    shop = None
-    api_key = None
+    shop: str | None = None
+    api_key: str = ""
 
-    def start_requests(self) -> Iterable[Request]:
+    def start_requests(self) -> Iterable[JsonRequest | Request]:
         if self.host == "core.service.elfsight.com":
             yield JsonRequest(f"https://{self.host}/p/boot/?w={self.api_key}")
         elif self.host == "shy.elfsight.com":
@@ -38,7 +37,7 @@ class ElfsightSpider(JSONBlobSpider):
             for url in self.start_urls:
                 yield Request(url)
 
-    def extract_json(self, response):
+    def extract_json(self, response: Response) -> list:
         if self.host == "core.service.elfsight.com" or self.host == "shy.elfsight.com":
             data = chompjs.parse_js_object(response.text)
             return data["data"]["widgets"][self.api_key]["data"]["settings"]["markers"]
