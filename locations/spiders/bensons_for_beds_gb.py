@@ -7,7 +7,7 @@ class BensonsForBedsGBSpider(SitemapSpider, StructuredDataSpider):
     name = "bensons_for_beds_gb"
     item_attributes = {"brand": "Bensons for Beds", "brand_wikidata": "Q4890299"}
     sitemap_urls = ["https://stores.bensonsforbeds.co.uk/robots.txt"]
-    sitemap_rules = [(r"uk/[^/]+/[^/]+$", "parse")]
+    sitemap_rules = [(r"uk/[^/]+/[^/]+(?:/[1-9][^/]+)?$", "parse")]
     wanted_types = ["FurnitureStore"]
     search_for_email = False
     search_for_facebook = False
