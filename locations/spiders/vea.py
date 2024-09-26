@@ -8,7 +8,7 @@ class VeaSpider(scrapy.Spider):
     item_attributes = {"brand": "Vea Cencosud"}
     allowed_domains = ["www.supermercadosvea.com.ar"]
     start_urls = ("http://www.supermercadosvea.com.ar/sucursales-obtener.html",)
-    requires_proxy = True
+    requires_proxy = "AR"
 
     def parse(self, response):
         store_list = response.json()
