@@ -12,6 +12,7 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["FastFoodRestaurant"]
     sitemap_urls = ["https://locations.wendys.com/sitemap.xml"]
     sitemap_rules = [(r"https://locations.wendys.com/.+/\w\w/.+/.+", "parse_sd")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = ld_data.get("url")
