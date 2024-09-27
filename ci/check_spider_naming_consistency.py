@@ -74,6 +74,7 @@ COUNTRYCODE_COMPONENTS = {
     "MY",
     "MZ",
     "NA",
+    "NC",
     "NG",
     "NI",
     "NL",
