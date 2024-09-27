@@ -14,6 +14,7 @@ class BurgerKingHNSpider(JSONBlobSpider):
             yield JsonRequest(url=url, data={"business_partner": 15})
 
     def post_process_item(self, item, response, location):
+        item["branch"] = item.pop("name")
         item["street_address"] = item.pop("addr_full")
         item["country"] = location["country_name"]
         item["state"] = location["location_one_name"]
