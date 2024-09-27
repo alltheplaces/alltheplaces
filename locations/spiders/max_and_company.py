@@ -7,8 +7,8 @@ from locations.hours import OpeningHours, sanitise_day
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MaxAndCoSpider(Spider):
-    name = "max_and_co"
+class MaxAndCompanySpider(Spider):
+    name = "max_and_company"
     item_attributes = {"brand": "MAX&Co.", "brand_wikidata": "Q120570926"}
     start_urls = [
         "https://gb.maxandco.com/store-locator?south=-90&west=-180&north=90&east=180&listJson=true&withoutRadius=false"
