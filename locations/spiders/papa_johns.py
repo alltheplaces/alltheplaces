@@ -16,6 +16,7 @@ class PapaJohnsSpider(SitemapSpider, StructuredDataSpider):
     ]
     wanted_types = ["FastFoodRestaurant"]
     download_delay = 0.2
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if name := item.get("name", "").lower():
