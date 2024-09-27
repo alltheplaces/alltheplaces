@@ -12,3 +12,4 @@ class MassageEnvySpider(SitemapSpider, StructuredDataSpider):
         (r"^https://locations.massageenvy.com/[^/]+/[^/]+/[^/]+.html$", "parse_sd"),
     ]
     wanted_types = ["LocalBusiness"]
+    drop_attributes = {"image"}
