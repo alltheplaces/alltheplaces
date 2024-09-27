@@ -30,6 +30,7 @@ class SevenElevenPHSpider(scrapy.Spider):
             if "[PERMANENT CLOSED]" in item["addr_full"]:
                 item["extras"]["end_date"] = "yes"
             self.clean_address(item)
+            item["phone"] = None
             apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item
 
