@@ -18,5 +18,6 @@ class DominosPizzaGBSpider(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
+    drop_attributes = ["image"]
     user_agent = BROWSER_DEFAULT
     requires_proxy = True
