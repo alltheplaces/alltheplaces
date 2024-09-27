@@ -16,6 +16,7 @@ class BurgerKingNOSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["website"] = f"https://burgerking.no/restaurants/{location['slug']}"
+        item["branch"] = item.pop("name")
         apply_yes_no(Extras.DRIVE_THROUGH, item, location["hasDriveThru"], False)
         # apply_yes_no(Extras.WHEELCHAIR, item, location["hasWheelchairAccess"], False) # Always false, not sure it is accurate
         # apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, location["hasDisabledToilets"], False) # Always false, not sure it is accurate
