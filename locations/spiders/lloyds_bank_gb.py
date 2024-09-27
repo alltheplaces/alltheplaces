@@ -13,6 +13,7 @@ class LloydsBankGBSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://branches.lloydsbank.com/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/branches\.lloydsbank\.com\/[-\w]+\/[-\/'\w]+$", "parse_sd")]
+    drop_attributes = {"image"}
 
     def sitemap_filter(self, entries):
         for entry in entries:
