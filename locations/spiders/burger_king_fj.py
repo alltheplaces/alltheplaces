@@ -6,4 +6,3 @@ class BurgerKingFJSpider(BurgerKingBSSpider):
     allowed_domains = ["www.burgerkingfiji.com"]
     host = "https://www.burgerkingfiji.com"
     country_code = "FJ"
-    no_refs = True

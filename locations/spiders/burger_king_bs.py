@@ -27,6 +27,8 @@ class BurgerKingBSSpider(Spider):
             item["ref"] = location.xpath('div[@class="bk-id"]/text()').get()
             item["street_address"] = location.xpath('div[@class="bk-address1"]/text()').get()
             item["branch"] = item["street_address"]
+            if item["ref"] is None:
+                item["ref"] = item["branch"].lower().replace(" ", "-")
             item["city"] = location.xpath('div[@class="bk-city"]/text()').get()
             item["postcode"] = location.xpath('div[@class="bk-zip"]/text()').get()
             item["country"] = location.xpath('div[@class="bk-country"]/text()').get()
