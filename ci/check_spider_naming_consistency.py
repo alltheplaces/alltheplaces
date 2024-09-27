@@ -46,6 +46,7 @@ COUNTRYCODE_COMPONENTS = {
     "GR",
     "GT",
     "HK",
+    "HN",
     "HR",
     "HU",
     "ID",
