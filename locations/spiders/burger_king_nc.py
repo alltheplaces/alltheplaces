@@ -13,7 +13,7 @@ class BurgerKingNCSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace("BURGER KING® ", "")
         item["website"] = (
-            f"https://www.burgerking.nc/restaurants/burger-king-{unidecode(item['branch'].replace(" ", "-").lower())}/"
+            f'https://www.burgerking.nc/restaurants/burger-king-{unidecode(item["branch"].replace(" ", "-").lower())}/'
         )
         yield item
         # TODO more info on individual pages, but doesn't seem worth html parsing for 4 locations
