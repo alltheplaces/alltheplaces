@@ -91,6 +91,8 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
     elif "daddr" in url:
         for daddr in get_query_param(url, "daddr"):
             daddr = daddr.split(",")
+            if len(daddr) == 1 and " " in daddr[0]:
+                daddr = daddr[0].split(" ")
             fixed_coords = []
             if any(["°" in coord for coord in daddr]):
                 for coord in daddr:
