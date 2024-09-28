@@ -1,4 +1,5 @@
 import re
+from typing import Iterable
 from urllib.parse import urlparse
 
 import pycountry
@@ -24,12 +25,12 @@ class NSI(metaclass=Singleton):
     """
 
     def __init__(self):
-        self.loaded = False
-        self.wikidata_json = None
-        self.nsi_json = None
+        self.loaded: bool = False
+        self.wikidata_json: dict = None
+        self.nsi_json: dict = None
 
     @staticmethod
-    def _request_file(file):
+    def _request_file(file: str) -> dict:
         resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/" + file)
         if not resp.status_code == 200:
             raise Exception("NSI load failure")
@@ -71,7 +72,7 @@ class NSI(metaclass=Singleton):
                     return wikidata_code
         return None
 
-    def lookup_wikidata(self, wikidata_code):
+    def lookup_wikidata(self, wikidata_code: str = None) -> dict:
         """
         Lookup wikidata code in the NSI.
         :param wikidata_code: wikidata code to lookup in the NSI
@@ -80,23 +81,39 @@ class NSI(metaclass=Singleton):
         self._ensure_loaded()
         return self.wikidata_json.get(wikidata_code)
 
-    def iter_wikidata(self, fuzzy_label=None):
+    def iter_wikidata(self, label_to_find: str = None) -> Iterable[tuple[str, dict]]:
         """
         Lookup by fuzzy label match in the NSI.
-        :param fuzzy_label: string to fuzzy match
+        :param label_to_find: string to fuzzy match
         :return: iterator of matching NSI wikidata.json entries
         """
         self._ensure_loaded()
-        s = NSI.normalise(fuzzy_label)
-        for k, v in self.wikidata_json.items():
-            if not fuzzy_label:
-                yield k, v
-                continue
-            if label := v.get("label"):
-                if s in NSI.normalise(label):
-                    yield k, v
+        if not label_to_find:
+            for k, v in self.wikidata_json.items():
+                yield (k, v)
+        else:
+            label_to_find_fuzzy = self.normalise_label(label_to_find)
+            for k, v in self.wikidata_json.items():
+                if nsi_label := v.get("label"):
+                    nsi_label_fuzzy = self.normalise_label(nsi_label)
+                    if label_to_find_fuzzy in nsi_label_fuzzy:
+                        yield (k, v)
 
-    def iter_nsi(self, wikidata_code=None):
+    def iter_country(self, location_code: str = None) -> Iterable[dict]:
+        """
+        Lookup by country code match in the NSI.
+        :param location_code: country code or NSI location to search for
+        :return: iterator of matching NSI wikidata.json entries
+        """
+        self._ensure_loaded()
+        for v in self.nsi_json.values():
+            for item in v["items"]:
+                if not location_code:
+                    yield item
+                elif location_code.lower() in item["locationSet"].get("include"):
+                    yield item
+
+    def iter_nsi(self, wikidata_code: str = None) -> Iterable[dict]:
         """
         Iterate NSI for all items in nsi.json with a matching wikidata code
         :param wikidata_code: wikidata code to match, if None then all entries
@@ -112,15 +129,36 @@ class NSI(metaclass=Singleton):
                 elif wikidata_code == item["tags"].get("operator:wikidata"):
                     yield item
 
+    @staticmethod
+    def normalise_label(original_label: str) -> str:
+        """
+        Normalise candidate brand/operator labels approximately according to
+        NSI's brand/operator label normalisation code at:
+        https://github.com/osmlab/name-suggestion-index/blob/main/lib/simplify.js
+
+        NSI label normalisation requires these changes:
+        - Diacritics are replaced with their closest ASCII equivalent.
+        - Ampersand characters are replaced with the word "and".
+        - Punctuation (including spaces but excluding ampersands) are removed.
+        - The label is converted to lower case.
+
+        :param original_label: original label which requires normalisation
+        :return: normalised label
+        """
+        return re.sub(r"[\W_]+", "", unidecode(original_label).replace("&", "and"), flags=re.ASCII).lower().strip()
+
+    @staticmethod
     def generate_keys_from_nsi_attributes(nsi_attributes: dict) -> tuple[str, str] | None:
         """
         From supplied NSI attributes of a brand or operator, generate a tuple
         containing:
           1. Key suitable for use as a spider key and filename.
           2. Class name suitable for use as the name of a spider class.
+
         If the brand or operator exists in one
         or two countries, add ISO 3166-1 alpha-2 codes for the one or two
         countries as suffixes to the generated key.
+
         :param nsi_attributes: dictionary of NSI attributes for a brand or
                                operator.
         :return: generated key or None if a key could not be generated.
@@ -171,93 +209,3 @@ class NSI(metaclass=Singleton):
 
         class_name = f"{class_name}Spider"
         return (key, class_name)
-
-    @staticmethod
-    def normalise(s):
-        """
-        Help fuzzy matcher by "normalising" string data.
-        :param s: string to be cleaned
-        :return: the cleaned string
-        """
-        if not s:
-            return None
-        s = s.upper()
-        converted_word = ""
-        for char in s:
-            if char in NSI.replace_table:
-                replace_char = NSI.replace_table[char]
-            else:
-                replace_char = char
-            if replace_char:
-                converted_word += replace_char
-        return converted_word
-
-    replace_table = {
-        ".": None,
-        "?": None,
-        "!": None,
-        "'": None,
-        "(": None,
-        ")": None,
-        "|": None,
-        ",": None,
-        "’": None,
-        "ʻ": None,
-        "%": None,
-        '"': None,
-        ":": None,
-        ";": None,
-        "*": None,
-        "#": None,
-        "/": None,
-        " ": None,
-        "-": None,
-        "–": None,
-        "Ǎ": "A",
-        "Ă": "A",
-        "Ä": "A",
-        "À": "A",
-        "Å": "A",
-        "Â": "A",
-        "Á": "A",
-        "Ã": "A",
-        "Č": "C",
-        "Ç": "C",
-        "É": "E",
-        "È": "E",
-        "Ê": "E",
-        "Ē": "E",
-        "Ė": "E",
-        "Ë": "E",
-        "Ě": "E",
-        "Í": "I",
-        "İ": "I",
-        "Ì": "I",
-        "Î": "I",
-        "Ï": "I",
-        "Ī": "I",
-        "Ї": "I",
-        "Ł": "L",
-        "Ñ": "N",
-        "Ń": "N",
-        "Ň": "N",
-        "Ö": "O",
-        "Ø": "O",
-        "Ó": "O",
-        "Ô": "O",
-        "Ộ": "O",
-        "Ò": "O",
-        "Ō": "O",
-        "Ş": "S",
-        "Ś": "S",
-        "Š": "S",
-        "Ș": "S",
-        "Ü": "U",
-        "Ú": "U",
-        "Û": "U",
-        "Ý": "Y",
-        "Ÿ": "Y",
-        "Ž": "Z",
-        "Ż": "Z",
-        "Ź": "Z",
-    }

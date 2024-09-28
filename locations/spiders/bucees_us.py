@@ -17,7 +17,7 @@ class BuceesUSSpider(WPStoreLocatorSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = unescape(item.pop("name"))
+        item["branch"] = unescape("name")
 
         apply_yes_no(Fuel.DIESEL, item, True)
         apply_yes_no("car_wash", item, "carwash" in feature["terms"])

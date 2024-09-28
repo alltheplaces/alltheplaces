@@ -19,7 +19,7 @@ US_TERRITORIES = {
 class XfinitySpider(scrapy.Spider):
     name = "xfinity"
     item_attributes = {"brand": "Xfinity", "brand_wikidata": "Q5151002"}
-    allowed_domains = ["www.xfinity.com"]
+    allowed_domains = ["www.xfinity.com", "api-support.xfinity.com"]
 
     def start_requests(self):
         for state in GeonamesCache().get_us_states() | US_TERRITORIES:

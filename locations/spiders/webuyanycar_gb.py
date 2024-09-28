@@ -17,7 +17,7 @@ class WebuyanycarGBSpider(CrawlSpider, StructuredDataSpider):
             follow=False,
         )
     ]
-    download_delay = 0.5
+    requires_proxy = "GB"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         extract_google_position(item, response)

@@ -14,6 +14,8 @@ class StatSpider(Spider):
     because of the "stat" in the API path.
     """
 
+    dataset_attributes = {"source": "api", "api": "stat"}
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["locations"]:
             store.update(store.pop("businessAddress"))
@@ -33,3 +35,6 @@ class StatSpider(Spider):
             item["opening_hours"] = oh
 
             yield from self.post_process_item(item, response, store)
+
+    def post_process_item(self, item, response, store):
+        yield item

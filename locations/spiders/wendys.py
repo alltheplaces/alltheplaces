@@ -12,6 +12,7 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["FastFoodRestaurant"]
     sitemap_urls = ["https://locations.wendys.com/sitemap.xml"]
     sitemap_rules = [(r"https://locations.wendys.com/.+/\w\w/.+/.+", "parse_sd")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = ld_data.get("url")
@@ -38,7 +39,7 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
         oh = OpeningHours()
 
         for day in days:
-            for interval in day["intervals"]:
+            for interval in day["intervals"] or []:
                 # These interval ranges are 24 hour times represented as integers, so they need to be converted to strings
                 open_time = str(interval["start"]).zfill(4)
                 close_time = str(interval["end"]).zfill(4)

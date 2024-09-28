@@ -64,6 +64,7 @@ do
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
     PARQUETFILE="${SPIDER_RUN_DIR}/output.parquet"
+    STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
     timeout -k 5s 90s \
@@ -74,7 +75,7 @@ do
         --logfile="${LOGFILE}" \
         -s CLOSESPIDER_TIMEOUT=60 \
         -s CLOSESPIDER_ERRORCOUNT=1 \
-        -s LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats.json \
+        -s LOGSTATS_FILE="${STATSFILE}" \
         $spider
 
     if [ ! $? -eq 0 ]; then
@@ -132,7 +133,89 @@ do
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "parquet copy to s3 failed with exit code ${retval}")
-            exit 1
+        fi
+
+        aws s3 cp --only-show-errors ${STATSFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            (>&2 echo "stats copy to s3 failed with exit code ${retval}")
+        fi
+
+        # Check the stats JSON to look for things that we consider warnings or errors
+        if [ ! -f "${STATSFILE}" ]; then
+            (>&2 echo "stats file not found")
+        else
+            STATS_WARNINGS=""
+            STATS_ERRORS=""
+
+            # We expect items to have a category
+            missing_category=$(jq '."atp/category/missing"' "${STATSFILE}")
+            if [ $missing_category -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
+            fi
+
+            # Warn if items are missing a lat/lon
+            missing_lat=$(jq '."atp/field/lat/missing"' "${STATSFILE}")
+            missing_lon=$(jq '."atp/field/lon/missing"' "${STATSFILE}")
+            if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
+            fi
+
+            # Error if items have invalid lat/lon
+            invalid_lat=$(jq '."atp/field/lat/invalid"' "${STATSFILE}")
+            invalid_lon=$(jq '."atp/field/lon/invalid"' "${STATSFILE}")
+            if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
+            fi
+
+            # Error if items have invalid website
+            invalid_website=$(jq '."atp/field/website/invalid"' "${STATSFILE}")
+            if [ $invalid_website -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Website is invalid on ${invalid_website} items</li>"
+            fi
+
+            # Warn if items were fetched using Zyte
+            zyte_fetched=$(jq '."scrapy-zyte-api/success"' "${STATSFILE}")
+            if [ $zyte_fetched -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${zyte_fetched} requests were made using Zyte</li>"
+            fi
+
+            # Warn if more than 30% of the items scraped were dropped by the dupe filter
+            dupe_dropped=$(jq '."dupefilter/filtered"' "${STATSFILE}")
+            total_scraped=$(jq '."item_scraped_count"' "${STATSFILE}")
+            dupe_percent=$(echo "scale=2; ${dupe_dropped} / ${total_scraped} * 100" | bc)
+            if [ $(echo "${dupe_percent} > 30" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
+            fi
+
+            # Warn if the image URL is not very unique across all the outputs
+            unique_image_urls=$(jq '.features|map(.properties.image) | unique | length' ${OUTFILE})
+            unique_image_url_rate=$(echo "scale=2; ${unique_image_urls} / ${FEATURE_COUNT} * 100" | bc)
+            if [ $(echo "${unique_image_url_rate} < 50" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
+            fi
+
+            # Warn if the phone number is not very unique across all the outputs
+            unique_phones=$(jq '.features|map(.properties.phone) | unique | length' ${OUTFILE})
+            unique_phone_rate=$(echo "scale=2; ${unique_phones} / ${FEATURE_COUNT} * 100" | bc)
+            if [ $(echo "${unique_phone_rate} < 90" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
+            fi
+
+            num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
+            num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
+            if [ $num_errors -gt 0 ]; then
+                FAILURE_REASON="stats"
+                EXIT_CODE=1
+            fi
+
+            if [ $num_errors -gt 0 ] || [ $num_warnings -gt 0 ]; then
+                # Include details in an expandable section if there are warnings or errors
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+            else
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}|\\n"
+            fi
+            continue
         fi
 
         PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"

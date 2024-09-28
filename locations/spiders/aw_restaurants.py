@@ -1,17 +1,18 @@
-from scrapy.spiders import SitemapSpider
+from locations.categories import Extras, apply_yes_no
+from locations.storefinders.stat import StatSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 
-
-class AwRestaurantsSpider(SitemapSpider, StructuredDataSpider):
+class AwRestaurantsSpider(StatSpider):
     name = "aw_restaurants"
-    item_attributes = {"brand": "A&W Restaurants", "brand_wikidata": "Q277641"}
-    allowed_domains = ["awrestaurants.com"]
-    sitemap_urls = ["https://awrestaurants.com/sitemap.xml"]
-    sitemap_rules = [("/locations/", "parse_sd")]
-    time_format = "%H:%M:%S"
+    item_attributes = {"brand": "A&W", "brand_wikidata": "Q277641"}
+    start_urls = [
+        "https://awrestaurants.com/stat/api/locations/search?limit=20000&fields=servicetags_drive_thru%2Cservicetags_outdoor_seating%2Cservicetags_breakfast%2Cservicetags_drive_in"
+    ]
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            entry["loc"] = entry["loc"].replace("http://awdev.dev.wwbtc.com/", "https://awrestaurants.com/")
-            yield entry
+    def post_process_item(self, item, response, store):
+        item["name"] = None
+        apply_yes_no(Extras.DRIVE_THROUGH, item, store["displayFields"]["servicetags_drive_thru"])
+        apply_yes_no(Extras.OUTDOOR_SEATING, item, store["displayFields"]["servicetags_outdoor_seating"])
+        apply_yes_no(Extras.BREAKFAST, item, store["displayFields"]["servicetags_breakfast"])
+        apply_yes_no("drive_in", item, store["displayFields"]["servicetags_drive_in"])
+        yield item
