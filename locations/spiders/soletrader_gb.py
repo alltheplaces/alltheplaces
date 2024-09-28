@@ -1,6 +1,6 @@
-from typing import Any
-import re
 import json
+import re
+from typing import Any
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
