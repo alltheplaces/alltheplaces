@@ -38,7 +38,7 @@ class LoewsHotelsSpider(StructuredDataSpider):
                     item["extras"]["rooms"] = amenity_feature["value"]
                 elif amenity_feature["name"] == "Free Wifi":
                     item["extras"]["internet_access"] = "wlan"
-                    item["extras"]["internet_access:fee"]  = "no"
+                    item["extras"]["internet_access:fee"] = "no"
                 elif amenity_feature["name"] == "Accessible":
                     apply_yes_no("wheelchair", item, True)
                 elif amenity_feature["name"] == "Air-conditioned":
@@ -60,8 +60,6 @@ class LoewsHotelsSpider(StructuredDataSpider):
                     item["extras"]["fitness_centre"] = "yes"
 
                 elif amenity_feature["name"] == "Bar":
-                    item["extras"]["bar"] = "yes"                
+                    item["extras"]["bar"] = "yes"
                 else:
-                    print(amenity_feature)
-    # TODO: There are additional amenity features
-    # 2024-09-28 04:18:32 [loews_hotels] DEBUG: [{'@type': 'LocationFeatureSpecification', 'value': '750', 'name': 'Number of Rooms'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Fitness Center'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'WiFi'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Outdoor Pool'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Room Service'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Restaurant'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Bar'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Valet Parking'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Parking'}, {'@type': 'LocationFeatureSpecification', 'value': True, 'name': 'Business Center'}]
+                    pass
