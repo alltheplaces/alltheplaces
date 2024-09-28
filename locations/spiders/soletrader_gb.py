@@ -6,6 +6,7 @@ from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
