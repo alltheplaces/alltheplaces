@@ -12,21 +12,19 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class SoletraderGBSpider(Spider):
     name = "soletrader_gb"
     item_attributes = {"brand": "Soletrader", "brand_wikidata": "Q25101942"}
-    start_urls = [
-        "https://www.soletrader.co.uk/store-locator"
-    ]
+    start_urls = ["https://www.soletrader.co.uk/store-locator"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data=response.xpath('//script[contains(text(),"postalCode")]/text()').get()
-        data=re.sub(r'\\"','"',data)
-        data=re.sub('^.*locations..','',data)
-        data=re.sub('.......$','',data)
+        data = response.xpath('//script[contains(text(),"postalCode")]/text()').get()
+        data = re.sub(r'\\"', '"', data)
+        data = re.sub("^.*locations..", "", data)
+        data = re.sub(".......$", "", data)
         for location in json.loads(data):
             item = Feature()
-            address=location["address"]
+            address = location["address"]
             item = DictParser.parse(address)
             item["street_address"] = merge_address_lines([address["address1"], address["address2"]])
-            item["ref"]=location["entityId"]
+            item["ref"] = location["entityId"]
 
             oh = OpeningHours()
             for day in DAYS_FULL:
