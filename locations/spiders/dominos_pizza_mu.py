@@ -1,9 +1,8 @@
-from locations.spiders.dominos_pizza_sa_qa import DominosPizzaSAQASpider
 
 
 class DominosPizzaMUSpider(GoReviewSpider):
     name = "dominos_pizza_mu"
-    
+
     def start_requests(self):
         for country_code, name, lat, lon in [
             ("MU", "MAURITIUS", "-20.3484", "57.5522"),
