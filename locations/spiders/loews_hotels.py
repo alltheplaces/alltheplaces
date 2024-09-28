@@ -9,9 +9,10 @@ class LoewsHotelsSpider(StructuredDataSpider):
     allowed_domains = ["loewshotels.com"]
     start_urls = ("https://www.loewshotels.com/destinations",)
     search_for_twitter = False
+    wanted_types = ["Hotel"]
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="row"]//p//a/@href').extract()
+        urls = response.xpath('//div[@class="buttons"]/a/@href').extract()
         for url in urls:
             if url.startswith("/booking"):
                 pass
