@@ -195,6 +195,13 @@ do
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
             fi
 
+            # Warn if the phone number is not very unique across all the outputs
+            unique_phones=$(jq '.features|map(.properties.phone) | unique | length' ${OUTFILE})
+            unique_phone_rate=$(echo "scale=2; ${unique_phones} / ${FEATURE_COUNT} * 100" | bc)
+            if [ $(echo "${unique_phone_rate} < 90" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
+            fi
+
             num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
             num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
             if [ $num_errors -gt 0 ]; then
