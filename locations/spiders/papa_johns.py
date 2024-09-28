@@ -24,6 +24,6 @@ class PapaJohnsSpider(SitemapSpider, StructuredDataSpider):
             else:
                 item["branch"] = item.pop("name").removeprefix("Papa Johns Pizza ")
 
-        item["website"] = reseponse.urljoin(item["website"])
+        item["website"] = response.urljoin(item["website"])
 
         yield item
