@@ -1,4 +1,5 @@
 from locations.spiders.dominos_pizza_sa_qa import DominosPizzaSAQASpider
+from scrapy.http import JsonRequest
 
 
 class DominosPizzaMUSpider(DominosPizzaSAQASpider):
