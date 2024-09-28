@@ -136,6 +136,35 @@ def set_closed(item: Feature, end_date: datetime = None):
     item["extras"]["end_date"] = end_date.strftime("%Y-%m-%d") if end_date else "yes"
 
 
+def merge_items(language_dict: dict, main_language: str, matching_key: str = "ref") -> Iterable[Feature]:
+    """
+    Merge multiple items in different languages together. See starbucks_cn for example usage.
+    :param language_dict: a dict of language to a dict of keys to items for all of the languages/items to be merged.
+    :param main_language: the language to be used for the main keys in the item.
+    :param matching_key: the key (defaults to "ref") that is used to match up items from different languages.
+    :return: individual merged items
+    """
+    all_item_refs = {language: [ref for ref in items.keys()] for language, items in language_dict.items()}
+    for item in language_dict[main_language].values():
+        matched_items = {}
+        for language, items in language_dict.items():
+            if item[matching_key] in items.keys():
+                matched_items[language] = items[item[matching_key]]
+                all_item_refs[language].remove(item[matching_key])
+            else:
+                logger.warning(
+                    f"No matches found for '{matching_key}': '{item[matching_key]}' in language '{language}'"
+                )
+
+        item = get_merged_item(matched_items, main_language)
+        yield item
+    for language, refs in all_item_refs.items():
+        if len(refs) > 0:
+            logger.warning(f"Failed to match {len(refs)} for language: {language}")
+        for ref in refs:
+            yield language_dict[language][ref]
+
+
 class GeneratedSpider(Feature):
     storefinder_url = scrapy.Field()
     spider = scrapy.Field()
@@ -193,6 +222,12 @@ TRANSLATABLE_PREFIXES = [
 
 
 def get_merged_item(matched_items: dict, main_language: str, matching_key: str) -> dict:
+    """
+    Merge items in different languages, but which are the same feature, together.
+    :param matched_items: a dict of language to item for all of the languages/items to be merged.
+    :param main_language: the language to be used for the main keys in the item.
+    :return: a single merged item
+    """
     # Do extras first before we add language keys to it
     item = get_merged_extras(matched_items, main_language, matching_key)
 

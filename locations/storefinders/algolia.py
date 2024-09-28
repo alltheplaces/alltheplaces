@@ -34,6 +34,9 @@ class AlgoliaSpider(Spider, AutomaticSpiderGenerator):
             headers='{api_key: .["x-algolia-api-key"], app_id: .["x-algolia-application-id"]}',
         ),
         DetectionRequestRule(
+            url=r"^https?:\/\/(?:[a-z0-9]+)-dsn\.algolia\.net\/1\/indexes\/(?P<index_name>[^/*]+)\/(?:browse|objects|queries|query)\?.*x-algolia-api-key=(?P<api_key>[^&]*)&x-algolia-application-id=(?P<app_id>[^&]*)",
+        ),
+        DetectionRequestRule(
             url=r"^https?:\/\/(?:[a-z0-9]+)-dsn\.algolia\.net\/1\/indexes\/\*\/(?:browse|objects|queries|query)(?:\?|$)",
             headers='{api_key: .["x-algolia-api-key"], app_id: .["x-algolia-application-id"]}',
             data='keys[] | capture("\\"indexName\\":\\"(?<index_name>[^\\"]*)\\"")',

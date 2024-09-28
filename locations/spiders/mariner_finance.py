@@ -4,6 +4,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MarinerFinanceSpider(scrapy.Spider):
@@ -49,7 +50,7 @@ class MarinerFinanceSpider(scrapy.Spider):
             "Connection": "keep-alive",
             "sec-ch-ua": '"Google Chrome";v="93", " Not;A Brand";v="99", "Chromium";v="93"',
             "sec-ch-ua-mobile": "?0",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
+            "User-Agent": BROWSER_DEFAULT,
             "sec-ch-ua-platform": '"Linux"',
             "Content-Type": "application/json",
             "Accept": "*/*",

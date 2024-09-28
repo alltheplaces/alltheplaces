@@ -3,7 +3,9 @@ from typing import Iterable
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request, Response
 
+
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
+
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -54,11 +56,19 @@ class AmaiPromapSpider(JSONBlobSpider, AutomaticSpiderGenerator):
 
             # Hours may (also) be in "operating_hours", but this has not yet been
             # encountered in the limited number of these found.
-            if schedule := feature.get("schedule"):
+            if hours_raw := feature.get("operating_hours"):
+                item["opening_hours"] = OpeningHours()
+                hours_dict = parse_js_object(hours_raw)
+                for day_key, day_value in hours_dict.items():
+                    for time in day_value["slot"]:
+                        item["opening_hours"].add_range(day_value["name"], time["from"], time["to"])
+
+            elif schedule := feature.get("schedule"):
                 item["opening_hours"] = OpeningHours()
                 for day in schedule.split("\n"):
                     item["opening_hours"].add_ranges_from_string(day)
 
             item["image"] = feature.get("store_image")
+
             item["street_address"] = clean_address([feature.get("address"), feature.get("address2")])
             yield from self.post_process_item(item, response, feature) or []

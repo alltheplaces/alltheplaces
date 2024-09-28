@@ -228,6 +228,7 @@ class StructuredDataSpider(Spider):
         "TravelAgency",
         "VeterinaryCare",
     ]
+    convert_microdata = True
     search_for_email = True
     search_for_phone = True
     search_for_twitter = True
@@ -250,7 +251,8 @@ class StructuredDataSpider(Spider):
         yield from self.parse_sd(response)
 
     def parse_sd(self, response: Response):  # noqa: C901
-        MicrodataParser.convert_to_json_ld(response)
+        if self.convert_microdata:
+            MicrodataParser.convert_to_json_ld(response)
         for ld_item in self.iter_linked_data(response):
             self.pre_process_data(ld_item)
 
@@ -369,9 +371,9 @@ class StructuredDataSpider(Spider):
                         return match.group(1)
         return url
 
-    def pre_process_data(self, ld_data, **kwargs):
+    def pre_process_data(self, ld_data: dict, **kwargs):
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         """Override with any post-processing on the item."""
         yield item
