@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.hyundai_kr import HYUNDAI_SHARED_ATTRIBUTES
@@ -25,24 +25,24 @@ class HyundaiCASpider(JSONBlobSpider):
         if feature.get("Hours"):
             if "Sales" in feature["Hours"].keys():
                 item["ref"] = feature.get("DealerCode") + "_Sales"
-                sales = item.copy()
+                sales = item.deepcopy()
                 apply_category(Categories.SHOP_CAR, sales)
                 sales["opening_hours"] = self.parse_opening_hours(feature, "Sales")
                 yield sales
             if "Service" in feature["Hours"].keys():
                 item["ref"] = feature.get("DealerCode") + "_Service"
-                service = item.copy()
+                service = item.deepcopy()
                 apply_category(Categories.SHOP_CAR_REPAIR, service)
                 service["opening_hours"] = self.parse_opening_hours(feature, "Service")
                 yield service
             if "Parts" in feature["Hours"].keys():
                 item["ref"] = feature.get("DealerCode") + "_Parts"
-                parts = item.copy()
+                parts = item.deepcopy()
                 apply_category(Categories.SHOP_CAR_PARTS, parts)
                 parts["opening_hours"] = self.parse_opening_hours(feature, "Parts")
                 yield parts
 
-    def parse_opening_hours(self, feature: dict, hours_type: str) -> OpeningHours():
+    def parse_opening_hours(self, feature: dict, hours_type: str) -> OpeningHours:
         oh = OpeningHours()
         if not feature.get("Hours"):
             return oh
@@ -55,7 +55,7 @@ class HyundaiCASpider(JSONBlobSpider):
                 or day_hours["End"] == "--"
                 or day_hours["End"] == "By Appt. Only"
             ):
-                oh.set_closed(DAYS_EN[day_hours["Weekday"]])
+                oh.set_closed(day_hours["Weekday"])
             else:
-                oh.add_range(DAYS_EN[day_hours["Weekday"]], day_hours["Start"], day_hours["End"], "%I:%M %p")
+                oh.add_range(day_hours["Weekday"], day_hours["Start"], day_hours["End"], "%I:%M %p")
         return oh

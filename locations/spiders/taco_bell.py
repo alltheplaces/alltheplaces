@@ -58,5 +58,5 @@ class TacoBellSpider(SitemapSpider):
                     item.update(self.TACOBELL_CANTINA)
             elif "locations.tacobell.co.uk" in item["website"]:
                 item["name"] = "Taco Bell"
-
+            item["image"] = None
             yield item

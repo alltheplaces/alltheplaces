@@ -16,14 +16,26 @@ class BurgerKingNGSpider(JSONBlobSpider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://api-mena.menu.app/api/directory/search"]
     locations_key = ["data", "venues", "data"]
-    # no_refs = True
+    website_root = "https://www.burger-king.ng/restaurants/"
+    request_headers = {"application": "5a426f83bbd4be2eb694497c5700c743"}
+    request_data = {"latitude": "0", "longitude": "0", "order_types": [4, 6], "view": "search", "per_page": 50}
 
     def start_requests(self):
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,
-                headers={"application": "5a426f83bbd4be2eb694497c5700c743"},
-                data={"latitude": "0", "longitude": "0", "order_types": [4, 6], "view": "search", "per_page": 5000},
+                headers=self.request_headers,
+                data=self.request_data,
+            )
+
+    def parse(self, response):
+        features = self.extract_json(response)
+        yield from self.parse_feature_array(response, features) or []
+        if next_page := response.json()["data"]["venues"].get("next_page_url"):
+            yield JsonRequest(
+                url=next_page,
+                headers=self.request_headers,
+                data=self.request_data,
             )
 
     def pre_process_data(self, feature: dict) -> None:
@@ -33,9 +45,13 @@ class BurgerKingNGSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
         item.pop("state")
-        item["street_address"] = item.pop("addr_full")
-        slug = item["street_address"].replace(" ", "-").replace(",", "").lower()
-        item["website"] = f"https://www.burger-king.ng/restaurants/{slug}?id={item['ref']}"
+        if "addr_full" in item:
+            item["street_address"] = item.pop("addr_full")
+        if address := item["street_address"]:
+            slug = address.replace(" ", "-").replace(",", "").lower()
+        else:
+            slug = "no-address"
+        item["website"] = f"{self.website_root}{slug}?id={item['ref']}"
 
         orders = [order["reference_type"] for order in location["order_types"]]
         for order in orders:
@@ -45,10 +61,13 @@ class BurgerKingNGSpider(JSONBlobSpider):
                 self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_order_type/{order}")
 
         item["opening_hours"] = OpeningHours()
-        for times in location["serving_times"]:
-            if times["reference_type"] == "WeekDays" and set(times["days"]) == set([i for i in range(7)]):
-                for day in DAYS:
-                    item["opening_hours"].add_range(day, times["time_from"], times["time_to"])
-            elif times["reference_type"] not in ["SpecialDays"]:
-                self.crawler.stats.inc_value(f"atp/{self.name}/hours_failed/{times['reference_type']}")
+        for rule in location["serving_times"]:
+            if rule["type_id"] != 2:
+                continue
+            for day in rule["days"]:
+                if rule["time_from"] == "00:00" and rule["time_to"] == "00:00":
+                    item["opening_hours"].add_range(DAYS[day - 1], "00:00", "23:59")
+                else:
+                    item["opening_hours"].add_range(DAYS[day - 1], rule["time_from"], rule["time_to"])
+
         yield item
