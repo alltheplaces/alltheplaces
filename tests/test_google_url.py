@@ -58,6 +58,8 @@ def test_maps_url():
         52.01390075683594,
         4.152029991149902,
     )
+    assert url_to_coords("https://maps.google.com/maps?daddr=1.3914° N, 103.8761° E") == (1.3914, 103.8761)
+    assert url_to_coords("https://maps.google.com/maps?daddr=1.3914° S, 103.8761° W") == (-1.3914, -103.8761)
 
 
 def test_directions():
