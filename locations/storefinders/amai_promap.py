@@ -3,9 +3,7 @@ from typing import Iterable
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request, Response
 
-
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
-
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature

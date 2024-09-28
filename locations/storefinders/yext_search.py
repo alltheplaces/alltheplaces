@@ -7,7 +7,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class YextSearchSpider(Spider):
