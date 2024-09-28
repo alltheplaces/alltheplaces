@@ -3,7 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 
-class VirginiaHealthInspectionBlueRidge(Spider):
+class VirginiaHealthInspectionBlueRidgeSpider(Spider):
     name = "virginia_health_inspection_blue_ridge"
     item_attributes = {}
     start_urls = ["https://inspections.myhealthdepartment.com"]
