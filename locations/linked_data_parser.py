@@ -128,7 +128,7 @@ class LinkedDataParser:
             logger.warning(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
         except Exception as e:
             logger.warning(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
-            logger.debug(traceback.print_exc())
+            logger.debug(traceback.format_exc())
 
         if image := LinkedDataParser.get_case_insensitive(ld, "image"):
             if isinstance(image, list):
@@ -183,13 +183,14 @@ class LinkedDataParser:
     #  "opens":  "09:00:00"
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
+    @staticmethod
     def _parse_opening_hours_specification(oh: OpeningHours, rule: dict, time_format: str):
         if (
             not type(LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")) in [list, str]
             or not type(LinkedDataParser.get_case_insensitive(rule, "opens")) == str
             or not type(LinkedDataParser.get_case_insensitive(rule, "closes")) == str
         ):
-            return
+            return oh
 
         days = LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")
         if not isinstance(days, list):
@@ -207,6 +208,7 @@ class LinkedDataParser:
     # Parse an individual https://schema.org/openingHours property value such as
     # "Mo,Tu,We,Th 09:00-12:00"
     # "Mo-Fr 10:00-19:00"
+    @staticmethod
     def _parse_opening_hours(oh: OpeningHours, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 

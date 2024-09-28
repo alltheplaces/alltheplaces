@@ -13,4 +13,5 @@ class YvesRocherITSpider(UberallSpider):
 
     def post_process_item(self, item, response, locaton):
         item.pop("name", None)
+        item.pop("image", None)
         yield item

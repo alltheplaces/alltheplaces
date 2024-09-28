@@ -19,7 +19,7 @@ class FiveGuysUSSpider(YextSearchSpider):
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         item.pop("name")
-        item["website"] = location["c_pagesURL"]
+        item["website"] = location["profile"]["c_pagesURL"]
         self.process_websites(item)
         yield item
 

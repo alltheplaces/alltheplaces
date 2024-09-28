@@ -1,4 +1,3 @@
-from html import unescape
 from typing import Iterable
 
 from scrapy.http import Response
@@ -20,7 +19,7 @@ class PrestonsZASpider(WPStoreLocatorSpider):
     days = DAYS_EN
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = unescape(item.pop("name"))
+        item["branch"] = item.pop("name")
         item["street_address"] = feature.get("address")
         item.pop("addr_full", None)
         item["city"] = feature.get("address2")

@@ -121,6 +121,8 @@ class DictParser:
         "county",
         "state-name",
         "store-state",
+        "store-province",
+        "storeProvince",
         # JP
         "都道府県",  # "prefecture"
         # IT
@@ -179,6 +181,7 @@ class DictParser:
         "phone",
         "telephone",
         "tel",
+        "tel-no",
         "telephone-number",
         "telephone1",
         "contact-number",
@@ -199,6 +202,7 @@ class DictParser:
         "latitude",
         "lat",
         "store-latitude",
+        "storeLatitude",
         "display-lat",
         "yext-display-lat",
         "map-latitude",
@@ -217,6 +221,7 @@ class DictParser:
         "long",
         "lng",
         "store-longitude",
+        "storeLongitude",
         "display-lng",
         "yext-display-lng",
         "map-longitude",
@@ -239,6 +244,7 @@ class DictParser:
         "websiteURL",
         "location-url",
         "web-address",
+        "WebSiteURL",
     ]
 
     hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]

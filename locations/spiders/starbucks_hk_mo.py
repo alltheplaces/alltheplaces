@@ -1,11 +1,12 @@
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksHKMOSpider(JSONBlobSpider):
     name = "starbucks_hk_mo"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     start_urls = ["https://www.starbucks.com.hk/rest/V1/mxstarbucks-getSBStoreList"]
     needs_json_request = True
     locations_key = "data"

@@ -49,7 +49,7 @@ class Categories(Enum):
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
-    INDUSTRIAL_WAREHOUSE = {"industrial": "warehouse"}
+    INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
@@ -292,6 +292,7 @@ class Categories(Enum):
 
     VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
+    VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
 
@@ -576,6 +577,7 @@ class PaymentMethods(Enum):
     SBP = "payment:sbp"  # https://www.cbr.ru/eng/psystem/sfp/
     TWINT = "payment:twint"
     UNIONPAY = "payment:unionpay"
+    UPI = "payment:upi"  # https://www.upichalega.com/
     VISA = "payment:visa"
     VISA_CONTACTLESS = "payment:visa_contactless"
     VISA_DEBIT = "payment:visa_debit"
