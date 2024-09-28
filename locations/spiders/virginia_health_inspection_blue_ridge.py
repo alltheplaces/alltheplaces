@@ -35,11 +35,10 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
         for inspection in response.json():
             item = DictParser.parse(inspection)
 
-            item["ref"] = inspection["inspectionID"]
+            item["ref"] = item["ref:myhealthdepartment.com"] = inspection["inspectionID"]
             item["name"] = inspection["establishmentName"]
 
-            # TODO: should this be check_date or is that controversial to use for a third-party check?
-            item["extras"]["inspectionDate"] = inspection["inspectionDate"]
+            item["extras"]["checked_date"] = inspection["inspectionDate"]
 
             # categorize the inspection to OSM standards
             if inspection["inspectionType"] == "Fast Food":
