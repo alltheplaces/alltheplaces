@@ -19,8 +19,8 @@ class SoletraderGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.xpath('//script[contains(text(),"postalCode")]/text()').get()
         data = re.sub(r'\\"', '"', data)
-        data = re.sub(r'^.*locations":','',data)
-        data = re.sub(r'\}\]\\n"\]\)$','',data)
+        data = re.sub(r'^.*locations":', "", data)
+        data = re.sub(r'\}\]\\n"\]\)$', "", data)
         for location in json.loads(data):
             item = Feature()
             address = location["address"]
