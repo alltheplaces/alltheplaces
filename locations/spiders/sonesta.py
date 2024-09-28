@@ -10,6 +10,7 @@ class SonestaSpider(SitemapSpider, StructuredDataSpider):
     # https://www.sonesta.com/sonesta-simply-suites/al/birmingham/sonesta-simply-suites-birmingham-hoover
     sitemap_rules = [(r"^https\:\/\/www\.sonesta\.com/[\w-]+/\w\w/[\w-]+/[\w-]+$", "parse_sd")]
     wanted_types = ["Hotel"]
+    drop_attributes = {"email"}
 
     def post_process_item(self, item, response, ld_data):
         # TODO: Establish why this is not just mapped for the Hotel type
