@@ -1,11 +1,12 @@
 import scrapy
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.categories import Categories
 
 
 class LoewsHotelsSpider(StructuredDataSpider):
     name = "loews_hotels"
-    item_attributes = {"brand": "Loews Hotels", "brand_wikidata": "Q6666622"}
+    item_attributes = {"brand": "Loews Hotels", "brand_wikidata": "Q6666622", extras: Categories.HOTEL.values}
     allowed_domains = ["loewshotels.com"]
     start_urls = ("https://www.loewshotels.com/destinations",)
     search_for_twitter = False
