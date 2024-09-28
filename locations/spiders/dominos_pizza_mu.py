@@ -1,6 +1,7 @@
+from locations.spiders.dominos_pizza_sa_qa import DominosPizzaSAQASpider
 
 
-class DominosPizzaMUSpider(GoReviewSpider):
+class DominosPizzaMUSpider(DominosPizzaSAQASpider):
     name = "dominos_pizza_mu"
 
     def start_requests(self):
