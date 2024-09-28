@@ -20,7 +20,7 @@ class SoletraderGBSpider(Spider):
         data = response.xpath('//script[contains(text(),"postalCode")]/text()').get()
         data = re.sub(r'\\"', '"', data)
         data = re.sub("^.*locations..", "", data)
-        data = re.sub(".......$", "", data)
+        data = re.sub('\}\].n"\]\)$','',data)
         for location in json.loads(data):
             item = Feature()
             address = location["address"]
