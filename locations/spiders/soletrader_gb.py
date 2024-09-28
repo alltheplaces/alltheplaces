@@ -9,7 +9,6 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SoletraderGBSpider(Spider):
@@ -26,7 +25,8 @@ class SoletraderGBSpider(Spider):
             item = Feature()
             address = location["address"]
             item = DictParser.parse(address)
-            item["street_address"] = merge_address_lines([address["address1"], address["address2"]])
+            item["street_address"] = address["address2"]
+            item["name"] = address["address1"]
             item["ref"] = location["entityId"]
 
             oh = OpeningHours()
