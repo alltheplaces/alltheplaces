@@ -15,6 +15,7 @@ from locations.name_suggestion_index import NSI
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 from locations.storefinders.aheadworks import AheadworksSpider
 from locations.storefinders.algolia import AlgoliaSpider
+from locations.storefinders.amai_promap import AmaiPromapSpider
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 from locations.storefinders.amrest_eu import AmrestEUSpider
 from locations.storefinders.closeby import ClosebySpider
@@ -196,6 +197,7 @@ class StorefinderDetectorSpider(Spider):
             AheadworksSpider,
             AlgoliaSpider,
             AgileStoreLocatorSpider,
+            AmaiPromapSpider,
             AmastyStoreLocatorSpider,
             AmrestEUSpider,
             ClosebySpider,

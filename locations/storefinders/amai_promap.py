@@ -3,6 +3,7 @@ from typing import Iterable
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -10,16 +11,31 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
 
-class AmaiPromapSpider(JSONBlobSpider):
+class AmaiPromapSpider(JSONBlobSpider, AutomaticSpiderGenerator):
     """
-    To use this spider, simply specify a store page URL with `start_urls`.
+    Marketing info here https://amai.com/apps/promap-store-locator/
+
+    Indicator:
+    Request to https://amaicdn.com/storelocator-prod/wtb/*.js
+
+    To use this spider, simply specify a store page URL with `start_urls`; or directly point to the `js_urls`.
     """
+
+    js_urls = []
+    detection_rules = [
+        DetectionRequestRule(url=r"^(?P<js_urls__list>https?:\/\/amaicdn\.com\/storelocator-prod\/wtb\/.*)")
+    ]
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield Request(url=url, callback=self.fetch_js)
+        # Configured with storefinder pages, extract links
+        if len(self.js_urls) == 0:
+            for url in self.start_urls:
+                yield Request(url=url, callback=self.detect_js)
 
-    def fetch_js(self, response: Response):
+        for url in self.js_urls:
+            yield JsonRequest(url=url, callback=self.parse)
+
+    def detect_js(self, response: Response):
         urls = parse_js_object(
             response.xpath('.//script[contains(text(), "var urls =")]/text()').get().split("var urls =")[1]
         )
