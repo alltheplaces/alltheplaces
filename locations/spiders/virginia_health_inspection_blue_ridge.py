@@ -50,6 +50,6 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
             elif inspection["inspectionType"] == "Educational Facility Food Service":
                 item["extras"]["amenity"] = "school"
             else:
-                return
+                continue
 
             yield item
