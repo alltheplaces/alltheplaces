@@ -188,6 +188,13 @@ do
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
             fi
 
+            # Warn if the image URL is not very unique across all the outputs
+            unique_image_urls=$(jq '.features|map(.properties.image) | unique | length' ${OUTFILE})
+            unique_image_url_rate=$(echo "scale=2; ${unique_image_urls} / ${FEATURE_COUNT} * 100" | bc)
+            if [ $(echo "${unique_image_url_rate} < 50" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
+            fi
+
             num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
             num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
             if [ $num_errors -gt 0 ]; then
