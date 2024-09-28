@@ -12,11 +12,12 @@ from locations.searchable_points import open_searchable_points
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
+STARBUCKS_SHARED_ATTRIBUTES = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
 
 
 class StarbucksUSSpider(Spider):
     name = "starbucks_us"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES | {"extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.starbucks.com"]
     searchable_point_files = ["us_centroids_50mile_radius.csv"]
     country_filter = ["US"]

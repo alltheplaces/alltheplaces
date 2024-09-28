@@ -1,10 +1,4 @@
-from html import unescape
-from typing import Iterable
-
-from scrapy.http import Response
-
 from locations.hours import DAYS_EN
-from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -16,7 +10,3 @@ class GloriaJeansCoffeesAUSpider(WPStoreLocatorSpider):
     search_radius = 50
     max_results = 50
     days = DAYS_EN
-
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["name"] = unescape(feature["store"])
-        yield item

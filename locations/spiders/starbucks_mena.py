@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.items import Feature, get_merged_item
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 from locations.storefinders.yext_search import YextSearchSpider
 
 AMENITIES_MAP = {"Drive Through": Extras.DRIVE_THROUGH, "WiFi": Extras.WIFI}
@@ -12,7 +13,7 @@ AMENITIES_MAP = {"Drive Through": Extras.DRIVE_THROUGH, "WiFi": Extras.WIFI}
 
 class StarbucksMenaSpider(YextSearchSpider):
     name = name = "starbucks_mena"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     stored_items = {}
 
     def start_requests(self) -> Iterable[Request]:
@@ -39,24 +40,25 @@ class StarbucksMenaSpider(YextSearchSpider):
                 )
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        if location["address"]["countryCode"] == "TR":  # Covered by starbucks_eu
+        profile = location["profile"]
+        if profile["address"]["countryCode"] == "TR":  # Covered by starbucks_eu
             return
-        if amenities := location.get("c_storeAmenities"):
+        if amenities := profile.get("c_storeAmenities"):
             for amenity in amenities:
                 if tag := AMENITIES_MAP.get(amenity):
                     apply_yes_no(tag, item, True)
                 else:
                     self.crawler.stats.inc_value(f"atp/{self.name}/unknown_amenity/{amenity}")
-        item["branch"] = location.get("c_siteLocation")
+        item["branch"] = profile.get("c_siteLocation")
         if item["branch"] is None:
-            item["branch"] = location.get("c_storeNameInternal")
+            item["branch"] = profile.get("c_storeNameInternal")
         if item["ref"] in self.stored_items:
             other_item = self.stored_items.pop(item["ref"])
-            if location["address"]["countryCode"] == "MA":
+            if profile["address"]["countryCode"] == "MA":
                 other_language = "fr"
             else:
                 other_language = "en"
-            if location["meta"]["language"] == "ar":
+            if profile["meta"]["language"] == "ar":
                 yield get_merged_item({other_language: other_item, "ar": item}, "ar")
             else:
                 yield get_merged_item({other_language: item, "ar": other_item}, "ar")

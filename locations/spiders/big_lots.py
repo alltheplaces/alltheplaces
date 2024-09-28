@@ -14,6 +14,7 @@ class BigLotsSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [
         (r"https://local\.biglots\.com/[^/]+/[^/]+/[^/]+$", "parse"),
     ]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)

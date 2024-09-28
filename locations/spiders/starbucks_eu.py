@@ -6,11 +6,12 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksEUSpider(scrapy.Spider):
     name = "starbucks_eu"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     allowed_domains = ["starbucks.co.uk"]
 
     def start_requests(self):

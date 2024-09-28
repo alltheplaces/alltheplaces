@@ -10,11 +10,10 @@ class PicardFRSpider(SitemapSpider):
     allowed_domains = ["magasins.picard.fr"]
     sitemap_urls = ["https://magasins.picard.fr/sitemap.xml"]
     sitemap_follow = [r"https:\/\/magasins\.picard\.fr\/locationsitemap\d+\.xml"]
+    drop_attributes = {"image"}
 
     def parse(self, response, **kwargs):
-
         feature = LinkedDataParser.parse(response, "LocalBusiness")
         feature["website"] = response.url
         feature["ref"] = response.url
-
         yield feature
