@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class LoewsHotelsSpider(StructuredDataSpider):
