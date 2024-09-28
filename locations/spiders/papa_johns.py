@@ -15,7 +15,6 @@ class PapaJohnsSpider(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["FastFoodRestaurant"]
-    download_delay = 0.2
     drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
@@ -24,5 +23,7 @@ class PapaJohnsSpider(SitemapSpider, StructuredDataSpider):
                 return
             else:
                 item["branch"] = item.pop("name").removeprefix("Papa Johns Pizza ")
+
+        item["website"] = reseponse.urljoin(item["website"])
 
         yield item
