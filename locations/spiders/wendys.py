@@ -39,7 +39,7 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
         oh = OpeningHours()
 
         for day in days:
-            for interval in day["intervals"]:
+            for interval in day["intervals"] or []:
                 # These interval ranges are 24 hour times represented as integers, so they need to be converted to strings
                 open_time = str(interval["start"]).zfill(4)
                 close_time = str(interval["end"]).zfill(4)
