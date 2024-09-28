@@ -13,7 +13,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class SoletraderGBSpider(Spider):
     name = "soletrader_gb"
-    item_attributes = {"brand": "Soletrader", "brand_wikidata": "Q25101942"}
+    item_attributes = {"brand": "Soletrader", "brand_wikidata": "Q25101942", "extras": Categories.SHOP_SHOES.value},
     start_urls = ["https://www.soletrader.co.uk/store-locator"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
