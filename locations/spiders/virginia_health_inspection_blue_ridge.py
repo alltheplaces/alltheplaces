@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 
+
 class VirginiaHealthInspectionBlueRidgeSpider(Spider):
     name = "virginia_health_inspection_blue_ridge"
     item_attributes = {}
@@ -31,13 +32,13 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
             )
 
     def parse_location_list(self, response):
-        for inspection in response.json():            
+        for inspection in response.json():
             item = DictParser.parse(inspection)
-            
+
             item["ref"] = inspection["inspectionID"]
             item["name"] = inspection["establishmentName"]
 
-            item["extras"] = {"inspectionDate": inspection["inspectionDate"]},
+            item["extras"] = ({"inspectionDate": inspection["inspectionDate"]},)
 
             # categorize the inspection to OSM standards
             if inspection["inspectionType"] == "Fast Food":
@@ -50,5 +51,5 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
                 item["extras"]["amenity"] = "school"
             else:
                 return
-            
+
             yield item
