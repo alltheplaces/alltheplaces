@@ -38,7 +38,8 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
             item["ref"] = inspection["inspectionID"]
             item["name"] = inspection["establishmentName"]
 
-            item["extras"] = ({"inspectionDate": inspection["inspectionDate"]},)
+            # TODO: should this be check_date or is that controversial to use for a third-party check?
+            item["extras"]["inspectionDate"] = inspection["inspectionDate"]
 
             # categorize the inspection to OSM standards
             if inspection["inspectionType"] == "Fast Food":
