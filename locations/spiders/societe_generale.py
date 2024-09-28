@@ -17,4 +17,9 @@ class SocieteGeneraleSpider(SitemapSpider, StructuredDataSpider):
 
         apply_category(Categories.BANK, item)
 
+        if item.get("image") and "agence-sg.jpg" in item["image"]:
+            # Ignore generic image of a store that is used as a placeholder
+            # when a location-specific image is not available.
+            item.pop("image")
+
         yield item

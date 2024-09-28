@@ -20,6 +20,7 @@ class NettoSallingSpider(SitemapSpider, StructuredDataSpider):
         ("/butikker/", "parse_sd"),
         ("/sklepy/", "parse_sd"),
     ]
+    drop_attributes = {"image"}
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["name"] = html.unescape(ld_data["name"])

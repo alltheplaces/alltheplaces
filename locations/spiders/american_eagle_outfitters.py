@@ -9,6 +9,7 @@ class AmericanEagleOutfittersSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.aeostores.com/sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["brand"] = response.xpath('//*[@class="LocationName-brand"]/text()').get()
