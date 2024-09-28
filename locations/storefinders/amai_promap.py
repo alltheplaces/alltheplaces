@@ -23,9 +23,7 @@ class AmaiPromapSpider(JSONBlobSpider, AutomaticSpiderGenerator):
 
     js_urls = []
     detection_rules = [
-        DetectionRequestRule(
-            url=r"^(?P<js_urls__list>https?:\/\/amaicdn\.com\/storelocator-prod\/wtb\/.*)"
-        )
+        DetectionRequestRule(url=r"^(?P<js_urls__list>https?:\/\/amaicdn\.com\/storelocator-prod\/wtb\/.*)")
     ]
 
     def start_requests(self):
@@ -35,7 +33,7 @@ class AmaiPromapSpider(JSONBlobSpider, AutomaticSpiderGenerator):
                 yield Request(url=url, callback=self.detect_js)
 
         for url in self.js_urls:
-           yield JsonRequest(url=url, callback=self.parse)
+            yield JsonRequest(url=url, callback=self.parse)
 
     def detect_js(self, response: Response):
         urls = parse_js_object(
