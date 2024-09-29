@@ -4,8 +4,8 @@ from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 DAYS_MAPPING = {
     1: "Mo",
@@ -16,6 +16,7 @@ DAYS_MAPPING = {
     6: "Sa",
     7: "Su",
 }
+
 
 class TheFragranceShopGBSpider(Spider):
     name = "the_fragrance_shop_gb"
@@ -34,8 +35,8 @@ class TheFragranceShopGBSpider(Spider):
     def parse_hours(self, item, location):
         times = location.get("openingHours")
         oh = OpeningHours()
-        hours=times.split(",")
-        i=1
+        hours = times.split(",")
+        i = 1
         for times in hours:
             # Days off
             if times == "CLOSED":
@@ -43,5 +44,5 @@ class TheFragranceShopGBSpider(Spider):
             day = DAYS_MAPPING.get(i)
             open, close = times.split("-")
             oh.add_range(day, open, close)
-            i=i+1
+            i = i + 1
         item["opening_hours"] = oh.as_opening_hours()
