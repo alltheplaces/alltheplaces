@@ -14,6 +14,7 @@ class TagHeuerSpider(AlgoliaSpider):
 
     def post_process_item(self, item, response, feature):
         item["branch"] = item.pop("name")
+        item["ref"] = feature["objectID"]
         item["lat"] = feature["_geoloc"]["lat"]
         item["lon"] = feature["_geoloc"]["lng"]
         item["image"] = feature["image"]
