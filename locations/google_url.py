@@ -91,8 +91,19 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
     elif "daddr" in url:
         for daddr in get_query_param(url, "daddr"):
             daddr = daddr.split(",")
-            if len(daddr) == 2:
-                return float(daddr[0]), float(daddr[1])
+            if len(daddr) == 1 and " " in daddr[0]:
+                daddr = daddr[0].split(" ")
+            fixed_coords = []
+            if any(["°" in coord for coord in daddr]):
+                for coord in daddr:
+                    if coord.endswith("N") or coord.endswith("E"):
+                        fixed_coords.append(coord.replace("°", "").removesuffix("N").removesuffix("E").strip())
+                    elif coord.endswith("S") or coord.endswith("W"):
+                        fixed_coords.append("-" + coord.replace("°", "").removesuffix("S").removesuffix("W").strip())
+            else:
+                fixed_coords = daddr
+            if len(fixed_coords) == 2:
+                return float(fixed_coords[0]), float(fixed_coords[1])
     elif "maps.apple.com" in url:
         for q in get_query_param(url, "q"):
             coords = q.split(",")

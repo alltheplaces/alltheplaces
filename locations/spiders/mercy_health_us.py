@@ -74,6 +74,7 @@ class MercyHealthUSSpider(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["EmergencyService", "ExerciseGym", "Hospital", "MedicalClinic", "Residence"]
+    drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item, response, ld_data):
         for url_slug in HEALTHCARE_CATEGORIES.keys():
@@ -86,6 +87,9 @@ class MercyHealthUSSpider(SitemapSpider, StructuredDataSpider):
                 if "/.home-health-care/" in response.url:
                     apply_yes_no("home_visit", item, True)
                 break
-        item.pop("facebook", None)
-        item.pop("twitter", None)
+
+        if item.get("image") and item["image"] == "https://www.mercy.com/":
+            # Ignore invalid image field values.
+            item.pop("image")
+
         yield item

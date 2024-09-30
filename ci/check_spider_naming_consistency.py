@@ -69,6 +69,7 @@ COUNTRYCODE_COMPONENTS = {
     "MA",
     "ME",
     "MK",
+    "MN",
     "MO",
     "MT",
     "MU",
