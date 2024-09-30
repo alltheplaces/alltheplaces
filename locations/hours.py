@@ -221,12 +221,17 @@ DAYS_GR = {
 
 DAYS_HR = {
     "Ponedjeljak": "Mo",
+    "Pon": "Mo",
     "Utorak": "Tu",
     "Srijeda": "We",
     "Četvrtak": "Th",
+    "Čet": "Th",
     "Petak": "Fr",
+    "Pet": "Fr",
     "Subota": "Sa",
+    "Sub": "Sa",
     "Nedjelja": "Su",
+    "Ned": "Su",
 }
 
 DAYS_HU = {
