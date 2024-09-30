@@ -1,5 +1,9 @@
+import json
+from datetime import datetime, timedelta
+from typing import Any
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 
@@ -18,10 +22,17 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
                     "data": {
                         "path": "va-blue-ridge",
                         "programName": "",
-                        # TODO: make the date dynamic
-                        "filters": {"date": "2024-01-01 to 2024-09-27", "purpose": "", "city": "", "zip": ""},
+                        "filters": {
+                            "date": "{} to {}".format(
+                                (datetime.now() - timedelta(weeks=4 * 6)).strftime("%Y-%m-%d"),
+                                datetime.now().strftime("%Y-%m-%d"),
+                            ),
+                            "purpose": "",
+                            "city": "",
+                            "zip": "",
+                        },
                         "start": 0,
-                        "count": 2000,
+                        "count": 500,
                         "searchQueryOverride": None,
                         "searchStr": "",
                         "lat": 0,
@@ -31,7 +42,7 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
                 },
             )
 
-    def parse_location_list(self, response):
+    def parse_location_list(self, response: Response, **kwargs: Any) -> Any:
         for inspection in response.json():
             item = DictParser.parse(inspection)
 
@@ -54,3 +65,8 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
                 continue
 
             yield item
+
+        if len(response.json()) == 500:
+            req = json.loads(response.request.body)
+            req["data"]["start"] += req["data"]["count"]
+            yield response.request.replace(data=req)
