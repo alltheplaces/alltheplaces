@@ -8,7 +8,7 @@ class DominosPizzaQASpider(DominosPizzaInternationalSpider):
 
     def post_process_item(self, item, response, location):
         if language_location := location.get("LanguageLocationInfo"):
-            if ar_addr := location["LanguageLocationInfo"].get("ar"):
+            if ar_addr := language_location.get("ar"):
                 item["addr_full"] = ar_addr
                 item["extras"]["addr:full:en"] = location["LocationInfo"]
                 item["extras"]["addr:full:ar"] = item["addr_full"]
