@@ -64,6 +64,7 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
             elif inspection["inspectionType"] == "Educational Facility Food Service":
                 item["extras"]["amenity"] = "school"
             else:
+                self.crawler.stats.inc_value("{}/unmapped_category/{}".format(self.name, inspection["inspectionType"]))
                 continue
 
             yield item
