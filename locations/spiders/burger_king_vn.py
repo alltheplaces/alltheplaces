@@ -31,4 +31,4 @@ class BurgerKingVNSpider(JSONBlobSpider):
             else:
                 yield get_merged_item({"en": other_item, "vn": item}, "vn")
         else:
-            item["extras"]["stored"] = response.url
+            self.stored_items[item["ref"]] = item
