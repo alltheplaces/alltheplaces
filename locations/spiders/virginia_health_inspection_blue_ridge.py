@@ -50,7 +50,9 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
             item["extras"]["ref:US:myhealthdepartment"] = inspection["inspectionID"]
             item["name"] = inspection["establishmentName"]
 
-            item["extras"]["checked_date"] = inspection["inspectionDate"]
+            item["extras"]["check_date"] = datetime.strptime(inspection["inspectionDate"], "%m/%d/%Y").strftime(
+                "%Y-%m-%d"
+            )
 
             # categorize the inspection to OSM standards
             if inspection["inspectionType"] == "Fast Food":
