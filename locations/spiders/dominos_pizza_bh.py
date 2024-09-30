@@ -1,7 +1,7 @@
 from locations.storefinders.dominos_pizza_international import DominosPizzaInternationalSpider
 
 
-class DominosPizzaQASpider(DominosPizzaInternationalSpider):
+class DominosPizzaBHSpider(DominosPizzaInternationalSpider):
     name = "dominos_pizza_bh"
     region_code = "BH"
     dpz_market = "BAHRAIN"
