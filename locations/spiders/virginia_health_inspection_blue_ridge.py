@@ -12,15 +12,18 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
     name = "virginia_health_inspection_blue_ridge"
     item_attributes = {}
     start_urls = ["https://inspections.myhealthdepartment.com"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
-        for url in self.start_urls:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for area in response.xpath('//a[@title="View Inspections"]/@href').getall():
+            if area != "/va-blue-ridge":
+                continue
             yield JsonRequest(
-                url=url,
+                url=response.url,
                 callback=self.parse_location_list,
                 data={
                     "data": {
-                        "path": "va-blue-ridge",
+                        "path": area.split("/")[-1],
                         "programName": "",
                         "filters": {
                             "date": "{} to {}".format(
