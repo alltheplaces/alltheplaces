@@ -47,7 +47,7 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
             item = DictParser.parse(inspection)
 
             item["ref"] = inspection["inspectionID"]
-            item["extras"]["ref:myhealthdepartment.com:inspectionID"] = inspection["inspectionID"]
+            item["extras"]["ref:US:myhealthdepartment"] = inspection["inspectionID"]
             item["name"] = inspection["establishmentName"]
 
             item["extras"]["checked_date"] = inspection["inspectionDate"]
