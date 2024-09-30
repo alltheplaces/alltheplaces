@@ -4,21 +4,29 @@ import re
 from scrapy import Request, Spider
 from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
-class StoreLocatorWidgetsSpider(Spider):
+class StoreLocatorWidgetsSpider(Spider, AutomaticSpiderGenerator):
     """
     Store Locator Widgets are a set of store locator components.
     https://www.storelocatorwidgets.com/api/
 
-    To use, specify a `key`
+    To use, specify:
+      - `key`: mandatory parameter
     """
 
     dataset_attributes = {"source": "api", "api": "storelocatorwidgets.com"}
     key: str = ""
+    detection_rules = [
+        DetectionRequestRule(url=r"^https?:\/\/cdn\.storelocatorwidgets\.com\/json\/(?P<key>[0-9a-f]{32})(?:\?|$)"),
+        DetectionResponseRule(
+            xpaths={"key": r'//script[contains(@src, "//cdn.storelocatorwidgets.com/widget/widget.js")]/@data-uid'}
+        ),
+    ]
 
     def start_requests(self):
         yield Request(url=f"https://cdn.storelocatorwidgets.com/json/{self.key}")

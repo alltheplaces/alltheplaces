@@ -1,6 +1,7 @@
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -32,12 +33,35 @@ from locations.items import Feature
 # If you need to clean up data returned, override the parse_item function.
 
 
-class LocalisrSpider(Spider):
+class LocalisrSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "localisr.io"}
     api_key: str = ""
     api_version: str = "2.1.0"  # Use the latest observed API version by default
     search_coordinates: list[tuple[float, float]] = []
     search_radius: int = 400
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/app\.localisr\.io\/public\/store-locator\?requestToken=(?P<api_key>[A-Z0-9]+)(?:&|\/|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/app\.localisr\.io\/api\/auth\/v2\/validate(?:\?|\/|$)",
+            data=r'{"api_key": .key, "api_version": .version}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/app\.localisr\.io\/js\/localisr\/widget\.js\?key=(?P<api_key>[A-Z0-9]+)&version=(?P<api_version>[\d.]+)$"
+        ),
+        DetectionResponseRule(
+            xpaths={
+                "api_key": r'substring-after(//iframe[contains(@src, "https://app.localisr.io/public/store-locator?requestToken=")]/@src, "requestToken=")'
+            }
+        ),
+        DetectionResponseRule(
+            xpaths={
+                "api_key": r'substring-after(substring-before(//script[contains(@src, "https://app.localisr.io/js/localisr/widget.js")]/@src, "&version="), "?key=")',
+                "api_version": r'substring-after(//script[contains(@src, "https://app.localisr.io/js/localisr/widget.js")]/@src, "&version=")',
+            }
+        ),
+    ]
 
     def start_requests(self):
         data = {

@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -16,10 +17,25 @@ from locations.items import Feature
 # data or to clean up and modify extracted data.
 
 
-class SylinderSpider(Spider):
+class SylinderSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "api.ngadata.no"}
     app_key: str = None
     base_url: str = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/platform-rest-prod\.ngdata\.no\/api\/extended-user\/(?P<app_key>\d+)\/default$"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/platform-rest-prod\.ngdata\.no\/api\/episearch\/(?P<app_key>\d+)\/querysuggestions\?"
+        ),
+        DetectionRequestRule(url=r"^https?:\/\/platform-rest-prod\.ngdata\.no\/api\/handoveroptions\/(?P<app_key>\d+)"),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.ngdata\.no\/sylinder\/stores\/v1\/basic-info\?chainId=(?P<app_key>\d+)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.ngdata\.no\/sylinder\/stores\/v1\/extended-info\?chainId=(?P<app_key>\d+)"
+        ),
+    ]
 
     def start_requests(self) -> Iterable[JsonRequest]:
         if self.base_url is None:

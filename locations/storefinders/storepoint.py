@@ -1,14 +1,18 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
 
-class StorepointSpider(Spider):
+class StorepointSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storepoint.co"}
     key: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    detection_rules = [
+        DetectionRequestRule(url=r"^https?:\/\/api\.storepoint\.co\/v1\/(?P<key>[0-9a-f]{14})\/locations(?:\?|\/|$)")
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://api.storepoint.co/v1/{self.key}/locations")

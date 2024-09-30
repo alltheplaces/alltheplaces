@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -10,9 +11,17 @@ from locations.items import Feature
 # parse_item function to adjust extracted field values.
 
 
-class MetizsoftSpider(Spider):
+class MetizsoftSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storelocator.metizapps.com"}
     shopify_url: str = ""
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/storelocator\.metizapps\.com\/stores\/storeDataGet$", data=r'{"shopify_url": .shopData}'
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/storelocator\.metizapps\.com\/assets\/js\/app\.js\?shop=(?P<shopify_url>[A-Za-z0-9\-.]+)$"
+        ),
+    ]
 
     def start_requests(self):
         yield FormRequest(

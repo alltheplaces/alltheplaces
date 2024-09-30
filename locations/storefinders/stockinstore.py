@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -26,13 +27,28 @@ from locations.items import Feature
 # the site where the widget is hosted e.g. https://brandexample.com
 
 
-class StockInStoreSpider(Spider):
+class StockInStoreSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "stockinstore.com"}
     api_site_id: str = None
     api_widget_id: str = None
     api_widget_type: str = None
     api_origin: str = None
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/stockinstore\.net\/stores\/(?:getAllStores|getAllStoresLimited|getStoresForWidget|getStoresStock)$",
+            headers='{"api_origin": .origin}',
+            data='{"api_site_id": .site, "api_widget_id": .widget, "api_widget_type": .widgetType}',
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "api_site_id": r"window._stockinstore[0].site",
+                "api_widget_id": r"window._stockinstore[0].widgets",
+                "api_widget_type": r"window.stockInStore.tags.sis_module",
+                "api_origin": r'window.location.protocol + "//" + window.location.hostname',
+            }
+        ),
+    ]
 
     def start_requests(self):
         data = {

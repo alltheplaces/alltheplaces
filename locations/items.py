@@ -165,6 +165,11 @@ def merge_items(language_dict: dict, main_language: str, matching_key: str = "re
             yield language_dict[language][ref]
 
 
+class GeneratedSpider(Feature):
+    storefinder_url = scrapy.Field()
+    spider = scrapy.Field()
+
+
 KEYS_THAT_SHOULD_MATCH = [
     "lat",
     "lon",

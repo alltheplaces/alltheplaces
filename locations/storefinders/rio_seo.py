@@ -1,16 +1,17 @@
 import json
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class RioSeoSpider(Spider):
+class RioSeoSpider(Spider, AutomaticSpiderGenerator):
     """
     RioSEO is a number of related storefinders.
     https://www.rioseo.com/platform/local-pages/
@@ -20,16 +21,20 @@ class RioSeoSpider(Spider):
         `/api/getAsyncLocations` and including parameters similar to
         `?template=search&level=search`
       - `template`: mandatory parameter, should be either "domain" or "search"
-      - `radius`: optional parameter, default value is 20038
-      - `limit`: optional parameter, default valus is 3000
+      - `radius`: optional parameter, default value is 10000
+      - `limit`: optional parameter, default valus is 10000
     """
 
     dataset_attributes = {"source": "api", "api": "rio_seo"}
-
-    end_point: Optional[str] = None
+    end_point: str = None
     limit: int = 10000
-    radius: int = 20038
+    radius: int = 10000
     template: str = "domain"
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/getAsyncLocations\?.+)$"
+        )
+    ]
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(f"{self.end_point}/api/getAutocompleteData", callback=self.parse_autocomplete)

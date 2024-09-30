@@ -1,22 +1,29 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class UberallSpider(Spider):
+class UberallSpider(Spider, AutomaticSpiderGenerator):
     """
     Uberall provides a web based store locator.
     https://uberall.com/en-us/products/locator-local-pages
 
-    Use by specifying the `key`, and optional filtering via `business_id_filter`
+    To use, specify:
+      - `key`: mandatory parameter
+      - `business_id_filter`: optional parameter, default value is `None`
     """
 
     dataset_attributes = {"source": "api", "api": "uberall.com"}
     key: str = ""
     business_id_filter: int = None
+    detection_rules = [
+        DetectionRequestRule(url=r"^https?:\/\/locator\.uberall\.com\/api\/storefinders\/(?P<key>\w+)\/"),
+        DetectionResponseRule(xpaths={"key": r'//div[@id="store-finder-widget"]/@data-key'}),
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://uberall.com/api/storefinders/{self.key}/locations/all")

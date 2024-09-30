@@ -5,6 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 from scrapy.signals import spider_idle
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, DAYS_EN, OpeningHours, day_range
 from locations.items import Feature
@@ -37,7 +38,7 @@ from locations.items import Feature
 # iterates through.
 
 
-class GeoMeSpider(Spider):
+class GeoMeSpider(Spider, AutomaticSpiderGenerator):
     api_key: str = ""
     api_version: str = "2"
     url_within_bounds_template: str = (
@@ -45,6 +46,7 @@ class GeoMeSpider(Spider):
     )
     url_nearest_to_template: str = "https://{}.geoapp.me/api/v{}/locations/nearest_to?lat={}&lng={}&limit=50"
     _locations_found: dict = {}
+    detection_rules = [DetectionRequestRule(url=r"^https?:\/\/(?P<api_key>\w+)\.geoapp\.me\/api\/v\d+\/locations\/")]
 
     def start_requests(self):
         self.crawler.signals.connect(self.start_location_requests, signal=spider_idle)

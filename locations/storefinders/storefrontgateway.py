@@ -3,13 +3,14 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class StorefrontgatewaySpider(Spider):
+class StorefrontgatewaySpider(Spider, AutomaticSpiderGenerator):
     """
     A relatively unknown storefinder, associated with https://mi9retail.com/
 
@@ -17,6 +18,12 @@ class StorefrontgatewaySpider(Spider):
     """
 
     start_urls = []
+    detection_rules = [
+        DetectionRequestRule(url=r"^(?P<start_urls__list>https?:\/\/storefrontgateway(?:\.[\w\-]+)+\/api\/stores)\/?$"),
+        DetectionResponseRule(
+            js_objects={"start_urls": r"[window.__PRELOADED_STATE__.settings.env.PUBLIC_API + 'stores']"}
+        ),
+    ]
 
     def start_requests(self):
         for url in self.start_urls:

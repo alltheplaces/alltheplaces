@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -16,10 +17,15 @@ from locations.items import Feature
 # data returned, override the `parse_item` function.
 
 
-class StoreLocatorPlusCloudSpider(Spider):
+class StoreLocatorPlusCloudSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storelocatorplus.com"}
     slp_dataset: str = None
     slp_key: str = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/dashboard\.storelocatorplus\.com\/(?P<slp_dataset>[^\/]+)\/wp-json\/myslp\/v2\/locations-map\?.*?(?<=[?&])api_key=(?P<slp_key>myslp\.[0-9a-f]+)(?:&|$)"
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(

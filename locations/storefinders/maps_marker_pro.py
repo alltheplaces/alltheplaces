@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy import Selector, Spider
 from scrapy.http import FormRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
@@ -32,8 +33,18 @@ from locations.items import Feature
 #      with unwanted suffixes.
 
 
-class MapsMarkerProSpider(Spider):
+class MapsMarkerProSpider(Spider, AutomaticSpiderGenerator):
     days: dict = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php$",
+            js_objects={"__": 'if (typeof window.MapsMarkerPro == "function") {true} else {null}'},
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)(?:\/[^\/]+)+\/wp-admin\/admin-ajax\.php)$",
+            js_objects={"__": 'if (typeof window.MapsMarkerPro == "function") {true} else {null}'},
+        ),
+    ]
 
     def start_requests(self):
         formdata = {

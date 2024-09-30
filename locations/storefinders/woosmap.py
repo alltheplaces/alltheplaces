@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -14,10 +15,22 @@ from locations.pipelines.address_clean_up import clean_address
 # 'https://www.brandname.example'.
 
 
-class WoosmapSpider(Spider):
+class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "woosmap.com"}
     key: str = ""
     origin: str = ""
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.woosmap\.com\/.*?(?<=[?&])key=(?P<key>woos-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:&|$)",
+            headers='{"origin": .origin}',
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "key": r"window.woosmap.public_key",
+                "origin": r'window.location.protocol + "//" + window.location.hostname',
+            }
+        ),
+    ]
 
     def start_requests(self):
         yield JsonRequest(

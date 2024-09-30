@@ -3,12 +3,13 @@ import urllib.parse
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class MomentFeedSpider(Spider):
+class MomentFeedSpider(Spider, AutomaticSpiderGenerator):
     """
     MomentFeed (owned by Uberall)
     https://momentfeed.com/
@@ -21,6 +22,14 @@ class MomentFeedSpider(Spider):
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
     api_key: str = ""
     page_size: int = 100
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.momentfeed\.com\/v1\/analytics\/api\/llp\/meta\.json\?.*?(?<=[?&])auth_token=(?P<api_key>[A-Z]+)(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/uberall\.com\/api\/mf-lp-adapter\/llp\.json\?.*?(?<=[?&])auth_token=(?P<api_key>[A-Z]+)(?:&|$)"
+        ),
+    ]
 
     def start_requests(self):
         yield JsonRequest(

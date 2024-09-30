@@ -4,12 +4,13 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 
-class AgileStoreLocatorSpider(Spider):
+class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     """
     Official documentation for Agile Store Locator:
     https://agilestorelocator.com/documentation/
@@ -27,6 +28,11 @@ class AgileStoreLocatorSpider(Spider):
     """
 
     time_format = "%I:%M%p"
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=asl_load_stores(?:&|$)"
+        ),
+    ]
 
     def start_requests(self) -> Iterable[JsonRequest]:
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):

@@ -4,6 +4,7 @@ from html import unescape
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -27,12 +28,31 @@ from locations.items import Feature
 # is available.
 
 
-class SuperStoreFinderSpider(Spider):
+class SuperStoreFinderSpider(Spider, AutomaticSpiderGenerator):
     """
     To use, specify:
       - `start_urls`: mandatory parameter if `allowed_domains` is unspecified
       - `allowed_domains`: mandatory parameter if `start_urls` is unspecified
     """
+
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)(?:\/[^\/]+)+\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?.*$|$))"
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "allowed_domains": r"(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).hostname] : null"
+            }
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "start_urls": r'(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/.+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).origin + new URL(window.ssf_wp_base).pathname + "/ssf-wp-xml.php"] : null'
+            }
+        ),
+    ]
 
     def start_requests(self):
         if len(self.start_urls) > 0:

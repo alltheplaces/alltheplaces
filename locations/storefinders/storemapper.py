@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -19,7 +20,7 @@ from locations.items import Feature
 # location).
 
 
-class StoremapperSpider(Spider):
+class StoremapperSpider(Spider, AutomaticSpiderGenerator):
     """
     Storemapper (https://www.storemapper.com/) is an emedded map based store locator.
 
@@ -32,6 +33,13 @@ class StoremapperSpider(Spider):
     dataset_attributes = {"source": "api", "api": "storemapper.com"}
     company_id: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https:\/\/storemapper-herokuapp-com\.global\.ssl\.fastly\.net\/api\/users\/(?P<company_id>\d+(?:-\w+)?)\/stores\.js(?:\?|$)"
+        ),
+        DetectionResponseRule(js_objects={"company_id": r"window.Storemapper.companyId"}),
+        DetectionResponseRule(xpaths={"company_id": r"//script/@data-storemapper-id"}),
+    ]
 
     def start_requests(self):
         yield JsonRequest(

@@ -6,6 +6,7 @@ from typing import Iterable
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionResponseRule
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
@@ -40,8 +41,14 @@ from locations.pipelines.address_clean_up import clean_address
 #      with unwanted suffixes.
 
 
-class LighthouseSpider(Spider):
+class LighthouseSpider(Spider, AutomaticSpiderGenerator):
     days: dict = None
+    detection_rules = [
+        DetectionResponseRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+).*)$",
+            xpaths={"__": r'//meta[@name="generator" and contains(@content, "Created by Lighthouse")]/@content'},
+        )
+    ]
 
     def parse(self, response: Response):
         for location in response.xpath('//article[@data-control="box"]'):
@@ -54,6 +61,7 @@ class LighthouseSpider(Spider):
                 .get("")
                 .strip()
             )
+
             item["addr_full"] = clean_address(
                 location.xpath('(.//*[contains(@class, "address-one")])[1]//text()').getall()
             )

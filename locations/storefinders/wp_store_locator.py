@@ -4,6 +4,7 @@ from typing import Iterable
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
@@ -73,13 +74,31 @@ from locations.pipelines.address_clean_up import merge_address_lines
 # location).
 
 
-class WPStoreLocatorSpider(Spider):
+class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     days: dict = None
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
     search_radius: int = 0
     max_results: int = 0
     possible_days: list[dict] = DAYS_BY_FREQUENCY
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)(?:\/[^\/]+)+\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search(?:&.*$|$))"
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "allowed_domains": r"(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null"
+            }
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "start_urls": r'(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/.+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).origin + new URL(window.wpslSettings.ajaxurl).pathname + "?action=store_search&autoload=1"] : null'
+            }
+        ),
+    ]
 
     def start_requests(self):
         if len(self.iseadgg_countries_list) > 0 and self.search_radius != 0 and self.max_results != 0:
@@ -184,19 +203,20 @@ class WPStoreLocatorSpider(Spider):
             item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address2")])
             item["name"] = html.unescape(feature["store"])
 
-            if self.days is not None:
+            if feature.get("hours"):
                 # If we have preconfigured the exact days to use, start there
-                item["opening_hours"] = self.parse_opening_hours(feature, self.days)
-            else:
-                # Otherwise, iterate over the possibilities until we get a first match
-                self.logger.warning(
-                    "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
-                )
-                for days in self.possible_days:
-                    item["opening_hours"] = self.parse_opening_hours(feature, days)
-                    if item["opening_hours"] is not None:
-                        self.days = days
-                        break
+                if self.days is not None:
+                    item["opening_hours"] = self.parse_opening_hours(feature, self.days)
+                else:
+                    # Otherwise, iterate over the possibilities until we get a first match
+                    self.logger.warning(
+                        "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
+                    )
+                    for days in self.possible_days:
+                        item["opening_hours"] = self.parse_opening_hours(feature, days)
+                        if item["opening_hours"] is not None:
+                            self.days = days
+                            break
 
             yield from self.post_process_item(item, response, feature) or []
 

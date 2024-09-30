@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -12,9 +13,14 @@ from locations.items import Feature
 # /commerce/storefront/locationUsageTypes/DL/locations
 
 
-class KiboSpider(Spider):
+class KiboSpider(Spider, AutomaticSpiderGenerator):
     page_size: int = 1000
     api_filter: str = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/commerce\/storefront\/locationUsageTypes\/SP\/locations)(?:\?|\/|$)"
+        )
+    ]
 
     def start_requests(self):
         if self.api_filter:

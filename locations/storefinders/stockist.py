@@ -6,6 +6,7 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 from scrapy.spidermiddlewares.httperror import HttpError
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -27,11 +28,16 @@ from locations.pipelines.address_clean_up import clean_address
 # store finder to return all locations.
 
 
-class StockistSpider(Spider):
+class StockistSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "stockist.co"}
     key: str = ""
     max_distance: int = 50000
     coordinates_pending: list[tuple[float, float]] = []
+    detection_rules = [
+        DetectionRequestRule(url=r"^https?:\/\/stockist\.co\/api\/v1\/(?P<key>u\d+)\/locations\/all(?:\?|$)"),
+        DetectionRequestRule(url=r"^https?:\/\/stockist\.co\/api\/v1\/(?P<key>u\d+)\/widget\.js(?:\?|$)"),
+        DetectionResponseRule(js_objects={"key": r"window.Stockist.__widget.__config.tag"}),
+    ]
 
     def start_requests(self):
         yield JsonRequest(

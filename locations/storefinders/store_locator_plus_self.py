@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import FormRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
 from locations.items import Feature
@@ -55,11 +56,28 @@ from locations.items import Feature
 # location).
 
 
-class StoreLocatorPlusSelfSpider(Spider):
+class StoreLocatorPlusSelfSpider(Spider, AutomaticSpiderGenerator):
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
     search_radius: int = 0
     max_results: int = 0
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\/wp-admin\/admin-ajax\.php(?:\?|$)",
+            data=r'if .action == "csl_ajax_onload" then {"search_radius": (.["options[initial_radius]"] | tonumber)} else null end',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\/wp-admin\/admin-ajax\.php(?:\?|$)",
+            data=r'if .action == "csl_ajax_onload" then {"max_results": (.["options[initial_results_returned]"] | tonumber), "search_radius": (.["options[radii]"] | split(",") | map_values(.|sub("[()]";"";"g")|tonumber) | max)} else null end',
+        ),
+        DetectionResponseRule(js_objects={"search_radius": r"parseInt(slplus.options.initial_radius)"}),
+        DetectionResponseRule(
+            js_objects={
+                "max_results": r"parseInt(window.slplus.options.initial_results_returned)",
+                "search_radius": r'Math.max(...window.slplus.options.radii.split(",").map(x => parseInt(x.replace("(", "").replace(")", ""))))',
+            }
+        ),
+    ]
 
     def start_requests(self):
         if hasattr(self, "allowed_domains"):

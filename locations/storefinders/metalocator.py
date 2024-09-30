@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -11,10 +12,17 @@ from locations.items import Feature
 # To use this spider, specify a brand_id (Itemid in API URLs).
 
 
-class MetaLocatorSpider(Spider):
+class MetaLocatorSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "metalocator.com"}
-    brand_id = None
+    brand_id: str = None
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?:admin|code)\.metalocator\.com\/index\.php\?.*?(?<=[?&])Itemid=(?P<brand_id>\d+)(?:&|$)"
+        ),
+        DetectionResponseRule(js_objects={"brand_id": r"window.ml___Itemid.toString()"}),
+        DetectionResponseRule(js_objects={"brand_id": r"window.ml_search_geography.itemid.toString()"}),
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&limit=100000")

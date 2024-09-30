@@ -6,6 +6,7 @@ from typing import Iterable
 from scrapy import Request, Spider
 from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -30,13 +31,24 @@ from locations.items import Feature
 # be extracted, override the `post_process_item` method.
 
 
-class WpGoMapsSpider(Spider):
+class WpGoMapsSpider(Spider, AutomaticSpiderGenerator):
     map_id: int = None
-    length: int = 10000
-    start: int = 0
-
-    start_urls = []
-    allowed_domains = []
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-json\/wpgmza\/v1\/features\/"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)(?:\/[^\/]+)+\/wp-json\/wpgmza\/v1\/features\/)"
+        ),
+        DetectionResponseRule(
+            js_objects={"allowed_domains": r'(typeof window.WPGMZA == "object") ? [window.location.hostname] : null'}
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "allowed_domains": r'(typeof window.wpgmza_google_api_status == "object") ? [window.location.hostname] : null'
+            }
+        ),
+    ]
 
     def start_requests(self) -> Iterable[Request]:
         urls = self.start_urls
@@ -64,7 +76,7 @@ class WpGoMapsSpider(Spider):
         path = base64.b64encode(data).rstrip(b"=").decode()
         return f"base64{path}"
 
-    def pre_process_marker(self, marker):
+    def pre_process_marker(self, marker: dict) -> dict:
         if "<img" in marker["title"]:
             marker.pop("title")
 

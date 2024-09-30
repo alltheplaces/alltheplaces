@@ -1,11 +1,12 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class VirtualEarthSpider(Spider):
+class VirtualEarthSpider(Spider, AutomaticSpiderGenerator):
     """
     A virtual earth spider is typically data hosted via virtualearth.net as a JSON API.
 
@@ -26,14 +27,20 @@ class VirtualEarthSpider(Spider):
     """
 
     dataset_attributes = {"source": "api", "api": "virtualearth.net"}
-
     dataset_id = ""
     dataset_name = ""
     api_key = ""
     dataset_filter = "Adresstyp Eq 1"
     dataset_select = "*"
-
     page_size = 250
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/spatial\.virtualearth\.net\/REST\/v1\/data\/(?P<dataset_id>[0-9a-f]{32})\/(?P<dataset_name>[^?]+)\?.*?(?<=[?&])\$filter=(?P<dataset_filter>[^&]+)&.*?(?<=&)\$select=(?P<dataset_select>[^&]+)&.*?(?<=&)key=(?P<api_key>[^&]+)(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/spatial\.virtualearth\.net\/REST\/v1\/data\/(?P<dataset_id>[0-9a-f]{32})\/(?P<dataset_name>[^?]+)\?.*?(?<=[?&])\$select=(?P<dataset_select>[^&]+)&.*?(?<=&)\$filter=(?P<dataset_filter>[^&]+)&.*?(?<=&)key=(?P<api_key>[^&]+)(?:&|$)"
+        ),
+    ]
 
     def start_requests(self):
         yield JsonRequest(

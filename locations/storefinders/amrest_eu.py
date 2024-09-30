@@ -1,13 +1,14 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class AmrestEUSpider(Spider):
+class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
     """
     AmRest is a European multinational casual dining, fast-food restaurant and coffee shop operator headquartered in the Spanish capital, Madrid
     https://www.wikidata.org/wiki/Q4738898
@@ -21,6 +22,57 @@ class AmrestEUSpider(Spider):
     api_source: str = None
     api_auth_source: str = None
     api_channel: str = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
+            headers=r'{"api_brand_key": .brand, "api_source": .source}',
+            data=r'{"api_auth_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
+            headers=r'{"api_brand_key": .brand}',
+            data=r'{"api_auth_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
+            headers=r'{"api_source": .source}',
+            data=r'{"api_auth_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
+            data=r'{"api_auth_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
+            headers=r'{"api_brand_key": .brand, "api_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
+            headers=r'{"api_brand_key": .brand}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
+            headers=r'{"api_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
+            headers=r'{"api_brand_key": .brand, "api_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
+            headers=r'{"api_brand_key": .brand}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
+            headers=r'{"api_source": .source}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
+        ),
+    ]
 
     def start_requests(self):
         headers = {

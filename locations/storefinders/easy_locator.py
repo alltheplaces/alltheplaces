@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 
 # To use this spider, specify api_brand_name as the brand name key existing
@@ -10,9 +11,14 @@ from locations.dict_parser import DictParser
 # Example api_brand_name from source URL: gigiscupcakesusa
 
 
-class EasyLocatorSpider(Spider):
+class EasyLocatorSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "easylocator.net"}
     api_brand_name: str = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/easylocator\.net\/ajax\/search_by_lat_lon_geojson\/(?P<api_brand_name>[^\/]+)\/"
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(
