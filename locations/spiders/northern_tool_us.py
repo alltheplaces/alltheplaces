@@ -1,5 +1,3 @@
-from typing import override
-
 from scrapy import FormRequest, Spider
 
 from locations.dict_parser import DictParser
@@ -13,7 +11,6 @@ class NorthernToolUSSpider(Spider):
     requires_proxy = True  # cloudflare
     user_agent = BROWSER_DEFAULT
 
-    @override
     def start_requests(self):
         yield FormRequest(
             method="GET",
