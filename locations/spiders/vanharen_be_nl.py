@@ -12,4 +12,4 @@ class VanharenBENLSpider(SitemapSpider, StructuredDataSpider):
         (r"-\d+$", "parse_sd"),
     ]
     wanted_types = ["LocalBusiness"]
-    drop_attributes = ["image"]
+    drop_attributes = {"image"}
