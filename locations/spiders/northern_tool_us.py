@@ -7,8 +7,8 @@ from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class NorthernToolSpider(Spider):
-    name = "northern_tool"
+class NorthernToolUSSpider(Spider):
+    name = "northern_tool_us"
     item_attributes = {"brand": "Northern Tool + Equipment", "brand_wikidata": "Q43379813"}
     requires_proxy = True  # cloudflare
     user_agent = BROWSER_DEFAULT
