@@ -22,6 +22,7 @@ class TheFragranceShopGBSpider(Spider):
     name = "the_fragrance_shop_gb"
     item_attributes = {"brand": "The Fragrance Shop", "brand_wikidata": "Q105337125"}
     start_urls = ["https://www.thefragranceshop.co.uk/api/stores/all"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["result"]:
