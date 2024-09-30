@@ -21,30 +21,24 @@ class NorthernToolUSSpider(Spider):
                 "radius": "5632",  # empirical maximum radius
                 "maxItems": "1000",
             },
-            callback=self.parse_storelocator,
+            callback=NorthernToolUSSpider.handle_response,
         )
 
-    def parse_storelocator(self, response):
+    @staticmethod
+    def handle_response(response):
         for store in response.json()["PhysicalStore"]:
             feature = DictParser.parse(store)
-            feature["housenumber"] = store["addressLine"][0].split(" ")[0]
             feature["name"] = store["Description"][0]["displayStoreName"]
-            feature["opening_hours"] = self.parse_opening_hours(store)
+            feature["opening_hours"] = OpeningHours()
             feature["ref"] = store["uniqueID"]
             feature["state"] = store["stateOrProvinceName"]
-            feature["street"] = " ".join(store["addressLine"][0].split(" ")[1:])
-            feature["street_address"] = None  # build this during address cleanup
+            feature["street_address"] = store["addressLine"][0]
             feature["website"] = f'https://www.northerntool.com/store/{store["x_url"]}/'
+            for attr in store["Attribute"]:
+                if attr["name"].title() in DAYS_FULL:
+                    feature["opening_hours"].add_range(
+                        DAYS_EN[attr["name"].title()],
+                        attr["value"][0:2] + ":" + attr["value"][2:4],
+                        attr["value"][5:7] + ":" + attr["value"][7:9],
+                    )
             yield feature
-
-    @staticmethod
-    def parse_opening_hours(store):
-        hours = OpeningHours()
-        for attr in store["Attribute"]:
-            if attr["name"].title() in DAYS_FULL:  # only want the attr['name'] that are all-caps weekday names
-                day = DAYS_EN[attr["name"].title()]  # map it to the OSM-like form of the weekday name (e.g. "Mo")
-                time_open, time_close = attr["value"].split("_")  # if addr['value'] looks like '0700_1900' ...
-                time_open = time_open[:2] + ":" + time_open[2:]  # ... this now looks like 07:00
-                time_close = time_close[:2] + ":" + time_close[2:]  # ... this now looks like 19:00
-                hours.add_range(day, time_open, time_close)
-        return hours
