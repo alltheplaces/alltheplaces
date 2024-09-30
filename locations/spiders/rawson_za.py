@@ -13,4 +13,5 @@ class RawsonZASpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["street_address"] = item.pop("addr_full")
+        item["branch"] = item.pop("name")
         yield item
