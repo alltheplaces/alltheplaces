@@ -14,3 +14,4 @@ class MadewellUSSpider(SitemapSpider, StructuredDataSpider):
         item["phone"] = response.xpath('//div[@id="phone-main"]/a/@href').get()
 
         yield item
+    drop_attributes = {"image"}
