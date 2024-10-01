@@ -39,3 +39,4 @@ class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
             item["name"] = name
 
         yield item
+    drop_attributes = {"image"}
