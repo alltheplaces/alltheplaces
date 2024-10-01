@@ -37,3 +37,4 @@ class Vets4petsGBSpider(CrawlSpider):
             if "petsathome" in item["street_address"].lower().replace(" ", ""):
                 set_located_in(item, PetsAtHomeGBSpider.item_attributes)
             return item
+    drop_attributes = {"image"}
