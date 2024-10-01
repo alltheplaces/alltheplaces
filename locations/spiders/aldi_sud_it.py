@@ -21,3 +21,4 @@ class AldiSudITSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
+    drop_attributes = {"image"}
