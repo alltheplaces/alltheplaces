@@ -20,3 +20,4 @@ class GreatClipsSpider(SitemapSpider, StructuredDataSpider):
         item["branch"] = response.xpath("//h1/text()").get()
 
         yield item
+    drop_attributes = {"image"}
