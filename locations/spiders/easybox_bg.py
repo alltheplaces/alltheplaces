@@ -26,3 +26,4 @@ class EasyboxBGSpider(scrapy.Spider):
                 closing_hour = day_schedule["closingHour"].rsplit(":", 1)[0]
                 item["opening_hours"].add_range(day, opening_hour, closing_hour)
             yield item
+    drop_attributes = {"image"}
