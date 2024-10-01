@@ -51,3 +51,4 @@ class DeutscheTelekomDESpider(Spider):
         paginator = response.json()["meta"]
         if paginator["current_page"] < paginator["total_pages"]:
             yield self.make_request(paginator["current_page"] + 1)
+    drop_attributes = {"image"}
