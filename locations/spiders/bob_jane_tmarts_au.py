@@ -27,3 +27,4 @@ class BobJaneTmartsAUSpider(SitemapSpider, StructuredDataSpider):
             return (float(match.group(1)), float(match.group(2)))
         else:
             return (None, None)
+    drop_attributes = {"image"}
