@@ -11,6 +11,7 @@ class SouthernCoopSpider(SitemapSpider, StructuredDataSpider):
     name = "southern_coop"
     sitemap_urls = ["https://stores.southern.coop/robots.txt"]
     sitemap_rules = [(r"\.coop\/[-\w]+\/[-\w]+\/[-\w]+\.html$", "parse_sd")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(SOUTHERN_COOP, item)
