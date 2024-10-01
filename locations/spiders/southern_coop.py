@@ -18,3 +18,4 @@ class SouthernCoopSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_CONVENIENCE, item)
 
         yield item
+    drop_attributes = {"image"}
