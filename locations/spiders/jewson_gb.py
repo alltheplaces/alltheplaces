@@ -1,9 +1,9 @@
 import scrapy
 
-from locations.structured_data_parser import StructuredDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class JewsonGBSpider(scrapy.spiders.SitemapSpider, StructuredDataParser):
+class JewsonGBSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
     name = "jewson_gb"
     item_attributes = {"brand": "Jewson", "brand_wikidata": "Q6190226", "country": "GB"}
     sitemap_urls = ["https://www.jewson.co.uk/sitemap/sitemap_branches_jewson.xml"]
