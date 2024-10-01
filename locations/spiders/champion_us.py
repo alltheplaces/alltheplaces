@@ -12,3 +12,4 @@ class ChampionUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("name", None)
         yield item
+    drop_attributes = {"image"}
