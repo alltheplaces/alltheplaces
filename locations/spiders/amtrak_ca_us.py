@@ -8,8 +8,8 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AmtrakUSSpider(Spider):
-    name = "amtrak_us"
+class AmtrakCAUSSpider(Spider):
+    name = "amtrak_ca_us"
     start_urls = ["https://maps.amtrak.com/services/MapDataService/stations/allStations"]
 
     station_types = {
