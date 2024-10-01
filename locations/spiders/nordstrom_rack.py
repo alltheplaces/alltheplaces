@@ -18,3 +18,4 @@ class NordstromRackSpider(SitemapSpider):
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)
         return LinkedDataParser.parse(response, "ClothingStore")
+    drop_attributes = {"image"}
