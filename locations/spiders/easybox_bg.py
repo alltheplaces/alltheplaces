@@ -13,6 +13,7 @@ class EasyboxBGSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "BG"
     no_refs = True
+    drop_attributes = {"image"}
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
@@ -26,4 +27,3 @@ class EasyboxBGSpider(scrapy.Spider):
                 closing_hour = day_schedule["closingHour"].rsplit(":", 1)[0]
                 item["opening_hours"].add_range(day, opening_hour, closing_hour)
             yield item
-    drop_attributes = {"image"}
