@@ -14,3 +14,4 @@ class ShoeCarnivalUSSpider(SitemapSpider, StructuredDataSpider):
         item.pop("name")
         item["branch"] = response.xpath('//span[@class="loc-name"]/a/text()').get()
         yield item
+    drop_attributes = {"image"}
