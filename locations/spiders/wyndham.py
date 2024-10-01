@@ -42,6 +42,7 @@ class WyndhamSpider(SitemapSpider):
     sitemap_rules = [(r"https:\/\/www\.wyndhamhotels\.com\/([-\w]+)\/([-\w]+)\/([-\w]+)\/overview", "parse_property")]
     custom_settings = {"REDIRECT_ENABLED": False}
     requires_proxy = True
+    drop_attributes = {"image"}
 
     def parse_property(self, response):
         item = LinkedDataParser.parse(response, "Hotel")
@@ -71,4 +72,4 @@ class WyndhamSpider(SitemapSpider):
             apply_category(Categories.HOTEL, item)
 
         return item
-    drop_attributes = {"image"}
+
