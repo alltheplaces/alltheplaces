@@ -28,6 +28,7 @@ class Vets4petsGBSpider(CrawlSpider):
     rules = [Rule(LinkExtractor(allow="/practices/"), callback="parse_func", follow=True)]
     allowed_domains = ["vets4pets.com"]
     download_delay = 0.2
+    drop_attributes = {"image"}
 
     def parse_func(self, response):
         item = LinkedDataParser.parse(response, "VeterinaryCare")
@@ -37,4 +38,3 @@ class Vets4petsGBSpider(CrawlSpider):
             if "petsathome" in item["street_address"].lower().replace(" ", ""):
                 set_located_in(item, PetsAtHomeGBSpider.item_attributes)
             return item
-    drop_attributes = {"image"}
