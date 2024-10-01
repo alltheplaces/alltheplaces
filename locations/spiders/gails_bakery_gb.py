@@ -28,3 +28,4 @@ class GailsBakeryGBSpider(Spider):
             item["postcode"] = props["zip"]
 
             yield item
+    drop_attributes = {"image"}
