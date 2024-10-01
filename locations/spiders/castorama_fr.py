@@ -9,6 +9,7 @@ class CastoramaFRSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Castorama", "brand_wikidata": "Q966971"}
     sitemap_urls = ["https://www.castorama.fr/static/sitemap.xml"]
     sitemap_rules = [(r"/store/\d+", "parse_sd")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         oh = OpeningHours()
@@ -21,4 +22,3 @@ class CastoramaFRSpider(SitemapSpider, StructuredDataSpider):
                 )
                 item["opening_hours"] = oh
         yield item
-    drop_attributes = {"image"}
