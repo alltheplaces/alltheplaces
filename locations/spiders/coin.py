@@ -29,3 +29,4 @@ class CoinSpider(JSONBlobSpider):
             yield item
         else:
             self.logger.error(f"unknown store type: {store_type}")
+    drop_attributes = {"image"}
