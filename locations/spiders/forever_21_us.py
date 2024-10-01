@@ -17,6 +17,7 @@ class Forever21USSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [
         (r"/stores/", "parse"),
     ]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         for city in response.css('[itemprop="address"] .Address-city'):
@@ -24,4 +25,3 @@ class Forever21USSpider(scrapy.spiders.SitemapSpider):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "ClothingStore")
         yield item
-    drop_attributes = {"image"}
