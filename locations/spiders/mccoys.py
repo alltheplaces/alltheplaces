@@ -10,6 +10,7 @@ class MccoysSpider(StructuredDataSpider):
     item_attributes = {"brand": "McCoy's Building Supply", "brand_wikidata": "Q27877295"}
     start_urls = ["https://www.mccoys.com/stores"]
     time_format = "%I%p"
+    drop_attributes = {"image"}
 
     def parse(self, response):
         locations = response.xpath('//*[@class="btn btn-block btn-outline-secondary"]//@href').getall()
@@ -19,5 +20,3 @@ class MccoysSpider(StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["openingHoursSpecification"] = ld_data.pop("OpeningHoursSpecification", None)
-
-    drop_attributes = {"image"}
