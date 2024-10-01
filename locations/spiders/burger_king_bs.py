@@ -67,7 +67,7 @@ class BurgerKingBSSpider(Spider):
             if drive_through:
                 o = OpeningHours()
                 for day in DAYS_3_LETTERS:
-                    if hours := response.xpath(f'.//div[@class="bk-location_{day.lower()}_drivethru"]/text()').get():
+                    if times := response.xpath(f'.//div[@class="bk-location_{day.lower()}_drivethru"]/text()').get():
                         times = re.sub(r"\d\d\d\d-\d\d-\d\d ", "", times)
                         times = "-".join([time for time in times.split(";") if time != "0"])
                         o.add_ranges_from_string(f"{day} {times}")
