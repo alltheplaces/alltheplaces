@@ -15,3 +15,4 @@ class SubwaySpider(SitemapSpider, StructuredDataSpider):
         if isinstance(ld_data["name"], list):
             # We actually want the second name in the Microdata
             ld_data["name"] = ld_data["name"][-1]
+    drop_attributes = {"image"}
