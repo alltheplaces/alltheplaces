@@ -14,3 +14,4 @@ class AmericanEagleOutfittersSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["brand"] = response.xpath('//*[@class="LocationName-brand"]/text()').get()
         yield item
+    drop_attributes = {"image"}
