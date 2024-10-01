@@ -9,3 +9,4 @@ class HomesenseSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://locations.us.homesense.com/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/locations\.us\.homesense\.com\/\w{2}\/[-\w]+$", "parse_sd")]
     wanted_types = ["DepartmentStore"]
+    drop_attributes = {"image"}
