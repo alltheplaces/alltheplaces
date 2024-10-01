@@ -60,3 +60,4 @@ class TacoBellSpider(SitemapSpider):
                 item["name"] = "Taco Bell"
             item["image"] = None
             yield item
+    drop_attributes = {"image"}
