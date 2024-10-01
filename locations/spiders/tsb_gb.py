@@ -23,3 +23,4 @@ class TsbGBSpider(SitemapSpider, StructuredDataSpider):
             item.pop("phone", None)
 
         yield item
+    drop_attributes = {"image"}
