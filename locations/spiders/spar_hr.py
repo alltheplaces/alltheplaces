@@ -23,3 +23,4 @@ class SparHRSpider(SitemapSpider, StructuredDataSpider):
             item["brand_wikidata"] = "Q15820339"
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
+    drop_attributes = {"image"}
