@@ -19,4 +19,5 @@ class MccoysSpider(StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["openingHoursSpecification"] = ld_data.pop("OpeningHoursSpecification", None)
+
     drop_attributes = {"image"}
