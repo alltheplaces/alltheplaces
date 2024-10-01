@@ -10,8 +10,8 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.sixt.co.uk/xml-sitemaps/branch.xml"]
     sitemap_rules = [(r"\/car-hire\/[-\w]+\/[-\w]+\/[-\w]+\/$", "parse_sd")]
     user_agent = BROWSER_DEFAULT
+    drop_attributes = {"image"}
 
     def pre_process_data(self, ld_data, **kwargs):
         if not ld_data["address"].get("addressCountry"):
             ld_data["address"]["addressCountry"] = ld_data["address"].pop("addressRegion")
-    drop_attributes = {"image"}
