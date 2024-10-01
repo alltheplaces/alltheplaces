@@ -29,3 +29,4 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
             item["branch"] = item.pop("name").removeprefix("M&T Bank in ")
 
         yield item
+    drop_attributes = {"image"}
