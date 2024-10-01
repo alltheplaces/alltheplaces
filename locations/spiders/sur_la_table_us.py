@@ -15,3 +15,4 @@ class SurLaTableUSSpider(SitemapSpider, StructuredDataSpider):
         item["email"] = response.xpath('//a[@title="Email"]/@href').get("").replace("mailTo:", "").strip()
         item["ref"] = item.get("email", "").split("@", 1)[0].replace("slt", "")
         yield item
+    drop_attributes = {"image"}
