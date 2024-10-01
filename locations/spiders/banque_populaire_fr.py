@@ -16,3 +16,4 @@ class BanquePopulaireFRSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.BANK, item)
 
         yield item
+    drop_attributes = {"image"}
