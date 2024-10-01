@@ -17,6 +17,7 @@ class CoachUSSpider(CrawlSpider, StructuredDataSpider):
         ),
     ]
     wanted_types = ["Store", "OutletStore"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["name"].startswith("COACH Outlet"):
@@ -27,4 +28,3 @@ class CoachUSSpider(CrawlSpider, StructuredDataSpider):
         item["branch"] = ld_data["name"].removeprefix(item["name"]).strip()
 
         yield item
-    drop_attributes = {"image"}
