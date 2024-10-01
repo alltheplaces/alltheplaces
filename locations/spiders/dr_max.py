@@ -2,7 +2,6 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import scrapy
-from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -28,10 +27,6 @@ class DrMaxSpider(scrapy.Spider):
         "https://www.drmax.it/le-nostre-farmacie/",
         "https://www.drmax.ro/farmacii/",
     ]
-
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json()["data"]:
