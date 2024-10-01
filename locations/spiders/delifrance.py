@@ -20,3 +20,4 @@ class DelifranceSpider(SitemapSpider, StructuredDataSpider):
         country_code = self.country_mapping.get(item["country"])
         item["country"] = item["country"] if country_code is None else country_code
         yield item
+    drop_attributes = {"image"}
