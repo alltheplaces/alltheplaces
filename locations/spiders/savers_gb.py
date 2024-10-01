@@ -35,7 +35,7 @@ class SaversGBSpider(SitemapSpider):
         item["opening_hours"] = OpeningHours()
         for rule in location["openingHours"]["weekDayOpeningList"]:
             item["opening_hours"].add_range(
-                rule["weekDay"], rule["openingTime"]["formattedHour"], rule["openingTime"]["formattedHour"], "%I:%M %p"
+                rule["weekDay"], rule["openingTime"]["formattedHour"], rule["closingTime"]["formattedHour"], "%I:%M %p"
             )
 
         yield item
