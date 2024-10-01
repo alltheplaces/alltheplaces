@@ -250,7 +250,7 @@ class DictParser:
     hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
 
     @staticmethod
-    def parse(obj) -> Feature:
+    def parse(obj: dict) -> Feature:
         item = Feature()
 
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
@@ -258,8 +258,9 @@ class DictParser:
 
         if (
             obj.get("geometry")
-            and obj["geometry"].get("type") is not None
-            and obj["geometry"].get("coordinates") is not None
+            and obj["geometry"].get("type")
+            in ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]
+            and isinstance(obj["geometry"].get("coordinates"), list)
         ):
             item["geometry"] = obj["geometry"]
         else:
