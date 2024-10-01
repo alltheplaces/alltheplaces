@@ -15,3 +15,4 @@ class SuperdrySpider(scrapy.spiders.SitemapSpider):
         item = LinkedDataParser.parse(response, "ClothingStore")
         if item:
             yield item
+    drop_attributes = {"image"}
