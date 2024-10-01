@@ -10,3 +10,4 @@ class MrGattisPizzaUSSpider(StoreLocatorWidgetsSpider):
         if "COMING SOON" in item["name"].upper():
             return
         yield item
+    drop_attributes = {"image"}
