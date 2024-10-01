@@ -9,6 +9,7 @@ class BedshedAUSpider(SitemapSpider, StructuredDataSpider):
     name = "bedshed_au"
     item_attributes = {"brand": "Bedshed", "brand_wikidata": "Q84452962"}
     sitemap_urls = ["https://www.bedshed.com.au/sitemap-stores.xml"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if m := re.search(r"latitude&quot;:(-?\d+\.\d+),", response.text):
