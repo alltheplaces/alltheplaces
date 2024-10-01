@@ -14,6 +14,7 @@ class KekeSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/kekes-", "parse_sd")]
     wanted_types = ["LocalBusiness"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data):
         if response.xpath('//div[@class="sqs-block-content"]/p[1]/text()').get() == "COMING SOON!":
@@ -35,4 +36,3 @@ class KekeSpider(SitemapSpider, StructuredDataSpider):
         item["lon"] = data.get("mapLng")
 
         yield item
-    drop_attributes = {"image"}
