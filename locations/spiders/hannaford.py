@@ -28,3 +28,4 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
         item["opening_hours"] = oh.as_opening_hours()
 
         yield item
+    drop_attributes = {"image"}
