@@ -18,6 +18,7 @@ class DrMaxSpider(scrapy.Spider):
         "https://pharmacy.drmax.cz/api/v1/public/pharmacies",
         "https://pharmacy.drmax.sk/api/v1/public/pharmacies",
         "https://pharmacy.drmax.it/api/v1/public/pharmacies",
+        "https://pharmacy.drmax.ro/api/v1/public/pharmacies",
     ]
 
     website_roots = [
@@ -25,6 +26,7 @@ class DrMaxSpider(scrapy.Spider):
         "https://www.drmax.cz/lekarny/",
         "https://www.drmax.sk/lekarne/",
         "https://www.drmax.it/le-nostre-farmacie/",
+        "https://www.drmax.ro/farmacii/",
     ]
 
     def start_requests(self):
