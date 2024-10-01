@@ -16,6 +16,7 @@ class DeutscheTelekomDESpider(Spider):
         "brand_wikidata": "Q9396",
         "extras": Categories.SHOP_MOBILE_PHONE.value,
     }
+    drop_attributes = {"image"}
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(url="https://shopseite.telekom.de/api/shops?_page={}".format(page))
@@ -51,4 +52,3 @@ class DeutscheTelekomDESpider(Spider):
         paginator = response.json()["meta"]
         if paginator["current_page"] < paginator["total_pages"]:
             yield self.make_request(paginator["current_page"] + 1)
-    drop_attributes = {"image"}
