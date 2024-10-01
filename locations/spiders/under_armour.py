@@ -27,4 +27,3 @@ class UnderArmourSpider(scrapy.spiders.SitemapSpider):
         item = LinkedDataParser.parse(response, "SportingGoodsStore")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
-
