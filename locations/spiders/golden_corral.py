@@ -17,3 +17,4 @@ class GoldenCorralSpider(CrawlSpider):
             item["country"] = "US"
             item["ref"] = response.url
             yield item
+    drop_attributes = {"image"}
