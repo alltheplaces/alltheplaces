@@ -13,9 +13,9 @@ class HalifaxGBSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://branches.halifax.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/branches\.halifax\.co\.uk\/[-'\w]+\/[-'\/\w]+$", "parse_sd")]
+    drop_attributes = {"image"}
 
     def sitemap_filter(self, entries):
         for entry in entries:
             if "event" not in entry["loc"].lower():
                 yield entry
-    drop_attributes = {"image"}
