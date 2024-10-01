@@ -20,3 +20,4 @@ class CondadoTacosUSSpider(SitemapSpider, StructuredDataSpider):
             item["name"] = name
         item["country"] = response.css("[itemprop=addressCountry]::text").get()
         yield item
+    drop_attributes = {"image"}
