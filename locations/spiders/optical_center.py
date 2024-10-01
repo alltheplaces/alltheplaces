@@ -20,6 +20,7 @@ class OpticalCenterSpider(CrawlSpider, StructuredDataSpider):
         )
     ]
     requires_proxy = True
+    drop_attributes = {"image"}
 
     def iter_linked_data(self, response):
         yield json.loads(response.xpath("//script[@data-lf-location-json]/text()").get())
@@ -51,4 +52,3 @@ class OpticalCenterSpider(CrawlSpider, StructuredDataSpider):
         del item["extras"]["website:fr-CA"]
 
         yield item
-    drop_attributes = {"image"}
