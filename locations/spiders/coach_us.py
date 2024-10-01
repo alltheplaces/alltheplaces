@@ -27,3 +27,4 @@ class CoachUSSpider(CrawlSpider, StructuredDataSpider):
         item["branch"] = ld_data["name"].removeprefix(item["name"]).strip()
 
         yield item
+    drop_attributes = {"image"}
