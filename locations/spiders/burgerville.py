@@ -14,6 +14,7 @@ class BurgervilleSpider(SitemapSpider):
             "parse_store",
         ),
     ]
+    drop_attributes = {"image"}
 
     def parse_store(self, response):
         item = LinkedDataParser.parse(response, "Restaurant")
@@ -22,4 +23,4 @@ class BurgervilleSpider(SitemapSpider):
             return
         item["country"] = "US"
         yield item
-    drop_attributes = {"image"}
+
