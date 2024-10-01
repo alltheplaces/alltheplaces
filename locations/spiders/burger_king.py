@@ -279,5 +279,5 @@ class BurgerKingSpider(scrapy.Spider):
                     )
             return oh
         except Exception as e:
-            self.logger.warning("Failed to parse hours for %s: %s", item["ref"], e)
+            self.logger.warning("Failed to parse hours: %s", e)
             return None
