@@ -23,6 +23,12 @@ class HyundaiNZSpider(JSONBlobSpider):
         item["branch"] = item.pop("name", None)
         item.pop("email", None)  # E-mail of primary contact person only. Ignore.
 
+        if website := item.get("website"):
+            if website == "/":
+                item["website"] = None
+            elif not website.startswith("http"):
+                item["website"] = "https://{}".format(website)
+
         if isinstance(feature.get("Type"), list) and len(feature["Type"]) > 0:
             if feature["Type"][0] == "Passenger sales and service":
                 service_feature = item.deepcopy()
