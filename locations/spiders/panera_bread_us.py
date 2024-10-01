@@ -14,6 +14,7 @@ def slugify(s):
 class PaneraBreadUSSpider(Spider):
     name = "panera_bread_us"
     item_attributes = {"brand": "Panera Bread", "brand_wikidata": "Q7130852"}
+    requires_proxy = True
 
     def start_requests(self):
         for state in GeonamesCache().get_us_states():

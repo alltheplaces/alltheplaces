@@ -62,7 +62,6 @@ class CommerzbankDESpider(CrawlSpider):
                     "lat": float(branch["position"][0]),
                     "lon": float(branch["position"][1]),
                     "phone": branch.get("telefon", ""),
-                    "email": branch.get("email"),
                     "opening_hours": self.parse_hours(branch),
                     "website": response.url,
                     "extras": {

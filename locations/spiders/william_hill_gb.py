@@ -13,6 +13,7 @@ class WilliamHillGBSpider(CrawlSpider):
     allowed_domains = ["shoplocator.williamhill"]
     start_urls = ["https://shoplocator.williamhill/directory"]
     rules = [Rule(LinkExtractor(), callback="parse_func", follow=False)]
+    drop_attributes = {"email"}
 
     def parse_func(self, response):
         pattern = re.compile(r"window.lctr.results.push\((.*?)\);", re.MULTILINE | re.DOTALL)
