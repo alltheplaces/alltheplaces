@@ -20,3 +20,4 @@ class BojanglesSpider(scrapy.spiders.SitemapSpider):
         item = LinkedDataParser.parse(response, "FastFoodRestaurant")
         item["ref"] = response.url.replace("https://locations.bojangles.com/", "").replace(".html", "")
         yield item
+    drop_attributes = {"image"}
