@@ -24,3 +24,4 @@ class Forever21USSpider(scrapy.spiders.SitemapSpider):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "ClothingStore")
         yield item
+    drop_attributes = {"image"}
