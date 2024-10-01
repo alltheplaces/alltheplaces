@@ -17,3 +17,4 @@ class BedshedAUSpider(SitemapSpider, StructuredDataSpider):
             item["lon"] = m.group(1)
 
         yield item
+    drop_attributes = {"image"}
