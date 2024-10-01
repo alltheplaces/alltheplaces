@@ -21,3 +21,4 @@ class MitraNLSpider(CrawlSpider, StructuredDataSpider):
         links = self.link_extractor.extract_links(response)
         for link in links:
             yield scrapy.Request(link.url, callback=self.parse_sd)
+    drop_attributes = {"image"}
