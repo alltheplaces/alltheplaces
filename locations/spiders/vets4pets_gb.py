@@ -2,8 +2,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import url_to_coords
-from locations.structured_data_spider import StructuredDataSpider
 from locations.spiders.pets_at_home_gb import PetsAtHomeGBSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
 def extract_google_position(item, response):
@@ -33,7 +33,7 @@ class Vets4petsGBSpider(CrawlSpider, StructuredDataSpider):
     time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, location):
-            extract_google_position(item, response)
-            if "petsathome" in item["street_address"].lower().replace(" ", ""):
-                set_located_in(item, PetsAtHomeGBSpider.item_attributes)
-            yield item
+        extract_google_position(item, response)
+        if "petsathome" in item["street_address"].lower().replace(" ", ""):
+            set_located_in(item, PetsAtHomeGBSpider.item_attributes)
+        yield item
