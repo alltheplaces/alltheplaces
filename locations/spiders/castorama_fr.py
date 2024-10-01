@@ -21,3 +21,4 @@ class CastoramaFRSpider(SitemapSpider, StructuredDataSpider):
                 )
                 item["opening_hours"] = oh
         yield item
+    drop_attributes = {"image"}
