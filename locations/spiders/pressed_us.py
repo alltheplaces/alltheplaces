@@ -14,7 +14,8 @@ query($input: StoreSearchInput!) {
         name
         streetAddress
         locality
-        region postal
+        region
+        postal
         phone
         storeHours
         isPickupAvailable
@@ -24,7 +25,6 @@ query($input: StoreSearchInput!) {
                 latitude
                 longitude
             }
-            type
         }
     }
 }
@@ -54,6 +54,7 @@ class PressedUSSpider(Spider):
     def parse(self, response):
         for location in response.json()["data"]["searchStores"]:
             item = DictParser.parse(location)
+            del item["geometry"]
 
             item["lat"] = location["geometry"]["coordinates"]["latitude"]
             item["lon"] = location["geometry"]["coordinates"]["longitude"]
