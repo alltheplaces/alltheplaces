@@ -31,7 +31,7 @@ class Vets4petsGBSpider(CrawlSpider, StructuredDataSpider):
     drop_attributes = {"image"}
     wanted_types = ["VeterinaryCare"]
 
-    def post_process_item(self, item, response):
+    def post_process_item(self, item, response, location):
             extract_google_position(item, response)
             if "petsathome" in item["street_address"].lower().replace(" ", ""):
                 set_located_in(item, PetsAtHomeGBSpider.item_attributes)
