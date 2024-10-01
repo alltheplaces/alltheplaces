@@ -22,3 +22,4 @@ class HssHireGBSpider(SitemapSpider, StructuredDataSpider):
             item["lon"] = js_blob.split("longitude = ")[1].split(";")[0]
 
         yield item
+    drop_attributes = {"image"}
