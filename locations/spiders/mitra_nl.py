@@ -10,9 +10,7 @@ class MitraNLSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Mitra", "brand_wikidata": "Q109186241"}
     allowed_domains = ["www.mitra.nl"]
     link_extractor = LinkExtractor(allow="/winkels/")
-    wanted_types = [
-        "LiquorStore"
-    ]
+    wanted_types = ["LiquorStore"]
     drop_attributes = {"image"}
 
     def start_requests(self):
@@ -22,4 +20,3 @@ class MitraNLSpider(CrawlSpider, StructuredDataSpider):
         links = self.link_extractor.extract_links(response)
         for link in links:
             yield scrapy.Request(link.url, callback=self.parse_sd)
-
