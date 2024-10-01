@@ -35,3 +35,4 @@ class KekeSpider(SitemapSpider, StructuredDataSpider):
         item["lon"] = data.get("mapLng")
 
         yield item
+    drop_attributes = {"image"}
