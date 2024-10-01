@@ -10,4 +10,3 @@ class AshleyFurnitureSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/store/", "parse_sd")]
     drop_attributes = {"image"}
     wanted_types = ["FurnitureStore"]
-
