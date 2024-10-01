@@ -28,6 +28,9 @@ class DictParser:
         "BranchID",
         "branchID",
         "branch-code",
+        # ES
+        "id-tienda",
+        "ID-tienda",
     ]
 
     name_keys = [
