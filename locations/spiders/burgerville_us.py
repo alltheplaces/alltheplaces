@@ -1,10 +1,10 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BurgervilleSpider(SitemapSpider):
-    name = "burgerville"
+class BurgervilleUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "burgerville_us"
     item_attributes = {"brand": "Burgerville", "brand_wikidata": "Q4998570"}
     allowed_domains = ["locations.burgerville.com"]
     sitemap_urls = ["https://locations.burgerville.com/sitemap.xml"]
@@ -14,13 +14,5 @@ class BurgervilleSpider(SitemapSpider):
             "parse_store",
         ),
     ]
+    wanted_types = ["Restaurant"]
     drop_attributes = {"image"}
-
-    def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "Restaurant")
-
-        if item is None:
-            return
-        item["country"] = "US"
-        yield item
-
