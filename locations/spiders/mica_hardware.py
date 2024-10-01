@@ -14,6 +14,7 @@ class MicaHardwareSpider(Spider):
         "brand": "Mica Hardware",
         "brand_wikidata": "Q116771560",
     }
+    skip_auto_cc_domain = True
 
     def parse(self, response):
         for location in response.xpath('.//ul[@id="js-map-elements"]/li'):
