@@ -16,3 +16,4 @@ class PgaTourSuperstoreUSSpider(CrawlSpider, StructuredDataSpider):
         item["branch"] = item.pop("name")
         item["website"] = response.url
         yield item
+    drop_attributes = {"image"}
