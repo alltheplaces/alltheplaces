@@ -18,3 +18,4 @@ class HalifaxGBSpider(SitemapSpider, StructuredDataSpider):
         for entry in entries:
             if "event" not in entry["loc"].lower():
                 yield entry
+    drop_attributes = {"image"}
