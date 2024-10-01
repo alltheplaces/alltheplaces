@@ -59,3 +59,4 @@ class NikeSpider(scrapy.Spider):
             else:
                 item["extras"]["type"] = store["businessConcept"]
             yield item
+    drop_attributes = {"image"}
