@@ -30,6 +30,7 @@ class Vets4petsGBSpider(CrawlSpider, StructuredDataSpider):
     download_delay = 0.2
     drop_attributes = {"image"}
     wanted_types = ["VeterinaryCare"]
+    time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, location):
             extract_google_position(item, response)
