@@ -25,3 +25,4 @@ class SalonCentricUSSpider(SitemapSpider, StructuredDataSpider):
             set_closed(item)
 
         yield item
+    drop_attributes = {"image"}
