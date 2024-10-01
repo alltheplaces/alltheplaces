@@ -14,6 +14,7 @@ class TsbGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://branches.tsb.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/branches\.tsb\.co\.uk\/[-\w]+\/[-\/\w]+\.html$", "parse_sd")]
     wanted_types = ["BankOrCreditUnion", "FinancialService"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["image"] == item["website"]:
@@ -23,4 +24,3 @@ class TsbGBSpider(SitemapSpider, StructuredDataSpider):
             item.pop("phone", None)
 
         yield item
-    drop_attributes = {"image"}
