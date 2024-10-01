@@ -14,3 +14,4 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
     def pre_process_data(self, ld_data, **kwargs):
         if not ld_data["address"].get("addressCountry"):
             ld_data["address"]["addressCountry"] = ld_data["address"].pop("addressRegion")
+    drop_attributes = {"image"}
