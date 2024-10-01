@@ -18,3 +18,4 @@ class JacksonHewittSpider(scrapy.spiders.SitemapSpider):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "AccountingService")
         yield item
+    drop_attributes = {"image"}
