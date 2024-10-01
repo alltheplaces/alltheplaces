@@ -14,6 +14,7 @@ class AldiSudITSpider(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("ALDI ")
@@ -21,4 +22,3 @@ class AldiSudITSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
-    drop_attributes = {"image"}
