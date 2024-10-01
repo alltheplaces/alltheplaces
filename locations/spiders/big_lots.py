@@ -20,3 +20,4 @@ class BigLotsSpider(scrapy.spiders.SitemapSpider):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "Store")
         yield item
+    drop_attributes = {"image"}
