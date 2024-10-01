@@ -18,3 +18,4 @@ class JewsonGBSpider(scrapy.spiders.SitemapSpider):
             item["lat"] = response.xpath("//@data-latitude").get()
             item["lon"] = response.xpath("//@data-longitude").get()
             yield item
+    drop_attributes = {"image"}
