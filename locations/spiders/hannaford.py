@@ -13,6 +13,7 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.hannaford.com/sitemap.xml"]
     sitemap_rules = [(r"[0-9]+$", "parse_sd")]
     wanted_types = ["GroceryStore"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         days = json.loads(response.xpath("//@data-days").get())
@@ -28,4 +29,3 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
         item["opening_hours"] = oh.as_opening_hours()
 
         yield item
-    drop_attributes = {"image"}
