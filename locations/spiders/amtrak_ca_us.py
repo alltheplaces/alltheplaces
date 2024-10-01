@@ -8,8 +8,8 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AmtrakSpider(Spider):
-    name = "amtrak"
+class AmtrakCAUSSpider(Spider):
+    name = "amtrak_ca_us"
     start_urls = ["https://maps.amtrak.com/services/MapDataService/stations/allStations"]
 
     station_types = {
@@ -44,8 +44,8 @@ class AmtrakSpider(Spider):
 
             if station_type := self.station_types.get(location["properties"]["StnType"]):
                 apply_category(station_type["category"], item)
-                item["network"] = station_type["network"]
-                item["network:wikidata"] = station_type["network:wikidata"]
+                item["extras"]["network"] = station_type["network"]
+                item["extras"]["network:wikidata"] = station_type["network:wikidata"]
             if details := self.shelter_types.get(location["properties"]["StaType"]):
                 item["extras"].update(details)
 
