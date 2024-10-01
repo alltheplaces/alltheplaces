@@ -16,3 +16,4 @@ class CubeSmartUSSpider(SitemapSpider, StructuredDataSpider):
         item["lon"] = item["lon"] * -1
 
         yield item
+    drop_attributes = {"image"}
