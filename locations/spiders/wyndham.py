@@ -72,4 +72,3 @@ class WyndhamSpider(SitemapSpider):
             apply_category(Categories.HOTEL, item)
 
         return item
-
