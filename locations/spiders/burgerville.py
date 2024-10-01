@@ -22,3 +22,4 @@ class BurgervilleSpider(SitemapSpider):
             return
         item["country"] = "US"
         yield item
+    drop_attributes = {"image"}
