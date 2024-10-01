@@ -34,6 +34,6 @@ class SosBRSpider(Spider):
             item["state"] = location["Endereco"]["EstadoNome"]
             item["lat"] = location["Coordenadas"]["Latitude"]
             item["lon"] = location["Coordenadas"]["Longitude"]
-            apply_category({"office": "business"}, item)
+            apply_category({"amenity": "training"}, item)
 
             yield item
