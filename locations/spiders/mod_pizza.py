@@ -31,3 +31,4 @@ class ModPizzaSpider(scrapy.spiders.SitemapSpider):
         item["postcode"] = response.css(".Address-field.Address-postalCode::text").get()
 
         yield item
+    drop_attributes = {"image"}
