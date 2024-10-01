@@ -25,7 +25,7 @@ class HyundaiNZSpider(JSONBlobSpider):
 
         if isinstance(feature.get("Type"), list) and len(feature["Type"]) > 0:
             if feature["Type"][0] == "Passenger sales and service":
-                service_feature = item.copy()
+                service_feature = item.deepcopy()
                 apply_category(Categories.SHOP_CAR, item)
                 item["ref"] = item["ref"] + "_Sales"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_feature)
@@ -37,7 +37,7 @@ class HyundaiNZSpider(JSONBlobSpider):
                 item["ref"] = item["ref"] + "_Service"
                 yield item
             elif feature["Type"][0] == "Truck sales and service":
-                service_feature = item.copy()
+                service_feature = item.deepcopy()
                 apply_category(Categories.SHOP_TRUCK, item)
                 item["ref"] = item["ref"] + "_Sales"
                 apply_category(Categories.SHOP_TRUCK_REPAIR, service_feature)

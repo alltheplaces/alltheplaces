@@ -49,7 +49,7 @@ class HyundaiUSSpider(JSONBlobSpider):
             service["ref"] = feature["dealerCd"] + "_Service"
             service["opening_hours"] = self.parse_opening_hours(feature, "operations")
             yield service
-            parts = item.copy()
+            parts = item.deepcopy()
             apply_category(Categories.SHOP_CAR_PARTS, parts)
             parts["ref"] = feature["dealerCd"] + "_Parts"
             parts["opening_hours"] = self.parse_opening_hours(feature, "operations")
