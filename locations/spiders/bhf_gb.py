@@ -15,6 +15,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         ("/find-bhf-near-you/.+-furniture-electrical-store", "parse_sd"),
     ]
     wanted_types = ["ClothingStore", "HomeGoodsStore"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         self.crawler.stats.inc_value("z/{}".format(ld_data["@type"]))

@@ -22,7 +22,6 @@ class SosBRSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Unidades"]:
             item = Feature()
-            item["extras"]["sources"] = [location]
             item["ref"] = location["ID"]
             item["name"] = location["NomeFantasia"]
             item["phone"] = location["Telefone"]
@@ -34,6 +33,6 @@ class SosBRSpider(Spider):
             item["state"] = location["Endereco"]["EstadoNome"]
             item["lat"] = location["Coordenadas"]["Latitude"]
             item["lon"] = location["Coordenadas"]["Longitude"]
-            apply_category({"office": "business"}, item)
+            apply_category({"amenity": "training"}, item)
 
             yield item

@@ -2,10 +2,12 @@ from chompjs import parse_js_object
 
 from locations.json_blob_spider import JSONBlobSpider
 
+HARCOURTS_SHARED_ATTRIBUTES = {"brand": "Harcourts", "brand_wikidata": "Q5655056"}
+
 
 class HarcourtsSpider(JSONBlobSpider):
     name = "harcourts"
-    item_attributes = {"brand": "Harcourts", "brand_wikidata": "Q5655056"}
+    item_attributes = HARCOURTS_SHARED_ATTRIBUTES
     allowed_domains = ["harcourts.net"]
     start_urls = [
         "https://harcourts.net/nz/offices",

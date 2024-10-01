@@ -1,4 +1,7 @@
+from typing import Any
+
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -13,7 +16,7 @@ class AkhonaZASpider(Spider):
         "nsi_id": "N/A",  # Because of the warehouse
     }
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('.//li[contains(@class, "dmGeoMLocItem")]'):
             item = Feature()
             item["ref"] = location.xpath("@geoid").get().strip()

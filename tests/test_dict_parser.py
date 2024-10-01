@@ -237,3 +237,21 @@ def test_get_first_key():
         }
         assert DictParser.get_first_key(location_dict, ref_keys) == "1234"
         assert DictParser.get_first_key(location_dict, ["lOCATION_ID"]) is None
+
+
+def test_geometry_parse():
+    # Invalid Geojson geometry should not be assigned
+    # Bad coords
+    src = {"geometry": {"coordinates": {"latitude": "38.9069966", "longitude": "-77.0633046"}, "type": "Point"}}
+    item = DictParser.parse(src)
+    assert item.get("geometry") is None
+
+    # Good coords, bad type
+    src = {"geometry": {"coordinates": [-77.0633046, 38.9069966], "type": "MadeUpPoint"}}
+    item = DictParser.parse(src)
+    assert item.get("geometry") is None
+
+    # Good coords, good type
+    src = {"geometry": {"coordinates": [-77.0633046, 38.9069966], "type": "Point"}}
+    item = DictParser.parse(src)
+    assert item["geometry"]["coordinates"] == [-77.0633046, 38.9069966]

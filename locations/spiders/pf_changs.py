@@ -10,3 +10,4 @@ class PfChangsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.pfchangs.com/locations/sitemap.xml"]
     sitemap_rules = [(r"/locations/[-\w]+/[-\w]+/[-\w]+/[-\w]+/[-\w]+.html$", "parse_sd")]
     wanted_types = ["Restaurant"]
+    drop_attributes = {"image"}

@@ -10,6 +10,7 @@ class AmeripriseUSSpider(SitemapSpider):
     item_attributes = {"brand": "Ameriprise Financial", "brand_wikidata": "Q2843129"}
     sitemap_urls = ["https://www.ameripriseadvisors.com/robots.txt"]
     sitemap_rules = [(r"/contact/$", "parse")]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         properties = LinkedDataParser.parse(response, "ContactPage")

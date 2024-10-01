@@ -45,7 +45,10 @@ class NikeSpider(scrapy.Spider):
 
             item["opening_hours"] = opening_hours.as_opening_hours()
             item["website"] = "https://www.nike.com/retail/s/" + store["slug"]
-            item["image"] = store["imageURL"]
+            if store.get("imageURL") and "2e8d9338-b43d-4ef5-96e1-7fdcfd838f8e" not in store["imageURL"]:
+                # Ignore generic placeholder image used when a store-specific
+                # image is not provided.
+                item["image"] = store["imageURL"]
             item["extras"] = {"owner:type": store["facilityType"]}
             if store["businessConcept"] == "FACTORY":
                 item["brand"] = "Nike Factory Store"

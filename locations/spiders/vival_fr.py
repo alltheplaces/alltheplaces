@@ -8,3 +8,4 @@ class VivalFRSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Vival", "brand_wikidata": "Q7937525"}
     sitemap_urls = ["https://magasins.vival.fr/robots.txt"]
     wanted_types = ["LocalBusiness"]
+    drop_attributes = {"image"}
