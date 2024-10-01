@@ -11,6 +11,7 @@ class NikeSpider(scrapy.Spider):
     name = "nike"
     item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = ["https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         all_stores = response.json()["stores"]
@@ -59,4 +60,3 @@ class NikeSpider(scrapy.Spider):
             else:
                 item["extras"]["type"] = store["businessConcept"]
             yield item
-    drop_attributes = {"image"}
