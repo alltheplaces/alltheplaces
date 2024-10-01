@@ -1,10 +1,9 @@
 import scrapy
 from scrapy import Spider
 
-from locations.hours import OpeningHours
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
-from locations.items import Feature
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -26,7 +25,9 @@ class PaversGBSpider(Spider):
         for location in response.json()["result"]["response"]["results"]:
             item = DictParser.parse(location["data"])
             if "line2" in location["data"]["address"]:
-                item["street_address"] = merge_address_lines([location["data"]["address"]["line1"], location["data"]["address"]["line2"]])
+                item["street_address"] = merge_address_lines(
+                    [location["data"]["address"]["line1"], location["data"]["address"]["line2"]]
+                )
 
             hours = OpeningHours()
             for day, intervals in location["data"]["hours"].items():
