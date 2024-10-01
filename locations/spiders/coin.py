@@ -21,7 +21,6 @@ class CoinSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["website"] = location.get("detailPage")
-        item["image"] = location["image"]
         store_type = location["storeType"]
         if brand_info := self.STORE_TYPES.get(store_type):
             item.update(brand_info)
@@ -29,4 +28,4 @@ class CoinSpider(JSONBlobSpider):
             yield item
         else:
             self.logger.error(f"unknown store type: {store_type}")
-    drop_attributes = {"image"}
+
