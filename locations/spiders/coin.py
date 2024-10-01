@@ -21,7 +21,6 @@ class CoinSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["website"] = location.get("detailPage")
-        item["image"] = location["image"]
         store_type = location["storeType"]
         if brand_info := self.STORE_TYPES.get(store_type):
             item.update(brand_info)

@@ -10,3 +10,4 @@ class AlliedIrishBanksIESpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://branches.aib.ie/robots.txt"]
     sitemap_rules = [(r"https://branches.aib.ie/.+/.+/.+", "parse_sd")]
     wanted_types = ["BankOrCreditUnion"]
+    drop_attributes = {"image"}

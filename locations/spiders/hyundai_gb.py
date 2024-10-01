@@ -35,20 +35,20 @@ class HyundaiGBSpider(JSONBlobSpider):
             if service["serviceId"] == "sales" or service["serviceId"] == "predaj":
                 # Features where new (and sometimes used) vehicles can be purchased.
                 # "Predaj" is "Sales" in Slovak.
-                sales_feature = item.copy()
+                sales_feature = item.deepcopy()
                 sales_feature["ref"] = sales_feature["ref"] + "_Sales"
                 apply_category(Categories.SHOP_CAR, sales_feature)
                 yield sales_feature
             elif service["serviceId"] == "service" or service["serviceId"] == "servis":
                 # Features where vehicles can be serviced and repaired.
                 # "Servis" is "Service" in Slovak.
-                service_feature = item.copy()
+                service_feature = item.deepcopy()
                 service_feature["ref"] = service_feature["ref"] + "_Service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_feature)
                 yield service_feature
             elif service["serviceId"] == "parts":
                 # Features where vehicle parts can be purchased.
-                parts_feature = item.copy()
+                parts_feature = item.deepcopy()
                 parts_feature["ref"] = service_feature["ref"] + "_Parts"
                 apply_category(Categories.SHOP_CAR_PARTS, parts_feature)
                 yield parts_feature

@@ -50,6 +50,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
         "Express",
         "Esso",
     ]
+    drop_attributes = {"email", "image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category_from_ld(item, ld_data)
@@ -67,8 +68,6 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
             elif store_details["storeformat"] == "Extra":
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 item.update(self.TESCO_EXTRA)
-
-        item["image"] = None
 
         branch = item.pop("name")
         for suffix in self.strip_names:

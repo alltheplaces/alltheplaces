@@ -9,3 +9,4 @@ class BassProShopsSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["stores.basspro.com"]
     sitemap_urls = ["https://stores.basspro.com/sitemap.xml"]
     sitemap_rules = [(r"https://stores.basspro.com/.+/.+/.+/.+.html$", "parse_sd")]
+    drop_attributes = {"image"}

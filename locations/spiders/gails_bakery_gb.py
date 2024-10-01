@@ -9,6 +9,7 @@ class GailsBakeryGBSpider(Spider):
     name = "gails_bakery_gb"
     item_attributes = {"brand": "GAIL's Bakery", "brand_wikidata": "Q110662562", "extras": Categories.SHOP_BAKERY.value}
     start_urls = ["https://gails.com/pages/find-us"]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         scripts = response.xpath("//script").getall()

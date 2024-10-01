@@ -8,13 +8,21 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AmtrakSpider(Spider):
-    name = "amtrak"
+class AmtrakCAUSSpider(Spider):
+    name = "amtrak_ca_us"
     start_urls = ["https://maps.amtrak.com/services/MapDataService/stations/allStations"]
 
     station_types = {
-        "BUS": Categories.BUS_STOP,
-        "TRAIN": Categories.TRAIN_STATION,
+        "BUS": {
+            "category": Categories.BUS_STOP,
+            "network": "Amtrak Thruway",
+            "network:wikidata": "Q4748907",
+        },
+        "TRAIN": {
+            "category": Categories.TRAIN_STATION,
+            "network": "Amtrak",
+            "network:wikidata": "Q23239",
+        },
     }
     shelter_types = {
         "Curbside Bus Stop only (no shelter)": {"shelter": "no"},
@@ -34,8 +42,10 @@ class AmtrakSpider(Spider):
                 item["name"] = location["properties"]["StationName"]
             item["website"] = "https://www.amtrak.com/stations/{}".format(location["properties"]["Code"].lower())
 
-            if cat := self.station_types.get(location["properties"]["StnType"]):
-                apply_category(cat, item)
+            if station_type := self.station_types.get(location["properties"]["StnType"]):
+                apply_category(station_type["category"], item)
+                item["extras"]["network"] = station_type["network"]
+                item["extras"]["network:wikidata"] = station_type["network:wikidata"]
             if details := self.shelter_types.get(location["properties"]["StaType"]):
                 item["extras"].update(details)
 

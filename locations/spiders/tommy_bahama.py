@@ -19,6 +19,7 @@ class TommyBahamaSpider(StructuredDataSpider):
     search_for_facebook = False
     search_for_image = False
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response):
         script = response.xpath("//div[@tbr-all-stores]/following-sibling::script/text()").get()

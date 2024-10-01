@@ -21,14 +21,14 @@ class HyundaiIESpider(JSONBlobSpider):
         item["name"] = feature["DealerName"]
         item["website"] = "https://www.hyundai.ie/dealer/?dealer=" + feature["Slug"]
 
-        sales = item.copy()
+        sales = item.deepcopy()
         apply_category(Categories.SHOP_CAR, sales)
         sales["ref"] = feature["Slug"] + "_Sales"
         sales["opening_hours"] = OpeningHours()
         sales["opening_hours"].add_ranges_from_string(re.sub(r"\s+", " ", feature["OpeningHours"]))
         yield sales
 
-        service = item.copy()
+        service = item.deepcopy()
         apply_category(Categories.SHOP_CAR_REPAIR, service)
         service["ref"] = feature["Slug"] + "_Service"
         service["opening_hours"] = OpeningHours()

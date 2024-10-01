@@ -221,12 +221,17 @@ DAYS_GR = {
 
 DAYS_HR = {
     "Ponedjeljak": "Mo",
+    "Pon": "Mo",
     "Utorak": "Tu",
     "Srijeda": "We",
     "Četvrtak": "Th",
+    "Čet": "Th",
     "Petak": "Fr",
+    "Pet": "Fr",
     "Subota": "Sa",
+    "Sub": "Sa",
     "Nedjelja": "Su",
+    "Ned": "Su",
 }
 
 DAYS_HU = {
@@ -262,6 +267,16 @@ DAYS_IL = {
     "יום שישי": "Fr",
     "יום שבת": "Sa",
     "יום ראשון": "Su",
+}
+
+DAYS_KR = {
+    "월요일": "Mo",
+    "화요일": "Tu",
+    "수요일": "We",
+    "목요일": "Th",
+    "금요일": "Fr",
+    "토요일": "Sa",
+    "일요일": "Su",
 }
 
 DAYS_LT = {
@@ -438,7 +453,10 @@ DAYS_PT = {
     "Sábado": "Sa",
     "Sa": "Sa",
     "Sá": "Sa",
+    "Sab": "Sa",
+    "Sáb": "Sa",
     "Do": "Su",
+    "Dom": "Su",
     "Domingo": "Su",
 }
 DAYS_SK = {
@@ -685,6 +703,13 @@ NAMED_TIMES_RU = {
     "Круглосуточно": ["00:00", "23:59"],  # 24/7
 }
 
+NAMED_DAY_RANGES_KR = {
+    "연중무휴": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "연중무": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "중무휴": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "연중": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+}
+
 DELIMITERS_EN = [
     "-",
     "–",
@@ -733,6 +758,8 @@ DELIMITERS_PL = [
 ]
 
 DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
+
+DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
 logger = logging.getLogger(__name__)
 
