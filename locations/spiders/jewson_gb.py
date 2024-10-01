@@ -9,6 +9,7 @@ class JewsonGBSpider(scrapy.spiders.SitemapSpider):
     item_attributes = {"brand": "Jewson", "brand_wikidata": "Q6190226", "country": "GB"}
     sitemap_urls = ["https://www.jewson.co.uk/sitemap/sitemap_branches_jewson.xml"]
     download_delay = 0.5
+    drop_attributes = {"image"}
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response.selector)
@@ -18,4 +19,3 @@ class JewsonGBSpider(scrapy.spiders.SitemapSpider):
             item["lat"] = response.xpath("//@data-latitude").get()
             item["lon"] = response.xpath("//@data-longitude").get()
             yield item
-    drop_attributes = {"image"}
