@@ -51,3 +51,4 @@ class OpticalCenterSpider(CrawlSpider, StructuredDataSpider):
         del item["extras"]["website:fr-CA"]
 
         yield item
+    drop_attributes = {"image"}
