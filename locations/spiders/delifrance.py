@@ -15,9 +15,9 @@ class DelifranceSpider(SitemapSpider, StructuredDataSpider):
         "India": "IN",
         "Malaysia": "MY",
     }
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         country_code = self.country_mapping.get(item["country"])
         item["country"] = item["country"] if country_code is None else country_code
         yield item
-    drop_attributes = {"image"}
