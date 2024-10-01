@@ -6,14 +6,13 @@ from scrapy.spiders import SitemapSpider
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import FIREFOX_LATEST
 
 
 class SaversGBSpider(SitemapSpider):
     name = "savers_gb"
     item_attributes = {"brand": "Savers", "brand_wikidata": "Q7428189"}
     sitemap_urls = ["https://www.savers.co.uk/sitemap.xml"]
-    user_agent = FIREFOX_LATEST
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
