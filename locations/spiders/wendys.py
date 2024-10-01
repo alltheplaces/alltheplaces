@@ -47,3 +47,4 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
                 oh.add_range(day=day["day"].title()[:2], open_time=open_time, close_time=close_time, time_format="%H%M")
 
         return oh.as_opening_hours()
+    drop_attributes = {"image"}
