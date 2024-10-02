@@ -18,7 +18,7 @@ class EngenSpider(JSONBlobSpider):
         try:
             int(item["street_address"].split(" ", 1)[0])
             item["housenumber"] = item["street_address"].split(" ", 1)[0]
-            item["street"] = item["housenumber"] = item["street_address"].split(" ", 1)[1]
+            item["street"] = item["street_address"].split(" ", 1)[1]
         except ValueError:
             pass
         if "Quickshop" in location.get("rental_units", ""):
