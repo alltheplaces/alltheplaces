@@ -12,6 +12,7 @@ class MeijerUSSpider(SitemapSpider):
     name = "meijer_us"
     item_attributes = {"brand": "Meijer", "brand_wikidata": "Q1917753", "extras": Categories.SHOP_SUPERMARKET.value}
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
     sitemap_urls = ["https://www.meijer.com/bin/meijer/store-sitemap.xml"]
     allowed_domains = ["www.meijer.com"]
     store_url = re.compile(r"https://www\.meijer\.com/shopping/store-locator/(\d+)\.html")
