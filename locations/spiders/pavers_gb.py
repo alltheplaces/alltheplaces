@@ -31,9 +31,12 @@ class PaversGBSpider(Spider):
 
             hours = OpeningHours()
             for day, intervals in location["data"]["hours"].items():
-                if "isClosed" in intervals:
+                if not isinstance(intervals, dict):
+                    continue
+                if intervals.get("isClosed") is True:
+                    hours.set_closed(day)
                     continue
                 for interval in intervals["openIntervals"]:
-                    hours.add_range(day[:2].capitalize(), interval["start"], interval["end"])
-            item["opening_hours"] = hours.as_opening_hours()
+                    hours.add_range(day, interval["start"], interval["end"])
+            item["opening_hours"] = hours
             yield item
