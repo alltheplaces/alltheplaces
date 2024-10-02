@@ -16,6 +16,6 @@ class BookerGBSpider(YextAnswersSpider):
         for brand_key in brands.keys():
             if brand_key in item["name"]:
                 item.update(brands[brand_key])
-        slug = location["data"]["slug"]
+        slug = location["slug"]
         item["website"] = f"https://www.booker.co.uk/branch-locator/{slug}"
         yield item
