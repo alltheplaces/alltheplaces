@@ -25,4 +25,3 @@ class TagHeuerSpider(AlgoliaSpider):
 
         if len(feature) == 1000:
             yield self.make_request(response.meta["page"] + 1)
-
