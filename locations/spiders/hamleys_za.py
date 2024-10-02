@@ -34,7 +34,7 @@ class HamleysZASpider(Spider):
                     pass
             item["addr_full"] = clean_address(address_lines)
 
-            extract_google_position(item, response)
+            extract_google_position(item, location)
             extract_email(item, location)
             extract_phone(item, location)
             yield item
