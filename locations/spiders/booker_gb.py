@@ -1,4 +1,5 @@
 from locations.storefinders.yext_answers import YextAnswersSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 brands = {
     "Booker": {"brand": "Booker", "brand_wikidata": "Q4943180"},
@@ -18,4 +19,8 @@ class BookerGBSpider(YextAnswersSpider):
                 item.update(brands[brand_key])
         slug = location["slug"]
         item["website"] = f"https://www.booker.co.uk/branch-locator/{slug}"
+        item["street_address"] = merge_address_lines(
+            [location["address"]["line1"], location["address"].get("line2")]
+        )
+
         yield item
