@@ -1,15 +1,19 @@
-import re
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.hamleys import HAMLEYS_SHARED_ATTRIBUTES
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class HamleysINSpider(JSONBlobSpider):
+class HamleysINSpider(CrawlSpider, StructuredDataSpider):
     name = "hamleys_in"
     item_attributes = HAMLEYS_SHARED_ATTRIBUTES
-    start_urls = ["https://hmpim.hamleys.in/pim/pimresponse.php?service=storelocator"]
-    locations_key = "result"
+    start_urls = ["https://stores.hamleys.in/"]
+    rules = [Rule(LinkExtractor(r"page=\d+$")), Rule(LinkExtractor("/Home"), callback="parse_sd")]
+    wanted_types = ["Store"]
+    time_format = "%I:%M %p"
 
-    def post_process_item(self, item, response, location):
-        item["branch"] = re.sub(r"^hamleys\s?-?_?\s?", "", item.pop("name"), flags=re.IGNORECASE)
+    def post_process_item(self, item, response, ld_data):
+        item["branch"] = ld_data["alternateName"]
+
         yield item
