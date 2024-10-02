@@ -30,9 +30,9 @@ class EngenSpider(JSONBlobSpider):
                 {
                     "brand": "Quickshop",
                     "brand_wikidata": "Q122764368",
-                    "extras": Categories.SHOP_CONVENIENCE.value,
                 }
             )
+            apply_category(Categories.SHOP_CONVENIENCE, item)
             yield shop_item
         apply_category(Categories.FUEL_STATION, item)
         if location["station_types"] == "Truck Stop":
