@@ -3,6 +3,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 HAMLEYS_SHARED_ATTRIBUTES = {"brand": "Hamleys", "brand_wikidata": "Q60299"}
 
@@ -29,7 +30,7 @@ class HamleysSpider(CrawlSpider):
         item["street_address"] = item.pop("addr_full")
         item["website"] = response.url
         item["ref"] = item["website"]
-        item["image"] = location.xpath(
+        item["image"] = response.xpath(
             './/div[@class="store-main-banner"]/figure/img[@data-element="mobile_image"]/@src'
         ).get()
 
