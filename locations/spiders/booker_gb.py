@@ -1,8 +1,8 @@
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 brands = {
-       "Booker" : {"brand": "Booker", "brand_wikidata": "Q4943180"},
-       "Makro" : {"brand": "Makro", "brand_wikidata": "Q704606"}
+    "Booker": {"brand": "Booker", "brand_wikidata": "Q4943180"},
+    "Makro": {"brand": "Makro", "brand_wikidata": "Q704606"},
 }
 
 
