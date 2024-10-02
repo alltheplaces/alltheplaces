@@ -22,3 +22,7 @@ class TagHeuerSpider(AlgoliaSpider):
         item["website"] = f"https://www.tagheuer.com/{slug}"
         if "boutique-tag-heuer" in slug:
             yield item
+
+        if len(feature) == 1000:
+            yield self.make_request(response.meta["page"] + 1)
+
