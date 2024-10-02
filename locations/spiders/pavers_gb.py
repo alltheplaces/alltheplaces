@@ -28,6 +28,9 @@ class PaversGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["result"]["response"]["results"]:
             item = DictParser.parse(location["data"])
+            if isinstance(item["website"], dict):
+                item["website"] = None
+
             if "line2" in location["data"]["address"]:
                 item["street_address"] = merge_address_lines(
                     [location["data"]["address"]["line1"], location["data"]["address"]["line2"]]
