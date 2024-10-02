@@ -18,6 +18,7 @@ class EccoSpider(scrapy.Spider):
                 # 0,  # PARTNER # Just sell the stock?
                 1,  # ECCO
                 2,  # Outlet
+                4,  # Large store?
             ]:
                 yield scrapy.Request(
                     url="https://se.ecco.com/api/store/finder/" + store["i"], callback=self.parse_store
