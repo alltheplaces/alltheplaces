@@ -7,7 +7,7 @@ from locations.items import Feature
 ZENITH_BANK_SHARED_ATTRIBUTES = {"brand": "Zenith Bank", "brand_wikidata": "Q5978240"}
 
 
-class ZenithBankBranchGH(Spider):
+class ZenithBankBranchGHSpider(Spider):
     name = "zenith_bank_branch_gh"
     start_urls = ["https://www.zenithbank.com.gh/about-us/branches/"]
     item_attributes = ZENITH_BANK_SHARED_ATTRIBUTES

@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.spiders.zenith_bank_branch_gh import ZENITH_BANK_SHARED_ATTRIBUTES
 
 
-class ZenithBankAtmGH(Spider):
+class ZenithBankAtmGHSpider(Spider):
     name = "zenith_bank_atm_gh"
     start_urls = ["https://www.zenithbank.com.gh/tools-resources/atm-locator/"]
     item_attributes = ZENITH_BANK_SHARED_ATTRIBUTES
