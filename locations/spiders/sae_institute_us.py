@@ -1,7 +1,7 @@
-from locations.spiders.sae_institute_au import SaeInstitueAUSpider
+from locations.spiders.sae_institute_au import SaeInstituteAUSpider
 
 
-class SaeInstituteUSSpider(SaeInstitueAUSpider):
+class SaeInstituteUSSpider(SaeInstituteAUSpider):
     name = "sae_institute_us"
     start_urls = ["https://usa.sae.edu/contact-us/"]
 
