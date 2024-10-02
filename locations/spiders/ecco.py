@@ -19,6 +19,7 @@ class EccoSpider(scrapy.Spider):
                 1,  # ECCO
                 2,  # Outlet
                 4,  # Large store?
+                5,  # One store in France
             ]:
                 yield scrapy.Request(
                     url="https://se.ecco.com/api/store/finder/" + store["i"], callback=self.parse_store
