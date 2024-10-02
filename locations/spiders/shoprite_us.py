@@ -10,7 +10,7 @@ class ShopriteUSSpider(StorefrontgatewaySpider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"X-Site-Host": "https://www.shoprite.com/"}}
 
     def post_process_item(self, item, response, location):
-        if location["type"] != "Regular" or name == "Test ShopRite":
+        if location["type"] != "Regular" or location["name"] == "Test ShopRite":
             return
         item["website"] = f"https://www.shoprite.com/sm/planning/rsid/{item['ref']}"
         split_name = re.split(r"\s+of\s+", item["name"], flags=re.IGNORECASE)
