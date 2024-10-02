@@ -7,7 +7,7 @@ from locations.spiders.sae_institute_au import SAE_INSTITUTE_SHARED_ATTRIBUTES
 
 
 # Also used by UK, US
-class SaeInstitueZASpider(Spider):
+class SaeInstituteZASpider(Spider):
     name = "sae_institute_za"
     start_urls = ["https://www.sae.edu.za/contact-us/"]
     item_attributes = SAE_INSTITUTE_SHARED_ATTRIBUTES

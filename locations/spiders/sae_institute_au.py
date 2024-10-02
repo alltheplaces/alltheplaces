@@ -8,7 +8,7 @@ SAE_INSTITUTE_SHARED_ATTRIBUTES = {"brand": "SAE Institute", "brand_wikidata": "
 
 
 # Also used by UK, US
-class SaeInstitueAUSpider(Spider):
+class SaeInstituteAUSpider(Spider):
     name = "sae_institute_au"
     start_urls = ["https://sae.edu.au/contact-us/"]
     item_attributes = SAE_INSTITUTE_SHARED_ATTRIBUTES
