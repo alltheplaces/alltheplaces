@@ -31,10 +31,9 @@ class PaversGBSpider(Spider):
             if isinstance(item["website"], dict):
                 item["website"] = None
 
-            if "line2" in location["data"]["address"]:
-                item["street_address"] = merge_address_lines(
-                    [location["data"]["address"]["line1"], location["data"]["address"]["line2"]]
-                )
+            item["street_address"] = merge_address_lines(
+                [location["data"]["address"]["line1"], location["data"]["address"].get("line2")]
+            )
 
             hours = OpeningHours()
             for day, intervals in location["data"]["hours"].items():
