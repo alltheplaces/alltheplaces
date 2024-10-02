@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class VanSchaikBWNAZA(Spider):
+class VanSchaikBWNAZASpider(Spider):
     name = "van_schaik_bw_na_za"
     start_urls = ["https://www.vanschaik.com/find-store"]
     item_attributes = {
