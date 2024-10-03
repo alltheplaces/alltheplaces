@@ -9,7 +9,7 @@ class IrenITSpider(JSONBlobSpider):
     item_attributes = {"brand": "Iren", "brand_wikidata": "Q3801865", "extras": {"office": "energy_supplier"}}
     start_urls = ["https://www.irenlucegas.it/assistenza/sportelli"]
     no_refs = True
-    
+
     def extract_json(self, response):
         return chompjs.parse_js_object(response.xpath('//div[@id="store-pin"]/@data-store').get())
 
