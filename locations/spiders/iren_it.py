@@ -9,7 +9,7 @@ class IrenITSpider(JSONBlobSpider):
     item_attributes = {
         "brand": "Iren",
         "brand_wikidata": "Q3801865",
-        # "extras": Categories.SHOP_XYZ.value
+        "extras": {"office": "energy_supplier"}
     }
     start_urls = ["https://www.irenlucegas.it/assistenza/sportelli"]
 
