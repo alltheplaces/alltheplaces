@@ -6,11 +6,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class IrenITSpider(JSONBlobSpider):
     name = "iren_it"
-    item_attributes = {
-        "brand": "Iren",
-        "brand_wikidata": "Q3801865",
-        "extras": {"office": "energy_supplier"}
-    }
+    item_attributes = {"brand": "Iren", "brand_wikidata": "Q3801865", "extras": {"office": "energy_supplier"}}
     start_urls = ["https://www.irenlucegas.it/assistenza/sportelli"]
 
     def extract_json(self, response):
