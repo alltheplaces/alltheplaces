@@ -13,6 +13,7 @@ class HssHireGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"https://www.hss.com/hire/find-a-branch/[\w-]+/[\w-]+", "parse"),
     ]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         """Override with any post-processing on the item."""

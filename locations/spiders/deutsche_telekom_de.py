@@ -16,6 +16,7 @@ class DeutscheTelekomDESpider(Spider):
         "brand_wikidata": "Q9396",
         "extras": Categories.SHOP_MOBILE_PHONE.value,
     }
+    drop_attributes = {"image"}
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(url="https://shopseite.telekom.de/api/shops?_page={}".format(page))

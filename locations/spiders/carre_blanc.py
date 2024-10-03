@@ -19,3 +19,4 @@ class CarreBlancSpider(CrawlSpider, StructuredDataSpider):
             follow=True,
         ),
     ]
+    drop_attributes = {"image"}

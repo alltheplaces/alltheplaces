@@ -11,6 +11,7 @@ ORDERS_MAP = {
 }
 
 
+# Used by AL, AR, BO, CL, CO, PR, UY
 class BurgerKingNGSpider(JSONBlobSpider):
     name = "burger_king_ng"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
