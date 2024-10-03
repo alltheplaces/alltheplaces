@@ -1,7 +1,7 @@
 import chompjs
 
+from locations.hours import DAYS_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.hours import OpeningHours, DAYS_IT
 
 
 class IrenSpider(JSONBlobSpider):
@@ -14,12 +14,10 @@ class IrenSpider(JSONBlobSpider):
     start_urls = ["https://www.irenlucegas.it/assistenza/sportelli"]
 
     def extract_json(self, response):
-        return chompjs.parse_js_object(
-            response.xpath('//div[@id="store-pin"]/@data-store').get()
-        )
+        return chompjs.parse_js_object(response.xpath('//div[@id="store-pin"]/@data-store').get())
 
     def post_process_item(self, item, response, location):
-        item["ref"] = location["cap"] # Or, is this postcode?
+        item["ref"] = location["cap"]  # Or, is this postcode?
 
         # TODO: Category... door? Shopfront?
         #  'categoria': 'Sportello'
@@ -30,4 +28,3 @@ class IrenSpider(JSONBlobSpider):
         item["opening_hours"] = oh
 
         yield item
-
