@@ -11,6 +11,7 @@ class CubeSmartUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["SelfStorage"]
     requires_proxy = True
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lon"] = item["lon"] * -1

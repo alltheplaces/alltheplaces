@@ -9,6 +9,7 @@ class JCrewUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "J. Crew", "brand_wikidata": "Q5370765"}
     allowed_domains = ["jcrew.com"]
     sitemap_urls = ["https://stores.jcrew.com/robots.txt", "https://stores.factory.jcrew.com/robots.txt"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")

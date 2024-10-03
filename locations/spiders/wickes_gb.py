@@ -8,6 +8,7 @@ class WickesGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Wickes", "brand_wikidata": "Q7998350"}
     sitemap_urls = ["https://www.wickes.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.wickes\.co\.uk\/store\/(\d+)$", "parse_sd")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath("//@data-latitude").get()
