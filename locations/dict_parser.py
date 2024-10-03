@@ -170,8 +170,8 @@ class DictParser:
         # DE
         "plz",
         "postleitzahl",
-        #IT
-        "cap"
+        # IT
+        "cap",
     ]
 
     email_keys = [
