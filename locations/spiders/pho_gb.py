@@ -10,7 +10,6 @@ class PhoGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Pho",
         "brand_wikidata": "Q108443630",
-        # "extras": Categories.SHOP_XYZ.value
     }
     sitemap_urls = ["https://www.phocafe.co.uk/locations-sitemap.xml"]
     wanted_types = ["Restaurant"]
