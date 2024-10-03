@@ -4,8 +4,8 @@ from locations.hours import DAYS_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class IrenSpider(JSONBlobSpider):
-    name = "iren"
+class IrenITSpider(JSONBlobSpider):
+    name = "iren_it"
     item_attributes = {
         "brand": "Iren",
         "brand_wikidata": "Q3801865",
