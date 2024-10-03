@@ -20,17 +20,17 @@ class NikeSpider(scrapy.Spider):
             "95cdf0dc-b6a1-4c87-a5fd-b374fca525e4",
             "ce9b47ad-af3e-4c4b-a500-9ed12969440e",
             "ed1a0204-614e-4e62-9d1b-1754dd9afe2c",
-            "fa253650-9040-44ac-91e9-7b7175f1cc3f"
+            "fa253650-9040-44ac-91e9-7b7175f1cc3f",
         ]
         # Ignore generic placeholder image used when a store-specific
         # image is not provided.
         if store.get("imageURL"):
             for placeholder_pattern in placeholders:
-                if  placeholder_pattern in store["imageURL"]:
+                if placeholder_pattern in store["imageURL"]:
                     return
 
             item["image"] = store["imageURL"]
-    
+
     def parse(self, response):
         all_stores = response.json()["stores"]
         for store in all_stores.values():
