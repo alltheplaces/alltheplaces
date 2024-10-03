@@ -1,8 +1,8 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class PhoGbSpider(SitemapSpider, StructuredDataSpider):
@@ -27,7 +27,9 @@ class PhoGbSpider(SitemapSpider, StructuredDataSpider):
             apply_yes_no(Extras.WIFI, item, True)
 
     def extract_opening_hours(self, item, response):
-        hours = response.xpath("//section[@class='location-contact']/div/div/div/div[@class='col-7']/div[@class='contact-details']/p/text()").get()    
+        hours = response.xpath(
+            "//section[@class='location-contact']/div/div/div/div[@class='col-7']/div[@class='contact-details']/p/text()"
+        ).get()
 
         oh = OpeningHours()
         oh.add_ranges_from_string(hours)
@@ -37,7 +39,7 @@ class PhoGbSpider(SitemapSpider, StructuredDataSpider):
     def extract_coords(self, item, response):
         url = response.xpath("//a[contains(@href, 'https://citymapper.com/directions?startcoord=')]/@href").get()
 
-        item['lat'], item['lon'] = url.split("https://citymapper.com/directions?startcoord=")[1].split(",")
+        item["lat"], item["lon"] = url.split("https://citymapper.com/directions?startcoord=")[1].split(",")
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         self.extract_opening_hours(item, response)
