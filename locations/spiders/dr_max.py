@@ -46,24 +46,21 @@ class DrMaxSpider(scrapy.Spider):
             item["website"] = urljoin(self.store_locators[response.meta["country"]], location["urlKey"])
 
             item["opening_hours"] = OpeningHours()
-            opening_days = location["openingHours"]
-            for day in opening_days:
-                if not day["open"]:
+            for rule in location["openingHours"]:
+                if not rule["open"]:
                     continue
-                # day in the format: "2009-01-02T00:00:00Z"
-                day_date_str = day["date"]
-                weekday = datetime.strptime(day_date_str, "%Y-%m-%dT%H:%M:%SZ").strftime("%A")
-                if day["nonstop"]:
+                if rule["nonstop"]:
+                    weekday = datetime.strptime(rule["date"], "%Y-%m-%dT%H:%M:%SZ").strftime("%A")
                     item["opening_hours"].add_range(weekday, "00:00", "23:59")
-                    continue
-                for opening_hours in day["openingHour"]:
-                    if not opening_hours["open"]:
-                        continue
-
-                    open_time = self.calculate_local_time(opening_hours["from"], item)
-                    close_time = self.calculate_local_time(opening_hours["to"], item)
-                    if open_time and close_time:
-                        item["opening_hours"].add_range(weekday, open_time, close_time)
+                else:
+                    for opening_hours in rule["openingHour"]:
+                        if not opening_hours["open"]:
+                            continue
+                        weekday = datetime.strptime(opening_hours["from"], "%Y-%m-%dT%H:%M:%SZ").strftime("%A")
+                        open_time = self.calculate_local_time(opening_hours["from"], item)
+                        close_time = self.calculate_local_time(opening_hours["to"], item)
+                        if open_time and close_time:
+                            item["opening_hours"].add_range(weekday, open_time, close_time)
 
             yield item
 
@@ -78,7 +75,11 @@ class DrMaxSpider(scrapy.Spider):
         elif item["country"].lower() == "pl":
             local_timezone = "Europe/Warsaw"
         else:
-            return None
+            return ""
         local_timezone = ZoneInfo(local_timezone)
-        local_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=ZoneInfo("UTC")).astimezone(local_timezone)
+        local_time = (
+            datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
+            .replace(tzinfo=ZoneInfo("UTC"))
+            .astimezone(local_timezone)
+        )
         return local_time.strftime("%H:%M")
