@@ -36,7 +36,8 @@ class DrMaxSpider(scrapy.Spider):
             item = DictParser.parse(location)
             item["ref"] = location["urlKey"]  # id is not unique globally
             item["street_address"] = item.pop("street")
-            item["name"] = location["pharmacyPublicName"]
+            item.pop("name")
+            item["branch"] = location["pharmacyPublicName"].removeprefix("Apteka ").removeprefix("Dr.Max , ")
             if len(location["phoneNumbers"]) > 0:
                 item["phone"] = location["phoneNumbers"][0]["number"]
             item["email"] = location.get("additionalParams").get("email")
