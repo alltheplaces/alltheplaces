@@ -40,10 +40,10 @@ class DrMaxSpider(scrapy.Spider):
                 item["phone"] = location["phoneNumbers"][0]["number"]
             item["email"] = location.get("additionalParams").get("email")
             item["image"] = location["pharmacyImage"]
-            item["country"] = response.meta["country"]
+            item["country"] = country = response.meta["country"]
             service_ids = [service["serviceId"] for service in location["services"]]
             apply_yes_no(Extras.WHEELCHAIR, item, "WHEELCHAIR_ACCESS" in service_ids)
-            item["website"] = urljoin(self.store_locators[response.meta["country"]], location["urlKey"])
+            item["website"] = urljoin(self.store_locators[country], location["urlKey"])
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]:
@@ -57,23 +57,25 @@ class DrMaxSpider(scrapy.Spider):
                         if not opening_hours["open"]:
                             continue
                         weekday = datetime.strptime(opening_hours["from"], "%Y-%m-%dT%H:%M:%SZ").strftime("%A")
-                        open_time = self.calculate_local_time(opening_hours["from"], item)
-                        close_time = self.calculate_local_time(opening_hours["to"], item)
+                        open_time = self.calculate_local_time(opening_hours["from"], country)
+                        close_time = self.calculate_local_time(opening_hours["to"], country)
                         if open_time and close_time:
                             item["opening_hours"].add_range(weekday, open_time, close_time)
 
             yield item
 
-    def calculate_local_time(self, date_string, item) -> str:
+    def calculate_local_time(self, date_string: str, country: str) -> str:
         local_timezone = None
-        if item["country"].lower() == "cz":
+        if country == "cz":
             local_timezone = "Europe/Prague"
-        elif item["country"].lower() == "sk":
+        elif country == "sk":
             local_timezone = "Europe/Bratislava"
-        elif item["country"].lower() == "it":
+        elif country == "it":
             local_timezone = "Europe/Rome"
-        elif item["country"].lower() == "pl":
+        elif country == "pl":
             local_timezone = "Europe/Warsaw"
+        elif country == "ro":
+            local_timezone = "Europe/Bucharest"
         else:
             return ""
         local_timezone = ZoneInfo(local_timezone)
