@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PhoGbSpider(SitemapSpider, StructuredDataSpider):
+class PhoGBSpider(SitemapSpider, StructuredDataSpider):
     name = "pho_gb"
     item_attributes = {
         "brand": "Pho",
