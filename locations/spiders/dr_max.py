@@ -34,6 +34,7 @@ class DrMaxSpider(scrapy.Spider):
         for location in response.json()["data"]:
             location.update(location.pop("location"))
             item = DictParser.parse(location)
+            item["ref"] = location["urlKey"]  # id is not unique globally
             item["street_address"] = item.pop("street")
             item["name"] = location["pharmacyPublicName"]
             if len(location["phoneNumbers"]) > 0:
