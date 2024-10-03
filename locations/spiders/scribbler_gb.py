@@ -3,6 +3,7 @@ from chompjs import parse_js_object
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
+
 class ScribblerGBSpider(JSONBlobSpider):
     name = "scribbler_gb"
     item_attributes = {"brand": "Scribbler", "brand_wikidata": "Q28457455"}
@@ -17,6 +18,6 @@ class ScribblerGBSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["addr_full"] = clean_address([location["address1"], location["address2"]])
         item["extras"]["ref:google"] = location.get("placeId")
-        item["lat"]=location["coords"]["lat"]
-        item["lon"]=location["coords"]["lng"]
+        item["lat"] = location["coords"]["lat"]
+        item["lon"] = location["coords"]["lng"]
         yield item
