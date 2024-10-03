@@ -17,6 +17,7 @@ class TacoBellSpider(SitemapSpider):
         # TODO: Different scheme to above, perhaps another spider?
         # "https://tacobell.nl/location-sitemap.xml",
     ]
+    drop_attributes = {"image"}
 
     def _parse_sitemap(self, response):
         def follow_link(url):

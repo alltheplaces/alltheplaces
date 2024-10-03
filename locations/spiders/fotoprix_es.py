@@ -13,3 +13,4 @@ class FotoprixESSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"https://www.fotoprix.com/tiendas/[\w-]+/[\w-]+", "parse"),
     ]
+    drop_attributes = {"image"}

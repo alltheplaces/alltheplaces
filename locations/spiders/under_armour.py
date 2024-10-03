@@ -16,6 +16,7 @@ class UnderArmourSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [
         (r"https://store-locations\.underarmour\.com/.*/.*/.*/", "parse"),
     ]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         for script in response.xpath('//script[@type="application/ld+json"]'):
