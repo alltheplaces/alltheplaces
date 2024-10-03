@@ -80,5 +80,5 @@ class DrMaxSpider(scrapy.Spider):
         else:
             return None
         local_timezone = ZoneInfo(local_timezone)
-        local_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ").astimezone(local_timezone)
+        local_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=ZoneInfo("UTC")).astimezone(local_timezone)
         return local_time.strftime("%H:%M")
