@@ -11,7 +11,7 @@ class BurgervilleUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (
             r"https:\/\/locations.burgerville.com\/burgerville-.*",
-            "parse_store",
+            "parse_sd",
         ),
     ]
     wanted_types = ["Restaurant"]
