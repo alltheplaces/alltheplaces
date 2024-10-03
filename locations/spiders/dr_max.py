@@ -57,10 +57,11 @@ class DrMaxSpider(scrapy.Spider):
                         if not opening_hours["open"]:
                             continue
                         weekday = datetime.strptime(opening_hours["from"], "%Y-%m-%dT%H:%M:%SZ").strftime("%A")
-                        open_time = self.calculate_local_time(opening_hours["from"], country)
-                        close_time = self.calculate_local_time(opening_hours["to"], country)
-                        if open_time and close_time:
-                            item["opening_hours"].add_range(weekday, open_time, close_time)
+                        if opening_hours["from"] and opening_hours["to"]:
+                            open_time = self.calculate_local_time(opening_hours["from"], country)
+                            close_time = self.calculate_local_time(opening_hours["to"], country)
+                            if open_time and close_time:
+                                item["opening_hours"].add_range(weekday, open_time, close_time)
 
             yield item
 
