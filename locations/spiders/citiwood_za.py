@@ -25,6 +25,6 @@ class CitiwoodZASpider(GoReviewSpider):
             yield Request(url=store_page_url, callback=self.parse)
 
     def post_process_item(self, item, response):
-        item["branch"] = item["branch"].replace("KAUAI ", "")
+        item["branch"] = item["branch"]
         item["name"] = self.item_attributes["brand"]
         yield item
