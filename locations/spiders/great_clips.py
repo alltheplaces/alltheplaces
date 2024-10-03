@@ -12,6 +12,7 @@ class GreatClipsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://salons.greatclips.com/robots.txt"]
     sitemap_rules = [(r"/(?:us|ca)/\w\w/[^/]+/[^/]+$", "parse")]
     wanted_types = ["HealthAndBeautyBusiness"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if m := re.search(r"\"latitude\":(-?\d+\.\d+),\"longitude\":(-?\d+\.\d+)", response.text):

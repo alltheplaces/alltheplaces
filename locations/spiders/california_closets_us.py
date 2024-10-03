@@ -18,3 +18,4 @@ class CaliforniaClosetsUSSpider(SitemapSpider, StructuredDataSpider):
         # https://www.locations.californiaclosets.com/tx/houston
         (r"california-closets-(.*)$", "parse_sd"),
     ]
+    drop_attributes = {"image"}
