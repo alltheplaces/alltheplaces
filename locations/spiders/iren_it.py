@@ -18,8 +18,9 @@ class IrenITSpider(JSONBlobSpider):
         #  'categoria': 'Sportello'
 
         # Parse hours where possible. This is a widely varied string
-        oh = OpeningHours()
-        oh.add_ranges_from_string(location["orario"], DAYS_IT)
-        item["opening_hours"] = oh
+        if location["orario"] is not None:
+            oh = OpeningHours()
+            oh.add_ranges_from_string(location["orario"], DAYS_IT)
+            item["opening_hours"] = oh
 
         yield item
