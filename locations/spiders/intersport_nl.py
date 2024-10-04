@@ -8,9 +8,9 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 
-class IntersportNLSpider(scrapy.Spider):
-    name = "intersport_nl"
-    start_urls = ["https://www.intersport.nl/stores"]
+class IntersportNLSKSpider(scrapy.Spider):
+    name = "intersport_nl_sk"
+    start_urls = ["https://www.intersport.nl/stores", "https://www.intersport.sk/stores"]
 
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
 
