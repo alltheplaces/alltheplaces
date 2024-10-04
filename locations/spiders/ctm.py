@@ -6,6 +6,7 @@ from locations.items import Feature
 from locations.structured_data_spider import extract_email, extract_phone
 
 
+# italtile_bw_za, topt_za and ctm all use a very similar storefinder
 class CtmSpider(Spider):
     name = "ctm"
     allowed_domains = ["www.ctm.co.za"]
@@ -38,7 +39,7 @@ class CtmSpider(Spider):
 
         item["website"] = response.url
         item["ref"] = response.url
-        item["branch"] = response.xpath(".//h1/text()").get().strip()
+        item["branch"] = response.xpath(".//h1/text()").get().replace("CTM", "").strip()
 
         item["addr_full"] = response.xpath('.//div[@class="details__info__location"]/h4/text()').get().strip()
         item["state"] = response.meta["province"]
