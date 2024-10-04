@@ -11,6 +11,7 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/car-hire\/[-\w]+\/[-\w]+\/[-\w]+\/$", "parse_sd")]
     user_agent = BROWSER_DEFAULT
     drop_attributes = {"image"}
+    search_for_twitter = False
 
     def pre_process_data(self, ld_data, **kwargs):
         if not ld_data["address"].get("addressCountry"):
