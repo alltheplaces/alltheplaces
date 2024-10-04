@@ -10,7 +10,6 @@ from locations.hours import OpeningHours, sanitise_day
 class IntersportNLSKSpider(scrapy.Spider):
     name = "intersport_nl_sk"
     start_urls = ["https://www.intersport.nl/stores", "https://www.intersport.sk/stores"]
-
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
 
     def parse(self, response, **kwargs):
@@ -21,7 +20,7 @@ class IntersportNLSKSpider(scrapy.Spider):
             item["street_address"] = " ".join(
                 filter(None, [store.get("houseNr"), store.get("houseNrAddition"), store.get("address2")])
             )
-            item["website"] = store.get("link")
+            item["website"] = response.url
             item["opening_hours"] = OpeningHours()
             if timing := store.get("storeHours"):
                 for day, time in timing.items():
@@ -37,5 +36,4 @@ class IntersportNLSKSpider(scrapy.Spider):
                                     item["opening_hours"].add_range(
                                         day, open_time_match.group(1), close_time_match.group(1)
                                     )
-
             yield item
