@@ -5,6 +5,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class IntersportNLSKSpider(scrapy.Spider):
@@ -17,8 +18,16 @@ class IntersportNLSKSpider(scrapy.Spider):
         stores_json = json.loads(re.search(pattern, response.text, re.DOTALL).group(1))
         for store in stores_json:
             item = DictParser.parse(store)
-            item["street_address"] = " ".join(
-                filter(None, [store.get("houseNr"), store.get("houseNrAddition"), store.get("address2")])
+            # Inconsistent address components, better to merge them all to make addr_full
+            item.pop("street_address")
+            item["addr_full"] = merge_address_lines(
+                [
+                    store.get("houseNr"),
+                    store.get("houseNrAddition"),
+                    store.get("address1"),
+                    store.get("address2"),
+                    store.get("storelocation"),
+                ]
             )
             item["website"] = response.url
             item["opening_hours"] = OpeningHours()
