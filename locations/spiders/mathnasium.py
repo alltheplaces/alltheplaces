@@ -31,12 +31,12 @@ class MathnasiumSpider(SitemapSpider, StructuredDataSpider):
             del item["facebook"]
 
         oh_instructional = OpeningHours()
-        for row in response.xpath("//h4[text()='Instructional Hours']/following-sibling::div[1]//tr"):
+        for row in response.xpath('//div[@class="hours"]/div[@class="schedule"][1]//tr'):
             oh_instructional.add_ranges_from_string(row.xpath("string(.)").get())
         item["opening_hours"] = oh_instructional
 
         oh_office = OpeningHours()
-        for row in response.xpath("//h4[text()='Office Hours']/following-sibling::div[1]//tr"):
+        for row in response.xpath('//div[@class="hours"]/div[@class="schedule"][2]//tr'):
             oh_office.add_ranges_from_string(row.xpath("string(.)").get())
         item["extras"]["opening_hours:office"] = oh_office.as_opening_hours()
 
