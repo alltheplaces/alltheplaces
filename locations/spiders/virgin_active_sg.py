@@ -21,7 +21,7 @@ class VirginActiveSGSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         yield JsonRequest(
-            url=self.start_urls[0].replace("/locations", "") + location["path"],
+            url=response.url.replace("/locations", "") + location["path"],
             meta={"item": item},
             callback=self.parse_location,
         )
@@ -31,6 +31,7 @@ class VirginActiveSGSpider(JSONBlobSpider):
         location = parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())["props"]["pageProps"]
         item["website"] = response.url
         item["email"] = location["email"]
+        item["branch"] = item.pop("name")
         item["opening_hours"] = OpeningHours()
         for day in location["openingHours"]:
             if day["value"].lower() == "closed" and day["label"] in DAYS_3_LETTERS:
