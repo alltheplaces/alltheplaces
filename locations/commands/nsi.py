@@ -87,10 +87,15 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                         missing.append(item)
         # Assume we are searching by location, either country code or some state geojson string
         else:
+            seen_wikidata = []  # There can be duplicate wikidata entries across different categories
             for item in self.nsi.iter_country(args[0]):
                 if "brand:wikidata" in item["tags"]:
-                    if not item["tags"]["brand:wikidata"] in codes.keys():
+                    if (
+                        item["tags"]["brand:wikidata"] not in codes.keys()
+                        and item["tags"]["brand:wikidata"] not in seen_wikidata
+                    ):
                         missing.append(item)
+                        seen_wikidata.append(item["tags"]["brand:wikidata"])
 
         print(f"Missing by wikidata: {len(missing)}")
         for brand in missing:
