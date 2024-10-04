@@ -21,10 +21,12 @@ class ItaltileBWZASpider(Spider):
             country_name = country.xpath(".//h3/text()").get().strip()
             for province in country.xpath('.//div[@class="accordion__province row"]'):
                 province_name = province.xpath(".//h6/text()").get().strip()
-                for link in province.xpath('.//a[contains(@href, "/storefinder/")]/@href').getall():
+                for store in province.xpath('.//a[contains(@href, "/storefinder/")]'):
+                    link = store.xpath("@href").get()
+                    image = store.xpath("../../.././/img/@src").get()
                     yield Request(
                         url="https://www.italtile.co.za" + link,
-                        meta={"country": country_name, "province": province_name},
+                        meta={"country": country_name, "province": province_name, "image": image},
                         callback=self.parse_store,
                     )
 
@@ -44,6 +46,8 @@ class ItaltileBWZASpider(Spider):
         item["addr_full"] = response.xpath('.//div[@class="details__info__location"]/h4/text()').get().strip()
         item["state"] = response.meta["province"]
         item["country"] = response.meta["country"]
+
+        item["image"] = response.meta["image"]
 
         extract_phone(item, response.xpath('.//div[@class="details__info__text text--contact"]'))
         extract_email(item, response.xpath('.//div[@class="details__info__text text--contact"]'))
