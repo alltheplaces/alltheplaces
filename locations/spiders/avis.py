@@ -23,10 +23,14 @@ class AvisSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"/en/locations/\w{2}/[-\w]+/[-\w]+/[-\w]+$"), callback="parse_sd"),
     ]
     search_for_image = False
+    search_for_facebook = False
+    search_for_twitter = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath('//meta[@itemprop="latitude"]/@content').get()
         item["lon"] = response.xpath('//meta[@itemprop="longitude"]/@content').get()
+
+        item["branch"] = item.pop("name").removeprefix("Avis ")
 
         if hours := response.xpath('//meta[@itemprop="openingHours"]/@content').get():
             item["opening_hours"] = OpeningHours()
