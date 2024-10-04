@@ -16,3 +16,10 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
     def pre_process_data(self, ld_data, **kwargs):
         if not ld_data["address"].get("addressCountry"):
             ld_data["address"]["addressCountry"] = ld_data["address"].pop("addressRegion")
+
+    def post_process_item(self, item, response, ld_data):
+        if "|" in item["name"]:
+            item["branch"] = item.pop("name").split("|")[0].replace("Car Hire", "").strip()
+        else:
+            item["branch"] = item.pop("name")
+        yield item
