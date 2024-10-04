@@ -12,7 +12,7 @@ class CtmSpider(Spider):
     start_urls = ["https://www.ctm.co.za/storefinder/"]
     item_attributes = {
         "brand": "CTM",
-        "brand:wikidata": "Q127378361",
+        "brand_wikidata": "Q127378361",
     }
 
     def parse(self, response):
