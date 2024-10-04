@@ -4,8 +4,7 @@ import re
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
-from locations.items import Feature
+from locations.hours import OpeningHours, sanitise_day
 
 
 class IntersportNLSKSpider(scrapy.Spider):
@@ -18,17 +17,6 @@ class IntersportNLSKSpider(scrapy.Spider):
         pattern = r"var\s+storesJson\s*=\s*(\[.*?\]);"
         stores_json = json.loads(re.search(pattern, response.text, re.DOTALL).group(1))
         for store in stores_json:
-            oh = OpeningHours()
-            for day, hours in store.get("storeHours", {}).items():
-                capitalized_day = day.capitalize()
-                if capitalized_day not in DAYS_EN.keys():
-                    continue
-                oh.add_range(
-                    day=DAYS_EN.get(capitalized_day),
-                    open_time=hours.get("fromFirst")[:5],
-                    close_time=hours.get("toFirst")[:5],
-                    time_format="%H:%M",
-                )
             item = DictParser.parse(store)
             item["ref"] = store.get("storeID")
             item["street_address"] = " ".join(
@@ -37,5 +25,20 @@ class IntersportNLSKSpider(scrapy.Spider):
             item["website"] = store.get("link")
             item["lat"] = store.get("latitude")
             item["lon"] = store.get("longitude")
-            item["opening_hours"] = oh
-            yield Feature(item)
+            item["opening_hours"] = OpeningHours()
+            if timing := store.get("storeHours"):
+                for day, time in timing.items():
+                    if day := sanitise_day(day):
+                        for shift in time:
+                            if "from" in shift:
+                                shift_name = shift.split("from")[1]
+                                open_time_match, close_time_match = [
+                                    re.search(r"(\d+:\d+)", t)
+                                    for t in [time[f"from{shift_name}"], time[f"to{shift_name}"]]
+                                ]
+                                if open_time_match and close_time_match:
+                                    item["opening_hours"].add_range(
+                                        day, open_time_match.group(1), close_time_match.group(1)
+                                    )
+
+            yield item
