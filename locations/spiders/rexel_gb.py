@@ -7,3 +7,4 @@ class RexelGBSpider(RexelSpider):
     base_url = "www.rexel.co.uk/uki"
     search_lat = 51
     search_lon = -0
+    drop_attributes = {"image"}
