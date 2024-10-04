@@ -18,13 +18,10 @@ class IntersportNLSKSpider(scrapy.Spider):
         stores_json = json.loads(re.search(pattern, response.text, re.DOTALL).group(1))
         for store in stores_json:
             item = DictParser.parse(store)
-            item["ref"] = store.get("storeID")
             item["street_address"] = " ".join(
                 filter(None, [store.get("houseNr"), store.get("houseNrAddition"), store.get("address2")])
             )
             item["website"] = store.get("link")
-            item["lat"] = store.get("latitude")
-            item["lon"] = store.get("longitude")
             item["opening_hours"] = OpeningHours()
             if timing := store.get("storeHours"):
                 for day, time in timing.items():
