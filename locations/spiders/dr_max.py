@@ -38,9 +38,6 @@ class DrMaxSpider(scrapy.Spider):
             item["ref"] = location["urlKey"]  # id is not unique globally
             item["street_address"] = item.pop("street")
             item.pop("name")
-            item["branch"] = location["pharmacyPublicName"]
-            for prefix in ["Apteka", "Farmacia", "Parafarmacia", "Dr.Max"]:
-                item["branch"] = item["branch"].removeprefix(prefix).strip(", ")
             if len(location["phoneNumbers"]) > 0:
                 item["phone"] = location["phoneNumbers"][0]["number"]
             item["email"] = location.get("additionalParams").get("email")
