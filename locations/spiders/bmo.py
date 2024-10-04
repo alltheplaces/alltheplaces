@@ -29,7 +29,7 @@ from locations.spiders.safeway import SafewaySpider
 from locations.spiders.schnucks_us import SchnucksUSSpider
 from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
 from locations.spiders.shell import ShellSpider
-from locations.spiders.shoprite import ShopriteSpider
+from locations.spiders.shoprite_us import ShopriteUSSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
 from locations.spiders.thrifty_foods_ca import ThriftyFoodsCASpider
@@ -189,8 +189,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = ShellSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = ShellSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Shoprite" or item["name"] == "Shop Rite":
-                item["located_in"] = ShopriteSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = ShopriteSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = ShopriteUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = ShopriteUSSpider.item_attributes["brand_wikidata"]
             elif (
                 item["name"] == "Smiths Food and Drugs"
                 or item["name"] == "Smiths"
