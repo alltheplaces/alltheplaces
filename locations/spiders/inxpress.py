@@ -28,12 +28,17 @@ class InxpressSpider(JSONBlobSpider):
         item["country"] = location["CultureCode"].split("-")[1]
         item["branch"] = item.pop("name")
         if slug := location["URL"]:
-            item["website"] = f"https://{item['country'].lower()}.inxpress.com{slug}"
+            if "http:" in slug or "https:" in slug:
+                item["website"] = slug
+            else:
+                item["website"] = f"https://{item['country'].lower()}.inxpress.com{slug}"
         if mobile := location.get("MobileNumber"):
             if phone := item["phone"]:
                 item["phone"] = phone + "; " + mobile
             else:
                 item["phone"] = mobile
+        if (email := item.get("email")) and "/" in item["email"]:
+            item["email"] = "; ".join(email.split("/"))
         for key, service in SOCIAL_MEDIA_MAP.items():
             if account := location.get(key):
                 set_social_media(item, service, account)

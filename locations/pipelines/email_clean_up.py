@@ -25,4 +25,4 @@ class EmailCleanUpPipeline:
             return None
         if email.startswith("mailto:"):
             return email.removeprefix("mailto:")
-        return email
+        return email.strip()
