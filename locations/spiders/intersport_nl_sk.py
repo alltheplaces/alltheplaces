@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -31,19 +31,20 @@ class IntersportNLSKSpider(scrapy.Spider):
                 ]
             )
             item["website"] = response.url
-            item["opening_hours"] = OpeningHours()
-            if timing := store.get("storeHours"):
-                for day, time in timing.items():
-                    if day := sanitise_day(day):
-                        for shift in time:
-                            if "from" in shift:
-                                shift_name = shift.split("from")[1]
-                                open_time_match, close_time_match = [
-                                    re.search(r"(\d+:\d+)", t)
-                                    for t in [time[f"from{shift_name}"], time[f"to{shift_name}"]]
-                                ]
-                                if open_time_match and close_time_match:
-                                    item["opening_hours"].add_range(
-                                        day, open_time_match.group(1), close_time_match.group(1)
-                                    )
+            item["opening_hours"] = self.parse_opeing_hours(store.get("storeHours"))
             yield item
+
+    def parse_opeing_hours(self, rules: dict) -> OpeningHours | None:
+        if not rules:
+            return None
+
+        oh = OpeningHours()
+        for day, time in rules.items():
+            if day in ["validTo", "validFrom"]:
+                continue
+            for key in ["First", "Second"]:
+                start_time = time.get("from{}".format(key))
+                end_time = time.get("to{}".format(key))
+                if start_time and end_time and len(start_time) == 5 and len(end_time) == 5:
+                    oh.add_range(day, start_time, end_time)
+        return oh
