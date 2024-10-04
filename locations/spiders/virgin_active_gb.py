@@ -3,7 +3,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.virgin_active_bw_na_za import VIRGIN_ACTIVE_SHARED_ATTRIBUTES
 
 
-class VirginActiveGB(JSONBlobSpider):
+class VirginActiveGBSpider(JSONBlobSpider):
     name = "virgin_active_gb"
     item_attributes = VIRGIN_ACTIVE_SHARED_ATTRIBUTES
     start_urls = ["https://www.virginactive.co.uk/api/club/getclubdetails"]

@@ -8,7 +8,7 @@ from locations.spiders.virgin_active_bw_na_za import VIRGIN_ACTIVE_SHARED_ATTRIB
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class VirginActiveIT(CrawlSpider, StructuredDataSpider):
+class VirginActiveITSpider(CrawlSpider, StructuredDataSpider):
     name = "virgin_active_it"
     item_attributes = VIRGIN_ACTIVE_SHARED_ATTRIBUTES
     allowed_domains = ["www.virginactive.it"]
