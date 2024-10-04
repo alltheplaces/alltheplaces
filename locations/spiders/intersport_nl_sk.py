@@ -18,6 +18,7 @@ class IntersportNLSKSpider(scrapy.Spider):
         stores_json = json.loads(re.search(pattern, response.text, re.DOTALL).group(1))
         for store in stores_json:
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name").title().removeprefix("Intersport").strip(" /")
             # Inconsistent address components, better to merge them all to make addr_full
             item.pop("street_address")
             item["addr_full"] = merge_address_lines(
