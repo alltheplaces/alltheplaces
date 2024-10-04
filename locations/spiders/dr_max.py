@@ -10,6 +10,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import set_closed
 
 
 class DrMaxSpider(scrapy.Spider):
@@ -37,12 +38,9 @@ class DrMaxSpider(scrapy.Spider):
             item["ref"] = location["urlKey"]  # id is not unique globally
             item["street_address"] = item.pop("street")
             item.pop("name")
-            item["branch"] = (
-                location["pharmacyPublicName"]
-                .removeprefix("Apteka ")
-                .removeprefix("Dr.Max , ")
-                .removeprefix("Dr.Max, ")
-            )
+            item["branch"] = location["pharmacyPublicName"]
+            for prefix in ["Apteka", "Farmacia", "Parafarmacia", "Dr.Max"]:
+                item["branch"] = item["branch"].removeprefix(prefix).strip(", ")
             if len(location["phoneNumbers"]) > 0:
                 item["phone"] = location["phoneNumbers"][0]["number"]
             item["email"] = location.get("additionalParams").get("email")
@@ -51,6 +49,10 @@ class DrMaxSpider(scrapy.Spider):
             service_ids = [service["serviceId"] for service in location["services"]]
             apply_yes_no(Extras.WHEELCHAIR, item, "WHEELCHAIR_ACCESS" in service_ids)
             item["website"] = urljoin(self.store_locators[country], location["urlKey"])
+            item["extras"]["start_date"] = location["openingDate"]
+            if location["closureDate"]:
+                set_closed(item, datetime.fromisoformat(location["closureDate"]))
+                return
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]:
