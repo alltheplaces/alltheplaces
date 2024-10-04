@@ -6,6 +6,7 @@ from locations.items import Feature
 from locations.structured_data_spider import extract_email, extract_phone
 
 
+# italtile_bw_za, topt_za and ctm all use a very similar storefinder
 class ToptZASpider(Spider):
     name = "topt_za"
     allowed_domains = ["www.topt.co.za"]
