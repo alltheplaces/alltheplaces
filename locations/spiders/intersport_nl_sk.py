@@ -30,7 +30,7 @@ class IntersportNLSKSpider(scrapy.Spider):
                     store.get("storelocation"),
                 ]
             )
-            item["website"] = response.url
+            item["website"] = response.urljoin("/storedetail?storeID={}".format(item["ref"]))
             item["opening_hours"] = self.parse_opeing_hours(store.get("storeHours"))
             yield item
 
