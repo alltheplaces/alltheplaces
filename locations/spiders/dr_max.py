@@ -38,8 +38,7 @@ class DrMaxSpider(scrapy.Spider):
             item["ref"] = location["urlKey"]  # id is not unique globally
             item["street_address"] = item.pop("street")
             item.pop("name")
-            if len(location["phoneNumbers"]) > 0:
-                item["phone"] = location["phoneNumbers"][0]["number"]
+            item["phone"] = "; ".join([n["number"] for n in location["phoneNumbers"]])
             item["email"] = location.get("additionalParams").get("email")
             item["image"] = location["pharmacyImage"]
             item["country"] = country = response.meta["country"]
