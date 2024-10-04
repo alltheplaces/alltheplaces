@@ -34,8 +34,10 @@ class TileAfricaNAZASpider(AmastyStoreLocatorSpider):
             line = line.strip()
             if line.startswith("Address: "):
                 item["street_address"] = line.replace("Address: ", "")
-            if line.startswith("City: "):
+            elif line.startswith("City: "):
                 item["city"] = line.replace("City: ", "")
+            elif line.startswith("Zip: "):
+                item["postcode"] = line.replace("Zip: ", "")
             elif line.startswith("State: "):
                 item["state"] = line.replace("State: ", "")
             elif line.startswith("Tel: "):
