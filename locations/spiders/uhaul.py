@@ -1,4 +1,3 @@
-import json
 import re
 
 import scrapy
@@ -26,22 +25,24 @@ class UhaulSpider(scrapy.Spider):
             yield scrapy.Request(url=response.urljoin(store_url), callback=self.parse_store)
 
     def parse_store(self, response):
-        item = LinkedDataParser.parse(response, self.wanted_types)
+        item = LinkedDataParser.parse(response, "SelfStorage")
         if item is None:
-            return
+            item = LinkedDataParser.parse(response, "LocalBusiness")
+            if item is None:
+                return
 
         item["ref"] = response.url.split("/")[-2]
 
         hour_elements = response.xpath(
             '//div[@class="callout flat radius hide-for-native"]/ul/li[@itemprop="openinghours"]/@datetime'
         )
-        items["opening_hours"] = self.hours(hour_elements)
-        if item["lat"] and item["lon"]:
+        item["opening_hours"] = self.hours(hour_elements)
+        if "lat" in item and "lon" in item:
             # Can skip the call to the next one if this page happened to have lat/lon
             yield item
 
         yield scrapy.Request(
-            url="https://www.uhaul.com/Locations/Directions-to-%s/" % ref,
+            url="https://www.uhaul.com/Locations/Directions-to-%s/" % item["ref"],
             callback=self.parse_directions,
             meta={"item": item},
         )
