@@ -6,11 +6,12 @@ from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.categories import Categories
 
 
 class KaporalFRSpider(Spider):
     name = "kaporal_fr"
-    item_attributes = {"brand": "Kaporal", "brand_wikidata": "Q125660181"}
+    item_attributes = {"brand": "Kaporal", "brand_wikidata": "Q125660181", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = ["https://www.kaporal.com/fr_fr/shops"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
