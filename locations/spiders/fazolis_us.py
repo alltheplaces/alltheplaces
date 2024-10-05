@@ -1,4 +1,4 @@
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -8,4 +8,3 @@ class FazolisUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "fazolis.com",
     ]
-
