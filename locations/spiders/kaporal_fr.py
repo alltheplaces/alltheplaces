@@ -4,9 +4,9 @@ import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.categories import Categories
 
 
 class KaporalFRSpider(Spider):
