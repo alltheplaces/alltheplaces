@@ -3,22 +3,12 @@ import json
 
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, DAYS_EN
 from locations.items import Feature
-
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
 
 
 class ChilisSpider(scrapy.Spider):
-    name = "chilis"
+    name = "c"
     item_attributes = {"brand": "Chili's", "brand_wikidata": "Q1072948"}
     allowed_domains = ["chilis.com"]
     download_delay = 0.5
@@ -29,7 +19,7 @@ class ChilisSpider(scrapy.Spider):
 
         for hour in hours:
             opening_hours.add_range(
-                day=DAY_MAPPING[hour["dayOfWeek"]],
+                day=DAYS_EN[hour["dayOfWeek"]],
                 open_time=hour["opens"],
                 close_time=hour["closes"],
             )
