@@ -59,7 +59,7 @@ class LinkedDataParser:
                 return ld_obj
 
     @staticmethod
-    def parse_ld(ld, time_format: str = "%H:%M") -> Feature:  # noqa: C901
+    def parse_ld(ld, time_format: str = "%H:%M", days: {} = DAYS_EN) -> Feature:  # noqa: C901
         item = Feature()
 
         if (
@@ -122,7 +122,7 @@ class LinkedDataParser:
         item["website"] = LinkedDataParser.get_case_insensitive(ld, "url")
 
         try:
-            item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld, time_format=time_format)
+            item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld, time_format=time_format, days=days)
         except ValueError as e:
             # Explicitly handle a ValueError, which is likely time_format related
             logger.warning(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
