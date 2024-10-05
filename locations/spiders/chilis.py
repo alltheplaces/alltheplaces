@@ -1,9 +1,7 @@
-import scrapy
-
-from locations.linked_data_parser import LinkedDataParser
-from locations.structured_data_spider import StructuredDataSpider
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class ChilisSpider(CrawlSpider, StructuredDataSpider):
@@ -18,7 +16,6 @@ class ChilisSpider(CrawlSpider, StructuredDataSpider):
             follow=True,
             callback="parse_city",
         ),
-
         Rule(
             LinkExtractor(restrict_xpaths='//a[text()="Details"]'),
             follow=True,
@@ -29,4 +26,3 @@ class ChilisSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data):
         item["ref"] = ld_data["branchCode"]
         yield item
-
