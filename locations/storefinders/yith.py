@@ -1,5 +1,6 @@
-from scrapy import Selector
 from typing import Iterable
+
+from scrapy import Selector
 
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
