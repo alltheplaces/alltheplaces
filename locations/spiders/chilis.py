@@ -3,7 +3,7 @@ import json
 
 import scrapy
 
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 
