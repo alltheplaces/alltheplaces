@@ -201,7 +201,7 @@ class LinkedDataParser:
 
         for day in parsed_days:
             # Handle plain text days, or URI references to a DayOfWeek enumeration, ie https://schema.org/Friday
-            parsed_day = day.strip().replace("http://schema.org/", "").replace("https://schema.org/", "")
+            parsed_day = sanitise_day(day.strip(), days)
             oh.add_range(
                 day=days[parsed_day],
                 open_time=LinkedDataParser.get_case_insensitive(rule, "opens").strip(),
