@@ -31,6 +31,13 @@ class CoopSESpider(scrapy.Spider):
                 for day in day_range(start_day, end_day):
                     oh.add_range(day, opening_hour["openFrom"], opening_hour["openTo"], time_format="%H:%M:%S")
 
+        website = None
+        if store.get("url"):
+            if store.get("url").startswith("/"):
+                website = f"https://www.coop.se{store.get('url')}"
+            else:
+                website = store.get("url")
+
         yield Feature(
             {
                 "ref": str(store.get("id")),
@@ -39,7 +46,7 @@ class CoopSESpider(scrapy.Spider):
                 "postcode": store["postalCode"],
                 "city": store["city"],
                 "phone": store.get("phone"),
-                "website": f"https://www.coop.se{store.get('url')}" if store.get("url") else None,
+                "website": website,
                 "lat": store.get("latitude"),
                 "lon": store.get("longitude"),
                 "opening_hours": oh,
