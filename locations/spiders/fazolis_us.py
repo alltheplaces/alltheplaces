@@ -1,5 +1,6 @@
 from locations.categories import Categories
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.hours import DAYS_EN
 
 
 class FazolisUSSpider(WPStoreLocatorSpider):
@@ -8,3 +9,7 @@ class FazolisUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "fazolis.com",
     ]
+    iseadgg_countries_list = ["US"]
+    search_radius = 100
+    max_results = 50
+    days = DAYS_EN
