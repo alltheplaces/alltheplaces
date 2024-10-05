@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import DAYS_SE, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.categories import apply_category, CAFE
 
 
 class CoopSESpider(scrapy.Spider):
@@ -38,7 +39,9 @@ class CoopSESpider(scrapy.Spider):
             else:
                 website = store.get("url")
 
-        yield Feature(
+        store_type = store.get("concept").get("name")
+
+        item = Feature(
             {
                 "ref": str(store.get("id")),
                 "name": store.get("name"),
@@ -50,6 +53,10 @@ class CoopSESpider(scrapy.Spider):
                 "lat": store.get("latitude"),
                 "lon": store.get("longitude"),
                 "opening_hours": oh,
-                "extras": {"store_type": store.get("concept").get("name")},
+                "extras": {"store_type": store_type},
             }
         )
+        if store_type == "Coop kök cafe":
+            apply_category(item, CAFE)
+
+        yield item
