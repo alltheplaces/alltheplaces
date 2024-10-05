@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class HmSpider(scrapy.Spider):
     name = "hm"
-    item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326", "extras": Categories.SHOP_CLOTHES}
+    item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326", "extras": Categories.SHOP_CLOTHES.value}
 
     use_hardcoded_countries = True
 
