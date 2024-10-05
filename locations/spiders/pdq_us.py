@@ -1,8 +1,8 @@
+import chompjs
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-import chompjs
 
 
 class PdqUSSpider(SitemapSpider):
@@ -69,8 +69,8 @@ class PdqUSSpider(SitemapSpider):
             if location_map := response.xpath('//div[contains(@data-block-json, "markerLat")]').get():
                 json_data = chompjs.parse_js_object(location_map)["location"]
 
-                item["lat"] = json_data["markerLat"] 
-                item["lon"] = json_data["markerLng"] 
+                item["lat"] = json_data["markerLat"]
+                item["lon"] = json_data["markerLng"]
 
             item["ref"] = response.url
             item["website"] = response.url
