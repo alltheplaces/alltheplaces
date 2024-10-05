@@ -47,12 +47,12 @@ def test_clean_address_removes_undefined():
     assert clean_address("UNDEFINED") == ""
     assert clean_address(" undefined") == ""
 
+
 def test_clean_address_removes_not_available():
     assert clean_address("N/A") == ""
     assert clean_address("N/a") == ""
     assert clean_address("n/a") == ""
     assert clean_address(" n/A") == ""
-
 
 
 def test_clean_address_removes_very_short_addresses():
