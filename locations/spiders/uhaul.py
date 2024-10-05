@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 
 
 class UhaulSpider(scrapy.Spider):
@@ -12,6 +12,7 @@ class UhaulSpider(scrapy.Spider):
     allowed_domains = ["www.uhaul.com"]
 
     start_urls = ("https://www.uhaul.com/Locations/US_and_Canada/",)
+    wanted_types = ["SelfStorage", "LocalBusiness"]
 
     def parse(self, response):
         for cell in response.xpath('//ul/li[@class="cell"]/a/@href'):
@@ -25,49 +26,24 @@ class UhaulSpider(scrapy.Spider):
             yield scrapy.Request(url=response.urljoin(store_url), callback=self.parse_store)
 
     def parse_store(self, response):
-        store_obj = None
-        for script in response.xpath('//script[@type="application/ld+json"]/text()').extract():
-            tmp_obj = json.loads(script)
-            ldjson_type = tmp_obj.get("@type")
-            if ldjson_type in ("SelfStorage", "LocalBusiness"):
-                store_obj = tmp_obj
-                break
-
-        if store_obj is None:
+        item = LinkedDataParser.parse(response, self.wanted_types)
+        if item is None:
             return
 
-        if ldjson_type == "SelfStorage":
-            ref = store_obj["url"].split("/")[-2]
-        elif ldjson_type == "LocalBusiness":
-            ref = store_obj["@id"].split("/")[-2]
+        item["ref"] = response.url.split("/")[-2]
 
-        telephone = store_obj.get("telephone") or store_obj.get("contactPoint", {}).get("telephone")
         hour_elements = response.xpath(
             '//div[@class="callout flat radius hide-for-native"]/ul/li[@itemprop="openinghours"]/@datetime'
         )
-
-        properties = {
-            "ref": ref,
-            "name": store_obj.get("name"),
-            "addr_full": store_obj.get("address", {}).get("streetAddress").strip(),
-            "city": store_obj.get("address", {}).get("addressLocality").strip(),
-            "state": store_obj.get("address", {}).get("addressRegion"),
-            "postcode": store_obj.get("address", {}).get("postalCode"),
-            "country": store_obj.get("address", {}).get("addressCountry"),
-            "phone": telephone,
-            "lat": store_obj.get("geo", {}).get("latitude"),
-            "lon": store_obj.get("geo", {}).get("longitude"),
-            "opening_hours": self.hours(hour_elements),
-        }
-
-        if properties["lat"] and properties["lon"]:
+        items["opening_hours"] = self.hours(hour_elements)
+        if item["lat"] and item["lon"]:
             # Can skip the call to the next one if this page happened to have lat/lon
-            yield Feature(**properties)
+            yield item
 
         yield scrapy.Request(
             url="https://www.uhaul.com/Locations/Directions-to-%s/" % ref,
             callback=self.parse_directions,
-            meta={"properties": properties},
+            meta={"item": item},
         )
 
     def hours(self, store_hours):
@@ -111,8 +87,8 @@ class UhaulSpider(scrapy.Spider):
         matches = re.search(r'"lat":([\-\d\.]*),"long":([\-\d\.]*),', script_str)
         lat, lon = matches.groups() if matches else (None, None)
 
-        properties = response.meta["properties"]
-        properties["lat"] = lat
-        properties["lon"] = lon
+        item = response.meta["item"]
+        item["lat"] = lat
+        item["lon"] = lon
 
-        yield Feature(**properties)
+        yield item
