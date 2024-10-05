@@ -1,26 +1,32 @@
 import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 
-class ChilisSpider(scrapy.Spider):
+class ChilisSpider(CrawlSpider, StructuredDataSpider):
     name = "chilis"
     item_attributes = {"brand": "Chili's", "brand_wikidata": "Q1072948"}
     allowed_domains = ["chilis.com"]
     download_delay = 0.5
-    start_urls = ("https://www.chilis.com/locations/us/all",)
+    start_urls = ["https://www.chilis.com/locations/us/all"]
+    rules = (
+        Rule(
+            LinkExtractor(restrict_xpaths='//div[contains(@class, "city-locations")]//a[@class="city-link"]'),
+            follow=True,
+            callback="parse_city",
+        ),
 
-    def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "Restaurant")
-        item["ref"] = data["branchCode"]
+        Rule(
+            LinkExtractor(restrict_xpaths='//a[text()="Details"]'),
+            follow=True,
+            callback="parse_sd",
+        ),
+    )
+
+    def post_process_item(self, item, response, ld_data):
+        item["ref"] = ld_data["branchCode"]
         yield item
 
-    def parse_city(self, response):
-        urls = response.xpath('//a[text()="Details"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
-
-    def parse(self, response):
-        urls = response.xpath('//div[contains(@class, "city-locations")]//a[@class="city-link"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
