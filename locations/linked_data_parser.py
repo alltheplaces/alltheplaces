@@ -6,7 +6,7 @@ import traceback
 import chompjs
 import json5
 
-from locations.hours import OpeningHours, day_range, sanitise_day, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours, day_range, sanitise_day
 from locations.items import Feature, add_social_media
 
 logger = logging.getLogger(__name__)
