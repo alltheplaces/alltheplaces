@@ -8,4 +8,3 @@ class LegendsBarbersZASpider(YithSpider):
         "brand_wikidata": "Q116895407",
     }
     allowed_domains = ["legends-barber.com"]
-

@@ -10,7 +10,7 @@ class YithSpider(JSONBlobSpider):
     Yith
     https://yithemes.com/themes/plugins/yith-store-locator-wordpress/
 
-    To use, specify allowed_domains
+    To use, specify `allowed_domains`
     """
 
     locations_key = "markers"
@@ -29,6 +29,7 @@ class YithSpider(JSONBlobSpider):
         item["phone"] = sel.xpath('//li[@class="store-phone"]/a/text()').get()
 
     def extract_hours(self, item, feature):
+        sel = Selector(text=feature["pin_modal"])
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(
             " ".join(sel.xpath('//div[@class="store-description"]/p/text()').getall())
