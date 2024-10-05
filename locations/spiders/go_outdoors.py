@@ -28,10 +28,7 @@ class GoOutdoorsSpider(CrawlSpider):
 
             item["name"] = "Go Outdoors"  # Yes, they have a typeo in their own name
 
-            item["ref"] = response.url
             item["website"] = response.url
             item["country"] = "GB"  # UK isn't a valid county code
-
-            item["lat"], item["lon"] = url_to_coords(store["hasmap"])
 
             yield item

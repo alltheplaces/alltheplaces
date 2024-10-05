@@ -17,6 +17,7 @@ class FirstHotelsSpider(StructuredDataSpider):
             yield scrapy.Request(url="https://www.firsthotels.com" + hotel["url"], callback=self.parse_sd)
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        print(item)
         coords = ld_data["hasMap"].split("@")[1]
         item["name"] = item["name"].strip()
         item["lat"] = coords.split(",")[0]

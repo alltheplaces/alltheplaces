@@ -21,7 +21,5 @@ class GreatWolfResortsUSSpider(SitemapSpider, StructuredDataSpider):
         item.pop("facebook")
         item.pop("image")
         item.pop("twitter")
-        has_map = unquote(ld_data["hasMap"])
-        item["lat"], item["lon"] = search(r"[@=](-?\d+\.\d+),(-?\d+\.\d+)", has_map).groups()
 
         yield item
