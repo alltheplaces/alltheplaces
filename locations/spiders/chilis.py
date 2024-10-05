@@ -1,10 +1,5 @@
-import html
-import json
-
 import scrapy
 
-from locations.hours import DAYS_EN, OpeningHours
-from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 
 
