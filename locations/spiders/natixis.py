@@ -1,6 +1,3 @@
-import json
-
-import scrapy
 from scrapy import Request
 
 from locations.categories import Categories, apply_category
