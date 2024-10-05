@@ -9,9 +9,10 @@ from locations.structured_data_spider import StructuredDataSpider
 class HornbachDESpider(SitemapSpider, StructuredDataSpider):
     name = "hornbach_de"
     item_attributes = {"brand": "HORNBACH", "brand_wikidata": "Q685926"}
-    sitemap_urls = ["https://www.hornbach.de/sitemap-index.xml"]
+    sitemap_urls = ["https://www.hornbach.de/mein-markt/sitemapcms-de.xml"]
     sitemap_follow = ["mein-markt"]
     sitemap_rules = [("baumarkt", "parse_sd")]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["city"] = response.xpath('//div[@itemprop="addressLocality"]/text()').get()
