@@ -6,7 +6,7 @@ import traceback
 import chompjs
 import json5
 
-from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.hours import OpeningHours, day_range, sanitise_day, DAYS_EN
 from locations.items import Feature, add_social_media
 
 logger = logging.getLogger(__name__)
@@ -183,8 +183,11 @@ class LinkedDataParser:
     #  "opens":  "09:00:00"
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
+    #
+    # This defaults to DAYS_EN, which is the standard (see https://schema.org/DayOfWeek)
+    # As some publishers publish localised days, we allow this to be overridden.
     @staticmethod
-    def _parse_opening_hours_specification(oh: OpeningHours, rule: dict, time_format: str):
+    def _parse_opening_hours_specification(oh: OpeningHours, rule: dict, time_format: str, days: DAYS_EN):
         if (
             not type(LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")) in [list, str]
             or not type(LinkedDataParser.get_case_insensitive(rule, "opens")) == str
@@ -192,13 +195,13 @@ class LinkedDataParser:
         ):
             return oh
 
-        days = LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")
-        if not isinstance(days, list):
-            days = [days]
+        parsed_days = LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")
+        if not isinstance(parsed_days, list):
+            parsed_days = [parsed_days]
 
-        for day in days:
+        for day in parsed_days:
             oh.add_range(
-                day=day.strip(),
+                day=days[day.strip()],
                 open_time=LinkedDataParser.get_case_insensitive(rule, "opens").strip(),
                 close_time=LinkedDataParser.get_case_insensitive(rule, "closes").strip(),
                 time_format=time_format,
@@ -209,7 +212,7 @@ class LinkedDataParser:
     # "Mo,Tu,We,Th 09:00-12:00"
     # "Mo-Fr 10:00-19:00"
     @staticmethod
-    def _parse_opening_hours(oh: OpeningHours, rule: str, time_format: str):
+    def _parse_opening_hours(oh: OpeningHours, rule: str, time_format: str, permitted_days: DAYS_EN):
         days, time_ranges = rule.split(" ", 1)
 
         for time_range in time_ranges.split(","):
@@ -224,28 +227,28 @@ class LinkedDataParser:
             if "-" in days:
                 start_day, end_day = days.split("-")
 
-                start_day = sanitise_day(start_day)
-                end_day = sanitise_day(end_day)
+                start_day = sanitise_day(start_day, permitted_days)
+                end_day = sanitise_day(end_day, permitted_days)
 
                 for day in day_range(start_day, end_day):
                     oh.add_range(day, start_time, end_time, time_format)
             else:
                 for day in days.split(","):
-                    if d := sanitise_day(day):
+                    if d := sanitise_day(day, permitted_days):
                         oh.add_range(d, start_time, end_time, time_format)
         return oh
 
     @staticmethod
-    def parse_opening_hours(linked_data, time_format: str = "%H:%M") -> OpeningHours:
+    def parse_opening_hours(linked_data, time_format: str = "%H:%M", days: DAYS_EN) -> OpeningHours:
         oh = OpeningHours()
         if spec := LinkedDataParser.get_case_insensitive(linked_data, "openingHoursSpecification"):
             if isinstance(spec, list):
                 for rule in spec:
                     if not isinstance(rule, dict):
                         continue
-                    oh = LinkedDataParser._parse_opening_hours_specification(oh, rule, time_format)
+                    oh = LinkedDataParser._parse_opening_hours_specification(oh, rule, time_format, days)
             elif isinstance(spec, dict):
-                oh = LinkedDataParser._parse_opening_hours_specification(oh, spec, time_format)
+                oh = LinkedDataParser._parse_opening_hours_specification(oh, spec, time_format, days)
             else:
                 logger.info("Unknown openingHoursSpecification structure, ignoring")
                 logger.debug(LinkedDataParser.get_case_insensitive(linked_data, "openingHoursSpecification"))
@@ -270,7 +273,7 @@ class LinkedDataParser:
                 if not rule:
                     continue
 
-                oh = LinkedDataParser._parse_opening_hours(oh, rule, time_format)
+                oh = LinkedDataParser._parse_opening_hours(oh, rule, time_format, days)
 
         return oh
 
