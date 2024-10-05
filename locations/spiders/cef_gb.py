@@ -14,4 +14,3 @@ class CefGBSpider(CrawlSpider, StructuredDataSpider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
-

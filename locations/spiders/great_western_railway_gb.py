@@ -1,7 +1,6 @@
 from scrapy import Request
 
 from locations.categories import Categories, apply_category
-from locations.google_url import url_to_coords
 from locations.structured_data_spider import StructuredDataSpider
 
 

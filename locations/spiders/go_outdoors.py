@@ -1,7 +1,6 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.google_url import url_to_coords
 from locations.linked_data_parser import LinkedDataParser
 
 

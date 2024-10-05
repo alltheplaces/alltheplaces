@@ -1,6 +1,3 @@
-from re import search
-from urllib.parse import unquote
-
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
