@@ -29,7 +29,7 @@ class GovBio123DESpider(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(Categories.HOTEL.value)
                 case "/anbieter/kategorie/unterkunft":
                     mapped_categories.append(
-                        {"extras": {"accomodation": "yes"}}
+                        {"accomodation": "yes"}
                     )  # Can't reliably tell if hotel/hostel/motel/etc.
                 case "/anbieter/kategorie/restaurant":
                     mapped_categories.append(Categories.RESTAURANT.value)  # TODO: Hotels with Restaurants?
@@ -70,7 +70,7 @@ class GovBio123DESpider(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(Categories.SHOP_BUTCHER.value)
 
                 case "/anbieter/kategorie/erzeuger-biobauernhof":
-                    mapped_categories.append({"extras": {"man_made": "works", "product": "food"}})  # shop=farm, maybe?
+                    mapped_categories.append({"man_made": "works", "product": "food"})  # shop=farm, maybe?
 
                 case "/anbieter/kategorie/lieferservice":
                     # Delivery service?
@@ -80,7 +80,7 @@ class GovBio123DESpider(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(Categories.SHOP_CRAFT.value)
 
                 case "/anbieter/kategorie/markt":
-                    mapped_categories.append({"extras": {"amenity": "marketplace"}})
+                    mapped_categories.append({"amenity": "marketplace"})
 
                 case "/anbieter/kategorie/grosshandler":
                     mapped_categories.append(Categories.SHOP_WHOLESALE.value)
@@ -103,7 +103,7 @@ class GovBio123DESpider(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(Categories.SHOP_PET)
 
                 case "/anbieter/kategorie/weingut":
-                    mapped_categories.append({"extras": {"craft": "winery"}})
+                    mapped_categories.append({"craft": "winery"})
                 case _:
                     self.logger.warning("Unmapped category %s", category)
 
