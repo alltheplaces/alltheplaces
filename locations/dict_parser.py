@@ -87,6 +87,8 @@ class DictParser:
         "address-line-one",
         # JP
         "町域以下住所",  # "address below town limits"
+        # IT
+        "indirizzo",
     ]
 
     city_keys = [
@@ -109,6 +111,7 @@ class DictParser:
         "ciudad",  # "city"
         # IT
         "comune",  # "comune",
+        "citta",
         # DE
         "ort",  # location
     ]
@@ -167,6 +170,8 @@ class DictParser:
         # DE
         "plz",
         "postleitzahl",
+        # IT
+        "cap",
     ]
 
     email_keys = [
@@ -250,7 +255,15 @@ class DictParser:
         "WebSiteURL",
     ]
 
-    hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
+    hours_keys = [
+        "hours",
+        "opening-hours",
+        "open-hours",
+        "store-opening-hours",
+        "store-hours",
+        # IT
+        "orario",
+    ]
 
     @staticmethod
     def parse(obj: dict) -> Feature:
