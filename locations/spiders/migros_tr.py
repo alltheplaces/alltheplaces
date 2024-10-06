@@ -39,7 +39,7 @@ class MigrosTRSpider(scrapy.Spider):
     def parse(self, response: Response) -> Iterable[Feature]:
         for poi in response.json()["data"]:
             item = DictParser.parse(poi)
-            item["street_address"] = item.pop("addr_full")
+
             item["branch"] = item.pop("name", "").replace("MİGROS", "").strip()
 
             if match := CATEGORY_MAPPING.get(poi.get("brandId")):
@@ -47,6 +47,10 @@ class MigrosTRSpider(scrapy.Spider):
             else:
                 self.crawler.stats.inc_value(f'atp/{self.name}/brand/fail/{poi.get("brandId")}/{poi.get("brand")}')
                 continue
+
+            item["street_address"] = item.pop("addr_full")
+            item["extras"]["addr:district"] = item.get("state")
+            item["state"] = item.pop("city")
 
             self.parse_hours(item, poi)
             yield item
