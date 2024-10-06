@@ -1,7 +1,7 @@
 from locations.storefinders.yext import YextSpider
 
 
-class NewBrandZZSpider(YextSpider):
+class MarugameJPSpider(YextSpider):
     name = "marugame_jp"
     api_key = "51c80e247bfe04d6c37bb95d074b26d1"
     api_version = "20220615"
