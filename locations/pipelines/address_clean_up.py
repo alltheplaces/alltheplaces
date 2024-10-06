@@ -18,7 +18,7 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
         return ""
 
     if isinstance(address, str):
-        if address.strip().lower() == "undefined" or address.strip().lower() == "n/a":
+        if address.strip().lower() in ("undefined", "n/a"):
             return ""
 
     if isinstance(address, list):
