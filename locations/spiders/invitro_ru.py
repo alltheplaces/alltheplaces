@@ -6,14 +6,9 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class InvitroRUSpider(SitemapSpider, StructuredDataSpider):
     name = "invitro_ru"
-    item_attributes = {
-        "brand": "Инвитро",
-        "brand_wikidata": "Q4200546"
-    }
+    item_attributes = {"brand": "Инвитро", "brand_wikidata": "Q4200546"}
     sitemap_urls = ["https://www.invitro.ru/sitemap/offices.xml"]
-    sitemap_rules = [
-        (r"/offices/.*/clinic.php\?ID=.*", "parse_sd")
-    ]
+    sitemap_rules = [(r"/offices/.*/clinic.php\?ID=.*", "parse_sd")]
     wanted_types = ["MedicalBusiness"]
     json_parser = "chompjs"
     custom_settings = {"ROBOTSTXT_OBEY": False}
