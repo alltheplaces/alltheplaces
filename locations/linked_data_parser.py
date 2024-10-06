@@ -6,6 +6,7 @@ import traceback
 import chompjs
 import json5
 
+from locations.google_url import url_to_coords
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature, add_social_media
 
@@ -120,6 +121,9 @@ class LinkedDataParser:
             item["email"] = item["email"].replace("mailto:", "")
 
         item["website"] = LinkedDataParser.get_case_insensitive(ld, "url")
+
+        if map_url := LinkedDataParser.get_case_insensitive(ld, "hasMap"):
+            item["lat"], item["lon"] = url_to_coords(map_url)
 
         try:
             item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld, time_format=time_format)
