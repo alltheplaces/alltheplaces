@@ -12,18 +12,20 @@ CATEGORY_MAPPING = {
     1: {"brand": "Macrocenter", "brand_wikidata": "Q123194881", "extras": Categories.SHOP_SUPERMARKET.value},
     2: {"brand": "Migros", "brand_wikidata": "Q1754510", "extras": Categories.SHOP_SUPERMARKET.value},
     5: {
+        # 5M Migros is just bigger version of Migros, as well as MM and MMM
         "brand": "Migros",
         "brand_wikidata": "Q1754510",
         "extras": Categories.SHOP_SUPERMARKET.value,
-    },  # 5M Migros is just bigger version of Migros
+    },
     8: {"brand": "Migros Jet", "brand_wikidata": "Q1754510", "extras": Categories.SHOP_CONVENIENCE.value},
     10: {"brand": "Kiosk", "extras": Categories.SHOP_CONVENIENCE.value},
     12: {"brand": "Mion", "extras": Categories.SHOP_CHEMIST.value},
     13: {
+        # Migros Toptan aka wholesale
         "brand": "Migros",
         "brand_wikidata": "Q1754510",
         "extras": Categories.SHOP_WHOLESALE.value,
-    },  # Migros Toptan aka wholesale
+    },
 }
 
 
