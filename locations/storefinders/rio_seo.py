@@ -15,8 +15,13 @@ class RioSeoSpider(Spider):
     RioSEO is a number of related storefinders.
     https://www.rioseo.com/platform/local-pages/
 
-    To use, specify `end_point` as the API endpoint, usually starting with
-    "maps.", and omitting the path starting with /api
+    To use, specify:
+      - `end_point`: mandatory parameter, should be a URL containing the path
+        `/api/getAsyncLocations` and including parameters similar to
+        `?template=search&level=search`
+      - `template`: mandatory parameter, should be either "domain" or "search"
+      - `radius`: optional parameter, default value is 20038
+      - `limit`: optional parameter, default valus is 3000
     """
 
     dataset_attributes = {"source": "api", "api": "rio_seo"}

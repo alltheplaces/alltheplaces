@@ -26,6 +26,7 @@ class MarriottHotelsSpider(scrapy.Spider):
     name = "marriott_hotels"
     custom_settings = {"REDIRECT_ENABLED": False}
     download_delay = 2.0
+    drop_attributes = {"image"}
 
     # Continue policy of ignoring collection hotels for now.
     my_brands = {

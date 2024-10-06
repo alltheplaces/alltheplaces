@@ -10,3 +10,4 @@ class JambaJuiceSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://locations.jamba.com/sitemap.xml"]
     sitemap_rules = [(r"/[-\w]+/[-\w]+/[-\w]+", "parse_sd")]
     wanted_types = ["Restaurant"]
+    drop_attributes = {"image"}

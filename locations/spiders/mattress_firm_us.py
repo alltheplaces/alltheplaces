@@ -1,7 +1,6 @@
 import json
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
@@ -9,6 +8,7 @@ class MattressFirmUSSpider(Where2GetItSpider):
     name = "mattress_firm_us"
     api_endpoint = "https://api.slippymap.com/mattressfirmsites/rest/getlist"
     api_key = "88FD3C6E-2B22-11EE-86CD-EF1E9DC6E625"
+    drop_attributes = {"email"}
 
     def parse_item(self, item, location, **kwargs):
         # Apply basic information common to each brand
@@ -36,11 +36,7 @@ class MattressFirmUSSpider(Where2GetItSpider):
         project_meta = json.loads(location["project_meta"])
         item["facebook"] = project_meta.get("Facebook URL")
         apply_category(
-            {
-                "contact:sms": PhoneCleanUpPipeline().normalize_numbers(
-                    project_meta.get("SMS Phone Number", ""), item["country"], self
-                )
-            },
+            {"contact:sms": project_meta.get("SMS Phone Number", "")},
             item,
         )
 

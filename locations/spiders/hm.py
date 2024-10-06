@@ -1,6 +1,7 @@
 import scrapy
 from geonamescache import GeonamesCache
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -8,7 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class HmSpider(scrapy.Spider):
     name = "hm"
-    item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326"}
+    item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326", "extras": Categories.SHOP_CLOTHES.value}
 
     use_hardcoded_countries = True
 

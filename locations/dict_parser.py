@@ -27,6 +27,10 @@ class DictParser:
         "branch-id",
         "BranchID",
         "branchID",
+        "branch-code",
+        # ES
+        "id-tienda",
+        "ID-tienda",
     ]
 
     name_keys = [
@@ -39,6 +43,7 @@ class DictParser:
         "item-name",
         "location-name",
         "loc-name",
+        "branch-name",
         # ES
         "nombre",
     ]
@@ -59,6 +64,7 @@ class DictParser:
         "store-address",
         "physical-address",
         "full-address",
+        "formattedAddress",
         # ES
         "direccion",  # "address"
     ]
@@ -75,11 +81,14 @@ class DictParser:
         # EN
         "street-address",
         "address1",
+        "address-line",
         "address-line1",
         "line1",
         "address-line-one",
         # JP
         "町域以下住所",  # "address below town limits"
+        # IT
+        "indirizzo",
     ]
 
     city_keys = [
@@ -102,6 +111,7 @@ class DictParser:
         "ciudad",  # "city"
         # IT
         "comune",  # "comune",
+        "citta",
         # DE
         "ort",  # location
     ]
@@ -117,6 +127,8 @@ class DictParser:
         "county",
         "state-name",
         "store-state",
+        "store-province",
+        "storeProvince",
         # JP
         "都道府県",  # "prefecture"
         # IT
@@ -158,6 +170,8 @@ class DictParser:
         # DE
         "plz",
         "postleitzahl",
+        # IT
+        "cap",
     ]
 
     email_keys = [
@@ -175,6 +189,7 @@ class DictParser:
         "phone",
         "telephone",
         "tel",
+        "tel-no",
         "telephone-number",
         "telephone1",
         "contact-number",
@@ -182,7 +197,10 @@ class DictParser:
         "contact-phone",
         "store-phone",
         "primary-phone",
+        "primaryNumber",
         "main-phone",
+        "branch-phone",
+        "branch-telephone",
         # ES
         "telefono",  # "phone"
     ]
@@ -192,10 +210,13 @@ class DictParser:
         "latitude",
         "lat",
         "store-latitude",
+        "storeLatitude",
         "display-lat",
         "yext-display-lat",
         "map-latitude",
         "geo-lat",
+        "GPSLat",
+        "geographicCoordinatesLatitude",
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
@@ -208,10 +229,13 @@ class DictParser:
         "long",
         "lng",
         "store-longitude",
+        "storeLongitude",
         "display-lng",
         "yext-display-lng",
         "map-longitude",
         "geo-lng",
+        "GPSLong",
+        "geographicCoordinatesLongitude",
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",
@@ -227,36 +251,57 @@ class DictParser:
         "website-url",
         "websiteURL",
         "location-url",
+        "web-address",
+        "WebSiteURL",
     ]
 
-    hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
+    hours_keys = [
+        "hours",
+        "opening-hours",
+        "open-hours",
+        "store-opening-hours",
+        "store-hours",
+        # IT
+        "orario",
+    ]
 
     @staticmethod
-    def parse(obj) -> Feature:
+    def parse(obj: dict) -> Feature:
         item = Feature()
 
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(
-            obj,
-            [
-                "location",
-                "geo-location",
-                "geo",
-                "geo-point",
-                "geocoded-coordinate",
-                "coordinates",
-                "geo-position",
-                "position",
-                "display-coordinate",
-            ],
-        )
-        # If not a good location object then use the parent
-        if not location or not isinstance(location, dict):
-            location = obj
-        item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
-        item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+        if (
+            obj.get("geometry")
+            and obj["geometry"].get("type")
+            in ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]
+            and isinstance(obj["geometry"].get("coordinates"), list)
+        ):
+            item["geometry"] = obj["geometry"]
+        else:
+            location = DictParser.get_first_key(
+                obj,
+                [
+                    "location",
+                    "geo-location",
+                    "geo",
+                    "geo-point",
+                    "geocoded-coordinate",
+                    "coordinates",
+                    "coords",
+                    "geo-position",
+                    "position",
+                    "positions",
+                    "display-coordinate",
+                    "yextDisplayCoordinate",
+                ],
+            )
+            # If not a good location object then use the parent
+            if not location or not isinstance(location, dict):
+                location = obj
+            item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+            item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 

@@ -11,7 +11,10 @@ class StoreRocketSpider(Spider):
     StoreRocket is a map based JSON API driven store locator.
     https://storerocket.io/
 
-    To use, specify the `storerocket_id` and optionally `base_url` to set website attributes.
+    To use, specify:
+      - `storerocket_id`: mandatory parameter
+      - `base_url`: optional parameter, sets the base URL for individual
+        location pages (which may be provided as a URL slug by this API)
     """
 
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
@@ -26,6 +29,7 @@ class StoreRocketSpider(Spider):
             return
 
         for location in response.json()["results"]["locations"]:
+            self.pre_process_data(location)
             item = DictParser.parse(location)
 
             item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))
@@ -48,3 +52,6 @@ class StoreRocketSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

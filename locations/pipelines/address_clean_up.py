@@ -18,7 +18,7 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
         return ""
 
     if isinstance(address, str):
-        if address.strip().lower() == "undefined":
+        if address.strip().lower() in ("undefined", "n/a"):
             return ""
 
     if isinstance(address, list):
@@ -30,6 +30,9 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
         .replace("\r", ",")
         .replace("\t", ",")
         .replace("\f", ",")
+        .replace("<br>", ",")
+        .replace("<br/>", ",")
+        .replace("<br />", ",")
         .split(",")
     )
 

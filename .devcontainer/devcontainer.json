@@ -16,6 +16,10 @@
 		}
 	},
 
+	"containerEnv": {
+		"EDITOR": "code"
+	},
+
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 

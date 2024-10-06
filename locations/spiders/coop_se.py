@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_SE, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
@@ -31,7 +32,16 @@ class CoopSESpider(scrapy.Spider):
                 for day in day_range(start_day, end_day):
                     oh.add_range(day, opening_hour["openFrom"], opening_hour["openTo"], time_format="%H:%M:%S")
 
-        yield Feature(
+        website = None
+        if store.get("url"):
+            if store.get("url").startswith("/"):
+                website = f"https://www.coop.se{store.get('url')}"
+            else:
+                website = store.get("url")
+
+        store_type = store.get("concept").get("name")
+
+        item = Feature(
             {
                 "ref": str(store.get("id")),
                 "name": store.get("name"),
@@ -39,10 +49,19 @@ class CoopSESpider(scrapy.Spider):
                 "postcode": store["postalCode"],
                 "city": store["city"],
                 "phone": store.get("phone"),
-                "website": f"https://www.coop.se{store.get('url')}" if store.get("url") else None,
+                "website": website,
                 "lat": store.get("latitude"),
                 "lon": store.get("longitude"),
                 "opening_hours": oh,
-                "extras": {"store_type": store.get("concept").get("name")},
+                "extras": {"store_type": store_type},
             }
         )
+
+        if store_type == "Coop" or store_type == "Stora Coop":
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif store_type == "Coop kök cafe":
+            apply_category(Categories.CAFE, item)
+        else:
+            self.logger.warn("Unknown store type, will default to supermarket: " + store_type)
+
+        yield item

@@ -9,14 +9,13 @@ from locations.hours import OpeningHours
 
 class UsBankSpider(SitemapSpider):
     name = "us_bank"
-    download_delay = 0.5
-    concurrent_requests = 3
     item_attributes = {"brand": "U.S. Bank", "brand_wikidata": "Q739084"}
     allowed_domains = ["usbank.com"]
     sitemap_urls = [
         "https://www.usbank.com/locations/sitemap.xml",
     ]
     sitemap_rules = [("/locations/([a-z-]*)/([.a-z-]*)/([.0-9a-z-]*)/", "parse_store_info")]
+    requires_proxy = True
 
     def opening_hours(self, hours):
         opening_hours = OpeningHours()

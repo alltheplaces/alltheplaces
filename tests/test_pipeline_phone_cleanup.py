@@ -31,7 +31,7 @@ def test_handle():
     pipeline.process_item(item, spider)
     assert item.get("phone") == "+32 2 633 17 59"
 
-    for key in ["fax", "operator:phone", "operator:fax"]:
+    for key in ["fax", "operator:phone", "operator:fax", "contact:whatsapp"]:
         assert pipeline.is_phone_key(key)
         item, pipeline, spider = get_objects(None, "TR")
         item["extras"] = {key: "+904441442"}
@@ -73,13 +73,19 @@ def test_bad_data():
 
 
 def test_bad_seperator():
-    item, pipeline, spider = get_objects("2484468015 / 2484468015", "US")
+    item, pipeline, spider = get_objects("2484468015 / 2484468016", "US")
     pipeline.process_item(item, spider)
-    assert item.get("phone") == "+1 248-446-8015;+1 248-446-8015"
+    assert item.get("phone") == "+1 248-446-8015;+1 248-446-8016"
 
     item, pipeline, spider = get_objects("Fijo: 963034448 / Móvil: 604026467", "ES")
     pipeline.process_item(item, spider)
     assert item.get("phone") == "+34 963 03 44 48;+34 604 02 64 67"
+
+
+def test_drop_duplicate():
+    item, pipeline, spider = get_objects("2484468015; 2484468015", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+1 248-446-8015"
 
 
 def test_undefined():

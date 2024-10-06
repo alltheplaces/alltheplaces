@@ -3,6 +3,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SimonmedSpider(scrapy.Spider):
@@ -67,7 +68,7 @@ class SimonmedSpider(scrapy.Spider):
             "Referer": "https://www.simonmed.com/locations",
             "Connection": "keep-alive",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
+            "User-Agent": BROWSER_DEFAULT,
         }
         form_data = {
             "location": "85251",

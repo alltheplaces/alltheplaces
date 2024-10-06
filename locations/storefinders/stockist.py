@@ -8,6 +8,7 @@ from scrapy.spidermiddlewares.httperror import HttpError
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 # Documentation for this Stockist store finder is available at:
 # https://help.stockist.co/
@@ -46,7 +47,7 @@ class StockistSpider(Spider):
     @staticmethod
     def parse_location(location):
         item = DictParser.parse(location)
-        item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))
+        item["street_address"] = clean_address([location.get("address_line_1"), location.get("address_line_2")])
         return item
 
     def parse_all_locations_error(self, failure):

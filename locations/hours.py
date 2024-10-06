@@ -25,17 +25,21 @@ DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa
 
 DAYS_EN = {
     "Monday": "Mo",
+    "Mondays": "Mo",
     "Mon": "Mo",
     "Mo": "Mo",
     "Tuesday": "Tu",
+    "Tuesdays": "Tu",
     "Tues": "Tu",
     "Tue": "Tu",
     "Tu": "Tu",
     "Wednesday": "We",
+    "Wednesdays": "We",
     "Weds": "We",
     "Wed": "We",
     "We": "We",
     "Thursday": "Th",
+    "Thursdays": "Th",
     "Thu": "Th",
     "Thr": "Th",
     "Thur": "Th",
@@ -43,12 +47,15 @@ DAYS_EN = {
     "Thurs": "Th",
     "Th": "Th",
     "Friday": "Fr",
+    "Fridays": "Fr",
     "Fri": "Fr",
     "Fr": "Fr",
     "Saturday": "Sa",
+    "Saturdays": "Sa",
     "Sat": "Sa",
     "Sa": "Sa",
     "Sunday": "Su",
+    "Sundays": "Su",
     "Sun": "Su",
     "Su": "Su",
 }
@@ -211,6 +218,22 @@ DAYS_GR = {
     "Κυ": "Su",
     "Κυριακή": "Su",
 }
+
+DAYS_HR = {
+    "Ponedjeljak": "Mo",
+    "Pon": "Mo",
+    "Utorak": "Tu",
+    "Srijeda": "We",
+    "Četvrtak": "Th",
+    "Čet": "Th",
+    "Petak": "Fr",
+    "Pet": "Fr",
+    "Subota": "Sa",
+    "Sub": "Sa",
+    "Nedjelja": "Su",
+    "Ned": "Su",
+}
+
 DAYS_HU = {
     "Hétfő": "Mo",
     "Hé": "Mo",
@@ -244,6 +267,16 @@ DAYS_IL = {
     "יום שישי": "Fr",
     "יום שבת": "Sa",
     "יום ראשון": "Su",
+}
+
+DAYS_KR = {
+    "월요일": "Mo",
+    "화요일": "Tu",
+    "수요일": "We",
+    "목요일": "Th",
+    "금요일": "Fr",
+    "토요일": "Sa",
+    "일요일": "Su",
 }
 
 DAYS_LT = {
@@ -285,18 +318,25 @@ DAYS_SE = {
 DAYS_SI = {
     "Po": "Mo",
     "Pon": "Mo",
+    "Ponedeljek": "Mo",
     "To": "Tu",
     "Tor": "Tu",
+    "Torek": "Tu",
     "Sr": "We",
     "Sre": "We",
+    "Sreda": "We",
     "Če": "Th",
     "Čet": "Th",
+    "Četrtek": "Th",
     "Pe": "Fr",
     "Pet": "Fr",
+    "Petek": "Fr",
     "So": "Sa",
     "Sob": "Sa",
+    "Sobota": "Sa",
     "Ne": "Su",
     "Ned": "Su",
+    "Nedelja": "Su",
 }
 DAYS_IT = {
     "Lunedì": "Mo",
@@ -413,17 +453,30 @@ DAYS_PT = {
     "Sábado": "Sa",
     "Sa": "Sa",
     "Sá": "Sa",
+    "Sab": "Sa",
+    "Sáb": "Sa",
     "Do": "Su",
+    "Dom": "Su",
     "Domingo": "Su",
 }
 DAYS_SK = {
     "Po": "Mo",
+    "Pondelok": "Mo",
     "Ut": "Tu",
+    "Utorok": "Tu",
+    "Útorok": "Tu",
     "St": "We",
+    "Streda": "We",
     "Št": "Th",
+    "Štvrtok": "Th",
+    "Stvrtok": "Th",
     "Pi": "Fr",
+    "Piatok": "Fr",
     "So": "Sa",
+    "Sobota": "Sa",
     "Ne": "Su",
+    "Nedeľa": "Su",
+    "Nedela": "Su",
 }
 DAYS_RU = {
     "Пн": "Mo",
@@ -577,6 +630,16 @@ DAYS_SR = {
     "Недеља": "Su",
 }
 
+DAYS_TR = {
+    "Pazartesi": "Mo",
+    "Salı": "Tu",
+    "Çarşamba": "We",
+    "Perşembe": "Th",
+    "Cuma": "Fr",
+    "Cumartesi": "Sa",
+    "Pazar": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
@@ -589,7 +652,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_FR,
     DAYS_PT,
     DAYS_IT,
-    # Turkish missing
+    DAYS_TR,
     DAYS_DK,
     DAYS_PL,
     # Persian
@@ -600,6 +663,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_CH,
     DAYS_FI,
     DAYS_GR,
+    DAYS_HR,
     DAYS_HU,
     DAYS_IL,
     DAYS_NL,
@@ -639,6 +703,13 @@ NAMED_TIMES_RU = {
     "Круглосуточно": ["00:00", "23:59"],  # 24/7
 }
 
+NAMED_DAY_RANGES_KR = {
+    "연중무휴": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "연중무": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "중무휴": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "연중": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+}
+
 DELIMITERS_EN = [
     "-",
     "–",
@@ -662,8 +733,14 @@ DELIMITERS_ES = [
     "de",
 ]
 
+DELIMITERS_FR = ["-", "–", "—", "―", "‒", "au", "à", "de"]
+
 DELIMITERS_PT = [
     "-",
+    "–",
+    "—",
+    "―",
+    "‒",
     "a",
     "das",
     "às",
@@ -681,6 +758,8 @@ DELIMITERS_PL = [
 ]
 
 DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
+
+DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
 logger = logging.getLogger(__name__)
 
@@ -763,6 +842,8 @@ class OpeningHours:
                 return
             if close_time == "24:00" or close_time == "00:00":
                 close_time = "23:59"
+            if close_time == "24:00:00" or close_time == "00:00:00":
+                close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
@@ -812,102 +893,6 @@ class OpeningHours:
         opening_hours = opening_hours[:-2]
 
         return opening_hours
-
-    # Parses an openingHoursSpecification dict
-    # IE:
-    # {
-    #  "@type": "OpeningHoursSpecification",
-    #  "closes":  "17:00:00",
-    #  "dayOfWeek": "https://schema.org/Sunday",
-    #  "opens":  "09:00:00"
-    # }
-    # See https://schema.org/OpeningHoursSpecification for further examples.
-    def _parse_opening_hours_specification(self, rule: dict, time_format: str):
-        if (
-            not type(rule.get("dayOfWeek")) in [list, str]
-            or not type(rule.get("opens")) == str
-            or not type(rule.get("closes")) == str
-        ):
-            return
-
-        days = rule["dayOfWeek"]
-        if not isinstance(days, list):
-            days = [days]
-
-        for day in days:
-            self.add_range(
-                day=day.strip(),
-                open_time=rule["opens"].strip(),
-                close_time=rule["closes"].strip(),
-                time_format=time_format,
-            )
-
-    # Parse an individual https://schema.org/openingHours property value such as
-    # "Mo,Tu,We,Th 09:00-12:00"
-    # "Mo-Fr 10:00-19:00"
-    def _parse_opening_hours(self, rule: str, time_format: str):
-        days, time_ranges = rule.split(" ", 1)
-
-        for time_range in time_ranges.split(","):
-            if time_ranges.lower() in ["closed", "off"]:
-                start_time = end_time = "closed"
-            else:
-                start_time, end_time = time_range.split("-")
-
-            start_time = start_time.strip()
-            end_time = end_time.strip()
-
-            if "-" in days:
-                start_day, end_day = days.split("-")
-
-                start_day = sanitise_day(start_day)
-                end_day = sanitise_day(end_day)
-
-                for day in day_range(start_day, end_day):
-                    self.add_range(day, start_time, end_time, time_format)
-            else:
-                for day in days.split(","):
-                    if d := sanitise_day(day):
-                        self.add_range(d, start_time, end_time, time_format)
-
-    def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
-        """
-        Deprecated, please use LinkedDataParser.parse_opening_hours
-        """
-        # TODO: move to LinkedDataParser
-        if spec := linked_data.get("openingHoursSpecification"):
-            if isinstance(spec, list):
-                for rule in linked_data["openingHoursSpecification"]:
-                    if not isinstance(rule, dict):
-                        continue
-                    self._parse_opening_hours_specification(rule, time_format)
-            elif isinstance(spec, dict):
-                self._parse_opening_hours_specification(spec, time_format)
-            else:
-                logger.info("Unknown openingHoursSpecification structure, ignoring")
-                logger.debug(linked_data.get("openingHoursSpecification"))
-
-        elif rules := linked_data.get("openingHours"):
-            if not isinstance(rules, list):
-                rules = re.findall(
-                    r"""((
-                        \w{2,3}                 # Day
-                        |\w{2,3}\s?\-\s?\w{2,3} # Day - Day
-                        |(\w{2,3},)+\w{2,3}     # Day,Day
-                    )\s(
-                        (\d\d:\d\d)\s?\-\s?(\d\d:\d\d) # time - range
-                        |(?i:closed) # ignoring case
-                    ))""",
-                    rules,
-                    re.X,
-                )
-                rules = [r[0] for r in rules]
-
-            for rule in rules:
-                if not rule:
-                    continue
-
-                self._parse_opening_hours(rule, time_format)
 
     @staticmethod
     def delimiters_regex(delimiters: list[str] = DELIMITERS_EN) -> str:
