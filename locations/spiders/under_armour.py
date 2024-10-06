@@ -17,6 +17,7 @@ class UnderArmourSpider(scrapy.spiders.SitemapSpider):
         (r"https://store-locations\.underarmour\.com/.*/.*/.*/", "parse"),
     ]
     drop_attributes = {"image"}
+    time_format = "%I:%M %p"
 
     def parse(self, response):
         for script in response.xpath('//script[@type="application/ld+json"]'):
@@ -24,6 +25,8 @@ class UnderArmourSpider(scrapy.spiders.SitemapSpider):
             # commented-out line
             text = re.sub(r" +//.*", "", text, flags=re.M)
             script.root.text = text
-        item = LinkedDataParser.parse(response, "SportingGoodsStore")
+
+        ld_item = LinkedDataParser.find_linked_data(response, "SportingGoodsStore")
+        item = LinkedDataParser.parse_ld(ld_item, time_format=self.time_format)
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
