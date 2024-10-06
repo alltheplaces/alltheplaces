@@ -17,7 +17,7 @@ class NuZASpider(GoReviewSpider):
             yield Request(url=url, callback=self.fetch_store)
 
     def fetch_store(self, response):
-        links = LinkExtractor(allow=r"^https:\/\/nu\d+\.goreview\.co\.za\/goreview\/default$").extract_links(response)
+        links = LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/goreview\/default$").extract_links(response)
         for link in links:
             store_page_url = link.url.replace("goreview.co.za/goreview/default", "goreview.co.za/store-information")
             yield Request(url=store_page_url, callback=self.parse)

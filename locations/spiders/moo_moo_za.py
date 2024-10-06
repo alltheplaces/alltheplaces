@@ -1,18 +1,13 @@
 from scrapy import Request
 from scrapy.linkextractors import LinkExtractor
 
-from locations.categories import Categories
 from locations.storefinders.go_review import GoReviewSpider
 
 
-class HudsonsZASpider(GoReviewSpider):
-    name = "hudsons_za"
-    item_attributes = {
-        "brand": "Hudsons",
-        "brand_wikidata": "Q130400275",
-        "extras": Categories.RESTAURANT.value,
-    }
-    start_urls = ["https://hudsons.goreview.co.za/"]
+class MooMooZASpider(GoReviewSpider):
+    name = "moo_moo_za"
+    item_attributes = {"brand": "Moo Moo Meet & Whine", "brand_wikidata": "Q130378128"}
+    start_urls = ["https://moomoo.goreview.co.za/"]
 
     def start_requests(self):
         for url in self.start_urls:
@@ -25,6 +20,5 @@ class HudsonsZASpider(GoReviewSpider):
             yield Request(url=store_page_url, callback=self.parse)
 
     def post_process_item(self, item, response):
-        item["branch"] = item["branch"].replace("Hudsons ", "")
-        item["name"] = self.item_attributes["brand"]
+        item["branch"] = item["branch"].replace("Moo Moo ", "")
         yield item
