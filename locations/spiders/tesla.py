@@ -48,7 +48,7 @@ class TeslaSpider(scrapy.Spider):
         feature["state"] = location_data.get("province_state") or None
 
         # Deal with https://github.com/alltheplaces/alltheplaces/issues/10892
-        if isinstance(location_data["email"], dict) and "value" in location_data["email"]:
+        if "email" in location_data and isinstance(location_data["email"], dict) and "value" in location_data["email"]:
             feature["email"] = location_data["email"]["value"]
 
         if "supercharger" in location_data.get("location_type"):
