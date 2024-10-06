@@ -28,9 +28,7 @@ class GovBio123DESpider(SitemapSpider, StructuredDataSpider):
                 case "/anbieter/kategorie/bio-hotels":
                     mapped_categories.append(Categories.HOTEL.value)
                 case "/anbieter/kategorie/unterkunft":
-                    mapped_categories.append(
-                        {"accomodation": "yes"}
-                    )  # Can't reliably tell if hotel/hostel/motel/etc.
+                    mapped_categories.append({"accomodation": "yes"})  # Can't reliably tell if hotel/hostel/motel/etc.
                 case "/anbieter/kategorie/restaurant":
                     mapped_categories.append(Categories.RESTAURANT.value)  # TODO: Hotels with Restaurants?
 
