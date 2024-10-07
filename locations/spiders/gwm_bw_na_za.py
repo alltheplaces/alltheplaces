@@ -19,8 +19,8 @@ GWM_BRANDS = {
 }
 
 
-class GwmZASpider(JSONBlobSpider):
-    name = "gwm_za"
+class GwmBWNAZASpider(JSONBlobSpider):
+    name = "gwm_bw_na_za"
     item_attributes = {
         "brand": "GWM",
         "brand_wikidata": "Q1117001",
