@@ -34,7 +34,6 @@ class TopgolfUSSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
         item["street_address"] = item.pop("addr_full")
-
         item["website"] = f"https://topgolf.com/us/{location['alias']}/"
         if location["upcoming"]:
             item["extras"]["start_date"] = location["upcoming_date"]
@@ -49,8 +48,16 @@ class TopgolfUSSpider(JSONBlobSpider):
             set_social_media(item, SocialMedia.FACEBOOK, social)
         if location.get("gallery"):
             item["image"] = location["gallery"][0]["large"]
+        self.parse_amenities(item, {a["amenity"] for a in location.get("amenities", [])})
 
-        amenities = {a["amenity"] for a in location.get("amenities", [])}
+        oh = OpeningHours()
+        for day_idx, hours in enumerate(location["hours"]["hours"]):
+            oh.add_range(DAYS_3_LETTERS_FROM_SUNDAY[day_idx], hours["time_start"], hours["time_end"])
+        item["opening_hours"] = oh
+
+        yield item
+
+    def parse_amenities(self, item, amenities):
         if 19 in amenities:
             # "3 floors"
             item["extras"]["building:levels"] = 3
@@ -104,10 +111,3 @@ class TopgolfUSSpider(JSONBlobSpider):
             item["extras"]["screens"] = 200
         apply_yes_no(Extras.WIFI, item, 18 in amenities)  # "Free Wi-Fi"
         apply_yes_no("restaurant", item, 9 in amenities)  # "Bar & restaurant"
-
-        oh = OpeningHours()
-        for day_idx, hours in enumerate(location["hours"]["hours"]):
-            oh.add_range(DAYS_3_LETTERS_FROM_SUNDAY[day_idx], hours["time_start"], hours["time_end"])
-        item["opening_hours"] = oh
-
-        yield item
