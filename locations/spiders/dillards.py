@@ -1,9 +1,10 @@
-import json
-
+import chompjs
 from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -17,23 +18,19 @@ class DillardsSpider(SitemapSpider, StructuredDataSpider):
     time_format = "%I:%M %p"
     wanted_types = ["DepartmentStore"]
 
-    def post_process_item(self, item, response, ld_data):
-        script = response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get()
-        script_data = json.decoder.JSONDecoder().raw_decode(script, script.index("{"))[0]
-        lat = script_data["contentData"]["store"]["latitude"]
-        lon = script_data["contentData"]["store"]["longitude"]
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        script_data = chompjs.parse_js_object(response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get())
+        item["lat"] = script_data["contentData"]["store"]["latitude"]
+        item["lon"] = script_data["contentData"]["store"]["longitude"]
 
         # TODO: Why isn't this automatically done by StructuredDataSpider?
         hours = OpeningHours()
         for row in ld_data["openingHoursSpecification"]:
             day = row["dayOfWeek"]["name"][:2]
             hours.add_range(day, row["opens"], row["closes"], self.time_format)
-
         item["opening_hours"] = hours
-        item["ref"] = response.css(".storeNumber::text").get()
-        item["lat"] = lat
-        item["lon"] = lon
         item["website"] = response.url
+
         yield item
 
     def parse(self, response):
