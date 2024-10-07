@@ -13,6 +13,7 @@ class DictParser:
         "store-id",
         "StoreID",
         "storeID",
+        "storeId",
         "store-number",
         "shop-number",
         "location-id",
