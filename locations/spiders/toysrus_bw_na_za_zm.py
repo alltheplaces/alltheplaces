@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class ToysrusBWNAZAZM(Spider):
+class ToysrusBWNAZAZMSpider(Spider):
     name = "toysrus_bw_na_za_zm"
     allowed_domains = ["www.toysrus.co.za"]
     start_urls = ["https://www.toysrus.co.za/find-a-store"]
