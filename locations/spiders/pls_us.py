@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PlsUsSpider(StructuredDataSpider):
+class PlsUSSpider(StructuredDataSpider):
     name = "pls_us"
     allowed_domains = ["pls247.com"]
     item_attributes = {
