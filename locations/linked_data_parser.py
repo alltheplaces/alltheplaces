@@ -62,7 +62,11 @@ class LinkedDataParser:
     @staticmethod
     def parse_ld(ld, time_format: str = "%H:%M") -> Feature:  # noqa: C901
         item = Feature()
+        # Attempt to find coordinates from a map link
+        if map_url := LinkedDataParser.get_case_insensitive(ld, "hasMap"):
+            item["lat"], item["lon"] = url_to_coords(map_url)
 
+        # Override coordinates with specific entries for lat/lon if available
         if (
             (geo := LinkedDataParser.get_case_insensitive(ld, "geo"))
             or "location" in [key.lower() for key in ld]
@@ -121,9 +125,6 @@ class LinkedDataParser:
             item["email"] = item["email"].replace("mailto:", "")
 
         item["website"] = LinkedDataParser.get_case_insensitive(ld, "url")
-
-        if map_url := LinkedDataParser.get_case_insensitive(ld, "hasMap"):
-            item["lat"], item["lon"] = url_to_coords(map_url)
 
         try:
             item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld, time_format=time_format)
