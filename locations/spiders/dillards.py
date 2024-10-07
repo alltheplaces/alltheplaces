@@ -18,6 +18,8 @@ class DillardsSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["DepartmentStore"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Dillard's ").split(" in ", 1)[0]
+
         script_data = chompjs.parse_js_object(response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get())
         item["lat"] = script_data["contentData"]["store"]["latitude"]
         item["lon"] = script_data["contentData"]["store"]["longitude"]
