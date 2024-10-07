@@ -30,15 +30,22 @@ class WorldcatSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         apply_category(Categories.LIBRARY, item)
 
+        if location["institutionType"] != "PUBLIC":
+            item["extras"]["access"] = "private"
+        item["extras"]["worldcat:type"] = location["institutionType"]
+        self.crawler.stats.inc_value(f"atp/{self.name}/type/{location['institutionType']}")
+
         item["ref"] = location["registryId"]
         item["name"] = location["institutionName"]
+
         if "closed" in item["name"].lower():
             set_closed(item)  # On initial run, all such items' names indicated they were closed
+
         item["street_address"] = clean_address([location.get("street1"), location.get("street2")])
 
         if "emails" in location:
             item["email"] = "; ".join(location["emails"])
         if "homePageUrl" in location:
             item["website"] = location["homePageUrl"]
-        self.crawler.stats.inc_value(f"atp/{self.name}/type/{location['institutionType']}")
+
         yield item
