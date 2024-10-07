@@ -72,14 +72,19 @@ class NSI(metaclass=Singleton):
                     return wikidata_code
         return None
 
-    def lookup_wikidata(self, wikidata_code: str = None) -> dict:
+    def lookup_wikidata(self, wikidata_code: str = None, include_dissolved=False) -> dict | None:
         """
         Lookup wikidata code in the NSI.
         :param wikidata_code: wikidata code to lookup in the NSI
         :return: NSI wikidata.json entry if present
         """
         self._ensure_loaded()
-        return self.wikidata_json.get(wikidata_code)
+        wd_json = self.wikidata_json.get(wikidata_code)
+        if include_dissolved:
+            return wd_json
+        elif "dissolutions" not in wd_json:
+            return wd_json
+        return None
 
     def iter_wikidata(self, label_to_find: str = None) -> Iterable[tuple[str, dict]]:
         """

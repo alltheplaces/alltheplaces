@@ -72,7 +72,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
     def detect_missing(self, args):
         codes = DuplicateWikidataCommand.wikidata_spiders(self.crawler_process)
 
-        missing = []
+        missing = {}  # dict to filter out duplicates
 
         # Fetch the category from NSI's github, and try to match to wikidata.
         # TODO: This assumes you are going for only one category, by wikidata ID.
@@ -84,23 +84,22 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             for item in response["items"]:
                 if "brand:wikidata" in item["tags"]:
                     if not item["tags"]["brand:wikidata"] in codes.keys():
-                        missing.append(item)
+                        missing[item["tags"]["brand:wikidata"]] = item
         # Assume we are searching by location, either country code or some state geojson string
         else:
-            seen_wikidata = []  # There can be duplicate wikidata entries across different categories
             for item in self.nsi.iter_country(args[0]):
                 if "brand:wikidata" in item["tags"]:
-                    if (
-                        item["tags"]["brand:wikidata"] not in codes.keys()
-                        and item["tags"]["brand:wikidata"] not in seen_wikidata
-                    ):
-                        missing.append(item)
-                        seen_wikidata.append(item["tags"]["brand:wikidata"])
+                    if item["tags"]["brand:wikidata"] not in codes.keys():
+                        missing[item["tags"]["brand:wikidata"]] = item
 
-        print(f"Missing by wikidata: {len(missing)}")
-        for brand in missing:
-            wikidata = self.nsi.lookup_wikidata(brand["tags"]["brand:wikidata"])
-            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata)
+        issue_list = {}
+        for code, brand in missing.items():
+            if wikidata := self.nsi.lookup_wikidata(code):
+                issue_list[code] = brand | {"label": brand["displayName"]} | wikidata
+
+        print(f"Missing by wikidata: {len(issue_list)}")
+        for code, data in issue_list.items():
+            self.issue_template(code, data)
 
     @staticmethod
     def show(code, data):
