@@ -76,6 +76,7 @@ class NSI(metaclass=Singleton):
         """
         Lookup wikidata code in the NSI.
         :param wikidata_code: wikidata code to lookup in the NSI
+        :param include_dissolved: whether or not to return brands marked in wikidata as dissolved
         :return: NSI wikidata.json entry if present
         """
         self._ensure_loaded()
