@@ -17,15 +17,7 @@ class GoOutdoorsGBSpider(Spider):
     def start_requests(self) -> Iterable[Request]:
         yield FormRequest(
             url="https://www.gooutdoors.co.uk/google/store-locator",
-            formdata={
-                "postcode": "",
-                "submit": "Find+stores",
-                "submit": "1",
-                "radius": "500",
-                "ac_store_limit": "300",
-                "current_view": "list",
-                "fascias%5B%5D": "GO",
-            },
+            formdata={"ac_store_limit": "300"},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
