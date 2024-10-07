@@ -11,12 +11,11 @@ class DillardsSpider(SitemapSpider, StructuredDataSpider):
     name = "dillards"
     item_attributes = {"brand": "Dillard's", "brand_wikidata": "Q844805"}
     allowed_domains = ["www.dillards.com"]
-    sitemap_urls = ("https://www.dillards.com/sitemap/sitemap_storeLocator_1.xml",)
-    download_delay = 0.5
-    wanted_types = ["DepartmentStore"]
+    sitemap_urls = ["https://www.dillards.com/robots.txt"]
+    sitemap_follow = ["sitemap_storeLocator_"]
+    sitemap_rules = [(r"/stores/[^/]+/[^/]+/(\d+)$", "parse")]
     time_format = "%I:%M %p"
-
-    sitemap_rules = [(r"https://www.dillards.com/stores/.*/.*", "parse")]
+    wanted_types = ["DepartmentStore"]
 
     def post_process_item(self, item, response, ld_data):
         script = response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get()
