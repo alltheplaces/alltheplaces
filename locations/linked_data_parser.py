@@ -64,7 +64,11 @@ class LinkedDataParser:
         item = Feature()
         # Attempt to find coordinates from a map link
         if map_url := LinkedDataParser.get_case_insensitive(ld, "hasMap"):
-            item["lat"], item["lon"] = url_to_coords(map_url)
+            if isinstance(map_url, str):
+                item["lat"], item["lon"] = url_to_coords(map_url)
+            else:
+                # TODO handle hasMap with @type Map
+                pass
 
         # Override coordinates with specific entries for lat/lon if available
         if (
