@@ -41,15 +41,29 @@ class LocationBankSpider(Spider):
             location["state"] = location.pop("administrativeArea")
             if data["detailViewUrl"] is not None:
                 location["website"] = re.sub(r"\{.+\}", location[detail_view_key], data["detailViewUrl"])
+
             location["street_address"] = clean_address([location.pop("addressLine1"), location.get("addressLine2")])
+
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+
+            item["addr_full"] = clean_address(
+                [
+                    location.get("street_address"),
+                    location.get("subLocality"),
+                    location.get("locality"),
+                    location.get("state"),
+                    location.get("postalCode"),
+                ]
+            )
+
             item["opening_hours"] = OpeningHours()
             for day in location["regularHours"]:
                 if day["isOpen"]:
                     item["opening_hours"].add_range(day["openDay"], day["openTime"], day["closeTime"])
                 else:
                     item["opening_hours"].set_closed(day["openDay"])
+
             if self.include_images:
                 image_root = "https://api.locationbank.net/storelocator/StoreLocatorAPI/locationImage"
                 item["image"] = (
