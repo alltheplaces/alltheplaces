@@ -15,7 +15,6 @@ class DillardsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.dillards.com/robots.txt"]
     sitemap_follow = ["sitemap_storeLocator_"]
     sitemap_rules = [(r"/stores/[^/]+/[^/]+/(\d+)$", "parse")]
-    time_format = "%I:%M %p"
     wanted_types = ["DepartmentStore"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
@@ -23,12 +22,11 @@ class DillardsSpider(SitemapSpider, StructuredDataSpider):
         item["lat"] = script_data["contentData"]["store"]["latitude"]
         item["lon"] = script_data["contentData"]["store"]["longitude"]
 
-        # TODO: Why isn't this automatically done by StructuredDataSpider?
-        hours = OpeningHours()
-        for row in ld_data["openingHoursSpecification"]:
-            day = row["dayOfWeek"]["name"][:2]
-            hours.add_range(day, row["opens"], row["closes"], self.time_format)
-        item["opening_hours"] = hours
+        item["opening_hours"] = OpeningHours()
+        for rule in script_data["contentData"]["store"]["attr_hours"]:
+            day, times = rule.split("|")
+            item["opening_hours"].add_range(day.split(" ")[0], *times.split(" - "), "%I:%M %p")
+
         item["website"] = response.url
 
         yield item
