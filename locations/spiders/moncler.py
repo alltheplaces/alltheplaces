@@ -1,9 +1,11 @@
 from typing import Any
-from requests_cache import Response
+
 import scrapy
+from requests_cache import Response
 
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
+
 
 class MonclerSpider(scrapy.Spider):
     name = "moncler"
@@ -19,4 +21,3 @@ class MonclerSpider(scrapy.Spider):
             item = DictParser.parse(location)
             item["state"] = location.get("stateCode")
             yield item
-
