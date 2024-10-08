@@ -11,10 +11,10 @@ from locations.items import Feature
 
 class UlybkaRadugiRUSpider(scrapy.Spider):
     name = "ulybka_radugi_ru"
+    item_attributes = {"brand": "Улыбка радуги", "brand_wikidata": "Q109734104"}
     start_urls = [
         "http://delivery.shop.api.svs.tdera.ru/stores?active=1&retailPoint=1&sortBy=geoCoordinates asc&fields[0]=id&fields[1]=code&fields[2]=geoCoordinates&fields[3]=subwayStations&fields[4]=openingHours&fields[5]=address&fields[6]=retailPoint&fields[7]=new&fields[8]=openingSoon&fields[9]=temporaryClosed&fields[10]=underReconstruction&fields[11]=pickupPoint&fields[12]=dateOpening&page=1&limit=10000"
     ]
-    item_attributes = {"brand": "Улыбка радуги", "brand_wikidata": "Q109734104"}
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for poi in response.json()["_embedded"]["items"]:
