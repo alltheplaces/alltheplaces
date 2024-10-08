@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class IndigoCASpider(scrapy.Spider):
+class IndigoSpider(scrapy.Spider):
     name = "indigo"
     item_attributes = {"operator": "Indigo", "operator_wikidata": "Q3559970"}
     url = "https://salesforce.parkindigo.com/locations?"

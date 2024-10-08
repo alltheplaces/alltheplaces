@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class NinetyNineRanchMarketUSSpider(Spider):
+class NinetynineRanchMarketUSSpider(Spider):
     name = "99_ranch_market_us"
     item_attributes = {
         "brand": "99 Ranch Market",

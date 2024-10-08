@@ -65,9 +65,9 @@ TELNETCONSOLE_ENABLED = False
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-# SPIDER_MIDDLEWARES = {
-#    'locations.middlewares.MyCustomSpiderMiddleware': 543,
-# }
+SPIDER_MIDDLEWARES = {
+    "locations.middlewares.track_sources.TrackSourcesMiddleware": 500,
+}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
@@ -108,6 +108,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
     "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
+    "locations.pipelines.email_clean_up.EmailCleanUpPipeline": 370,
     "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
     "locations.pipelines.drop_logo.DropLogoPipeline": 550,
@@ -167,3 +168,5 @@ REQUESTS_CACHE_BACKEND_SETTINGS = {
     "backend": "filesystem",
     "wal": True,
 }
+
+TEMPLATES_DIR = "templates/"

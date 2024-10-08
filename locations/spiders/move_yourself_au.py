@@ -3,12 +3,12 @@ from scrapy import FormRequest, Spider
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.spiders.ampol_au import AmpolAUSpider
-from locations.spiders.bp import BPSpider
+from locations.spiders.bp import BpSpider
 from locations.spiders.coles_au import ColesAUSpider
-from locations.spiders.exxonmobil import ExxonMobilSpider
+from locations.spiders.exxon_mobil import ExxonMobilSpider
 from locations.spiders.liberty_au import LibertyAUSpider
-from locations.spiders.night_owl_au import NightOwlAU
-from locations.spiders.otr_au import OTRAUSpider
+from locations.spiders.night_owl_au import NightOwlAUSpider
+from locations.spiders.otr_au import OtrAUSpider
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.shell import ShellSpider
 from locations.spiders.united_petroleum_au import UnitedPetroleumAUSpider
@@ -38,8 +38,8 @@ class MoveYourselfAUSpider(Spider):
                     item["located_in"] = AmpolAUSpider.item_attributes["brand"]
                     item["located_in_wikidata"] = AmpolAUSpider.item_attributes["brand_wikidata"]
                 case "bp":
-                    item["located_in"] = BPSpider.brands["bp"]["brand"]
-                    item["located_in_wikidata"] = BPSpider.brands["bp"]["brand_wikidata"]
+                    item["located_in"] = BpSpider.brands["bp"]["brand"]
+                    item["located_in_wikidata"] = BpSpider.brands["bp"]["brand_wikidata"]
                 case "coles":
                     item["located_in"] = ColesAUSpider.BRANDS[1]["brand"]
                     item["located_in_wikidata"] = ColesAUSpider.BRANDS[1]["brand_wikidata"]
@@ -50,8 +50,8 @@ class MoveYourselfAUSpider(Spider):
                     item["located_in"] = "Metro Petroleum"
                     item["located_in_wikidata"] = "Q111970125"
                 case "otr":
-                    item["located_in"] = OTRAUSpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = OTRAUSpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = OtrAUSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = OtrAUSpider.item_attributes["brand_wikidata"]
                 case "puma":
                     item["located_in"] = "Puma"
                     item["located_in_wikidata"] = "Q7259769"
@@ -78,8 +78,8 @@ class MoveYourselfAUSpider(Spider):
                         item["located_in"] = ExxonMobilSpider.brands["Mobil"]["brand"]
                         item["located_in_wikidata"] = ExxonMobilSpider.brands["Mobil"]["brand_wikidata"]
                     elif item["name"].startswith("Night Owl "):
-                        item["located_in"] = NightOwlAU.item_attributes["brand"]
-                        item["located_in_wikidata"] = NightOwlAU.item_attributes["brand_wikidata"]
+                        item["located_in"] = NightOwlAUSpider.item_attributes["brand"]
+                        item["located_in_wikidata"] = NightOwlAUSpider.item_attributes["brand_wikidata"]
                     elif item["name"].startswith("Octane Fuels "):
                         item["located_in"] = "Octane Fuels"
                     elif item["name"].startswith("Pearl Energy "):

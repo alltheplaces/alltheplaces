@@ -12,7 +12,7 @@ from locations.geo import postal_regions
 from locations.hours import OpeningHours
 
 
-class NatWestGBSpider(Spider):
+class NatwestGBSpider(Spider):
     name = "natwest_gb"
     item_attributes = {"brand": "NatWest", "brand_wikidata": "Q2740021"}
     total_pois = -1

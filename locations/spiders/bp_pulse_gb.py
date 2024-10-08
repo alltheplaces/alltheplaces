@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class BPPulseGBSpider(Spider):
+class BpPulseGBSpider(Spider):
     name = "bp_pulse_gb"
     item_attributes = {"brand_wikidata": "Q39057719"}
 

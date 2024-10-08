@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class KiKSpider(Spider):
+class KikSpider(Spider):
     name = "kik"
     item_attributes = {"brand": "KiK", "brand_wikidata": "Q883965"}
     allowed_domains = ["www.kik.de", "storefinder-microservice.kik.de"]

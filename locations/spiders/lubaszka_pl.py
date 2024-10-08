@@ -22,6 +22,7 @@ class LubaszkaPLSpider(Spider):
             item["ref"] = sha1(location["location_name"].encode("UTF-8")).hexdigest()
             item["street_address"] = item.pop("street", None)
             item["opening_hours"] = OpeningHours()
+            item.pop("name", None)
             for day, hours in location["opening_hours"].items():
                 day = sanitise_day(day.split("_")[-1], DAYS_PL)
                 hours = hours.replace(".", ":")

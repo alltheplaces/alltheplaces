@@ -1,7 +1,8 @@
-import html
 import re
+from html import unescape
 
 from scrapy import Request, Selector, Spider
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -20,9 +21,19 @@ from locations.items import Feature
 # are passed, item (an ATP "Feature" class) and location (a Scrapy
 # "Selector" class that has selected the XML node for a particular
 # location).
+#
+# Note that some variants of this spider exist, where a url such as
+# https://flippinpizza.com/wp-content/uploads/ssf-wp-uploads/ssf-data.json
+# is available.
 
 
 class SuperStoreFinderSpider(Spider):
+    """
+    To use, specify:
+      - `start_urls`: mandatory parameter if `allowed_domains` is unspecified
+      - `allowed_domains`: mandatory parameter if `start_urls` is unspecified
+    """
+
     def start_requests(self):
         if len(self.start_urls) > 0:
             for url in self.start_urls:
@@ -31,14 +42,14 @@ class SuperStoreFinderSpider(Spider):
             for allowed_domain in self.allowed_domains:
                 yield Request(url=f"https://{allowed_domain}/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         for location in response.xpath("//store/item"):
             properties = {
                 "ref": location.xpath("./storeId/text()").get(),
                 "name": location.xpath("./location/text()").get(),
                 "lat": location.xpath("./latitude/text()").get(),
                 "lon": location.xpath("./longitude/text()").get(),
-                "addr_full": html.unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
+                "addr_full": unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
                 "phone": location.xpath("./telephone/text()").get(),
                 "email": location.xpath("./email/text()").get(),
                 "website": location.xpath("./website/text()").get(),
@@ -59,5 +70,5 @@ class SuperStoreFinderSpider(Spider):
 
             yield from self.parse_item(Feature(**properties), location) or []
 
-    def parse_item(self, item: Feature, location: Selector, **kwargs):
+    def parse_item(self, item: Feature, location: Selector):
         yield item

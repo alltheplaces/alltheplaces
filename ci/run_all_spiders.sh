@@ -80,7 +80,6 @@ python ci/concatenate_parquet.py \
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't convert to parquet")
-    exit 1
 fi
 
 # concatenate_parquet.py leaves behind the parquet files for each spider, and I don't
@@ -261,6 +260,62 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
+# Update the latest/ directory with redirects to the latest run
+touch "${SPIDER_RUN_DIR}/latest_placeholder.txt"
+
+aws s3 cp \
+    --only-show-errors \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.zip" \
+    "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
+    "s3://${S3_BUCKET}/runs/latest/output.zip"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't update latest/output.zip redirect")
+    exit 1
+fi
+
+aws s3 cp \
+    --only-show-errors \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.pmtiles" \
+    "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
+    "s3://${S3_BUCKET}/runs/latest/output.pmtiles"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't update latest/output.pmtiles redirect")
+    exit 1
+fi
+
+aws s3 cp \
+    --only-show-errors \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.parquet" \
+    "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
+    "s3://${S3_BUCKET}/runs/latest/output.parquet"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't update latest/output.parquet redirect")
+    exit 1
+fi
+
+for spider in $(scrapy list)
+do
+    aws s3 cp \
+        --only-show-errors \
+        --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output/${spider}.geojson" \
+        "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
+        "s3://${S3_BUCKET}/runs/latest/output/${spider}.geojson"
+
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "Couldn't update latest/output/${spider}.geojson redirect")
+        exit 1
+    fi
+done
+
+(>&2 echo "Done updating latest/ redirects")
+
 if [ -z "${BUNNY_API_KEY}" ]; then
     (>&2 echo "Skipping CDN cache purge because BUNNY_API_KEY environment variable not set")
 else
@@ -291,4 +346,18 @@ else
     fi
 
     (>&2 echo "Purged history.json from CDN")
+
+    curl --request GET \
+         --silent \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Flatest%2Foutput%2F%2A&async=false' \
+         --header "AccessKey: ${BUNNY_API_KEY}" \
+         --header 'accept: application/json'
+
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "Failed to purge latest/output/* from CDN")
+        exit 1
+    fi
+
+    (>&2 echo "Purged latest/output/* from CDN")
 fi

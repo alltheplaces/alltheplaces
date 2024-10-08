@@ -38,9 +38,73 @@ def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: f
     return math.degrees(lat2), math.degrees(lon2)
 
 
+def country_iseadgg_centroids(country_codes: list[str] | str, radius: int) -> list[tuple[float, float]]:
+    """
+    Get WGS84 ISEADGG point locations for one or more countries at a specified
+    radius.
+
+    ISEADGG centroids minimise the number of point locations required to
+    fully search a country with radius (circle) searches. There are only
+    predefined radiuses for which ISEADGG centroids can be generated, but
+    these predefined radiuses generally align reasonably well with APIs that
+    expect a radius be supplied for a geographic search of a circular area.
+
+    If multiple countries are specified, deduplication of point locations
+    occurs. This is particularly useful for multiple adjoining or nearby
+    countries, particularly for small countries.
+
+    If you have an API which requires a radius search, the following lookup
+    table will help find a suitable radius parameter value for common API
+    accepted values for a radius, in both kilometres and miles:
+        >=25km or >=15mi: specify radius=24
+        >=50km or >=30mi: specify radius=48
+        >=80km or >=50mi: specify radius=79
+        >=100km or >=60mi: specify radius=94
+        >=160km or >=100mi: specify radius=158
+        >=315km or >=200mi: specify radius=315
+        >=460km or >=285mi: specify radius=458
+
+    Usage examples:
+        country_centroids(["FR", "IT", "ES", "DE", "PT"], 48)
+        country_centroids("US", 315)
+        country_centroids(["NZ", "AU"], 94)
+
+    :param country_codes: single ISO-3166 alpha-2 country code as a string or
+           an array of ISO-3166 alpha-2 country code strings for specifying
+           multiple countries.
+    :param radius: a radius (in kilometres) with accepted values being 24, 48,
+           79, 94, 158, 315 and 458. If any other radius is supplied, this
+           function will raise a ValueError exception.
+    :return: list of locations being a tuple consisting of latitude then
+             longitude WGS84 coordinates.
+    """
+    if radius not in [24, 48, 79, 94, 158, 315, 458]:
+        raise ValueError("Invalid search radius specified. Value must be 24, 48, 79, 94, 158, 315 or 458 (kilometres).")
+
+    if isinstance(country_codes, str):
+        country_codes = [country_codes]
+
+    all_points = []
+    for country_code in country_codes:
+        try:
+            with open_searchable_points(
+                "iseadgg/{}_centroids_iseadgg_{}km_radius.csv".format(country_code.lower(), str(radius))
+            ) as file:
+                rows = csv.DictReader(file)
+                for row in rows:
+                    all_points.append((float(row["latitude"]), float(row["longitude"])))
+        except FileNotFoundError:
+            raise ValueError(
+                "Invalid ISO-3166 alpha-2 country code supplied. Ensure supplied code is represented in the locations/searchable_points/iseadgg/ path."
+            )
+
+    unique_points = list(set(all_points))
+    return unique_points
+
+
 def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) -> Iterable[tuple[float, float]]:
     """
-    Get point locations from requested *_centroids_*.csv file.
+    Get WGS84 point locations from requested *_centroids_*.csv file.
 
     Usage examples:
         point_locations("eu_centroids_40km_radius_country.csv")
@@ -49,6 +113,8 @@ def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) ->
 
     :param areas_csv_file: CSV file with lat/lon points
     :param area_field_filter: optional list of area names to filter on
+    :return: iterable point locations being a a tuple consisting of latitude
+             then longitude WGS84 coordinates.
 
     """
 

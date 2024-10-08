@@ -5,7 +5,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PizzaHutFR(SitemapSpider, StructuredDataSpider):
+class PizzaHutFRSpider(SitemapSpider, StructuredDataSpider):
     name = "pizza_hut_fr"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     PIZZA_HUT_DELIVERY = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q107293079"}

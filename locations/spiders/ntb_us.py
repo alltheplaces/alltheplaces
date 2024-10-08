@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class NationalTireAndBatteryUSSpider(Spider):
+class NtbUSSpider(Spider):
     name = "ntb_us"
     item_attributes = {"brand": "NTB", "brand_wikidata": "Q6978944"}
     start_urls = ["https://www.ntb.com/netstorage/framework.min.js"]

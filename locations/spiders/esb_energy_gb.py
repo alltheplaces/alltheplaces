@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class ESBEnergyGBSpider(Spider):
+class EsbEnergyGBSpider(Spider):
     name = "esb_energy_gb"
     item_attributes = {"brand": "ESB Energy", "brand_wikidata": "Q118261834"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -24,7 +24,7 @@ class ESBEnergyGBSpider(Spider):
         if not response.json()["success"]:
             self.log(response.json()["errors"], logging.ERROR)
             return
-        for location in response.json()["data"][1]:
+        for location in response.json()["data"]:
             if location["deleted"]:
                 continue
 

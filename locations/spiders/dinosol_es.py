@@ -9,7 +9,7 @@ from locations.hours import DAYS_ES, DELIMITERS_ES, OpeningHours
 from locations.items import Feature
 
 
-class DinoSolESSpider(Spider):
+class DinosolESSpider(Spider):
     name = "dinosol_es"
     allowed_domains = ["www.hiperdino.es"]
     start_urls = ["https://www.hiperdino.es/c9504/tiendas/"]

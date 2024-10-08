@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class EasyHotelGB(SitemapSpider, StructuredDataSpider):
+class EasyHotelGBSpider(SitemapSpider, StructuredDataSpider):
     name = "easy_hotel_gb"
     item_attributes = {"brand": "Easy Hotel", "brand_wikidata": "Q17011598"}
     sitemap_urls = ["https://www.easyhotel.com/sitemap.xml"]
@@ -20,6 +20,6 @@ class EasyHotelGB(SitemapSpider, StructuredDataSpider):
             entry["loc"] = entry["loc"].replace("www.www.", "www.")
             yield entry
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item["state"] = None
         yield item

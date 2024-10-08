@@ -5,7 +5,7 @@ import scrapy
 from locations.items import Feature
 
 
-class CBRESpider(scrapy.Spider):
+class CbreSpider(scrapy.Spider):
     name = "cbre"
     item_attributes = {"brand": "CBRE", "brand_wikidata": "Q1023013"}
     allowed_domains = ["cbre.us"]

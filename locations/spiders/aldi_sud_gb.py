@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AldiSudGB(SitemapSpider, StructuredDataSpider):
+class AldiSudGBSpider(SitemapSpider, StructuredDataSpider):
     name = "aldi_sud_gb"
     item_attributes = {"brand_wikidata": "Q41171672", "country": "GB"}
     allowed_domains = ["aldi.co.uk"]

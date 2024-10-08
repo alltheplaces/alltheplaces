@@ -1,16 +1,18 @@
 from html import unescape
+from typing import Iterable
 
-from scrapy import Request
+from scrapy import Request, Selector
 
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class EVEREVEUSSpider(AmastyStoreLocatorSpider):
+class EvereveUSSpider(AmastyStoreLocatorSpider):
     name = "evereve_us"
     item_attributes = {"brand": "EVEREVE", "brand_wikidata": "Q69891997"}
     allowed_domains = ["evereve.com"]
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         # The request won't work without the headers supplied below.
         headers = {
             "X-Requested-With": "XMLHttpRequest",
@@ -18,7 +20,7 @@ class EVEREVEUSSpider(AmastyStoreLocatorSpider):
         for domain in self.allowed_domains:
             yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         if "COMING SOON" in item["name"].upper():
             return
         popup_text = list(

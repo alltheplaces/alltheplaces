@@ -4,7 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BIG4HolidayParksAUSpider(CrawlSpider, StructuredDataSpider):
+class Big4HolidayParksAUSpider(CrawlSpider, StructuredDataSpider):
     name = "big4_holiday_parks_au"
     item_attributes = {"brand": "BIG4 Holiday Parks", "brand_wikidata": "Q18636678"}
     allowed_domains = ["www.big4.com.au"]

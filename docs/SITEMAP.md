@@ -12,8 +12,8 @@ The sitemap is such an important concept that the [scrapy framework](https://scr
 
 Within our project there are a severeal examples showing slightly different use of `SitemapSpider` support:
 
-* [`jackinthebox.py`](../locations/spiders/jackinthebox.py)
-* [`moeys.py`](../locations/spiders/moes.py)
+* [`jackinthebox.py`](../locations/spiders/jack_in_the_box.py)
+* [`moeys.py`](../locations/spiders/moes_southwest_grill.py)
 * [`shopko.py`](../locations/spiders/shopko.py)
 
 Note that spiders with have good sitemap links nearly always have good machine-readable [structured data](./STRUCTURED_DATA.md) for their POI details. In these cases you will see frequent use of our [`StructuredDataSpider`](../locations/structured_data_spider.py) assistant class.

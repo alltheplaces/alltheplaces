@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class SunbeltRentalsUsCaSpider(scrapy.Spider):
+class SunbeltRentalsUSCASpider(scrapy.Spider):
     name = "sunbelt_rentals_us_ca"
     item_attributes = {
         "brand": "Sunbelt Rentals",

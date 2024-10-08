@@ -1,10 +1,10 @@
 from locations.storefinders.storemapper import StoremapperSpider
 
 
-class VPZGBSpider(StoremapperSpider):
+class VpzGBSpider(StoremapperSpider):
     name = "vpz_gb"
     item_attributes = {"brand": "VPZ", "brand_wikidata": "Q107300487"}
-    key = "14072-3UOwEWhgZ0NnwVEo"
+    company_id = "14072-3UOwEWhgZ0NnwVEo"
 
     def parse_item(self, item, location):
         for custom_field in location["store_custom_fields"]:

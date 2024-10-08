@@ -41,6 +41,6 @@ class LeCrobagDESpider(scrapy.Spider):
             address_text = description_elem.xpath('//span[@class="locationaddress"]/text()').extract()
             item["street_address"] = "".join(address_text[:-2]).strip()
             item["postcode"] = address_text[-2].strip().split("\xa0")[0]
-            item["city"] = address_text[-2].strip().split("\xa0")[1]
+            item["city"] = address_text[-2].strip().split("\xa0")[1].rstrip(",")
 
             yield item

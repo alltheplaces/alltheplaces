@@ -5,7 +5,7 @@ from locations.items import Feature, set_closed
 from locations.storefinders.yext_search import YextSearchSpider
 
 
-class ChickfilASpider(YextSearchSpider):
+class ChickFilASpider(YextSearchSpider):
     name = "chick_fil_a"
     item_attributes = {"brand": "Chick-fil-A", "brand_wikidata": "Q491516"}
 

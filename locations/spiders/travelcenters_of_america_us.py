@@ -6,7 +6,7 @@ from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TravelCentersOfAmericaUSSpider(SitemapSpider, StructuredDataSpider):
+class TravelcentersOfAmericaUSSpider(SitemapSpider, StructuredDataSpider):
     name = "travelcenters_of_america_us"
     allowed_domains = ["www.ta-petro.com"]
     sitemap_urls = ["https://www.ta-petro.com/sitemap-xml/"]

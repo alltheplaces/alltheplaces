@@ -5,14 +5,14 @@ from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
 from locations.items import SocialMedia, set_social_media
 from locations.pipelines.address_clean_up import clean_address
-from locations.spiders.tgi_fridays_us import TGIFridaysUSSpider
+from locations.spiders.tgi_fridays_us import TgiFridaysUSSpider
 from locations.structured_data_spider import clean_facebook
 
 
-class TGIFridaysAUSpider(Spider):
+class TgiFridaysAUSpider(Spider):
     name = "tgi_fridays_au"
-    item_attributes = TGIFridaysUSSpider.item_attributes
-    allowed_domains = ["www.tgifridays.com.au", "goo.gl"]
+    item_attributes = TgiFridaysUSSpider.item_attributes
+    allowed_domains = ["www.tgifridays.com.au", "goo.gl", "google.com"]
     start_urls = ["https://www.tgifridays.com.au/page-data/book/page-data.json"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Ignore www.google.com robots.txt
 

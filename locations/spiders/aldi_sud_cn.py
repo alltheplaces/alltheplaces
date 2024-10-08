@@ -8,7 +8,7 @@ from locations.items import Feature
 class AldiSudCNSpider(Spider):
     name = "aldi_sud_cn"
     item_attributes = {"brand_wikidata": "Q41171672", "country": "CN"}
-    start_urls = ["https://www.aldi.cn/images/2019aldi/assets/js/stores.json"]
+    start_urls = ["https://aldi.cn/assets/json/stores.json"]
 
     def parse(self, response, **kwargs):
         districts = response.json().values()

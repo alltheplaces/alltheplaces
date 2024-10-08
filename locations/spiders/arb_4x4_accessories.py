@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class ARB4x4AccessoriesSpider(Spider):
+class Arb4x4AccessoriesSpider(Spider):
     name = "arb_4x4_accessories"
     item_attributes = {
         "brand": "ARB 4×4 Accessories",

@@ -7,7 +7,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 AMC = {"brand": "AMC", "brand_wikidata": "Q294721"}
 
 
-class AMCTheatresUSSpider(Spider):
+class AmcTheatresUSSpider(Spider):
     name = "amc_theatres_us"
     allowed_domains = ["www.amctheatres.com"]
     start_urls = ["https://www.amctheatres.com/sitemaps/sitemap-theatres.xml"]

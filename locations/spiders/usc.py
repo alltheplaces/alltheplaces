@@ -5,7 +5,7 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
-class USCSpider(CrawlSpider):
+class UscSpider(CrawlSpider):
     name = "usc"
     item_attributes = {"brand": "USC", "brand_wikidata": "Q7866331"}
     allowed_domains = ["www.usc.co.uk"]

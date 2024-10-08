@@ -15,7 +15,7 @@ from locations.storefinders.geo_me import GeoMeSpider
 class ShellSpider(GeoMeSpider):
     name = "shell"
     item_attributes = {"brand": "Shell", "brand_wikidata": "Q110716465"}
-    key = "shellgsllocator"
+    api_key = "shellgsllocator"
 
     def parse_item(self, item, location):
         # Definitions extracted from https://shellgsllocator.geoapp.me/config/published/retail/prod/en_US.json?format=json
@@ -29,10 +29,13 @@ class ShellSpider(GeoMeSpider):
             select_shop_item["name"] = "Shell Select"
             select_shop_item["brand"] = "Shell Select"
             select_shop_item["brand_wikidata"] = "Q124359752"
+            if item.get("shop_open_status") == "twenty_four_hour":
+                item["opening_hours"] = "Mo-Su 00:00-24:00"
             apply_category(Categories.SHOP_CONVENIENCE, select_shop_item)
             yield select_shop_item
 
         apply_category(Categories.FUEL_STATION, item)
+        item.pop("name", None)
 
         # As we do not know the name of shop/restaurant attached, we apply to main item
         if "shop" in amenities:

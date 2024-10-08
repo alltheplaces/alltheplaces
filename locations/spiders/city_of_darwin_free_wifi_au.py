@@ -9,7 +9,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class CityOfDarwinFreeWiFiAUSpider(Spider):
+class CityOfDarwinFreeWifiAUSpider(Spider):
     name = "city_of_darwin_free_wifi_au"
     item_attributes = {"operator": "City of Darwin", "operator_wikidata": "Q125673118"}
     allowed_domains = ["services6.arcgis.com"]

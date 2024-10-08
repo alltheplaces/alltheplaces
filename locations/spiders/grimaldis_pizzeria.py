@@ -12,7 +12,7 @@ class GrimaldisPizzeriaSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["Restaurant"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         oh = OpeningHours()
         for day in response.xpath('//div[@class="info_block hrs"]//tbody//tr'):
             oh.add_range(

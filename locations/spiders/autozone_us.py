@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AutoZoneUSSpider(SitemapSpider, StructuredDataSpider):
+class AutozoneUSSpider(SitemapSpider, StructuredDataSpider):
     name = "autozone_us"
     item_attributes = {"brand": "AutoZone", "brand_wikidata": "Q4826087"}
     sitemap_urls = ["https://www.autozone.com/locations/sitemap.xml"]

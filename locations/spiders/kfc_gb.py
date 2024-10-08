@@ -11,7 +11,7 @@ from locations.spiders.vets4pets_gb import set_located_in
 from locations.user_agents import FIREFOX_LATEST
 
 
-class KFCGBSpider(Spider):
+class KfcGBSpider(Spider):
     name = "kfc_gb"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://uk.kfc-cms.com/api/data/restaurants_all?countrycode=GB"]

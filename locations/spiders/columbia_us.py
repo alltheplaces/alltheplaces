@@ -1,7 +1,7 @@
 from locations.storefinders.locally import LocallySpider
 
 
-class ColumbiaUsSpider(LocallySpider):
+class ColumbiaUSSpider(LocallySpider):
     name = "columbia_us"
     item_attributes = {"brand": "Columbia Sportswear Company", "brand_wikidata": "Q1112588"}
     allowed_domains = ["www.columbia.com"]

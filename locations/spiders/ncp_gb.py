@@ -21,7 +21,7 @@ OPERATORS = {
 }
 
 
-class NCPGB(SitemapSpider):
+class NcpGBSpider(SitemapSpider):
     name = "ncp_gb"
     sitemap_urls = ["https://www.ncp.co.uk/uploads/sitemap.xml"]
     sitemap_rules = [("/find-a-car-park/car-parks/", "parse_pois")]

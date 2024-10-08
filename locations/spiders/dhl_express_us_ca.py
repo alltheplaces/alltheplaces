@@ -7,7 +7,7 @@ from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class DhlExpressUsSpider(SitemapSpider, StructuredDataSpider):
+class DhlExpressUSCASpider(SitemapSpider, StructuredDataSpider):
     name = "dhl_express_us_ca"
     item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     sitemap_urls = [

@@ -3,7 +3,7 @@ import scrapy
 from locations.items import Feature
 
 
-class SoulCycleSpider(scrapy.Spider):
+class SoulcycleSpider(scrapy.Spider):
     name = "soulcycle"
     item_attributes = {"brand": "Soulcycle", "brand_wikidata": "Q17084730"}
     allowed_domains = ["soul-cycle.com"]

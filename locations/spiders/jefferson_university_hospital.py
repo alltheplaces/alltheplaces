@@ -6,7 +6,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 
 class JeffersonUniversityHospitalSpider(scrapy.Spider):
-    name = "jefferson_univ_hosp"
+    name = "jefferson_university_hospital"
     item_attributes = {
         "brand": "Jefferson University Hospital",
         "brand_wikidata": "Q59676202",

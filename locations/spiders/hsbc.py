@@ -9,7 +9,7 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HSBCSpider(CrawlSpider, StructuredDataSpider):
+class HsbcSpider(CrawlSpider, StructuredDataSpider):
     name = "hsbc"
     item_attributes = {"brand": "HSBC", "brand_wikidata": "Q190464", "extras": Categories.BANK.value}
     start_urls = [

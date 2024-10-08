@@ -9,7 +9,7 @@ from locations.geo import point_locations
 from locations.hours import DAYS_PL, DELIMITERS_PL, OpeningHours
 
 
-class PKOBankPolskiPLSpider(Spider):
+class PkoBankPolskiPLSpider(Spider):
     name = "pko_bank_polski_pl"
     item_attributes = {"brand": "PKO Bank Polski", "brand_wikidata": "Q578832"}
 

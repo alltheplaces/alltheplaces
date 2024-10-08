@@ -21,4 +21,5 @@ class GamestopITSpider(GamestopCASpider):
         hours_string = hours_string.replace("Chiuso", "")  # "Lunedi Chiuso 15:30 - 19:30" -> "Lunedi  15:30 - 19:30"
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_IT)
+        item.pop("name", None)
         yield item

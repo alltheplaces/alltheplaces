@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ATTSpider(SitemapSpider, StructuredDataSpider):
+class DelifranceSpider(SitemapSpider, StructuredDataSpider):
     name = "delifrance"
     item_attributes = {"brand": "Delifrance", "brand_wikidata": "Q5320229"}
     sitemap_urls = ["https://delifrancerestaurants.com/sitemap.xml"]
@@ -15,6 +15,7 @@ class ATTSpider(SitemapSpider, StructuredDataSpider):
         "India": "IN",
         "Malaysia": "MY",
     }
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         country_code = self.country_mapping.get(item["country"])

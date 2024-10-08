@@ -8,7 +8,7 @@ from locations.hours import DAYS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GovBio123DE(SitemapSpider, StructuredDataSpider):
+class GovBio123DESpider(SitemapSpider, StructuredDataSpider):
     name = "gov_bio123_de"
     sitemap_urls = ["https://www.bio123.de/sitemap.xml"]
     # Example: https://www.bio123.de/anbieter/holzkirchen/bio-terra-markt - Do want
@@ -28,9 +28,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
                 case "/anbieter/kategorie/bio-hotels":
                     mapped_categories.append(Categories.HOTEL.value)
                 case "/anbieter/kategorie/unterkunft":
-                    mapped_categories.append(
-                        {"extras": {"accomodation": "yes"}}
-                    )  # Can't reliably tell if hotel/hostel/motel/etc.
+                    mapped_categories.append({"accomodation": "yes"})  # Can't reliably tell if hotel/hostel/motel/etc.
                 case "/anbieter/kategorie/restaurant":
                     mapped_categories.append(Categories.RESTAURANT.value)  # TODO: Hotels with Restaurants?
 
@@ -70,7 +68,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(Categories.SHOP_BUTCHER.value)
 
                 case "/anbieter/kategorie/erzeuger-biobauernhof":
-                    mapped_categories.append({"extras": {"man_made": "works", "product": "food"}})  # shop=farm, maybe?
+                    mapped_categories.append({"man_made": "works", "product": "food"})  # shop=farm, maybe?
 
                 case "/anbieter/kategorie/lieferservice":
                     # Delivery service?
@@ -80,7 +78,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(Categories.SHOP_CRAFT.value)
 
                 case "/anbieter/kategorie/markt":
-                    mapped_categories.append({"extras": {"amenity": "marketplace"}})
+                    mapped_categories.append({"amenity": "marketplace"})
 
                 case "/anbieter/kategorie/grosshandler":
                     mapped_categories.append(Categories.SHOP_WHOLESALE.value)
@@ -103,7 +101,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(Categories.SHOP_PET)
 
                 case "/anbieter/kategorie/weingut":
-                    mapped_categories.append({"extras": {"craft": "winery"}})
+                    mapped_categories.append({"craft": "winery"})
                 case _:
                     self.logger.warning("Unmapped category %s", category)
 

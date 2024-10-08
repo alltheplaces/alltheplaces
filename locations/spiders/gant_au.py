@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class GANTAUSpider(Spider):
+class GantAUSpider(Spider):
     name = "gant_au"
     item_attributes = {"brand": "GANT", "brand_wikidata": "Q1493667"}
     allowed_domains = ["gant.com.au"]

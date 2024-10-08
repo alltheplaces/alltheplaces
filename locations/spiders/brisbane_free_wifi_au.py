@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class BrisbaneFreeWiFiAUSpider(XMLFeedSpider):
+class BrisbaneFreeWifiAUSpider(XMLFeedSpider):
     name = "brisbane_free_wifi_au"
     item_attributes = {"operator": "Brisbane City Council", "operator_wikidata": "Q56477660"}
     allowed_domains = ["www.brisbane.qld.gov.au"]

@@ -9,7 +9,7 @@ class Via313Spider(SitemapSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Via 313",
         "brand_wikidata": "Q115699944",
-        "nsi_id": -1,
+        "nsi_id": "-1",
         "extras": {**Categories.RESTAURANT.value, "cuisine": "pizza"},
     }
     sitemap_urls = ["https://locations.via313.com/robots.txt"]

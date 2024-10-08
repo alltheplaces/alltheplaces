@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class OreillyAutoSpider(SitemapSpider, StructuredDataSpider):
-    name = "oreilly"
+    name = "oreilly_auto"
     item_attributes = {"brand": "O'Reilly Auto Parts", "brand_wikidata": "Q7071951", "country": "US"}
     allowed_domains = ["locations.oreillyauto.com"]
     sitemap_urls = ["https://locations.oreillyauto.com/sitemap.xml"]

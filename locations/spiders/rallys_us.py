@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.yext_search import YextSearchSpider
 
 
-class RallysUS(YextSearchSpider):
+class RallysUSSpider(YextSearchSpider):
     name = "rallys_us"
     item_attributes = {"brand": "Rally's", "brand_wikidata": "Q63919323", "extras": Categories.FAST_FOOD.value}
     host = "https://locations.rallys.com"

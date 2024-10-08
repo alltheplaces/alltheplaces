@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 
 
-class RemaxEsSpider(Spider):
+class RemaxESSpider(Spider):
     name = "remax_es"
     item_attributes = {
         "brand": "RE/MAX",

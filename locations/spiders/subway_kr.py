@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.subway import SubwaySpider
 
 
-class Subwaykrpider(scrapy.Spider):
+class SubwayKRSpider(scrapy.Spider):
     name = "subway_kr"
     item_attributes = SubwaySpider.item_attributes
     link_extractor = LinkExtractor(allow="/storeDetail?")

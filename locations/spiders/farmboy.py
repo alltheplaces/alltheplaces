@@ -5,7 +5,7 @@ import scrapy
 from locations.items import Feature
 
 
-class FarmBoySpider(scrapy.Spider):
+class FarmboySpider(scrapy.Spider):
     name = "farmboy"
     item_attributes = {"brand": "Farmboy", "brand_wikidata": "Q5435469"}
     allowed_domains = ["www.farmboy.ca"]

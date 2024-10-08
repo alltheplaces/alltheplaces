@@ -3,7 +3,7 @@ import scrapy
 from locations.items import Feature
 
 
-class InNOutSpider(scrapy.Spider):
+class InnoutSpider(scrapy.Spider):
     name = "innout"
     item_attributes = {"brand": "In-N-Out Burger", "brand_wikidata": "Q1205312"}
 

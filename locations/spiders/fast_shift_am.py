@@ -5,7 +5,7 @@ from scrapy import Spider
 from locations.dict_parser import DictParser
 
 
-class FastShiftAMSpider(Spider):
+class FastShiftAmSpider(Spider):
     name = "fast_shift_am"
     item_attributes = {"brand": "Fast Shift", "brand_wikidata": "Q118289125"}
     start_urls = [

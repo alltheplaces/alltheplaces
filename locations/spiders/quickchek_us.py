@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class QuickChekUSSpider(Spider):
+class QuickchekUSSpider(Spider):
     name = "quickchek_us"
     item_attributes = {"brand": "QuickChek", "brand_wikidata": "Q7271689"}
     allowed_domains = ["quickchek.com"]

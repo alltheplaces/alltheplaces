@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SuzukiBeSpider(scrapy.Spider):
+class SuzukiBESpider(scrapy.Spider):
     name = "suzuki_be"
     item_attributes = {"brand": "Suzuki", "brand_wikidata": "Q181642"}
     allowed_domains = ["suzuki.be"]

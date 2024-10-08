@@ -22,12 +22,12 @@ class SuperRetailGroupSpider(SitemapSpider, StructuredDataSpider):
         "https://www.supercheapauto.com.au/sitemap-stores.xml",
         "https://www.supercheapauto.co.nz/sitemap-stores.xml",
     ]
-    sitemap_rules = [(r"\/stores\/details\?sid=(?:bcf|rebel|sca)-[\w\-]+$", "parse_sd")]
+    sitemap_rules = [(r"\/stores\/details\/(?:bcf|rebel|sca)-[\w\-]+$", "parse_sd")]
     time_format = "%I:%M %p"
 
     def post_process_item(self, item, response, ld_data):
         sid_list = "|".join(self.brands.keys())
-        m = re.search(r"\?sid=(" + sid_list + r")", response.url)
+        m = re.search(r"\/stores\/details\/(" + sid_list + r")-", response.url)
         if not m:
             return
         sid = m.group(1)

@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TSBGB(SitemapSpider, StructuredDataSpider):
+class TsbGBSpider(SitemapSpider, StructuredDataSpider):
     name = "tsb_gb"
     item_attributes = {
         "brand": "TSB",
@@ -14,8 +14,13 @@ class TSBGB(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://branches.tsb.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/branches\.tsb\.co\.uk\/[-\w]+\/[-\/\w]+\.html$", "parse_sd")]
     wanted_types = ["BankOrCreditUnion", "FinancialService"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["image"] == item["website"]:
             item["image"] = None
+
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
+
         yield item

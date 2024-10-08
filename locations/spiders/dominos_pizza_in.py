@@ -9,7 +9,7 @@ from locations.items import Feature
 logger = logging.getLogger(__name__)
 
 
-class DominiosINSpider(SitemapSpider):
+class DominosPizzaINSpider(SitemapSpider):
     name = "dominos_pizza_in"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     sitemap_urls = ["https://www.dominos.co.in/store-locations/sitemap_store.xml"]

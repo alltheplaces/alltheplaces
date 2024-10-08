@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 class AlbertAndWalterSpider(scrapy.Spider):
-    name = "albert_walter"
+    name = "albert_and_walter"
     item_attributes = {"brand": "A&W", "brand_wikidata": "Q2818848"}
     start_urls = ["https://web.aw.ca/api/locations/"]
 

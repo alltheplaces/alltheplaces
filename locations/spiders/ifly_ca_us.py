@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class iFLYCAUSSpider(Spider):
+class IflyCAUSSpider(Spider):
     name = "ifly_ca_us"
     item_attributes = {"brand": "iFLY", "brand_wikidata": "Q64767105"}
     allowed_domains = ["dataanywhereprod.azure-api.net"]

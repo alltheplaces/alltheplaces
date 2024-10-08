@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class SushiExpressTW(Spider):
+class SushiExpressTWSpider(Spider):
     name = "sushi_express_tw"
     item_attributes = {"brand": "Sushi Express", "brand_wikidata": "Q15920674"}
     start_urls = ["https://www.sushiexpress.com.tw/WCF/getSpot.ashx"]

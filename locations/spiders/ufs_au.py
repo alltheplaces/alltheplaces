@@ -1,8 +1,8 @@
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.storefinders.storeify import StoreifySpider
 
 
-class UFSAUSpider(WPStoreLocatorSpider):
+class UfsAUSpider(StoreifySpider):
     name = "ufs_au"
     item_attributes = {"brand": "UFS", "brand_wikidata": "Q63367573"}
-    allowed_domains = ["www.ufs.com.au"]
-    start_urls = ["https://www.ufs.com.au/ufs1/wp-admin/admin-ajax.php?action=store_search&autoload=1"]
+    api_key = "ufs-pharmacies.myshopify.com"
+    domain = "https://ufs.com.au/"

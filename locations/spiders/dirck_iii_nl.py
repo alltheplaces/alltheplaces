@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class DirckIIINLSpider(Spider):
+class DirckIiiNLSpider(Spider):
     name = "dirck_iii_nl"
     item_attributes = {"brand": "Dirck III", "brand_wikidata": "Q109188079", "extras": Categories.SHOP_ALCOHOL.value}
     allowed_domains = ["www.dirckiii.nl"]

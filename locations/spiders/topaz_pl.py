@@ -12,7 +12,7 @@ class TopazPLSpider(Spider):
     allowed_domains = ["topaz24.pl"]
     start_urls = ["https://topaz24.pl/sklepy-topaz"]
 
-    def parse(self, response):
+    def extract_json(self, response):
         js_blob = (
             "["
             + response.xpath('//script[contains(text(), "var locations = [")]/text()')
@@ -22,7 +22,10 @@ class TopazPLSpider(Spider):
             + "]"
         )
         js_blob = js_blob.replace('\\"', "").replace("\\/", "/")
-        for location in parse_js_object(js_blob, unicode_escape=True):
+        return parse_js_object(js_blob, unicode_escape=True)
+
+    def parse(self, response):
+        for location in self.extract_json(response):
             properties = {
                 "ref": location[0].split("<a href=/sklep/", 1)[1].split(">", 1)[0],
                 "name": location[1],

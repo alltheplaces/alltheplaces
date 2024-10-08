@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 
 
-class RevolutionLaundry(Spider):
+class RevolutionLaundrySpider(Spider):
     name = "revolution_laundry"
     item_attributes = {"brand_wikidata": "Q113516904"}
     companies = [

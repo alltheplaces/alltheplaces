@@ -8,8 +8,8 @@ from locations.dict_parser import DictParser
 from locations.user_agents import CHROME_LATEST
 
 
-class BangkokBankSpider(scrapy.Spider):
-    name = "bangkok_bank"
+class BangkokBankTHSpider(scrapy.Spider):
+    name = "bangkok_bank_th"
     allowed_domains = ["www.bangkokbank.com"]
     item_attributes = {"brand_wikidata": "Q806483"}
     user_agent = CHROME_LATEST

@@ -1,18 +1,9 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
-
-from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
-from locations.structured_data_spider import StructuredDataSpider
+from locations.spiders.nandos_za import NandosZASpider
 
 
-class NandosINSpider(CrawlSpider, StructuredDataSpider):
+class NandosINSpider(NandosZASpider):
     name = "nandos_in"
-    item_attributes = NANDOS_SHARED_ATTRIBUTES
-    start_urls = ["https://www.nandosindia.com/eat/restaurants-all"]
-    rules = [Rule(LinkExtractor(allow=r"/eat/restaurant/"), callback="parse_sd")]
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = response.url
-        item["addr_full"] = item.pop("street_address")
-
-        yield item
+    start_urls = [
+        "https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=85c0345d-9a0d-4ba4-b7d2-d6ba41f5d32c"
+    ]
+    web_root = "https://store.nandosindia.com/details/"

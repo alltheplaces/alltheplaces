@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class BMWGroupSpider(scrapy.Spider):
+class BmwGroupSpider(scrapy.Spider):
     name = "bmw_group"
     available_countries = [
         "LU",

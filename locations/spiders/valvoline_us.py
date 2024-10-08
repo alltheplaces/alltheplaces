@@ -4,7 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ValvolineUSChangeSpider(CrawlSpider, StructuredDataSpider):
+class ValvolineUSSpider(CrawlSpider, StructuredDataSpider):
     name = "valvoline_us"
     item_attributes = {"brand": "Valvoline", "brand_wikidata": "Q7912852"}
     drop_attributes = {"name"}

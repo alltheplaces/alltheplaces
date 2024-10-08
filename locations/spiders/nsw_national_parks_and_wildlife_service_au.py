@@ -4,7 +4,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class NSWNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSpider):
+class NswNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSpider):
     name = "nsw_national_parks_and_wildlife_service_au"
     item_attributes = {
         "state": "New South Wales",

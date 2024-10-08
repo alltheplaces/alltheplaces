@@ -41,7 +41,7 @@ def convert_24hour(time):
     return time_formatted
 
 
-class PetSmartSpider(scrapy.Spider):
+class PetsmartSpider(scrapy.Spider):
     name = "petsmart"
     item_attributes = {"brand": "PetSmart", "brand_wikidata": "Q3307147"}
     allowed_domains = ["petsmart.com", "petsmart.ca"]

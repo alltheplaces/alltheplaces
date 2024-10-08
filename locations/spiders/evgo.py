@@ -5,7 +5,7 @@ from locations.geo import bbox_contains, make_subdivisions
 from locations.items import Feature
 
 
-class EVGoSpider(scrapy.Spider):
+class EvgoSpider(scrapy.Spider):
     name = "evgo"
     allowed_domains = ["account.evgo.com"]
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}

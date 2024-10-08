@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class FamilyMartTWSpider(Spider):
+class FamilymartTWSpider(Spider):
     name = "familymart_tw"
     item_attributes = {
         "brand_wikidata": "Q10891564",

@@ -6,7 +6,7 @@ import scrapy
 from locations.items import Feature
 
 
-class EuroMobilNLSpider(scrapy.Spider):
+class EuromobilNLSpider(scrapy.Spider):
     name = "euromobil_nl"
     start_urls = ["https://euromobil.nl/contact/"]
 

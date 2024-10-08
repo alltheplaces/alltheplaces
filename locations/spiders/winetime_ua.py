@@ -8,7 +8,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class WINETIMEUASpider(CrawlSpider):
+class WinetimeUASpider(CrawlSpider):
     name = "winetime_ua"
     item_attributes = {"brand": "WINETIME", "brand_wikidata": "Q116698397"}
     allowed_domains = ["winetime.ua"]

@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class CBRfreeAU(Spider):
+class CbrfreeAUSpider(Spider):
     name = "cbrfree_au"
     item_attributes = {"operator": "Government of the Australian Capital Territory", "operator_wikidata": "Q27220504"}
     allowed_domains = ["www.google.com"]

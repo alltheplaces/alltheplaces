@@ -5,7 +5,7 @@ from locations.categories import Categories
 from locations.items import Feature
 
 
-class CountryFireAuthority(Spider):
+class CountryFireAuthorityAUSpider(Spider):
     name = "country_fire_authority_au"
     item_attributes = {
         "operator": "Country Fire Authority",

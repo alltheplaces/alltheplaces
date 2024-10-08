@@ -3,9 +3,10 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class PenzeysUS(Spider):
+class PenzeysUSSpider(Spider):
     name = "penzeys_us"
     item_attributes = {"brand_wikidata": "Q7165435"}
 
@@ -13,7 +14,7 @@ class PenzeysUS(Spider):
         url = "https://www.penzeys.com/api/GetLocations"
         headers = {
             "Referer": "https://www.penzeys.com/locations/",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "User-Agent": BROWSER_DEFAULT,
         }
         yield JsonRequest(url=url, headers=headers, callback=self.parse)
 

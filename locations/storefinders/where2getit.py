@@ -52,7 +52,7 @@ from locations.pipelines.address_clean_up import clean_address
 # }
 #
 # As filters are complex to understand, it is best to search spiders
-# using "api_query" to see other examples of filters being used.
+# using "api_filter" to see other examples of filters being used.
 
 # Instead of Where2GetIt being provided as a service, it is also
 # possible for brands to self-host the software at a custom domain
@@ -73,13 +73,15 @@ from locations.pipelines.address_clean_up import clean_address
 class Where2GetItSpider(Spider):
     dataset_attributes = {"source": "api", "api": "where2getit.com"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    api_endpoint = ""
-    api_brand_name = ""
-    api_key = ""
-    api_filter = {}
-    api_filter_admin_level = 0  # 0 = no filtering,
-    # 1 = filter by country
-    # 2 = filter by state/province
+    api_endpoint: str = ""
+    api_brand_name: str = ""
+    api_key: str = ""
+    api_filter: dict = {}
+    # api_filter_admin_level:
+    #   0 = no filtering
+    #   1 = filter by country
+    #   2 = filter by state/province
+    api_filter_admin_level: int = 0
 
     def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:
         where_clause = {}

@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class REMA1000NOSpider(Spider):
+class Rema1000NOSpider(Spider):
     name = "rema_1000_no"
     item_attributes = {"brand": "REMA 1000", "brand_wikidata": "Q28459", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.rema.no"]

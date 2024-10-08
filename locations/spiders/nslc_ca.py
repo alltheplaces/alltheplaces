@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class NSLCCASpider(Spider):
+class NslcCASpider(Spider):
     name = "nslc_ca"
     item_attributes = {"brand": "NSLC", "brand_wikidata": "Q17018587"}
     start_urls = ["https://www.mynslc.com/ac/storelocations"]

@@ -7,7 +7,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class NSWPoliceForceAUSpider(CrawlSpider):
+class NswPoliceForceAUSpider(CrawlSpider):
     name = "nsw_police_force_au"
     item_attributes = {"operator": "New South Wales Police Force", "operator_wikidata": "Q7011763"}
     allowed_domains = ["www.police.nsw.gov.au", "portal.spatial.nsw.gov.au"]

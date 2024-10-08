@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 
 
-class DhlExpressGbSpider(scrapy.Spider):
+class DhlExpressGBSpider(scrapy.Spider):
     name = "dhl_express_gb"
     item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["dhlparcel.co.uk"]

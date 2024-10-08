@@ -7,7 +7,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KFCMYSpider(Spider):
+class KfcMYSpider(Spider):
     name = "kfc_my"
     item_attributes = KFC_SHARED_ATTRIBUTES
     allowed_domains = ["kfc.com.my"]

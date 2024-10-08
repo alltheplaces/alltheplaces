@@ -1,11 +1,11 @@
 from locations.categories import Extras, apply_yes_no
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.storefinders.woosmap import WoosmapSpider
 
 
-class McDonaldsFRSpider(WoosmapSpider):
+class McdonaldsFRSpider(WoosmapSpider):
     name = "mcdonalds_fr"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     key = "woos-77bec2e5-8f40-35ba-b483-67df0d5401be"
     origin = "https://www.mcdonalds.fr"
 

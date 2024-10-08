@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.stockist import StockistSpider
 
 
-class TheAFLStoreAUAUSpider(StockistSpider):
+class TheAflStoreAUSpider(StockistSpider):
     name = "the_afl_store_au"
     item_attributes = {"brand": "The AFL Store", "brand_wikidata": "Q117851311", "extras": Categories.SHOP_SPORTS.value}
     key = "u15982"

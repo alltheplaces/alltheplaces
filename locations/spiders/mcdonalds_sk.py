@@ -1,7 +1,7 @@
-from locations.spiders.mcdonalds_cz import McDonaldsCZSpider
+from locations.spiders.mcdonalds_cz import McdonaldsCZSpider
 
 
-class McDonaldsSKSpider(McDonaldsCZSpider):
+class McdonaldsSKSpider(McdonaldsCZSpider):
     name = "mcdonalds_sk"
     allowed_domains = ["www.mcdonalds.sk"]
     start_urls = [

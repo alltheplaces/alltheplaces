@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CiceSpider(CrawlSpider, StructuredDataSpider):
+class CicSpider(CrawlSpider, StructuredDataSpider):
     name = "cic"
     item_attributes = {"brand_wikidata": "Q746525"}
     start_urls = ["https://www.cic.fr/fr/banques/entreprises/agences-et-distributeurs/BrowseSubdivision.aspx"]
@@ -23,7 +23,6 @@ class CiceSpider(CrawlSpider, StructuredDataSpider):
         item = Feature()
         item["website"] = response.url
         item["ref"] = response.url
-        item["name"] = response.xpath('//*[@itemprop="name"]/a/text()').get()
         item["phone"] = response.xpath('//*[@itemprop="telephone"]/text()').get()
         item["street_address"] = response.xpath('//*[@itemprop="streetAddress"]/text()').get()
         item["postcode"] = response.xpath('//*[@itemprop="postalCode"]/text()').get()

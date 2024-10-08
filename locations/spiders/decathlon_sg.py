@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 
 
-class DecathlonsgSpider(scrapy.Spider):
+class DecathlonSGSpider(scrapy.Spider):
     name = "decathlon_sg"
     item_attributes = {"brand": "Decathlon", "brand_wikidata": "Q509349", "extras": Categories.SHOP_SPORTS.value}
     start_urls = [

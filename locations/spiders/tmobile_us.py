@@ -12,7 +12,7 @@ from locations.items import Feature
 BASE_URL = "https://www.t-mobile.com/stores/api/get-nearby-business/?"
 
 
-class TMobileUSSpider(scrapy.Spider):
+class TmobileUSSpider(scrapy.Spider):
     name = "tmobile_us"
     item_attributes = {
         "brand": "T-Mobile",

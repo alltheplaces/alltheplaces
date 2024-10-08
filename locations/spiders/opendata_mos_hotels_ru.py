@@ -15,7 +15,7 @@ HOTEL_STARS_MAPPING = {
 }
 
 
-class OpendataMosFoodRUSpider(OpendataMosSpider):
+class OpendataMosHotelsRUSpider(OpendataMosSpider):
     name = "opendata_mos_hotels_ru"
     datasets = {"Classified Hotels and Other Accommodation Facilities": 2343}
     category_mapping = {

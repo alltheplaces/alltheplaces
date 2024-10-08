@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_PL, OpeningHours
 
 
-class TMobilePLSpider(Spider):
+class TmobilePLSpider(Spider):
     name = "tmobile_pl"
     item_attributes = {"brand": "T-Mobile", "brand_wikidata": "Q327634"}
     start_urls = ["https://www.t-mobile.pl/c/_bffapi/sdr-shops/v1/shops"]

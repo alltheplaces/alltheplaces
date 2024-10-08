@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class DATS24BESpider(Spider):
+class Dats24BESpider(Spider):
     name = "dats_24_be"
     item_attributes = {"brand": "DATS 24", "brand_wikidata": "Q15725576", "extras": Categories.FUEL_STATION.value}
     start_urls = ["https://dats24.be/api/service_point_locator"]

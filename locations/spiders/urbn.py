@@ -6,7 +6,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class URBNSpider(Spider):
+class UrbnSpider(Spider):
     name = "urbn"
     allowed_domains = ["www.anthropologie.com"]
     start_urls = ["https://www.anthropologie.com/api/misl/v1/stores/search"]

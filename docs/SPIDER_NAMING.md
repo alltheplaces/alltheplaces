@@ -57,3 +57,7 @@ by the spider are in the same country. The reason for this
 is that [ATP pipeline code](../locations/pipelines/country_code_clean_up.py) will add
 this country suffix as the country code to scraped POIs if it
 has not been set by the spider itself.
+
+## Next steps
+
+When you know the best naming for your spider, use either [scrapy's genspider](https://docs.scrapy.org/en/latest/topics/commands.html#std-command-genspider) command to start with a basic template, or explore other existing spiders as a basis to start.

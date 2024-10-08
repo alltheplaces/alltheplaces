@@ -8,7 +8,7 @@ from locations.hours import DAYS
 from locations.items import Feature
 
 
-class McmenaminsSpider(scrapy.Spider):
+class McmenaminsUSSpider(scrapy.Spider):
     name = "mcmenamins_us"
     item_attributes = {
         "brand": "McMenamins",

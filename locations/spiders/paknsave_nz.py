@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class PakNSaveNZSpider(Spider):
+class PaknsaveNZSpider(Spider):
     name = "paknsave_nz"
     start_urls = ["https://www.paknsave.co.nz/BrandsApi/BrandsStore/GetBrandStores"]
     item_attributes = {"brand": "PAK'nSAVE", "brand_wikidata": "Q7125339"}

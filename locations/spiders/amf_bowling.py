@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class AMFBowlingSpider(scrapy.Spider):
+class AmfBowlingSpider(scrapy.Spider):
     name = "amf_bowling"
     start_urls = ("https://www.amf.com/bowlero-location/finder?_format=json",)
 

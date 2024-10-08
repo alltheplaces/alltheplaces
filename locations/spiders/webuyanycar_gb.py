@@ -5,7 +5,7 @@ from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class WeBuyAnyCarGB(CrawlSpider, StructuredDataSpider):
+class WebuyanycarGBSpider(CrawlSpider, StructuredDataSpider):
     name = "webuyanycar_gb"
     item_attributes = {"brand": "WeBuyAnyCar", "brand_wikidata": "Q7977432"}
     allowed_domains = ["www.webuyanycar.com"]
@@ -17,7 +17,7 @@ class WeBuyAnyCarGB(CrawlSpider, StructuredDataSpider):
             follow=False,
         )
     ]
-    download_delay = 0.5
+    requires_proxy = "GB"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         extract_google_position(item, response)

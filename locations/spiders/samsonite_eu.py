@@ -5,11 +5,11 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature, SocialMedia, set_social_media
 
 
-class SamsoniteEuSpider(scrapy.Spider):
+class SamsoniteEUSpider(scrapy.Spider):
     name = "samsonite_eu"
     CHIC_ACCENT = {"brand": "Chic Accent"}
     SAMSONITE = {"brand": "Samsonite", "brand_wikidata": "Q1203426"}
-    allowed_domains = ["samsonite.com"]
+    allowed_domains = ["samsonite.com", "storelocator.samsonite.eu"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
     def start_requests(self):

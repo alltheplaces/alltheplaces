@@ -31,8 +31,7 @@ st = [
 
 
 class GenesisRehabSpider(scrapy.Spider):
-    # download_delay = 0.2
-    name = "gen_rehab"
+    name = "genesis_rehab"
     item_attributes = {"brand": "Genesis Rehab Services", "brand_wikidata": "Q5532813"}
     allowed_domains = ["genesishcc.com"]
     start_urls = ("https://www.genesishcc.com/page-data/findlocations/page-data.json",)

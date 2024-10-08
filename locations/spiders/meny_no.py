@@ -1,7 +1,7 @@
 from locations.storefinders.sylinder import SylinderSpider
 
 
-class MenyNO(SylinderSpider):
+class MenyNOSpider(SylinderSpider):
     name = "meny_no"
     item_attributes = {"brand": "Meny", "brand_wikidata": "Q10581720"}
     app_key = "1300"

@@ -13,7 +13,7 @@ FEATURES_MAPPING = {
 }
 
 
-class LHWSpider(scrapy.Spider):
+class LhwSpider(scrapy.Spider):
     name = "lhw"
     allowed_domains = ["www.lhw.com"]
     start_urls = ["https://www.lhw.com/services/json/FindAllHotelsV2_en.js"]

@@ -1,7 +1,7 @@
-from locations.spiders.mcdonalds_au import McDonaldsAUSpider
+from locations.spiders.mcdonalds_au import McdonaldsAUSpider
 
 
-class McDonaldsEGSpider(McDonaldsAUSpider):
+class McdonaldsEGSpider(McdonaldsAUSpider):
     name = "mcdonalds_eg"
     allowed_domains = ["mcdonalds.eg"]
     start_urls = ["https://mcdonalds.eg/Stotes"]

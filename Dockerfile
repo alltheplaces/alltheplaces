@@ -31,7 +31,7 @@ ARG BUILD_OPT_DEPS=" \
 # basic update & locale setting
 RUN apt-get update \
  && apt-get upgrade -yqq \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -yqq --no-install-recommends \
         ${BUILD_PYTHON_DEPS} \
         ${BUILD_OPT_DEPS} \
  && localedef -f UTF-8 -i en_US en_US.UTF-8 \

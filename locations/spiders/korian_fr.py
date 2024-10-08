@@ -3,7 +3,7 @@ import scrapy
 from locations.items import Feature
 
 
-class KorianFrSpider(scrapy.Spider):
+class KorianFRSpider(scrapy.Spider):
     name = "korian_fr"
     item_attributes = {"brand": "Korian", "brand_wikidata": "Q3198944"}
     allowed_domains = ["api-www.korian.fr"]

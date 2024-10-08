@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.items import Feature
 
 
-class PhotoMeGBSpider(Spider):
+class PhotomeGBSpider(Spider):
     name = "photome_gb"
     item_attributes = {"brand": "Photo-Me", "brand_wikidata": "Q123456627"}
     base_url = (

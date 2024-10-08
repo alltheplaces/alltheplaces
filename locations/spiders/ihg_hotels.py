@@ -1,10 +1,12 @@
+import html
+
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
+class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
     name = "ihg_hotels"
     allowed_domains = ["ihg.com"]
     sitemap_urls = ["https://www.ihg.com/bin/sitemapindex.xml"]
@@ -41,7 +43,7 @@ class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data):
         if not item.get("street_address"):
             return
-        item["name"] = item["name"].strip("\n").strip("\t")
+        item["name"] = html.unescape(item["name"].strip())
 
         if (hotel_type := response.url.split("/")[3]) in self.my_brands:
             item["brand"], item["brand_wikidata"] = self.my_brands.get(hotel_type)

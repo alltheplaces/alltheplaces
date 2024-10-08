@@ -18,3 +18,4 @@ class AkachanJPSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"stores\.akachan\.jp/\d+$", "parse_sd"),
     ]
+    drop_attributes = {"image"}

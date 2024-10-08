@@ -10,21 +10,27 @@ class OportoAUSpider(Spider):
     item_attributes = {"brand": "Oporto", "brand_wikidata": "Q4412342"}
     allowed_domains = ["www.oporto.com.au"]
     start_urls = ["https://www.oporto.com.au/api-proxy/stores?include=amenities,collection,storeAddress"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt does not exist and HTML page returned instead.
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,  # robots.txt does not exist and HTML page returned instead.
+        "DOWNLOAD_TIMEOUT": 60,
+    }
 
     def parse(self, response):
         for location in response.json()["data"]:
             item = DictParser.parse(location["attributes"])
             item["ref"] = location["attributes"]["storeNumber"]
-            address = location["relationships"]["storeAddress"]["data"]["attributes"]["addressComponents"]
-            if address["floor"]["value"]:
-                item["extras"].update({"addr:floor": address["floor"]["value"]})
-            item["housenumber"] = " / ".join(filter(None, [address["unit"]["value"], address["streetNumber"]["value"]]))
-            item["street"] = address["streetName"]["value"]
-            item["city"] = address["suburb"]["value"]
-            item["state"] = address["state"]["value"]
-            item["country"] = address["country"]["longValue"]
-            item["postcode"] = address["postcode"]["value"]
+            if location["relationships"].get("storeAddress"):
+                address = location["relationships"]["storeAddress"]["data"]["attributes"]["addressComponents"]
+                if address["floor"]["value"]:
+                    item["extras"].update({"addr:floor": address["floor"]["value"]})
+                item["housenumber"] = " / ".join(
+                    filter(None, [address["unit"]["value"], address["streetNumber"]["value"]])
+                )
+                item["street"] = address["streetName"]["value"]
+                item["city"] = address["suburb"]["value"]
+                item["state"] = address["state"]["value"]
+                item["country"] = address["country"]["longValue"]
+                item["postcode"] = address["postcode"]["value"]
             item["phone"] = location["attributes"]["storePhone"]
             item["email"] = location["attributes"]["storeEmail"]
             item["website"] = "https://www.oporto.com.au/locations/" + location["attributes"][

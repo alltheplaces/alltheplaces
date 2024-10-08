@@ -3,8 +3,8 @@ import scrapy
 from locations.items import Feature
 
 
-class LiquorCitySpider(scrapy.Spider):
-    name = "liquor_city_spider"
+class LiquorCityZASpider(scrapy.Spider):
+    name = "liquor_city_za"
     item_attributes = {
         "brand": "Liquor City",
         "brand_wikidata": "Q116620538",

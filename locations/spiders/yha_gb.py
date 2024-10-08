@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class YHAGBSpider(Spider):
+class YhaGBSpider(Spider):
     name = "yha_gb"
     item_attributes = {"brand": "YHA", "brand_wikidata": "Q118234608"}
     start_urls = ["https://www.yha.org.uk/hostels/all-youth-hostels"]

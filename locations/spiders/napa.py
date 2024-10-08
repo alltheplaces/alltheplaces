@@ -6,7 +6,7 @@ import scrapy
 from locations.items import Feature
 
 
-class Napa(scrapy.Spider):
+class NapaSpider(scrapy.Spider):
     name = "napa"
     item_attributes = {"brand": "Napa Auto Parts", "brand_wikidata": "Q6970842"}
     allowed_domains = ["napaonline.com"]

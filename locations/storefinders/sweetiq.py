@@ -8,6 +8,13 @@ from locations.hours import OpeningHours
 
 
 class SweetIQSpider(Spider):
+    """
+    SweetIQ (now owned by uberall) provides a store locator
+    https://sweetiq.com/our-products/store-locator-microsites/
+
+    Provide `start_urls`, which will then automatically extract API keys and other data.
+    """
+
     dataset_attributes = {"source": "api", "api": "sweetiq.com"}
     request_batch_size = 10
 
@@ -35,6 +42,8 @@ class SweetIQSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["features"]:
+            self.pre_process_data(location)
+
             if location["properties"]["isPermanentlyClosed"]:
                 return
 
@@ -73,3 +82,6 @@ class SweetIQSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def pre_process_data(self, location, **kwargs):
+        """Override with any pre-processing on the item."""

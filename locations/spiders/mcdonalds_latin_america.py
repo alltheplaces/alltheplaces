@@ -4,12 +4,12 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsLatinAmericaSpider(Spider):
+class McdonaldsLatinAmericaSpider(Spider):
     name = "mcdonalds_latin_america"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["api-middleware-mcd.mcdonaldscupones.com"]
     start_urls = ["https://api-middleware-mcd.mcdonaldscupones.com/api/restaurant/list"]
     country_codes = [

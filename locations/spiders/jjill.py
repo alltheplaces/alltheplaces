@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class JJillSpider(scrapy.Spider):
+class JjillSpider(scrapy.Spider):
     name = "jjill"
     item_attributes = {"brand": "J.Jill", "brand_wikidata": "Q64448268"}
     allowed_domains = ["jjill.com"]

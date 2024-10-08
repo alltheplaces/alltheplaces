@@ -5,8 +5,8 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours
 
 
-class GallAndGallSpider(Spider):
-    name = "gall_and_gall"
+class GallAndGallNLSpider(Spider):
+    name = "gall_and_gall_nl"
     item_attributes = {"brand": "Gall & Gall", "brand_wikidata": "Q13639185"}
     allowed_domains = ["www.gall.nl"]
     start_urls = [

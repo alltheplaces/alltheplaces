@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MosaicBrandSpider(Spider):
+class MosaicBrandsSpider(Spider):
     name = "mosaic_brands"
     allowed_domains = [
         "www.autographfashion.com.au",

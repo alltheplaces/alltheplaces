@@ -9,7 +9,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 # On the date of writing (2023-12-20) the website blocks the spider with a captcha
 # after ~150 requests with current settings, so we are not getting all POIs.
-class WalmartCaSpider(scrapy.Spider):
+class WalmartCASpider(scrapy.Spider):
     name = "walmart_ca"
     allowed_domains = ["www.walmart.ca"]
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}

@@ -1,17 +1,17 @@
 from urllib.parse import parse_qs, urlparse
 
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PureGymGBSpider(SitemapSpider, StructuredDataSpider):
+class PuregymGBSpider(CrawlSpider, StructuredDataSpider):
     name = "puregym_gb"
     item_attributes = {"brand": "PureGym", "brand_wikidata": "Q18345898", "country": "GB"}
-    allowed_domains = ["www.puregym.com"]
-    sitemap_urls = ["https://www.puregym.com/sitemap.xml"]
-    sitemap_rules = [(r"/gyms/([^/]+)/$", "parse_sd")]
     wanted_types = ["HealthClub"]
+    start_urls = ["https://www.puregym.com/gyms/"]
+    rules = [Rule(LinkExtractor(allow="/gyms/"), callback="parse_sd")]
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["address"] = ld_data.get("location", {}).get("address")

@@ -5,10 +5,10 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class CorePowerYogaUSSpider(Spider):
+class CorepowerYogaUSSpider(Spider):
     name = "corepower_yoga_us"
     item_attributes = {"brand": "Corepower Yoga", "brand_wikidata": "Q21015663"}
-    allowed_domains = ["www.corepoweryoga.com"]
+    allowed_domains = ["www.corepoweryoga.com", "cdn.contentful.com"]
     start_urls = [
         "https://cdn.contentful.com/spaces/go5rjm58sryl/environments/master/entries?access_token=6b61TxCL9VW-1xwx-Oy4x9OOGMweRyBSDhaXCZM4d-o&include=10&limit=400&content_type=studios&select=sys.id,fields.region,fields.zenotiCenterId,fields.title,fields.slug,fields.address,fields.coordinates,fields.image,fields.openDate,fields.closed,fields.comingSoonStartDate"
     ]

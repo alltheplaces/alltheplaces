@@ -10,12 +10,12 @@ from locations.categories import (
     apply_category,
     apply_yes_no,
 )
-from locations.items import get_lat_lon, set_lat_lon
+from locations.items import Feature, get_lat_lon, set_lat_lon
 from locations.storefinders.woosmap import WoosmapSpider
 
 
 class TotalEnergiesSpider(WoosmapSpider):
-    name = "totalenergies"
+    name = "total_energies"
     key = "mapstore-prod-woos"
     origin = "https://totalenergies.com"
 
@@ -54,73 +54,91 @@ class TotalEnergiesSpider(WoosmapSpider):
         #      1 "fin"
         #      1 "em"
     }
+    SERVICES_MAPPING = {
+        # Fuels
+        "excellium_93": Fuel.OCTANE_93,
+        "excellium95": Fuel.OCTANE_95,
+        "excellium98": Fuel.OCTANE_98,
+        "excelliumdiesel": Fuel.DIESEL,
+        "sp95e10": Fuel.E10,
+        "sp95performance": Fuel.OCTANE_95,
+        "superethanole85": Fuel.E85,
+        "adblue": Fuel.ADBLUE,
+        "lpg": Fuel.LPG,
+        "kerosene": Fuel.KEROSENE,
+        "avgas100llautomate": Fuel.AV100LL,
+        "avgas100ll": Fuel.AV100LL,
+        "jeta1": Fuel.AVJetA1,
+        "engineoil": Fuel.ENGINE_OIL,
+        "wasserstoff": Fuel.LH2,
+        "sp95": Fuel.OCTANE_95,
+        "sp98": Fuel.OCTANE_98,
+        "dieseldetruck": Fuel.HGV_DIESEL,
+        # TODO: Other fuels: gasoil super superethanole85 excellium95e10 gasoline92_eg regulargasoline
+        # happyfuel sp95_lb supereffimax dieseleffimax dieselb10 adbluecar
+        # Payment methods
+        "amex": PaymentMethods.AMERICAN_EXPRESS,
+        "mastercard": PaymentMethods.MASTER_CARD,
+        "visa": PaymentMethods.VISA,
+        "maestro": PaymentMethods.MAESTRO,
+        "vpay": PaymentMethods.V_PAY,
+        "girocard": PaymentMethods.GIROCARD,
+        "appay": PaymentMethods.APPLE_PAY,
+        "googlepay": PaymentMethods.GOOGLE_PAY,
+        "cash": PaymentMethods.CASH,
+        "credit_card": PaymentMethods.CREDIT_CARDS,
+        "grcartefr": "payment:gr_total_card",
+        "totalcard": FuelCards.TOTAL_CARD,
+        "ffc": "payment:fleet_fuel_card",
+        "eurotrafic": "payment:eurotrafic",
+        "carteclubtotal": "payment:club_total_card",
+        "mpesa": PaymentMethods.MPESA,
+        # TODO: other cards: proficard mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
+        # Extras
+        "atm": Extras.ATM,
+        "absaatm": Extras.ATM,
+        "bankafrica": Extras.ATM,
+        "capitecatm": Extras.ATM,
+        "fdhbankatm": Extras.ATM,
+        "fnbatm": Extras.ATM,
+        "nationalbankatm": Extras.ATM,
+        "nedbank": Extras.ATM,
+        "standardbank": Extras.ATM,
+        "standardchartered": Extras.ATM,
+        "carwash": Extras.CAR_WASH,
+        "restroom": Extras.TOILETS,
+        "restroom_tn": Extras.TOILETS,
+        "toilets": Extras.TOILETS,
+        "showers": Extras.SHOWERS,
+        "freewifi": Extras.WIFI,
+        "accessibility": Extras.WHEELCHAIR,
+        "truckfriendly": Access.HGV,
+        "oilchange": Extras.OIL_CHANGE,
+        "carglass": "service:vehicle:glass",
+        "generator": Extras.BACKUP_GENERATOR,
+    }
+    FOOD_TAGS = [
+        "burgerking",
+        "debonairspizza",
+        "fishaways",
+        "greggs",
+        "hot_dog",
+        "hotsnacks",
+        "kfc",
+        "mcdonalds",
+        "pizzahut",
+        "restaurant",
+        "restaurant_be",
+        "restaurantfr",
+        "spur",
+        "steers",
+    ]
 
     def parse_item(self, item, feature, **kwargs):
         if feature["properties"]["user_properties"]["status"] != "2":
             return
         if feature["properties"]["user_properties"]["brand"] == "partners":
             return
-        if feature["properties"]["user_properties"]["poiType"] == "t002":
-            if "be_borne_electrique" in feature["properties"]["tags"]:
-                apply_category(Categories.CHARGING_STATION, item)
-            else:
-                apply_category(Categories.FUEL_STATION, item)
-        else:
-            # Other types, possibly interesting
-            return
-
-        item["website"] = f'https://store.totalenergies.fr/en_EN/{item["ref"]}'
-
-        apply_yes_no(Extras.ATM, item, "atm" in feature["properties"]["tags"])
-        apply_yes_no(Extras.CAR_WASH, item, "carwash" in feature["properties"]["tags"])
-        apply_yes_no(Extras.TOILETS, item, "restroom" in feature["properties"]["tags"])
-        apply_yes_no(Extras.WIFI, item, "freewifi" in feature["properties"]["tags"])
-        apply_yes_no(Extras.WHEELCHAIR, item, "accessibility" in feature["properties"]["tags"])
-        apply_yes_no(Access.HGV, item, "truckfriendly" in feature["properties"]["tags"])
-        apply_yes_no(Extras.OIL_CHANGE, item, "oilchange" in feature["properties"]["tags"])
-        apply_yes_no("service:vehicle:glass", item, "carglass" in feature["properties"]["tags"])
-
-        apply_yes_no(Fuel.ENGINE_OIL, item, "engineoil" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.AV100LL, item, "avgas100llautomate" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.AV100LL, item, "avgas100ll" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.AVJetA1, item, "jeta1" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.OCTANE_95, item, "excellium95" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.OCTANE_98, item, "excellium98" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.DIESEL, item, "excelliumdiesel" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.E10, item, "sp95e10" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.ADBLUE, item, "adblue" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.LPG, item, "lpg" in feature["properties"]["tags"])
-        apply_yes_no(Fuel.KEROSENE, item, "kerosene" in feature["properties"]["tags"])
-        # TODO: Other fuels?:
-        # gasoil sp95 sp98 super superethanole85 excellium95e10 gasoline92_eg regulargasoline superethanole85
-        # sp95performance happyfuel sp95_lb supereffimax dieseleffimax dieselb10 adbluecar excellium_93
-
-        apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "amex" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.MASTER_CARD, item, "mastercard" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.VISA, item, "visa" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.MAESTRO, item, "maestro" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.V_PAY, item, "vpay" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.GIROCARD, item, "girocard" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.APPLE_PAY, item, "appay" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.GOOGLE_PAY, item, "googlepay" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.CASH, item, "cash" in feature["properties"]["tags"])
-        apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "credit_card" in feature["properties"]["tags"])
-        apply_yes_no("payment:gr_total_card", item, "grcartefr" in feature["properties"]["tags"])
-        apply_yes_no(FuelCards.TOTAL_CARD, item, "totalcard" in feature["properties"]["tags"])
-        apply_yes_no("payment:fleet_fuel_card", item, "ffc" in feature["properties"]["tags"])
-        apply_yes_no("payment:eurotrafic", item, "eurotrafic" in feature["properties"]["tags"])
-        apply_yes_no("payment:club_total_card", item, "carteclubtotal" in feature["properties"]["tags"])
-        # TODO: other cards: proficard bonjour mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
-
-        if "shop" in feature["properties"]["tags"]:
-            apply_category(Categories.SHOP_CONVENIENCE, item)
-
-        if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):
-            item.update(brand)
-        else:
-            self.crawler.stats.inc_value(
-                f'atp/total_energies/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
-            )
 
         # Some locations have flipped coordinates - all gas stations of certain brands (Agip) and
         # some, but not all stations of other brands (Cepsa).
@@ -133,4 +151,52 @@ class TotalEnergiesSpider(WoosmapSpider):
         if expected_country == flipped_coords_country and expected_country != coords_country:
             set_lat_lon(item, lon, lat)
 
+        # As we know the name of the shop attached we create its own POI
+        if "bonjour" in feature["properties"]["tags"] or "cafebonjour" in feature["properties"]["tags"]:
+            bonjour_shop_item = item.deepcopy()
+            bonjour_shop_item["ref"] = item.get("ref") + "-attached-shop"
+            bonjour_shop_item["name"] = "Bonjour"
+            bonjour_shop_item["brand"] = "Bonjour"
+            bonjour_shop_item["brand_wikidata"] = "Q110278299"
+            apply_category(Categories.SHOP_CONVENIENCE, bonjour_shop_item)
+            yield bonjour_shop_item
+
+        # As we do not know the name of shop/restaurant attached, we apply to main item
+        if "shop" in feature["properties"]["tags"]:
+            apply_yes_no("shop", item, True)
+
+        if feature["properties"]["user_properties"]["poiType"] == "t002":
+            if "be_borne_electrique" in feature["properties"]["tags"]:
+                apply_category(Categories.CHARGING_STATION, item)
+            else:
+                apply_category(Categories.FUEL_STATION, item)
+        else:
+            # Other types, possibly interesting
+            return
+
+        item["website"] = f'https://store.totalenergies.fr/en_EN/{item["ref"]}'
+
+        self.apply_services(item, feature)
+
+        if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):
+            item.update(brand)
+        else:
+            self.crawler.stats.inc_value(
+                f'atp/{self.name}/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
+            )
+
+        item["branch"] = item.pop("name")
+
         yield item
+
+    def apply_services(self, item: Feature, poi: dict) -> None:
+        tags = poi.get("properties", {}).get("tags", [])
+        if not tags:
+            return
+        for tag in tags:
+            if match := self.SERVICES_MAPPING.get(tag):
+                apply_yes_no(match, item, True)
+            elif tag in self.FOOD_TAGS:
+                apply_yes_no("food", item, True)
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/unknown_tag/{tag}")

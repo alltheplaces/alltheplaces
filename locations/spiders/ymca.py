@@ -1,33 +1,25 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
 
-class YMCASpider(scrapy.Spider):
+class YmcaSpider(SitemapSpider):
     name = "ymca"
     item_attributes = {"brand": "YMCA", "brand_wikidata": "Q157169"}
     allowed_domains = ["ymca.org"]
-    download_delay = 0.5
-    start_urls = (
-        "https://www.ymca.org/sitemap.xml?page=1",
-        "https://www.ymca.org/sitemap.xml?page=2",
-    )
+    sitemap_urls = [
+        "https://www.ymca.org/sitemap.xml",
+    ]
+    sitemap_rules = [(r"locations/", "parse_location")]
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        all_urls = response.xpath("//url/loc/text()").extract()
-        # Fix URLs and filter out blogs, etc at the same time
-        ymca_urls = [
-            url.replace("http://national/", "https://www.ymca.org/") for url in all_urls if "locations/" in url
-        ]
-        for url in ymca_urls:
-            # As of 2021-10-25, this URL 500's consistently
-            if url == "https://www.ymca.org/locations/skyview-ymca":
-                continue
-            yield scrapy.Request(url.strip(), callback=self.parse_location)
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            # To avoid constant redirects
+            entry["loc"] = entry["loc"].replace("https://ymca.org/", "https://www.ymca.org/")
+            yield entry
 
     def parse_location(self, response):
         geo = response.xpath('//div[contains(@class, "geolocation-location")]')

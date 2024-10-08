@@ -5,11 +5,12 @@ import scrapy
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class McCoysSpider(StructuredDataSpider):
+class MccoysSpider(StructuredDataSpider):
     name = "mccoys"
     item_attributes = {"brand": "McCoy's Building Supply", "brand_wikidata": "Q27877295"}
     start_urls = ["https://www.mccoys.com/stores"]
     time_format = "%I%p"
+    drop_attributes = {"image"}
 
     def parse(self, response):
         locations = response.xpath('//*[@class="btn btn-block btn-outline-secondary"]//@href').getall()

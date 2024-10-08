@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class TasmanianGovernmentFreeWiFiAUSpider(Spider):
+class TasmanianGovernmentFreeWifiAUSpider(Spider):
     name = "tasmanian_government_free_wifi_au"
     item_attributes = {"operator": "Government of Tasmania", "operator_wikidata": "Q3112571"}
     allowed_domains = ["freewifi.tas.gov.au"]

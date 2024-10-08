@@ -6,8 +6,8 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class TacobuenoSpider(scrapy.Spider):
-    name = "bueno"
+class TacoBuenoSpider(scrapy.Spider):
+    name = "taco_bueno"
     item_attributes = {"brand": "Taco Bueno", "brand_wikidata": "Q7673958"}
 
     def start_requests(self):

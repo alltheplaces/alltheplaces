@@ -8,7 +8,7 @@ from locations.items import Feature
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
-class LuLuLemonSpider(SitemapSpider):
+class LululemonSpider(SitemapSpider):
     name = "lululemon"
     item_attributes = {"brand": "Lululemon", "brand_wikidata": "Q6702957"}
     sitemap_urls = ("https://shop.lululemon.com/sitemap.xml",)

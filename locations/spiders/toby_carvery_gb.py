@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TobyCarveryGB(SitemapSpider, StructuredDataSpider):
+class TobyCarveryGBSpider(SitemapSpider, StructuredDataSpider):
     name = "toby_carvery_gb"
     item_attributes = {"brand": "Toby Carvery", "brand_wikidata": "Q7811777"}
     sitemap_urls = ["https://www.tobycarvery.co.uk/sitemap.xml"]

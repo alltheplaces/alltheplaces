@@ -6,7 +6,7 @@ from locations.storefinders.where2getit import Where2GetItSpider
 from locations.structured_data_spider import clean_facebook
 
 
-class ATTUSSpider(Where2GetItSpider):
+class AttUSSpider(Where2GetItSpider):
     name = "att_us"
     item_attributes = {"brand": "AT&T", "brand_wikidata": "Q298594"}
     api_endpoint = "https://www.att.com/stores/rest/getlist"

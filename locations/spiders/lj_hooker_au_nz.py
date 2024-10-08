@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class LJHookerAUNZSpider(Spider):
+class LjHookerAUNZSpider(Spider):
     name = "lj_hooker_au_nz"
     item_attributes = {"brand": "LJ Hooker", "brand_wikidata": "Q6456509"}
     allowed_domains = ["api01.ljx.com.au"]

@@ -8,7 +8,7 @@ from locations.hours import DAYS, OpeningHours
 
 class AuchanUASpider(scrapy.Spider):
     name = "auchan_ua"
-    item_attributes = {"brand": "Auchan", "brand_wikidata": "Q758603", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Auchan", "brand_wikidata": "Q4073419", "extras": Categories.SHOP_SUPERMARKET.value}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):

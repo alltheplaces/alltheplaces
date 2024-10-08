@@ -6,11 +6,12 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksEUSpider(scrapy.Spider):
     name = "starbucks_eu"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     allowed_domains = ["starbucks.co.uk"]
 
     def start_requests(self):
@@ -32,6 +33,11 @@ class StarbucksEUSpider(scrapy.Spider):
                 street, postal_city = place["address"].strip().split("\n")
             except:
                 street, addr_2, postal_city = place["address"].strip().split("\n")
+
+            # https://github.com/alltheplaces/alltheplaces/pull/8993#issuecomment-2254338471
+            # starbucks_eu.geojson has "addr:full": "undefined, BA11 4QE Frome", "addr:street_address": "undefined"
+            if street.lower() == "undefined":
+                street = None
 
             try:
                 city_hold = re.search(

@@ -6,7 +6,7 @@ from scrapy.http import Response
 from locations.items import Feature
 
 
-class ThreeSixFiveDiscountDKSpider(Spider):
+class ThreehundredsixtyfiveDiscountDKSpider(Spider):
     name = "365_discount_dk"
     item_attributes = {"brand": "365discount", "brand_wikidata": "Q104671354"}
     custom_settings = {"ROBOTSTXT_OBEY": False}

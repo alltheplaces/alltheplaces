@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class TurkiyeIsBankasi(scrapy.Spider):
+class TurkiyeIsBankasiSpider(scrapy.Spider):
     name = "turkiye_is_bankasi"
     item_attributes = {"brand": "Türkiye İş Bankası", "brand_wikidata": "Q909613"}
     allowed_domains = ["www.isbank.com.tr"]

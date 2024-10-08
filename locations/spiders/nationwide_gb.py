@@ -5,7 +5,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class NationwideGB(CrawlSpider, StructuredDataSpider):
+class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
     name = "nationwide_gb"
     item_attributes = {
         "brand": "Nationwide",
@@ -14,7 +14,17 @@ class NationwideGB(CrawlSpider, StructuredDataSpider):
     }
     start_urls = ["https://www.nationwide.co.uk/branches/index.html"]
     rules = [Rule(LinkExtractor(allow=r"/branches/"), callback="parse_sd", follow=True)]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if "permanently closed" not in item["name"].lower():
-            yield item
+        if "permanently closed" in item["name"].lower():
+            return
+
+        if item["street_address"] is not None and "store is opening" in item["street_address"]:
+            # 'addr:street_address': 'This store is opening September/October 2024'
+            return
+
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
+
+        yield item

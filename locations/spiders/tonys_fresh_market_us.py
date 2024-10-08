@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.freshop import FreshopSpider
 
 
-class TonysFreshMarketSpider(FreshopSpider):
+class TonysFreshMarketUSSpider(FreshopSpider):
     name = "tonys_fresh_market_us"
     item_attributes = {
         "brand": "Tony's Fresh Market",

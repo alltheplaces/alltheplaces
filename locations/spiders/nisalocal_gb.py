@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class NisaLocalGBSpider(CrawlSpider, StructuredDataSpider):
+class NisalocalGBSpider(CrawlSpider, StructuredDataSpider):
     name = "nisalocal_gb"
     item_attributes = {"brand": "Nisa", "brand_wikidata": "Q16999069"}
     allowed_domains = ["nisalocally.co.uk"]

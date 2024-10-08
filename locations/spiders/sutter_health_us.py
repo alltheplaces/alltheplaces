@@ -84,7 +84,7 @@ SERVICES_MAP = {
 
 
 class SutterHealthUSSpider(CrawlSpider, StructuredDataSpider):
-    name = "sutter_health"
+    name = "sutter_health_us"
     item_attributes = {"brand": "Sutter Health", "brand_wikidata": "Q7650154"}
     allowed_domains = ["sutterhealth.org", "www.sutterhealth.org"]
     start_urls = ["https://www.sutterhealth.org/location-search?start=1&max=50"]
@@ -126,7 +126,7 @@ class SutterHealthUSSpider(CrawlSpider, StructuredDataSpider):
                 apply_healthcare_specialities([CATEGORY_SPECIALTY_MAP[cat]], item)
         else:
             apply_category(Categories.CLINIC, item)
-            item["extras"]["type"] = cat
+            item["extras"]["object_type"] = cat
             self.crawler.stats.inc_value(f"atp/sutter_health/unmapped_category/{cat}")
 
         specialties = [

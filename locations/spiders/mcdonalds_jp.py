@@ -3,7 +3,7 @@ import scrapy
 from locations.items import Feature
 
 
-class McDonaldsJPSpider(scrapy.Spider):
+class McdonaldsJPSpider(scrapy.Spider):
     name = "mcdonalds_jp"
     item_attributes = {"brand_wikidata": "Q38076"}
     start_urls = (

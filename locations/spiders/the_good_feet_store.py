@@ -16,11 +16,13 @@ class TheGoodFeetStoreSpider(Spider):
     allowed_domains = ["www.goodfeet.com"]
     start_urls = ["https://www.goodfeet.com/locations"]
 
-    def parse(self, response):
+    def extract_json(self, response):
         js_blob = response.xpath('//script[contains(text(), "var addresses = [[")]/text()').get()
         js_blob = "[[" + js_blob.split("var addresses = [[", 1)[1].split("]];", 1)[0] + "]]"
-        locations = parse_js_object(js_blob)
-        for location in locations:
+        return parse_js_object(js_blob)
+
+    def parse(self, response):
+        for location in self.extract_json(response):
             location_html = Selector(text=location[1])
             all_text = " ".join(location_html.xpath("//text()").getall())
             if "COMING SOON" in all_text.upper():

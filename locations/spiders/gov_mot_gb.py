@@ -10,7 +10,7 @@ from locations.spiders.arnold_clark import ArnoldClarkSpider
 from locations.spiders.kwik_fit_gb import KwikFitGBSpider
 
 
-class GovMOTGBSpider(CSVFeedSpider):
+class GovMotGBSpider(CSVFeedSpider):
     name = "gov_mot_gb"
     dataset_attributes = {
         "license": "Open Government Licence v3.0",

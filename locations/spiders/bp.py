@@ -14,9 +14,9 @@ from locations.items import Feature
 from locations.storefinders.geo_me import GeoMeSpider
 
 
-class BPSpider(GeoMeSpider):
+class BpSpider(GeoMeSpider):
     name = "bp"
-    key = "bpretaillocator"
+    api_key = "bpretaillocator"
     brands = {
         "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
         "aral": {"brand": "Aral", "brand_wikidata": "Q565734"},

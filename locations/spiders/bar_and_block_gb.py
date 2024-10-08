@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class BarAndBlockGB(CrawlSpider):
+class BarAndBlockGBSpider(CrawlSpider):
     name = "bar_and_block_gb"
     item_attributes = {"brand": "Bar + Block", "brand_wikidata": "Q117599706"}
     start_urls = ["https://www.barandblock.co.uk/en-gb/locations"]

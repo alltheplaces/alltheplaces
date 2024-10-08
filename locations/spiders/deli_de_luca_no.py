@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.sylinder import SylinderSpider
 
 
-class DeliDeLucaSpider(SylinderSpider):
+class DeliDeLucaNOSpider(SylinderSpider):
     name = "deli_de_luca_no"
     item_attributes = {
         "brand": "Deli de Luca",

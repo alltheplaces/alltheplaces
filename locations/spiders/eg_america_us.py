@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class EGAmericaUSSpider(Spider):
+class EgAmericaUSSpider(Spider):
     name = "eg_america_us"
     allowed_domains = ["www.cumberlandfarms.com"]
     # The provided start_urls[0] returns all brand locations due to

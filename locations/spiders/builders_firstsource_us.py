@@ -2,7 +2,7 @@ from locations.categories import Categories, apply_category
 from locations.storefinders.yext import YextSpider
 
 
-class BuildersFirstSourceUSSpider(YextSpider):
+class BuildersFirstsourceUSSpider(YextSpider):
     name = "builders_firstsource_us"
     item_attributes = {"brand": "Builders FirstSource", "brand_wikidata": "Q27686100"}
     api_key = "75d03100e13baa02575a046100dc4a15"

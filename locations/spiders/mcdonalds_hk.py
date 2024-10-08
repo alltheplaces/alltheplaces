@@ -1,12 +1,12 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsHKSpider(scrapy.Spider):
+class McdonaldsHKSpider(scrapy.Spider):
     name = "mcdonalds_hk"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):

@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AEONBiGMYSpider(CrawlSpider):
+class AeonBigMYSpider(CrawlSpider):
     name = "aeon_big_my"
     item_attributes = {"brand": "AEON BiG", "brand_wikidata": "Q8077280", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["aeonbig.com.my"]

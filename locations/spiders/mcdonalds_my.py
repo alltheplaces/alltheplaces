@@ -1,12 +1,12 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsMYSpider(scrapy.Spider):
+class McdonaldsMYSpider(scrapy.Spider):
     name = "mcdonalds_my"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
 
     def start_requests(self):
         form_data = {

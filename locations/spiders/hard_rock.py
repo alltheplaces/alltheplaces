@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class HardRockSpider(scrapy.Spider):
-    name = "hardrock"
+    name = "hard_rock"
     allowed_domains = ["www.hardrock.com"]
     start_urls = ["https://www.hardrock.com/files/5880/widget935343.js?callback=widget935343DataCallback"]
 

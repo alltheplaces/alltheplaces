@@ -5,7 +5,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class REWEDESpider(SitemapSpider, StructuredDataSpider):
+class ReweDESpider(SitemapSpider, StructuredDataSpider):
     name = "rewe_de"
     item_attributes = {"name": "REWE", "brand": "REWE", "brand_wikidata": "Q16968817"}
     allowed_domains = ["www.rewe.de"]

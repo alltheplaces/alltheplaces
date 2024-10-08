@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class WSPSpider(scrapy.Spider):
+class WspSpider(scrapy.Spider):
     name = "wsp"
     item_attributes = {"brand": "WSP", "brand_wikidata": "Q1333162"}
     allowed_domains = ["www.wsp.com"]

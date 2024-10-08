@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 class SweetgreenUSSpider(Spider):
     name = "sweetgreen_us"
     item_attributes = {"brand": "Sweetgreen", "brand_wikidata": "Q18636413"}
-    allowed_domains = ["www.sweetgreen.com"]
+    allowed_domains = ["sweetgreen.com"]
     start_urls = ["https://order.sweetgreen.com/graphql"]
 
     def start_requests(self):

@@ -1,6 +1,8 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
+from locations.categories import Extras, apply_yes_no
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -10,14 +12,18 @@ class HabitBurgerSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["habitburger.com"]
     sitemap_urls = ["https://www.habitburger.com/locations-sitemap.xml"]
     wanted_types = ["Restaurant"]
+    time_format = "%I:%M%p"
 
-    def post_process_item(self, item, response, ld_data):
+    def pre_process_data(self, ld_data: dict, **kwargs):
         rules = ld_data["openingHours"][0].split()
         opening_hours = []
         for days, hours in zip(rules[::2], rules[1::2]):
             opening_hours.extend(f"{day} {hours}" for day in days.split(","))
-        oh = OpeningHours()
-        oh.from_linked_data({"openingHours": opening_hours}, "%I:%M%p")
-        item["opening_hours"] = oh.as_opening_hours()
+        ld_data["openingHours"] = opening_hours
 
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["name"] = None
+        item["branch"] = response.xpath('//h1[@class="loc_title bebas"]/text()').get()
+        item["extras"]["website:orders"] = response.xpath('//a[contains(@class, "order_now")]/@href').get()
+        apply_yes_no(Extras.DRIVE_THROUGH, item, response.xpath('//div[@class="info_icon drive_thru dt"]'))
         yield item

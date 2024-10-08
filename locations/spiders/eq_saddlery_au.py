@@ -2,7 +2,7 @@ from locations.categories import Categories
 from locations.storefinders.stockinstore import StockInStoreSpider
 
 
-class EQSaddleryAUSpider(StockInStoreSpider):
+class EqSaddleryAUSpider(StockInStoreSpider):
     name = "eq_saddlery_au"
     item_attributes = {"brand": "EQ Saddlery", "brand_wikidata": "Q117746041", "extras": Categories.SHOP_SPORTS.value}
     api_site_id = "10040"

@@ -7,7 +7,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class DozApotekSE(Spider):
+class DozApotekSESpider(Spider):
     name = "doz_apotek_se"
     item_attributes = {"brand": "Doz Apotek", "brand_wikidata": "Q10475311"}
     start_urls = ["https://dozapotek.se/hitta-apotek"]

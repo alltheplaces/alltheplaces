@@ -1,41 +1,34 @@
-from scrapy.http import JsonRequest
-from scrapy.spiders import Spider
+from typing import Iterable
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from scrapy.http import Response
+
+from locations.categories import Categories
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.storefinders.algolia import AlgoliaSpider
 
 
-class DunelmGBSpider(Spider):
+class DunelmGBSpider(AlgoliaSpider):
     name = "dunelm_gb"
-    item_attributes = {"name": "Dunelm", "brand": "Dunelm", "brand_wikidata": "Q5315020"}
+    item_attributes = {
+        "name": "Dunelm",
+        "brand": "Dunelm",
+        "brand_wikidata": "Q5315020",
+        "extras": Categories.SHOP_INTERIOR_DECORATION.value,
+    }
+    app_id = "FY8PLEBN34"
+    api_key = "ae9bc9ca475f6c3d7579016da0305a33"
+    index_name = "stores_prod"
 
-    def start_requests(self):
-        yield JsonRequest(
-            url="https://fy8plebn34-dsn.algolia.net/1/indexes/*/queries?x-algolia-application-id=FY8PLEBN34&x-algolia-api-key=ae9bc9ca475f6c3d7579016da0305a33",
-            data={
-                "requests": [
-                    {
-                        "indexName": "stores_prod",
-                        "params": "hitsPerPage=300",
-                    }
-                ]
-            },
-        )
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["lat"] = feature["_geoloc"]["lat"]
+        item["lon"] = feature["_geoloc"]["lng"]
+        item["branch"] = item.pop("name")
+        item["ref"] = feature["sapStoreId"]
+        item["website"] = "https://www.dunelm.com/stores/" + feature["uri"]
 
-    def parse(self, response, **kwargs):
-        for store in response.json()["results"][0]["hits"]:
-            store["location"] = store["_geoloc"]
-            item = DictParser.parse(store)
-            item["branch"] = item.pop("name")
-            item["ref"] = store["sapStoreId"]
-            item["website"] = "https://www.dunelm.com/stores/" + store["uri"]
+        item["opening_hours"] = OpeningHours()
+        for rule in feature["openingHours"]:
+            item["opening_hours"].add_range(rule["day"], rule["open"], rule["close"])
 
-            oh = OpeningHours()
-            for rule in store["openingHours"]:
-                oh.add_range(rule["day"], rule["open"], rule["close"])
-
-            item["opening_hours"] = oh.as_opening_hours()
-
-            apply_category(Categories.SHOP_INTERIOR_DECORATION, item)
-            yield item
+        yield item

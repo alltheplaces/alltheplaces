@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.geo import point_locations
 
 
-class LongChampUsSpider(scrapy.Spider):
+class LongchampUSSpider(scrapy.Spider):
     name = "longchamp_us"
     item_attributes = {"brand": "Longchamp", "brand_wikidata": "Q1869471"}
     custom_settings = {"ROBOTSTXT_OBEY": False}

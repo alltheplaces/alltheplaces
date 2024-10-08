@@ -2,13 +2,13 @@ import re
 
 from scrapy import Request
 
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class McDonaldsLUSpider(StructuredDataSpider):
+class McdonaldsLUSpider(StructuredDataSpider):
     name = "mcdonalds_lu"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcd.lu"]
     start_urls = ["https://mcd.lu/"]
 

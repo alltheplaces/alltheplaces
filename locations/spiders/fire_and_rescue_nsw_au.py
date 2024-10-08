@@ -5,7 +5,7 @@ from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class FireAndRescueNSWAUSpider(SitemapSpider):
+class FireAndRescueNswAUSpider(SitemapSpider):
     name = "fire_and_rescue_nsw_au"
     item_attributes = {
         "operator": "Fire and Rescue New South Wales",

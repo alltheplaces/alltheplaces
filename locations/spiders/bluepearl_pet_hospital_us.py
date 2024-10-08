@@ -5,7 +5,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BluePearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
+class BluepearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
     name = "bluepearl_pet_hospital_us"
     item_attributes = {"brand": "BluePearl Pet Hospital", "brand_wikidata": "Q4928764"}
     allowed_domains = ["bluepearlvet.com"]

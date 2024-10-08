@@ -5,7 +5,7 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
-class FatFaceSpider(CrawlSpider):
+class FatfaceSpider(CrawlSpider):
     name = "fatface"
     item_attributes = {"brand": "FATFACE", "brand_wikidata": "Q5437186"}
     allowed_domains = ["www.fatface.com", "us.fatface.com"]

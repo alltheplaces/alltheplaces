@@ -3,7 +3,7 @@ import scrapy
 from locations.linked_data_parser import LinkedDataParser
 
 
-class VCASpider(scrapy.Spider):
+class VcaSpider(scrapy.Spider):
     name = "vca"
     item_attributes = {"brand": "VCA", "brand_wikidata": "Q7906620"}
     allowed_domains = ["vcahospitals.com"]

@@ -26,7 +26,7 @@ class GoodwillSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Goodwill",
         "brand_wikidata": "Q5583655",
-        "nsi_id": -1,
+        "nsi_id": "-1",
         "extras": Categories.SHOP_CHARITY.value,
     }
     allowed_domains = ["www.goodwill.org"]

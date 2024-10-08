@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class CobasiBR(Spider):
+class CobasiBRSpider(Spider):
     name = "cobasi_br"
     item_attributes = {"brand_wikidata": "Q86739236"}
     start_urls = ["https://mid-back.cobasi.com.br/stores"]

@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class JMcLaughlinUSSpider(scrapy.Spider):
+class JmclaughlinUSSpider(scrapy.Spider):
     name = "jmclaughlin_us"
     item_attributes = {"brand": "J. McLaughlin", "brand_wikidata": "Q111230943"}
     allowed_domains = ["orders.jmclaughlin.com"]

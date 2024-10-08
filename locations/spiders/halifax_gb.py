@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HalifaxGB(SitemapSpider, StructuredDataSpider):
+class HalifaxGBSpider(SitemapSpider, StructuredDataSpider):
     name = "halifax_gb"
     item_attributes = {
         "brand": "Halifax",
@@ -13,6 +13,7 @@ class HalifaxGB(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://branches.halifax.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/branches\.halifax\.co\.uk\/[-'\w]+\/[-'\/\w]+$", "parse_sd")]
+    drop_attributes = {"image"}
 
     def sitemap_filter(self, entries):
         for entry in entries:

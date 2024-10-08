@@ -1,12 +1,12 @@
 from scrapy import Spider
 
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsZASpider(Spider):
+class McdonaldsZASpider(Spider):
     name = "mcdonalds_za"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.co.za/templates/_layout/ajax_calls/get_all_locations.php?lat=0&long=0"]
 
     def parse(self, response, **kwargs):

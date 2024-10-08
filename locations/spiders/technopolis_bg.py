@@ -1,6 +1,5 @@
 import scrapy
 
-from locations.categories import Categories, apply_category
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
@@ -47,5 +46,4 @@ class TechnopolisBGSpider(scrapy.Spider):
                     item["opening_hours"].add_days_range(day_range(days[0], days[1]), hours[0], hours[1])
                 else:
                     item["opening_hours"].add_range(days[0], hours[0], hours[1])
-            apply_category(Categories.SHOP_ELECTRONICS, item)
             yield item

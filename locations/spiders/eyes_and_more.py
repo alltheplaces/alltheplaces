@@ -8,7 +8,7 @@ from locations.hours import DAYS_DE, DAYS_NL, OpeningHours, sanitise_day
 from locations.structured_data_spider import extract_phone
 
 
-class EyesAndMoreDESpider(Spider):
+class EyesAndMoreSpider(Spider):
     name = "eyes_and_more"
     item_attributes = {"brand": "eyes + more", "brand_wikidata": "Q1385775"}
     start_urls = [

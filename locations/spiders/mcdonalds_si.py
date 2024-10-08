@@ -6,12 +6,12 @@ import scrapy
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsSISpider(scrapy.Spider):
+class McdonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.si/restavracije/"]
 
     def parse(self, response, **kwargs):

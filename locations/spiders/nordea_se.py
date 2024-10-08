@@ -7,7 +7,7 @@ from locations.hours import DAYS_SE, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class NordeaSeSpider(scrapy.Spider):
+class NordeaSESpider(scrapy.Spider):
     name = "nordea_se"
     item_attributes = {"brand": "Nordea", "brand_wikidata": "Q1123823"}
     start_urls = [

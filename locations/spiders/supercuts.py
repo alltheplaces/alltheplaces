@@ -4,7 +4,7 @@ from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
 
-class SuperCutsSpider(scrapy.Spider):
+class SupercutsSpider(scrapy.Spider):
     name = "supercuts"
     item_attributes = {"brand": "Supercuts", "brand_wikidata": "Q7643239"}
     allowed_domains = ["api-booking.regiscorp.com"]

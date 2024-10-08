@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, OpeningHours
 
 
-class ccbankBGSpider(Spider):
+class CcbankBGSpider(Spider):
     name = "ccbank_bg"
     item_attributes = {"brand": "Central Cooperative Bank", "brand_wikidata": "Q2944755"}
     allowed_domains = ["ccbank.bg"]

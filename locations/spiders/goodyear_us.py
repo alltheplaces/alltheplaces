@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GoodYearUSSpider(SitemapSpider, StructuredDataSpider):
+class GoodyearUSSpider(SitemapSpider, StructuredDataSpider):
     name = "goodyear_us"
     item_attributes = {"brand": "Goodyear", "brand_wikidata": "Q620875"}
     sitemap_urls = ["https://www.goodyearautoservice.com/sitemap-retail-locations-sitemap-GAS.xml"]

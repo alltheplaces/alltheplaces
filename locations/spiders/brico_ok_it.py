@@ -3,7 +3,7 @@ from scrapy.spiders import XMLFeedSpider
 from locations.items import Feature
 
 
-class BricoOKITSpider(XMLFeedSpider):
+class BricoOkITSpider(XMLFeedSpider):
     name = "brico_ok_it"
     item_attributes = {"brand": "Brico OK", "brand_wikidata": "Q124719999"}
     start_urls = ["https://www.bricook.it/admin/bricook-store-locator/data.php"]

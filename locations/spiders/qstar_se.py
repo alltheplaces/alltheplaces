@@ -22,7 +22,7 @@ BRANDS_MAPPING = {
 }
 
 
-class QStartSESpider(scrapy.Spider):
+class QstarSESpider(scrapy.Spider):
     name = "qstar_se"
     start_urls = ["https://qstar-backend-prod.herokuapp.com/api/v2/stations/qstar"]
 

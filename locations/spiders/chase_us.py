@@ -1,36 +1,29 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class ChaseUSSpider(SitemapSpider, StructuredDataSpider):
     name = "chase_us"
     item_attributes = {"brand": "Chase", "brand_wikidata": "Q524629"}
+    drop_attributes = {"image"}
     allowed_domains = ["locator.chase.com"]
     sitemap_urls = ["https://locator.chase.com/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/locator\.chase\.com\/(?!es)[a-z]{2}\/[\w\-]+\/[\w\-]+$", "parse_sd")]
+    search_for_facebook = False
+    search_for_twitter = False
 
-    def post_process_item(self, item, response, ld_data):
-        item["ref"] = item["ref"].split("#", 1)[1]
-        hours_text = " ".join(
-            response.xpath(
-                '//div[contains(@class, "Core-branchRow--hours")]//table[1]/tbody/tr[@itemprop="openingHours"]/@content'
-            ).getall()
-        )
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_text)
-        atm_count = response.xpath('//div[@class="Core-atmCount"]/text()').get()
-        if hours_text and atm_count:
+    def pre_process_data(self, ld_data, **kwargs):
+        for i in range(0, len(ld_data.get("openingHours", []))):
+            ld_data["openingHours"][i] = ld_data["openingHours"][i].replace("00:00-00:00", "Closed")
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if item["name"] == "Chase Bank":
+            item.pop("name")
             apply_category(Categories.BANK, item)
-            apply_yes_no(Extras.ATM, item, True)
-        elif hours_text:
-            apply_category(Categories.BANK, item)
-            apply_yes_no(Extras.ATM, item, False)
-        elif atm_count:
+            apply_yes_no(Extras.ATM, item, "ATM services" in response.text)
+        elif item["name"] == "Chase ATM":
             apply_category(Categories.ATM, item)
-        item.pop("image")
-        item.pop("facebook")
-        item.pop("twitter")
+
         yield item

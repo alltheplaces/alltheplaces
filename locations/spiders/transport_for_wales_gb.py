@@ -8,7 +8,7 @@ from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class TransportForWalesGB(Spider):
+class TransportForWalesGBSpider(Spider):
     name = "transport_for_wales_gb"
     item_attributes = {"operator": "Transport for Wales", "operator_wikidata": "Q104878180"}
     start_urls = ["https://tfw.wales/api/stations/links/{}".format(letter) for letter in string.ascii_uppercase]

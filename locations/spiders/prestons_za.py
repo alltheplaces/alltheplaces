@@ -1,6 +1,10 @@
-from html import unescape
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import Categories
+from locations.hours import DAYS_EN
+from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -12,11 +16,11 @@ class PrestonsZASpider(WPStoreLocatorSpider):
         "extras": Categories.SHOP_ALCOHOL.value,
     }
     allowed_domains = ["prestonsliquors.co.za"]
-    time_format = "%I:%M %p"
+    days = DAYS_EN
 
-    def parse_item(self, item, location):
-        item["name"] = unescape(item["name"])
-        item["street_address"] = location.get("address")
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["street_address"] = feature.get("address")
         item.pop("addr_full", None)
-        item["city"] = location.get("address2")
+        item["city"] = feature.get("address2")
         yield item
