@@ -1,5 +1,5 @@
-from locations.storefinders.location_bank import LocationBankSpider
 from locations.categories import Categories
+from locations.storefinders.location_bank import LocationBankSpider
 
 
 class VodacomZASpider(LocationBankSpider):
