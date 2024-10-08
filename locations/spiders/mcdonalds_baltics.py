@@ -16,6 +16,7 @@ class McdonaldsBalticsSpider(SitemapSpider):
         "https://mcd.lt/wp-sitemap-posts-location-1.xml",
         "https://mcdonalds.lv/location-sitemap.xml",
     ]
+    requires_proxy = "GB"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
