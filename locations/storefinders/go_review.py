@@ -21,7 +21,7 @@ class GoReviewSpider(CrawlSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt disallows everything
     rules = [
         Rule(
-            LinkExtractor(allow=r"^https:\/\/.*?\d+\.goreview\.co\.za\/store-information\?store-locator=.*$"),
+            LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/store-information.+$"),
             callback="parse",
         )
     ]

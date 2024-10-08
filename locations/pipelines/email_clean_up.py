@@ -1,3 +1,6 @@
+import re
+
+
 class EmailCleanUpPipeline:
     def process_item(self, item, spider):
         emails = item.get("email")
@@ -20,9 +23,11 @@ class EmailCleanUpPipeline:
         return item
 
     def normalize(self, email, spider):
+        email = re.sub(r"mailto:", "", email, flags=re.IGNORECASE)
+        email = email.strip()
+        if not email:
+            return None
         if "@" not in email:
             spider.crawler.stats.inc_value("atp/field/email/invalid")
             return None
-        if email.startswith("mailto:"):
-            return email.removeprefix("mailto:")
         return email.strip()
