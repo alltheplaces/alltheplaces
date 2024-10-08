@@ -11,6 +11,7 @@ class ScoutsGGGBIMJESpider(JSONBlobSpider):
     }
     start_urls = ["https://groupfinder.azurewebsites.net/GroupFinder?page=1&pageSize=500&location=london"]
     locations_key = "Data"
+    skip_auto_cc_domain = True
 
     def parse(self, response):
         features = self.extract_json(response)
