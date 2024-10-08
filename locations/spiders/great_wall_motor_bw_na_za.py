@@ -2,12 +2,10 @@ import chompjs
 
 from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
+from locations.spiders.great_wall_motor_au_nz import GREAT_WALL_MOTOR_SHARED_ATTRIBBUTES
 
 GWM_BRANDS = {
-    "NEWGWM": {
-        "brand": "GWM",
-        "brand_wikidata": "Q1117001",
-    },
+    "NEWGWM": GREAT_WALL_MOTOR_SHARED_ATTRIBBUTES,
     "NEWGWMHAVAL": {
         "brand": "GWM;Haval",
         "brand_wikidata": "Q1117001;Q28223947",
@@ -19,8 +17,8 @@ GWM_BRANDS = {
 }
 
 
-class GwmBWNAZASpider(JSONBlobSpider):
-    name = "gwm_bw_na_za"
+class GreatWallMotorBWNAZASpider(JSONBlobSpider):
+    name = "great_wall_motor_bw_na_za"
     item_attributes = {
         "brand": "GWM",
         "brand_wikidata": "Q1117001",
