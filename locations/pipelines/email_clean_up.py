@@ -30,4 +30,4 @@ class EmailCleanUpPipeline:
         if "@" not in email:
             spider.crawler.stats.inc_value("atp/field/email/invalid")
             return None
-        return email
+        return email.strip()
