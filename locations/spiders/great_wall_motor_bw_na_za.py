@@ -41,6 +41,9 @@ class GreatWallMotorBWNAZASpider(JSONBlobSpider):
             item["city"] = item["addr_full"].split(",")[-2]
         except:
             pass
+        if item["state"] in ["Namibia", "Botswana"]:
+            item.pop("state")
+
         if location["category"] == "Dealership":
             apply_category(Categories.SHOP_CAR, item)
         else:
