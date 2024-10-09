@@ -41,7 +41,6 @@ class TgiFridaysGBSpider(Spider):
 
     def parse(self, response):
         data = response.xpath("//textarea/text()").get()
-        print(data)
         jsondata = json.loads(data)[1]["args"][1]
         for location in jsondata["results"]:
             item = DictParser.parse(location)
