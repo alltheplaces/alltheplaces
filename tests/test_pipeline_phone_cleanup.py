@@ -15,6 +15,12 @@ def get_objects(phone, country):
     )
 
 
+def test_phoneword():
+    item, pipeline, spider = get_objects("1-800-Flowers", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+1 800-356-9377"
+
+
 def test_handle():
     # Switzerland
     item, pipeline, spider = get_objects("0442017500", "CH")
