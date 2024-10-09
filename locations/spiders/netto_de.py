@@ -13,7 +13,7 @@ class NettoDESpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.netto-online.de/ueber-netto/sitemap/index"]
     sitemap_rules = [(r"/filialen/[^/]+/[^/]+/(\d+)/$", "parse")]
     wanted_types = ["GroceryStore"]
-    user_agent = BROWSER_DEFAULT
+    requires_proxy = "GB"
 
     categories = {
         "Netto City": Categories.SHOP_SUPERMARKET,
