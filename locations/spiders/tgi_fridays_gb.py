@@ -37,7 +37,7 @@ class TGIFridaysGBSpider(Spider):
         )
 
     def start_requests(self) -> Iterable[Request]:
-        yield self.make_request(1)
+        yield self.make_request(0)
 
     def parse(self, response):
         data = response.xpath("//textarea/text()").get()
