@@ -20,6 +20,7 @@ class UlybkaRadugiRUSpider(scrapy.Spider):
         for poi in response.json()["_embedded"]["items"]:
             item = DictParser.parse(poi)
             item["city"] = poi["city"]["title"]
+            item.pop("name")
             item["lon"], item["lat"] = poi["geoCoordinates"]
             item["housenumber"] = poi.get("house")
             item["street_address"] = poi.get("addressSMS")
