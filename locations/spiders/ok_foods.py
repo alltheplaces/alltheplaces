@@ -4,10 +4,10 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 OK_FOODS_BRANDS = {
-    "FR SEVENELEVEN": SEVEN_ELEVEN_SHARED_ATTRIBUTES | {"extras": Categories.SHOP_CONVENIENCE.value},
+    # Only 1 store at time of writing. Doesn't look like a regular 7-11
+    "FR SEVENELEVEN": {"brand": None, "brand_wikidata": None, "extras": Categories.SHOP_CONVENIENCE.value},
     "MEGASAVE": {"brand": "Megasave", "brand_wikidata": "Q116520541", "extras": Categories.SHOP_WHOLESALE.value},
     "OK EXPRESS": {"brand": "OK Express", "brand_wikidata": "Q116520407", "extras": Categories.SHOP_CONVENIENCE.value},
     "OK FOODS": {"brand": "OK Foods", "brand_wikidata": "Q116520377", "extras": Categories.SHOP_SUPERMARKET.value},
