@@ -20,7 +20,7 @@ class VinmonopoletNOSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["ref"] = location.get("name")
-            item["branch"] = location.get("displayName")
+            item["branch"] = item.pop("name")
             item["addr_full"] = location["address"].get("formattedAddress")
             item["website"] = "https://www.vinmonopolet.no/butikk/" + item["ref"]
             item["phone"] = location["address"].get("phone")
