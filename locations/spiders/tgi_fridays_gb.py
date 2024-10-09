@@ -46,8 +46,8 @@ class TGIFridaysGBSpider(Spider):
         for location in jsondata["results"]:
             item = DictParser.parse(location)
             coords = location["geolocation"].split(",")
-            item["lat"] = coords[0]
-            item["lon"] = coords[1]
+            item["lat"] = coords[1]
+            item["lon"] = coords[0]
             item["ref"] = location["nid"]
             yield item
 
