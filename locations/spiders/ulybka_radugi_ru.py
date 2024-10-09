@@ -26,13 +26,14 @@ class UlybkaRadugiRUSpider(scrapy.Spider):
             item["lon"], item["lat"] = poi["geoCoordinates"]
             if start_date := poi.get("dateOpening"):
                 item["extras"]["start_date"] = "-".join(reversed(start_date.split(".")))
-            if poi.get("openingSoon"):
-                # TODO: also temporaryClosed and underReconstruction
-                yield None
+
+            if poi.get("openingSoon") or poi.get("temporaryClosed") or poi.get("underReconstruction"):
+                item["opening_hours"] = "closed"
             else:
-                apply_category(Categories.SHOP_CHEMIST, item)
                 self.parse_hours(item, poi)
-                yield item
+
+            apply_category(Categories.SHOP_CHEMIST, item)
+            yield item
 
     def parse_hours(self, item: Feature, poi: dict):
         if hours := poi.get("openingHours"):
