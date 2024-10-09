@@ -11,7 +11,6 @@ class KuveytTurkTRSpider(JSONBlobSpider):
     item_attributes = {"brand": "Kuveyt Türk", "brand_wikidata": "Q6036058"}
     allowed_domains = ["kuveytturk.com.tr"]
     base_url = "https://www.kuveytturk.com.tr/"
-    no_refs = True  # Id is not unique across items, it appears to refer to a physical location, so a branch and two ATMs in one place all have the same Id
 
     def start_requests(self):
         yield Request(urljoin(self.base_url, "/en/branches-and-atms"), callback=self.parse_branch_page)
@@ -57,6 +56,9 @@ class KuveytTurkTRSpider(JSONBlobSpider):
             )
 
     def post_process_item(self, item, response, location):
+        # Id is not unique across items, it appears to refer to a physical location, so a branch and two ATMs in one place all have the same Id
+        item["ref"] = f"{location.get('Id')}-{location.get('Name').replace(" ", "_")}"
+
         if location["Type"] == 1:
             apply_category(Categories.BANK, item)
             # Unhandled: "IsForeignAccountOpening"
