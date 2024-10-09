@@ -24,6 +24,7 @@ COUNTRYCODE_COMPONENTS = {
     "BW",
     "BY",
     "CA",
+    "CD",
     "CH",
     "CL",
     "CN",
