@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import FIREFOX_LATEST
 
 
 class NettoDESpider(SitemapSpider, StructuredDataSpider):
@@ -12,7 +13,8 @@ class NettoDESpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.netto-online.de/ueber-netto/sitemap/index"]
     sitemap_rules = [(r"/filialen/[^/]+/[^/]+/(\d+)/$", "parse")]
     wanted_types = ["GroceryStore"]
-    requires_proxy = "GB"
+    user_agent = FIREFOX_LATEST
+    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
 
     categories = {
         "Netto City": Categories.SHOP_SUPERMARKET,
