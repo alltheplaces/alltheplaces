@@ -40,6 +40,9 @@ class UlybkaRadugiRUSpider(scrapy.Spider):
                 oh = OpeningHours()
                 for hour in hours:
                     day = DAYS[int(hour["weekDay"]) - 1]
+                    if hour.get("closed") is True:
+                        oh.set_closed(day)
+                        continue
                     open_time = hour["openAt"]
                     close_time = hour["closeAt"]
                     oh.add_range(day, open_time, close_time, "%H:%M:%S")
