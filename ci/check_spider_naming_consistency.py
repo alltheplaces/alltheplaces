@@ -116,6 +116,7 @@ COUNTRYCODE_COMPONENTS = {
     "TR",
     "TT",
     "TW",
+    "TZ",
     "UA",
     "US",
     "UY",
