@@ -32,4 +32,6 @@ class ArgosSpider(SitemapSpider, StructuredDataSpider):
             if store_type == "1" or "Collection Point" in item["name"] or "CP" in item["name"]:
                 return
 
+        item.pop("name", None)
+
         yield item
