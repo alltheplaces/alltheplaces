@@ -57,7 +57,7 @@ class KuveytTurkTRSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         # Id is not unique across items, it appears to refer to a physical location, so a branch and two ATMs in one place all have the same Id
-        item["ref"] = f"{location.get('Id')}-{location.get('Name').replace(" ", "_")}"
+        item["ref"] = f"{location.get('Id')}-{location.get('Name').replace(' ', '_')}"
 
         if location["Type"] == 1:
             apply_category(Categories.BANK, item)
