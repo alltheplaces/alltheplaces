@@ -1,3 +1,5 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -23,5 +25,6 @@ class SupaQuickSpider(SitemapSpider, StructuredDataSpider):
                 item["branch"] = item.pop("name").replace(brand, "").strip()
         item["opening_hours"] = OpeningHours()
         for row in response.xpath('.//div[contains(text(), "REGULAR HOURS")]/.././/table/tr'):
-            item["opening_hours"].add_ranges_from_string(row.xpath("string(.)").get())
+            hours_string = re.sub(r"(?<=\d)h(?=\d)", ":", row.xpath("string(.)").get())
+            item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
