@@ -51,4 +51,4 @@ class TGIFridaysGBSpider(Spider):
             yield item
 
         if jsondata["totalCount"] > jsondata["offset"] + jsondata["limit"]:
-            yield self.make_request(int(jsondata["offset"] / jsondata["limit"]))
+            yield self.make_request(int(jsondata["offset"] / jsondata["limit"]) + 1)
