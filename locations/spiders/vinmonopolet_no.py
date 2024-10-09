@@ -21,6 +21,10 @@ class VinmonopoletNOSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location.get("name")
             item["name"] = location.get("displayName")
+            if item.get("name") != None:
+                item["branch"] = item["name"]
+                if "Vinmonopolet" not in item["name"]:
+                    item["name"] = "Vinmonopolet " + item["name"]
             item["addr_full"] = location["address"].get("formattedAddress")
             item["website"] = "https://www.vinmonopolet.no/butikk/" + item["ref"]
             item["phone"] = location["address"].get("phone")
@@ -34,5 +38,4 @@ class VinmonopoletNOSpider(Spider):
                     day_hours["openingTime"]["formattedHour"],
                     day_hours["closingTime"]["formattedHour"],
                 )
-
             yield item
