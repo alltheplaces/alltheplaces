@@ -16,4 +16,5 @@ class AmpmUSSpider(Spider):
             item["street_address"] = item.pop("addr_full")
             item["state"] = location["state"]
             apply_yes_no(Extras.ATM, item, location["chaseATM"] != "")
+            apply_yes_no(Extras.CAR_WASH, item, location["carwash"] == "TRUE")
             yield item
