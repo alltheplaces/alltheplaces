@@ -41,6 +41,9 @@ class SantanderPLSpider(Spider):
 
         if category == Categories.ATM:
             item["name"] = None
+        else:
+            item["branch"] = item.get("name")
+            item["name"] = None
 
         apply_category(category, item)
 
