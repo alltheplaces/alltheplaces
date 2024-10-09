@@ -7,7 +7,7 @@ from scrapy.spiders import Request, Spider
 from locations.dict_parser import DictParser
 
 
-class TGIFridaysGBSpider(Spider):
+class TgiFridaysGBSpider(Spider):
     name = "tgi_fridays_gb"
     item_attributes = {
         "brand": "TGI Fridays",
