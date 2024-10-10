@@ -1,45 +1,29 @@
-import scrapy
+from typing import Any
 
-from locations.categories import Categories, apply_category
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
 
 
-class MisensoCHSpider(scrapy.Spider):
+class MisensoCHSpider(SitemapSpider):
     name = "misenso_ch"
-    allowed_domains = ["misenso.ch"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    item_attributes = {"brand": "Misenso", "brand_wikidata": "Q116151325"}
+    sitemap_urls = ["https://www.misenso.ch/de/wp-sitemap.xml"]
+    sitemap_rules = [(r"/filialen/[a-zA-Z0-9]+", "parse")]
 
-    def start_requests(self):
-        url = "https://www.misenso.ch/store/locator/vals"
-        query = {"jsonrpc": "2.0", "method": "call", "params": {}, "id": 123}
-        return [scrapy.http.JsonRequest(url, data=query)]
-
-    def parse(self, response):
-        for store in response.json()["result"]["map_stores_data"].values():
-            address = store["store_address"]
-            feature = Feature(
-                brand="Misenso",
-                brand_wikidata="Q116151325",
-                city=address[1],
-                country="CH",
-                email=address[9],
-                branch=store["store_name"],
-                extras={"healthcare": "audiologist;optometrist"},
-                lat=float(store["store_lat"]),
-                lon=float(store["store_lng"]),
-                name="Misenso",
-                image=self.parse_image(response, store),
-                phone=address[6],
-                postcode=address[4],
-                ref=str(store["store_id"]),
-                street_address=address[0],
-            )
-            apply_category(Categories.SHOP_OPTICIAN, feature)
-            yield feature
-
-    @staticmethod
-    def parse_image(response, store):
-        if image := store["store_image"]:
-            return response.urljoin(image).split("?")[0]  # strip off tracking id
-        else:
-            return None
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["name"] = response.xpath("//h1/text()").get()
+        item["addr_full"] = response.xpath("//p").xpath("normalize-space()").get()
+        item["ref"] = item["website"] = response.url
+        item["phone"] = response.xpath('//*[@class="rtc"]//*[contains(@href,"tel:")]/text()').get()
+        item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
+        item["opening_hours"] = OpeningHours()
+        for day_time in response.xpath(
+            '//*[@class = "type--module name--text moix--1 moix-wowr--1 moix-mona--text--0 container number_of_cols--two"]//li'
+        ):
+            day_time = day_time.xpath("normalize-space()").get()
+            item["opening_hours"].add_ranges_from_string(day_time, days=DAYS_DE)
+        yield item
