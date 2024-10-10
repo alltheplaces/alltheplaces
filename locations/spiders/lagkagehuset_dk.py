@@ -4,7 +4,8 @@ from typing import Iterable
 import chompjs
 from scrapy.http import Response
 
-from locations.items import Feature
+from locations.hours import DAYS_3_LETTERS, OpeningHours
+from locations.items import Feature, set_closed
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -22,4 +23,10 @@ class LagkagehusetDKSpider(JSONBlobSpider):
         item["street_address"] = item.pop("addr_full")
         item["branch"] = item.pop("name")
         item["email"] = feature.get("mail")
+        if all(feature.get("openingHours", {}).get(day.lower()) == "0:00-0:00" for day in DAYS_3_LETTERS):
+            set_closed(item)
+        else:
+            item["opening_hours"] = OpeningHours()
+            for day, hours in feature.get("openingHours").items():
+                item["opening_hours"].add_range(day, *hours.split("-"))
         yield item
