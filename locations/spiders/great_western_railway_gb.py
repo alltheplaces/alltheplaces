@@ -1,6 +1,7 @@
 from scrapy import Request
 
 from locations.categories import Categories, apply_category
+from locations.google_url import url_to_coords
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -12,6 +13,7 @@ class GreatWesternRailwayGBSpider(StructuredDataSpider):
     search_for_twitter = False
     search_for_facebook = False
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -19,6 +21,7 @@ class GreatWesternRailwayGBSpider(StructuredDataSpider):
                 yield Request(response.urljoin(location["url"]), callback=self.parse_sd)
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["lat"], item["lon"] = url_to_coords(ld_data["hasMap"])
         item["extras"]["ref:crs"] = item["ref"]
 
         apply_category(Categories.TRAIN_STATION, item)

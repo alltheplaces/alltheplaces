@@ -1,6 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.google_url import url_to_coords
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,3 +15,8 @@ class CefGBSpider(CrawlSpider, StructuredDataSpider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
+
+    def post_process_item(self, item, response, ld_data):
+        item["lat"], item["lon"] = url_to_coords(ld_data["hasmap"])
+
+        yield item
