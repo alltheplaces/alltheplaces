@@ -6,8 +6,8 @@ from scrapy.http import JsonRequest, Response
 from locations.dict_parser import DictParser
 
 
-class TheFishAndChipCoZASpider(Spider):
-    name = "the_fish_and_chip_co_za"
+class TheFishAndChipCompanyZASpider(Spider):
+    name = "the_fish_and_chip_company_za"
     item_attributes = {"brand": "The Fish & Chip Co", "brand_wikidata": "Q126916268"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
