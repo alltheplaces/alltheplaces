@@ -23,6 +23,7 @@ class LagkagehusetDKSpider(JSONBlobSpider):
         item["street_address"] = item.pop("addr_full")
         item["branch"] = item.pop("name")
         item["email"] = feature.get("mail")
+        item["website"] = f'https://lagkagehuset.dk/butik/{item["branch"]}'.replace(" ", "_")
         if all(feature.get("openingHours", {}).get(day.lower()) == "0:00-0:00" for day in DAYS_3_LETTERS):
             set_closed(item)
         else:
