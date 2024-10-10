@@ -3,12 +3,15 @@ from scrapy.http import JsonRequest
 
 from locations.hours import DAYS_3_LETTERS, DAYS_WEEKDAY, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.vodacom_za import VODACOM_SHARED_ATTRIBUTES
 
 
 class VodacomMZSpider(JSONBlobSpider):
     name = "vodacom_mz"
-    item_attributes = VODACOM_SHARED_ATTRIBUTES
+    item_attributes = item_attributes = {
+        "brand": "Vodacom Moçambique",
+        "brand_wikidata": "Q130477552",
+        "extras": Categories.SHOP_MOBILE_PHONE.value,
+    }
     start_urls = ["https://www.vm.co.mz/lojas"]
     locations_key = "data"
 

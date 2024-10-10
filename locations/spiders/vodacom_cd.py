@@ -1,12 +1,15 @@
 from scrapy.http import JsonRequest
 
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.vodacom_za import VODACOM_SHARED_ATTRIBUTES
 
 
 class VodacomCDSpider(JSONBlobSpider):
     name = "vodacom_cd"
-    item_attributes = VODACOM_SHARED_ATTRIBUTES
+    item_attributes = item_attributes = {
+        "brand": "Vodacom Congo",
+        "brand_wikidata": "Q130477507",
+        "extras": Categories.SHOP_MOBILE_PHONE.value,
+    }
     locations_key = ["response", "stores"]
 
     def start_requests(self):
