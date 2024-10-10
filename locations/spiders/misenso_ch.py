@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
 
@@ -20,6 +21,7 @@ class MisensoCHSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["phone"] = response.xpath('//*[@class="rtc"]//*[contains(@href,"tel:")]/text()').get()
         item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
+        apply_category(Categories.SHOP_OPTICIAN, item)
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath(
             '//*[@class = "type--module name--text moix--1 moix-wowr--1 moix-mona--text--0 container number_of_cols--two"]//li'
