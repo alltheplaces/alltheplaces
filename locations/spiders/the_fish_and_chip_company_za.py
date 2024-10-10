@@ -1,33 +1,17 @@
-from typing import Any, Iterable
+from typing import Iterable
 
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.storefinders.go_review_api import GoReviewApiSpider
 
 
-class TheFishAndChipCompanyZASpider(Spider):
+class TheFishAndChipCompanyZASpider(GoReviewApiSpider):
     name = "the_fish_and_chip_company_za"
     item_attributes = {"brand": "The Fish & Chip Co", "brand_wikidata": "Q126916268"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    domain = "fishchipco.localpages.io"
 
-    def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(
-            url="https://admin.goreview.co.za/website/api/locations/search",
-            data={
-                "domain": "fishchipco.localpages.io",
-                "latitude": "null",
-                "longitude": "null",
-                "attributes": "false",
-                "radius": "null",
-                "initialLoad": "true",
-            },
-        )
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("The Fish & Chip Co ")
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["stores"]:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name").removeprefix("The Fish & Chip Co ")
-            item["website"] = location["local_page_url"]
-
-            yield item
+        yield item
