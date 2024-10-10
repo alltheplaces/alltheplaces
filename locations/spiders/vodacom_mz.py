@@ -1,6 +1,7 @@
 from scrapy import Request
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.hours import DAYS_3_LETTERS, DAYS_WEEKDAY, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 

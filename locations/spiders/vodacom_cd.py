@@ -1,5 +1,6 @@
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.json_blob_spider import JSONBlobSpider
 
 
