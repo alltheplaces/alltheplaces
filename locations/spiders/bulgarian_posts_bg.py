@@ -10,7 +10,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class BulgarianPostsBGSpider(Spider):
     name = "bulgarian_posts_bg"
-    item_attributes = {"brand": "Bulgarian Posts", "brand_wikidata": "Q2880826"}
+    item_attributes = {"operator": "Български пощи", "operator_wikidata": "Q2880826"}
     allowed_domains = ["bgpost.bg"]
     start_urls = ["https://bgpost.bg/api/offices?search_by_city_name_or_address="]
 
