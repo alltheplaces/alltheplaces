@@ -12,6 +12,41 @@ This is great for modelling common (or even uncommon) atrributes like:
 
 and more.
 
+Example: locations/spiders/shell.py
+```
+from locations.categories import (
+    Access,
+    Categories,
+    Extras,
+    Fuel,
+    FuelCards,
+    PaymentMethods,
+    apply_category,
+    apply_yes_no,
+)
+
+class ShellSpider(GeoMeSpider):
+    # ...
+    def parse_item(self, item, location):
+
+        amenities = location["amenities"]
+        # ...
+        if "restaurant" in amenities:
+            apply_yes_no("food", item, True)
+
+        if "charging" in amenities or "electric_charging_other" in fuels or "shell_recharge" in fuels:
+            apply_yes_no("fuel:electricity", item, True)
+
+        apply_yes_no(Extras.TOILETS, item, any("toilet" in a for a in amenities))
+        apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, "wheelchair_accessible_toilet" in amenities)
+        apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "baby_change_facilities" in amenities)
+        apply_yes_no(Extras.SHOWERS, item, "shower" in amenities)
+        apply_yes_no(Extras.ATM, item, "atm" in amenities or "atm_in" in amenities or "atm_out" in amenities)
+        apply_yes_no(
+            Extras.CAR_WASH, item, any("carwash" in a for a in amenities) or any("car_wash" in a for a in amenities)
+        )
+```
+
 ### I have something that is a valid attribute, but there is no enum
 
 If you have important information that isnt modelled, any valid OSM tags can be manually applied to the extras key.
