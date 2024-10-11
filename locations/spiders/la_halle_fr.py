@@ -1,3 +1,5 @@
+import json
+import re
 from typing import Any, Iterable
 
 from scrapy import Request
@@ -5,6 +7,7 @@ from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import FIREFOX_LATEST
 
@@ -31,4 +34,28 @@ class LaHalleFRSpider(Spider):
             ] = f'https://www.lahalle.com/magasins-{item["state"]}-{state_code}-{item["branch"]}-{item["ref"]}.html'.lower().replace(
                 " ", "-"
             )
+            item["opening_hours"] = OpeningHours()
+            opening_hours = json.loads(store["custom"]["BMNR_horaires"])
+            for day, hours in opening_hours.items():
+                if day := sanitise_day(day, DAYS_FR):
+                    shift_1_open_time, shift_1_close_time = hours.get("ouverture_matin"), hours.get(
+                        "fermeture_matin"
+                    ) or hours.get("fermeture_apresmidi")
+                    shift_2_open_time, shift_2_close_time = hours.get("ouverture_apresmidi"), hours.get(
+                        "fermeture_apresmidi"
+                    )
+                    for shift_timing in [
+                        (shift_1_open_time, shift_1_close_time),
+                        (shift_2_open_time, shift_2_close_time),
+                    ]:
+                        if shift_timing[0] and shift_timing[1]:
+                            item["opening_hours"].add_range(
+                                day, self.clean_hours(shift_timing[0]), self.clean_hours(shift_timing[1])
+                            )
             yield item
+
+    def clean_hours(self, hours: str) -> str:
+        if not hours:
+            return ""
+        hours = re.sub(r"(\d{2})(\d{2})", r"\1:\2", hours)
+        return hours
