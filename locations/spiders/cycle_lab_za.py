@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-# Also used by chris_willemse_cycles_za
+# Also used by chris_willemse_cycles_za and the_pro_shop_za
 class CycleLabZASpider(Spider):
     name = "cycle_lab_za"
     item_attributes = {
