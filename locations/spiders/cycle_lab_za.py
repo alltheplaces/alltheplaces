@@ -6,6 +6,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
+# Also used by chris_willemse_cycles_za
 class CycleLabZASpider(Spider):
     name = "cycle_lab_za"
     item_attributes = {
@@ -36,4 +37,7 @@ class CycleLabZASpider(Spider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(info.xpath('string(.//div[@class="hours-location"])').get())
 
-            yield item
+            yield from self.post_process_item(item, response, location)
+
+    def post_process_item(self, item, response, location):
+        yield item
