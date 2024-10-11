@@ -1,5 +1,7 @@
-import xmltodict
-from scrapy import Spider
+from typing import Iterable
+
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
@@ -8,16 +10,13 @@ from locations.user_agents import BROWSER_DEFAULT
 class KrefelBESpider(Spider):
     name = "krefel_be"
     item_attributes = {"brand": "Krëfel", "brand_wikidata": "Q3200093"}
-    start_urls = ["https://api.krefel.be/api/v2/krefel/stores?pageSize=100&lang=nl"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    user_agent = BROWSER_DEFAULT
+
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(url="https://api.krefel.be/api/v2/krefel/stores?pageSize=100&lang=nl")
 
     def parse(self, response, **kwargs):
-        # API response's content-type is not consistent.
-        if response.headers["Content-Type"] == "application/json":
-            locations = response.json()["stores"]
-        else:
-            locations = xmltodict.parse(response.text)["storeFinderSearchPage"]["stores"]
-        for location in locations:
+        for location in response.json()["stores"]:
             location["ref"] = location.pop("name")
             location["website"] = f'https://www.krefel.be/nl/winkels/{location["ref"]}'
             location["phone"] = "; ".join(
