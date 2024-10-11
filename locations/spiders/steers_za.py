@@ -1,18 +1,15 @@
-from scrapy.spiders import SitemapSpider
+from locations.categories import Extras, apply_yes_no
+from locations.storefinders.yext_search import YextSearchSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 
-
-class SteersZASpider(SitemapSpider, StructuredDataSpider):
+class SteersZASpider(YextSearchSpider):
     name = "steers_za"
     item_attributes = {"brand": "Steers", "brand_wikidata": "Q3056765"}
-    sitemap_urls = ["https://location.steers.co.za/robots.txt"]
-    sitemap_rules = [(r"location\.steers\.co\.za/[-\w()]+$", "parse")]
-    search_for_twitter = False
+    host = "https://location.steers.co.za"
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["image"] = None
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").lstrip(self.item_attributes["brand"]).strip()
+    def parse_item(self, location, item):
+        apply_yes_no(Extras.DELIVERY, item, location["profile"].get("c_delivery"), False)
+        if location_filters := location.get("c_steersLocatorFilters"):
+            apply_yes_no(Extras.HALAL, item, "Halaal" in location_filters, False)
+            apply_yes_no(Extras.BACKUP_GENERATOR, item, "Generator" in location_filters, False)
         yield item
