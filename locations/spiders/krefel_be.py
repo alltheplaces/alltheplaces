@@ -28,4 +28,5 @@ class KrefelBESpider(Spider):
 
             item = DictParser.parse(location)
             item["extras"]["website:fr"] = f'https://www.krefel.be/fr/magasins/{location["ref"]}'
+            item["branch"] = item.pop("name")
             yield item
