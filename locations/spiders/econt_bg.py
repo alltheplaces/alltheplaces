@@ -14,7 +14,7 @@ def unix_timestamp_to_local_time(timezone, timestamp):
 
 class EcontBGSpider(Spider):
     name = "econt_bg"
-    item_attributes = {"brand": "Econt", "brand_wikidata": "Q12279603"}
+    item_attributes = {"brand": "Еконт", "brand_wikidata": "Q12279603"}
     allowed_domains = ["ee.econt.com"]
     start_urls = ["https://ee.econt.com/services/Nomenclatures/NomenclaturesService.getOffices.json"]
 
