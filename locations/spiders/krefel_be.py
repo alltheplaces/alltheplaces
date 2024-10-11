@@ -1,5 +1,6 @@
 from typing import Any, Iterable
 
+import xmltodict
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +18,12 @@ class KrefelBESpider(Spider):
         yield JsonRequest(url="https://api.krefel.be/api/v2/krefel/stores?pageSize=100&lang=nl")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["stores"]:
+        # API response's content-type is not consistent.
+        if response.headers["Content-Type"] == "application/json":
+            locations = response.json()["stores"]
+        else:
+            locations = xmltodict.parse(response.text)["storeFinderSearchPage"]["stores"]
+        for location in locations:
             location["ref"] = location.pop("name")
             location["phone"] = "; ".join(
                 filter(None, [location["address"].get("phone"), location["address"].get("phone2")])
