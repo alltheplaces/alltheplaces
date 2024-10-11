@@ -19,7 +19,7 @@ class KrefelBESpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # API response's content-type is not consistent.
-        if response.headers["Content-Type"] == "application/json":
+        if response.headers["Content-Type"] == b"application/json":
             locations = response.json()["stores"]
         else:
             locations = xmltodict.parse(response.text)["storeFinderSearchPage"]["stores"]
