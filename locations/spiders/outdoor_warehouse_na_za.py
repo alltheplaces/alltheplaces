@@ -12,6 +12,7 @@ class OutdoorWarehouseNAZASpider(JSONBlobSpider):
         "brand_wikidata": "Q130485369",
     }
     start_urls = ["https://www.outdoorwarehouse.co.za/store-locator"]
+    skip_auto_cc_domain = True
 
     def extract_json(self, response):
         return chompjs.parse_js_object(response.xpath("//store-selector").get())
