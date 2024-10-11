@@ -11,4 +11,3 @@ This is great for modelling common (or even uncommon) atrributes like:
 * Dietary compatibility
 
 and more.
-
