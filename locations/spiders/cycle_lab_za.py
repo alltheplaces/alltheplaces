@@ -32,7 +32,9 @@ class CycleLabZASpider(Spider):
             item["addr_full"] = clean_address(
                 info.xpath('.//div[@class="Store-Location-Address"]/div/div/p/text()').getall()
             )
-            item["phone"] = info.xpath('.//div[@class="number"]/h3/text()').get()
+
+            item["phone"] = info.xpath('.//i[@class="fa fa-phone"]/../text()').get()
+            item["email"] = info.xpath('.//i[@class="fa fa-envelope"]/../text()').get()
 
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(info.xpath('string(.//div[@class="hours-location"])').get())
