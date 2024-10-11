@@ -5,8 +5,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
 
-class OutdoorWarehouseZASpider(JSONBlobSpider):
-    name = "outdoor_warehouse_za"
+class OutdoorWarehouseNAZASpider(JSONBlobSpider):
+    name = "outdoor_warehouse_na_za"
     item_attributes = {
         "brand": "Outdoor Warehouse",
         "brand_wikidata": "Q130485369",
