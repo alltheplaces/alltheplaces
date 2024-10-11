@@ -20,7 +20,7 @@ Consider adding a pull request to add your enumeration value if is commonly avai
 
 Example: Detailed wifi attributes
 ```
-properties = {
+             properties = {
                 "ref": location["properties"]["Name"],
                 "geometry": location["geometry"],
                 "name": location["properties"]["Long_Name"],
