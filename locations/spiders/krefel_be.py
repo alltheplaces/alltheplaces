@@ -18,7 +18,6 @@ class KrefelBESpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:
             location["ref"] = location.pop("name")
-            location["website"] = f'https://www.krefel.be/nl/winkels/{location["ref"]}'
             location["phone"] = "; ".join(
                 filter(None, [location["address"].get("phone"), location["address"].get("phone2")])
             ).replace("/", "")
@@ -26,6 +25,7 @@ class KrefelBESpider(Spider):
             location["address"]["street"] = location["address"].pop("line1")
 
             item = DictParser.parse(location)
+            item["website"] = item["extras"]["website:nl"] = f'https://www.krefel.be/nl/winkels/{location["ref"]}'
             item["extras"]["website:fr"] = f'https://www.krefel.be/fr/magasins/{location["ref"]}'
             item["branch"] = item.pop("name")
             yield item
