@@ -7,7 +7,7 @@ from locations.hours import DAYS_BG, OpeningHours
 
 class CcbankBGSpider(Spider):
     name = "ccbank_bg"
-    item_attributes = {"brand": "Central Cooperative Bank", "brand_wikidata": "Q2944755"}
+    item_attributes = {"brand": "Централна Кооперативна Банка", "brand_wikidata": "Q2944755"}
     allowed_domains = ["ccbank.bg"]
     start_urls = ["https://ccbank.bg/bg/branches_network/offices"]
 
