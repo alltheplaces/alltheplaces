@@ -24,4 +24,11 @@ class LaHalleFRSpider(Spider):
             store["street-address"] = merge_address_lines([store.pop("address1", ""), store.pop("address2", "")])
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
+            item["state"] = store["custom"]["BMNR_StateName"]
+            state_code = store["custom"]["BMNR_StateCode"]
+            item[
+                "website"
+            ] = f'https://www.lahalle.com/magasins-{item["state"]}-{state_code}-{item["branch"]}-{item["ref"]}.html'.lower().replace(
+                " ", "-"
+            )
             yield item
