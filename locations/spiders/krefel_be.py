@@ -20,7 +20,7 @@ class KrefelBESpider(Spider):
         for location in locations:
             location["ref"] = location.pop("name")
             location["website"] = f'https://www.krefel.be/nl/winkels/{location["ref"]}'
-            location["phone"] = ";".join(
+            location["phone"] = "; ".join(
                 filter(None, [location["address"].get("phone"), location["address"].get("phone2")])
             ).replace("/", "")
             location["address"]["house_number"] = location["address"].pop("line2", "")
