@@ -1,25 +1,27 @@
-import re
+from typing import Any, Iterable
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
 
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import FIREFOX_LATEST
 
 
-class LaHalleFRSpider(CrawlSpider, StructuredDataSpider):
+class LaHalleFRSpider(Spider):
     name = "la_halle_fr"
     item_attributes = {"brand": "La Halle", "brand_wikidata": "Q100728296"}
-    start_urls = ["https://www.lahalle.com/magasins"]
-    rules = [
-        Rule(LinkExtractor(restrict_xpaths='//div[@id="store-locator-home-departements"]')),
-        Rule(LinkExtractor(restrict_xpaths='//a[@class="store-details-link"]'), callback="parse_sd"),
-    ]
-    wanted_types = ["LocalBusiness", "ClothingStore"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if script := response.xpath('//script[contains(text(), "env_template")]/text()').get():
-            if lat := re.search(r'\\"store_latitude\\":\\"(-?\d+\.\d+)\\",', script):
-                item["lat"] = lat.group(1)
-            if lon := re.search(r'\\"store_longitude\\":\\"(-?\d+\.\d+)\\",', script):
-                item["lon"] = lon.group(1)
-        yield item
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(
+            url="https://www.lahalle.com/on/demandware.store/Sites-LHA_FR_SFRA-Site/fr_FR/Stores-FindStores?showMap=true&lat=48.85349504454055&long=2.3483914659676657&radius=10000",
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["stores"]:
+            store["street-address"] = merge_address_lines([store.pop("address1", ""), store.pop("address2", "")])
+            item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
+            yield item
