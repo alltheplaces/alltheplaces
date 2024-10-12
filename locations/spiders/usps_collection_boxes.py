@@ -170,4 +170,10 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             if h:
                 properties["extras"]["collection_times"] = h
 
+            if properties.get("name") == "USPS COLLECTION BOX - BLUE BOX":
+                properties.pop("name")
+            elif properties.get("name") == "USPS COLLECTION BOX - PO LOBBY":
+                properties["extras"]["indoor"] = "yes"
+                properties.pop("name")
+
             yield Feature(**properties)
