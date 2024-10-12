@@ -46,7 +46,7 @@ class YextSearchSpider(Spider):
             if menu_url := profile.get("menuUrl"):
                 item["extras"]["website:menu"] = menu_url
             if order_url := profile.get("orderUrl"):
-                item["extras"]["website:orders"] = order_url
+                item["extras"]["website:orders"] = order_url.split("?")[0]
 
             phones = []
             for phone_type in ["localPhone", "mainPhone", "mobilePhone", "alternatePhone"]:
@@ -60,7 +60,13 @@ class YextSearchSpider(Spider):
             if emails:
                 item["email"] = "; ".join(emails)
 
-            item["facebook"] = profile.get("facebookPageUrl")
+            if facebook_vanity := profile.get("facebookVanityUrl"):
+                if not facebook_vanity.startswith("http"):
+                    item["facebook"] = "https://www.facebook.com/" + facebook_vanity
+                else:
+                    item["facebook"] = facebook_vanity
+            elif facebook_profile := profile.get("facebookPageUrl"):
+                item["facebook"] = facebook_profile
 
             if profile.get("googlePlaceId"):
                 item["extras"]["ref:google"] = profile.get("googlePlaceId")
