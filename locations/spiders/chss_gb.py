@@ -10,7 +10,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class ChssGBSpider(Spider):
     name = "chss_gb"
-    item_attributes = {"name": "Chest, Heart and Stroke Scotland", "brand": "Chest, Heart and Stroke Scotland", "brand_wikidata": "Q30265706"}
+    item_attributes = {
+        "name": "Chest, Heart and Stroke Scotland",
+        "brand": "Chest, Heart and Stroke Scotland",
+        "brand_wikidata": "Q30265706",
+    }
     start_urls = [
         "https://www.chss.org.uk/wp-admin/admin-ajax.php?action=store_search&lat=56.81&lng=-4.18&max_results=50&search_radius=200"
     ]
