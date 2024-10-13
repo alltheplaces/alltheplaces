@@ -19,7 +19,7 @@ class JigsawGBSpider(Spider):
             item["branch"] = newlocation["name"]
             item["name"] = "Jigsaw"
             item["street_address"] = newlocation["address_2"]
-            item["lat"], item["lon"] = location["geometry"]["coordinates"]
+            item["lon"], item["lat"] = location["geometry"]["coordinates"]
 
             opening_hours = OpeningHours()
             oh = newlocation["opening_hours"]
