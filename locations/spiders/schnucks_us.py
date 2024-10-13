@@ -8,7 +8,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class SchnucksUSSpider(scrapy.Spider):
     name = "schnucks_us"
-    item_attributes = {"brand": "Schnuck's", "brand_wikidata": "Q7431920"}
+    item_attributes = {"brand": "Schnucks", "brand_wikidata": "Q7431920"}
     allowed_domains = ["locations.schnucks.com"]
     start_urls = ["https://locations.schnucks.com/"]
 
