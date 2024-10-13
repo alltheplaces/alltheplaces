@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class DswSpider(SitemapSpider):
     name = "dsw"
-    item_attributes = {"brand": "Designer Shoe Warehouse", "brand_wikidata": "Q5206207"}
+    item_attributes = {"brand": "DSW", "long_name": "Designer Shoe Warehouse", "brand_wikidata": "Q5206207"}
     allowed_domains = [
         "stores.dsw.com",
         "stores.dsw.ca",
