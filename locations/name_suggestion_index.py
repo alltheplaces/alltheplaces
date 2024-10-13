@@ -81,10 +81,15 @@ class NSI(metaclass=Singleton):
         """
         self._ensure_loaded()
         wd_json = self.wikidata_json.get(wikidata_code)
+
+        if not wd_json:
+            return None
+
         if include_dissolved:
             return wd_json
         elif "dissolutions" not in wd_json:
             return wd_json
+
         return None
 
     def iter_wikidata(self, label_to_find: str = None) -> Iterable[tuple[str, dict]]:
