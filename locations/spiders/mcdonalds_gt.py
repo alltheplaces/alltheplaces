@@ -27,4 +27,5 @@ class McdonaldsGTSpider(JSONBlobSpider):
                     if day := sanitise_day(rule["description"], DAYS_ES):
                         item["opening_hours"].add_range(day, rule["start_time"], rule["end_time"])
 
+        item.pop("name")
         yield item
