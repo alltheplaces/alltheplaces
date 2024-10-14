@@ -1,4 +1,4 @@
-import json
+
 import scrapy
 
 from locations.categories import Categories
@@ -8,10 +8,8 @@ from locations.hours import DAYS, OpeningHours
 
 class HandelsbankenGBSpider(scrapy.Spider):
     name = "handelsbanken_gb"
-    item_attributes = {"brand": "Handelsbanken", "brand_wikidata": "Q1421630",  "extras": Categories.BANK.value}
-    start_urls = [
-        "https://www.handelsbanken.co.uk/rsoia/parg/bu/branches/v3/country/GB/en"
-    ]
+    item_attributes = {"brand": "Handelsbanken", "brand_wikidata": "Q1421630", "extras": Categories.BANK.value}
+    start_urls = ["https://www.handelsbanken.co.uk/rsoia/parg/bu/branches/v3/country/GB/en"]
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -19,13 +17,13 @@ class HandelsbankenGBSpider(scrapy.Spider):
             item["name"] = "Handelsbanken"
             item["branch"] = location["name"]
             if location["branchUrl"]:
-                item["website"] = "https://"+location["branchUrl"]
+                item["website"] = "https://" + location["branchUrl"]
             item["street_address"] = location["streetAddress"]
 
             oh = OpeningHours()
             days = location["openingHours"]
             for day in days:
                 oh.add_range(DAYS[int(day.get("weekday"))], day.get("openTime"), day.get("closeTime"))
-            item["opening_hours"]=oh.as_opening_hours()
+            item["opening_hours"] = oh.as_opening_hours()
 
             yield item
