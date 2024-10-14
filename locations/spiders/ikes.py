@@ -1,9 +1,9 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class IkesSpider(SitemapSpider):
+class IkesSpider(SitemapSpider, StructuredDataSpider):
     name = "ikes"
     item_attributes = {
         "brand": "Ike's Love & Sandwiches",
@@ -11,21 +11,10 @@ class IkesSpider(SitemapSpider):
     }
 
     allowed_domains = ["locations.ikessandwich.com"]
-    sitemap_urls = ["https://locations.ikessandwich.com/sitemap.xml"]
+    sitemap_urls = ["https://locations.ikessandwich.com/robots.txt"]
     sitemap_rules = [
         (
             r"https:\/\/locations.ikessandwich.com\/.+\/",
             "parse",
         ),
     ]
-
-    def parse(self, response):
-        store_links = response.css(".sb-directory-list li a")
-        yield from response.follow_all(store_links, callback=self.parse_store)
-
-    def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "LocalBusiness")
-        if item is None:
-            return
-        item["ref"] = response.url.split("/")[-2]
-        yield item
