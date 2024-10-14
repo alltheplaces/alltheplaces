@@ -3,6 +3,7 @@ import re
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
@@ -33,6 +34,9 @@ class KfcIDSpider(scrapy.Spider):
                         item["opening_hours"].add_range(day, open_time, close_time)
             else:
                 continue
+
+            services = [s["name"] for s in store["store_services"]]
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "KFC Drive Thru" in services)
 
             yield item
 
