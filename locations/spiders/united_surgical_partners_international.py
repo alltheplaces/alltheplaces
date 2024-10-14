@@ -25,7 +25,7 @@ class UnitedSurgicalPartnersInternationalSpider(scrapy.Spider):
                 website = None
             properties = {
                 "name": item[0],
-                "addr_full": item[3] + " " + item[4],
+                "street_address": item[3] + " " + item[4],
                 "city": item[5],
                 "state": item[6],
                 "postcode": item[7],
