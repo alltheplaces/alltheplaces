@@ -33,4 +33,9 @@ class BenAndJerrysSpider(Where2GetItSpider):
                 item["opening_hours"].set_closed(day)
             else:
                 item["opening_hours"].add_ranges_from_string(day + " " + location.get(day.lower()))
+        # this source is not listing standalone ice cream POIs from this brand
+        # but rather known locations where their ice cream is provided
+        item.pop("amenity", None)
+        item.pop("cuisine", None)
+        apply_yes_no("ice_cream", item, "yes")
         yield item
