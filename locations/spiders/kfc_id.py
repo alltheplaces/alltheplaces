@@ -20,6 +20,7 @@ class KfcIDSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for store in response.json().get("data"):
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
             item["image"] = store.get("picture")
             item["city"] = store.get("district").get("name")
             item["state"] = store.get("district").get("province").get("name")
