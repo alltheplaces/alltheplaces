@@ -9,4 +9,3 @@ class KateSpadeCAUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = KateSpadeSpider.item_attributes
     sitemap_urls = ["https://www.katespade.com/robots.txt"]
     sitemap_rules = [(r"/stores/\w\w/\w\w/[-\w]+/[-\w]+$", "parse_sd")]
-    wanted_types = ["OutletStore"]
