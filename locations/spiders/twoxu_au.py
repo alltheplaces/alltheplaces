@@ -38,4 +38,5 @@ class TwoxuAUSpider(StockistSpider):
                     hours_string = f"{hours_string} {days}: {open_time}-{close_time}"
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
+        item["branch"] = item.pop("name")
         yield item
