@@ -41,12 +41,23 @@ class KfcMYSpider(Spider):
             item = DictParser.parse(location)
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["drivethru"] == "1", False)
             item["opening_hours"] = OpeningHours()
+
             if len(location["selfcollect_open"].split(":")) == 2:
                 location["selfcollect_open"] = location["selfcollect_open"] + ":00"
+            location["selfcollect_open"] = location["selfcollect_open"].replace("::", ":")
+
             if len(location["selfcollect_close"].split(":")) == 2:
                 location["selfcollect_close"] = location["selfcollect_close"] + ":00"
             location["selfcollect_close"] = location["selfcollect_close"].replace("24:00:00", "23:59:00")
-            item["opening_hours"].add_days_range(
-                DAYS, location["selfcollect_open"], location["selfcollect_close"], "%H:%M:%S"
-            )
+            location["selfcollect_close"] = location["selfcollect_close"].replace("::", ":")
+
+            try:
+                item["opening_hours"].add_days_range(
+                    DAYS, location["selfcollect_open"], location["selfcollect_close"], "%H:%M:%S"
+                )
+            except Exception as e:
+                self.logger.warning(
+                    f"Error parsing hours: {location["selfcollect_open"]}, {location["selfcollect_close"]}, {e}"
+                )
+                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
             yield item
