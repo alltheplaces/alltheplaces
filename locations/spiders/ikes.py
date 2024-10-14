@@ -9,12 +9,10 @@ class IkesSpider(SitemapSpider, StructuredDataSpider):
         "brand": "Ike's Love & Sandwiches",
         "brand_wikidata": "Q112028897",
     }
-
-    allowed_domains = ["locations.ikessandwich.com"]
     sitemap_urls = ["https://locations.ikessandwich.com/robots.txt"]
     sitemap_rules = [
         (
-            r"https:\/\/locations.ikessandwich.com\/.+\/",
-            "parse",
+            r"https://locations.ikessandwich.com/[a-z]{2}/[-\w]+/[-\w]+",
+            "parse_sd",
         ),
     ]
