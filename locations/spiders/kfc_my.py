@@ -57,7 +57,7 @@ class KfcMYSpider(Spider):
                 )
             except Exception as e:
                 self.logger.warning(
-                    f"Error parsing hours: {location["selfcollect_open"]}, {location["selfcollect_close"]}, {e}"
+                    f"Error parsing hours: {location['selfcollect_open']}, {location['selfcollect_close']}, {e}"
                 )
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
             yield item
