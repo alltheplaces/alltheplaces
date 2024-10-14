@@ -8,7 +8,6 @@ class NickTheGreekUSSpider(StoreRocketSpider):
     base_url = "https://www.nickthegreek.com/"
 
     def parse_item(self, item, location):
-        item["website"] = "https://www.nickthegreek.com/locations"
         # remove unused/non-store-specific-value fields
         if item["email"] == "office@nickthegreek.com":
             item.pop("email")

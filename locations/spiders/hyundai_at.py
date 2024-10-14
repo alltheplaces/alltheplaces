@@ -19,7 +19,6 @@ class HyundaiATSpider(scrapy.Spider):
             item["street_address"] = dealer.get("Strasse")
             item["city"] = dealer.get("Ort")
             item["state"] = dealer.get("Bundesland")
-            item["website"] = "https://www.hyundai.at/partner-finden"
 
             if dealer.get("Verkauf"):
                 apply_category(Categories.SHOP_CAR, item)
