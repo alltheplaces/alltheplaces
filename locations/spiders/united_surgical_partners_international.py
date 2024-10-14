@@ -22,7 +22,7 @@ class UnitedSurgicalPartnersInternationalSpider(scrapy.Spider):
             if len(item) == 12:
                 website = item[11]
             else:
-                website = "na"
+                website = None
             properties = {
                 "name": item[0],
                 "addr_full": item[3] + " " + item[4],
