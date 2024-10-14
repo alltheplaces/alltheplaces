@@ -1,5 +1,7 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -16,3 +18,7 @@ class IkesSpider(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         ),
     ]
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = response.xpath('//*[@class="location-name"]/text()').get()
+        yield item
