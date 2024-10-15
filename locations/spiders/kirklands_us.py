@@ -7,8 +7,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class KirklandsSpider(CrawlSpider, StructuredDataSpider):
-    name = "kirklands"
+class KirklandsUSSpider(CrawlSpider, StructuredDataSpider):
+    name = "kirklands_us"
     item_attributes = {
         "brand": "Kirkland's",
         "brand_wikidata": "Q6415714",
