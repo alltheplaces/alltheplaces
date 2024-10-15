@@ -15,8 +15,8 @@ class PapaJohnsGBSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["website"] = response.url
-        if item["extras"]["facebook"] == "https://www.facebook.com/papajohnsuk":
-            item["extras"].pop("facebook")
+        if item.get("facebook") == "https://www.facebook.com/papajohnsuk":
+            item.pop("facebook")
 
         item["branch"] = item.pop("name")
         if m := re.search(r"\((-?\d+\.\d+),(-?\d+\.\d+)\)", response.xpath('.//*[@class="map col"]/img/@src').get()):
