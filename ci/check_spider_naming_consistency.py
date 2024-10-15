@@ -14,6 +14,7 @@ COUNTRYCODE_COMPONENTS = {
     "AT",
     "AU",
     "AW",
+    "AZ",
     "BD",
     "BE",
     "BG",
