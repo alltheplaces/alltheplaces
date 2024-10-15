@@ -21,7 +21,7 @@ class SchnucksUSSpider(scrapy.Spider):
             item["name"] = location["businessName"]
             item["street_address"] = location["addressLines"][0]
             item["phone"] = location["phoneNumbers"][0]
-            item["website"] = location["websiteURL"].replace("//", "/")
+            item["website"] = location["websiteURL"]
             item["image"] = (
                 "https://storage.googleapis.com/schnucks-digital-assets/storefront-image/" + item["ref"] + ".jpg"
             )
