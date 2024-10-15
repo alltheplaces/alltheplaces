@@ -122,6 +122,7 @@ COUNTRYCODE_COMPONENTS = {
     "UA",
     "US",
     "UY",
+    "UZ",
     "VE",
     "VN",
     "ZA",
