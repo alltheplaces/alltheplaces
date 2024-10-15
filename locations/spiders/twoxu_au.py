@@ -13,6 +13,7 @@ class TwoxuAUSpider(StockistSpider):
     def parse_item(self, item, location):
         if "2XU" not in item["name"]:
             return
+        item["name"], item["branch"] = item["name"].split(" ", 1)
         for custom_field in location["custom_fields"]:
             if custom_field["name"] != "Hours":
                 continue
@@ -38,5 +39,5 @@ class TwoxuAUSpider(StockistSpider):
                     hours_string = f"{hours_string} {days}: {open_time}-{close_time}"
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
-        item["branch"] = item.pop("name")
+
         yield item
