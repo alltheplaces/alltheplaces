@@ -14,6 +14,7 @@ class PapaJohnsGBSpider(SitemapSpider, StructuredDataSpider):
     requires_proxy = True
 
     def post_process_item(self, item, response, ld_data):
+        item["website"] = response.url
         item["branch"] = item.pop("name")
         if m := re.search(r"\((-?\d+\.\d+),(-?\d+\.\d+)\)", response.xpath('.//*[@class="map col"]/img/@src').get()):
             item["lon"], item["lat"] = m.groups()
