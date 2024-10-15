@@ -5,8 +5,6 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class CountdownNZSpider(Spider):
@@ -14,11 +12,7 @@ class CountdownNZSpider(Spider):
     item_attributes = {"brand": "Countdown", "brand_wikidata": "Q5176845"}
     allowed_domains = ["api.cdx.nz"]
     start_urls = ["https://api.cdx.nz/site-location/api/v1/sites?latitude=-42&longitude=174&maxResults=10000"]
-    user_agent = BROWSER_DEFAULT
-    # TLS fingerprinting is used to detect bots, so Playwright must be used to
-    # present a TLS fingerprint of a real web browser.
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
-    is_playwright_spider = True
+    requires_proxy = "NZ"
 
     def start_requests(self):
         for url in self.start_urls:

@@ -3,13 +3,15 @@ import re
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
 class KfcIDSpider(scrapy.Spider):
     name = "kfc_id"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
     no_refs = True
 
     def start_requests(self):
@@ -19,10 +21,10 @@ class KfcIDSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for store in response.json().get("data"):
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
             item["image"] = store.get("picture")
             item["city"] = store.get("district").get("name")
             item["state"] = store.get("district").get("province").get("name")
-            item["website"] = "https://kfcku.com/"
             item["opening_hours"] = OpeningHours()
             if store.get("offices") != []:
                 item["phone"] = store.get("offices").get("phone")
@@ -32,6 +34,9 @@ class KfcIDSpider(scrapy.Spider):
                         item["opening_hours"].add_range(day, open_time, close_time)
             else:
                 continue
+
+            services = [s["name"] for s in store["store_services"]]
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "KFC Drive Thru" in services)
 
             yield item
 

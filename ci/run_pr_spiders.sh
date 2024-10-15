@@ -182,10 +182,30 @@ do
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
             dupe_dropped=$(jq '."dupefilter/filtered"' "${STATSFILE}")
-            total_scraped=$(jq '."item_scraped_count"' "${STATSFILE}")
-            dupe_percent=$(echo "scale=2; ${dupe_dropped} / ${total_scraped} * 100" | bc)
+            dupe_percent=$(echo "scale=2; ${dupe_dropped} / ${FEATURE_COUNT} * 100" | bc)
             if [ $(echo "${dupe_percent} > 30" | bc) -eq 1 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
+            fi
+
+            # Warn if the image URL is not very unique across all the outputs
+            unique_image_urls=$(jq '.features|map(.properties.image) | unique | length' ${OUTFILE})
+            unique_image_url_rate=$(echo "scale=2; ${unique_image_urls} / ${FEATURE_COUNT} * 100" | bc)
+            if [ $(echo "${unique_image_url_rate} < 50" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
+            fi
+
+            # Warn if the phone number is not very unique across all the outputs
+            unique_phones=$(jq '.features|map(.properties.phone) | unique | length' ${OUTFILE})
+            unique_phone_rate=$(echo "scale=2; ${unique_phones} / ${FEATURE_COUNT} * 100" | bc)
+            if [ $(echo "${unique_phone_rate} < 90" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
+            fi
+
+            # Warn if the email is not very unique across all the outputs
+            unique_emails=$(jq '.features|map(.properties.email) | unique | length' ${OUTFILE})
+            unique_email_rate=$(echo "scale=2; ${unique_emails} / ${FEATURE_COUNT} * 100" | bc)
+            if [ $(echo "${unique_email_rate} < 90" | bc) -eq 1 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
             fi
 
             num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
@@ -199,7 +219,7 @@ do
                 # Include details in an expandable section if there are warnings or errors
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
             else
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
             fi
             continue
         fi

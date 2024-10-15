@@ -14,6 +14,7 @@ class FifthThirdBankSpider(scrapy.spiders.SitemapSpider):
     sitemap_urls = [
         "https://locations.53.com/robots.txt",
     ]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response.selector)

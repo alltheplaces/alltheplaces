@@ -7,6 +7,7 @@ class UnitedRentalsSpider(Spider):
     name = "united_rentals"
     item_attributes = {"brand": "United Rentals", "brand_wikidata": "Q7889101"}
     start_urls = ["https://www.unitedrentals.com/api/v4/locations"]
+    requires_proxy = True
 
     def parse(self, response):
         for location in response.json()["data"]:

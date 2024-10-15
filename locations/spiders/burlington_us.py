@@ -11,3 +11,4 @@ class BurlingtonUSSpider(SitemapSpider, StructuredDataSpider):
         "brand": "Burlington",
         "brand_wikidata": "Q4999220",
     }
+    drop_attributes = {"image"}

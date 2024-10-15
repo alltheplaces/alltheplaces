@@ -11,6 +11,7 @@ class ScoutsGGGBIMJESpider(JSONBlobSpider):
     }
     start_urls = ["https://groupfinder.azurewebsites.net/GroupFinder?page=1&pageSize=500&location=london"]
     locations_key = "Data"
+    skip_auto_cc_domain = True
 
     def parse(self, response):
         features = self.extract_json(response)
@@ -24,5 +25,5 @@ class ScoutsGGGBIMJESpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         if item.get("postcode") is not None and item["postcode"].lower() == "null":
             item.pop("postcode")
-        item["website"] = f"https://www.scouts.org.uk/groups/{location['id']}?slug={location['slug']}"
+        item["website"] = f"https://www.scouts.org.uk/groups/{location['Id']}?slug={location['Slug']}"
         yield item

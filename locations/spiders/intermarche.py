@@ -84,7 +84,7 @@ class IntermarcheSpider(scrapy.Spider):
                 continue  # Something to do with post offices
 
             if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
-                fuel = item.copy()
+                fuel = item.deepcopy()
                 fuel["ref"] += "_fuel"
                 fuel.update(self.INTERMARCHE)
 
@@ -93,7 +93,7 @@ class IntermarcheSpider(scrapy.Spider):
                 yield fuel
 
             if any(s["code"] == "lav" for s in place["ecommerce"]["services"]):
-                car_wash = item.copy()
+                car_wash = item.deepcopy()
                 car_wash["ref"] += "_carwash"
                 car_wash.update(self.INTERMARCHE)
 

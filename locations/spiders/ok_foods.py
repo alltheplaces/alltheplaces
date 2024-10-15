@@ -6,7 +6,8 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
 OK_FOODS_BRANDS = {
-    # "FR SEVENELEVEN": {"brand": "", "brand_wikidata": ""}, # Not sure what this is. Only 1 store at time of writing
+    # Only 1 store at time of writing. Doesn't look like a regular 7-11
+    "FR SEVENELEVEN": {"brand": None, "brand_wikidata": None, "extras": Categories.SHOP_CONVENIENCE.value},
     "MEGASAVE": {"brand": "Megasave", "brand_wikidata": "Q116520541", "extras": Categories.SHOP_WHOLESALE.value},
     "OK EXPRESS": {"brand": "OK Express", "brand_wikidata": "Q116520407", "extras": Categories.SHOP_CONVENIENCE.value},
     "OK FOODS": {"brand": "OK Foods", "brand_wikidata": "Q116520377", "extras": Categories.SHOP_SUPERMARKET.value},
@@ -79,6 +80,8 @@ class OkFoodsSpider(Spider):
             if location["brand"] in OK_FOODS_BRANDS:
                 item.update(OK_FOODS_BRANDS[location["brand"]])
                 item["name"] = item["brand"]
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{location['brand']}")
 
             try:
                 oh = OpeningHours()

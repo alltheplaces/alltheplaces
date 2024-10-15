@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class BarnardosGBSpider(Spider):
     name = "barnardos_gb"
-    item_attributes = {"brand": "Barnardos", "brand_wikidata": "Q2884670"}
+    item_attributes = {"brand": "Barnardo's", "brand_wikidata": "Q2884670"}
 
     def start_requests(self):
         yield JsonRequest(

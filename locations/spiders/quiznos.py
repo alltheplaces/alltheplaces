@@ -8,7 +8,7 @@ DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sun
 
 class QuiznosSpider(scrapy.Spider):
     name = "quiznos"
-    item_attributes = {"brand": "Quizno's", "brand_wikidata": "Q1936229"}
+    item_attributes = {"brand": "Quiznos", "brand_wikidata": "Q1936229"}
     allowed_domains = ["restaurants.quiznos.com"]
     start_urls = (
         "https://restaurants.quiznos.com/api/stores-by-bounds?bounds={%22south%22:-90,%22west%22:-180,%22north%22:90,%22east%22:180}",

@@ -11,7 +11,7 @@ class EeGBSpider(SitemapSpider):
     name = "ee_gb"
     item_attributes = {"brand": "EE", "brand_wikidata": "Q5322942"}
     sitemap_urls = ["https://ee.co.uk/sitemap-pages.xml"]
-    sitemap_rules = [(r"/stores/[^/]+/[^/]+/[^/]+/[^/]+", "parse")]
+    sitemap_rules = [(r"/stores/[^/]+(:?/[^/]+){0,2}/[^/]+", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
