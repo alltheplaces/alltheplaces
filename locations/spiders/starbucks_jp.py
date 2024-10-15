@@ -4,12 +4,11 @@ from scrapy.http import JsonRequest, Request
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksJPSpider(JSONBlobSpider):
     name = "starbucks_jp"
-    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
+    item_attributes = {"brand": "スターバックス", "brand_wikidata": "Q37158"}
     start_urls = ["https://store.starbucks.co.jp/store_vue/js/store.js"]
     locations_key = ["hits", "hit"]
 
