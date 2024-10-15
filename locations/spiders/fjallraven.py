@@ -15,4 +15,4 @@ class FjallravenSpider(Where2GetItSpider):
         "brand_store": {"eq": "1"},
     }
     # Website seems to be generic
-    drop_keys = {"website"}
+    drop_attributes = {"website"}
