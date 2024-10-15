@@ -19,6 +19,7 @@ class KirklandsSpider(CrawlSpider, StructuredDataSpider):
     time_format = "%I %p"
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name")
         if isinstance(item.get("city"), list):  # e.g. ['Suite A-1', 'Huntsville']
             item["street_address"] = merge_address_lines([item["street_address"], item["city"][0]])
             item["city"] = item["city"][-1]
