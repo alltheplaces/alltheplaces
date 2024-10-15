@@ -152,7 +152,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             properties = {
                 "ref": store["locationID"],
                 "name": store["locationName"],
-                "addr_full": store["address1"],
+                "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["zip5"],
