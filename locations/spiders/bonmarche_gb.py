@@ -1,23 +1,19 @@
 import json
 from typing import Iterable
-from urllib.parse import urlencode
-from scrapy.spiders import CrawlSpider, Rule
 
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import Request, Response
-from locations.linked_data_parser import LinkedDataParser
 
-from locations.country_utils import CountryUtils, get_locale
-from locations.dict_parser import DictParser
+from locations.country_utils import CountryUtils
 from locations.geo import city_locations
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 
 
 class BonmarcheGBSpider(Spider):
     name = "bonmarche_gb"
     item_attributes = {"brand": "Bonmarche", "brand_wikidata": "Q4942146"}
     country_utils = CountryUtils()
+
     def start_requests(self) -> Iterable[Request]:
         country = "GB"
         language = "en-GB"
@@ -40,17 +36,17 @@ class BonmarcheGBSpider(Spider):
         )
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        geodata=response.xpath('//div[@id="map"]//@data-results').get()
-        geo=json.loads(geodata)
+        geodata = response.xpath('//div[@id="map"]//@data-results').get()
+        geo = json.loads(geodata)
         data = response.xpath('//li[@class="stores-list-item"]')
         for location in data:
-            item=Feature()
-            item["addr_full"]=location.xpath('//div[@class="store-address"]').get()
-            item["phone"]=location.xpath('//a/href[contains(text,"tel:")]').get()
-            item["ref"]=location.xpath('//a//@data-storeid').get()
+            item = Feature()
+            item["addr_full"] = location.xpath('//div[@class="store-address"]').get()
+            item["phone"] = location.xpath('//a/href[contains(text,"tel:")]').get()
+            item["ref"] = location.xpath("//a//@data-storeid").get()
             for store in geo["stores"]:
-                if store["id"]==item["ref"]:
-                    item["lat"]=store["lat"]
-                    item["lon"]=store["lng"]
+                if store["id"] == item["ref"]:
+                    item["lat"] = store["lat"]
+                    item["lon"] = store["lng"]
 
             yield item
