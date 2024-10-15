@@ -20,5 +20,5 @@ class KopAndKandeSpider(SitemapSpider):
         item = DictParser.parse(store)
         item["name"] = data["stateCmsPage"]["name"].replace("&a;", "&")
         item["website"] = response.url
-        apply_category(Categories.SHOP_HARDWARE, item)
+        apply_category(Categories.SHOP_HOUSEWARE, item)
         yield item
