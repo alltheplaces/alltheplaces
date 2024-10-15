@@ -3,7 +3,7 @@ from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class VanWallEquipmentCarroll(WPStoreLocatorSpider):
+class VanWallEquipmentCarrollSpider(WPStoreLocatorSpider):
     name = "van_wall_equipment_carroll"
     item_attributes = {"brand": "Van Wall", "extras": Categories.SHOP_TOOL_HIRE.value}
     allowed_domains = [
