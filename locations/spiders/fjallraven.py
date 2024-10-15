@@ -14,3 +14,5 @@ class FjallravenSpider(Where2GetItSpider):
     api_filter = {
         "brand_store": {"eq": "1"},
     }
+    # Website seems to be generic
+    drop_keys = {"website"}
