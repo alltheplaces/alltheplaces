@@ -14,6 +14,7 @@ class KirklandsSpider(Spider):
     }
     start_urls = ["https://www.kirklands.com/js/dyn/store_locator_all_stores.js"]
     ROBOTSTXT_OBEY = False
+    requires_proxy = True
 
     def parse(self, response):
         location_objects = re.split(r"allStores\[\d+\] = ", response.text)[1:]
