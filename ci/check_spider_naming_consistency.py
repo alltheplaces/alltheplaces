@@ -65,6 +65,7 @@ COUNTRYCODE_COMPONENTS = {
     "JO",
     "JP",
     "KE",
+    "KG",
     "KH",
     "KN",
     "KR",
