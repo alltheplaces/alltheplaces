@@ -15,7 +15,7 @@ class VkusnoITochkaRUSpider(scrapy.Spider):
     """
 
     name = "vkusno_i_tochka_ru"
-    item_attributes = {"brand": "Vkusno i tochka", "brand_wikidata": "Q112406961"}
+    item_attributes = {"brand": "Вкусно – и точка", "brand_wikidata": "Q112406961"}
     all_restaurants_url = "https://vkusnoitochka.ru/api/restaurants"
     single_restaurant_url = "https://vkusnoitochka.ru/api/restaurant/"
     restaurants_map_url = "https://vkusnoitochka.ru/restaurants/map/"
