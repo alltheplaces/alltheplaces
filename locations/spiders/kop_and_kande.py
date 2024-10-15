@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 
 class KopAndKandeSpider(SitemapSpider):
     name = "kop_and_kande"
-    item_attributes = {"brand": "Kop & Kande", "brand_wikidata": "Q122730882"}
+    item_attributes = {"brand": "Kop & Kande", "brand_wikidata": "Q124005159"}
     sitemap_urls = ["https://www.kop-kande.dk/sitemap/content"]
     sitemap_rules = [(r"/find-butik/.+", "parse")]
 
