@@ -16,6 +16,8 @@ class HandelsbankenGBSpider(scrapy.Spider):
             item["branch"] = item.pop("name")
             if location["branchUrl"]:
                 item["website"] = "https://" + location["branchUrl"]
+            else:
+                continue
 
             oh = OpeningHours()
             for day in location["openingHours"]:
