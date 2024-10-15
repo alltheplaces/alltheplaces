@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class LouisaCoffeeTWSpider(scrapy.Spider):
     name = "louisa_coffee_tw"
-    item_attributes = {"brand": "Louisa Coffee", "brand_wikidata": "Q96390921"}
+    item_attributes = {"brand": "路易莎咖啡", "brand_wikidata": "Q96390921"}
     start_urls = ["https://www.louisacoffee.co/visit_result?data[county]="]
 
     def parse(self, response):

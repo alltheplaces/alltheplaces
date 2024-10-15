@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 
 class KopAndKandeSpider(SitemapSpider):
     name = "kop_and_kande"
-    item_attributes = {"brand": "Kop & Kande", "brand_wikidata": "Q122730882"}
+    item_attributes = {"brand": "Kop & Kande", "brand_wikidata": "Q124005159"}
     sitemap_urls = ["https://www.kop-kande.dk/sitemap/content"]
     sitemap_rules = [(r"/find-butik/.+", "parse")]
 
@@ -20,5 +20,5 @@ class KopAndKandeSpider(SitemapSpider):
         item = DictParser.parse(store)
         item["name"] = data["stateCmsPage"]["name"].replace("&a;", "&")
         item["website"] = response.url
-        apply_category(Categories.SHOP_HARDWARE, item)
+        apply_category(Categories.SHOP_HOUSEWARE, item)
         yield item
