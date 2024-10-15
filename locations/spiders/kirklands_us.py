@@ -15,7 +15,6 @@ class KirklandsUSSpider(CrawlSpider, StructuredDataSpider):
     }
     start_urls = ["https://www.kirklands.com/custserv/locate_store.cmd"]
     rules = [Rule(LinkExtractor(allow="/store.jsp?"), callback="parse_sd")]
-    requires_proxy = True
     time_format = "%I %p"
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
