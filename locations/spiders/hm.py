@@ -34,8 +34,9 @@ class HmSpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
-            item["ref"] = store["storeCode"]
-            item["extras"] = {"storeClass": store.get("storeClass")}
+            item["branch"] = item.pop("name")
+
+            item["extras"]["storeClass"] = store.get("storeClass")
 
             oh = OpeningHours()
             for rule in store["openingHours"]:
