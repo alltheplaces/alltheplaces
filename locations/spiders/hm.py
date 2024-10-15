@@ -33,8 +33,15 @@ class HmSpider(scrapy.Spider):
             store["street_address"] = clean_address([store.get("streetName1"), store.get("streetName2")])
 
             item = DictParser.parse(store)
+            if (item.get("name") or "").startswith("H&M Kids "):
+                item["branch"] = item.pop("name").removeprefix("H&M Kids ")
+                item["name"] = "H&M Kids"
+            else:
+                item["branch"] = (item.pop("name") or "").removeprefix("H&M ")
+                item["name"] = "H&M"
 
-            item["branch"] = item.pop("name")
+            if isinstance(item["state"], dict):
+                item["state"] = item["state"]["name"]
 
             item["extras"]["storeClass"] = store.get("storeClass")
 
