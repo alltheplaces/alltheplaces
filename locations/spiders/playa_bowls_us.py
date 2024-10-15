@@ -18,6 +18,7 @@ class PlayaBowlsUSSpider(Spider):
 
     def parse(self, response: Response):
         for location in response.json():
+            location["street_address"] = location.pop("address")
             item = DictParser.parse(location)
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location["timing"].replace("Open Everyday ", "Mo-Su"))
