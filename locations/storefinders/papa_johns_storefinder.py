@@ -45,9 +45,9 @@ class PapaJohnsStorefinderSpider(Spider):
             item["name"] = None
 
             item["addr_full"] = location.get("address", {}).get(self.languages[0])
-
-            for lang in self.languages:
-                item["extras"][f"addr:full:{lang}"] = location.get("address", {}).get(lang)
+            if len(self.languages) > 1:
+                for lang in self.languages:
+                    item["extras"][f"addr:full:{lang}"] = location.get("address", {}).get(lang)
 
             item["branch"] = (
                 location.get("name", {})
@@ -55,10 +55,11 @@ class PapaJohnsStorefinderSpider(Spider):
                 .replace("Papa John's ", "")
                 .replace("Papa Johns ", "")
             )
-            for lang in self.languages:
-                item["extras"][f"branch:{lang}"] = (
-                    location.get("name", {}).get(lang, "").replace("Papa John's ", "").replace("Papa Johns ", "")
-                )
+            if len(self.languages) > 1:
+                for lang in self.languages:
+                    item["extras"][f"branch:{lang}"] = (
+                        location.get("name", {}).get(lang, "").replace("Papa John's ", "").replace("Papa Johns ", "")
+                    )
 
             item["phone"] = location.get("phone", [{}])[0].get("value")
 
