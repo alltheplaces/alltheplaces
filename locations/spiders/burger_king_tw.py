@@ -29,4 +29,5 @@ class BurgerKingTWSpider(Spider):
                     continue
                 item["opening_hours"].add_range(DAYS[rule["week"] - 1], rule["openTime"], rule["closeTime"])
             item["website"] = "https://www.burgerking.com.tw/map"
+            item["brand"] = "漢堡王"
             yield item
