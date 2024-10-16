@@ -16,4 +16,5 @@ class PeaveyMartCASpider(KiboSpider):
 
     def parse_item(self, item, location):
         item["website"] = "https://www.peaveymart.com/store-details?locationCode=" + item["ref"]
+        item["branch"] = item.pop("name")
         yield item
