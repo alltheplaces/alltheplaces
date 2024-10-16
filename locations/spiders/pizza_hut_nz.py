@@ -22,7 +22,6 @@ class PizzaHutNZSpider(Spider):
                 continue
 
             item = DictParser.parse(location)
-            item["website"] = "https://www.pizzahut.co.nz/"
 
             apply_yes_no("sells:alcohol", item, location["alcohol_drinks_available"])
             apply_yes_no(PaymentMethods.CASH, item, location["payment_accepted"]["cash"]["active"])

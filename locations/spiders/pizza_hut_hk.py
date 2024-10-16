@@ -16,7 +16,6 @@ class PizzaHutHKSpider(scrapy.Spider):
         for store in response.json()["data"]:
             item = DictParser.parse(store)
             item["addr_full"] = store.get("location").get("line")
-            item["website"] = "https://www.pizzahut.com.hk/"
             item["opening_hours"] = OpeningHours()
             for day_time in store.get("openings").get("weekdays"):
                 day = day_time.get("weekday")
