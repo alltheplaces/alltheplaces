@@ -12,14 +12,19 @@ from locations.items import Feature
 from locations.spiders.papa_johns import PAPA_JOHNS_SHARED_ATTRIBUTES
 
 PAYMENT_OPTIONS_MAP = {
+    "apple_pay": PaymentMethods.APPLE_PAY,
     "cash": PaymentMethods.CASH,
     "card": PaymentMethods.CARDS,
-    # "bizum"
+    # "bizum" (ES)
     "credit": PaymentMethods.CREDIT_CARDS,
     # "direct_click_to_pay"
+    # "fpay" (CL)
+    "mercado_pago": PaymentMethods.MERCADO_PAGO,
+    # "oneclick" (CL)
     "paypal": PaymentMethods.PAYPAL,
-    "apple_pay": PaymentMethods.APPLE_PAY,
-    # "web_online"
+    "sodexo": PaymentMethods.SODEXO,
+    # "tenpo" (CL)
+    # "web_online" (every location?)
 }
 
 
@@ -40,8 +45,9 @@ class PapaJohnsApiSpider(Spider):
             item["branch"] = item.pop("name")
 
             item["street_address"] = location.get("text_address")
-            # ES: commune? is it city or district? Also have region
-            # ES: location?
+            # commune? is it city or district?
+            # also have region
+            # and location?
 
             item["website"] = (
                 f"{self.website_base}/{unidecode(location['name'].lower()).replace(' ', '-')}-{item['ref']}"

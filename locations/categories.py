@@ -562,6 +562,7 @@ class PaymentMethods(Enum):
     MASTER_CARD = "payment:mastercard"
     MASTER_CARD_CONTACTLESS = "payment:mastercard_contactless"
     MASTER_CARD_DEBIT = "payment:mastercard_debit"
+    MERCADO_PAGO = "payment:mercado_pago"
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
     MIR = "payment:mir"
@@ -576,6 +577,7 @@ class PaymentMethods(Enum):
     SAMSUNG_PAY = "payment:samsung_pay"
     SATISPAY = "payment:satispay"
     SBP = "payment:sbp"  # https://www.cbr.ru/eng/psystem/sfp/
+    SODEXO = "payment:sodexo"
     TWINT = "payment:twint"
     UNIONPAY = "payment:unionpay"
     UPI = "payment:upi"  # https://www.upichalega.com/
