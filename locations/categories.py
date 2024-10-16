@@ -568,6 +568,7 @@ class PaymentMethods(Enum):
     MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
+    PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
     QUICPAY = "payment:quicpay"
