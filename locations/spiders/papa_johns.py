@@ -14,6 +14,7 @@ class PapaJohnsSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = item["ref"].strip("/.")
         if item.get("name").startswith("Coming Soon - "):
             item["opening_hours"] = "off"
         item["name"] = item["image"] = None
