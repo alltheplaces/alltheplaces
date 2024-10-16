@@ -1,7 +1,8 @@
-from scrapy import Spider
+from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.hours import OpeningHours, DAYS_BG, sanitise_day
+from locations.spiders.vapestore_gb import clean_address
 
 
 class MussalaBGSpider(Spider):
@@ -13,6 +14,17 @@ class MussalaBGSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            location["street_address"] = merge_address_lines([location.pop("address"), location.pop("address2")])
-
-            yield DictParser.parse(location)
+            item = DictParser.parse(location)
+            item["street_address"] = clean_address([location.pop("address"), location.pop("address2")])
+            item["opening_hours"] = OpeningHours()
+            rows = Selector(text=location["hours"]).xpath("//table/tr").getall()
+            for row in rows:
+                selector_row = Selector(text=row)
+                hours = selector_row.xpath('//td[2]//text()').get()
+                if hours == 'Затворено':
+                    continue
+                day = selector_row.xpath('//td[1]/text()').get()
+                day = sanitise_day(day, DAYS_BG)
+                start_time, end_time = hours.replace('.', ':').split(" - ")
+                item["opening_hours"].add_range(day, start_time, end_time)
+            yield item
