@@ -20,6 +20,7 @@ PAYMENT_OPTIONS_MAP = {
     # "direct_click_to_pay"
     # "fpay" (CL)
     "mercado_pago": PaymentMethods.MERCADO_PAGO,
+    # "mercantil" (PA)
     # "oneclick" (CL)
     "paypal": PaymentMethods.PAYPAL,
     "sodexo": PaymentMethods.SODEXO,

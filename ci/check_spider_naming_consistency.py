@@ -97,6 +97,7 @@ COUNTRYCODE_COMPONENTS = {
     "NO",
     "NZ",
     "OM",
+    "PA",
     "PE",
     "PH",
     "PK",
