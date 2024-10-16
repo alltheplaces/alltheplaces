@@ -4,6 +4,7 @@ from html import unescape
 from geonamescache import GeonamesCache
 from scrapy import Selector
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 
@@ -39,5 +40,7 @@ class TacoPalenqueSpider(SuperStoreFinderSpider):
             item["country"] = "US"
         else:
             item["country"] = "MX"
+
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item
