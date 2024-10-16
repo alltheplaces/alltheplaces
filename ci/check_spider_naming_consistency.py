@@ -30,6 +30,7 @@ COUNTRYCODE_COMPONENTS = {
     "CL",
     "CN",
     "CO",
+    "CR",
     "CY",
     "CZ",
     "DE",
