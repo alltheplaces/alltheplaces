@@ -8,13 +8,10 @@ class PapaJohnsSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Papa John's", "brand_wikidata": "Q2759586"}
     allowed_domains = ["papajohns.com"]
     sitemap_urls = ["https://locations.papajohns.com/sitemap.xml"]
-    sitemap_rules = [(r"com/(?:united\-states|canada)/\w{2}/([-\w]+)/[^/]+/[^/]+$", "parse_sd")]
+    sitemap_rules = [(r"com/(?:united\-states|canada)/\w{2}/[-\w]+/[^/]+/[^/]+$", "parse_sd")]
     wanted_types = ["FastFoodRestaurant"]
     search_for_twitter = False
     search_for_facebook = False
-
-    def pre_process_data(self, ld_data: dict, **kwargs):
-        ld_data["@id"] = None
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item.get("name").startswith("Coming Soon - "):
