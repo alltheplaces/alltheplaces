@@ -26,6 +26,5 @@ class McdonaldsMYSpider(scrapy.Spider):
     def parse(self, response):
         for index, store in enumerate(response.json()["stores"]):
             item = DictParser.parse(store)
-            item["website"] = "https://www.mcdonalds.com.my"
             item["ref"] = index
             yield item

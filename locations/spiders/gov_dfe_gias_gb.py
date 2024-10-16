@@ -6,6 +6,7 @@ from scrapy.spiders import CSVFeedSpider
 from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
+from locations.settings import ITEM_PIPELINES
 
 
 class GovDfeGiasGBSpider(CSVFeedSpider):
@@ -23,8 +24,10 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
         "attribution": "required",
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
     }
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    skip_auto_cc_spider_name = True
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None},
+    }
     # British OSGB36 -> lat/lon (https://epsg.io/4326)
     coord_transformer = pyproj.Transformer.from_crs(27700, 4326)
 
@@ -47,7 +50,7 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
             and row["ReasonEstablishmentOpened (name)"] == "New Provision"
             and row["OpenDate"] != ""
         ):
-            item["extras"]["start_date"] = datetime.strptime(row["OpenDate"], "%d-%m-%Y")
+            item["extras"]["start_date"] = datetime.strptime(row["OpenDate"], "%d-%m-%Y").strftime("%Y-%m-%d")
         elif row["EstablishmentStatus (name)"] != "Open":
             return
 
@@ -80,7 +83,9 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
                 row.get("Postcode"),
             ]
         )
-        item["website"] = row.get("SchoolWebsite")
+        if website := row.get("SchoolWebsite"):
+            if not website.lower().startswith("http"):
+                item["website"] = "https://{}".format(website)
         item["phone"] = row.get("TelephoneNum")
         item["extras"]["ref:GB:uprn"] = row.get("UPRN")
 
