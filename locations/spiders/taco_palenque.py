@@ -11,13 +11,8 @@ from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 
 class TacoPalenqueSpider(SuperStoreFinderSpider):
     name = "taco_palenque"
-    item_attributes = {
-        "brand_wikidata": "Q7673965",
-        "brand": "Taco Palenque",
-    }
-    allowed_domains = [
-        "www.tacopalenque.com",
-    ]
+    item_attributes = {"brand": "Taco Palenque", "brand_wikidata": "Q7673965"}
+    allowed_domains = ["www.tacopalenque.com"]
 
     def get_us_state_code_from_address(self, address: str) -> bool:
         states = GeonamesCache.us_states
@@ -31,7 +26,7 @@ class TacoPalenqueSpider(SuperStoreFinderSpider):
         return None
 
     def parse_item(self, item: Feature, location: Selector):
-        item["branch"] = unescape(item.pop("name"))
+        item["branch"] = unescape(item.pop("name").removeprefix("Taco Palenque - "))
 
         # this makes the assumption that the chain only exists in US and Mexico
         state_code = self.get_us_state_code_from_address(item["addr_full"])
