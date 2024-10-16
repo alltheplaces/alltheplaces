@@ -23,9 +23,12 @@ class BurgerKingTWSpider(Spider):
         for location in response.json()["args"]["branchList"]:
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
+            item["brand"] = "漢堡王"
+
             item["opening_hours"] = OpeningHours()
             for rule in json.loads(location["openHours"]):
                 if not rule["isopen"]:
                     continue
                 item["opening_hours"].add_range(DAYS[rule["week"] - 1], rule["openTime"], rule["closeTime"])
+
             yield item

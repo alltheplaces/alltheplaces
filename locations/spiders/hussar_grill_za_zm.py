@@ -21,10 +21,12 @@ class HussarGrillZAZMSpider(SitemapSpider):
 
     def parse(self, response):
         item = Feature()
+
         if branch := response.xpath('.//div[contains(@class,"sub-title")]/h3/text()').get():
             item["branch"] = branch.strip()
         else:
             return  # Some dud locations in sitemap with no content
+
         item["website"] = response.url
         item["ref"] = response.url
         item["addr_full"] = clean_address(response.xpath('.//strong[contains(text(), "Address")]/../p/text()').getall())
@@ -32,9 +34,11 @@ class HussarGrillZAZMSpider(SitemapSpider):
         # item["email"] = response.xpath('.//a[contains(@href, "mailto:")]/@href').get() # Email is protected
 
         extract_google_position(item, response)
-        add_social_media(
-            item, SocialMedia.TRIP_ADVISOR, response.xpath('.//a[contains(@href, "tripadvisor.co")]/@href').get()
-        )
+
+        trip_advisor_link = response.xpath('.//a[contains(@href, "tripadvisor.co")]/@href').get()
+        if trip_advisor_link not in ["https://www.tripadvisor.co.za/"]:
+            add_social_media(item, SocialMedia.TRIP_ADVISOR, trip_advisor_link)
+
         add_social_media(
             item,
             SocialMedia.FACEBOOK,

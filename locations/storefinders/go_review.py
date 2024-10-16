@@ -28,32 +28,38 @@ class GoReviewSpider(CrawlSpider):
     days = DAYS_EN
 
     def parse(self, response):
-        properties = {
-            "ref": re.sub(r"\.goreview\.co\.za.*", "", re.sub(r"https:\/\/", "", response.url)),
-            "branch": response.xpath('//div[@class="left-align-header"]/h2/text()')
-            .get()
-            .replace(self.item_attributes["brand"], "")
-            .strip(),
-            "addr_full": merge_address_lines(
-                response.xpath('//div[contains(@class, "content-wrapper")]/div[2]/div[1]//p/text()').getall(),
-            ),
-            "phone": response.xpath(
-                '//div[contains(@class, "content-wrapper")]/div[2]/div[3]//a[contains(@href, "tel:")]/@href'
-            ).get(),
-            "facebook": response.xpath(
-                '//div[contains(@class, "content-wrapper")]/div[2]/div[5]//a[contains(@href, "facebook.com")]/@href'
-            ).get(),
-            "website": response.url,
-        }
+        item = Feature()
+        item["ref"] = re.sub(r"\.goreview\.co\.za.*", "", re.sub(r"https:\/\/", "", response.url))
+
+        branch_raw = response.xpath('//div[@class="left-align-header"]/h2/text()').get()
+        item["branch"] = branch_raw.replace(self.item_attributes["brand"], "").strip()
+
+        item["addr_full"] = merge_address_lines(
+            response.xpath('//div[contains(@class, "content-wrapper")]/div[2]/div[1]//p/text()').getall(),
+        )
+
+        item["phone"] = response.xpath(
+            '//div[contains(@class, "content-wrapper")]/div[2]/div[3]//a[contains(@href, "tel:")]/@href'
+        ).get()
+
+        item["facebook"] = response.xpath(
+            '//div[contains(@class, "content-wrapper")]/div[2]/div[5]//a[contains(@href, "facebook.com")]/@href'
+        ).get()
+
+        item["website"] = response.url
+        if "?" in item["website"]:
+            item["website"] = item["website"].split("?", 1)[0]
+
         if maps_links_js := response.xpath('//script[contains(text(), "#apple_maps_directions")]/text()').get():
             if "&sll=" in maps_links_js:
-                properties["lat"], properties["lon"] = maps_links_js.split("&sll=", 1)[1].split("&", 1)[0].split(",", 2)
+                item["lat"], item["lon"] = maps_links_js.split("&sll=", 1)[1].split("&", 1)[0].split(",", 2)
+
         hours_string = " ".join(
             response.xpath('//div[contains(@class, "content-wrapper")]/div[2]/div[4]/p//text()').getall()
         )
-        properties["opening_hours"] = OpeningHours()
-        properties["opening_hours"].add_ranges_from_string(hours_string, days=self.days)
-        item = Feature(**properties)
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_string, days=self.days)
+
         yield from self.post_process_item(item, response) or []
 
     def post_process_item(self, item, response):
