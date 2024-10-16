@@ -8,7 +8,7 @@ from locations.linked_data_parser import LinkedDataParser
 class BarlouieSpider(SitemapSpider):
     name = "barlouie"
     allowed_domains = ["www.barlouie.com"]
-    item_attributes = {"brand": "Barlouie", "brand_wikidata": "Q16935493"}
+    item_attributes = {"brand": "Bar Louie", "brand_wikidata": "Q16935493"}
     sitemap_urls = ["https://www.barlouie.com/sitemap.xml"]
     sitemap_rules = [("/locations/", "parse")]
 

@@ -12,7 +12,7 @@ STATES = ["NC", "AL", "GA", "KY", "MD", "MS", "SC", "TN", "VA", "WV"]
 
 class CookoutSpider(scrapy.Spider):
     name = "cookout"
-    item_attributes = {"brand": "Cookout", "brand_wikidata": "Q5166992"}
+    item_attributes = {"brand": "Cook Out", "brand_wikidata": "Q5166992"}
     allowed_domains = ["cookout.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

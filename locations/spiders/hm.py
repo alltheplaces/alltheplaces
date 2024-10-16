@@ -1,7 +1,7 @@
 import scrapy
 from geonamescache import GeonamesCache
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class HmSpider(scrapy.Spider):
     name = "hm"
-    item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326", "extras": Categories.SHOP_CLOTHES.value}
+    item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326"}
 
     use_hardcoded_countries = True
 
@@ -33,13 +33,23 @@ class HmSpider(scrapy.Spider):
             store["street_address"] = clean_address([store.get("streetName1"), store.get("streetName2")])
 
             item = DictParser.parse(store)
+            if (item.get("name") or "").startswith("H&M Kids "):
+                item["branch"] = item.pop("name").removeprefix("H&M Kids ")
+                item["name"] = "H&M Kids"
+            else:
+                item["branch"] = (item.pop("name") or "").removeprefix("H&M ")
+                item["name"] = "H&M"
 
-            item["ref"] = store["storeCode"]
-            item["extras"] = {"storeClass": store.get("storeClass")}
+            if isinstance(item["state"], dict):
+                item["state"] = item["state"]["name"]
+
+            item["extras"]["storeClass"] = store.get("storeClass")
 
             oh = OpeningHours()
             for rule in store["openingHours"]:
                 oh.add_range(rule["name"], rule["opens"], rule["closes"])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
+
+            apply_category(Categories.SHOP_CLOTHES, item)
 
             yield item

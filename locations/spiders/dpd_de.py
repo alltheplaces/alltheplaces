@@ -93,7 +93,7 @@ class DpdDESpider(scrapy.Spider):
             item["postcode"] = plz
             item["ref"] = lat + lng
             item["housenumber"] = housenumber
-            apply_category({"amenity": "post_office", "post_office": "post_partner"}, item)
+            apply_category({"post_office": "post_partner"}, item)
 
             formdata = {
                 "ctl00$ctl16": "ctl00$ContentPlaceHolder1$modShopFinder$ctl01|ctl00$ContentPlaceHolder1$modShopFinder$repShopList$ctl0"
