@@ -29,7 +29,6 @@ class PizzaHutVNSpider(scrapy.Spider):
             item["extras"]["name:en"] = store.get("name_en")
             item["addr_full"] = store.get("add_vn")
             item["extras"]["addr:full:en"] = clean_address(store.get("add_en"))
-            item["website"] = "https://pizzahut.vn/"
             if store.get("Open_Time") and store.get("Close_Time"):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_days_range(DAYS, store["Open_Time"], store["Close_Time"])

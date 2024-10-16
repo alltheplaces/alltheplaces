@@ -36,7 +36,6 @@ class VolkswagenBESpider(Spider):
             item["lon"] = location.get("GPSLONG")
             item["street_address"] = item.pop("addr_full")
             item["email"] = location.get("MAIL")
-            item["website"] = "https://dealerlocator.volkswagen.be/fr"
             item["extras"]["website_2"] = location.get("URL")
             if location.get("VENTE"):  # Sale
                 apply_category(Categories.SHOP_CAR, item)

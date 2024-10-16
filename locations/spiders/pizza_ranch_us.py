@@ -25,5 +25,4 @@ class PizzaRanchUSSpider(CrawlSpider, StructuredDataSpider):
                 yield Request(url=website, callback=self.parse_sd)
             else:
                 item = DictParser.parse(store)
-                item["website"] = "https://pizzaranch.com/"
                 yield item

@@ -52,7 +52,6 @@ class StarbucksSGSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for store in response.json()["data"]["store"]:
             item = DictParser.parse(store)
-            item["website"] = "https://www.starbucks.com.sg/stores/"
             item["opening_hours"] = OpeningHours()
             for rule in store["openingHours"]["contentItems"]:
                 if "Closed" in rule["times"]:

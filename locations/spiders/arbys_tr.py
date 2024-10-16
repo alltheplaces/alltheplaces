@@ -18,5 +18,4 @@ class ArbysTRSpider(Spider):
             location.update(location.pop("data"))
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full")
-            item["website"] = "https://www.arbys.com.tr/restoranlar"
             yield item

@@ -63,4 +63,5 @@ class BurgerKingCNSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         item["state"] = response.meta["province"]
         apply_yes_no(Extras.BREAKFAST, item, location["hasBreakfast"] == "1", False)
+        item["brand"] = "汉堡王"
         yield item

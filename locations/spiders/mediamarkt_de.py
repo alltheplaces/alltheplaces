@@ -22,7 +22,6 @@ class MediamarktDESpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs):
         for store in response.json()["data"]["stores"]:
             item = DictParser.parse(store)
-            item["website"] = "https://www.mediamarkt.de/"
             item["opening_hours"] = OpeningHours()
             for day_time in store["openingTimes"]["regular"]:
                 day = day_time["type"]
