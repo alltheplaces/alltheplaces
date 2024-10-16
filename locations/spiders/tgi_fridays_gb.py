@@ -1,9 +1,10 @@
 import json
+import re
 from typing import Iterable
 
+from urllib.parse import urljoin
 from scrapy.http import FormRequest
 from scrapy.spiders import Request, Spider
-
 from locations.dict_parser import DictParser
 
 
@@ -44,11 +45,14 @@ class TgiFridaysGBSpider(Spider):
         jsondata = json.loads(data)[1]["args"][1]
         for location in jsondata["results"]:
             item = DictParser.parse(location)
-            coords = location["geolocation"].split(",")
-            item["lat"] = coords[0]
-            item["lon"] = coords[1]
+            item["geometry"]=location["geolocation"]
+            slug = re.sub("(TGI Fridays |')","",location["title"])
+            slug = re.sub("\s+","-",slug)
+            slug = "restaurant/" + slug.lower()
+            item["website"] = urljoin("https://www.tgifridays.co.uk/",slug)
             item["ref"] = location["nid"]
             yield item
 
         if jsondata["totalCount"] > jsondata["offset"] + jsondata["limit"]:
             yield self.make_request(int(jsondata["offset"] / jsondata["limit"]) + 1)
+
