@@ -2,23 +2,21 @@ import json
 import re
 from typing import Iterable
 from urllib.parse import urljoin
-from scrapy.spiders import CrawlSpider, Rule
 
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import Request, Response
-from locations.linked_data_parser import LinkedDataParser
 
-from locations.country_utils import CountryUtils, get_locale
-from locations.dict_parser import DictParser
+from locations.country_utils import CountryUtils
 from locations.geo import city_locations
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 from locations.hours import OpeningHours
+from locations.items import Feature
+
 
 class BonmarcheGBSpider(Spider):
     name = "bonmarche_gb"
     item_attributes = {"brand": "Bonmarche", "brand_wikidata": "Q4942146"}
     country_utils = CountryUtils()
+
     def start_requests(self) -> Iterable[Request]:
         country = "GB"
         language = "en-GB"
@@ -42,33 +40,33 @@ class BonmarcheGBSpider(Spider):
 
     def parse(self, response: Response) -> Iterable[Feature]:
         if response.xpath('//div[@id="map"]'):
-            geo=json.loads(response.xpath('//div[@id="map"]//@data-results').get())
+            geo = json.loads(response.xpath('//div[@id="map"]//@data-results').get())
             data = response.xpath('//li[@class="stores-list-item"]')
             for location in data:
-                item=Feature()
+                item = Feature()
                 addr = location.xpath('div/div/div[@class="store-address"]').get()
-                item["addr_full"] = re.sub("(</?div[^>]*>|<br>|\n)","",addr)
+                item["addr_full"] = re.sub("(</?div[^>]*>|<br>|\n)", "", addr)
                 tel = location.xpath('div/div/div/a[contains(@href, "tel:")]/text()').get()
                 if tel:
-                    item["phone"]=re.sub("(Tel:|\n)","",tel)
+                    item["phone"] = re.sub("(Tel:|\n)", "", tel)
                 item["ref"] = location.xpath("a//@data-storeid").get()
                 for store in geo["stores"]:
                     if store["id"] == item["ref"]:
                         item["lat"] = store["lat"]
                         item["lon"] = store["lng"]
-                slug=location.xpath('div/div/a[@class="button"]/@href').get()
-                item["website"]=urljoin("https://www.bonmarche.co.uk",slug)
+                slug = location.xpath('div/div/a[@class="button"]/@href').get()
+                item["website"] = urljoin("https://www.bonmarche.co.uk", slug)
 
-                table=location.xpath('div/div/div/div/div[@class="storehours"]/table//tr')
-                opening_hours=OpeningHours()
+                table = location.xpath('div/div/div/div/div[@class="storehours"]/table//tr')
+                opening_hours = OpeningHours()
                 for row in table:
-                    day=row.xpath('td[@class="storeday"]//text()').get()
-                    start=row.xpath('td[@class="storehours-from"]//text()').get().replace(".",":")
-                    end=row.xpath('td[@class="storehours-to"]//text()').get().replace(".",":")
+                    day = row.xpath('td[@class="storeday"]//text()').get()
+                    start = row.xpath('td[@class="storehours-from"]//text()').get().replace(".", ":")
+                    end = row.xpath('td[@class="storehours-to"]//text()').get().replace(".", ":")
                     if "closed" in start.lower() or "closed" in end.lower():
                         continue
                     #'17:30pm'
-                    if int(end.split(":")[0])>12:
+                    if int(end.split(":")[0]) > 12:
                         newhour = int(end.split(":")[0]) - 12
                         end = str(newhour) + ":" + end.split(":")[1]
                     #'10am'
@@ -78,12 +76,12 @@ class BonmarcheGBSpider(Spider):
                         end = end.replace("am", ":00am").replace("pm", ":00pm")
                     #'10:00'
                     if "m" not in start:
-                            start = start + "am"
+                        start = start + "am"
                     #'4:00' - all closing times must be pm?
                     if "m" not in end:
-                            end = end + "pm"
+                        end = end + "pm"
 
                     opening_hours.add_range(day=day, open_time=start, close_time=end, time_format="%I:%M%p")
-                item["opening_hours"]=opening_hours.as_opening_hours()
+                item["opening_hours"] = opening_hours.as_opening_hours()
 
                 yield item
