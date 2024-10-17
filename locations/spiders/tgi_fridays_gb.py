@@ -50,7 +50,7 @@ class TgiFridaysGBSpider(Spider):
             item = DictParser.parse(location)
             item["geometry"] = location["geolocation"]
             slug = re.sub("(TGI Fridays |')", "", location["title"])
-            slug = re.sub("\s+", "-", slug)
+            slug = re.sub(" +", "-", slug)
             slug = "restaurant/" + slug.lower()
             item["website"] = urljoin("https://www.tgifridays.co.uk/", slug)
             item["ref"] = location["nid"]
