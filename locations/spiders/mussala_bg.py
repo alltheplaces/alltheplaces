@@ -2,7 +2,7 @@ from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, OpeningHours, sanitise_day
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MussalaBGSpider(Spider):
@@ -15,7 +15,7 @@ class MussalaBGSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = clean_address([location.pop("address"), location.pop("address2")])
+            item["street_address"] = merge_address_lines([location.pop("address"), location.pop("address2")])
             item["opening_hours"] = OpeningHours()
             rows = Selector(text=location["hours"]).xpath("//table/tr").getall()
             for row in rows:
