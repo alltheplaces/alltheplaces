@@ -70,7 +70,7 @@ class TgiFridaysGBSpider(Spider):
                 days = [days]
             hour_range = hour.xpath('p//span[@class="font-bold"]//text()').get()
             if ":" in hour_range:
-                hour_range=re.sub(":",".",hour_range)
+                hour_range = re.sub(":", ".", hour_range)
             open, close = hour_range.split(" - ")
             opening_hours.add_days_range(days, open, close, "%H.%M")
         item["opening_hours"] = opening_hours.as_opening_hours()
