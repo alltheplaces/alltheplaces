@@ -1,12 +1,14 @@
 import json
 import re
 from typing import Iterable
-
 from urllib.parse import urljoin
+
 from scrapy.http import FormRequest, Request
 from scrapy.spiders import Request, Spider
+
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
+
 
 class TgiFridaysGBSpider(Spider):
     name = "tgi_fridays_gb"
@@ -46,13 +48,13 @@ class TgiFridaysGBSpider(Spider):
 
         for location in jsondata["results"]:
             item = DictParser.parse(location)
-            item["geometry"]=location["geolocation"]
-            slug = re.sub("(TGI Fridays |')","",location["title"])
-            slug = re.sub("\s+","-",slug)
+            item["geometry"] = location["geolocation"]
+            slug = re.sub("(TGI Fridays |')", "", location["title"])
+            slug = re.sub("\s+", "-", slug)
             slug = "restaurant/" + slug.lower()
-            item["website"] = urljoin("https://www.tgifridays.co.uk/",slug)
+            item["website"] = urljoin("https://www.tgifridays.co.uk/", slug)
             item["ref"] = location["nid"]
-            yield Request(item["website"], callback=self.parse_opening_hours, cb_kwargs={'item':item})
+            yield Request(item["website"], callback=self.parse_opening_hours, cb_kwargs={"item": item})
 
         if jsondata["totalCount"] > jsondata["offset"] + jsondata["limit"]:
             yield self.make_request(int(jsondata["offset"] / jsondata["limit"]) + 1)
@@ -67,7 +69,7 @@ class TgiFridaysGBSpider(Spider):
             else:
                 days = [days]
             hour_range = hour.xpath('p//span[@class="font-bold"]//text()').get()
-            open,close=hour_range.split(" - ")
+            open, close = hour_range.split(" - ")
             opening_hours.add_days_range(days, open, close, "%H.%M")
         item["opening_hours"] = opening_hours.as_opening_hours()
         yield item
