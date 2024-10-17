@@ -48,10 +48,8 @@ class TgiFridaysGBSpider(Spider):
 
         for location in jsondata["results"]:
             item = DictParser.parse(location)
-            # item["geometry"] = location["geolocation"]
-            coords = location["geolocation"].split(",")
-            item["lat"] = coords[0]
-            item["lon"] = coords[1]
+            item["branch"] = item.pop("name").removeprefix("TGI Fridays ")
+            item["lat"], item["lon"] = location["geolocation"].split(",")
             slug = re.sub("(TGI Fridays |'| $)", "", location["title"])
             slug = re.sub(" +", "-", slug)
             slug = "restaurant/" + slug.lower()
