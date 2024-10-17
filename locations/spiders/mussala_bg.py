@@ -9,7 +9,8 @@ class MussalaBGSpider(Spider):
     name = "mussala_bg"
     item_attributes = {"brand_wikidata": "Q120314195"}
     start_urls = [
-        "https://mussalains.com/wp-admin/admin-ajax.php?action=store_search&lat=43.21405&lng=27.914733&autoload=1"
+        "https://mussalains.com/wp-admin/admin-ajax.php?action=store_search&lat=43.21405&lng=27.914733&autoload=1",
+        "https://mussalains.com/wp-admin/admin-ajax.php?action=store_search&lat=41.85321&lng=24.038064&autoload=1",
     ]
 
     def parse(self, response, **kwargs):
