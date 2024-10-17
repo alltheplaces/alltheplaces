@@ -1,8 +1,10 @@
-import scrapy
+from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 FUEL_TYPES_MAPPING = {
     "CNG": Fuel.CNG,
@@ -21,48 +23,27 @@ FUEL_TYPES_MAPPING = {
 }
 
 
-class KumAndGoSpider(scrapy.Spider):
+class KumAndGoSpider(CrawlSpider, StructuredDataSpider):
     name = "kum_and_go"
     item_attributes = {"brand": "Kum & Go", "brand_wikidata": "Q6443340"}
-    allowed_domains = ["kumandgo.com"]
+    start_urls = ["https://locations.kumandgo.com/index.html"]
+    rules = [
+        Rule(LinkExtractor(r"https://locations.kumandgo.com/[a-z]{2}$")),
+        Rule(LinkExtractor(r"https://locations.kumandgo.com/[a-z]{2}/[-\w]+$")),
+        Rule(LinkExtractor(r"https://locations.kumandgo.com/[a-z]{2}/[-\w]+/[-\w]+"), callback="parse_sd"),
+    ]
     skip_auto_cc_spider_name = True
 
-    def start_requests(self):
-        states = [
-            "ar",
-            "co",
-            "ia",
-            "mn",
-            "mo",
-            "mt",
-            "ne",
-            "nd",
-            "ok",
-            "sd",
-            "wy",
-        ]
-        for state in states:
-            yield scrapy.Request(f"https://app.kumandgo.com/api/stores/nearest?q={state}")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        fuels = set(response.xpath('//*[@class="FuelPrices-fuelTitle"]/text()').getall())
+        if fuels:
+            apply_category(Categories.FUEL_STATION, item)
+            for fuel in fuels:
+                if tag := FUEL_TYPES_MAPPING.get(fuel):
+                    apply_yes_no(tag, item, True)
+                else:
+                    self.crawler.stats.inc_value(f"kum_and_go/fuel_not_mapped/{fuel}")
+        else:
+            apply_category(Categories.SHOP_CONVENIENCE, item)
 
-    def parse(self, response):
-        for store in response.json().get("data"):
-            item = DictParser.parse(store)
-            fuels = store["features"].get("fuelProducts")
-            if fuels:
-                apply_category(Categories.FUEL_STATION, item)
-                for fuel in fuels:
-                    if tag := FUEL_TYPES_MAPPING.get(fuel):
-                        apply_yes_no(tag, item, True)
-                    else:
-                        self.crawler.stats.inc_value(f"kum_and_go/fuel_not_mapped/{fuel}")
-            else:
-                apply_category(Categories.SHOP_CONVENIENCE, item)
-
-            oh = OpeningHours()
-            for hours in store["storeHours"].get("hours"):
-                if hours.get("displayText") is not None:
-                    oh.add_ranges_from_string(hours.get("day") + " " + hours.get("displayText"))
-            item["opening_hours"] = oh
-            item["website"] = "https://www.kumandgo.com/store-locator?details={}".format(item["ref"])
-
-            yield item
+        yield item
