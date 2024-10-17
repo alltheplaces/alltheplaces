@@ -8,8 +8,8 @@ from scrapy.http import Request, Response
 
 from locations.country_utils import CountryUtils
 from locations.geo import city_locations
-from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.hours import OpeningHours
 
 
 class BonmarcheGBSpider(Spider):
@@ -47,7 +47,7 @@ class BonmarcheGBSpider(Spider):
                 addr = location.xpath('div/div/div[@class = "store-address"]').get()
                 item["addr_full"] = re.sub("(</?div[^>]*>|<br>|\n)", "", addr)
                 if "Bonmarch" in item["addr_full"]:
-                    item["addr_full"] = re.sub("Bonmarch[^,]+,", "", item["addr_full"])
+                    item["addr_full"]=re.sub("Bonmarch[^,]+,", "", item["addr_full"])
                 tel = location.xpath('div/div/div/a[contains(@href, "tel:")]/text()').get()
                 if tel:
                     item["phone"] = re.sub("(Tel:|\n)", "", tel)
@@ -66,10 +66,8 @@ class BonmarcheGBSpider(Spider):
                     day = row.xpath('td[@class = "storeday"]//text()').get()
                     start = row.xpath('td[@class = "storehours-from"]//text()').get().replace(".", ":")
                     end = row.xpath('td[@class = "storehours-to"]//text()').get().replace(".", ":")
-                    if "closed" in start.lower() or "closed" in end.lower():
-                        continue
-                    # '--'
-                    if bool(re.search(r"\d", start)) == 0:
+                    # '--' or closed
+                    if bool(re.search(r'\d', start)) == 0:
                         continue
                     # '10:00'
                     if "m" not in start:
@@ -93,6 +91,5 @@ class BonmarcheGBSpider(Spider):
                     if "am" not in end and "pm" not in end:
                         continue
                     opening_hours.add_range(day=day, open_time=start, close_time=end, time_format="%I:%M%p")
-                item["opening_hours"] = opening_hours.as_opening_hours()
-
+                item["opening_hours"] = opening_hours
                 yield item
