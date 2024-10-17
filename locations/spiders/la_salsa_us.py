@@ -11,3 +11,6 @@ class LaSalsaUSSpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(LinkExtractor(allow="/stores/"), callback="parse_sd"),
     ]
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data["openingHours"] = None  # Requires fix, only a few locations, not worth the effort
