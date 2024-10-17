@@ -1,6 +1,8 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,3 +16,7 @@ class LaSalsaUSSpider(CrawlSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         ld_data["openingHours"] = None  # Requires fix, only a few locations, not worth the effort
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["ref"] = item.pop("name").removeprefix("La Salsa Store ")
+        yield item
