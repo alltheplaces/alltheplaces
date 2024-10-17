@@ -75,6 +75,6 @@ class TgiFridaysGBSpider(Spider):
             opening_hours.add_days_range(days, open, close, "%H.%M")
         item["opening_hours"] = opening_hours.as_opening_hours()
         phone = str(response.xpath('//a[contains(@href,"tel")]/@href')[0])
-        item["phone"] = re.sub("tel:","",phone)
+        item["phone"] = re.sub("tel:", "", phone)
 
         yield item
