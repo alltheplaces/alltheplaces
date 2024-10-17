@@ -1,10 +1,13 @@
 import json
+import re
 from typing import Iterable
+from urllib.parse import urljoin
 
-from scrapy.http import FormRequest
-from scrapy.spiders import Request, Spider
+from scrapy.http import FormRequest, Request
+from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, day_range
 
 
 class TgiFridaysGBSpider(Spider):
@@ -42,13 +45,33 @@ class TgiFridaysGBSpider(Spider):
     def parse(self, response):
         data = response.xpath("//textarea/text()").get()
         jsondata = json.loads(data)[1]["args"][1]
+
         for location in jsondata["results"]:
             item = DictParser.parse(location)
-            coords = location["geolocation"].split(",")
-            item["lat"] = coords[0]
-            item["lon"] = coords[1]
+            item["branch"] = item.pop("name").removeprefix("TGI Fridays ")
+            item["lat"], item["lon"] = location["geolocation"].split(",")
+            slug = re.sub("(TGI Fridays |'| $)", "", location["title"])
+            slug = re.sub(" +", "-", slug)
+            slug = "restaurant/" + slug.lower()
+            item["website"] = urljoin("https://www.tgifridays.co.uk/", slug)
             item["ref"] = location["nid"]
-            yield item
+            yield Request(item["website"], callback=self.parse_opening_hours, cb_kwargs={"item": item})
 
         if jsondata["totalCount"] > jsondata["offset"] + jsondata["limit"]:
             yield self.make_request(int(jsondata["offset"] / jsondata["limit"]) + 1)
+
+    def parse_opening_hours(self, response, item):
+        opening_hours = OpeningHours()
+        hours = response.xpath('//div[contains(@class, "field--type-opening-timetable")]//div[@class="mb-5 last:mb-0"]')
+        for hour in hours:
+            days = hour.xpath('p[contains(@class, "subtitle-s")]/text()').get()
+            if "-" in days:
+                days = day_range(*days.split(" - "))
+            else:
+                days = [days]
+            hour_range = hour.xpath('p//span[@class="font-bold"]/text()').get()
+            opening_hours.add_days_range(days, *hour_range.replace(".", ":").split(" - "))
+        item["opening_hours"] = opening_hours
+        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/text()').get()
+
+        yield item
