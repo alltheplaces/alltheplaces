@@ -1,23 +1,13 @@
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class LaSalsaSpider(scrapy.Spider):
+class LaSalsaSpider(CrawlSpider, StructuredDataSpider):
     name = "la_salsa"
     item_attributes = {"brand": "La Salsa", "brand_wikidata": "Q48835190"}
-    allowed_domains = ["www.lasalsa.com"]
-    start_urls = ("http://lasalsa.com/wp-content/themes/lasalsa-main/locations-search.php?lat=0&lng=0&radius=99999999",)
-
-    def parse(self, response):
-        for match in response.xpath("//markers/marker"):
-            yield Feature(
-                ref=match.xpath(".//@name").extract_first(),
-                lat=float(match.xpath(".//@latitude").extract_first()),
-                lon=float(match.xpath(".//@longitude").extract_first()),
-                addr_full=match.xpath(".//@address").extract_first(),
-                city=match.xpath(".//@city").extract_first(),
-                state=match.xpath(".//@state").extract_first(),
-                postcode=match.xpath(".//@zip").extract_first(),
-                phone=match.xpath(".//@phone").extract_first(),
-            )
+    start_urls = ["https://www.lasalsa.com/locator/index.php?brand=26&pagesize=1000&q=us"]
+    rules = [
+        Rule(LinkExtractor(allow="/stores/"), callback="parse_sd"),
+    ]
