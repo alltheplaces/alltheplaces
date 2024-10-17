@@ -45,11 +45,10 @@ class KeurslagerNLSpider(Spider):
         item["lon"] = kwargs["lon"]
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath("//table//tr"):
-            day = day_time.xpath(".//td/text()").get()
-            if day_time.xpath(".//td[2]/text()").get() in ["gesloten", None]:
-                continue
-            open_time, close_time = day_time.xpath(".//td[2]/text()").get().split("-")
-            item["opening_hours"].add_range(
-                day=day.replace(":", ""), open_time=open_time.strip(), close_time=close_time.strip()
-            )
+            day, times = day_time.xpath(".//td/text()").getall()
+            day = day.replace(":", "")
+            if times == "gesloten":
+                item["opening_hours"].set_closed(day)
+            else:
+                item["opening_hours"].add_range(day, *times.split(" - "))
         yield item
