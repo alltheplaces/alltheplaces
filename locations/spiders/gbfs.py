@@ -1,8 +1,11 @@
+from typing import Iterable
+
 from scrapy.http import JsonRequest
 from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # General Bikeshare Feed Specification
 # https://gbfs.mobilitydata.org/
@@ -327,7 +330,13 @@ class GbfsSpider(CSVFeedSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_row(self, response, row):
-        yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
+        url = row["Auto-Discovery URL"]
+        if auth := row["Authentication Info"]:
+            if auth.startswith("http"):
+                return
+            else:
+                url = "{}?{}".format(url, auth)
+        yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
 
     def parse_gbfs(self, response, **kwargs):
         try:
@@ -337,9 +346,13 @@ class GbfsSpider(CSVFeedSpider):
 
         for feed in DictParser.get_nested_key(data, "feeds") or []:
             if feed["name"] == "station_information":
-                yield JsonRequest(url=feed["url"], cb_kwargs=kwargs, callback=self.parse_stations)
+                url = feed["url"]
+                if auth := kwargs["Authentication Info"]:
+                    if auth not in url:
+                        url = "{}?{}".format(url, auth)
+                yield JsonRequest(url=url, cb_kwargs=kwargs, callback=self.parse_stations)
 
-    def parse_stations(self, response, **kwargs):
+    def parse_stations(self, response, **kwargs) -> Iterable[Feature]:
         try:
             data = response.json()
         except:
