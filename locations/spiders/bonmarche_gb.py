@@ -8,8 +8,8 @@ from scrapy.http import Request, Response
 
 from locations.country_utils import CountryUtils
 from locations.geo import city_locations
-from locations.items import Feature
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class BonmarcheGBSpider(Spider):
@@ -47,7 +47,7 @@ class BonmarcheGBSpider(Spider):
                 addr = location.xpath('div/div/div[@class = "store-address"]').get()
                 item["addr_full"] = re.sub("(</?div[^>]*>|<br>|\n)", "", addr)
                 if "Bonmarch" in item["addr_full"]:
-                    item["addr_full"]=re.sub("Bonmarch[^,]+,", "", item["addr_full"])
+                    item["addr_full"] = re.sub("Bonmarch[^,]+,", "", item["addr_full"])
                 tel = location.xpath('div/div/div/a[contains(@href, "tel:")]/text()').get()
                 if tel:
                     item["phone"] = re.sub("(Tel:|\n)", "", tel)
@@ -67,7 +67,7 @@ class BonmarcheGBSpider(Spider):
                     start = row.xpath('td[@class = "storehours-from"]//text()').get().replace(".", ":")
                     end = row.xpath('td[@class = "storehours-to"]//text()').get().replace(".", ":")
                     # '--' or closed
-                    if bool(re.search(r'\d', start)) == 0:
+                    if bool(re.search(r"\d", start)) == 0:
                         continue
                     # '10:00'
                     if "m" not in start:
