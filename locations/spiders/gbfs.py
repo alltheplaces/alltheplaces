@@ -352,6 +352,10 @@ class GbfsSpider(CSVFeedSpider):
 
             item = DictParser.parse(station)
 
+            if isinstance(station.get("name"), list):
+                for value in station["name"]:
+                    item["name"] = item["extras"]["name:{}".format(value["language"])] = value["text"]
+
             item["ref"] = item["extras"]["ref:gbfs"] = "{}:{}".format(kwargs["System ID"], station["station_id"])
             item["extras"]["ref:gbfs:{}".format(kwargs["System ID"])] = str(station["station_id"])
 
@@ -361,15 +365,13 @@ class GbfsSpider(CSVFeedSpider):
             item["website"] = kwargs["URL"]
 
             # TODO: Map all brands/names
-            brand_mapped = False
             for brand in BRAND_MAPPING:
                 if kwargs["Name"] in BRAND_MAPPING[brand]["names"]:
                     apply_category(BRAND_MAPPING[brand]["category"], item)
                     item["brand"] = brand
                     item["brand_wikidata"] = BRAND_MAPPING[brand]["wikidata"]
-                    brand_mapped = True
                     break
-            if not brand_mapped:
+            else:
                 item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
                 if "bike" in kwargs["Name"].lower() or "cycle" in kwargs["Name"].lower():
                     apply_category(Categories.BICYCLE_RENTAL, item)
