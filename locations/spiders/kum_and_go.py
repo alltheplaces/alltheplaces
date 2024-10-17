@@ -2,7 +2,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -30,6 +30,11 @@ FUEL_TYPES_MAPPING = {
     "Xtreme Diesel": Fuel.DIESEL,
 }
 
+SERVICES_MAPPING = {
+    "Air Machine": Extras.COMPRESSED_AIR,
+    "ATM": Extras.ATM,
+}
+
 
 class KumAndGoSpider(CrawlSpider, StructuredDataSpider):
     name = "kum_and_go"
@@ -53,5 +58,9 @@ class KumAndGoSpider(CrawlSpider, StructuredDataSpider):
                     self.crawler.stats.inc_value(f"kum_and_go/fuel_not_mapped/{fuel}")
         else:
             apply_category(Categories.SHOP_CONVENIENCE, item)
-
+        for service in response.xpath('//*[@class="Services-listText"]/text()').getall():
+            if tag := SERVICES_MAPPING.get(service):
+                apply_yes_no(tag, item, True)
+            elif service not in fuels:
+                self.crawler.stats.inc_value(f"kum_and_go/unknown_service/{service}")
         yield item
