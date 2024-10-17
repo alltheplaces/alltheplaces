@@ -1,6 +1,5 @@
-import scrapy
 from chompjs import chompjs
-from scrapy import Spider
+from scrapy import FormRequest, Spider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -15,17 +14,17 @@ class KeurslagerNLSpider(Spider):
         for location_id in (chompjs.parse_js_object(response.xpath('//*[contains(text(),"FWP_JSON")]/text()').get()))[
             "preload_data"
         ]["settings"]["map"]["locations"]:
-            payload = f'action=facetwp_map_marker_content&facet_name=map&post_id={location_id["post_id"]}'
-            url = "https://www.keurslager.nl/wp/wp-admin/admin-ajax.php"
-            yield scrapy.Request(
-                url=url,
-                method="POST",
-                body=payload,
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            yield FormRequest(
+                url="https://www.keurslager.nl/wp/wp-admin/admin-ajax.php",
                 cb_kwargs={
                     "id": location_id["post_id"],
                     "lat": location_id["position"]["lat"],
                     "lon": location_id["position"]["lng"],
+                },
+                formdata={
+                    "action": "facetwp_map_marker_content",
+                    "facet_name": "map",
+                    "post_id": str(location_id["post_id"]),
                 },
                 callback=self.parse_details,
             )
