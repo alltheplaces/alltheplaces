@@ -3,6 +3,7 @@ from scrapy import FormRequest, Spider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class KeurslagerNLSpider(Spider):
@@ -32,8 +33,10 @@ class KeurslagerNLSpider(Spider):
     def parse_details(self, response, **kwargs):
         item = Feature()
         item["name"] = response.xpath("//h2/text()").get()
-        item["street_address"] = response.xpath("//text()[1]").get()
-        item["addr_full"] = ",".join([response.xpath("//text()[1]").get(), response.xpath("//text()[2]").get()])
+        item["street_address"] = response.xpath("//body/text()[1]").get()
+        item["addr_full"] = merge_address_lines(
+            [response.xpath("//body/text()[1]").get(), response.xpath("//body/text()[2]").get()]
+        )
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
         item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
         item["website"] = response.xpath("//a[3]/@href").get()
