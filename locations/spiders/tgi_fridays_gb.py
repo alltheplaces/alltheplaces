@@ -4,7 +4,7 @@ from typing import Iterable
 from urllib.parse import urljoin
 
 from scrapy.http import FormRequest, Request
-from scrapy.spiders import Request, Spider
+from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
@@ -49,7 +49,7 @@ class TgiFridaysGBSpider(Spider):
         for location in jsondata["results"]:
             item = DictParser.parse(location)
             item["geometry"] = location["geolocation"]
-            slug = re.sub("(TGI Fridays |')", "", location["title"])
+            slug = re.sub("(TGI Fridays |'| $)", "", location["title"])
             slug = re.sub(" +", "-", slug)
             slug = "restaurant/" + slug.lower()
             item["website"] = urljoin("https://www.tgifridays.co.uk/", slug)
@@ -69,6 +69,8 @@ class TgiFridaysGBSpider(Spider):
             else:
                 days = [days]
             hour_range = hour.xpath('p//span[@class="font-bold"]//text()').get()
+            if ":" in hour_range:
+                hour_range=re.sub(":",".",hour_range)
             open, close = hour_range.split(" - ")
             opening_hours.add_days_range(days, open, close, "%H.%M")
         item["opening_hours"] = opening_hours.as_opening_hours()
