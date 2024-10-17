@@ -41,7 +41,7 @@ class FairmontSpider(Spider):
                 ("ar", "https://www.fairmont.ae"),
                 ("cn", "https://www.fairmont.cn"),
                 ("ja", "https://www.fairmont.jp"),
-                ("ko", "https://www.fairmont.co.kr/"),
+                ("ko", "https://www.fairmont.co.kr"),
             ]:
                 item["extras"]["website:{}".format(lang)] = "{}{}".format(domain, slug)
 
