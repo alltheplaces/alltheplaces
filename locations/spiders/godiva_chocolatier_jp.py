@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 class GodivaChocolatierJPSpider(Spider):
     name = "godiva_chocolatier_jp"
     item_attributes = {
-        "brand": "Godiva Chocolatier",
+        "brand": "Godiva",
         "brand_wikidata": "Q931084",
         "extras": Categories.SHOP_CHOCOLATE.value,
     }
