@@ -13,6 +13,7 @@ class IntersportFRSpider(scrapy.Spider):
     name = "intersport_fr"
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888", "extras": Categories.SHOP_SPORTS.value}
     start_url = "https://www.intersport.fr/store-finder/"
+    requires_proxy = "FR"
 
     def start_requests(self):
         # Need to make the request more browser-like to be accepted
