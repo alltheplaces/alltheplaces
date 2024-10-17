@@ -35,8 +35,8 @@ SERVICES_MAPPING = {
 }
 
 
-class KumAndGoSpider(SitemapSpider, StructuredDataSpider):
-    name = "kum_and_go"
+class KumAndGoUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "kum_and_go_us"
     item_attributes = {"brand": "Kum & Go", "brand_wikidata": "Q6443340"}
     sitemap_urls = ["https://locations.kumandgo.com/robots.txt"]
     sitemap_rules = [(r"com/\w\w/[^/]+/[^/]+$", "parse")]
