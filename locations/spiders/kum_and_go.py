@@ -8,17 +8,25 @@ from locations.structured_data_spider import StructuredDataSpider
 
 FUEL_TYPES_MAPPING = {
     "CNG": Fuel.CNG,
+    "DEF": Fuel.ADBLUE,
     "Diesel": Fuel.DIESEL,
     "Dyed Diesel": Fuel.UNTAXED_DIESEL,
     "E85": Fuel.E85,
     "E15": Fuel.E15,
+    "Ethanol Free 87": Fuel.ETHANOL_FREE,
+    "Ethanol Free 88": Fuel.ETHANOL_FREE,
+    "Ethanol Free 91": Fuel.ETHANOL_FREE,
     "Kerosene": Fuel.KEROSENE,
     "Midgrade - Ethanol Free": Fuel.ETHANOL_FREE,
-    "Midgrade": Fuel.OCTANE_87,
+    "Mid": Fuel.OCTANE_89,
+    "Midgrade": Fuel.OCTANE_89,
+    "Mid-High": Fuel.OCTANE_90,
     "Premium - Ethanol Free": Fuel.ETHANOL_FREE,
     "Premium Plus (93 octane)": Fuel.OCTANE_93,
     "Premium": Fuel.OCTANE_91,
+    "Regular": Fuel.OCTANE_87,
     "Super Unleaded/Regular": Fuel.OCTANE_87,
+    "Truck Diesel": Fuel.HGV_DIESEL,
     "Xtreme Diesel": Fuel.DIESEL,
 }
 
