@@ -20,11 +20,11 @@ class MussalaBGSpider(Spider):
             rows = Selector(text=location["hours"]).xpath("//table/tr").getall()
             for row in rows:
                 selector_row = Selector(text=row)
-                hours = selector_row.xpath("//td[2]//text()").get()
-                if hours == "Затворено":
-                    continue
                 day = selector_row.xpath("//td[1]/text()").get()
                 day = sanitise_day(day, DAYS_BG)
-                start_time, end_time = hours.replace(".", ":").split(" - ")
-                item["opening_hours"].add_range(day, start_time, end_time)
+                hours = selector_row.xpath("//td[2]//text()").get()
+                if hours == "Затворено":
+                    item["opening_hours"].set_closed(day)
+                else:
+                    item["opening_hours"].add_range(day, *hours.replace(".", ":").split(" - "))
             yield item
