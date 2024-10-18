@@ -17,7 +17,7 @@ class MyflexboxSpider(Spider):
         for location in response.json()["lockers"]:
             item = Feature()
             item["ref"] = "{}-{}".format(location["countryCode"], location["externalId"])
-            item["housenumber"] = location["streetNumber"]
+            item["housenumber"] = location["streetNumber"].strip()
             item["street"] = location["streetName"]
             item["city"] = location["city"]
             item["country"] = location["countryCode"]

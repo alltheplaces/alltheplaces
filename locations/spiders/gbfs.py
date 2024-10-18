@@ -1,8 +1,11 @@
+from typing import Iterable
+
 from scrapy.http import JsonRequest
 from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # General Bikeshare Feed Specification
 # https://gbfs.mobilitydata.org/
@@ -327,7 +330,13 @@ class GbfsSpider(CSVFeedSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_row(self, response, row):
-        yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
+        url = row["Auto-Discovery URL"]
+        if auth := row["Authentication Info"]:
+            if auth.startswith("http"):
+                return
+            else:
+                url = "{}?{}".format(url, auth)
+        yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
 
     def parse_gbfs(self, response, **kwargs):
         try:
@@ -337,9 +346,13 @@ class GbfsSpider(CSVFeedSpider):
 
         for feed in DictParser.get_nested_key(data, "feeds") or []:
             if feed["name"] == "station_information":
-                yield JsonRequest(url=feed["url"], cb_kwargs=kwargs, callback=self.parse_stations)
+                url = feed["url"]
+                if auth := kwargs["Authentication Info"]:
+                    if auth not in url:
+                        url = "{}?{}".format(url, auth)
+                yield JsonRequest(url=url, cb_kwargs=kwargs, callback=self.parse_stations)
 
-    def parse_stations(self, response, **kwargs):
+    def parse_stations(self, response, **kwargs) -> Iterable[Feature]:
         try:
             data = response.json()
         except:
@@ -352,6 +365,10 @@ class GbfsSpider(CSVFeedSpider):
 
             item = DictParser.parse(station)
 
+            if isinstance(station.get("name"), list):
+                for value in station["name"]:
+                    item["name"] = item["extras"]["name:{}".format(value["language"])] = value["text"]
+
             item["ref"] = item["extras"]["ref:gbfs"] = "{}:{}".format(kwargs["System ID"], station["station_id"])
             item["extras"]["ref:gbfs:{}".format(kwargs["System ID"])] = str(station["station_id"])
 
@@ -361,15 +378,13 @@ class GbfsSpider(CSVFeedSpider):
             item["website"] = kwargs["URL"]
 
             # TODO: Map all brands/names
-            brand_mapped = False
             for brand in BRAND_MAPPING:
                 if kwargs["Name"] in BRAND_MAPPING[brand]["names"]:
                     apply_category(BRAND_MAPPING[brand]["category"], item)
                     item["brand"] = brand
                     item["brand_wikidata"] = BRAND_MAPPING[brand]["wikidata"]
-                    brand_mapped = True
                     break
-            if not brand_mapped:
+            else:
                 item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
                 if "bike" in kwargs["Name"].lower() or "cycle" in kwargs["Name"].lower():
                     apply_category(Categories.BICYCLE_RENTAL, item)
