@@ -29,4 +29,3 @@ class NettoSallingPLSpider(SitemapSpider, StructuredDataSpider):
             if oh.get("validFrom", "") == oh.get("validThrough"):
                 # No day, but we've got a day range of 1 day.
                 oh["dayOfWeek"] = DAYS[datetime.strptime(oh["validFrom"], "%Y-%m-%d").weekday()]
-                print(oh["dayOfWeek"])

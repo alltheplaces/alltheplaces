@@ -20,7 +20,6 @@ class NettoSallingDESpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            print(location)
             item = DictParser.parse(location)
             item["lon"], item["lat"] = location["coordinates"]
             item["street_address"] = item.pop("street")
@@ -31,7 +30,6 @@ class NettoSallingDESpider(Spider):
                     open = re.sub(f'{opening_hours["date"]}T', '', opening_hours["open"])
                     close = re.sub(f'{opening_hours["date"]}T', '', opening_hours["close"])
                     day = DAYS[datetime.strptime(opening_hours["date"], "%Y-%m-%d").weekday()]
-                    print(day, open, close)
                     oh.add_ranges_from_string(f'{day} {open}-{close}')
                 item["opening_hours"] = oh
                             
