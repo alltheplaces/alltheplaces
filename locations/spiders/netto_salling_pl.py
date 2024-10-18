@@ -7,17 +7,13 @@ from locations.hours import DAYS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class NettoSallingSpider(SitemapSpider, StructuredDataSpider):
-    name = "netto_salling"
+class NettoSallingPLSpider(SitemapSpider, StructuredDataSpider):
+    name = "netto_salling_pl"
     item_attributes = {"brand": "Netto", "brand_wikidata": "Q552652"}
     sitemap_urls = [
-        "https://www.netto.de/sitemap.xml",
-        "https://www.netto.dk/sitemap.xml",
         "https://www.netto.pl/sitemap.xml",
     ]
     sitemap_rules = [
-        ("/geschaefte/", "parse_sd"),
-        ("/butikker/", "parse_sd"),
         ("/sklepy/", "parse_sd"),
     ]
     drop_attributes = {"image"}
