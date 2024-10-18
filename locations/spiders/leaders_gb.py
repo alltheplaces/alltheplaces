@@ -22,4 +22,5 @@ class LeadersGBSpider(JSONBlobSpider):
             f'//img[contains(@alt, "{item["branch"]}")]/ancestor::div[@class="slider-item properties-contacts-slider-item"]'
         )
         item["addr_full"] = item_properties.xpath('.//*[@class="slider-item-description"]/text()').get()
+        item["phone"] = item_properties.xpath('.//a[contains(@href,"tel:")]/@href').get()
         yield item
