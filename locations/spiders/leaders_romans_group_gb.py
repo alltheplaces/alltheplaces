@@ -7,10 +7,16 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class LeadersGBSpider(JSONBlobSpider):
-    name = "leaders_gb"
-    item_attributes = {"brand": "Leaders", "brand_wikidata": "Q111522674"}
-    start_urls = ["https://www.leaders.co.uk/contact-us"]
+class LeadersRomansGroupGBSpider(JSONBlobSpider):
+    name = "leaders_romans_group_gb"
+    BRANDS = {
+        "leaders": {"brand": "Leaders", "brand_wikidata": "Q111522674"},
+        "romans": {"brand": "Romans", "brand_wikidata": "Q113562519"},
+    }
+    start_urls = [
+        "https://www.leaders.co.uk/contact-us",
+        "https://www.romans.co.uk/contact-us",
+    ]
 
     def extract_json(self, response: Response) -> list:
         return json.loads(response.xpath("//@data-branches").get())
@@ -23,4 +29,7 @@ class LeadersGBSpider(JSONBlobSpider):
         )
         item["addr_full"] = item_properties.xpath('.//*[@class="slider-item-description"]/text()').get()
         item["phone"] = item_properties.xpath('.//a[contains(@href,"tel:")]/@href').get()
+        brand_key = response.url.split(".")[1]
+        if brand := self.BRANDS.get(brand_key):
+            item.update(brand)
         yield item
