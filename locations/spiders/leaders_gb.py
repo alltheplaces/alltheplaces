@@ -18,4 +18,8 @@ class LeadersGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = item["website"]
         item["branch"] = item.pop("name")
+        item_properties = response.xpath(
+            f'//img[contains(@alt, "{item["branch"]}")]/ancestor::div[@class="slider-item properties-contacts-slider-item"]'
+        )
+        item["addr_full"] = item_properties.xpath('.//*[@class="slider-item-description"]/text()').get()
         yield item
