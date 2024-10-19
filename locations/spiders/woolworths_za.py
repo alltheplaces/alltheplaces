@@ -21,7 +21,6 @@ class WoolworthsZASpider(JSONBlobSpider):
     def post_process_item(self, item, response, store):
         item["street_address"] = store.get("storeAddressInfo")
         item["addr_full"] = store.get("storeAddress")
-        item["website"] = "https://www.woolworths.co.za/"
         timing = store.get("openingHours")
         if all("closed" in t.get("hours", "").lower() for t in timing):
             return

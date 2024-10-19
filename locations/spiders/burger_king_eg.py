@@ -43,12 +43,14 @@ class BurgerKingEGSpider(JSONBlobSpider):
         item["email"] = location["attributes"]["email"]
         item["addr_full"] = location["attributes"]["line1"]
         # item["country"] = location["attributes"]["country"] # Incorrect country (SA) reported for some locations
+
         apply_yes_no(Extras.DELIVERY, item, location["attributes"]["delivery-enabled"] == 1, False)
         apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"]["is-drive-thru-enabled"], False)
+
         item["opening_hours"] = OpeningHours()
         if location["attributes"]["open-24-hours"]:
             item["opening_hours"] = "Mo-Su 00:00-24:00"
-        else:
+        elif location["attributes"]["opening-hours"] is not None:
             for day in location["attributes"]["opening-hours"]:
                 item["opening_hours"].add_range(DAYS[day["day"]], day["open"], day["closed"])
 

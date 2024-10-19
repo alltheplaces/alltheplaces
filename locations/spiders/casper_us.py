@@ -10,3 +10,4 @@ class CasperUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.casper.com/sitemap.xml"]
     sitemap_rules = [(r"stores\.casper\.com\/casper\-.*$", "parse_sd")]
     wanted_types = ["HomeGoodsStore"]
+    drop_attributes = {"image"}

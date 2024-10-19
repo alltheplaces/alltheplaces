@@ -23,7 +23,7 @@ class ErnstYoungSpider(scrapy.Spider):
             "lon": float(office["officeLongitude"]),
         }
         if office["officeAddress"]:
-            properties["addr_full"] = office["officeAddress"].strip().replace("\r\n", " ")
+            properties["street_address"] = office["officeAddress"].strip().replace("\r\n", " ")
         return properties
 
     def parse(self, response):

@@ -13,6 +13,7 @@ class DictParser:
         "store-id",
         "StoreID",
         "storeID",
+        "storeId",
         "store-number",
         "shop-number",
         "location-id",
@@ -28,6 +29,9 @@ class DictParser:
         "BranchID",
         "branchID",
         "branch-code",
+        # ES
+        "id-tienda",
+        "ID-tienda",
     ]
 
     name_keys = [
@@ -84,6 +88,8 @@ class DictParser:
         "address-line-one",
         # JP
         "町域以下住所",  # "address below town limits"
+        # IT
+        "indirizzo",
     ]
 
     city_keys = [
@@ -106,6 +112,7 @@ class DictParser:
         "ciudad",  # "city"
         # IT
         "comune",  # "comune",
+        "citta",
         # DE
         "ort",  # location
     ]
@@ -164,6 +171,8 @@ class DictParser:
         # DE
         "plz",
         "postleitzahl",
+        # IT
+        "cap",
     ]
 
     email_keys = [
@@ -247,10 +256,18 @@ class DictParser:
         "WebSiteURL",
     ]
 
-    hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
+    hours_keys = [
+        "hours",
+        "opening-hours",
+        "open-hours",
+        "store-opening-hours",
+        "store-hours",
+        # IT
+        "orario",
+    ]
 
     @staticmethod
-    def parse(obj) -> Feature:
+    def parse(obj: dict) -> Feature:
         item = Feature()
 
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
@@ -258,8 +275,9 @@ class DictParser:
 
         if (
             obj.get("geometry")
-            and obj["geometry"].get("type") is not None
-            and obj["geometry"].get("coordinates") is not None
+            and obj["geometry"].get("type")
+            in ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]
+            and isinstance(obj["geometry"].get("coordinates"), list)
         ):
             item["geometry"] = obj["geometry"]
         else:

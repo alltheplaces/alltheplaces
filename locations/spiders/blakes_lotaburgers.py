@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 class BlakesLotaburgersSpider(Spider):
     name = "blakes_lotaburgers"
-    item_attributes = {"brand": "Blakes Lotaburgers", "brand_wikidata": "Q4924308"}
+    item_attributes = {"brand": "Blake's Lotaburgers", "brand_wikidata": "Q4924308"}
     allowed_domains = ["www.lotaburger.com"]
     start_urls = ["https://www.lotaburger.com/wp-json/ip/v1/blakes_location_json/"]
 
