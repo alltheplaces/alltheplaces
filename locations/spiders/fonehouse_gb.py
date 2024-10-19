@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
+
 class FonehouseGBSpider(CrawlSpider, StructuredDataSpider):
     name = "fonehouse_gb"
     item_attributes = {
@@ -32,7 +33,7 @@ class FonehouseGBSpider(CrawlSpider, StructuredDataSpider):
             "country": data.get("address", {}).get("addressCountry"),
             "geometry": data.get("geometry", {}).get("geo"),
             "website": response.url,
-           # "opening_hours": oh.as_opening_hours(),
+            # "opening_hours": oh.as_opening_hours(),
         }
         item = Feature(**properties)
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
