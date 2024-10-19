@@ -95,8 +95,6 @@ class GrandvisionSpider(CrawlSpider, StructuredDataSpider):
             unquote(instagram_link),
         )
         set_social_media(item, SocialMedia.TIKTOK, response.xpath('//a[contains(@href, "tiktok")]/@href').get(""))
-        set_social_media(item, SocialMedia.YOUTUBE, response.xpath('//a[contains(@href, "youtube")]/@href').get(""))
-        set_social_media(item, SocialMedia.LINKEDIN, response.xpath('//a[contains(@href, "linkedin")]/@href').get(""))
 
         brand = response.url.split(".")[1]
         if brand_details := self.BRANDS.get(brand):
