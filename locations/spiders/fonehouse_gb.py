@@ -5,10 +5,9 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from locations.linked_data_parser import LinkedDataParser
 
-
-class FonehouseGBSpider(CrawlSpider, StructuredDataSpider):
+class FonehouseGBSpider(CrawlSpider):
     name = "fonehouse_gb"
     item_attributes = {
         "brand": "fonehouse",
@@ -23,17 +22,23 @@ class FonehouseGBSpider(CrawlSpider, StructuredDataSpider):
     def parse(self, response):
         ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,\'"LocalBusiness"\')]').get()
         data = json.decoder.JSONDecoder(strict=False).raw_decode(ldjson, ldjson.index("{"))[0]
+#        open_hour_filtered = [row for row in data.get("openingHoursSpecification") if ":" in row]
+#        oh = LinkedDataParser.parse_opening_hours({"openingHoursSpecification": open_hour_filtered})
+
         properties = {
             "ref": response.url,
             "name": data.get("name"),
             "phone": data.get("telephone"),
+            "email": data.get("email"),
             "street_address": data.get("address", {}).get("streetAddress"),
             "city": data.get("address", {}).get("addressLocality"),
-            "state": data.get("address", {}).get("addressRegion"),
-            "country": data.get("address", {}).get("addressCountry"),
-            "geometry": data.get("geometry", {}).get("geo"),
+            "state": data.get("address", {}).get("addressCountry"),
+            "country": "GB",
+            "postcode" : data.get("address", {}).get("postalCode"),
+            "geometry": data.get("geo"),
+            "image": data.get("image"),
             "website": response.url,
-            # "opening_hours": oh.as_opening_hours(),
+#            "opening_hours": oh.as_opening_hours(),
         }
         item = Feature(**properties)
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
