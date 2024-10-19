@@ -13,7 +13,7 @@ def token_split(val):
 
 
 def top_level_items(selector: parsel.Selector):
-    yield from selector.xpath("//*[@itemscope][not(@itemprop)]")
+    yield from selector.xpath("//*[(@itemscope and not(@itemprop)) or (@typeof and not(@property))]")
 
 
 def property_value(element: lxml.html.HtmlElement):
@@ -24,7 +24,7 @@ def property_value(element: lxml.html.HtmlElement):
     # following list:
 
     # If the element also has an itemscope attribute
-    if "itemscope" in element.attrib:
+    if "itemscope" in element.attrib or "typeof" in element.attrib:
         # The value is the item created by the element.
         return element
     # If the element is a meta element
@@ -102,7 +102,7 @@ def property_value(element: lxml.html.HtmlElement):
 
 
 def item_props(scope: lxml.html.HtmlElement):
-    assert "itemscope" in scope.attrib
+    assert "itemscope" in scope.attrib or "typeof" in scope.attrib
     # 5.2.5 Associating names with items
 
     # 1. Let results, memory, and pending be empty lists of elements.
@@ -143,12 +143,12 @@ def item_props(scope: lxml.html.HtmlElement):
 
         # 5. 4. If current does not have an itemscope attribute, then: add all
         # the child elements of current to pending.
-        if "itemscope" not in current.attrib:
+        if "itemscope" not in current.attrib and "typeof" not in current.attrib:
             pending.extend(current.getchildren())
 
         # 5. 5. If current has an itemprop attribute specified and has one or
         # more property names, then add current to results.
-        prop_tokens = token_split(current.attrib.get("itemprop", ""))
+        prop_tokens = token_split(current.attrib.get("itemprop", current.attrib.get("property", "")))
         if prop_tokens:
             results.append(current)
 
@@ -172,6 +172,9 @@ def get_object(item: lxml.html.HtmlElement, memory=None):
     # were specified on the itemtype attribute.
     if item_type := token_split(item.attrib.get("itemtype", "")):
         result["type"] = item_type
+    elif item_type := token_split(item.attrib.get("typeof", "")):
+        schema = item.attrib.get("vocab", "http://schema.org/")
+        result["type"] = [schema + it for it in item_type]
 
     # 5. If the item has a global identifier, add an entry to result called
     # "id" whose value is the global identifier of item.
@@ -205,7 +208,7 @@ def get_object(item: lxml.html.HtmlElement, memory=None):
 
         # 7.3. For each name name in element's property names, run the
         # following substeps:
-        for name in token_split(element.attrib.get("itemprop", "")):
+        for name in token_split(element.attrib.get("itemprop", element.attrib.get("property", ""))):
             # 7.3.1. If there is no entry named name in properties, then add an
             # entry named name to properties whose value is an empty array.
             if name not in properties:
