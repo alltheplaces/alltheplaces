@@ -10,7 +10,7 @@ class TagHeuerSpider(AlgoliaSpider):
     api_key = "8cf40864df513111d39148923f754024"
     app_id = "6OBGA4VJKI"
     index_name = "stores"
-    myfilter = "type:TAGSTORE"
+    myfilter = "type:FRANCHISE OR type:TAGSTORE"
 
     # {"params":"filters=products.mechanicalWatches:true AND country:GB&attributesToRetrieve=address,Latitude,zip,country,phone,type,id,image,address2,email,name,description,services,payments,city,openingHours,exceptionalHours,_geoloc,i18nAddress,image1,timezone,sfccUrl","aroundRadius":"15000","hitsPerPage":"1000","getRankingInfo":"1","attributesToRetrieve":"address,Latitude,zip,country,phone,type,id,image,address2,email,name,description,services,payments,city,openingHours,exceptionalHours,_geoloc,i18nAddress,image1,timezone,sfccUrl","attributesToHighlight":"name"}
 
