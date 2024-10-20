@@ -1,4 +1,5 @@
 from locations.storefinders.algolia import AlgoliaSpider
+from locations.hours import DAYS, OpeningHours
 
 
 class TagHeuerSpider(AlgoliaSpider):
@@ -22,5 +23,16 @@ class TagHeuerSpider(AlgoliaSpider):
         item["image"] = feature["image"]
         slug = feature["sfccUrl"]
         item["website"] = f"https://www.tagheuer.com/{slug}"
-        # if "boutique-tag-heuer" in slug:
+
+        oh = OpeningHours()
+        if feature["openingHours"]:
+            for j in range(1,7):
+                if j == 7: i = 0
+                else: i = j
+                try:
+                    oh.add_range(DAYS[j], feature["openingHours"][str(i)][0]["start"], feature["openingHours"][str(i)][0]["end"])
+                except:
+                    self.logger.error("No opening hour on day" + str(i))
+            item["opening_hours"] = oh
+
         yield item
