@@ -28,8 +28,8 @@ class AlgoliaSpider(Spider):
     myfilter: str | None = None
     referer: str | None = None
 
-    def _make_request(self, page: int | None = None, myfilter: str | None = None) -> JsonRequest:
-        params = f"hitsPerPage=1000"
+    def _make_request(self, page: int | None = None) -> JsonRequest:
+        params = "hitsPerPage=1000"
         if self.myfilter is not None:
             params += f"&filters={self.myfilter}"
         if page is not None:
