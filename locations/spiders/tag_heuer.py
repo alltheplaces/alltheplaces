@@ -27,7 +27,7 @@ class TagHeuerSpider(AlgoliaSpider):
         oh = OpeningHours()
         if feature["openingHours"]:
             for j in range(6):
-                if j == 7:
+                if j == 6:
                     i = 0
                 else:
                     i = j + 1
@@ -36,7 +36,7 @@ class TagHeuerSpider(AlgoliaSpider):
                         DAYS[j], feature["openingHours"][str(i)][0]["start"], feature["openingHours"][str(i)][0]["end"]
                     )
                 except:
-                    self.logger.error("No opening hour on day" + str(i))
+                    self.logger.error("No opening hour on day")
             item["opening_hours"] = oh
 
         yield item
