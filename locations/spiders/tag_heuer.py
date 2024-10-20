@@ -22,5 +22,5 @@ class TagHeuerSpider(AlgoliaSpider):
         item["image"] = feature["image"]
         slug = feature["sfccUrl"]
         item["website"] = f"https://www.tagheuer.com/{slug}"
-        #if "boutique-tag-heuer" in slug:
+        # if "boutique-tag-heuer" in slug:
         yield item
