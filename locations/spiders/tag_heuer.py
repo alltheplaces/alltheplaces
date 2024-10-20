@@ -26,7 +26,7 @@ class TagHeuerSpider(AlgoliaSpider):
 
         oh = OpeningHours()
         if feature["openingHours"]:
-            for j in range(6):
+            for j in range(7):
                 if j == 6:
                     i = 0
                 else:
