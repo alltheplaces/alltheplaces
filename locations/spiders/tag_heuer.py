@@ -1,5 +1,5 @@
-from locations.storefinders.algolia import AlgoliaSpider
 from locations.hours import DAYS, OpeningHours
+from locations.storefinders.algolia import AlgoliaSpider
 
 
 class TagHeuerSpider(AlgoliaSpider):
@@ -26,11 +26,15 @@ class TagHeuerSpider(AlgoliaSpider):
 
         oh = OpeningHours()
         if feature["openingHours"]:
-            for j in range(1,7):
-                if j == 7: i = 0
-                else: i = j
+            for j in range(1, 7):
+                if j == 7:
+                    i = 0
+                else:
+                    i = j
                 try:
-                    oh.add_range(DAYS[j], feature["openingHours"][str(i)][0]["start"], feature["openingHours"][str(i)][0]["end"])
+                    oh.add_range(
+                        DAYS[j], feature["openingHours"][str(i)][0]["start"], feature["openingHours"][str(i)][0]["end"]
+                    )
                 except:
                     self.logger.error("No opening hour on day" + str(i))
             item["opening_hours"] = oh
