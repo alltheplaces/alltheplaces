@@ -22,8 +22,6 @@ class SushiDailySpider(scrapy.Spider):
             "gpsLongitude": "lon",
             "gpsLatitude": "lat",
         }
-        # distributorGroup = supermarket brand
-        EXTRA_TAGS = ["distributorGroup", "kioskType"]
         for shop in locations:
             for old, new in RENAME.items():
                 shop[new] = shop.pop(old)
@@ -35,8 +33,9 @@ class SushiDailySpider(scrapy.Spider):
             for key in "lon", "lat":
                 shop[key] = re.sub("[,°].*", "", shop[key])
             item = DictParser.parse(shop)
-            for tag in EXTRA_TAGS:
-                item["extras"][tag] = shop.pop(tag)
+
+            item["located_in"] = shop["distributorGroup"]
+            item["extras"]["kioskType"] = str(shop["kioskType"])
 
             apply_category(Categories.FAST_FOOD, item)
 
