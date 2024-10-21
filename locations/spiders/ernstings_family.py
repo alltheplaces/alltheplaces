@@ -28,7 +28,7 @@ class ErnstingsFamilySpider(Spider):
                 location["phone"] = location.pop("primaryPhone")
                 item = DictParser.parse(location)
                 item["opening_hours"] = self.format_opening_hours(location["regularHours"]["periods"])
-                item["extras"] = {"placeid": location["placeid"]}
+                item["extras"]["ref:google"] = location["placeid"]
 
                 yield item
 
