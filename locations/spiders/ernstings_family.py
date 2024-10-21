@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
