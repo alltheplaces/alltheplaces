@@ -3,14 +3,14 @@ import re
 
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class SushiDailySpider(scrapy.Spider):
     name = "sushi_daily"
     start_urls = ["https://sushidaily.com/gb-en/find-us/"]
-    item_attributes = {"brand": "Sushi Daily", "brand_wikidata": "Q124301611", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {"brand": "Sushi Daily", "brand_wikidata": "Q124301611"}
 
     def parse(self, response):
         script = response.xpath('//script[contains(text(), "window.SD_KIOSKS")]/text()').re(
@@ -37,4 +37,7 @@ class SushiDailySpider(scrapy.Spider):
             item = DictParser.parse(shop)
             for tag in EXTRA_TAGS:
                 item["extras"][tag] = shop.pop(tag)
+
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item
