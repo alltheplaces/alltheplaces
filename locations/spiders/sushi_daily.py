@@ -26,9 +26,6 @@ class SushiDailySpider(scrapy.Spider):
             for old, new in RENAME.items():
                 shop[new] = shop.pop(old)
             shop["url"] = response.urljoin(shop["url"])
-            # There are some unfixable coordinates
-            if type(shop["lat"]) == str and shop["lat"].startswith("N"):
-                continue
             # Some shop data contains hacks like "gpsLongitude": "10.719548,16.25z"
             for key in "lon", "lat":
                 shop[key] = re.sub("[,°].*", "", shop[key])
