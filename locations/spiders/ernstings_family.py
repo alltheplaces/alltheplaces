@@ -11,7 +11,6 @@ class ErnstingsFamilySpider(Spider):
         "brand_wikidata": "Q1361016",
     }
     start_urls = ["https://filialen.ernstings-family.de/api/stores/nearby/51.3127114/9.4797461/10000/3000"]
-    requires_proxy = "DE"
 
     def parse(self, response, **kwargs):
         for location in response.json():
