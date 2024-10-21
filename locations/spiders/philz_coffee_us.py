@@ -16,6 +16,7 @@ class PhilzCoffeeUSSpider(JSONBlobSpider):
     def post_process_item(self, item, response, feature):
         item["branch"] = item.pop("name").strip()
         item["state"] = feature["state"]
+        item["country"] = "US"
         item["website"] = f"https://philzcoffee.com/locations/{item['ref']}"
 
         if feature["header_image_one_url"]:
