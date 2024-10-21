@@ -3,7 +3,6 @@ from typing import Iterable
 import chompjs
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -20,6 +19,9 @@ class MavisUSSpider(JSONBlobSpider):
         )[-1]["children"][-1]["stores"].values():
             stores.extend(state_wise_stores_list)
         return stores
+
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("latLng"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         label = feature.get("storeHeader", {}).get("fields", {}).get("myStoreLabel")
