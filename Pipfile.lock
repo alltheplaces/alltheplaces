@@ -1896,12 +1896,12 @@
         },
         "xmltodict": {
             "hashes": [
-                "sha256:338c8431e4fc554517651972d62f06958718f6262b04316917008e8fd677a6b0",
-                "sha256:3ef4a7b71c08f19047fcbea572e1d7f4207ab269da1565b5d40e9823d3894e63"
+                "sha256:201e7c28bb210e374999d1dde6382923ab0ed1a8a5faeece48ab525b7810a553",
+                "sha256:20cc7d723ed729276e808f26fb6b3599f786cbc37e06c65e192ba77c40f20aac"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.6'",
-            "version": "==0.14.1"
+            "version": "==0.14.2"
         },
         "yarl": {
             "hashes": [
