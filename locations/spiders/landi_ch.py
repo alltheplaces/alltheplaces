@@ -27,7 +27,7 @@ class LandiCHSpider(SitemapSpider):
         "garage": Categories.SHOP_CAR_REPAIR,
         "laden": Categories.SHOP_SUPERMARKET,
         "landgarage": Categories.SHOP_CAR_REPAIR,
-        "landi": Categories.SHOP_SUPERMARKET,
+        "landi": Categories.SHOP_COUNTRY_STORE,
         "mofag": Categories.SHOP_MOTORCYCLE,
         "moto": Categories.SHOP_MOTORCYCLE,
         "motobene": Categories.SHOP_MOTORCYCLE_REPAIR,
