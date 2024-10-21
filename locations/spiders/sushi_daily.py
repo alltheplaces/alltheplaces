@@ -5,6 +5,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.items import set_closed
 
 
 class SushiDailySpider(scrapy.Spider):
@@ -30,6 +31,9 @@ class SushiDailySpider(scrapy.Spider):
             for key in "lon", "lat":
                 shop[key] = re.sub("[,°].*", "", shop[key])
             item = DictParser.parse(shop)
+
+            if shop["closed"] is True:
+                set_closed(item)
 
             item["located_in"] = shop["distributorGroup"]
             item["extras"]["kioskType"] = str(shop["kioskType"])
