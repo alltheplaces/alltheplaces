@@ -1,4 +1,5 @@
 from typing import Iterable
+from urllib.parse import urljoin
 
 import chompjs
 from scrapy.http import Response
@@ -29,4 +30,5 @@ class MavisUSSpider(JSONBlobSpider):
             item["name"] = "Mavis Tires & Brakes"
         elif label.startswith("Mavis Discount"):
             item["name"] = "Mavis Discount Tire"
+        item["website"] = urljoin("https://www.mavis.com/locations/", feature.get("slug"))
         yield item
