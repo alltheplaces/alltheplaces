@@ -26,10 +26,9 @@ class WoolworthsAUSpider(scrapy.Spider):
             item["ref"] = location["StoreNo"]
             item["city"] = location["Suburb"]
 
-            item["website"] = (
-                "https://www.woolworths.com.au/shop/storelocator/"
-                + "-".join([item["state"], item["city"], item["ref"], location["Division"]]).lower()
-            )
+            item["website"] = "https://www.woolworths.com.au/shop/storelocator/" + "-".join(
+                [item["state"], item["city"], item["ref"]]
+            ).lower().replace(" ", "-")
 
             if "Metro" in item["branch"]:
                 item["branch"] = item["branch"].replace("Metro", "").strip(" ()")
