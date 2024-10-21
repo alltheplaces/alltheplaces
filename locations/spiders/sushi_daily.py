@@ -24,6 +24,13 @@ class SushiDailySpider(scrapy.Spider):
             "gpsLatitude": "lat",
         }
         for shop in locations:
+            if (
+                shop["name"].startswith("DELIVEROO - ")
+                or shop["name"].startswith("UBER EATS - ")
+                or shop["name"].startswith("JUST EAT - ")
+            ):
+                continue
+
             for old, new in RENAME.items():
                 shop[new] = shop.pop(old)
             shop["url"] = response.urljoin(shop["url"])
