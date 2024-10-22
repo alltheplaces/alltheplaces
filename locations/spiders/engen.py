@@ -9,6 +9,7 @@ class EngenSpider(JSONBlobSpider):
     locations_key = ["response", "data", "stations"]
 
     def post_process_item(self, item, response, location):
+        item["ref"] = location["internal_id"]
         item["branch"] = location.pop("company_name").replace(self.item_attributes["brand"], "").strip()
         item["phone"] = location.pop("mobile")
 
