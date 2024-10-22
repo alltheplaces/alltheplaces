@@ -26,6 +26,7 @@ class LeeannChinUSSpider(JSONBlobSpider):
         item["street"] = feature.get("address_route")
         item["addr_full"] = feature.get("location")
         item["branch"] = item.pop("name")
+        item["name"] = self.item_attributes["brand"]
         hours_info = Selector(text=feature.get("hours", ""))
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(", ".join(hours_info.xpath("//li/text()").getall()))
