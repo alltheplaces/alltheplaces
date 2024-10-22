@@ -25,6 +25,7 @@ class LeeannChinUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street"] = feature.get("address_route")
         item["addr_full"] = feature.get("location")
+        item["branch"] = item.pop("name")
         hours_info = Selector(text=feature.get("hours", ""))
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(", ".join(hours_info.xpath("//li/text()").getall()))
