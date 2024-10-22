@@ -25,7 +25,7 @@ class MavisUSSpider(JSONBlobSpider):
         feature.update(feature.pop("latLng"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        label = feature.get("storeHeader", {}).get("fields", {}).get("myStoreLabel")
+        label = feature.get("storeHeader", {}).get("fields", {}).get("myStoreLabel", "")
         if label.startswith("Mavis Tire"):
             item["name"] = "Mavis Tires & Brakes"
         elif label.startswith("Mavis Discount"):
