@@ -22,7 +22,7 @@ class NordseeSpider(Spider):
             item["street_address"] = item.pop("housenumber", None)
             item["opening_hours"] = OpeningHours()
             for day_abbrev, hours_range in location.get("opening").items():
-                if isinstance(hours_range, str):
+                if isinstance(hours_range, str) and "------" not in hours_range:
                     item["opening_hours"].add_range(day_abbrev.title(), *hours_range.split(" - ", 1), "%H:%M")
             item["website"] = (
                 "https://www.nordsee.com"
