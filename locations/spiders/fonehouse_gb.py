@@ -4,8 +4,9 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
 from locations.hours import OpeningHours
+from locations.items import Feature
+
 
 class FonehouseGBSpider(CrawlSpider):
     name = "fonehouse_gb"
@@ -17,18 +18,17 @@ class FonehouseGBSpider(CrawlSpider):
 
     start_urls = ["https://www.fonehouse.co.uk/store-finder"]
     rules = [Rule(LinkExtractor(allow=r"/stores/([^/]+)$"), callback="parse")]
-    #wanted_types = ["LocalBusiness"]
+    # wanted_types = ["LocalBusiness"]
 
     def parse(self, response):
         ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,\'"LocalBusiness"\')]').get()
         data = json.decoder.JSONDecoder(strict=False).raw_decode(ldjson, ldjson.index("{"))[0]
-        oh=OpeningHours()
+        oh = OpeningHours()
         hours = data.get("openingHoursSpecification")
         for day in hours:
-            if day["opens"]==day["closes"]:
+            if day["opens"] == day["closes"]:
                 continue
-            oh.add_range(day.get("dayOfWeek")[0][:2].capitalize(),day.get("opens"),day.get("closes"))
-
+            oh.add_range(day.get("dayOfWeek")[0][:2].capitalize(), day.get("opens"), day.get("closes"))
 
         properties = {
             "ref": response.url,
