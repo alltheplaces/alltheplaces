@@ -15,6 +15,8 @@ class EngenSpider(JSONBlobSpider):
 
         if location.get("country_name") == "DRC":  # has incorrect country_code of ZA
             item["country"] = "CD"
+        if location.get("country_name") == "eSwatini":  # has incorrect country_code of ZA
+            item["country"] = "SZ"
 
         postcode = location.pop("street_postal_code")
         if postcode and postcode != "0":
