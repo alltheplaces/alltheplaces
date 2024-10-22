@@ -1,10 +1,9 @@
 import json
-import re
 
 import scrapy
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
 class MedicalCityHealthcareSpider(scrapy.Spider):
@@ -16,52 +15,38 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
     ]
 
     categories = [
-        ("Hospital", Categories.HOSPITAL),
-        ("Childrens_Hospital", Categories.HOSPITAL),
-        ("ER", Categories.HOSPITAL),
-        ("Pharmacy", Categories.PHARMACY),
-        ("Behavioral_Health", {"healthcare": "psychotherapist", "healthcare:speciality": "behavior"}),
+        ("PHYSICIAN PRACTICE", Categories.HOSPITAL),
+        ("HOSPITAL - GENERAL", Categories.HOSPITAL),
+        ("HOSPITAL - CHILDRENS", Categories.HOSPITAL),
+        ("BEHAVIORAL DEPARTMENT", {"healthcare": "psychotherapist", "healthcare:speciality": "behavior"}),
+        ("HOSPITAL - PSYCHIATRIC", {"healthcare": "psychotherapist", "healthcare:speciality": "behavior"}),
         (
-            "Imaging_Center",
+            "IMAGING CENTER",
             {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "diagnostic_radiology"},
         ),
-        ("Surgery_Center", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
-        ("Rehabilitation_Center", {"healthcare": "rehabilitation"}),
-        ("Urgent_Care", Categories.CLINIC_URGENT),
-        ("Cancer_Center", {"healthcare": "centre", "healthcare:speciality": "oncology"}),
-        ("Health_Center", {"healthcare": "centre"}),
-        ("Diagnostic_Center", {"healthcare": "centre"}),
-        ("Womens_Center", {"healthcare": "centre"}),
-        ("Medical_Group", {"healthcare": "centre"}),
-        ("Other", {"healthcare": "centre"}),
+        ("SURGERY CENTER", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
+        ("HOSPITAL - REHABILITATION", {"healthcare": "rehabilitation"}),
+        ("URGENT CARE CENTER", Categories.CLINIC_URGENT),
+        ("CANCER CENTER", {"healthcare": "centre", "healthcare:speciality": "oncology"}),
+        ("HEALTH CENTER", {"healthcare": "centre"}),
     ]
 
     def parse(self, response):
-        script = response.xpath('//script[contains(text(), "hostLocations")]').extract_first()
-        data = re.search(r"var hostLocations = (.*]);", script).group(1)
-        locations = json.loads(data)
-
-        for location in locations:
-            properties = {
-                "ref": location["id"],
-                "name": location["title"],
-                "street_address": location["address1"],
-                "city": location["city"],
-                "state": location["state"],
-                "postcode": location["zip"],
-                "lat": location["lat"],
-                "lon": location["lng"],
-                "phone": location["phone"],
-                "website": response.url,
-            }
-
-            types = location.get("type")[1:-1].split(",")
+        script = json.loads(response.xpath('//script[@type="application/json"]/text()').get())
+        for data in script["sitecore"]["route"]["placeholders"]["body"][0]["placeholders"]["col-top"][0]["fields"][
+            "defaultResponse"
+        ]["results"]:
+            item = DictParser.parse(data)
+            item["name"] = data.get("facilityName")
+            item["phone"] = data.get("marketedPrimaryPhoneNumber")
+            item["website"] = data.get("marketedWebsite")
+            item["street_address"] = data.get("street1")
+            types = data.get("purposeTypeName")
+            item["street"] = types
             for label, cat in self.categories:
                 if label in types:
-                    apply_category(cat, properties)
+                    apply_category(cat, item)
                     break
             else:
-                for cat in types:
-                    self.crawler.stats.inc_value(f"atp/medical_city_healthcare/unmatched_category/{cat}")
-
-            yield Feature(**properties)
+                apply_category(Categories.HOSPITAL, item)
+            yield item
