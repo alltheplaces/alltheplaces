@@ -16,7 +16,7 @@ class JohnstonesDecoratingCentreSpider(scrapy.Spider):
         for store in response.json()["markers"]:
             data = Selector(text=store["popupHTML"])
             item = Feature()
-            item["name"] = data.xpath("//h5/text()").get()
+            item["branch"] = data.xpath("//h5/text()").get()
             item["street_address"] = data.xpath("//*[@class='address-holder']/text()").get()
             item["addr_full"] = data.xpath("//*[@class='address-holder']").xpath("normalize-space()").get()
             item["lat"], item["lon"] = store["location"]
