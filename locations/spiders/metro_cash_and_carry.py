@@ -8,12 +8,12 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.user_agents import CHROME_LATEST
+from locations.user_agents import FIREFOX_LATEST
 
 
 class MetroCashAndCarrySpider(SitemapSpider):
     name = "metro_cash_and_carry"
-    user_agent = CHROME_LATEST
+    user_agent = FIREFOX_LATEST
     requires_proxy = True
     sitemap_rules = [
         # A better way to get all shop URLs was not found.
