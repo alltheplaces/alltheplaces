@@ -16,6 +16,7 @@ class SmashburgerSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"^https://smashburger\.com/locations/\w\w/\w\w/[^/]+/[^/]+$"), callback="parse_sd"),
     ]
     wanted_types = ["Restaurant"]
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["website"] = response.url
