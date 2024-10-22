@@ -12,13 +12,13 @@ class EngenSpider(JSONBlobSpider):
         item["branch"] = location.pop("company_name").replace(self.item_attributes["brand"], "").strip()
         item["phone"] = location.pop("mobile")
 
-        if location.get("country_name") == "DRC": # has incorrect country_code of ZA
+        if location.get("country_name") == "DRC":  # has incorrect country_code of ZA
             item["country"] = "CD"
-        
+
         postcode = location.pop("street_postal_code")
         if postcode and postcode != "0":
             location["postcode"] = postcode
-        
+
         item["street_address"] = item.pop("street")
         try:
             int(item["street_address"].split(" ", 1)[0])
@@ -26,7 +26,7 @@ class EngenSpider(JSONBlobSpider):
             item["street"] = item["street_address"].split(" ", 1)[1]
         except ValueError:
             pass
-        
+
         if "Quickshop" in location.get("rental_units", ""):
             shop_item = item.deepcopy()
             shop_item["ref"] = str(item.get("ref")) + "-attached-shop"
@@ -40,15 +40,15 @@ class EngenSpider(JSONBlobSpider):
             )
             apply_category(Categories.SHOP_CONVENIENCE, shop_item)
             yield shop_item
-        
+
         apply_category(Categories.FUEL_STATION, item)
-        
+
         if location["station_types"] == "Truck Stop":
             item["name"] = "Truck Stop"
             apply_yes_no(Access.HGV, item, True)
         else:
             item["name"] = "Engen"
-        
+
         apply_yes_no(Fuel.ADBLUE, item, "AdBlue" in location["rental_units"])
-        
+
         yield item
