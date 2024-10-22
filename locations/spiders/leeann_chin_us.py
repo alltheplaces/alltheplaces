@@ -4,6 +4,7 @@ import chompjs
 from scrapy import Selector
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -30,4 +31,5 @@ class LeeannChinUSSpider(JSONBlobSpider):
         hours_info = Selector(text=feature.get("hours", ""))
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(", ".join(hours_info.xpath("//li/text()").getall()))
+        apply_category(Categories.RESTAURANT, item)
         yield item
