@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import urljoin
 
 import scrapy
 from scrapy import Selector
@@ -21,4 +22,9 @@ class JohnstonesDecoratingCentreSpider(scrapy.Spider):
             item["addr_full"] = data.xpath("//*[@class='address-holder']").xpath("normalize-space()").get()
             item["lat"], item["lon"] = store["location"]
             item["ref"] = store["id"]
+
+            sel = Selector(text=store["card"])
+            item["website"] = urljoin(
+                "https://www.johnstonesdc.com", sel.xpath('//a[text() = "Shop detail"]/@href').get()
+            )
             yield item
