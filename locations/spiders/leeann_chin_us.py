@@ -1,8 +1,10 @@
 from typing import Iterable
 
 import chompjs
+from scrapy import Selector
 from scrapy.http import Response
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -23,4 +25,7 @@ class LeeannChinUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street"] = feature.get("address_route")
         item["addr_full"] = feature.get("location")
+        hours_info = Selector(text=feature.get("hours", ""))
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(", ".join(hours_info.xpath("//li/text()").getall()))
         yield item
