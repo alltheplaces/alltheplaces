@@ -1,6 +1,9 @@
+from typing import Iterable
+
 import chompjs
 from scrapy.http import Response
 
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -16,3 +19,8 @@ class LeeannChinUSSpider(JSONBlobSpider):
         return chompjs.parse_js_object(response.xpath('//script[contains(text(), "var jsonContent")]/text()').get())[
             "data"
         ]
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["street"] = feature.get("address_route")
+        item["addr_full"] = feature.get("location")
+        yield item
