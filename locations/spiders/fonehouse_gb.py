@@ -33,6 +33,7 @@ class FonehouseGBSpider(CrawlSpider):
         properties = {
             "ref": response.url,
             "name": data.get("name"),
+            "branch": item["name"].pop(),
             "phone": data.get("telephone"),
             "email": data.get("email"),
             "street_address": data.get("address", {}).get("streetAddress"),
