@@ -48,7 +48,7 @@ class MetroCashAndCarrySpider(SitemapSpider):
         )
 
     def get_sitemaps(self, response: Response):
-        country_urls = response.xpath("//div[@id='metro-and-makro']//a[@href and not(@class)]/@href").getall()
+        country_urls = response.xpath("//div[@class='teaser__body__content']//a/@href").getall()
         for url in country_urls:
             if url.startswith("http"):
                 yield Request(urljoin(url, "sitemap.xml"), callback=self._parse_sitemap)
