@@ -14,7 +14,6 @@ from locations.user_agents import FIREFOX_LATEST
 class MetroCashAndCarrySpider(SitemapSpider):
     name = "metro_cash_and_carry"
     user_agent = FIREFOX_LATEST
-    requires_proxy = True
     sitemap_rules = [
         # A better way to get all shop URLs was not found.
         ("/metro-maerkte/", "parse"),  # at
