@@ -42,7 +42,6 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
             item["website"] = data.get("marketedWebsite")
             item["street_address"] = data.get("street1")
             types = data.get("purposeTypeName")
-            item["street"] = types
             for label, cat in self.categories:
                 if label in types:
                     apply_category(cat, item)
