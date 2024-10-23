@@ -8,7 +8,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.user_agents import FIREFOX_LATEST
 
 
 class MetroCashAndCarrySpider(SitemapSpider):
