@@ -24,5 +24,4 @@ class IntersportGRSpider(scrapy.Spider):
                 store.xpath('.//a[contains(text(),"Περισσότερα")]/@href').get()
             )
             item["branch"] = store.xpath('.//li[@class="name"]/text()').get()
-            item["name"] = None
             yield item
