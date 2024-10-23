@@ -5,12 +5,14 @@ import scrapy
 from scrapy.http import Response
 
 from locations.linked_data_parser import LinkedDataParser
+from locations.user_agents import FIREFOX_LATEST
 
 
 class IntersportGRSpider(scrapy.Spider):
     name = "intersport_gr"
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
     start_urls = ["https://www.intersport.gr/el/etairia/katastimata/"]
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath('//*[@data-control="box"]'):
