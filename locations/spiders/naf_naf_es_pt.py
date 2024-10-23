@@ -7,7 +7,7 @@ from scrapy.http import Response
 from locations.items import Feature
 
 
-class NafNafESPT(Spider):
+class NafNafESPTSpider(Spider):
     name = "naf_naf_es_pt"
     item_attributes = {"brand_wikidata": "Q3334188"}
     start_urls = ["https://www.nafnaf.es/pages/store-locator"]
