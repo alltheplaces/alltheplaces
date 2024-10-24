@@ -14,6 +14,7 @@ class FrasersGBSpider(Spider):
         "https://www.houseoffraser.co.uk/stores/search?countryName=United%20Kingdom&countryCode=GB&lat=0&long=0&sd=40"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//*[@class="StoreFinderStore"]'):

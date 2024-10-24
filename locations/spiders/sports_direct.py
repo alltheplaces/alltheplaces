@@ -15,6 +15,7 @@ class SportsDirectSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.sportsdirect.com/stores/all"]
     rules = [Rule(LinkExtractor(allow=r"store\-([\d]+)$"), callback="parse_sd")]
     wanted_types = ["LocalBusiness"]
+    requires_proxy = "GB"
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if item["name"].startswith("Sportmaster "):
