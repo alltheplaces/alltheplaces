@@ -47,5 +47,6 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
                     apply_category(cat, item)
                     break
             else:
-                apply_category(Categories.HOSPITAL, item)
+                for cat in types:
+                    self.crawler.stats.inc_value(f"atp/medical_city_healthcare/unmatched_category/{cat}")
             yield item
