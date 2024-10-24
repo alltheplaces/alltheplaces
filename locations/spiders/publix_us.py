@@ -26,8 +26,9 @@ class PublixUSSpider(Spider):
             item["website"] = f'https://www.publix.com/locations/{location["storeNumber"]}'
             item["phone"] = location["phoneNumbers"].get("Store")
             item["image"] = location["image"]["hero"]
-            item["extras"]["start_date"] = location["openingDate"]
 
+            if location["openingDate"]:
+                item["extras"]["start_date"] = location["openingDate"].split("T", 1)[0]
             if location["closingDate"]:
                 set_closed(item, datetime.fromisoformat(location["closingDate"]))
 
