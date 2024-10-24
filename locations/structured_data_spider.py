@@ -166,7 +166,6 @@ class StructuredDataSpider(Spider):
         "GroceryStore",
         "FastFoodRestaurant",
         "Hotel",
-        "Place",
         "ClothingStore",
         "DepartmentStore",
         "HardwareStore",

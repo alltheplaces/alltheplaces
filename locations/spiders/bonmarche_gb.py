@@ -6,7 +6,6 @@ from urllib.parse import urljoin
 from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.country_utils import CountryUtils
 from locations.geo import city_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -15,7 +14,6 @@ from locations.items import Feature
 class BonmarcheGBSpider(Spider):
     name = "bonmarche_gb"
     item_attributes = {"brand": "Bonmarche", "brand_wikidata": "Q4942146"}
-    country_utils = CountryUtils()
 
     def start_requests(self) -> Iterable[Request]:
         country = "GB"
