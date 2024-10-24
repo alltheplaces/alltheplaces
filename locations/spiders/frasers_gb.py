@@ -7,8 +7,8 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class FraserGBSpider(Spider):
-    name = "fraser_gb"
+class FrasersGBSpider(Spider):
+    name = "frasers_gb"
     item_attributes = {"brand": "House of Fraser", "brand_wikidata": "Q5928422"}
     start_urls = [
         "https://www.houseoffraser.co.uk/stores/search?countryName=United%20Kingdom&countryCode=GB&lat=0&long=0&sd=40"
