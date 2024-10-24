@@ -31,13 +31,7 @@ class PublixUSSpider(Spider):
             if location["closingDate"]:
                 set_closed(item, datetime.fromisoformat(location["closingDate"]))
 
-            item["opening_hours"] = OpeningHours()
-            for rule in location["hours"]:
-                if rule["isClosed"]:
-                    continue
-                start_time = datetime.fromisoformat(rule["openTime"])
-                end_time = datetime.fromisoformat(rule["openTime"])
-                item["opening_hours"].add_range(start_time.strftime("%a"), start_time.timetuple(), end_time.timetuple())
+            item["opening_hours"] = self.parse_opening_hours(location["hours"])
 
             if location["type"] == "P":
                 item["branch"] = item.pop("name").removeprefix("Publix Pharmacy at ")
@@ -52,3 +46,13 @@ class PublixUSSpider(Spider):
                 self.crawler.stats.inc_value(f'atp/publix_us/unmapped_category/{location["type"]}')
 
             yield item
+
+    def parse_opening_hours(self, hours: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in hours:
+            if rule["isClosed"]:
+                continue
+            start_time = datetime.fromisoformat(rule["openTime"])
+            end_time = datetime.fromisoformat(rule["openTime"])
+            oh.add_range(start_time.strftime("%a"), start_time.timetuple(), end_time.timetuple())
+        return oh
