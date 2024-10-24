@@ -14,6 +14,7 @@ class FlannelsGBSpider(SitemapSpider, StructuredDataSpider):
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Flannels ").removesuffix(" FL")
         # Take structured data as well as embedded JSON to form a better POI.
         json = chompjs.parse_js_object(response.xpath('//script[contains(text(),"var store = ")]/text()').get())
         json_item = DictParser.parse(json)
