@@ -31,6 +31,24 @@ class PublixUSSpider(Spider):
             if location["closingDate"]:
                 set_closed(item, datetime.fromisoformat(location["closingDate"]))
 
+            for secondary in location["secondaryLocations"]:
+                i = item.deepcopy()
+                i["ref"] = "{}-{}".format(item["ref"], secondary["type"])
+                i["phone"] = secondary["phone"]
+                i["opening_hours"] = self.parse_opening_hours(secondary["hours"])
+
+                if secondary["type"] == "P":
+                    i["name"] = None
+                    apply_category(Categories.PHARMACY, i)
+                elif secondary["type"] == "L":
+                    i["name"] = "Publix Liquors"
+                    apply_category(Categories.SHOP_ALCOHOL, i)
+                else:
+                    self.logger.error("Unrecognised type: {}".format(location["type"]))
+                    self.crawler.stats.inc_value(f'atp/publix_us/unmapped_category/{location["type"]}')
+
+                yield i
+
             item["opening_hours"] = self.parse_opening_hours(location["hours"])
 
             if location["type"] == "P":
@@ -43,6 +61,7 @@ class PublixUSSpider(Spider):
                 item["name"] = "Publix GreenWise Market"
                 apply_category(Categories.SHOP_SUPERMARKET, item)
             else:
+                self.logger.error("Unrecognised type: {}".format(location["type"]))
                 self.crawler.stats.inc_value(f'atp/publix_us/unmapped_category/{location["type"]}')
 
             yield item
