@@ -13,7 +13,7 @@ class PublixUSSpider(Spider):
     item_attributes = {"brand": "Publix", "brand_wikidata": "Q672170"}
     allowed_domains = ["publix.com"]
     start_urls = [
-        "https://services.publix.com/storelocator/api/v1/stores/?count=3000&distance=5000&includeOpenAndCloseDates=true&city=AL&isWebsite=true"
+        "https://services.publix.com/storelocator/api/v1/stores/?count=3000&distance=5000&includeOpenAndCloseDates=true&isWebsite=true&latitude=39.8422945&longitude=-74.8828235"
     ]
     requires_proxy = True
 
