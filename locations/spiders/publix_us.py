@@ -5,6 +5,7 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import set_closed
 
 
 class PublixUSSpider(Spider):
@@ -26,6 +27,9 @@ class PublixUSSpider(Spider):
             item["phone"] = location["phoneNumbers"].get("Store")
             item["image"] = location["image"]["hero"]
             item["extras"]["start_date"] = location["openingDate"]
+
+            if location["closingDate"]:
+                set_closed(item, datetime.fromisoformat(location["closingDate"]))
 
             item["opening_hours"] = OpeningHours()
             for rule in location["hours"]:
