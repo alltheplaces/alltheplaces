@@ -40,11 +40,13 @@ class PublixUSSpider(Spider):
                 item["opening_hours"].add_range(start_time.strftime("%a"), start_time.timetuple(), end_time.timetuple())
 
             if location["type"] == "P":
+                item["branch"] = item.pop("name").removeprefix("Publix Pharmacy at ")
                 apply_category(Categories.PHARMACY, item)
             elif location["type"] == "R":
+                item["branch"] = item.pop("name").removeprefix("Publix ").removeprefix("Super Market ")
                 apply_category(Categories.SHOP_SUPERMARKET, item)
             elif location["type"] == "W":
-                item["brand"] = "Publix GreenWise Market"
+                item["name"] = "Publix GreenWise Market"
                 apply_category(Categories.SHOP_SUPERMARKET, item)
             else:
                 self.crawler.stats.inc_value(f'atp/publix_us/unmapped_category/{location["type"]}')
