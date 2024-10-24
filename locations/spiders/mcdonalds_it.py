@@ -13,6 +13,7 @@ class McdonaldsITSpider(scrapy.Spider):
     name = "mcdonalds_it"
     item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     start_urls = ["https://www.mcdonalds.it/static/json/store_locator.json"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["sites"]:
