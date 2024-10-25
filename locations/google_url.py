@@ -33,6 +33,8 @@ def extract_google_position(item: Feature, response: Response | Selector):
 
 
 def url_to_coords(url: str) -> (float, float):  # noqa: C901
+    print(url)
+
     def get_query_param(link, query_param):
         parsed_link = urlsplit(link)
         queries = parse_qs(parsed_link.query)
