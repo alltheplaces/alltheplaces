@@ -1,5 +1,5 @@
 import re
-from urllib.parse import parse_qs, urlsplit, unquote
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from scrapy import Selector
 from scrapy.http import Response
