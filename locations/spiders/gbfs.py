@@ -153,7 +153,55 @@ BRAND_MAPPING = {
         "wikidata": "Q63753939",
     },
     "Dott": {
-        "names": ["Dott Stockholm"],
+        "names": [
+            "Dott Aalst",
+            "Dott Brussels",
+            "Dott Charleroi",
+            "Dott Ghent",
+            "Dott Liege",
+            "Dott Namur",
+            "Dott Estepona",
+            "Dott Madrid",
+            "Dott Malaga",
+            "Dott Seville",
+            "Dott Bordeaux",
+            "Dott Grenoble",
+            "Dott Lyon",
+            "Dott Marseille",
+            "Dott Ol-Vallee",
+            "Dott Paris",
+            "Dott Tignes",
+            "Dott Val-d’isere",
+            "Dott Bristol",
+            "Dott London",
+            "Dott Petah-Tikva",
+            "Dott Tel-Aviv",
+            "Dott Alghero",
+            "Dott Arzachena",
+            "Dott Cagliari",
+            "Dott Catania",
+            "Dott Ferrara",
+            "Dott Milan",
+            "Dott Monza",
+            "Dott Padua",
+            "Dott Palermo",
+            "Dott Riccione",
+            "Dott Rome",
+            "Dott Turin",
+            "Dott Varese",
+            "Dott Verona",
+            "Dott elblag",
+            "Dott Iława",
+            "Dott Kwidzyn",
+            "Dott Malbork",
+            "Dott Ostroda",
+            "Dott Poznan",
+            "Dott Sobieszewo-Island",
+            "Dott Tczew",
+            "Dott Tricity",
+            "Dott Warsaw",
+            "Dott Stockholm"
+        ],
         "category": {"amenity": "bicycle_rental"},
         "secondary_category": {"amenity": "kick-scooter_rental"},
         "wikidata": "Q107463014",
@@ -336,6 +384,7 @@ class GbfsSpider(CSVFeedSpider):
                 return
             else:
                 url = "{}?{}".format(url, auth)
+
         yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
 
     def parse_gbfs(self, response, **kwargs):
@@ -343,7 +392,6 @@ class GbfsSpider(CSVFeedSpider):
             data = response.json()
         except:
             return
-
         for feed in DictParser.get_nested_key(data, "feeds") or []:
             if feed["name"] == "station_information":
                 url = feed["url"]
@@ -357,7 +405,6 @@ class GbfsSpider(CSVFeedSpider):
             data = response.json()
         except:
             return
-
         for station in DictParser.get_nested_key(data, "stations") or []:
             if station.get("address"):
                 station["street_address"] = station.pop("address")
