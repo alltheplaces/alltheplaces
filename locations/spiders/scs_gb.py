@@ -3,7 +3,7 @@ import scrapy
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ScSGBSpider(StructuredDataSpider):
+class ScsGBSpider(StructuredDataSpider):
     name = "scs_gb"
     item_attributes = {"brand": "ScS", "brand_wikidata": "Q19654399"}
     start_urls = ["https://www.scs.co.uk/stores/"]
