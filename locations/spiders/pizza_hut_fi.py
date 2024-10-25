@@ -18,9 +18,9 @@ class PizzaHutFISpider(JSONBlobSpider):
         return parse_js_object(data)["props"]["pageProps"]["data"]["chainStores"]["msg"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["name"] = feature["title"]["fi_FI"]
-        item["extras"]["name:en"] = feature["title"]["en_US"]
-        item["extras"]["name:fi"] = feature["title"]["fi_FI"]
+        item["name"] = None
+        item["extras"]["branch:en"] = feature["title"]["en_US"].removeprefix("PIZZA HUT ")
+        item["branch"] = item["extras"]["branch:fi"] = feature["title"]["fi_FI"].removeprefix("PIZZA HUT ")
         item["country"] = feature["address"]["countryCode"]
         item["addr_full"] = feature["address"]["formatted"]
         item["city"] = feature["address"]["city"]
