@@ -509,6 +509,7 @@ class Extras(Enum):
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
     SHOWERS = "shower"
+    SMOKING = "smoking"
     SMOKING_AREA = "smoking=isolated"
     SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
