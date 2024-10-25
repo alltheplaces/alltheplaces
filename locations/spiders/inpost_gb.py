@@ -45,10 +45,13 @@ class InpostGBSpider(Spider):
             apply_yes_no("parcel_mail_in", item, "parcel_send   " in location["functions"])
             apply_yes_no("parcel_pickup", item, "parcel_collect" in location["functions"])
 
-            if location["location_247"]:
+            if location["location_247"] or location["opening_hours"] == "24/7":
                 item["opening_hours"] = "24/7"
             else:
-                item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
+                try:
+                    item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
+                except Exception as e:
+                    self.logger.error("Error parsing {} {}".format(location["opening_hours"], e))
 
             item["website"] = "https://www.inpost.co.uk/lockers/{}".format(item["ref"])
 
