@@ -463,6 +463,7 @@ DAYS_SK = {
     "Po": "Mo",
     "Pondelok": "Mo",
     "Ut": "Tu",
+    "Út": "Tu",
     "Utorok": "Tu",
     "Útorok": "Tu",
     "St": "We",
