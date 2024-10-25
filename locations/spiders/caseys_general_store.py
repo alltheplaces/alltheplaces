@@ -16,3 +16,7 @@ class CaseysGeneralStoreSpider(SitemapSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         ld_data["name"] = ld_data["url"] = ld_data["@id"] = None
+        for rule in ld_data["openingHoursSpecification"]:
+            if rule.get("opens") == rule.get("closes") == "24 hrs":
+                rule["opens"] = "12:00am"
+                rule["closes"] = "11:59pm"
