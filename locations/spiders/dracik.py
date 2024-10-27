@@ -4,7 +4,7 @@ from urllib.parse import parse_qs, urlsplit
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, Extras, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import DAYS_CZ, DAYS_SK, OpeningHours
 from locations.items import Feature
@@ -24,7 +24,7 @@ class DracikSpider(CrawlSpider):
             callback="parse",
         )
     ]
-    item_attributes = {"brand": "Dráčik", "brand_wikidata": "Q57653669", "extras": Categories.SHOP_TOYS.value}
+    item_attributes = {"brand": "Dráčik", "brand_wikidata": "Q57653669"}
 
     def parse(self, response):
         def get_query_param(link, query_param):
@@ -90,5 +90,7 @@ class DracikSpider(CrawlSpider):
                 hrs = row.xpath("td/text()[normalize-space()]").get().strip()
                 oh.add_ranges_from_string(day + " " + hrs, days)
             item["opening_hours"] = oh.as_opening_hours()
+
+        apply_category(Categories.SHOP_TOYS, item)
 
         yield item
