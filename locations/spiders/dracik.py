@@ -38,6 +38,7 @@ class DracikSpider(CrawlSpider):
 
         item = Feature()
         item["ref"] = id
+        item["website"] = response.url
         item["name"] = detail.xpath("//h3/text()[normalize-space()]").get().strip()
         extract_phone(item, detail)
         extract_google_position(item, detail)
@@ -89,7 +90,7 @@ class DracikSpider(CrawlSpider):
                 day = row.xpath("th/text()[normalize-space()]").get().strip()
                 hrs = row.xpath("td/text()[normalize-space()]").get().strip()
                 oh.add_ranges_from_string(day + " " + hrs, days)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
         apply_category(Categories.SHOP_TOYS, item)
 
