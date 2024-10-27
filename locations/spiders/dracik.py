@@ -39,7 +39,7 @@ class DracikSpider(CrawlSpider):
         item = Feature()
         item["ref"] = id
         item["website"] = response.url
-        item["name"] = detail.xpath("//h3/text()[normalize-space()]").get().strip()
+        item["name"] = detail.xpath("normalize-space(//h3/text())").get()
         extract_phone(item, detail)
         extract_google_position(item, detail)
 
@@ -87,8 +87,8 @@ class DracikSpider(CrawlSpider):
         if days is not None:
             oh = OpeningHours()
             for row in response.xpath("//*[@class='StoreModal-time']//tr"):
-                day = row.xpath("th/text()[normalize-space()]").get().strip()
-                hrs = row.xpath("td/text()[normalize-space()]").get().strip()
+                day = row.xpath("normalize-space(th/text())").get()
+                hrs = row.xpath("normalize-space(td/text())").get()
                 oh.add_ranges_from_string(day + " " + hrs, days)
             item["opening_hours"] = oh
 
