@@ -200,7 +200,7 @@ BRAND_MAPPING = {
             "Dott Tczew",
             "Dott Tricity",
             "Dott Warsaw",
-            "Dott Stockholm"
+            "Dott Stockholm",
         ],
         "category": {"amenity": "bicycle_rental"},
         "secondary_category": {"amenity": "kick-scooter_rental"},
