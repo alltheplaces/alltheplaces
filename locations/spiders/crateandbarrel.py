@@ -2,7 +2,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class CrateandbarrelSpider(CrawlSpider, StructuredDataSpider):
