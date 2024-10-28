@@ -18,7 +18,7 @@ class BonmarcheGBSpider(Spider):
     def start_requests(self) -> Iterable[Request]:
         country = "GB"
         language = "en-GB"
-        for city in city_locations("GB", 1000):
+        for city in city_locations("GB", 500):
             lat, lon = city["latitude"], city["longitude"]
             yield self.make_request(lat, lon, country, 1, language)
 
