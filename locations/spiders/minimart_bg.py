@@ -1,31 +1,36 @@
+import ast
 from typing import Any
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import Response
 
-from locations.google_url import url_to_coords
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class MinimartBGSpider(Spider):
     name = "minimart_bg"
     item_attributes = {"brand": "Minimart", "brand_wikidata": "Q119168386"}
-    allowed_domains = ["mini-mart.bg", "goo.gl"]
-    start_urls = ["https://mini-mart.bg/nameri-magazin/"]
-    custom_settings = {"REDIRECT_ENABLED": False}
-    handle_httpstatus_list = [302]
-    no_refs = True
+    start_urls = ["https://mini-mart.bg/wp-admin/admin-ajax.php?action=asl_load_stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("//div[contains(@class, 'et_pb_with_border')]"):
-            item = Feature()
-            item["addr_full"] = location.xpath(".//p//text()").get()
-            location_url = location.xpath(".//a/@href").get()
-            if location_url is not None:
-                yield Request(method="HEAD", url=location_url, meta={"item": item}, callback=self.parse_maps_url)
+        for store in response.json():
+            item = DictParser.parse(store)
+            item["website"] = "https://mini-mart.bg/"
+            item["opening_hours"] = OpeningHours()
+            for key, value in ast.literal_eval(store["open_hours"]).items():
+                day = key
+                for time in value:
+                    open_time, close_time = time.split(" - ")
+                    if "AM" in open_time and "PM" in close_time:
+                        item["opening_hours"].add_range(
+                            day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p"
+                        )
+                    else:
+                        item["opening_hours"].add_range(
+                            day=day,
+                            open_time=open_time,
+                            close_time=close_time,
+                        )
 
-    # Follow shortened URL to find full Google Maps URL containing coordinates
-    def parse_maps_url(self, response):
-        item = response.meta["item"]
-        item["lat"], item["lon"] = url_to_coords(str(response.headers["Location"]))
-        yield item
+            yield item
