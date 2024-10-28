@@ -384,7 +384,6 @@ class GbfsSpider(CSVFeedSpider):
                 return
             else:
                 url = "{}?{}".format(url, auth)
-
         yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
 
     def parse_gbfs(self, response, **kwargs):
