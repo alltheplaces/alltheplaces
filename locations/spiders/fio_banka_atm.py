@@ -1,14 +1,13 @@
 import re
-import time
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category, apply_yes_no, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import DAYS, DAYS_CZ, DAYS_SK, OpeningHours
 from locations.items import Feature
-from locations.structured_data_spider import extract_email
+
 
 class FioBankaAtmSpider(CrawlSpider):
     name = "fio_banka_atm"
@@ -22,7 +21,7 @@ class FioBankaAtmSpider(CrawlSpider):
         "brand": "Fio banka",
         "brand_wikidata": "Q12016657",
         "operator": "Fio banka",
-        "operator_wikidata": "Q12016657"
+        "operator_wikidata": "Q12016657",
     }
 
     def parse(self, response):
@@ -32,7 +31,9 @@ class FioBankaAtmSpider(CrawlSpider):
             item = Feature()
             header = line1.xpath(".//h3/text()").get()
             item["name"] = header
-            item["city"] = header.replace("(bankomat i vkladomat)", "").replace("(bankomat aj vkladomat)", "").strip(" -")
+            item["city"] = (
+                header.replace("(bankomat i vkladomat)", "").replace("(bankomat aj vkladomat)", "").strip(" -")
+            )
             extract_google_position(item, line1)
             item["street_address"] = line2.xpath(".//strong/text()").get()
 
@@ -55,9 +56,7 @@ class FioBankaAtmSpider(CrawlSpider):
             elif "fio.sk" in response.url:
                 item["country"] = "SK"
 
-            hrs = line2.xpath(
-                ".//li[3]/text()"
-            ).get()
+            hrs = line2.xpath(".//li[3]/text()").get()
             if hrs:
                 if "CZ" == item["country"]:
                     item["opening_hours"] = self.parse_opening_hours(hrs, DAYS_CZ)
@@ -78,11 +77,11 @@ class FioBankaAtmSpider(CrawlSpider):
             text = text.replace("/svátky", "")
             oh.add_ranges_from_string(text, days)
         return oh
-    
+
     # polyfill for itertools
     # TODO: replace with itertools.batched in Python 3.12
     def batched(self, iterable, n):
-        iterators = [iter(iterable)]*n
+        iterators = [iter(iterable)] * n
         return zip(*iterators)
 
     def parse_coordinates(self, text: str) -> float:
@@ -93,5 +92,5 @@ class FioBankaAtmSpider(CrawlSpider):
         if not min:
             return float(deg)
         if not sec:
-            return float(deg) + float(min)/60
-        return float(deg) + float(min)/60 + float(sec)/3600
+            return float(deg) + float(min) / 60
+        return float(deg) + float(min) / 60 + float(sec) / 3600
