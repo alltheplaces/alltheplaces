@@ -392,6 +392,7 @@ class GbfsSpider(CSVFeedSpider):
             data = response.json()
         except:
             return
+        
         for feed in DictParser.get_nested_key(data, "feeds") or []:
             if feed["name"] == "station_information":
                 url = feed["url"]
@@ -405,6 +406,7 @@ class GbfsSpider(CSVFeedSpider):
             data = response.json()
         except:
             return
+        
         for station in DictParser.get_nested_key(data, "stations") or []:
             if station.get("address"):
                 station["street_address"] = station.pop("address")
