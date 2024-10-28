@@ -17,7 +17,7 @@ class BoconceptSpider(Spider):
             item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street")
 
-            amenities = {amenity["id"] for amenity in location["amenities"]}
+            amenities = {amenity["id"] for amenity in (location["amenities"] or [])}
             apply_yes_no(Extras.DELIVERY, item, "deliveryassembly" in amenities)
             apply_yes_no(
                 Extras.WHEELCHAIR,
