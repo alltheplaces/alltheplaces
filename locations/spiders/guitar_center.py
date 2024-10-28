@@ -9,7 +9,7 @@ class GuitarCenterSpider(RioSeoSpider):
     end_point = "https://maps.stores.guitarcenter.com"
 
     def start_requests(self):
-        yield JsonRequest(f"https://stores.guitarcenter.com/api/getAutocompleteData", callback=self.parse_autocomplete)
+        yield JsonRequest("https://stores.guitarcenter.com/api/getAutocompleteData", callback=self.parse_autocomplete)
 
     def post_process_feature(self, feature, location):
         feature["branch"] = feature.pop("name")
