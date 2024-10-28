@@ -156,20 +156,20 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:18416d07b41e6094101a44f8b881047dcec6b846dad0b9f83b9bbf2f0cd93d07",
-                "sha256:7f8e8a252458d584d8cf7877c372c4f74ec103356eedf43d2dd9e479f47f3639"
+                "sha256:b660c649a27a6b47a34f6f858f5bd7c3b0a798a16dec8dda7cbebeee80fd1f60",
+                "sha256:ddecb27f5699ca9f97711c52b6c0652c2e63bf6c2bfbc13b819b4f523b4d30ff"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==1.35.44"
+            "version": "==1.35.49"
         },
         "botocore": {
             "hashes": [
-                "sha256:1fcd97b966ad8a88de4106fe1bd3bbd6d8dadabe99bbd4a6aadcf11cb6c66b39",
-                "sha256:55388e80624401d017a9a2b8109afd94814f7e666b53e28fce51375cfa8d9326"
+                "sha256:07d0c1325fdbfa49a4a054413dbdeab0a6030449b2aa66099241af2dac48afd8",
+                "sha256:aed4d3643afd702920792b68fbe712a8c3847993820d1048cd238a6469354da1"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.35.44"
+            "version": "==1.35.49"
         },
         "brotli": {
             "hashes": [
