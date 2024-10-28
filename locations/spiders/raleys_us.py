@@ -16,7 +16,7 @@ BRAND_WIKIDATA = {
 class RaleysUSSpider(Spider):
     name = "raleys_us"
     item_attributes = {"extras": Categories.SHOP_SUPERMARKET.value}
-    custom_settings = {"DOWNLOAD_TIMEOUT": 55}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 55, "ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         yield JsonRequest(
