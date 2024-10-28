@@ -47,6 +47,10 @@ class TeslaSpider(scrapy.Spider):
         feature["street_address"] = location_data["address_line_1"].replace("<br />", ", ")
         feature["state"] = location_data.get("province_state") or None
 
+        # Deal with https://github.com/alltheplaces/alltheplaces/issues/10892
+        if "email" in location_data and isinstance(location_data["email"], dict) and "value" in location_data["email"]:
+            feature["email"] = location_data["email"]["value"]
+
         if "supercharger" in location_data.get("location_type"):
             apply_category(Categories.CHARGING_STATION, feature)
             feature["brand_wikidata"] = "Q17089620"

@@ -20,7 +20,7 @@ class VinmonopoletNOSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["ref"] = location.get("name")
-            item["name"] = location.get("displayName")
+            item["branch"] = item.pop("name")
             item["addr_full"] = location["address"].get("formattedAddress")
             item["website"] = "https://www.vinmonopolet.no/butikk/" + item["ref"]
             item["phone"] = location["address"].get("phone")
@@ -28,11 +28,12 @@ class VinmonopoletNOSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day_hours in location.get("openingTimes"):
                 if day_hours["closed"]:
-                    continue
-                item["opening_hours"].add_range(
-                    DAYS_NO[day_hours["weekDay"]],
-                    day_hours["openingTime"]["formattedHour"],
-                    day_hours["closingTime"]["formattedHour"],
-                )
+                    item["opening_hours"].set_closed(DAYS_NO[day_hours["weekDay"]])
+                else:
+                    item["opening_hours"].add_range(
+                        DAYS_NO[day_hours["weekDay"]],
+                        day_hours["openingTime"]["formattedHour"],
+                        day_hours["closingTime"]["formattedHour"],
+                    )
 
             yield item

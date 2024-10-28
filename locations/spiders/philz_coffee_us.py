@@ -14,8 +14,9 @@ class PhilzCoffeeUSSpider(JSONBlobSpider):
         return json.loads(response.xpath("//@data-locations-locations-value").get())
 
     def post_process_item(self, item, response, feature):
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").strip()
         item["state"] = feature["state"]
+        item["country"] = "US"
         item["website"] = f"https://philzcoffee.com/locations/{item['ref']}"
 
         if feature["header_image_one_url"]:

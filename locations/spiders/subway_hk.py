@@ -17,5 +17,4 @@ class SubwayHKSpider(scrapy.Spider):
         )
         for store in data.values():
             item = DictParser.parse(store)
-            item["website"] = "https://www.subway.com.hk/"
             yield item

@@ -103,6 +103,17 @@ def test_search():
     )
 
 
+def test_alternative_domain():
+    assert url_to_coords("https://www.google.co.uk/maps/search/?api=1&query=48.929153%2C21.911026") == (
+        48.929153,
+        21.911026,
+    )
+    assert url_to_coords("https://www.google.cz/maps/search/?api=1&query=48.929153,21.911026") == (
+        48.929153,
+        21.911026,
+    )
+
+
 def test_apple_maps():
     assert url_to_coords("http://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)
     assert url_to_coords("https://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)

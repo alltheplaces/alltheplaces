@@ -1,5 +1,5 @@
 import re
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from scrapy import Selector
 from scrapy.http import Response
@@ -38,7 +38,10 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
         queries = parse_qs(parsed_link.query)
         return queries.get(query_param, [])
 
-    url = url.replace("google.co.uk", "google.com")
+    url = unquote(url)
+
+    # replace alternative domains such as google.cz or google.co.uk with google.com
+    url = re.sub(r"google(\.[a-z]{2,3})?\.[a-z]{2,3}/", "google.com/", url)
 
     if match := re.search(r"@(-?\d+.\d+),\s?(-?\d+.\d+),[\d.]+[zm]", url):
         return float(match.group(1)), float(match.group(2))

@@ -152,7 +152,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             properties = {
                 "ref": store["locationID"],
                 "name": store["locationName"],
-                "addr_full": store["address1"],
+                "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["zip5"],
@@ -169,5 +169,11 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             h = self.parse_hours(store["locationServiceHours"][0]["dailyHoursList"])
             if h:
                 properties["extras"]["collection_times"] = h
+
+            if properties.get("name") == "USPS COLLECTION BOX - BLUE BOX":
+                properties.pop("name")
+            elif properties.get("name") == "USPS COLLECTION BOX - PO LOBBY":
+                properties["extras"]["indoor"] = "yes"
+                properties.pop("name")
 
             yield Feature(**properties)

@@ -43,6 +43,9 @@ class PhoneCleanUpPipeline:
         phone = phone.strip()
         if not phone:
             return None
+        numbers_only = re.sub(r"[^\d]", "", phone)
+        if numbers_only == "" or int(numbers_only) == 0:
+            return None
         try:
             ph = phonenumbers.parse(phone, country)
             if phonenumbers.is_valid_number(ph):

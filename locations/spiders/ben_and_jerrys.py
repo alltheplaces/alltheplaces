@@ -13,18 +13,23 @@ class BenAndJerrysSpider(Where2GetItSpider):
     api_filter = {"icon": {"in": "default,SHOP"}}
 
     def parse_item(self, item, location):
-        try:
-            shop_info = parse_js_object(location["jsonshopinfo"])
+        # Appears to be an indicator for suppliers (not actual shops), even after api_filter above
+        if location.get("jsonshopinfo") is None:  # May be equivalent to "jsonshop"
+            return
+
+        if jsonshopinfo := location.get("jsonshopinfo"):
+            shop_info = parse_js_object(jsonshopinfo)
             try:
                 shop = shop_info[0]["ShopInfoContent"][0]["StoreDetails"]
                 if url := shop.get("WebsiteURL"):
                     item["website"] = url
             except (TypeError, IndexError):
                 pass
-        except ValueError:
-            pass
+
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+
         apply_yes_no(Extras.DELIVERY, item, location["offersdelivery"] == "1")
+
         item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
             if location.get(day.lower()) in [None, ""]:
@@ -33,4 +38,5 @@ class BenAndJerrysSpider(Where2GetItSpider):
                 item["opening_hours"].set_closed(day)
             else:
                 item["opening_hours"].add_ranges_from_string(day + " " + location.get(day.lower()))
+
         yield item

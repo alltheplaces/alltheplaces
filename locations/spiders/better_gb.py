@@ -25,3 +25,12 @@ class BetterGBSpider(SitemapSpider, StructuredDataSpider):
         for rule in ld_data.get("openingHours", ""):
             rules.append(re.sub(r"(\w{3})\s*-\s*(\w{3})", r"\1-\2", rule))
         ld_data["openingHours"] = rules
+
+    def post_process_item(self, item, response, ld_data):
+        if item["facebook"] == "https://www.facebook.com/BetterUK/":
+            item["facebook"] = None
+
+        if item["twitter"] == "Better_UK":
+            item["twitter"] = None
+
+        yield item

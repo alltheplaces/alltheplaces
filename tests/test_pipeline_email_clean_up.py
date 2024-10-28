@@ -62,3 +62,9 @@ def test_handle_invalid():
         item, pipeline, spider = get_objects(email)
         pipeline.process_item(item, spider)
         assert item.get("email") is None
+
+
+def test_strip_mailto():
+    item, pipeline, spider = get_objects("mailto: test@example.com")
+    pipeline.process_item(item, spider)
+    assert item.get("email") == "test@example.com"

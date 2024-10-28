@@ -9,7 +9,7 @@ class McgrathAUSpider(AlgoliaSpider):
         "brand_wikidata": "Q105290661",
         "brand": "McGrath",
     }
-    api_key = "d1594f8570b9fa5a764d624db7ebd84e"
+    api_key = "df963b4441c0cd860efa53894f15fd35"
     app_id = "testingA3VXEX35KE"
     index_name = "office"
 

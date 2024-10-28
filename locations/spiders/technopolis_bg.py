@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class TechnopolisBGSpider(scrapy.Spider):
     name = "technopolis_bg"
-    item_attributes = {"brand": "Technopolis", "brand_wikidata": "Q28056752", "country": "BG"}
+    item_attributes = {"brand": "Технополис", "brand_wikidata": "Q28056752", "country": "BG"}
     allowed_domains = ["www.technopolis.bg"]
     start_urls = [
         "https://api.technopolis.bg/videoluxcommercewebservices/v2/technopolis-bg/mapbox/customerpreferedstore"
