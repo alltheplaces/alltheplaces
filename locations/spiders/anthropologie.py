@@ -1,7 +1,6 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -18,5 +17,4 @@ class AnthropologieSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["name"] = store.get("addresses").get("marketing").get("name") + "- Anthropologie Store"
             item["lon"], item["lat"] = store.get("loc")[0], store.get("loc")[1]
-            item["addr_full"] = clean_address([store.get("addressLineOne"), store.get("addressLineTwo")])
             yield item
