@@ -45,4 +45,5 @@ class PosIndonesiaIDSpider(Spider):
         item["lon"] = location["longitude"]
         item["street_address"] = location["alamat"]
         item["phone"] = location["telpon_old"]
+        item["website"] = "https://postoffice.posindonesia.co.id/"
         yield item
