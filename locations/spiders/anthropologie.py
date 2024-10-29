@@ -15,6 +15,8 @@ class AnthropologieSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for store in response.json()["results"]:
             item = DictParser.parse(store)
+            if "<" in store.get("addressLineOne", "") + store.get("addressLineTwo", ""):
+                continue
             item["name"] = store.get("addresses").get("marketing").get("name") + "- Anthropologie Store"
             item["lon"], item["lat"] = store.get("loc")[0], store.get("loc")[1]
             yield item
