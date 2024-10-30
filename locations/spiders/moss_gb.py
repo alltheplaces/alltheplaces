@@ -31,7 +31,7 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
         hours = response.xpath('//p[contains(@class,"store-opening-hours-text")]//text()').getall()
         for dayrange in hours:
             dayrange = dayrange.strip()
-            if " to " in dayrange:
+            if " to " in dayrange and "Holiday" not in dayrange:
                 day, timerange = dayrange.split(" ", 1)
                 open, close = timerange.split(" to ")
                 if ":" not in open:
