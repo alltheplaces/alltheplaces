@@ -1,4 +1,4 @@
-import ast
+import json
 from typing import Any
 
 from scrapy import Spider
@@ -18,7 +18,7 @@ class MinimartBGSpider(Spider):
             item = DictParser.parse(store)
             item["website"] = "https://mini-mart.bg/"
             item["opening_hours"] = OpeningHours()
-            for key, value in ast.literal_eval(store["open_hours"]).items():
+            for key, value in json.loads(store["open_hours"]).items():
                 day = key
                 for time in value:
                     open_time, close_time = time.split(" - ")
