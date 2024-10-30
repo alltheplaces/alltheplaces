@@ -34,11 +34,10 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
             if " to " in dayrange:
                 day, timerange = dayrange.split(" ", 1)
                 open, close = timerange.split(" to ")
-                if not ":" in open:
+                if ":" not in open:
                     open = open.replace("am", ":00am")
-                if not ":" in close:
+                if ":" not in close:
                     close = close.replace("pm", ":00pm")
-                print(day, open, close)
                 oh.add_range(day, open, close, time_format="%I:%M%p")
         item["opening_hours"] = oh
         yield item
