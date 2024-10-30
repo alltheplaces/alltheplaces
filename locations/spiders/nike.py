@@ -48,7 +48,8 @@ class NikeSpider(scrapy.Spider):
 
                 closing_h = closing.split("H")[0].replace("PT", "") if "H" in closing else "0"
                 closing_m = closing[len(closing) - 3 :].replace("M", "") if "M" in closing else "0"
-
+                closing_m = closing_m.replace("H", "") # needed for 1 digit minutes
+                
                 start = opening.split(":")
                 closing_time = str(
                     datetime.timedelta(hours=int(start[0]), minutes=int(start[1]))
