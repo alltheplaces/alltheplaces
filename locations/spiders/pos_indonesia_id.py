@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class PosIndonesiaIDSpider(Spider):
     name = "pos_indonesia_id"
-    item_attributes = {"brand": "Pos Indonesia", "brand_wikidata": "Q4273095"}
+    item_attributes = {"operator": "Pos Indonesia", "operator_wikidata": "Q4273095"}
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
