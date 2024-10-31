@@ -27,7 +27,7 @@ class MenyDKSpider(JSONBlobSpider):
 
     def pre_process_data(self, feature: dict) -> None:
         feature["ref"] = feature["ss_field_store_viking_id"]
-        feature["name"] = feature["tm_X3b_en_title"]
+        feature["name"] = feature["tm_X3b_en_title"][0]
         feature["lat"], feature["lon"] = feature["locs_latlon"].split(",", 1)
         feature["street_address"] = feature["tm_X3b_en_address_line1"][0]
         feature["city"] = feature["tm_X3b_en_locality"][0]
