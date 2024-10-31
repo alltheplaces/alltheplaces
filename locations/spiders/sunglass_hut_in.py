@@ -21,7 +21,7 @@ class SunglassHutINSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["lon"], item["lat"] = location["lat_long"]["coordinates"]
         item["branch"] = item.pop("name")
-        item["postcode"] = location.get("pincode")
+        item["postcode"] = str(location.get("pincode"))
         item["street_address"] = item.pop("addr_full")
         phone = [i for i in location["contacts"] if "number" in i.keys()][0]
         item["phone"] = f"+{phone['country_code']} {phone['number']}"
