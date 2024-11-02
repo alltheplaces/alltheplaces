@@ -23,6 +23,7 @@ class FioBankaAtmSpider(CrawlSpider):
         "operator": "Fio banka",
         "operator_wikidata": "Q12016657",
     }
+    no_refs = True
 
     def parse(self, response):
         rows = response.xpath("//div[@class='results']//tr")
@@ -36,13 +37,6 @@ class FioBankaAtmSpider(CrawlSpider):
             )
             extract_google_position(item, line1)
             item["street_address"] = line2.xpath(".//strong/text()").get()
-
-            google_url = line1.xpath(".//a/@href").get()
-            if "goo.gl" in google_url:
-                # set ref to Google shortener id
-                item["ref"] = line1.xpath(".//a/@href").get().split("/")[-1]
-            else:
-                item["ref"] = item["name"]
 
             apply_category(Categories.ATM, item)
 
