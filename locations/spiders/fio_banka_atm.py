@@ -4,7 +4,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.google_url import extract_google_position
 from locations.hours import DAYS, DAYS_CZ, DAYS_SK, OpeningHours
 from locations.items import Feature
 
