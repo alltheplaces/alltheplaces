@@ -35,15 +35,13 @@ class FioBankaAtmSpider(CrawlSpider):
             item["city"] = (
                 header.replace("(bankomat i vkladomat)", "").replace("(bankomat aj vkladomat)", "").strip(" -")
             )
-            extract_google_position(item, line1)
             item["street_address"] = line2.xpath(".//strong/text()").get()
 
             apply_category(Categories.ATM, item)
 
-            if "lat" not in item:
-                lat, lon = line1.xpath(".//td[contains(text(), 'GPS')]/text()").get().removeprefix("GPS:").split(",")
-                item["lat"] = self.parse_coordinates(lat)
-                item["lon"] = self.parse_coordinates(lon)
+            lat, lon = line1.xpath(".//td[contains(text(), 'GPS')]/text()").get().removeprefix("GPS:").split(",")
+            item["lat"] = self.parse_coordinates(lat)
+            item["lon"] = self.parse_coordinates(lon)
 
             if "fio.cz" in response.url:
                 item["country"] = "CZ"
