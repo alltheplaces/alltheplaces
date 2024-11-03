@@ -28,7 +28,7 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
             item["lat"], item["lon"] = coords.split(",")
         else:
             return
-#       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
+        #       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
         item["name"] = response.xpath('//li[@class="boldcopyright"][@itemprop="name"]/text()').get()
         item["branch"] = item.pop("name").removeprefix("Moss ")
 
