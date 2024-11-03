@@ -26,7 +26,12 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
                 .replace("https://maps.google.com/maps?hl=en&daddr=", "")
             )
             item["lat"], item["lon"] = coords.split(",")
-        #       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
+        else:
+            return
+#       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
+        item["name"] = response.xpath('//li[@class="boldcopyright"][@itemprop="name"]/text()').get()
+        item["branch"] = item.pop("name").removeprefix("Moss ")
+
         oh = OpeningHours()
         hours = response.xpath('//p[contains(@class,"store-opening-hours-text")]//text()').getall()
         for dayrange in hours:
