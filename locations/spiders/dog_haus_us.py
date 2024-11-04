@@ -33,6 +33,7 @@ class DogHausUSSpider(JSONBlobSpider):
         item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
         item["lat"] = location["latitude"]
         item["lon"] = location["longitude"]
+        item["image"] = location["asset"]["Store Image 1"]["Image URL"]
 
         oh = OpeningHours()
         for day in DAYS_FULL:
