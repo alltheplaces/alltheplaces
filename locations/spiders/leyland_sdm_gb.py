@@ -1,39 +1,32 @@
-from json import loads
-from typing import Iterable
+import json
+import re
+from typing import Any
 
+import scrapy
 from scrapy import Selector
+from scrapy.http import Response
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+from locations.dict_parser import DictParser
 
 
-class LeylandSdmGBSpider(AmastyStoreLocatorSpider):
+class LeylandSdmGBSpider(scrapy.Spider):
     name = "leyland_sdm_gb"
     item_attributes = {"brand": "Leyland SDM", "brand_wikidata": "Q110437963"}
-    allowed_domains = ["leylandsdm.co.uk"]
+    start_urls = ["https://leylandsdm.co.uk/amlocator/"]
 
-    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
-        item["name"] = item["name"].strip()
-        item["street_address"] = item.pop("addr_full")
-        item.pop("state")
-        item["image"] = feature["photo"]
-        if "https://" not in item["website"]:
-            item["website"] = "https://leylandsdm.co.uk/amlocator/" + item["website"] + "/"
-
-        item["opening_hours"] = OpeningHours()
-        hours_json = loads(feature["schedule_string"])
-        for day_name, day in hours_json.items():
-            if day[f"{day_name}_status"] != "1":
-                continue
-            open_time = day["from"]["hours"] + ":" + day["from"]["minutes"]
-            break_start = day["break_from"]["hours"] + ":" + day["break_from"]["minutes"]
-            break_end = day["break_to"]["hours"] + ":" + day["break_to"]["minutes"]
-            close_time = day["to"]["hours"] + ":" + day["to"]["minutes"]
-            if break_start == break_end:
-                item["opening_hours"].add_range(day_name.title(), open_time, close_time)
-            else:
-                item["opening_hours"].add_range(day_name.title(), open_time, break_start)
-                item["opening_hours"].add_range(day_name.title(), break_end, close_time)
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        data = json.loads(
+            re.search(
+                r"items\":(\[.*\]),\"totalRecords", response.xpath('//*[contains(text(),"jsonLocations")]/text()').get()
+            ).group(1)
+        )
+        for store in data:
+            html_data = Selector(text=store["popup_html"])
+            item = DictParser.parse(store)
+            item["name"] = html_data.xpath("//h3//text()").get()
+            item["street_address"] = html_data.xpath("//text()[4]").get().replace("Address:", "")
+            item["city"] = html_data.xpath("//text()[5]").get().replace("City:", "")
+            item["postcode"] = html_data.xpath("//text()[6]").get().replace("Postcode:", "")
+            item["phone"] = html_data.xpath("//text()[7]").get()
+            item["website"] = html_data.xpath("//@href").get().replace("Maida Vale/", "Maida%20Vale/")
+            yield item
