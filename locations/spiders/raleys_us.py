@@ -1,9 +1,8 @@
-from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 BRAND_WIKIDATA = {
     "Bel Air": "Q112922067",
@@ -13,33 +12,29 @@ BRAND_WIKIDATA = {
 }
 
 
-class RaleysUSSpider(Spider):
+class RaleysUSSpider(JSONBlobSpider):
     name = "raleys_us"
     item_attributes = {"extras": Categories.SHOP_SUPERMARKET.value}
     custom_settings = {"DOWNLOAD_TIMEOUT": 55, "ROBOTSTXT_OBEY": False}
+    locations_key = ["data"]
+    allowed_domains = ["www.raleys.com"]
 
     def start_requests(self):
-        yield JsonRequest(
-            "https://www.raleys.com/api/store", data={"rows": 250, "searchParameter": {"shippingMethod": "pickup"}}
-        )
+        for domain in self.allowed_domains:
+            yield JsonRequest(
+                f"https://{domain}/api/store", data={"rows": 1000, "searchParameter": {"shippingMethod": "pickup"}}
+            )
 
-    def parse(self, response):
-        result = response.json()
+    def post_process_item(self, item, response, location):
+        item["ref"] = location["number"]
+        item["website"] = response.urljoin(f"/store/{location['number']}")
+        item["brand"] = item["name"] = location["brand"]["name"]
+        item["brand_wikidata"] = BRAND_WIKIDATA.get(location["brand"]["name"])
+        item["street_address"] = item.pop("street")
 
-        if result["limit"] < result["total"]:
-            raise RuntimeError(f"Got {result['total']} results, need to increase limit")
+        oh = OpeningHours()
+        # TODO: Is it safe to assume that all stores are open 7 days?
+        oh.add_ranges_from_string(f"Mo-Su {location['storeHours'].removeprefix('Between ')}")
+        item["opening_hours"] = oh
 
-        for location in response.json()["data"]:
-            item = DictParser.parse(location)
-            item["ref"] = location["number"]
-            item["website"] = f"https://www.raleys.com/store/{location['number']}"
-            item["brand"] = item["name"] = location["brand"]["name"]
-            item["brand_wikidata"] = BRAND_WIKIDATA[location["brand"]["name"]]
-            item["street_address"] = item.pop("street")
-
-            oh = OpeningHours()
-            # TODO: Is it safe to assume that all stores are open 7 days?
-            oh.add_ranges_from_string(f"Mo-Su {location['storeHours'].removeprefix('Between ')}")
-            item["opening_hours"] = oh
-
-            yield item
+        yield item
