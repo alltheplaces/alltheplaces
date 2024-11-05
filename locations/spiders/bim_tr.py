@@ -1,4 +1,3 @@
-import scrapy
 from scrapy import FormRequest, Spider
 
 from locations.categories import Categories, apply_category
