@@ -8,7 +8,6 @@ class TraderJoesUSSpider(Where2GetItSpider):
     item_attributes = {"brand": "Trader Joe's", "brand_wikidata": "Q688825"}
     api_brand_name = "traderjoes"
     api_key = "8559C922-54E3-11E7-8321-40B4F48ECC77"
-    api_filter = {"comingsoon": {"ne": "Yes"}}
 
     def pre_process_data(self, location):
         location.pop("location", None)  # Fix coordinate mis-detection
