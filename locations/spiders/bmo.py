@@ -9,7 +9,7 @@ from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
-from locations.spiders.food_city_us import FoodCityUSSpider
+from locations.spiders.food_city_southeast_us import FoodCitySoutheastUSSpider
 from locations.spiders.giant_food import GiantFoodSpider
 from locations.spiders.giant_food_stores import GiantFoodStoresSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
@@ -113,8 +113,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = KROGER_BRANDS["https://www.food4less.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.food4less.com/"]["brand_wikidata"]
             elif item["name"] == "Food City":
-                item["located_in"] = FoodCityUSSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = FoodCityUSSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = FoodCitySoutheastUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = FoodCitySoutheastUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Fred Meyer":
                 item["located_in"] = KROGER_BRANDS["https://www.fredmeyer.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.fredmeyer.com/"]["brand_wikidata"]
