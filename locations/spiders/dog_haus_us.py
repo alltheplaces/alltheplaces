@@ -1,50 +1,116 @@
-from scrapy import Spider
+import re
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from scrapy.http import JsonRequest
+
+from locations.categories import Categories, Drink, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import SocialMedia, set_social_media
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
+
+branch_code_re = re.compile(r"(BG|GK|DH)[ +]*\d{3}$")
 
 
-class DogHausUSSpider(Spider):
+class DogHausUSSpider(JSONBlobSpider):
     name = "dog_haus_us"
     item_attributes = {"brand": "Dog Haus", "brand_wikidata": "Q105529843"}
-    start_urls = ["https://locations.doghaus.com/modules/multilocation/?near_lat=0&near_lon=0&limit=200"]
+    locations_key = ["response", "collection"]
 
-    def parse(self, response):
-        if response.json()["meta"]["next"]:
-            self.logger.error("FIXME: too many results")
-        for location in response.json()["objects"]:
-            item = DictParser.parse(location)
-            item["phone"] = location["phonemap_e164"]["phone"]
-            item["branch"] = (
-                location["custom_fields"]["display_name"]
-                .removeprefix("Dog Haus ")
-                .removeprefix("Biergarten ")
-                .removeprefix("Kitchen ")
-            )
-            item["opening_hours"] = self.parse_hours(location["hours_by_type"]["primary"]["hours"])
-            item["extras"]["happy_hours"] = self.parse_hours(
-                location["hours_by_type"].get("happy_hour", {}).get("hours", [])
-            ).as_opening_hours()
-            item["ref"] = location["partner_location_id"].removeprefix("doghaus-")
-            item["addr_full"] = location["geocoded"]
-            del item["street"]
-            item["street_address"] = location["street"]
+    def start_requests(self):
+        yield JsonRequest(
+            "https://locations.doghaus.com/rest/locatorsearch",
+            data={
+                "request": {
+                    "appkey": "F9C9435A-1156-11EF-972B-1BEEB43C2251",
+                    "formdata": {"geolocs": {"geoloc": [{"latitude": 45, "longitude": -104}]}, "searchradius": "24902"},
+                }
+            },
+        )
 
-            if "filter-kitchen" in location["services_tags"]:
-                apply_category(Categories.CRAFT_CATERER, item)
-            else:
-                apply_category(Categories.FAST_FOOD, item)
-                apply_yes_no(Extras.BAR, item, "filter-biergarten" in location["services_tags"])
-                apply_yes_no(Extras.OUTDOOR_SEATING, item, "filter-biergarten" in location["services_tags"])
+    def post_process_item(self, item, response, location):
+        item["ref"] = branch_code_re.search(item["name"]).group()
+        item["branch"] = item.pop("name").removeprefix("DH-").removesuffix(item["ref"]).strip()
+        item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
+        item["lat"] = location["latitude"]
+        item["lon"] = location["longitude"]
+        item["image"] = location["asset"]["Store Image 1"]["Image URL"]
 
-            yield item
-
-    def parse_hours(self, hours):
         oh = OpeningHours()
-        for row, day in zip(hours, DAYS):
-            if len(row) == 0 or len(row[0]) < 2:
-                continue
-            for start, end in row:
-                oh.add_range(day, start, end, time_format="%H:%M:%S")
-        return oh
+        for day in DAYS_FULL:
+            oh.add_range(day, location.get(f"{day.lower()}_open"), location.get(f"{day.lower()}_close"))
+        item["opening_hours"] = oh
+
+        set_social_media(item, SocialMedia.FACEBOOK, location["facebook_url"])
+        set_social_media(item, SocialMedia.INSTAGRAM, location["instagram_url"])
+        set_social_media(item, SocialMedia.YELP, location["yelp_url"])
+
+        attributes = location["location"]["attributes"]
+        self.apply_attribute(Extras.DELIVERY, item, attributes, "has_delivery")
+        self.apply_attribute(Extras.PARKING_WHEELCHAIR, item, attributes, "has_wheelchair_accessible_parking")
+        self.apply_attribute(Extras.TOILETS_WHEELCHAIR, item, attributes, "has_wheelchair_accessible_restroom")
+        self.apply_attribute("toilets:unisex", item, attributes, "has_restroom_unisex")
+        self.apply_attribute(PaymentMethods.CHEQUE, item, attributes, "pay_check")
+        self.apply_attribute(PaymentMethods.DEBIT_CARDS, item, attributes, "pay_debit_card")
+        self.apply_attribute(PaymentMethods.CONTACTLESS, item, attributes, "pay_mobile_nfc")
+        self.apply_attribute(Extras.OUTDOOR_SEATING, item, attributes, "has_seating_outdoors")
+        self.apply_attribute(Extras.DRIVE_THROUGH, item, attributes, "has_drive_through")
+        self.apply_attribute(Extras.TAKEAWAY, item, attributes, "has_takeout")
+        self.apply_attribute("fireplace", item, attributes, "has_fireplace")
+        self.apply_attribute(Extras.LIVE_MUSIC, item, attributes, "has_live_music")
+        self.apply_attribute(Drink.BEER, item, attributes, "serves_beer")
+        self.apply_attribute(Drink.COCKTAIL, item, attributes, "serves_cocktails")
+        self.apply_attribute(Drink.COFFEE, item, attributes, "serves_coffee")
+        self.apply_attribute(Extras.HALAL, item, attributes, "serves_halal_food")
+        self.apply_attribute("happy_hours", item, attributes, "serves_happy_hour_drinks")
+        self.apply_attribute(Drink.LIQUOR, item, attributes, "serves_liquor")
+        self.apply_attribute("organic", item, attributes, "serves_organic")
+        self.apply_attribute("lunch:saladbar", item, attributes, "has_salad_bar")
+        self.apply_attribute(Extras.VEGETARIAN, item, attributes, "serves_vegetarian")
+        self.apply_attribute(Drink.WINE, item, attributes, "serves_wine")
+        self.apply_attribute(Extras.BREAKFAST, item, attributes, "serves_breakfast")
+        self.apply_attribute("lunch", item, attributes, "serves_lunch")
+        self.apply_attribute("dinner", item, attributes, "serves_dinner")
+        self.apply_attribute(Extras.BAR, item, attributes, "has_bar_onsite")
+        self.apply_attribute(Extras.TOILETS, item, attributes, "has_restroom")
+        self.apply_attribute(Extras.RESERVATION, item, attributes, "accepts_reservations")
+        self.apply_attribute(Extras.VEGAN, item, attributes, "serves_vegan")
+        self.apply_attribute(Extras.DOG, item, attributes, "welcomes_dogs")
+        self.apply_attribute(PaymentMethods.CREDIT_CARDS, item, attributes, "pay_credit_card")
+        self.apply_attribute(Extras.BABY_CHANGING_TABLE, item, attributes, "has_changing_tables")
+
+        if (
+            attributes.get("has_wheelchair_accessible_entrance") == "yes"
+            and attributes.get("has_wheelchair_accessible_seating") == "yes"
+        ):
+            apply_yes_no(Extras.WHEELCHAIR, item, True)
+        elif (
+            attributes.get("has_wheelchair_accessible_entrance") == "no"
+            and attributes.get("has_wheelchair_accessible_seating") == "no"
+        ):
+            apply_yes_no(Extras.WHEELCHAIR, item, False, False)
+        elif (
+            attributes.get("has_wheelchair_accessible_entrance") == "yes"
+            or attributes.get("has_wheelchair_accessible_seating") == "yes"
+        ):
+            apply_yes_no(Extras.WHEELCHAIR_LIMITED, item, True)
+
+        cards = set(attributes["pay_credit_card_types_accepted"])
+        apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "american_express" in cards)
+        apply_yes_no(PaymentMethods.DINERS_CLUB, item, "diners_club" in cards)
+        apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "discover" in cards)
+        apply_yes_no(PaymentMethods.VISA, item, "visa" in cards)
+        apply_yes_no(PaymentMethods.MASTER_CARD, item, "mastercard" in cards)
+        cards.difference_update({"american_express", "discover", "visa", "mastercard", "diners_club"})
+        assert cards == set(), cards
+
+        item["extras"]["website:menu"] = attributes["url_menu"]
+        item["extras"]["website:orders"] = attributes["url_order_ahead"]
+        item["extras"]["website:booking"] = attributes.get("url_reservations")
+
+        if attributes["has_catering"] == "yes":
+            apply_category(Categories.CRAFT_CATERER, item)
+
+        yield item
+
+    def apply_attribute(self, attribute, item, attributes, key):
+        apply_yes_no(attribute, item, attributes.get(key) == "yes", attributes.get(key, "unsure") == "unsure")
