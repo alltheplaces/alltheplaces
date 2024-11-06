@@ -9,7 +9,6 @@ class BimTRSpider(Spider):
     name = "bim_tr"
     item_attributes = {"brand": "BİM", "brand_wikidata": "Q1022075"}
     start_urls = ["https://www.bim.com.tr/Categories/104/magazalar.aspx"]
-    no_refs = True
 
     def parse(self, response, **kwargs):
         city_list = response.xpath('//select[@id="BimFiltre_DrpCity"]/option')
