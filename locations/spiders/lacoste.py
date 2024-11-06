@@ -21,4 +21,5 @@ class LacosteSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("addr_full")
         item["website"] = f'https://www.lacoste.com/fr/stores{feature["url"]}'
+        item["country"] = feature["url"].split("/")[1].title()
         yield item
