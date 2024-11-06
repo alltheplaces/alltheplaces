@@ -1,3 +1,4 @@
+import html
 from typing import Iterable
 
 from scrapy.http import Response
@@ -19,6 +20,7 @@ class LacosteSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("addr_full")
         item["website"] = f'https://www.lacoste.com/us/stores{feature["url"]}'
+        item["name"] = html.unescape(item["name"]).strip()
         country = feature["url"].split("/")[1]
         if "taiwan" in country:
             item["country"] = "TW"
