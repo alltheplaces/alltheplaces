@@ -1,4 +1,5 @@
 import unicodedata
+
 from scrapy import FormRequest, Spider
 
 from locations.categories import Categories, apply_category
@@ -11,9 +12,8 @@ class BimTRSpider(Spider):
     item_attributes = {"brand": "BİM", "brand_wikidata": "Q1022075"}
     start_urls = ["https://www.bim.com.tr/Categories/104/magazalar.aspx"]
 
-
     def normalize_string(self, s):
-        return unicodedata.normalize('NFC', s).lower()
+        return unicodedata.normalize("NFC", s).lower()
 
     def parse(self, response, **kwargs):
         city_list = response.xpath('//select[@id="BimFiltre_DrpCity"]/option')
