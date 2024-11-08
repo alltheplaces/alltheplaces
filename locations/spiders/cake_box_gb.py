@@ -1,11 +1,11 @@
-import re
 import json
-
+import re
 from typing import Any
-from scrapy.http import Response
-from scrapy import Spider
 
-from locations.categories import Categories, apply_category
+from scrapy import Spider
+from scrapy.http import Response
+
+from locations.categories import apply_category
 from locations.items import Feature
 
 
