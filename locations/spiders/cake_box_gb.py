@@ -5,7 +5,6 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import apply_category
 from locations.items import Feature
 
 
@@ -28,5 +27,4 @@ class CakeBoxGBSpider(Spider):
             item["city"] = re.search(r"(?<=City: )[^<]+", sel).group(0)
             item["street_address"] = re.search(r"(?<=Address: )[^<]+", sel).group(0)
             item["postcode"] = re.search(r"(?<=Zip: )[^<]+", sel).group(0)
-            apply_category({"shop": "bakery"}, item)
             yield item
