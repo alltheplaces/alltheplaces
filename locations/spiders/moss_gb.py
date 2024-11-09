@@ -31,10 +31,12 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
                 return
         #       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
         item["name"] = response.xpath('//ul[@itemprop="address"]//li[@itemprop="name"]/text()').get()
-        if item["name"].startswith("Moss "):
-            item["branch"] = item.pop("name").removeprefix("Moss ")
-        else:
-            item["branch"] = item.pop("name")
+        if item["name"]:
+            if item["name"].startswith("Moss "):
+                item["branch"] = item.pop("name").removeprefix("Moss ")
+            else:
+                item["branch"] = item.pop("name")
+            print(item)
         oh = OpeningHours()
         hours = response.xpath('//p[contains(@class,"store-opening-hours-text")]//text()').getall()
         for dayrange in hours:
