@@ -6,6 +6,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class SlimChickensGBSpider(Spider):
@@ -22,5 +23,15 @@ class SlimChickensGBSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = location["title"]
             item["website"] = location["permalink"]
-            # Needs opening hours adding
+            item["street_address"] = item["addr_full"]
+            del item["addr_full"]
+            oh=OpeningHours()
+            j=-1
+            for day in location["days"]:
+                j=j+1
+                if day["closed"] == 'true':
+                    continue
+                oh.add_range(DAYS[j], day["open"], day["close"])
+            item["opening_hours"]=oh
+
             yield item
