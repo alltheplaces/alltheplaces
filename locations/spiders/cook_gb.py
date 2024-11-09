@@ -1,12 +1,10 @@
-import json
 import re
 from typing import Any
 
 from scrapy import Request, Spider
 from scrapy.http import Response
+
 from locations.items import Feature
-from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
 
 
 class CookGBSpider(Spider):
@@ -18,18 +16,18 @@ class CookGBSpider(Spider):
         data = response.xpath('//div[@class="shopinfo"]')
         for location in data:
             item = Feature()
-            slug = location.xpath('h2//a/@href').get()
-            item["website"] = 'https://www.cookfood.net' + slug
+            slug = location.xpath("h2//a/@href").get()
+            item["website"] = "https://www.cookfood.net" + slug
             item["ref"] = slug
-            item["branch"] = location.xpath('h2//a/text()').get()
-            address = location.xpath('p//text()').get()
+            item["branch"] = location.xpath("h2//a/text()").get()
+            address = location.xpath("p//text()").get()
             if "t: " in address:
-                item["addr_full"],item["phone"] = address.split("t: ")
+                item["addr_full"], item["phone"] = address.split("t: ")
 
             yield Request(item["website"], callback=self.parse_storepage, cb_kwargs={"item": item})
 
     def parse_storepage(self, response, item):
-            item["lat"] = re.search(r'(?<=lat: )[^,]+', response.text).group(0)
-            item["lon"] = re.search(r'(?<=lng: )[^,]+', response.text).group(0)
+        item["lat"] = re.search(r"(?<=lat: )[^,]+", response.text).group(0)
+        item["lon"] = re.search(r"(?<=lng: )[^,]+", response.text).group(0)
 
-            yield item
+        yield item
