@@ -21,6 +21,6 @@ class SlimChickensGBSpider(Spider):
         for location in jsondata:
             item = DictParser.parse(location)
             item["branch"] = location["title"]
-            item["url"] = location["permalink"]
+            item["website"] = location["permalink"]
             # Needs opening hours adding
             yield item
