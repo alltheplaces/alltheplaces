@@ -25,13 +25,13 @@ class SlimChickensGBSpider(Spider):
             item["website"] = location["permalink"]
             item["street_address"] = item["addr_full"]
             del item["addr_full"]
-            oh=OpeningHours()
-            j=-1
+            oh = OpeningHours()
+            j = -1
             for day in location["days"]:
-                j=j+1
-                if day["closed"] == 'true':
+                j = j + 1
+                if day["closed"] == "true":
                     continue
                 oh.add_range(DAYS[j], day["open"], day["close"])
-            item["opening_hours"]=oh
+            item["opening_hours"] = oh
 
             yield item
