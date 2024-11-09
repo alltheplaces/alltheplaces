@@ -14,7 +14,7 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
     }
 
     start_urls = ["https://www.moss.co.uk/store/finder"]
-    rules = [Rule(LinkExtractor(allow=r"/store/([^/]+)$"), callback="parse_sd")]
+    rules = [Rule(LinkExtractor(allow=r"/store/([^/]+)$", deny="/store/finder", unique=1), callback="parse_sd")]
     wanted_types = ["Store"]
     drop_attributes = {"facebook"}
 
@@ -25,13 +25,16 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
                 .get()
                 .replace("https://maps.google.com/maps?hl=en&daddr=", "")
             )
-            item["lat"], item["lon"] = coords.split(",")
-        else:
-            return
+            if "," in coords:
+                item["lat"], item["lon"] = coords.split(",")
+            else:
+                return
         #       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
         item["name"] = response.xpath('//li[@class="boldcopyright"][@itemprop="name"]/text()').get()
-        item["branch"] = item.pop("name").removeprefix("Moss ")
-
+        if item["name"].startswith("Moss "):
+            item["branch"] = item.pop("name").removeprefix("Moss ")
+        else:
+            item["branch"] = item.pop("name")
         oh = OpeningHours()
         hours = response.xpath('//p[contains(@class,"store-opening-hours-text")]//text()').getall()
         for dayrange in hours:
