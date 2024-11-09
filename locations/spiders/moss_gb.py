@@ -30,7 +30,7 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
             else:
                 return
         #       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
-        item["name"] = response.xpath('//li[@class="boldcopyright"][@itemprop="name"]/text()').get()
+        item["name"] = response.xpath('//ul[@itemprop="address"]//li[@itemprop="name"]/text()').get()
         if item["name"].startswith("Moss "):
             item["branch"] = item.pop("name").removeprefix("Moss ")
         else:
