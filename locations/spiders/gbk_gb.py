@@ -1,5 +1,5 @@
-
 from locations.spiders.slim_chickens_gb import SlimChickensGBSpider
+
 
 class GBKGBSpider(SlimChickensGBSpider):
     name = "gbk_gb"
