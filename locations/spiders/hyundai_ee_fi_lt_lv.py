@@ -22,7 +22,6 @@ class HyundaiEEFILTLVSpider(JSONBlobSpider):
         item["street_address"] = feature["address"]["fi"]
         item["city"] = feature["city"]["fi"]
         item["postcode"] = feature["postcode"]
-        item["state"] = feature["region"]["fi"] or None
         item["country"] = feature["country"]["fi"]
         if item["country"] == "ET":
             # ISO 639 language code for Estonian is "ET"
