@@ -23,8 +23,9 @@ class SlimChickensGBSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = location["title"]
             item["website"] = location["permalink"]
-            item["street_address"] = item["addr_full"]
-            del item["addr_full"]
+            if item["addr_full"]:
+                item["street_address"] = item["addr_full"]
+                del item["addr_full"]
             oh = OpeningHours()
             j = -1
             for day in location["days"]:
