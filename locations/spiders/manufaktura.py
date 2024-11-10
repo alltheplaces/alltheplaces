@@ -34,12 +34,12 @@ class ManufakturaSpider(CrawlSpider):
         extract_mapy_cz_position(item, response)
         apply_category(Categories.SHOP_COSMETICS, item)
 
-        if item["email"].endswith(".cz"):
-            item["country"] = "CZ"
-        elif item["email"].endswith(".sk"):
+        if "eshop@manufaktura.sk" in response.text:
             item["country"] = "SK"
+        elif "eshop@manufaktura.cz" in response.text:
+            item["country"] = "CZ"
         else:
-            raise RuntimeError("Cannot detect country from email: {}".format(item["email"]))
+            raise RuntimeError("Cannot detect country")
 
         seller_info = response.xpath("//*[@class='seller-detail-info']").get()
         if "Wheelchair access" in seller_info:
