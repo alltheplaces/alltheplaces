@@ -23,4 +23,6 @@ class RobertDyasGBSpider(Spider):
             del item["addr_full"]
             item["email"] = location["cs_email"]
             item["opening_hours"] = location["hours"].replace(", ", ";")
+            item["branch"] = item["name"]
+            item["name"] = "Robert Dyas"
             yield item
