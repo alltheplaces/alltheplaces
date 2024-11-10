@@ -1,3 +1,4 @@
+#This is also used by gbk_gb.py
 import json
 import re
 from typing import Any
@@ -21,11 +22,12 @@ class SlimChickensGBSpider(Spider):
         jsondata = json.loads(data)
         for location in jsondata:
             item = DictParser.parse(location)
+            if not location["address"]: # Some GBK places are delivery only
+                continue
             item["branch"] = location["title"]
             item["website"] = location["permalink"]
-            if item["addr_full"]:
-                item["street_address"] = item["addr_full"]
-                del item["addr_full"]
+            item["street_address"] = item["addr_full"]
+            del item["addr_full"]
             oh = OpeningHours()
             j = -1
             for day in location["days"]:
