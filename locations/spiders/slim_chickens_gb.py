@@ -1,4 +1,4 @@
-#This is also used by gbk_gb.py
+# This is also used by gbk_gb.py
 import json
 import re
 from typing import Any
@@ -22,7 +22,7 @@ class SlimChickensGBSpider(Spider):
         jsondata = json.loads(data)
         for location in jsondata:
             item = DictParser.parse(location)
-            if not location["address"]: # Some GBK places are delivery only
+            if not location["address"]:  # Some GBK places are delivery only
                 continue
             item["branch"] = location["title"]
             item["website"] = location["permalink"]
