@@ -15,4 +15,5 @@ class PopeyesGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
             item = DictParser.parse(location)
+            item["geometry"]=location["storeLocation"]["coordinates"]
             yield item
