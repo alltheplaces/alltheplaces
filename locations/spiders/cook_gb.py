@@ -4,6 +4,7 @@ from typing import Any
 from scrapy import Request, Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -19,11 +20,13 @@ class CookGBSpider(Spider):
             slug = location.xpath("h2//a/@href").get()
             item["website"] = "https://www.cookfood.net" + slug
             item["ref"] = slug
+            item["name"] = "Cook"
             item["branch"] = location.xpath("h2//a/text()").get()
-            address = location.xpath("p//text()").get()
-            if "t: " in address:
-                item["addr_full"], item["phone"] = address.split("t: ")
-
+            address = location.xpath('p/text()').getall()
+            joinaddress=" ".join(address)
+            if "t: " in joinaddress:
+                item["addr_full"], item["phone"] = joinaddress.split("t: ")
+            apply_category(Categories.SHOP_FROZEN_FOOD, item)
             yield Request(item["website"], callback=self.parse_storepage, cb_kwargs={"item": item})
 
     def parse_storepage(self, response, item):
