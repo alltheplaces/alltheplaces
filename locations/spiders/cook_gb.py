@@ -22,8 +22,8 @@ class CookGBSpider(Spider):
             item["ref"] = slug
             item["name"] = "Cook"
             item["branch"] = location.xpath("h2//a/text()").get()
-            address = location.xpath('p/text()').getall()
-            joinaddress=" ".join(address)
+            address = location.xpath("p/text()").getall()
+            joinaddress = " ".join(address)
             if "t: " in joinaddress:
                 item["addr_full"], item["phone"] = joinaddress.split("t: ")
             apply_category(Categories.SHOP_FROZEN_FOOD, item)
