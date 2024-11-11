@@ -18,7 +18,6 @@ class BudniDESpider(scrapy.Spider):
             yield Feature(
                 {
                     "ref": location_data["id"],
-                    "name": location_data["displayName"],
                     "street_address": location_data["street"],
                     "city": location_data["city"],
                     "postcode": location_data["zip"],
