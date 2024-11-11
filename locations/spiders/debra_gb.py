@@ -19,4 +19,6 @@ class DebraGBSpider(SitemapSpider):
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
         item["ref"] = item["website"] = response.url
+        item["email"] = response.xpath('//a[contains(@href,"mailto:")]/text()').get()
+        item["phone"] = response.xpath('//a[contains(@href,"tel:")]/text()').get()
         yield item
