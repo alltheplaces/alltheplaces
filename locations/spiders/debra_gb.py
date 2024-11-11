@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -10,18 +11,18 @@ class DebraGBSpider(SitemapSpider):
     name = "debra_gb"
     item_attributes = {"brand": "Debra", "brand_wikidata": "Q104535435"}
     sitemap_urls = ["https://www.debra.org.uk/sitemap.xml"]
-    sitemap_rules = [(r"uk/[^/]+-shop$", "parse")]
+    sitemap_rules = [(r"uk/charity-shop/[-\w]+", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        content = response.xpath("//meta[@property='og:description']/@content").get()
-        if "Tel:" in content:
-            item = Feature()
-            address = content.split("Tel:")[0].strip()
-            item["addr_full"] = address
-            postcode = address.split(",")[-1].strip()
-            # Last address element should be postcode but comma between county and postcode is often missing
-            cleaner_postcode = postcode.split(" ")
-            postcode = " ".join(cleaner_postcode[-2:])
-            item["postcode"] = postcode
-            item["ref"] = item["website"] = response.url
-            yield item
+        item = Feature()
+        item["branch"] = response.xpath('//meta[@property="og:title"]/@content').get()
+        item["addr_full"] = response.xpath("//address/text()").get()
+        item["lat"] = response.xpath("//@data-lat").get()
+        item["lon"] = response.xpath("//@data-lng").get()
+        item["ref"] = item["website"] = response.url
+        item["email"] = response.xpath('//a[contains(@href,"mailto:")]/text()').get()
+        item["phone"] = response.xpath('//a[contains(@href,"tel:")]/text()').get()
+        if hours := response.xpath('//*[contains(@class,"details-opening-times")]/text()').get():
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours)
+        yield item
