@@ -16,7 +16,7 @@ class ZEnergyNZSpider(scrapy.Spider):
             response.xpath('//script[contains(text(), "stations")]/text()').re_first(r"({\"stations\":.+});")
         )["stations"]:
             item = DictParser.parse(location)
-            item["ref"] = location["externalID"]
+            item["ref"] = location["site_id"]
             item["website"] = f'https://www.z.co.nz{location["link"]}'
 
             if location["type_slug"] == "airstop":
