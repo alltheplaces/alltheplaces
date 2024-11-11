@@ -9,15 +9,16 @@ from locations.dict_parser import DictParser
 class ZEnergyNZSpider(scrapy.Spider):
     name = "z_energy_nz"
     item_attributes = {"brand": "Z", "brand_wikidata": "Q8063337"}
-    start_urls = ["https://www.z.co.nz/find-a-station/"]
+    start_urls = ["https://www.z.co.nz/find-a-station"]
 
     def parse(self, response, **kwargs):
         for location in json.loads(
             response.xpath('//script[contains(text(), "stations")]/text()').re_first(r"({\"stations\":.+});")
         )["stations"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Z ")
             item["ref"] = location["site_id"]
-            item["website"] = f'https://www.z.co.nz{location["link"]}'
+            item["website"] = response.urljoin(location["link"])
 
             if location["type_slug"] == "airstop":
                 apply_category({"aeroway": "fuel"}, item)
