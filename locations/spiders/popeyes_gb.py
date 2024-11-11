@@ -17,8 +17,6 @@ class PopeyesGBSpider(Spider):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
             item["geometry"] = location["storeLocation"]["coordinates"]
-            item["branch"] = item["name"]
-            item["name"] = "Popeyes"
-            slug = location["slug"]
-            item["website"] = urljoin("https://popeyesuk.com/restaurants/", slug)
+            item["branch"] = item.pop("name")
+            item["website"] = urljoin("https://popeyesuk.com/restaurants/", location["slug"])
             yield item
