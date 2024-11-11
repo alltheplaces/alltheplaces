@@ -13,15 +13,9 @@ class DebraGBSpider(SitemapSpider):
     sitemap_rules = [(r"uk/charity-shop/[-\w]+", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        content = response.xpath("//meta[@property='og:description']/@content").get()
-        if "Tel:" in content:
-            item = Feature()
-            address = content.split("Tel:")[0].strip()
-            item["addr_full"] = address
-            postcode = address.split(",")[-1].strip()
-            # Last address element should be postcode but comma between county and postcode is often missing
-            cleaner_postcode = postcode.split(" ")
-            postcode = " ".join(cleaner_postcode[-2:])
-            item["postcode"] = postcode
-            item["ref"] = item["website"] = response.url
-            yield item
+        item = Feature()
+        item["addr_full"] = response.xpath("//address/text()").get()
+        item["lat"] = response.xpath("//@data-lat").get()
+        item["lon"] = response.xpath("//@data-lng").get()
+        item["ref"] = item["website"] = response.url
+        yield item
