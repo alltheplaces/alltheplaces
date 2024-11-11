@@ -86,6 +86,7 @@ class DictParser:
         "address-line1",
         "line1",
         "address-line-one",
+        "address-street",
         # JP
         "町域以下住所",  # "address below town limits"
         # IT
@@ -166,6 +167,7 @@ class DictParser:
         "store-zip",
         "store-zip-code",
         "store-zipcode",
+        "address-zip",
         # JP
         "郵便番号",  # "post code"
         # DE
