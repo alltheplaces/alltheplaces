@@ -14,6 +14,7 @@ class DebraGBSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
+        item["branch"] = response.xpath('//meta[@property="og:title"]/@content').get()
         item["addr_full"] = response.xpath("//address/text()").get()
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
