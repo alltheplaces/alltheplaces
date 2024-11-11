@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class VodafoneCzSpider(scrapy.Spider):
+class VodafoneCZSpider(scrapy.Spider):
     name = "vodafone_cz"
     allowed_domains = ["www.vodafone.cz"]
     start_urls = ["https://www.vodafone.cz/prodejny/"]
