@@ -19,10 +19,8 @@ class RobertDyasGBSpider(Spider):
         jsondata = json.loads(data)
         for location in jsondata["locations"]:
             item = DictParser.parse(location)
-            item["street_address"] = item["addr_full"]
-            del item["addr_full"]
+            item["street_address"] = item.pop("addr_full")
             item["email"] = location["cs_email"]
             item["opening_hours"] = location["hours"].replace(", ", ";")
             item["branch"] = item["name"]
-            item["name"] = "Robert Dyas"
             yield item
