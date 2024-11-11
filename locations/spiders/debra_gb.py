@@ -10,7 +10,7 @@ class DebraGBSpider(SitemapSpider):
     name = "debra_gb"
     item_attributes = {"brand": "Debra", "brand_wikidata": "Q104535435"}
     sitemap_urls = ["https://www.debra.org.uk/sitemap.xml"]
-    sitemap_rules = [(r"uk/[^/]+-shop$", "parse")]
+    sitemap_rules = [(r"uk/charity-shop/[-\w]+", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         content = response.xpath("//meta[@property='og:description']/@content").get()
