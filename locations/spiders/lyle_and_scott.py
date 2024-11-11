@@ -5,6 +5,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -36,4 +37,6 @@ class LyleAndScottSpider(Spider):
             if coords:
                 m = re.search(r"https://www.google.com/maps/place/[^/]+/@([^,]+),([^,]+),", coords)
                 item["lat"], item["lon"] = m.group(1), m.group(2)
+            apply_category(Categories.SHOP_CLOTHES, item)
+
             yield item
