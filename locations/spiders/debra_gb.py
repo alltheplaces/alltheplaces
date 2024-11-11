@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -21,4 +22,7 @@ class DebraGBSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["email"] = response.xpath('//a[contains(@href,"mailto:")]/text()').get()
         item["phone"] = response.xpath('//a[contains(@href,"tel:")]/text()').get()
+        if hours := response.xpath('//*[contains(@class,"details-opening-times")]/text()').get():
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours)
         yield item
