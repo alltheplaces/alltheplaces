@@ -23,7 +23,7 @@ class Mitre10NZSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["ref"] = location["name"]
-            item["name"] = location["displayName"]
+            item["name"] = location.get("displayName")
             item["city"] = location["address"].get(
                 "suburb", location["address"].get("town", location["address"].get("city"))
             )
