@@ -15,7 +15,7 @@ class GoldmarkAUSpider(JSONBlobSpider):
     allowed_domains = ["www.goldmark.com.au"]
     start_urls = ["https://www.goldmark.com.au/stores/all-stores"]
 
-    def extract_json(self, response: Response) -> list[dict]:
+    def extract_json(self, response: Response) -> dict:
         stores_js = response.xpath('//script[contains(text(), "var go_stores = ")]/text()').get()
         locations = parse_js_object("{" + stores_js.split("{", 1)[1].split("};", 1)[0] + "}")
         return locations
