@@ -1,4 +1,3 @@
-
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
