@@ -26,13 +26,23 @@ class AussieDisposalsAUSpider(SitemapSpider):
         location_element = response.xpath('//div[@class="amlocator-location-container"]')
         properties = {
             "ref": response.url,
-            "branch": location_element.xpath('.//h3/text()').get(),
-            "addr_full": merge_address_lines(location_element.xpath('.//div[@class="amlocator-block-address"]//text()').getall()),
-            "phone": location_element.xpath('.//div[@class="amlocator-block-phone"]//a[contains(@href, "tel:")]/@href').get("").replace("tel:", ""),
+            "branch": location_element.xpath(".//h3/text()").get(),
+            "addr_full": merge_address_lines(
+                location_element.xpath('.//div[@class="amlocator-block-address"]//text()').getall()
+            ),
+            "phone": location_element.xpath('.//div[@class="amlocator-block-phone"]//a[contains(@href, "tel:")]/@href')
+            .get("")
+            .replace("tel:", ""),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
-        properties["lat"], properties["lon"] = url_to_coords(location_element.xpath('//div[@class="directions-btn"]/a/@href').get())
-        hours_text = re.sub(r"\s+", " ", " ".join(location_element.xpath('.//div[@class="amlocator-description-grey"]/div[1]/p//text()').getall())).strip()
+        properties["lat"], properties["lon"] = url_to_coords(
+            location_element.xpath('//div[@class="directions-btn"]/a/@href').get()
+        )
+        hours_text = re.sub(
+            r"\s+",
+            " ",
+            " ".join(location_element.xpath('.//div[@class="amlocator-description-grey"]/div[1]/p//text()').getall()),
+        ).strip()
         properties["opening_hours"].add_ranges_from_string(hours_text)
         yield Feature(**properties)
