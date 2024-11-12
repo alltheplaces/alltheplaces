@@ -68,7 +68,7 @@ class JSONBlobSpider(Spider):
             for url in self.start_urls:
                 yield Request(url)
 
-    def extract_json(self, response: Response) -> dict | list:
+    def extract_json(self, response: Response) -> dict | list[dict]:
         """
         Override this method to extract the main JSON content from the page. The default
         behaviour is to treat the returned body as JSON and treat it as an array of
