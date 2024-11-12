@@ -1,7 +1,6 @@
 from typing import Iterable
 
 from chompjs import parse_js_object
-
 from scrapy.http import Response
 
 from locations.categories import Categories
