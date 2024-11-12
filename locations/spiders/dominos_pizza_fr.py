@@ -4,7 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
-
+from locations.pipelines.address_clean_up import clean_address
 
 class DominosPizzaFRSpider(SitemapSpider):
     name = "dominos_pizza_fr"
@@ -20,15 +20,10 @@ class DominosPizzaFRSpider(SitemapSpider):
     ]
 
     def parse_store(self, response):
-        address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
-        locality_data = re.match(r"([\d]+)? ?([-\ \w'À-Ÿ()]+)$", address_data[1].strip())
         properties = {
             "ref": response.url,
             "name": response.xpath('//h2[@class="storetitle"]/text()').extract_first(),
-            "street_address": address_data[0].strip().strip(","),
-            "city": locality_data.group(2),
-            "postcode": locality_data.group(1),
-            "country": "FR",
+            "addr_full": clean_address(response.xpath('//a[@id="open-map-address"]/text()').extract()),
             "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
             "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
             "phone": response.xpath('//div[@class="store-phone"]/a/text()').get(),
