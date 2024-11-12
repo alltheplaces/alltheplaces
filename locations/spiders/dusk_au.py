@@ -21,6 +21,7 @@ class DuskAUSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["store_number"]
         item["branch"] = item.pop("name", None)
+        item.pop("state", None)
         item["opening_hours"] = OpeningHours()
         for day_hours in feature.get("schedule_data"):
             if not day_hours["is_open"]:
