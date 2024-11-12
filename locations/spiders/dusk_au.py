@@ -26,8 +26,14 @@ class DuskAUSpider(JSONBlobSpider):
             if not day_hours["is_open"]:
                 continue
             if day_hours["break_from"] and day_hours["break_to"]:
-                item["opening_hours"].add_range(DAYS_EN[day_hours["weekday"].title()], day_hours["from"], day_hours["break_from"], "%I:%M %p")
-                item["opening_hours"].add_range(DAYS_EN[day_hours["weekday"].title()], day_hours["break_to"], day_hours["to"], "%I:%M %p")
+                item["opening_hours"].add_range(
+                    DAYS_EN[day_hours["weekday"].title()], day_hours["from"], day_hours["break_from"], "%I:%M %p"
+                )
+                item["opening_hours"].add_range(
+                    DAYS_EN[day_hours["weekday"].title()], day_hours["break_to"], day_hours["to"], "%I:%M %p"
+                )
             else:
-                item["opening_hours"].add_range(DAYS_EN[day_hours["weekday"].title()], day_hours["from"], day_hours["to"], "%I:%M %p")
+                item["opening_hours"].add_range(
+                    DAYS_EN[day_hours["weekday"].title()], day_hours["from"], day_hours["to"], "%I:%M %p"
+                )
         yield item
