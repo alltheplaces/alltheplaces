@@ -3,8 +3,9 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
+
 
 class DominosPizzaFRSpider(SitemapSpider):
     name = "dominos_pizza_fr"
