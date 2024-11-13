@@ -11,6 +11,7 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://www.autonation.com/dealers/[^/]+$", "parse")]
     wanted_types = ["AutoDealer"]
     time_format = "%I:%M %p"
+    requires_proxy = "US"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath('//input[@id="storeLatitude"]/@value').get()
