@@ -4,10 +4,10 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class BottegAvenetaSpider(scrapy.Spider):
-    name = "botteg_aveneta"
+class BottegaVenetaSpider(scrapy.Spider):
+    name = "bottega_veneta"
     item_attributes = {
-        "brand": "BottegAveneta",
+        "brand": "Bottega Veneta",
         "brand_wikidata": "Q894874",
     }
     allowed_domains = ["bottegaveneta.com"]
