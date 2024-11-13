@@ -1,7 +1,6 @@
 from typing import Iterable
 from urllib.parse import quote
 
-from dateutil.rrule import weekday
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
