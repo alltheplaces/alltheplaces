@@ -113,7 +113,10 @@ fragment sectionalNotification on StoreSectionalNotification {
                     },
                 },
             }
-            yield JsonRequest(url=url, data=data, method="POST")
+            headers = {
+                "x-specsavers-application-id": "nuxt-find-and-book/1.702.0",
+            }
+            yield JsonRequest(url=url, data=data, headers=headers, method="POST")
 
     def parse(self, response):
         for location in response.json()["data"]["storesSearch"]["stores"]:
