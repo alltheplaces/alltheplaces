@@ -34,16 +34,17 @@ class NewYorkPizzaNLDESpider(Spider):
     def parse(self, response, top_level_domain=None, **kwargs):
         for store in response.json():
             item = DictParser.parse(store)
+            if item["name"] == "S4D Test":
+                continue
             if item["name"].startswith("New York Pizza "):
-                item["branch"] = item["name"].lstrip("New York Pizza ")
+                item["branch"] = item["name"].removeprefix("New York Pizza ")
                 item["name"] = "New York Pizza"
             item["ref"] = f"{top_level_domain}-{item['ref']}"
             item["postcode"], item["city"] = store["address_line_2"].split(maxsplit=1)
             item["country"] = top_level_domain.upper()
             item["website"] = response.urljoin(store["details_url"])
             item["opening_hours"] = self.convert_opening_hours(store, top_level_domain)
-            if item["name"] != "S4D Test":
-                yield item
+            yield item
 
     @staticmethod
     def convert_opening_hours(store, language):
@@ -51,7 +52,7 @@ class NewYorkPizzaNLDESpider(Spider):
         re_interval = re.compile(r"(\d\d:\d\d) - (\d\d:\d\d)")
         hours = OpeningHours()
         for entry in store["opening_hours"]:
-            for weekday in entry["key"].split("-"):
+            for weekday in OpeningHours.days_in_day_range(entry["key"].split("-"), days_to_en):
                 for open_time, close_time in re_interval.findall(entry["value"]):
-                    hours.add_range(days_to_en[weekday], open_time, close_time)
+                    hours.add_range(weekday, open_time, close_time)
         return hours
