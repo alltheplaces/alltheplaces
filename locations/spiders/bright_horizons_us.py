@@ -1,9 +1,8 @@
-import logging
 import re
-import time
 
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -33,19 +32,19 @@ class BrightHorizonsUSSpider(SitemapSpider, StructuredDataSpider):
                 yield entry
 
     def post_process_item(self, item, response, ld_data):
-        if "openingHours" in ld_data:
-            oh = ld_data["openingHours"]
-            if oh != "Not Available":
-                days, times = oh.split(": ")
+        if opening_hours := ld_data.get("openingHours"):
+            item["opening_hours"] = self.parse_opening_hours(opening_hours, response.url)
+        yield item
 
-                if days != "M-F":
-                    logging.error("Unexpected days: " + days)
-                else:
-                    start_time, end_time = times.replace("a.m.", "AM").replace("p.m.", "PM").split(" to ")
-
-                    start_time = time.strftime("%H:%M", time.strptime(start_time, "%I:%M %p"))
-                    end_time = time.strftime("%H:%M", time.strptime(end_time, "%I:%M %p"))
-
-                    item["opening_hours"] = f"Mo-Fr {start_time}-{end_time}"
-
-            yield item
+    def parse_opening_hours(self, opening_hours, url):
+        try:
+            o = OpeningHours()
+            if opening_hours != "Not Available":
+                if "M-F" in opening_hours:
+                    days, times = opening_hours.split(": ")
+                    start_time, end_time = times.replace(" a.m.", "AM").replace(" p.m.", "PM").split(" to ")
+                    o.add_days_range(DAYS_WEEKDAY, start_time.strip(), end_time.strip(), time_format="%I:%M%p")
+            return o.as_opening_hours()
+        except Exception as e:
+            self.logger.warning(f"Failed to parse opening hours for {url}, {e}")
+            self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
