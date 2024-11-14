@@ -13,6 +13,7 @@ class DouglasSpider(Spider):
         "brand_wikidata": "Q2052213",
     }
     user_agent = BROWSER_DEFAULT
+    requires_proxy = "DE"
 
     def start_requests(self):
         for tld in ("at", "be", "ch", "de", "es", "it", "nl", "pl"):
