@@ -28,7 +28,7 @@ class FiestaMartUSSpider(scrapy.Spider):
             ).strip()
             try:
                 item["opening_hours"] = self.parse_opening_times(data)
-            except:
+            except Exception as e:
                 self.logger.warning(f"Failed to parse opening hours for {item['ref']}, {e}")
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
             yield item
