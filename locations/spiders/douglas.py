@@ -33,11 +33,12 @@ class DouglasSpider(Spider):
                 feature["branch"] = feature.pop("displayName")
             else:
                 feature["branch"] = feature["address"]["town"] + ", " + feature["address"]["line1"]
-            feature["address"]["house_number"] = feature["address"].get("line2")
+            if "address" in feature:
+                feature["address"]["house_number"] = feature["address"].get("line2")
+                feature["address"]["country"] = feature["address"]["country"]["isocode"]
+                if "region" in feature["address"]:
+                    feature["address"]["region"] = feature["address"]["region"]["isocodeShort"]
             feature["website"] = response.urljoin(feature.pop("url"))
-            feature["address"]["country"] = feature["address"]["country"]["isocode"]
-            if "region" in feature["address"]:
-                feature["address"]["region"] = feature["address"]["region"]["isocodeShort"]
             item = DictParser().parse(feature)
             item["opening_hours"] = self.parse_opening_hours(feature["openingHours"]["weekDayOpeningList"])
             apply_category(Categories.SHOP_PERFUMERY, item)
