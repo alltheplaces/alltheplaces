@@ -38,25 +38,22 @@ class SnapFitnessSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["items"]:
-            item = DictParser.parse(location.get("customProperties", {}).get("contactDetails", {}))
-            item["ref"] = location["id"]
-            item["name"] = location["name"]
-            item["lat"] = location["customProperties"]["latitude"]
-            item["lon"] = location["customProperties"]["longitude"]
+            location.update(location.pop("customProperties"))
+            if location.get("contactDetails"):
+                location.update(location.pop("contactDetails"))
+            item = DictParser.parse(location)
             item["street_address"] = clean_address(
                 [
-                    location["customProperties"]["contactDetails"].get("address"),
-                    location["customProperties"]["contactDetails"].get("address2"),
+                    location.get("address"),
+                    location.get("address2"),
                 ]
             )
             item["website"] = response.url.replace("/api/location-finder-edge", location["urlPath"])
             if not item.get("extras"):
                 item["extras"] = {}
-            item["extras"]["contact:instagram"] = clean_instagram(
-                location["customProperties"]["contactDetails"].get("instagramUrl", "")
-            )
-            item["facebook"] = clean_facebook(location["customProperties"]["contactDetails"].get("facebookUrl", ""))
-            if location["customProperties"]["contactDetails"].get("open24Hours"):
+            item["extras"]["contact:instagram"] = clean_instagram(location.get("instagramUrl", ""))
+            item["facebook"] = clean_facebook(location.get("facebookUrl", ""))
+            if location.get("open24Hours"):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             yield item
