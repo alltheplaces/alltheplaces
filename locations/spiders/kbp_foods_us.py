@@ -19,8 +19,8 @@ brands_map = {
 }
 
 
-class KbpFoodsSpider(Spider):
-    name = "kbp_foods"
+class KbpFoodsUSSpider(Spider):
+    name = "kbp_foods_us"
     start_urls = ["https://kbp-foods.com/wp-admin/admin-ajax.php?action=get_all_locations"]
     item_attributes = {"operator": "KBP Foods"}
     brands = {}
@@ -57,9 +57,9 @@ class KbpFoodsSpider(Spider):
                 item["addr_full"] = html_data.xpath('//*[@class="fwpl-item"]/text()').get()
                 item["phone"] = html_data.xpath('//*[contains(@href, "tel:")]/text()').get()
 
-                item["extras"]["start_date"] = self.start_dates[item["ref"]]
-
                 apply_category(Categories.FAST_FOOD, item)
+
+                item["extras"]["start_date"] = self.start_dates[item["ref"]]
 
                 if brands := brands_map.get(self.brands[item["ref"]]):
                     for b in brands:
