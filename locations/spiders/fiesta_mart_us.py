@@ -26,16 +26,22 @@ class FiestaMartUSSpider(scrapy.Spider):
                 .replace(item["state"], "")
                 .replace(",", "")
             ).strip()
-            oh = OpeningHours()
-            for day in DAYS:
-                if not data.get("hours"):
-                    continue
-                oh.add_range(
-                    day=day,
-                    open_time=re.split(" - |-", data.get("hours"))[0],
-                    close_time=re.split(" - |-", data.get("hours"))[1],
-                    time_format="%I:%M %p",
-                )
-            item["opening_hours"] = oh.as_opening_hours()
-
+            try:
+                item["opening_hours"] = self.parse_opening_times(data)
+            except:
+                self.logger.warning(f"Failed to parse opening hours for {item['ref']}, {e}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
             yield item
+
+    def parse_opening_times(self, data):
+        oh = OpeningHours()
+        for day in DAYS:
+            if opening_hours := data.get("hours"):
+                if ":" in opening_hours:
+                    oh.add_range(
+                        day=day,
+                        open_time=re.split(" - |-", opening_hours)[0],
+                        close_time=re.split(" - |-", opening_hours)[1],
+                        time_format="%I:%M %p",
+                    )
+        return oh.as_opening_hours()
