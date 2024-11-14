@@ -1,5 +1,6 @@
 import scrapy
 from scrapy import Selector
+from scrapy.http import JsonRequest
 
 from locations.items import Feature
 
@@ -8,10 +9,15 @@ class KbpFoodsSpider(scrapy.Spider):
     name = "kbp_foods"
     item_attributes = {"brand": "KBP Foods"}
 
-    def make_request(self, page: int):
-        brand_url = "https://kbp-foods.com/wp-json/facetwp/v1/refresh"
-        payload = f'{{"action":"facetwp_refresh","data":{{"facets":{{"proximity":[],"map":[]}},"template":"locations","paged":{page}}}}}'
-        return scrapy.Request(url=brand_url, body=payload, method="POST", cb_kwargs={"page": page})
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url="https://kbp-foods.com/wp-json/facetwp/v1/refresh",
+            data={
+                "action": "facetwp_refresh",
+                "data": {"facets": {"proximity": [], "map": []}, "template": "locations", "paged": page},
+            },
+            cb_kwargs={"page": page},
+        )
 
     def start_requests(self):
         yield self.make_request(1)
