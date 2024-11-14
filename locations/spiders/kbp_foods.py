@@ -7,7 +7,6 @@ from locations.items import Feature
 
 class KbpFoodsSpider(scrapy.Spider):
     name = "kbp_foods"
-    item_attributes = {"brand": "KBP Foods"}
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
@@ -30,10 +29,8 @@ class KbpFoodsSpider(scrapy.Spider):
                 item["ref"] = store["post_id"]
                 item["lat"] = store["position"]["lat"]
                 item["lon"] = store["position"]["lng"]
-                item["name"] = "KBP Foods"
                 item["branch"] = html_data.xpath("//h2/text()").get()
                 item["addr_full"] = html_data.xpath('//*[@class="fwpl-item"]/text()').get()
                 item["phone"] = html_data.xpath('//*[contains(@href,"tel:")]/text()').get()
-                item["website"] = "https://kbp-foods.com/"
                 yield item
             yield self.make_request(kwargs["page"] + 1)
