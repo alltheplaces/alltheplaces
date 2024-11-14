@@ -17,7 +17,7 @@ class DebraGBSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["name"] = response.xpath("//title/text()").get()
+        item["branch"] = response.xpath("//h1/text()").get()
         item["addr_full"] = clean_address(response.xpath('//*[contains(@class,"details-address")]/text()').get())
         item["phone"] = response.xpath('//*[contains(@class,"details-phone")]/text()').get()
         item["email"] = response.xpath('//*[contains(@class,"details-email")]/text()').get()
