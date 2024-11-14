@@ -42,7 +42,8 @@ class DouglasSpider(Spider):
             item = DictParser().parse(feature)
             item["opening_hours"] = self.parse_opening_hours(feature["openingHours"]["weekDayOpeningList"])
             apply_category(Categories.SHOP_PERFUMERY, item)
-            yield item
+            if item["lat"] is not None and item["lon"] is not None:
+                yield item
 
     def parse_opening_hours(self, opening_list):
         hours = OpeningHours()
