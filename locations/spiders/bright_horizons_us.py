@@ -48,4 +48,3 @@ class BrightHorizonsUSSpider(SitemapSpider, StructuredDataSpider):
                 start_time, end_time = times.replace(" a.m.", "AM").replace(" p.m.", "PM").split(" to ")
                 o.add_days_range(DAYS_WEEKDAY, start_time.strip(), end_time.strip(), time_format="%I:%M%p")
         return o.as_opening_hours()
-
