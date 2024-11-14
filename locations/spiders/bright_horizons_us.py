@@ -33,18 +33,19 @@ class BrightHorizonsUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         if opening_hours := ld_data.get("openingHours"):
-            item["opening_hours"] = self.parse_opening_hours(opening_hours, response.url)
+            try:
+                item["opening_hours"] = self.parse_opening_hours(opening_hours, response.url)
+            except Exception as e:
+                self.logger.warning(f"Failed to parse opening hours for {response.url}, {e}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
         yield item
 
     def parse_opening_hours(self, opening_hours, url):
-        try:
-            o = OpeningHours()
-            if opening_hours != "Not Available":
-                if "M-F" in opening_hours:
-                    days, times = opening_hours.split(": ")
-                    start_time, end_time = times.replace(" a.m.", "AM").replace(" p.m.", "PM").split(" to ")
-                    o.add_days_range(DAYS_WEEKDAY, start_time.strip(), end_time.strip(), time_format="%I:%M%p")
-            return o.as_opening_hours()
-        except Exception as e:
-            self.logger.warning(f"Failed to parse opening hours for {url}, {e}")
-            self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
+        o = OpeningHours()
+        if opening_hours != "Not Available":
+            if "M-F" in opening_hours:
+                days, times = opening_hours.split(": ")
+                start_time, end_time = times.replace(" a.m.", "AM").replace(" p.m.", "PM").split(" to ")
+                o.add_days_range(DAYS_WEEKDAY, start_time.strip(), end_time.strip(), time_format="%I:%M%p")
+        return o.as_opening_hours()
+
