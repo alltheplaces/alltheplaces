@@ -7,7 +7,6 @@ from locations.items import Feature
 class KbpFoodsSpider(scrapy.Spider):
     name = "kbp_foods"
     item_attributes = {"brand": "KBP Foods"}
-    # custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def make_request(self, page: int):
         brand_url = "https://kbp-foods.com/wp-json/facetwp/v1/refresh"
