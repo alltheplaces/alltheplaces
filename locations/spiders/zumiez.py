@@ -23,7 +23,7 @@ class ZumiezSpider(JSONBlobSpider):
         try:
             s = html.unescape(feature.get("store_hours"))
             oh = OpeningHours()
-            for day in re.findall('content="([\w\s:-]+)"', s):
+            for day in re.findall(r'content="([\w\s:-]+)"', s):
                 splits = day.replace("-", " ").split(" ")
                 oh.add_range(splits[0], splits[1], splits[2])
             item["opening_hours"] = oh
