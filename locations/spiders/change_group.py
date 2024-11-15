@@ -10,7 +10,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class ChangeGroupGBSpider(Spider):
+class ChangeGroupSpider(Spider):
     name = "change_group"
     item_attributes = {"brand": "Change Group", "brand_wikidata": "Q5071758"}
     start_urls = ["https://uk.changegroup.com/slatwall/?slatAction=changeGroup:main.globalBranchData"]
