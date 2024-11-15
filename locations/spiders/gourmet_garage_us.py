@@ -14,6 +14,7 @@ class GourmetGarageUSSpider(StorefrontgatewaySpider):
     }
     start_urls = ["https://storefrontgateway.brands.wakefern.com/api/stores"]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"X-Site-Host": "https://www.gourmetgarage.com/"}}
+    requires_proxy = True
 
     def post_process_item(self, item, response, location):
         if location["type"] != "Regular":
