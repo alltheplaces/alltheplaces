@@ -32,7 +32,7 @@ class Fitness19USSpider(CrawlSpider):
             location_info = response.xpath('//span[@class="elementor-icon-list-text"]/text()').getall()
             item["addr_full"], item["phone"] = location_info[:2]
             yield item
-        else:
+        elif "fit19.com" in response.url:
             # Collect POIs for urls redirecting to alternate website, https://www.fit19.com/locations/.
             # This website also doesn't list all POIs, so we are relying upon two websites, to collect them all.
             location = chompjs.parse_js_object(response.xpath('//script[contains(text(),"geolocation")]').get())
