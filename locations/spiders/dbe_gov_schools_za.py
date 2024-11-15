@@ -20,7 +20,7 @@ ZA_EDUCATION_DEPARTMENTS = {
 }
 
 
-class DbeGovZASpider(Spider):
+class DbeGovSchoolsZASpider(Spider):
     name = "dbe_gov_schools_za"
     download_timeout = 60
 
