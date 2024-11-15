@@ -22,7 +22,7 @@ class ChangeGroupGBSpider(Spider):
             for region in country["regions"]:
                 for location in region["branches"]:
                     item = DictParser.parse(location)
-                    item["street_address"] = merge_address_lines([location.pop("streetAddress"), location.pop("streetAddress2")]
+                    item["street_address"] = merge_address_lines([location.pop("streetAddress"), location.pop("streetAddress2")])
                     apply_category(Categories.BUREAU_DE_CHANGE, item)
                     oh = OpeningHours()
                     for day in DAYS_FULL:
