@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class DbeGovZASpider(Spider):
+class DbeGovEcdZASpider(Spider):
     name = "dbe_gov_ecd_za"
     download_timeout = 60
 
