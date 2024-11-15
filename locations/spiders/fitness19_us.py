@@ -6,14 +6,13 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
 class Fitness19USSpider(CrawlSpider):
     name = "fitness19_us"
-    item_attributes = {"brand": "Fitness 19", "brand_wikidata": "Q121787953", "extras": Categories.GYM.value}
+    item_attributes = {"brand": "Fitness 19", "brand_wikidata": "Q121787953"}
     start_urls = ["https://www.fitness19.com/convenient-locations/"]
     rules = [Rule(LinkExtractor(allow="/centers/"), callback="parse")]
 
