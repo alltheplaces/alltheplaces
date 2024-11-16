@@ -7,6 +7,18 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
+ZA_PROVINCES = {
+    "EC": "Eastern Cape",
+    "FS": "Free State",
+    "GT": "Gauteng",
+    "KZN": "KwaZulu-Natal",
+    "LIM": "Limpopo",
+    "MP": "Mpumalanga",
+    "NC": "Northern Cape",
+    "NW": "North West",
+    "WC": "Western Cape",
+}
+
 
 class DbeGovEcdZASpider(Spider):
     name = "dbe_gov_ecd_za"
@@ -44,14 +56,22 @@ class DbeGovEcdZASpider(Spider):
             item["lat"] = location["GIS_Lat"]
             item["lon"] = location["GIS_Long"]
 
-            item["city"] = location["Town_City"]
-            item["state"] = location["Province"]
-            if location["StreetAddress"] is not None:
-                item["addr_full"] = clean_address(str(location["StreetAddress"]))
-            if location["PostalAddress"] is not None:
-                item["extras"]["addr:postal"] = clean_address(str(location["PostalAddress"]))
+            if location.get("Town_City") is not None:
+                item["city"] = str(location.get("Town_City")).title().replace("'S", "'s")
 
-            item["name"] = location["ECD_Name"]
+            item["state"] = ZA_PROVINCES.get(location["Province"])
+
+            if location.get("StreetAddress") is not None:
+                item["street_address"] = (
+                    clean_address(str(location.get("StreetAddress"))).title().replace("'S", "'s").replace("`S", "'s")
+                )
+
+            if location.get("PostalAddress") is not None:
+                item["extras"]["addr:postal"] = (
+                    clean_address(str(location.get("PostalAddress"))).title().replace("'S", "'s").replace("`S", "'s")
+                )
+
+            item["name"] = str(location.get("ECD_Name")).title().replace("'S", "'s").replace("`S", "'s")
 
             item["phone"] = location["Telephone"]
 
