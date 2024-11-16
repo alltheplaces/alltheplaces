@@ -1,4 +1,5 @@
 import io
+import re
 
 from openpyxl import load_workbook
 from scrapy import Spider
@@ -17,6 +18,18 @@ ZA_EDUCATION_DEPARTMENTS = {
     "NC": {"operator_wikidata": "Q96396466"},
     "NW": {"operator_wikidata": "Q116681285"},
     "WC": {"operator_wikidata": "Q116681286"},
+}
+
+ZA_PROVINCES = {
+    "EC": "Eastern Cape",
+    "FS": "Free State",
+    "GT": "Gauteng",
+    "KZN": "KwaZulu-Natal",
+    "LP": "Limpopo",
+    "MP": "Mpumalanga",
+    "NC": "Northern Cape",
+    "NW": "North West",
+    "WC": "Western Cape",
 }
 
 
@@ -60,12 +73,34 @@ class DbeGovSchoolsZASpider(Spider):
             if location["Province"] in ["EC", "NC"]:
                 item["lat"], item["lon"] = item["lon"], item["lat"]
 
-            item["city"] = location["Town_City"]
-            item["state"] = location["Province"]
-            item["addr_full"] = clean_address(location["StreetAddress"])
-            item["extras"]["addr:postal"] = clean_address(location["PostalAddress"])
+            if location.get("Town_City") is not None:
+                item["city"] = location.get("Town_City").title().replace("'S", "'s")
 
-            item["name"] = location["Official_Institution_Name"]
+            item["state"] = ZA_PROVINCES.get(location["Province"])
+
+            if location.get("StreetAddress") is not None:
+                item["addr_full"] = (
+                    clean_address(location.get("StreetAddress")).title().replace("'S", "'s").replace("`S", "'s")
+                )
+
+            if location.get("PostalAddress") is not None:
+                item["extras"]["addr:postal"] = (
+                    clean_address(location.get("PostalAddress")).title().replace("'S", "'s").replace("`S", "'s")
+                )
+
+            if match := re.match(r"^.*\s(\d\d\d\d)$", item["addr_full"]):
+                item["postcode"] = match[1]
+
+            item["name"] = (
+                location.get("Official_Institution_Name")
+                .title()
+                .replace("'S", "'s")
+                .replace("`S", "'s")
+                .replace(" P/S", " Primary School")
+                .replace(" S/S", " Secondary School")
+                .replace(" C/S", " Combined School")
+                .replace(" I/S", " Intermediate School")
+            )
 
             item["phone"] = location["Telephone"]
 
