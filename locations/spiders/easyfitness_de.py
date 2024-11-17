@@ -19,7 +19,7 @@ class EasyfitnessDESpider(scrapy.Spider):
         point_files = "eu_centroids_20km_radius_country.csv"
         for lat, lng in point_locations(point_files, ["DE"]):
             yield scrapy.FormRequest(
-                f"https://easyfitness.club/wp-admin/admin-ajax.php",
+                "https://easyfitness.club/wp-admin/admin-ajax.php",
                 formdata={
                     "action": "search_nearby_studios",
                     "lat": str(lat),
