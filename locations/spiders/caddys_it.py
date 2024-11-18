@@ -1,4 +1,3 @@
-
 from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
