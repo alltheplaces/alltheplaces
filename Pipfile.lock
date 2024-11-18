@@ -943,12 +943,12 @@
         },
         "json5": {
             "hashes": [
-                "sha256:17b43d78d3a6daeca4d7030e9bf22092dba29b1282cc2d0cfa56f6febee8dc93",
-                "sha256:5a19de4a6ca24ba664dc7d50307eb73ba9a16dea5d6bde85677ae85d3ed2d8e0"
+                "sha256:1f82f36e615bc5b42f1bbd49dbc94b12563c56408c6ffa06414ea310890e9a6e",
+                "sha256:29c56f1accdd8bc2e037321237662034a7e07921e2b7223281a5ce2c46f0c4df"
             ],
             "index": "pypi",
             "markers": "python_full_version >= '3.8.0'",
-            "version": "==0.9.27"
+            "version": "==0.9.28"
         },
         "lxml": {
             "hashes": [
