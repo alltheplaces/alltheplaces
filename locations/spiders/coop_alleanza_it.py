@@ -15,22 +15,7 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
     }
     allowed_domains = ["www.coopalleanza3-0.it"]
     start_urls = ["https://www.coopalleanza3-0.it/storeLocatorServlet/?operation=getStores"]
-    custom_settings = {
-        "HTTPCACHE_ENABLED": True,
-    }
 
-    store_types = {
-        "Amici di casa coop": Categories.SHOP_PET,
-        "Extracoop": Categories.SHOP_SUPERMARKET,
-        "Ipercoop": Categories.SHOP_SUPERMARKET,
-        "Minimercato": Categories.SHOP_SUPERMARKET,
-        "Minimercato Coop": Categories.SHOP_SUPERMARKET,
-        "Supermercato": Categories.SHOP_SUPERMARKET,
-        "Supermercato Coop": Categories.SHOP_SUPERMARKET,
-        "Superstore Coop": Categories.SHOP_SUPERMARKET,
-        "affiliati": Categories.SHOP_SUPERMARKET,
-        "amici affiliato": Categories.SHOP_PET,
-    }
     custom_name = {
         "Minimercato": "Minimercato Coop",
         "Supermercato": "Supermercato Coop",
@@ -44,6 +29,19 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
         location["website"] = (
             f"https://www.coopalleanza3-0.it/fare-spesa/elenco-negozi/dettaglio-negozio/{location['detailsPage']}.html"
         )
+
+    store_types = {
+        "Amici di casa coop": Categories.SHOP_PET,
+        "Extracoop": Categories.SHOP_SUPERMARKET,
+        "Ipercoop": Categories.SHOP_SUPERMARKET,
+        "Minimercato": Categories.SHOP_SUPERMARKET,
+        "Minimercato Coop": Categories.SHOP_SUPERMARKET,
+        "Supermercato": Categories.SHOP_SUPERMARKET,
+        "Supermercato Coop": Categories.SHOP_SUPERMARKET,
+        "Superstore Coop": Categories.SHOP_SUPERMARKET,
+        "affiliati": Categories.SHOP_SUPERMARKET,
+        "amici affiliato": Categories.SHOP_PET,
+    }
 
     def post_process_item(self, item, response, location):
         item["branch"] = location["title"].replace(" - Affiliato Coop Alleanza 3.0", "").strip()
