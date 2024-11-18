@@ -4,7 +4,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CaddysItSpider(JSONBlobSpider):
+class CaddysITSpider(JSONBlobSpider):
     name = "caddys_it"
     item_attributes = {
         "brand": "Caddy's",
