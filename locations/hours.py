@@ -697,8 +697,9 @@ NAMED_DAY_RANGES_IT = {
     "Ogni giorno": ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"],
     "Tutti i giorni": ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"],
     "Giorni lavorativi": ["Lun", "Mar", "Mer", "Gio", "Ven"],
-    "Feriali": ["Sab", "Dom"],
-    "Giorni feriali": ["Sab", "Dom"],
+    "Lavorativi": ["Lun", "Mar", "Mer", "Gio", "Ven"],
+    "Giorni feriali": ["Lun", "Mar", "Mer", "Gio", "Ven"],
+    "Feriali": ["Lun", "Mar", "Mer", "Gio", "Ven"],
     "Weekend": ["Sab", "Dom"],
     "Weekends": ["Sab", "Dom"],
     "Prefestivi": ["Sab"],
@@ -740,6 +741,25 @@ DELIMITERS_EN = [
     "thru",
     "through",
     "until",
+]
+
+DELIMITERS_IT = [
+    "-",
+    "–",
+    "—",
+    "―",
+    "‒",
+    "dal",
+    "al",
+    "il",
+    "fino al",
+    "alle",
+    "fino alle",
+    "dalle",
+    "da",
+    "a",
+    "dall'",
+    "all'",
 ]
 
 DELIMITERS_DE = ["-", "–", "—", "―", "‒", "bis"]
