@@ -1122,7 +1122,7 @@ class OpeningHours:
         closed_strings: list[str] = CLOSED_EN,
     ) -> str:
         """
-        Creates a regular expression for capturing opening time
+        Creates a regular expression for capturing closed days
         information from a localised string.
         :param days: dictionary mapping localised day names to those
                      within DAYS ("Mo", "Tu", ...).
