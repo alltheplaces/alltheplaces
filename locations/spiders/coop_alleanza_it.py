@@ -1,4 +1,3 @@
-
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -59,7 +58,7 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
         if phone := response.css('.telephone-fax a[href*="tel:"]::attr(href)').get():
             item["phone"] = f"+39 {phone.split(':')[-1]}"
         if fax := response.css('.telephone-fax p:contains("Fax:")::text').get():
-            item['fax'] = f"+39 {fax.split(':')[-1].strip()}"
+            item["fax"] = f"+39 {fax.split(':')[-1].strip()}"
 
         hours = clean_strings(response.css(".orari *::text").getall())
         oh = OpeningHours()
