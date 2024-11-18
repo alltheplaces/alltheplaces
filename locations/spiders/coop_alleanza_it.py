@@ -59,7 +59,7 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
         if phone := response.css('.telephone-fax a[href*="tel:"]::attr(href)').get():
             item["phone"] = f"+39 {phone.split(':')[-1]}"
         if fax := response.css('.telephone-fax p:contains("Fax:")::text').get():
-            item["phone"] = f"+39 {phone.split(':')[-1]}"
+            item['fax'] = f"+39 {fax.split(':')[-1].strip()}"
 
         hours = clean_strings(response.css(".orari *::text").getall())
         oh = OpeningHours()
