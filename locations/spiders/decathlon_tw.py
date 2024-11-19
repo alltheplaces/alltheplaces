@@ -4,6 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class DecathlonTWSpider(Spider):
@@ -18,4 +19,7 @@ class DecathlonTWSpider(Spider):
             item["street_address"] = item.pop("street")
             item["branch"] = item.pop("name").strip("店")
             item["phone"] = store.get("phone1")
+            item["opening_hours"] = OpeningHours()
+            for rule in store.get("workingHours", []):
+                item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["open"], rule["close"])
             yield item
