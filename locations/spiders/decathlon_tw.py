@@ -19,6 +19,7 @@ class DecathlonTWSpider(Spider):
             item["street_address"] = item.pop("street")
             item["branch"] = item.pop("name").strip("店")
             item["phone"] = store.get("phone1")
+            item["website"] = "https://www.decathlon.tw/s/門市資訊"
             item["opening_hours"] = OpeningHours()
             for rule in store.get("workingHours", []):
                 item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["open"], rule["close"])
