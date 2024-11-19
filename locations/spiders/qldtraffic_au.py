@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class QLDTrafficAUSpider(JSONBlobSpider):
+class QldtrafficAUSpider(JSONBlobSpider):
     name = "qldtraffic_au"
     item_attributes = {
         "operator": "Queensland Government",
