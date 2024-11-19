@@ -16,4 +16,5 @@ class DecathlonTWSpider(Spider):
             store.update(store.pop("address"))
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name").strip("店")
             yield item
