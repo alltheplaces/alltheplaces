@@ -9,7 +9,11 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class TrafficScotlandGBSpider(JSONBlobSpider):
     name = "traffic_scotland_gb"
-    item_attributes = {"operator": "Traffic Scotland", "operator_wikidata": "Q7834896", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "Traffic Scotland",
+        "operator_wikidata": "Q7834896",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["www.traffic.gov.scot"]
     start_urls = ["https://www.traffic.gov.scot/tsis/cameras"]
     locations_key = "results"
