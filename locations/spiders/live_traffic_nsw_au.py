@@ -9,7 +9,11 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class LiveTrafficNSWAUSpider(JSONBlobSpider):
     name = "live_traffic_nsw_au"
-    item_attributes = {"operator": "Transport for NSW", "operator_wikidata": "Q7834923", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "Transport for NSW",
+        "operator_wikidata": "Q7834923",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["www.livetraffic.com"]
     start_urls = ["https://www.livetraffic.com/datajson/all-feeds-web.json"]
 
