@@ -23,7 +23,8 @@ class JjillSpider(scrapy.Spider):
             state = response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first()
             postalcode = response.xpath('//*[@itemprop="postalCode"]/text()').extract_first()
             country = response.xpath('//*[@itemprop="addressCountry"]/text()').extract_first()
-            phone = response.xpath('//*[@itemprop="telephone"]/text()').extract_first()
+            if phone := response.xpath('//*[@itemprop="telephone"]/text()').extract_first():
+                phone = phone.strip()
             latitude = response.xpath('//*[@property="place:location:latitude"]/@content').extract_first()
             longitude = response.xpath('//*[@property="place:location:longitude"]/@content').extract_first()
             ref = response.url.strip("/").split("/")[-1]
@@ -38,7 +39,7 @@ class JjillSpider(scrapy.Spider):
                 "postcode": postalcode.strip(),
                 "state": state.strip(),
                 "country": country.strip(),
-                "phone": phone.strip(),
+                "phone": phone,
                 "website": response.url,
                 "lat": float(latitude),
                 "lon": float(longitude),
