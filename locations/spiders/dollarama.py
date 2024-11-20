@@ -25,6 +25,7 @@ class DollaramaSpider(scrapy.Spider):
                 yield scrapy.Request(url=base_url + urlencode(params), method="POST")
 
     def parse_hours(self, hours):
+        print(hours)
         hrs = hours.split("|")
 
         opening_hours = OpeningHours()
@@ -59,7 +60,11 @@ class DollaramaSpider(scrapy.Spider):
                 "phone": row["ExtraData"]["Phone"],
             }
 
-            if hours := self.parse_hours(row["ExtraData"]["Hours of operations"]):
-                properties["opening_hours"] = hours
-
+            if opening_hours := row["ExtraData"].get("Hours of operations"):
+                try:
+                    hours = self.parse_hours(opening_hours)
+                    properties["opening_hours"] = hours
+                except Exception as e:
+                    self.logger.warning(f"Failed to parse opening hours for {opening_hours}, {e}")
+                    self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
             yield Feature(**properties)
