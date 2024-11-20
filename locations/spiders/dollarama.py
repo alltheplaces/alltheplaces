@@ -25,7 +25,6 @@ class DollaramaSpider(scrapy.Spider):
                 yield scrapy.Request(url=base_url + urlencode(params), method="POST")
 
     def parse_hours(self, hours):
-        print(hours)
         hrs = hours.split("|")
 
         opening_hours = OpeningHours()
