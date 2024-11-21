@@ -19,10 +19,11 @@ class FitActiveSpider(scrapy.Spider):
             name = link.xpath("descendant::text()").extract_first()
             website[name] = link.attrib["href"]
             phone[name] = item.xpath('descendant::a[contains(@href, "tel:")]/text()').extract_first()
+
         # The main information is in a JavaScript call
         javascript = response.xpath(
             '//script[@type="text/javascript" and contains(text(), "mainMap(")]/text()'
-        ).re_first("mainMap\((.*)\);")
+        ).re_first(r"mainMap\((.*)\);")
         map_data = json.loads(javascript)
         for shop in map_data:
             name = shop["title"]
