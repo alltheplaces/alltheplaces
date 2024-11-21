@@ -6,7 +6,6 @@ from scrapy.http import FormRequest
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
-from locations.user_agents import FIREFOX_LATEST
 
 
 class PostbankBGSpider(scrapy.Spider):
@@ -15,7 +14,7 @@ class PostbankBGSpider(scrapy.Spider):
     allowed_domains = ["www.postbank.bg"]
     start_urls = ["https://www.postbank.bg/bg-BG/api/locations/locations"]
     no_refs = True
-    user_agent = FIREFOX_LATEST
+    requires_proxy = True
 
     def start_requests(self):
         return [
