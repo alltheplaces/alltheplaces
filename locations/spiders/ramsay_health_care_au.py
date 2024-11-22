@@ -100,7 +100,6 @@ class RamsayHealthCareAUSpider(JSONBlobSpider):
             "Orthopaedic Surgery - Shoulder and Knee": HealthcareSpecialities.ORTHOPAEDICS,
             "Orthopaedic Surgery - Shoulder and Upper Limb": HealthcareSpecialities.ORTHOPAEDICS,
             "Orthopaedic Surgery - Shoulder": HealthcareSpecialities.ORTHOPAEDICS,
-            "Orthopaedic Surgery - Shoulder": HealthcareSpecialities.ORTHOPAEDICS,
             "Orthopaedic Surgery - Spine": HealthcareSpecialities.ORTHOPAEDICS,
             "Orthopaedic Surgery - Sports Injury": HealthcareSpecialities.ORTHOPAEDICS,
             "Orthopaedic Surgery - Upper Limb": HealthcareSpecialities.ORTHOPAEDICS,
