@@ -71,6 +71,8 @@ class Categories(Enum):
     SHOP_BOOKMAKER = {"shop": "bookmaker"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_BOAT = {"shop": "boat"}
+    SHOP_BOAT_PARTS = {"shop": "boat_parts"}
+    SHOP_BOAT_REPAIR = {"shop": "boat_repair"}
     SHOP_BUTCHER = {"shop": "butcher"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
