@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class NZTransportAgencyNZSpider(JSONBlobSpider):
+class NzTransportAgencyNZSpider(JSONBlobSpider):
     name = "nz_transport_agency_nz"
     item_attributes = {
         "operator": "NZ Transport Agency",
