@@ -1,8 +1,6 @@
-from typing import Any
 
-from scrapy.http import Response
 
-from locations.hours import DAYS, OpeningHours, sanitise_day
+from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
 
