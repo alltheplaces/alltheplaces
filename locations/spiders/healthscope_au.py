@@ -13,6 +13,7 @@ class HealthscopeAUSpider(JSONBlobSpider):
     allowed_domains = ["healthscopeassist.com.au"]
     start_urls = ["https://healthscopeassist.com.au/getBoundedSites.asp?n=90&e=180&s=-90&w=-180&u=ALL&x="]
     locations_key = "data"
+    requires_proxy = "AU"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if item["name"] == "Independence Services":
