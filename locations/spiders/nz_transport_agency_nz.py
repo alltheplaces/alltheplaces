@@ -9,7 +9,12 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class NZTransportAgencyNZSpider(JSONBlobSpider):
     name = "nz_transport_agency_nz"
-    item_attributes = {"operator": "NZ Transport Agency", "operator_wikidata": "Q7015807", "extras": Categories.SURVEILLANCE_CAMERA.value, "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "NZ Transport Agency",
+        "operator_wikidata": "Q7015807",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+        "nsi_id": "N/A",
+    }
     allowed_domains = ["www.journeys.nzta.govt.nz"]
     start_urls = ["https://www.journeys.nzta.govt.nz/assets/map-data-cache/cameras.json"]
     locations_key = "features"
