@@ -17,7 +17,8 @@ class CharleysPhillySteaksSpider(SitemapSpider, StructuredDataSpider):
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = html.unescape(item.pop("name"))
+        if item.get("name"):
+            item["branch"] = html.unescape(item.pop("name"))
         item["website"] = response.url.split("?", 1)[0]
 
         yield item

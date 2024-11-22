@@ -34,15 +34,15 @@ class InglesSpider(scrapy.Spider):
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
-
-        for day in DAYS:
-            open_time, close_time = hours.split("to")
-            opening_hours.add_range(
-                day=day,
-                open_time=("".join(open_time).strip()),
-                close_time=("".join(close_time).strip()),
-                time_format="%I:%M%p",
-            )
+        if "closed" not in hours:
+            for day in DAYS:
+                open_time, close_time = hours.split("to")
+                opening_hours.add_range(
+                    day=day,
+                    open_time=("".join(open_time).strip()),
+                    close_time=("".join(close_time).strip()),
+                    time_format="%I:%M%p",
+                )
 
         return opening_hours
 

@@ -131,6 +131,7 @@ class DictParser:
         "store-state",
         "store-province",
         "storeProvince",
+        "prefecture",
         # JP
         "都道府県",  # "prefecture"
         # IT

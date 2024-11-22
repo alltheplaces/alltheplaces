@@ -14,10 +14,10 @@ class E5BESpider(Spider):
     def parse(self, response, **kwargs):
         data = json.loads(
             response.xpath(
-                '//script[@type="text/x-magento-init"][contains(text(), "locator_baldwin_storepickup_locator")]/text()'
+                '//script[@type="text/x-magento-init"][contains(text(), "locator_e5mode_storepickup_locator")]/text()'
             ).get()
         )
-        for location in data["[data-role=locator_baldwin_storepickup_locator]"]["baldwin/storeLocator"]["stores"][
+        for location in data["[data-role=locator_e5mode_storepickup_locator]"]["e5mode/storeLocator"]["stores"][
             "items"
         ]:
             if location["enabled"] != "1":
