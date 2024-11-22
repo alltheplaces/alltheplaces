@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_IT, OpeningHours, sanitise_day
+from locations.hours import DAYS, DAYS_IT, OpeningHours, sanitise_day
 from locations.items import set_closed
 
 
@@ -23,14 +23,14 @@ class HappyCasaITSpider(Spider):
             item["extras"]["store_type"] = location["signboard"]
 
             item["opening_hours"] = OpeningHours()
-            for rule in location["orari"][0]:
+            for day, rule in zip(DAYS, location["orari"][0]):
                 if rule == "CHIUSO":
-                    item["opening_hours"].add_range(sanitise_day(day, DAYS_IT), "closed", "closed")
+                    item["opening_hours"].add_range(day, "closed", "closed")
                     continue
-                day, times = rule.split(" ", 1)
+                _, times = rule.split(" ", 1)
                 for time in times.replace("  ", "-").split(" "):
                     if "CHIUSO" not in time:
-                        item["opening_hours"].add_range(sanitise_day(day, DAYS_IT), *time.split("-"))
+                        item["opening_hours"].add_range(day, *time.split("-"))
 
             if location["stato_pv"] == "chiuso":
                 set_closed(item)
