@@ -349,7 +349,7 @@ if [ -z "${BUNNY_API_KEY}" ]; then
 else
     curl --request GET \
          --silent \
-         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Flatest.json&async=false' \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Falltheplaces.b-cdn.net%2Fruns%2Flatest.json&async=false' \
          --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 
@@ -363,7 +363,7 @@ else
 
     curl --request GET \
          --silent \
-         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Fhistory.json&async=false' \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Falltheplaces.b-cdn.net%2Fruns%2Fhistory.json&async=false' \
          --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 
@@ -377,7 +377,7 @@ else
 
     curl --request GET \
          --silent \
-         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Flatest%2Foutput%2F%2A&async=false' \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Falltheplaces.b-cdn.net%2Fruns%2Flatest%2Foutput%2F%2A&async=false' \
          --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 
