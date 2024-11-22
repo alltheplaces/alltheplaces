@@ -39,7 +39,7 @@ class PrixQualityITSpider(scrapy.Spider):
             item["opening_hours"] = OpeningHours()
             for day in DAYS_IT:
                 if times := store.get(day.lower(), ""):
-                    for time in times.split('|'):
+                    for time in times.split("|"):
                         item["opening_hours"].add_range(DAYS_IT[day], *time.split("-"), time_format=self.time_format)
 
             yield item
