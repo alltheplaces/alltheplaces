@@ -25,6 +25,7 @@ class HappyCasaITSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for rule in location["orari"][0]:
                 if rule == "CHIUSO":
+                    item["opening_hours"].add_range(sanitise_day(day, DAYS_IT), "closed", "closed")
                     continue
                 day, times = rule.split(" ", 1)
                 for time in times.replace("  ", "-").split(" "):

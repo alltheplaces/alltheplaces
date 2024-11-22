@@ -1,6 +1,6 @@
 import chompjs
 
-from locations.hours import DAYS_IT, OpeningHours
+from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -20,7 +20,13 @@ class IrenITSpider(JSONBlobSpider):
         # Parse hours where possible. This is a widely varied string
         if location["orario"] is not None:
             oh = OpeningHours()
-            oh.add_ranges_from_string(location["orario"], DAYS_IT)
+            oh.add_ranges_from_string(
+                location["orario"],
+                days=DAYS_IT,
+                named_day_ranges=NAMED_DAY_RANGES_IT,
+                named_times=NAMED_TIMES_IT,
+                closed=CLOSED_IT,
+            )
             item["opening_hours"] = oh
 
         yield item

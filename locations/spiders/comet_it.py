@@ -4,8 +4,10 @@ from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
+from scrapy.selector import Selector
 
 from locations.items import Feature
+from locations.hours import CLOSED_IT, DAYS_IT, DELIMITERS_IT, OpeningHours
 
 
 class CometITSpider(Spider):
@@ -26,5 +28,7 @@ class CometITSpider(Spider):
             item["phone"] = location["telefono"].replace("/", "")
             item["email"] = location["email"]
             item["branch"] = location["nome"].removeprefix("Comet ")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(Selector(text=location["orariestesi"]).xpath('string(//*)').get(), days=DAYS_IT, closed=CLOSED_IT, delimiters=DELIMITERS_IT)
 
             yield item

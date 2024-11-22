@@ -4,7 +4,7 @@ from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories
-from locations.hours import DAYS_IT, OpeningHours
+from locations.hours import CLOSED_IT, DAYS_IT, OpeningHours
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
@@ -28,5 +28,5 @@ class SigmaITSpider(AgileStoreLocatorSpider):
         )
         if hours_string:
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_IT)
+            item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_IT, closed=CLOSED_IT)
         yield item

@@ -66,7 +66,7 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
                 days=DAYS_IT,
                 named_day_ranges=NAMED_DAY_RANGES_IT,
                 named_times=NAMED_TIMES_IT,
-                closed_strings=CLOSED_IT,
+                closed=CLOSED_IT,
             )
         if oh:
             item["opening_hours"] = oh

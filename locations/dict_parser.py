@@ -267,6 +267,7 @@ class DictParser:
         "store-hours",
         # IT
         "orario",
+        "orari",
     ]
 
     @staticmethod
