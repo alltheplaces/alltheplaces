@@ -16,10 +16,17 @@ class HealthscopeAUSpider(JSONBlobSpider):
     requires_proxy = "AU"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if item["name"] == "Independence Services":
+        if item["name"] == "Independence Services" or feature.get("latitude") == 0 or feature.get("longitude") == 0:
             return  # Not a hospital.
+
         item["ref"] = feature["site_id"]
         item["street_address"] = item.pop("addr_full", None)
+
+        if item["website"].startswith("www."):
+            item["website"] = "https://" + item["website"]
+        elif not item["website"].startswith("http"):
+            item.pop("website", None)  # Not a valid website - ignore.
+
         if feature.get("ed_wait_info"):
             item["extras"]["emergency"] = "yes"
             apply_healthcare_specialities([HealthcareSpecialities.EMERGENCY], item)
