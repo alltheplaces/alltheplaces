@@ -1,5 +1,5 @@
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
-from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
+from locations.hours import DAYS_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -64,9 +64,6 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
             oh.add_ranges_from_string(
                 f"{day} {hour}",
                 days=DAYS_IT,
-                named_day_ranges=NAMED_DAY_RANGES_IT,
-                named_times=NAMED_TIMES_IT,
-                closed_strings=CLOSED_IT,
             )
         if oh:
             item["opening_hours"] = oh
