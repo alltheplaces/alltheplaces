@@ -92,6 +92,7 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
         "satispay": PaymentMethods.SATISPAY,
         "visa": PaymentMethods.VISA,
         "visa electron": PaymentMethods.VISA_ELECTRON,
+        "unicard": PaymentMethods.VISA_ELECTRON,
     }
 
     def apply_payment_methods(self, response, item):
