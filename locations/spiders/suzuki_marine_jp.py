@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -18,6 +18,9 @@ class SuzukiMarineJPSpider(JSONBlobSpider):
 
     def pre_process_data(self, feature: dict) -> None:
         feature["id"] = feature.pop("cd", None)
+        if feature.get("url") == "無し":
+            # Translation: "無し" is "None".
+            feature.pop("url", None)
         if not feature.get("url") and feature["id"]:
             feature["website"] = "https://www1.suzuki.co.jp/marine/dealer/detail/?cd=" + feature["id"]
 
@@ -32,5 +35,5 @@ class SuzukiMarineJPSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if not item["ref"]:
             return  # Blank location returned - ignore it.
-        apply_category({"boat:parts": "yes"}, item)
+        apply_category(Categories.SHOP_BOAT_PARTS, item)
         yield item

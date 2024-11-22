@@ -27,10 +27,16 @@ class SuzukiMarineAUSpider(JSONBlobSpider):
             services_list = loads(services_string)
             if "0" in services_list:
                 apply_category(Categories.SHOP_BOAT, item)
-            if "1" in services_list:
-                apply_category({"boat:repair": "yes"}, item)
-            if "2" in services_list:
-                apply_category({"boat:parts": "yes"}, item)
+                if "1" in services_list:
+                    apply_category({"boat:repair": "yes"}, item)
+                if "2" in services_list:
+                    apply_category({"boat:parts": "yes"}, item)
+            elif "1" in services_list:
+                apply_category(Categories.SHOP_BOAT_REPAIR, item)
+                if "2" in services_list:
+                    apply_category({"boat:parts": "yes"}, item)
+            elif "2" in services_list:
+                apply_category(Categories.SHOP_BOAT_PARTS, item)
 
             if feature.get("ServicesHours"):
                 item["opening_hours"] = OpeningHours()
