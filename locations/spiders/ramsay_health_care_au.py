@@ -1,6 +1,6 @@
-from chompjs import parse_js_object
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy.http import Response
 
 from locations.categories import Categories, HealthcareSpecialities, apply_healthcare_specialities
@@ -11,7 +11,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class RamsayHealthCareAUSpider(JSONBlobSpider):
     name = "ramsay_health_care_au"
-    item_attributes = {"operator": "Ramsay Health Care", "operator_wikidata": "Q17054333", "extras": Categories.HOSPITAL.value}
+    item_attributes = {
+        "operator": "Ramsay Health Care",
+        "operator_wikidata": "Q17054333",
+        "extras": Categories.HOSPITAL.value,
+    }
     allowed_domains = ["www.ramsayhealth.com.au"]
     start_urls = ["https://www.ramsayhealth.com.au/Find-a-Service/Hospitals"]
 
@@ -158,7 +162,9 @@ class RamsayHealthCareAUSpider(JSONBlobSpider):
         known_specialities = set(specialities_mapping.keys())
 
         matched_specialities_keys = listed_specialities | known_specialities
-        matched_specialities = [v for k, v in specialities_mapping.items() if v is not None and k in matched_specialities_keys]
+        matched_specialities = [
+            v for k, v in specialities_mapping.items() if v is not None and k in matched_specialities_keys
+        ]
         apply_healthcare_specialities(matched_specialities, item)
         if HealthcareSpecialities.EMERGENCY in matched_specialities:
             item["extras"]["emergency"] = "yes"
@@ -167,6 +173,10 @@ class RamsayHealthCareAUSpider(JSONBlobSpider):
 
         unmatched_specialities_keys = listed_specialities - known_specialities
         for unmatched_speciality_key in list(filter(None, unmatched_specialities_keys)):
-            self.logger.warning("Hospital has additional unknown and ignored healthcare speciality of: {}".format(unmatched_speciality_key))
+            self.logger.warning(
+                "Hospital has additional unknown and ignored healthcare speciality of: {}".format(
+                    unmatched_speciality_key
+                )
+            )
 
         yield item
