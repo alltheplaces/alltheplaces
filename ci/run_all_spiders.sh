@@ -216,6 +216,20 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
+AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+aws s3 \
+    --endpoint-url="${R2_ENDPOINT_URL}" \
+    --only-show-errors \
+    latest.json \
+    "s3://${R2_BUCKET}/runs/latest.json"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't copy latest.json to R2")
+    exit 1
+fi
+
 (>&2 echo "Saved latest.json to https://data.alltheplaces.xyz/runs/latest.json")
 
 (>&2 echo "Creating history.json")
@@ -257,6 +271,20 @@ aws s3 cp \
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't copy history.json to S3")
+    exit 1
+fi
+
+AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+aws s3 \
+    --endpoint-url="${R2_ENDPOINT_URL}" \
+    --only-show-errors \
+    history.json \
+    "s3://${R2_BUCKET}/runs/history.json"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't copy history.json to R2")
     exit 1
 fi
 
