@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, DAYS_IT, OpeningHours, sanitise_day
+from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
 
 
