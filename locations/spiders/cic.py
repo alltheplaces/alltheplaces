@@ -23,7 +23,8 @@ class CicSpider(CrawlSpider, StructuredDataSpider):
         item = Feature()
         item["website"] = response.url
         item["ref"] = response.url
-        item["phone"] = response.xpath('//*[@itemprop="telephone"]/text()').get()
+        if phone := response.xpath('//*[@itemprop="telephone"]/text()').get():
+            item["phone"] = phone
         item["street_address"] = response.xpath('//*[@itemprop="streetAddress"]/text()').get()
         item["postcode"] = response.xpath('//*[@itemprop="postalCode"]/text()').get()
         item["city"] = response.xpath('//*[@itemprop="addressLocality"]/text()').get()
