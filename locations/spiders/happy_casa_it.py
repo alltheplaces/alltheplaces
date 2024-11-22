@@ -1,5 +1,3 @@
-
-
 from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
