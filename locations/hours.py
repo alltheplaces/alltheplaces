@@ -1195,12 +1195,7 @@ class OpeningHours:
         )
 
         full_regex = (
-            days_regex
-            + r"(?:\W+|"
-            + OpeningHours.delimiters_regex(delimiters)
-            + r")((?:"
-            + r"|".join(closed)
-            + r"))"
+            days_regex + r"(?:\W+|" + OpeningHours.delimiters_regex(delimiters) + r")((?:" + r"|".join(closed) + r"))"
         )
         return full_regex
 
