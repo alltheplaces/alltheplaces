@@ -315,15 +315,16 @@ class Categories(Enum):
 
 def apply_category(category, item: Feature):
     """
-    Apply categories to a Feature, where categories can be supplied
-    as a single Enum, or dictionary of key-value strings. If a
-    value for the category key is already defined, the new value for
-    the category key is appended rather than overwritten. When
-    appending the new value, the list of values is sorted and each
-    value is separated with a semi-colon.
-    :param category: Either an Enum member representing a single
-                     category to add, or a dictionary of key-value
-                     strings representing multiple categories to add.
+    Apply categories to a Feature, where categories can be supplied as a
+    single Enum, or dictionary of key-value strings. If a value for the
+    category key is already defined, the new value for the category key is
+    appended rather than overwritten. When appending the new value, the list
+    of values is sorted and each value is separated with a semi-colon. Any
+    duplication of values is avoided by ignoring second attempts to add an
+    already existing value.
+    :param category: Either an Enum member representing a single category to
+                     add, or a dictionary of key-value strings representing
+                     multiple categories to add.
     :param item: Feature to which categories should be added to.
     """
     if isinstance(category, Enum):
@@ -687,12 +688,13 @@ class Clothes(Enum):
 
 def apply_clothes(clothes: [Clothes], item: Feature):
     """
-    Apply clothing categories to a Feature. If the Feature
-    already has clothing categories defined, this function will
-    append to the list of clothing categories rather than
-    overwriting existing clothing categories. When appending,
-    the list of clothing categories is sorted and then each value
-    is separated with a semi-colon.
+    Apply clothing categories to a Feature. If the Feature already has
+    clothing categories defined, this function will append to the list of
+    clothing categories rather than overwriting existing clothing categories.
+    When appending, the list of clothing categories is sorted and then each
+    value is separated with a semi-colon. Duplication of clothing categories
+    is avoided by ignoring subsequent attempts to add an already existing
+    clothing category.
     :param clothes: array of Clothes Enum members
     :param item: Feature which should have clothing categories applied.
     """
@@ -804,12 +806,13 @@ class HealthcareSpecialities(Enum):
 
 def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
     """
-    Apply healthcare specialities to a Feature. If the Feature
-    already has healthcare specialities defined, this function will
-    append to the list of healthcare specialities rather than
-    overwriting existing healthcare specialities. When appending,
-    the list of healthcare specialities is sorted and then each
-    value is separated with a semi-colon.
+    Apply healthcare specialities to a Feature. If the Feature already has
+    healthcare specialities defined, this function will append to the list of
+    healthcare specialities rather than overwriting existing healthcare
+    specialities. When appending, the list of healthcare specialities is
+    sorted and then each value is separated with a semi-colon. Duplication of
+    healthcare specialities is avoided by ignoring subsequent attempts to add
+    an already existing healthcare speciality.
     :param specialities: array of HealthcareSpecialities Enum members
     :param item: Feature which should have healthcare specialities applied.
     """
