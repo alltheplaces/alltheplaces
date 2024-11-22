@@ -18,7 +18,6 @@ class NevadaDotUSSpider(JSONBlobSpider):
     locations_key = "item2"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        print(item)
         item["lat"], item["lon"] = feature["location"]
         item["image"] = "https://www.nvroads.com/map/Cctv/" + item["ref"]
         item["website"] = "https://www.nvroads.com/map"
