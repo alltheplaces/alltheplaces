@@ -19,18 +19,18 @@ class KfcITSpider(Spider):
         for store in locations:
             store.update(store.pop("labels"))
             item = DictParser.parse(store)
-            item['extras']['province'] = store['province']
-            item['housenumber'] = store['address_number']
-            item['branch'] = store['title']
+            item["extras"]["province"] = store["province"]
+            item["housenumber"] = store["address_number"]
+            item["branch"] = store["title"]
             item.pop("name", None)
             item.pop("state", None)
-            item['opening_hours'] = oph = OpeningHours()
-            if hours := list(filter(lambda tt: tt['id'] == 'store', store['timetables']))[-1]:
-                for day in hours['times']:
+            item["opening_hours"] = oph = OpeningHours()
+            if hours := list(filter(lambda tt: tt["id"] == "store", store["timetables"]))[-1]:
+                for day in hours["times"]:
                     for hour in day["hour"]:
                         oph.add_ranges_from_string(f"{day['label_day']} {hour}", days=DAYS_IT)
                     if not day["hour"]:
-                        oph.add_range(DAYS_IT[day["label_day"]], 'closed', 'closed')
+                        oph.add_range(DAYS_IT[day["label_day"]], "closed", "closed")
             accessible = any(map(lambda s: s["code"] == "DISABLED", store["services"]))
-            apply_yes_no('wheelchair', item, accessible, apply_positive_only=False)
+            apply_yes_no("wheelchair", item, accessible, apply_positive_only=False)
             yield item
