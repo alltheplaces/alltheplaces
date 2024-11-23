@@ -2,9 +2,10 @@ from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+
 
 class UniqloSpider(JSONBlobSpider):
     name = "uniqlo"
@@ -50,9 +51,9 @@ class UniqloSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         oh = OpeningHours()
         for day in DAYS:
-            if day == 'Su':
-                oh.add_range(day,feature["weHolOpenAt"],feature["weHolCloseAt"])
+            if day == "Su":
+                oh.add_range(day, feature["weHolOpenAt"], feature["weHolCloseAt"])
             else:
-                oh.add_range(day,feature["wdOpenAt"],feature["wdCloseAt"])
-        item["opening_hours"]=oh
+                oh.add_range(day, feature["wdOpenAt"], feature["wdCloseAt"])
+        item["opening_hours"] = oh
         yield item
