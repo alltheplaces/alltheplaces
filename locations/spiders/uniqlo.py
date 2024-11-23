@@ -15,8 +15,8 @@ class UniqloSpider(JSONBlobSpider):
 
     def start_requests(self):
         for country in [
-            "jp",
             "uk",
+            "jp",
             "fr",
             "de",
             "es",
@@ -57,5 +57,6 @@ class UniqloSpider(JSONBlobSpider):
                 oh.add_range(day, feature["wdOpenAt"], feature["wdCloseAt"])
         item["opening_hours"] = oh
         item["website"] = f'https://map.uniqlo.com/{response.meta["country"]}/en/detail/{feature["id"]}'
+        item["branch"] = item.pop("name")
 
         yield item
