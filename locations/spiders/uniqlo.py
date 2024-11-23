@@ -56,4 +56,6 @@ class UniqloSpider(JSONBlobSpider):
             else:
                 oh.add_range(day, feature["wdOpenAt"], feature["wdCloseAt"])
         item["opening_hours"] = oh
+        item["website"] = f'https://map.uniqlo.com/{response.meta["country"]}/en/detail/{feature["id"]}'
+
         yield item
