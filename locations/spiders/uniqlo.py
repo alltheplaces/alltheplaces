@@ -1,7 +1,6 @@
-import scrapy
-import json
-from typing import Any
-from scrapy.http import JsonRequest, Response
+
+from scrapy.http import JsonRequest
+
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -30,7 +29,7 @@ class UniqloSpider(JSONBlobSpider):
 
     def request_page(self, country, offset):
         yield JsonRequest(
-            url = f"https://map.uniqlo.com/{country}/api/storelocator/v1/en/stores?limit=100&RESET=true&offset={offset}&r=storelocator",
+            url=f"https://map.uniqlo.com/{country}/api/storelocator/v1/en/stores?limit=100&RESET=true&offset={offset}&r=storelocator",
             meta={
                 "country": country,
                 "offset": offset,
@@ -46,4 +45,3 @@ class UniqloSpider(JSONBlobSpider):
             offset = response.meta["offset"] + 100
             country = response.meta["country"]
             yield from self.request_page(country, offset)
-
