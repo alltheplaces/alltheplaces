@@ -1,8 +1,10 @@
+from typing import Iterable
 
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.json_blob_spider import JSONBlobSpider
-
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 class UniqloSpider(JSONBlobSpider):
     name = "uniqlo"
@@ -40,8 +42,17 @@ class UniqloSpider(JSONBlobSpider):
         features = self.extract_json(response)
         yield from self.parse_feature_array(response, features) or []
         pagination = response.json()["result"]["pagination"]
-        print(pagination)
         if pagination["total"] > pagination["offset"] + pagination["count"]:
             offset = response.meta["offset"] + 100
             country = response.meta["country"]
             yield from self.request_page(country, offset)
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        oh = OpeningHours()
+        for day in DAYS:
+            if day == 'Su':
+                oh.add_range(day,feature["weHolOpenAt"],feature["weHolCloseAt"])
+            else:
+                oh.add_range(day,feature["wdOpenAt"],feature["wdCloseAt"])
+        item["opening_hours"]=oh
+        yield item
