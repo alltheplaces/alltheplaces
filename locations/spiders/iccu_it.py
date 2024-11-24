@@ -13,7 +13,7 @@ from locations.json_blob_spider import JSONBlobSpider
 class IccuITSpider(JSONBlobSpider):
     name = "iccu_it"
     allowed_domains = ["opendata.anagrafe.iccu.sbn.it"]
-    start_urls = ["https://opendata.anagrafe.iccu.sbn.it/opendata.zip"]
+    start_urls = ["https://opendata.anagrafe.iccu.sbn.it/biblioteche.zip"]
     countries = ["it"]
 
     dataset_attributes = {
