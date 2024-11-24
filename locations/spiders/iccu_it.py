@@ -1,8 +1,9 @@
 import io
 import json
-import phonenumbers as pn
 import re
 import zipfile
+
+import phonenumbers as pn
 
 from locations.categories import Categories, apply_category
 from locations.items import set_social_media
@@ -40,10 +41,11 @@ class IccuITSpider(JSONBlobSpider):
     @staticmethod
     def filter_library(library):
         stato = library["stato-registrazione"]
-        return (stato is None or not (
-              stato in ["Biblioteca non più esistente", "Biblioteca non censita"]
-              or stato.startswith("Altri istituti") or stato.startswith("Biblioteca confluita")
-        ))
+        return stato is None or not (
+            stato in ["Biblioteca non più esistente", "Biblioteca non censita"]
+            or stato.startswith("Altri istituti")
+            or stato.startswith("Biblioteca confluita")
+        )
 
     def pre_process_data(self, feature: dict) -> None:
         addr = feature.pop("indirizzo")
@@ -59,14 +61,21 @@ class IccuITSpider(JSONBlobSpider):
         feature["cap"] = addr["cap"]
         feature["nome"] = feature["denominazioni"].pop("ufficiale").strip()
 
-    regex_for_ministero_cleanup = re.compile(r"^Ministero\s*(?:" + r"|".join([
-                                              r"dell[’']istruzione(?: e del merito|(?:,? dell[’']universit(?:à|a'))? e della ricerca)?",
-                                              r"della cultura",
-                                              r"della difesa",
-                                              r"della giustizia",
-                                              r"dell[’']economia e delle finanze",
-                                              r"dell[’']interno",
-                                          ]) + r")\s*[\\.,-]\s*(.+)", flags=re.I)
+    regex_for_ministero_cleanup = re.compile(
+        r"^Ministero\s*(?:"
+        + r"|".join(
+            [
+                r"dell[’']istruzione(?: e del merito|(?:,? dell[’']universit(?:à|a'))? e della ricerca)?",
+                r"della cultura",
+                r"della difesa",
+                r"della giustizia",
+                r"dell[’']economia e delle finanze",
+                r"dell[’']interno",
+            ]
+        )
+        + r")\s*[\\.,-]\s*(.+)",
+        flags=re.I,
+    )
 
     def post_process_item(self, item, response, location: dict):
         extras = item["extras"]
@@ -78,21 +87,24 @@ class IccuITSpider(JSONBlobSpider):
             item["operator"] = ente
 
         for ref, val in location["codici-identificativi"].items():
-             if val: extras[f"ref:{ref}"] = val
+            if val:
+                extras[f"ref:{ref}"] = val
         item["ref"] = extras["ref:isil"]
 
         extras["official_name"] = item["name"]
         for name in location["denominazioni"]["alternative"]:
-             if name := name.strip():
-                 apply_category({"alt_name": name}, item)
+            if name := name.strip():
+                apply_category({"alt_name": name}, item)
         for name in location["denominazioni"]["precedenti"]:
-             if name := name.strip():
-                 apply_category({"old_name": name}, item)
+            if name := name.strip():
+                apply_category({"old_name": name}, item)
 
-        extras.update({
-            "access": "permit" if location["accesso"]["riservato"] else "yes",
-            "wheelchair": "yes" if location["accesso"]["portatori-handicap"] else "no",
-        })
+        extras.update(
+            {
+                "access": "permit" if location["accesso"]["riservato"] else "yes",
+                "wheelchair": "yes" if location["accesso"]["portatori-handicap"] else "no",
+            }
+        )
         if updated := location.get("data-aggiornamento"):
             extras["source:iccu:updated"] = updated
 
@@ -109,16 +121,18 @@ class IccuITSpider(JSONBlobSpider):
 
     contact_match = {
         "telex_value": re.compile(r"\d{1,6}(\s*[A-Z].+)?$", flags=re.I),
-        "pec_value": re.compile(r".+@[a-z0-9\.-]*(pec|legalmail|(posta)?cert(ificata)?)[a-z0-9\.-]*\\.[a-z0-9\.-]+$", flags=re.I),
+        "pec_value": re.compile(
+            r".+@[a-z0-9\.-]*(pec|legalmail|(posta)?cert(ificata)?)[a-z0-9\.-]*\\.[a-z0-9\.-]+$", flags=re.I
+        ),
         "pec_alt_value": re.compile(r"[^@]*pec[^@]*@[a-z0-9\.-]+\.[a-z0-9\.-]+$", flags=re.I),
         "mail_value": re.compile(r"^.+@.+$", flags=re.I),
         "ip_urls": re.compile(r"^(https?://)?([\d]{1,3}[\./]?){4}/", flags=re.I),
         "common_urls": re.compile(r"^(http|www|[^/]+.(it|eu|com|org|net|site)(/|$))", flags=re.I),
-        "phone_value": re.compile(r"^(\+39|3|0)[\d /-]{6,26}")
+        "phone_value": re.compile(r"^(\+39|3|0)[\d /-]{6,26}"),
     }
 
     def add_contact(self, item, contact):
-        valore = (contact["valore"] or "").strip(";:\" \t(\n")
+        valore = (contact["valore"] or "").strip(';:" \t(\n')
         tipo = (contact["tipo"] or "").strip()
         note = (contact["note"] or "").strip()
 
@@ -128,7 +142,7 @@ class IccuITSpider(JSONBlobSpider):
             return
 
         # email and PEC (italian certified email)
-        if (self.contact_match["pec_value"].match(valore) or self.contact_match["pec_alt_value"].match(valore)):
+        if self.contact_match["pec_value"].match(valore) or self.contact_match["pec_alt_value"].match(valore):
             apply_category({"contact:pec": valore}, item)
             return
         if self.contact_match["mail_value"].match(valore):
@@ -141,21 +155,31 @@ class IccuITSpider(JSONBlobSpider):
         # urls and social media
         valore = valore.replace(r"h+t+p(s)?[;:]/+\s*", r"http\1://")
         if self.contact_match["ip_urls"].match(valore):
-            return # avoid urls that are IPs
+            return  # avoid urls that are IPs
         if self.contact_match["common_urls"].match(valore):
             tipo = "website"
         if "facebook" in valore.lower() or (valore.startswith("@") and "facebook" in note.lower()):
-            valore = valore.replace(r"^(?:@|(?:https?://)?(?:[^\.]+\.)?facebook\.com/*)([^/].+)(?:/|\?).*$", r"https://facebook.com/\1")
+            valore = valore.replace(
+                r"^(?:@|(?:https?://)?(?:[^\.]+\.)?facebook\.com/*)([^/].+)(?:/|\?).*$", r"https://facebook.com/\1"
+            )
             set_social_media(item, "facebook", valore)
             return
         if "instagram" in valore.lower() or (valore.startswith("@") and "instagram" in note.lower()):
             if "/invites/contact" in valore.lower():
-                return # not usable instagram links
-            valore = valore.replace(r"^(?:@|(?:https?://)?(?:www\.)?instagram\.com/*)([^/].+)(?:/|\?).*$", r"https://instagram.com/\1")
+                return  # not usable instagram links
+            valore = valore.replace(
+                r"^(?:@|(?:https?://)?(?:www\.)?instagram\.com/*)([^/].+)(?:/|\?).*$", r"https://instagram.com/\1"
+            )
             set_social_media(item, "instagram", valore)
             return
-        if "twitter" in valore.lower() or "x.com" in valore.lower() or (valore.startswith("@") and "twitter" in note.lower()):
-            valore = valore.replace(r"^(?:@|(?:https?://)?(?:www\.)?(?:twitter|x)\.com/*)([^/].+)(?:/|\?).*$", r"https://x.com/\1")
+        if (
+            "twitter" in valore.lower()
+            or "x.com" in valore.lower()
+            or (valore.startswith("@") and "twitter" in note.lower())
+        ):
+            valore = valore.replace(
+                r"^(?:@|(?:https?://)?(?:www\.)?(?:twitter|x)\.com/*)([^/].+)(?:/|\?).*$", r"https://x.com/\1"
+            )
             set_social_media(item, "twitter", valore)
             return
         if tipo == "website":
