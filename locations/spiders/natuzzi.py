@@ -1,4 +1,5 @@
 from typing import Iterable
+from urllib.parse import urljoin
 
 from scrapy.http import Response
 
@@ -15,5 +16,17 @@ class NatuzziSpider(JSONBlobSpider):
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+
+        if feature["type"] in [
+            "EDOS",  # Office
+            "GALLERY",  # "Natuzzi Italia Gallery" / shop in a shop
+            "POINT",
+        ]:
+            return
+
+        item["name"] = None
+        item["branch"] = feature["shortName"]
+        item["website"] = urljoin("https://www.natuzzi.com/gb/en/stores/", feature["slug"])
         apply_category(Categories.SHOP_FURNITURE, item)
+
         yield item
