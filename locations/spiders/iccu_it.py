@@ -128,6 +128,9 @@ class IccuITSpider(JSONBlobSpider):
         "mail_value": re.compile(r"^.+@.+$", flags=re.I),
         "ip_urls": re.compile(r"^(https?://)?([\d]{1,3}[\./]?){4}/", flags=re.I),
         "common_urls": re.compile(r"^(http|www|[^/]+.(it|eu|com|org|net|site)(/|$))", flags=re.I),
+        "facebook_url": re.compile(r"^(?:@|(?:https?://)?(?:[^\.]+\.)?facebook\.com/+)([^?]+)(?:\?.*)?$", flags=re.I),
+        "instagram_url": re.compile(r"^(?:@|(?:https?://)?(?:www\.)?instagram\.com/+)([^?/]+)(?:/|\?)?.*$", flags=re.I),
+        "twitter_url": re.compile(r"^(?:@|(?:https?://)?(?:www\.)?(?:twitter|x)\.com/+)([^?/]+)(?:/|\?)?.*$", flags=re.I),
         "phone_value": re.compile(r"^(\+39|3|0)[\d /-]{6,26}"),
     }
 
@@ -141,59 +144,71 @@ class IccuITSpider(JSONBlobSpider):
         if tipo == "Telex" or self.contact_match["telex_value"].match(valore):
             return
 
+        if self.add_mail(item, valore):
+            return
+        if self.add_url(item, tipo, valore, note):
+            return
+        if self.add_phone(item, tipo, valore):
+            return
+        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_contact_values")
+
+
+    def add_mail(self, item, valore):
         # email and PEC (italian certified email)
         if self.contact_match["pec_value"].match(valore) or self.contact_match["pec_alt_value"].match(valore):
             apply_category({"contact:pec": valore}, item)
-            return
+            return True
         if self.contact_match["mail_value"].match(valore):
             if item["email"]:
                 apply_category({"contact:email": valore}, item)
             else:
                 item["email"] = valore
-            return
+            return True
+        return False
 
+    def add_url(self, item, tipo, valore, note):
         # urls and social media
         valore = valore.replace(r"h+t+p(s)?[;:]/+\s*", r"http\1://")
         if self.contact_match["ip_urls"].match(valore):
-            return  # avoid urls that are IPs
+            return True # avoid urls that are IPs
         if self.contact_match["common_urls"].match(valore):
             tipo = "website"
-        if "facebook" in valore.lower() or (valore.startswith("@") and "facebook" in note.lower()):
-            valore = valore.replace(
-                r"^(?:@|(?:https?://)?(?:[^\.]+\.)?facebook\.com/*)([^/].+)(?:/|\?).*$", r"https://facebook.com/\1"
-            )
-            set_social_media(item, "facebook", valore)
-            return
-        if "instagram" in valore.lower() or (valore.startswith("@") and "instagram" in note.lower()):
+        if self.contact_match["facebook_url"].match(valore):
+            if valore.startswith("@") and "facebook" not in note.lower():
+                pass
+            else:
+                valore = self.contact_match["facebook_url"].sub(r"https://www.facebook.com/\1", valore)
+                set_social_media(item, "facebook", valore)
+                return True
+        if self.contact_match["instagram_url"].match(valore):
             if "/invites/contact" in valore.lower():
                 return  # not usable instagram links
-            valore = valore.replace(
-                r"^(?:@|(?:https?://)?(?:www\.)?instagram\.com/*)([^/].+)(?:/|\?).*$", r"https://instagram.com/\1"
-            )
-            set_social_media(item, "instagram", valore)
-            return
-        if (
-            "twitter" in valore.lower()
-            or "x.com" in valore.lower()
-            or (valore.startswith("@") and "twitter" in note.lower())
-        ):
-            valore = valore.replace(
-                r"^(?:@|(?:https?://)?(?:www\.)?(?:twitter|x)\.com/*)([^/].+)(?:/|\?).*$", r"https://x.com/\1"
-            )
-            set_social_media(item, "twitter", valore)
-            return
+            if valore.startswith("@") and "instagram" not in note.lower():
+                pass
+            else:
+                valore = self.contact_match["instagram_url"].sub(r"https://www.instagram.com/\1", valore)
+                set_social_media(item, "instagram", valore)
+                return True
+        if self.contact_match["twitter_url"].match(valore):
+            if valore.startswith("@") and "instagram" not in note.lower():
+                pass
+            else:
+                valore = self.contact_match["twitter_url"].sub(r"https://x.com/\1", valore)
+                set_social_media(item, "twitter", valore)
+                return True
         if tipo == "website":
             if item["website"]:
                 apply_category({"contact:website": valore}, item)
             else:
                 item["website"] = valore
-            return
+            return True
+        return False
 
+    def add_phone(self, item, tipo, valore):
         # phone and fax
         valore = valore.replace(r"^(\+39\s*)?(\+|00)\s*3\s*9[\.:;\s\)]*", "+39 ")
         if not self.contact_match["phone_value"].match(valore):
-            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_contact_value")
-            return
+            return False
         if tipo != "Fax" and not valore.endswith("fax"):
             tipo = "phone"
         else:
@@ -202,13 +217,13 @@ class IccuITSpider(JSONBlobSpider):
 
         if valore.endswith("omune"):
             # some phone/fax numbers are not for the library, but for the townhall
-            return
+            return True
         try:
             valore = pn.format_number(pn.parse(valore, "IT"), pn.PhoneNumberFormat.INTERNATIONAL)
         except pn.phonenumberutil.NumberParseException:
+            # avoid formatting and leave to people interpret it
             self.crawler.stats.inc_value(f"atp/{self.name}/invalid_phone_number")
-            return
         if tipo == "phone" and not item[tipo]:
             item[tipo] = valore
         else:
-            apply_category({r"contact:{tipo}": valore}, item)
+            apply_category({f"contact:{tipo}": valore}, item)
