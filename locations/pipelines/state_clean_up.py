@@ -1,5 +1,6 @@
 import reverse_geocoder
 from geonamescache import GeonamesCache
+from scrapy.exceptions import DropItem
 
 from locations.items import get_lat_lon
 from locations.spiders.xfinity import US_TERRITORIES
@@ -58,5 +59,18 @@ class StateCodeCleanUpPipeline:
                     state = result["admin1"]
 
         item["state"] = StateCodeCleanUpPipeline.clean_state(state, country)
+
+        # If the spider wants a callback then make it. If there are any errors
+        # in the mechanism then catch them, log them and abort the output.
+        try:
+            if StateCodeCleanUpPipeline in getattr(spider, "pipeline_after_callbacks", []):
+                item = spider.pipeline_after_callback(item, StateCodeCleanUpPipeline)
+        except Exception as e:
+            spider.crawler.stats.inc_value("atp/pipeline/error/StateCodeCleanUpPipeline")
+            spider.logger.error(f"Error in pipeline callback: {str(e)}")
+            item = None
+
+        if item is None:
+            raise DropItem
 
         return item
