@@ -130,7 +130,9 @@ class IccuITSpider(JSONBlobSpider):
         "common_urls": re.compile(r"^(http|www|[^/]+.(it|eu|com|org|net|site)(/|$))", flags=re.I),
         "facebook_url": re.compile(r"^(?:@|(?:https?://)?(?:[^\.]+\.)?facebook\.com/+)([^?]+)(?:\?.*)?$", flags=re.I),
         "instagram_url": re.compile(r"^(?:@|(?:https?://)?(?:www\.)?instagram\.com/+)([^?/]+)(?:/|\?)?.*$", flags=re.I),
-        "twitter_url": re.compile(r"^(?:@|(?:https?://)?(?:www\.)?(?:twitter|x)\.com/+)([^?/]+)(?:/|\?)?.*$", flags=re.I),
+        "twitter_url": re.compile(
+            r"^(?:@|(?:https?://)?(?:www\.)?(?:twitter|x)\.com/+)([^?/]+)(?:/|\?)?.*$", flags=re.I
+        ),
         "phone_value": re.compile(r"^(\+39|3|0)[\d /-]{6,26}"),
     }
 
@@ -152,7 +154,6 @@ class IccuITSpider(JSONBlobSpider):
             return
         self.crawler.stats.inc_value(f"atp/{self.name}/unknown_contact_values")
 
-
     def add_mail(self, item, valore):
         # email and PEC (italian certified email)
         if self.contact_match["pec_value"].match(valore) or self.contact_match["pec_alt_value"].match(valore):
@@ -170,7 +171,7 @@ class IccuITSpider(JSONBlobSpider):
         # urls and social media
         valore = valore.replace(r"h+t+p(s)?[;:]/+\s*", r"http\1://")
         if self.contact_match["ip_urls"].match(valore):
-            return True # avoid urls that are IPs
+            return True  # avoid urls that are IPs
         if self.contact_match["common_urls"].match(valore):
             tipo = "website"
         if self.contact_match["facebook_url"].match(valore):
