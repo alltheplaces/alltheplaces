@@ -8,7 +8,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 
 class FiveHundredElevenNlCASpider(JSONBlobSpider):
-    name = "511nl_ca"
+    name = "511_nl_ca"
     item_attributes = {
         "operator": "Department of Transportation and Infrastructure",
         "operator_wikidata": "Q15125415",
