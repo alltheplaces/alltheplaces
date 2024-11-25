@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class FiveHundredElevenNlCASpider(JSONBlobSpider):
+class FivehundredelevenNLCASpider(JSONBlobSpider):
     name = "511_nl_ca"
     item_attributes = {
         "operator": "Department of Transportation and Infrastructure",
