@@ -9,7 +9,11 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class FiveHundredElevenNlCASpider(JSONBlobSpider):
     name = "511nl_ca"
-    item_attributes = {"operator": "Department of Transportation and Infrastructure", "operator_wikidata": "Q15125415", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "Department of Transportation and Infrastructure",
+        "operator_wikidata": "Q15125415",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["511nl.ca"]
     start_urls = ["https://511nl.ca/map/mapIcons/Cameras"]
     locations_key = "item2"
