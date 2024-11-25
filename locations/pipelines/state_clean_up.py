@@ -41,7 +41,8 @@ class StateCodeCleanUpPipeline:
                 if possible_state["name"] == state:
                     return possible_state["code"]
 
-    def process_item(self, item, spider):
+    @staticmethod
+    def clean_state_process_item(item, spider):
         country = item.get("country")
         if not country:
             return item
@@ -60,3 +61,6 @@ class StateCodeCleanUpPipeline:
         item["state"] = StateCodeCleanUpPipeline.clean_state(state, country)
 
         return item
+
+    def process_item(self, item, spider):
+        return self.clean_state_process_item(item, spider)
