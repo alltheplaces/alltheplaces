@@ -3,7 +3,6 @@ import io
 from openpyxl import load_workbook
 from scrapy import Spider
 
-from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
 
