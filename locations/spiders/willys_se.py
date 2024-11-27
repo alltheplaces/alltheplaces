@@ -18,9 +18,10 @@ class WillysSESpider(scrapy.Spider):
 
             item["opening_hours"] = OpeningHours()
             for rule in store["openingHours"]:
-                day, times = rule.split(" ")
-                start_time, end_time = times.split("-")
-                if day := sanitise_day(day, DAYS_SE):
-                    item["opening_hours"].add_range(day, start_time, end_time)
+                if "stängd" not in rule:
+                    day, times = rule.split(" ")
+                    start_time, end_time = times.split("-")
+                    if day := sanitise_day(day, DAYS_SE):
+                        item["opening_hours"].add_range(day, start_time, end_time)
 
             yield item
