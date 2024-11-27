@@ -12,7 +12,7 @@ class IsolaTesoriITSpider(JSONBlobSpider):
     item_attributes = {
         "brand": "L'Isola dei Tesori",
         "brand_wikidata": "Q108578003",
-        "extras": Categories.SHOP_PET.value
+        "extras": Categories.SHOP_PET.value,
     }
     start_urls = ["https://www.isoladeitesori.it/on/demandware.store/Sites-idt-it-Site/it_IT/Stores-FindStores"]
     locations_key = "stores"
