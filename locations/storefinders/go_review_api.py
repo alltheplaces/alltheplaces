@@ -33,7 +33,7 @@ class GoReviewApiSpider(JSONBlobSpider):
 
     def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
-            if feature["trading_status"] != "Open":
+            if feature.get("trading_status") == True and feature.get("trading_status") != "Open":
                 continue
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
