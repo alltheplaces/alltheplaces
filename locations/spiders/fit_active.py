@@ -1,12 +1,13 @@
-from locations.hours import DAYS_IT, CLOSED_IT, OpeningHours
+from locations.hours import CLOSED_IT, DAYS_IT, OpeningHours
 from locations.items import set_social_media
 from locations.json_blob_spider import JSONBlobSpider
+
 
 class FitActiveSpider(JSONBlobSpider):
     name = "fit_active"
     item_attributes = {"brand": "FitActive", "brand_wikidata": "Q123807531"}
     start_urls = ["https://www.fitactive.it/Club/ProvaDellaMappa"]
-    skip_auto_cc_domain = True # all URLs are .it, but not all places are in Italy
+    skip_auto_cc_domain = True  # all URLs are .it, but not all places are in Italy
 
     def pre_process_data(self, location):
         del location["region"]
@@ -33,4 +34,3 @@ class FitActiveSpider(JSONBlobSpider):
             oh.add_ranges_from_string(oph, days=DAYS_IT, closed=CLOSED_IT)
             item["extras"]["opening_hours:office"] = oh.as_opening_hours()
         yield item
-
