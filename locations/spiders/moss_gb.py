@@ -36,7 +36,6 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
                 item["branch"] = item.pop("name").removeprefix("Moss ")
             else:
                 item["branch"] = item.pop("name")
-            print(item)
         oh = OpeningHours()
         hours = response.xpath('//p[contains(@class,"store-opening-hours-text")]//text()').getall()
         for dayrange in hours:
