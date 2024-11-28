@@ -5,8 +5,8 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
 
-class TheCourierGuySpider(scrapy.Spider):
-    name = "the_courier_guy"
+class TheCourierGuyZASpider(scrapy.Spider):
+    name = "the_courier_guy_za"
     PUDO = {"brand": "pudo", "brand_wikidata": "Q116753323"}
     item_attributes = {"brand": "The Courier Guy", "brand_wikidata": "Q116753262"}
     allowed_domains = ["wp-admin.thecourierguy.co.za", "api-pudo.co.za"]
