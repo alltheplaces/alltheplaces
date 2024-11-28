@@ -19,4 +19,7 @@ class FarmboyCASpider(SitemapSpider):
         item["branch"] = response.xpath("//title/text()").get("").split("|")[0].removeprefix("Farm Boy ").strip()
         item["addr_full"] = response.xpath('//*[@class="address"]/text()').get()
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        if contact_details := response.xpath('//*[@class="connect"]/text()').getall():
+            if "Fax" in contact_details[-1]:
+                item["extras"]["fax"] = contact_details[-1]
         yield item
