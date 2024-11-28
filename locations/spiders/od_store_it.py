@@ -10,6 +10,6 @@ class OdStoreITSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["extras"]["addr:province"] = item.pop("state")
         item["street_address"] = item.pop("street")
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").removeprefix("ODStore ")
         apply_category(Categories.SHOP_CONFECTIONERY, item)
         yield item
