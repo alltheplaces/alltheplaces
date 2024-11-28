@@ -24,7 +24,7 @@ class FatfaceSpider(CrawlSpider):
     def parse_stores(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath('//li[@class="vs-store"]'):
             item = Feature()
-            item["ref"] = item["branch"] = store.xpath(".//button/strong/text()").get()
+            item["branch"] = store.xpath(".//button/strong/text()").get()
             store_details = store.xpath('.//*[@class="vs-store-address"]/text()').getall()
             hours_start_index = len(store_details)
             for index, info in enumerate(store_details):
@@ -36,7 +36,7 @@ class FatfaceSpider(CrawlSpider):
             if not re.search(r"[A-Za-z]+", address[-1]):
                 item["phone"] = address[-1]
                 address = address[:-1]
-            item["addr_full"] = clean_address(address)
+            item["ref"] = item["addr_full"] = clean_address(address)
             item["country"] = response.url.split("/")[3]
             item["website"] = response.url
             yield item
