@@ -5,7 +5,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Request, Rule
 
-from locations.hours import DAYS_3_LETTERS
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -39,4 +39,8 @@ class FatfaceSpider(CrawlSpider):
             item["ref"] = item["addr_full"] = clean_address(address)
             item["country"] = response.url.split("/")[3]
             item["website"] = response.url
+            if hours_start_index < len(store_details):
+                item["opening_hours"] = OpeningHours()
+                for rule in store_details[hours_start_index:]:
+                    item["opening_hours"].add_ranges_from_string(rule)
             yield item
