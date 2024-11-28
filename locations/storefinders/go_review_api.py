@@ -41,7 +41,7 @@ class GoReviewApiSpider(JSONBlobSpider):
 
             item["website"] = feature["local_page_url"]
 
-            if item.get("attributes") is not None:
+            if feature.get("attributes") is not None:
                 apply_yes_no(Extras.DELIVERY, item, "Delivery" in feature.get("attributes"))
                 apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-through" in feature.get("attributes"))
                 apply_yes_no(Extras.TAKEAWAY, item, "Takeaway" in feature.get("attributes"))
