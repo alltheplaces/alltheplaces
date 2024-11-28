@@ -4,32 +4,40 @@ from urllib.parse import urljoin
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class GifiFRSpider(Spider):
-    name = "gifi_fr"
+class GifiSpider(Spider):
+    name = "gifi"
     item_attributes = {"brand": "GiFi", "brand_wikidata": "Q3105439"}
 
-    def make_request(self, page: int) -> JsonRequest:
+    def make_request(self, page: int, index_name: str) -> JsonRequest:
         return JsonRequest(
             url="https://0knemtbxx3-dsn.algolia.net/1/indexes/*/queries",
             headers={"x-algolia-api-key": "7a46160ed01bb0af2c2af8d14b97f3c5", "x-algolia-application-id": "0KNEMTBXX3"},
             data={
                 "requests": [
                     {
-                        "indexName": "AFEB_fr",
+                        "indexName": index_name,
                         "query": "",
                         "params": "facets=&filters=&page={}".format(page),
                     },
                 ]
             },
+            meta={"index_name": index_name},
         )
 
     def start_requests(self) -> Iterable[Request]:
-        yield self.make_request(0)
+        for index_name in [
+            "AFEB_fr",  # https://www.gifi.fr/
+            "GFES_es",  # https://www.gifi.es/
+            "GFCH_fr",  # https://www.gifi.ch/
+        ]:
+            # TODO: add Italy when available at http://www.gifi.it/
+            yield self.make_request(0, index_name)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         resp = response.json()["results"][0]
@@ -49,10 +57,12 @@ class GifiFRSpider(Spider):
             except:
                 self.logger.error("Error parsing opening hours: {}".format(location["formatted_opening_hours"]))
 
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
+
             yield item
 
         if resp["page"] < resp["nbPages"]:
-            yield self.make_request(resp["page"] + 1)
+            yield self.make_request(resp["page"] + 1, response.meta["index_name"])
 
     def parse_opening_hours(self, rules: dict) -> OpeningHours:
         oh = OpeningHours()
