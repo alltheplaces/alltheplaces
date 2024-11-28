@@ -13,6 +13,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class GifiSpider(Spider):
     name = "gifi"
     item_attributes = {"brand": "GiFi", "brand_wikidata": "Q3105439"}
+    skip_auto_cc_domain = True
 
     def make_request(self, page: int, index_name: str) -> JsonRequest:
         return JsonRequest(
