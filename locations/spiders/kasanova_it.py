@@ -1,7 +1,7 @@
 import chompjs
 import phonenumbers as pn
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class KasanovaITSpider(JSONBlobSpider):
     name = "kasanova_it"
-    item_attributes = {"brand": "Kasanova", "brand_wikidata": "Q116214505", "extras": Categories.SHOP_HOUSEWARE.value}
+    item_attributes = {"brand": "Kasanova", "brand_wikidata": "Q116214505"}
     start_urls = ["https://www.kasanova.com/it/stores"]
 
     def extract_json(self, response):
@@ -40,4 +40,7 @@ class KasanovaITSpider(JSONBlobSpider):
                 item["opening_hours"].add_range(day, "closed", "closed")
             for span in hours:
                 item["opening_hours"].add_range(day, span["start_time"], span["end_time"])
+
+        apply_category(Categories.SHOP_HOUSEWARE, item)
+
         yield item
