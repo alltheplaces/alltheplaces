@@ -2,7 +2,7 @@ import chompjs
 import phonenumbers as pn
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -35,9 +35,9 @@ class KasanovaITSpider(JSONBlobSpider):
         item["email"] = location["contact_mail"]
 
         item["opening_hours"] = OpeningHours()
-        for day, hours in zip(DAYS, location["schedule"]["openingHours"]):
+        for day, hours in zip(DAYS_3_LETTERS_FROM_SUNDAY, location["schedule"]["openingHours"]):
             if len(hours) == 0:
-                item["opening_hours"].add_range(day, "closed", "closed")
+                item["opening_hours"].set_closed(day)
             for span in hours:
                 item["opening_hours"].add_range(day, span["start_time"], span["end_time"])
 
