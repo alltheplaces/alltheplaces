@@ -37,4 +37,5 @@ class FatfaceSpider(CrawlSpider):
                 item["phone"] = address[-1]
                 address = address[:-1]
             item["addr_full"] = clean_address(address)
+            item["country"] = response.url.split("/")[3]
             yield item
