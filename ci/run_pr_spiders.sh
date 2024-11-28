@@ -149,39 +149,39 @@ do
             STATS_ERRORS=""
 
             # We expect items to have a category
-            missing_category=$(jq '."atp/category/missing"' "${STATSFILE}")
+            missing_category=$(jq '."atp/category/missing" // 0' "${STATSFILE}")
             if [ $missing_category -gt 0 ]; then
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
             fi
 
             # Warn if items are missing a lat/lon
-            missing_lat=$(jq '."atp/field/lat/missing"' "${STATSFILE}")
-            missing_lon=$(jq '."atp/field/lon/missing"' "${STATSFILE}")
+            missing_lat=$(jq '."atp/field/lat/missing" // 0' "${STATSFILE}")
+            missing_lon=$(jq '."atp/field/lon/missing" // 0' "${STATSFILE}")
             if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
             fi
 
             # Error if items have invalid lat/lon
-            invalid_lat=$(jq '."atp/field/lat/invalid"' "${STATSFILE}")
-            invalid_lon=$(jq '."atp/field/lon/invalid"' "${STATSFILE}")
+            invalid_lat=$(jq '."atp/field/lat/invalid" // 0' "${STATSFILE}")
+            invalid_lon=$(jq '."atp/field/lon/invalid" // 0' "${STATSFILE}")
             if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
             fi
 
             # Error if items have invalid website
-            invalid_website=$(jq '."atp/field/website/invalid"' "${STATSFILE}")
+            invalid_website=$(jq '."atp/field/website/invalid" // 0' "${STATSFILE}")
             if [ $invalid_website -gt 0 ]; then
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Website is invalid on ${invalid_website} items</li>"
             fi
 
             # Warn if items were fetched using Zyte
-            zyte_fetched=$(jq '."scrapy-zyte-api/success"' "${STATSFILE}")
+            zyte_fetched=$(jq '."scrapy-zyte-api/success" // 0' "${STATSFILE}")
             if [ $zyte_fetched -gt 0 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${zyte_fetched} requests were made using Zyte</li>"
             fi
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
-            dupe_dropped=$(jq '."dupefilter/filtered"' "${STATSFILE}")
+            dupe_dropped=$(jq '."dupefilter/filtered" // 0' "${STATSFILE}")
             dupe_percent=$(echo "scale=2; ${dupe_dropped} / ${FEATURE_COUNT} * 100" | bc)
             if [ $(echo "${dupe_percent} > 30" | bc) -eq 1 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"

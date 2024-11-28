@@ -38,6 +38,7 @@ class TodisITSpider(Spider):
         item["opening_hours"] = OpeningHours()
         for day_hours in location["orari"]:
             if day_hours["chiuso"] != "0":
+                item["opening_hours"].add_range(DAYS_IT[day_hours["g"]], "closed", "closed")
                 continue
             item["opening_hours"].add_range(DAYS_IT[day_hours["g"]], day_hours["a"], day_hours["c"])
             if day_hours["a_2"] and day_hours["c_2"]:

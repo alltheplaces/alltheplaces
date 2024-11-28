@@ -1,5 +1,5 @@
 from locations.categories import Categories
-from locations.hours import DAYS, OpeningHours
+from locations.hours import CLOSED_IT, DAYS_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -33,11 +33,12 @@ class CaddysITSpider(JSONBlobSpider):
         for day_split, delimiters in [("|", "-/"), ("/", "-")]:
             if len(location.get("storeHours", "").split(day_split)) >= 6:
                 oph = OpeningHours()
-                for day, hours in zip(DAYS, f"{location['storeHours']} {day_split} CHIUSO".split(day_split)):
-                    if "CHIUSO" in hours:
-                        oph.set_closed(day)
-                    else:
-                        oph.add_ranges_from_string(f"{day} {hours}", delimiters=delimiters)
+                for day, hours in zip(DAYS_IT, f"{location['storeHours']} {day_split} CHIUSO".split(day_split)):
+                    oph.add_ranges_from_string(
+                        f"{day} {hours}",
+                        days=DAYS_IT,
+                        closed=CLOSED_IT,
+                    )
                 item["opening_hours"] = oph
                 break
         item["state"] = location["provincia"]

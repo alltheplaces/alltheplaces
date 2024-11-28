@@ -3,7 +3,6 @@ import io
 from openpyxl import load_workbook
 from scrapy import Spider
 
-from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
 
@@ -52,12 +51,4 @@ class YettelBGSpider(Spider):
                 item["street_address"] = store["address_loc"]
                 item["city"] = store["city_loc"]
 
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_days_range(
-                    day_range("Mo", "Fr"), *store["working_time_weekdays"].replace(" ", "").split("-")
-                )
-                if store["is_closed_on_saturday"] == "No":
-                    item["opening_hours"].add_range("Sa", *store["working_time_saturday"].replace(" ", "").split("-"))
-                if store["is_closed_on_sunday"] == "No":
-                    item["opening_hours"].add_range("Su", *store["working_time_sunday"].replace(" ", "").split("-"))
                 yield item

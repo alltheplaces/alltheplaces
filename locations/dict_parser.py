@@ -47,6 +47,8 @@ class DictParser:
         "branch-name",
         # ES
         "nombre",
+        # IT
+        "nome",
     ]
 
     house_number_keys = [
@@ -267,6 +269,7 @@ class DictParser:
         "store-hours",
         # IT
         "orario",
+        "orari",
     ]
 
     @staticmethod
