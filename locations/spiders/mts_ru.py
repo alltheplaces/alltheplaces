@@ -8,7 +8,7 @@ from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_T
 class MtsRUSpider(scrapy.Spider):
     name = "mts_ru"
     item_attributes = {"brand_wikidata": "Q1368919"}
-    start_urls = ["https://mts.ru/json/offices/points"]
+    start_urls = ["https://moskva.mts.ru/api/bff/v1/offices/points"]
 
     def parse(self, response):
         for poi in response.json():
