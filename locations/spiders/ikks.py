@@ -9,7 +9,7 @@ from locations.hours import DAYS_FR, OpeningHours
 
 class IkksSpider(scrapy.Spider):
     name = "ikks"
-    item_attributes = {"brand": "IKKS", "brand_wikidata": "Q3146711"}
+    item_attributes = {"brand": "Ikks", "brand_wikidata": "Q3146711"}
     allowed_domains = ["stores.ikks.com"]
     start_urls = [
         "https://stores.ikks.com/mobify/proxy/ocapi/s/IKKS_COM/dw/shop/v21_3/stores?latitude=24.3356791&longitude=23.769953599999997&max_distance=20000&delivery_method=delivery&client_id=1c53da3a-3640-4a31-adad-0f43be6c0904&start=0&count=200"
