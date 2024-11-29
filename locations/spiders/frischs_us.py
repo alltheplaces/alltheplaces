@@ -5,8 +5,8 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FrischsSpider(SitemapSpider, StructuredDataSpider):
-    name = "frischs"
+class FrischsUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "frischs_us"
     item_attributes = {
         "brand": "Frisch's Big Boy",
         "brand_wikidata": "Q5504660",
