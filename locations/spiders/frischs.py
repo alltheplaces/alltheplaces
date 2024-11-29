@@ -16,3 +16,4 @@ class FrischsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"/\d+/$", "parse_sd"),
     ]
+    json_parser = "chompjs"
