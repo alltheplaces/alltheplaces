@@ -1,3 +1,5 @@
+from unidecode import unidecode
+
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -24,7 +26,7 @@ class IsolaTesoriITSpider(JSONBlobSpider):
         yield response.follow(item["website"], cb_kwargs={"item": item}, callback=self.parse_store_oph)
 
     def parse_store_oph(self, response, item):
-        hours = clean_strings(response.css(".store-hours td::text").getall())
+        hours = clean_strings(unidecode(s) for s in response.css(".store-hours td::text").getall())
         oh = OpeningHours()
         for day, hour in zip(hours[0::2], hours[1::2]):
             oh.add_ranges_from_string(
