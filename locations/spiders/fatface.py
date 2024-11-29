@@ -15,7 +15,7 @@ class FatfaceSpider(CrawlSpider):
     item_attributes = {"brand": "FATFACE", "brand_wikidata": "Q5437186"}
     start_urls = ["https://www.fatface.com/countryselect"]
     rules = [
-        Rule(LinkExtractor(allow="https://www.fatface.com/[a-z]{2}/en"), callback="parse"),
+        Rule(LinkExtractor(allow=r"https://www.fatface.com/[a-z]{2}/en"), callback="parse"),
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
