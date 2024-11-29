@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 import requests
 from chompjs import parse_js_object
@@ -94,16 +95,17 @@ class HiltonSpider(Spider):
         "tennisCourt": None,
     }
 
-    def parse(self, response: Response):
-        config = parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-        app_id = config["runtimeConfig"]["DX_AUTH_API_CUSTOMER_APP_ID"]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        config = parse_js_object(
+            response.xpath('//script[contains(text(), "DX_AUTH_API_CUSTOMER_APP_ID")]/text()').get()
+        )
 
-        url = "https://www.hilton.com/dx-customer/auth/applications/token?appName=dx_shop_search_app"
-        headers = {
-            "x-dtpc": "ignore",
-        }
-        data = {"app_id": app_id}
-        yield JsonRequest(url, headers=headers, data=data, callback=self.parse_token)
+        yield JsonRequest(
+            url="https://www.hilton.com/dx-customer/auth/applications/token?appName=dx_shop_search_app",
+            headers={"x-dtpc": "ignore"},
+            data={"app_id": config["DX_AUTH_API_CUSTOMER_APP_ID"]},
+            callback=self.parse_token,
+        )
 
     def parse_token(self, response: Response):
         self.token = response.json()["access_token"]
