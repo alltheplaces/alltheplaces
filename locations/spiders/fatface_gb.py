@@ -25,4 +25,5 @@ class FatfaceGBSpider(StructuredDataSpider):
         item["ref"] = store.get("BR")
         item["lat"] = store.get("LT")
         item["lon"] = store.get("LN")
+        item["branch"] = item.pop("name").split("-")[0].strip()
         yield item
