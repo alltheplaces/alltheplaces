@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -22,6 +23,7 @@ class GameZASpider(Spider):
             item["lat"] = location.xpath(".//geoPoint/latitude/text()").get()
             item["lon"] = location.xpath(".//geoPoint/longitude/text()").get()
             item["ref"] = location.xpath(".//id/text()").get()
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             item["website"] = "https://www.game.co.za/"
             item["opening_hours"] = OpeningHours()
             for day_time in location.xpath(".//openingHours//weekDayOpeningList"):
