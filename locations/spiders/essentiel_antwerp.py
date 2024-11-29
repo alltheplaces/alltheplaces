@@ -5,7 +5,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
-from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -33,16 +32,4 @@ class EssentielAntwerpSpider(CrawlSpider):
         item["website"] = item["ref"] = response.url
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]//text()').get()
         extract_google_position(item, response)
-        item["opening_hours"] = OpeningHours()
-        for time_string in response.xpath('(//*[@class="ImageBlock_paragraph__43zjD"])[3]//p'):
-            time = time_string.xpath(".//text()").get()
-            if time in ["Closed", None]:
-                continue
-            if "&" in time:
-                for open_close_time in time.split("&"):
-                    open_time, close_time = open_close_time.split("-")
-            else:
-                open_time, close_time = time.split("—")
-            for day in DAYS_FULL:
-                item["opening_hours"].add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
         yield item
