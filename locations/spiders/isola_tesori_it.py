@@ -16,7 +16,6 @@ class IsolaTesoriITSpider(JSONBlobSpider):
     locations_key = "stores"
 
     def post_process_item(self, item, response, location):
-        item["extras"]["addr:province"] = item.pop("state")
         item["branch"] = item["name"]
         item["name"] = self.item_attributes["brand"]
         item["website"] = f"https://www.isoladeitesori.it/store/{item['website']}.html"
