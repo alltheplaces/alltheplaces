@@ -28,8 +28,8 @@ state = {
 }
 
 
-class GenesisRehabSpider(scrapy.Spider):
-    name = "genesis_rehab"
+class GenesisRehabUSSpider(scrapy.Spider):
+    name = "genesis_rehab_us"
     item_attributes = {"brand": "Genesis Rehab Services", "brand_wikidata": "Q5532813"}
     allowed_domains = ["genesishcc.com"]
     start_urls = [
