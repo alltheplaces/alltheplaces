@@ -1,5 +1,7 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -17,3 +19,8 @@ class FrischsSpider(SitemapSpider, StructuredDataSpider):
         (r"/\d+/$", "parse_sd"),
     ]
     json_parser = "chompjs"
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        name = item.pop("name").split(" ", 1)  # remove store id from branch name
+        item["branch"] = name[1] if len(name) > 1 else name
+        yield item
