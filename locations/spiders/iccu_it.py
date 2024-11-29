@@ -5,31 +5,31 @@ import zipfile
 
 import phonenumbers as pn
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import set_social_media
 from locations.json_blob_spider import JSONBlobSpider
+from locations.settings import ITEM_PIPELINES
 
 
 class IccuITSpider(JSONBlobSpider):
     name = "iccu_it"
     allowed_domains = ["opendata.anagrafe.iccu.sbn.it"]
     start_urls = ["https://opendata.anagrafe.iccu.sbn.it/biblioteche.zip"]
-    countries = ["it"]
 
     dataset_attributes = {
-        "attribution": "not required",
+        "attribution": "optional",
+        "attribution:name": "Istituto Centrale per il Catalogo Unico delle Biblioteche Italiane e per le Informazioni Bibliografiche",
         "contact:email": "ic-cu.anagrafe@beniculturali.it",
-        "license": "CC0",
+        "license": "Creative Commons Zero",
         "license:website": "https://creativecommons.org/publicdomain/zero/1.0/deed.it",
         "license:wikidata": "Q6938433",
-        "use:commercial": "yes",
+        "use:commercial": "permit",
         "use:openstreetmap": "yes",
         "website": "https://anagrafe.iccu.sbn.it/it/open-data/",
     }
 
-    item_attributes = {
-        "country": "IT",
-        "extras": Categories.LIBRARY.value,
+    custom_settings = {
+        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None}
     }
 
     def extract_json(self, response):
@@ -78,9 +78,10 @@ class IccuITSpider(JSONBlobSpider):
     )
 
     def post_process_item(self, item, response, location: dict):
-        extras = item["extras"]
         if "archivio" in item["name"].lower():
-            extras["amenity"] = "archive"
+            apply_category({"amenity": "archive"}, item)
+        else:
+            apply_category(Categories.LIBRARY, item)
 
         if ente := (location.get("ente") or "").strip():
             ente = re.sub(self.regex_for_ministero_cleanup, r"\1", ente)
@@ -88,25 +89,25 @@ class IccuITSpider(JSONBlobSpider):
 
         for ref, val in location["codici-identificativi"].items():
             if val:
-                extras[f"ref:{ref}"] = val
-        item["ref"] = extras["ref:isil"]
+                item["extras"][f"ref:{ref}"] = val
+        item["ref"] = item["extras"]["ref:isil"]
 
-        extras["official_name"] = item["name"]
+        item["extras"]["official_name"] = item["name"]
         for name in location["denominazioni"]["alternative"]:
             if name := name.strip():
-                apply_category({"alt_name": name}, item)
+                item["extras"]["alt_name"] = name
         for name in location["denominazioni"]["precedenti"]:
             if name := name.strip():
-                apply_category({"old_name": name}, item)
+                item["extras"]["old_name"] = name
 
-        extras.update(
-            {
-                "access": "permit" if location["accesso"]["riservato"] else "yes",
-                "wheelchair": "yes" if location["accesso"]["portatori-handicap"] else "no",
-            }
-        )
+        apply_yes_no(Extras.WHEELCHAIR, item, location["accesso"]["portatori-handicap"], False)
+        if location["accesso"]["riservato"]:
+            apply_yes_no("access=permit", item, True)
+        else:
+            apply_yes_no("access", item, True)
+
         if updated := location.get("data-aggiornamento"):
-            extras["source:iccu:updated"] = updated
+            item["extras"]["check_date"] = updated
 
         self.add_contacts(item, location)
 
@@ -157,11 +158,11 @@ class IccuITSpider(JSONBlobSpider):
     def add_mail(self, item, valore):
         # email and PEC (italian certified email)
         if self.contact_match["pec_value"].match(valore) or self.contact_match["pec_alt_value"].match(valore):
-            apply_category({"contact:pec": valore}, item)
+            item["extras"]["contact:pec"] = valore
             return True
         if self.contact_match["mail_value"].match(valore):
             if item["email"]:
-                apply_category({"contact:email": valore}, item)
+                item["extras"]["contact:email"] = valore
             else:
                 item["email"] = valore
             return True
@@ -199,7 +200,7 @@ class IccuITSpider(JSONBlobSpider):
                 return True
         if tipo == "website":
             if item["website"]:
-                apply_category({"contact:website": valore}, item)
+                item["extras"]["contact:website"] = valore
             else:
                 item["website"] = valore
             return True
@@ -227,4 +228,4 @@ class IccuITSpider(JSONBlobSpider):
         if tipo == "phone" and not item[tipo]:
             item[tipo] = valore
         else:
-            apply_category({f"contact:{tipo}": valore}, item)
+            item["extras"][f"contact:{tipo}"] = valore
