@@ -10,17 +10,13 @@ class FitActiveSpider(JSONBlobSpider):
     skip_auto_cc_domain = True  # all URLs are .it, but not all places are in Italy
 
     def pre_process_data(self, location):
-        del location["region"]
-        del location["state"]
         website_path = location["title"].removeprefix("FitActive").strip().replace(" ", "")
         location["website"] = f"https://www.fitactive.it/i-club/{website_path}.php"
-        location["branch"] = location["title"]
-        location["title"] = "FitActive"
 
     def post_process_item(self, item, response, location):
         if img_path := location.get("img"):
             item["image"] = f"https://www.fitactive.it/{img_path.lstrip('/')}"
-        item["branch"] = location["branch"]
+        item["branch"] = item.pop("name")
         if fb := location.get("fbLinkString"):
             set_social_media(item, "facebook", fb.strip())
         if insta := location.get("linkInsta"):
