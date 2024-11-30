@@ -5,7 +5,7 @@ from locations.items import Feature, SocialMedia, set_social_media
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class EggsUpGrillUSSpdier(SitemapSpider, StructuredDataSpider):
+class EggsUpGrillUSSpider(SitemapSpider, StructuredDataSpider):
     name = "eggs_up_grill_us"
     item_attributes = {"brand": "Eggs Up Grill", "brand_wikidata": "Q131319129"}
     sitemap_urls = ["https://locations.eggsupgrill.com/robots.txt"]
