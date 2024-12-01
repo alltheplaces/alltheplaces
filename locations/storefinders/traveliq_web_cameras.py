@@ -38,7 +38,11 @@ class TravelIQWebCamerasSpider(Spider):
     operators: dict[tuple[str, str, str]] = {}
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(url="https://" +  self.allowed_domains[0] + '/List/GetData/Cameras?query={"columns":[{"data":null,"name":""},{"name":"sortId","s":true},{"name":"state","s":true},{"name":"roadway","s":true},{"name":"description1"},{"data":5,"name":""}],"order":[{"column":2,"dir":"asc"},{"column":1,"dir":"asc"}],"start":0,"length":100,"search":{"value":""}}&lang=en-US')
+        yield JsonRequest(
+            url="https://"
+            + self.allowed_domains[0]
+            + '/List/GetData/Cameras?query={"columns":[{"data":null,"name":""},{"name":"sortId","s":true},{"name":"state","s":true},{"name":"roadway","s":true},{"name":"description1"},{"data":5,"name":""}],"order":[{"column":2,"dir":"asc"},{"column":1,"dir":"asc"}],"start":0,"length":100,"search":{"value":""}}&lang=en-US'
+        )
 
     def parse(self, response: Response) -> Iterable[JsonRequest | Feature]:
         for start in range(100, response.json()["recordsFiltered"], 100):
@@ -60,8 +64,7 @@ class TravelIQWebCamerasSpider(Spider):
             }
             apply_category(Categories.SURVEILLANCE_CAMERA, properties)
             properties["extras"]["contact:webcam"] = "https://{}/tooltip/Cameras/{}".format(
-                self.allowed_domains[0],
-                properties["ref"]
+                self.allowed_domains[0], properties["ref"]
             )
             properties["extras"]["camera:type"] = "fixed"
             yield Feature(**properties)
