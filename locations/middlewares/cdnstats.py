@@ -17,4 +17,7 @@ class CDNStatsMiddleware:
         elif response.headers.get(b"Server") == b"AkamaiGHost":
             self.crawler.stats.inc_value("atp/cdn/akamai/response_count")
             self.crawler.stats.inc_value(f"atp/cdn/akamai/response_status_count/{response.status}")
+        elif response.headers.get(b"Server") == b"CloudFront":
+            self.crawler.stats.inc_value("atp/cdn/cloudfront/response_count")
+            self.crawler.stats.inc_value(f"atp/cdn/cloudfront/response_status_count/{response.status}")
         return response
