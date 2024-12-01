@@ -9,7 +9,12 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class IllinoisDepartmentOfTransportationUSSpider(JSONBlobSpider):
     name = "illinois_department_of_transportation_us"
-    item_attributes = {"operator": "Illinois Department of Transportation", "operator_wikidata": "Q4925114", "state": "IL", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "Illinois Department of Transportation",
+        "operator_wikidata": "Q4925114",
+        "state": "IL",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["travelmidwest.com"]
     start_urls = ["https://travelmidwest.com/lmiga/cameraMap.json"]
     locations_key = "features"
