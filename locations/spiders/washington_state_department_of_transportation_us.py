@@ -29,7 +29,7 @@ class WashingtonStateDepartmentOfTransportationUSSpider(JSONBlobSpider):
         item["ref"] = str(feature["attributes"]["CameraID"])
         item["name"] = feature["attributes"]["CameraTitle"]
         item["lat"], item["lon"] = Transformer.from_crs("epsg:3857", "epsg:4326").transform(
-            feature["geometry"]["x"], feature["geometry"]["x"]
+            feature["geometry"]["x"], feature["geometry"]["y"]
         )
         item["extras"]["contact:webcam"] = feature["attributes"]["ImageURL"]
         item["extras"]["camera:type"] = "fixed"
