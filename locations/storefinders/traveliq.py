@@ -5,7 +5,6 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
@@ -65,16 +64,38 @@ class TravelIQSpider(Spider):
                     # The "Cameras" feature type returns a single view from
                     # fixed cameras, or multiple views from a single PTZ
                     # camera.
-                    yield JsonRequest(url=f"{self.api_endpoint}get/cameras?key={self.api_key}", callback=self.parse_cameras)
+                    yield JsonRequest(
+                        url=f"{self.api_endpoint}get/cameras?key={self.api_key}", callback=self.parse_cameras
+                    )
                 case "Grouped Cameras":
-                    yield JsonRequest(url=f"{self.api_endpoint}get/groupedcameras?key={self.api_key}", callback=self.parse_cameras)
-                case "Airports" | "Alerts" | "Alternative Fuel" | "Bridges" | "Events" | "Express Lanes" | "Ferries" | "Message Signs" | "Parks" | "Ports Of Entry" | "Rest Areas" | "Road Conditions" | "Truck Parking" | "Variable Speed Signs" | "Weather Stations" | "Winter Road Conditions":
+                    yield JsonRequest(
+                        url=f"{self.api_endpoint}get/groupedcameras?key={self.api_key}", callback=self.parse_cameras
+                    )
+                case (
+                    "Airports"
+                    | "Alerts"
+                    | "Alternative Fuel"
+                    | "Bridges"
+                    | "Events"
+                    | "Express Lanes"
+                    | "Ferries"
+                    | "Message Signs"
+                    | "Parks"
+                    | "Ports Of Entry"
+                    | "Rest Areas"
+                    | "Road Conditions"
+                    | "Truck Parking"
+                    | "Variable Speed Signs"
+                    | "Weather Stations"
+                    | "Winter Road Conditions"
+                ):
                     # Not yet implemented by this storefinder class.
                     pass
                 case _:
                     # New type of feature detected.
-                    self.logger.warning("New type of feature detected for Travel-IQ storefinder: {}".format(feature_type))
-                    pass
+                    self.logger.warning(
+                        "New type of feature detected for Travel-IQ storefinder: {}".format(feature_type)
+                    )
 
     def parse_cameras(self, response: Response) -> Iterable[Feature]:
         cameras = response.json()
@@ -84,7 +105,15 @@ class TravelIQSpider(Spider):
                 continue
             properties = {
                 "ref": next(ref for ref in [camera.get("SourceId"), camera.get("Id")] if ref is not None),
-                "name": next(name for name in [camera.get("Name"), camera.get("Location"), camera.get("Views", [{}])[0].get("Description")] if name is not None),
+                "name": next(
+                    name
+                    for name in [
+                        camera.get("Name"),
+                        camera.get("Location"),
+                        camera.get("Views", [{}])[0].get("Description"),
+                    ]
+                    if name is not None
+                ),
                 "lat": camera["Latitude"],
                 "lon": camera["Longitude"],
             }
@@ -98,8 +127,14 @@ class TravelIQSpider(Spider):
                     properties["extras"]["camera:type"] = "fixed"
                 else:
                     properties["extras"]["camera:type"] = "dome"
-                webcam_urls += [view["VideoUrl"] for view in views if view.get("VideoUrl") is not None and view.get("Status") != "Disabled"]
-                webcam_urls += [view["Url"] for view in views if view.get("Url") is not None and view.get("Status") != "Disabled"]
+                webcam_urls += [
+                    view["VideoUrl"]
+                    for view in views
+                    if view.get("VideoUrl") is not None and view.get("Status") != "Disabled"
+                ]
+                webcam_urls += [
+                    view["Url"] for view in views if view.get("Url") is not None and view.get("Status") != "Disabled"
+                ]
             elif fixed_image_url := camera.get("Url"):
                 properties["extras"]["camera:type"] = "fixed"
                 webcam_urls += [fixed_image_url]
