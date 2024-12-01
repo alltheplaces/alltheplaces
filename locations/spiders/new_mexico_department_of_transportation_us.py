@@ -7,11 +7,12 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class NmroadsUSSpider(JSONBlobSpider):
-    name = "nmroads_us"
+class NewMexicoDepartmentOfTransportationUSSpider(JSONBlobSpider):
+    name = "new_mexico_department_of_transportation_us"
     item_attributes = {
         "operator": "New Mexico Department of Transportation",
         "operator_wikidata": "Q2250917",
+        "state": "NM",
         "extras": Categories.SURVEILLANCE_CAMERA.value,
     }
     allowed_domains = ["servicev4.nmroads.com"]
