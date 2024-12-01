@@ -13,9 +13,12 @@ class NewEngland511USSpider(Spider):
     and website. Usually TravelIQSpider storefinder could be used, but in this
     case the API has been disabled so an alternative spider is required.
     """
+
     name = "new_england_511_us"
     allowed_domains = ["www.newengland511.org"]
-    start_urls = ['https://www.newengland511.org/List/GetData/Cameras?query={"columns":[{"data":null,"name":""},{"name":"sortId","s":true},{"name":"state","s":true},{"name":"roadway","s":true},{"name":"description1"},{"data":5,"name":""}],"order":[{"column":2,"dir":"asc"},{"column":1,"dir":"asc"}],"start":0,"length":100,"search":{"value":""}}&lang=en-US']
+    start_urls = [
+        'https://www.newengland511.org/List/GetData/Cameras?query={"columns":[{"data":null,"name":""},{"name":"sortId","s":true},{"name":"state","s":true},{"name":"roadway","s":true},{"name":"description1"},{"data":5,"name":""}],"order":[{"column":2,"dir":"asc"},{"column":1,"dir":"asc"}],"start":0,"length":100,"search":{"value":""}}&lang=en-US'
+    ]
     operators = {
         "ME": ["Maine Department of Transportation", "Q4926312"],
         "NH": ["New Hampshire Department of Transportation", "Q5559073"],
@@ -24,7 +27,9 @@ class NewEngland511USSpider(Spider):
 
     def parse(self, response: Response) -> Iterable[JsonRequest | Feature]:
         for start in range(100, response.json()["recordsFiltered"], 100):
-            yield JsonRequest(url=response.url.replace('%22start%22:0', '%22start%22:{}'.format(start)), callback=self.parse_cameras)
+            yield JsonRequest(
+                url=response.url.replace("%22start%22:0", "%22start%22:{}".format(start)), callback=self.parse_cameras
+            )
         yield from self.parse_cameras(response)
 
     def parse_cameras(self, response: Response) -> Iterable[Feature]:
@@ -39,6 +44,8 @@ class NewEngland511USSpider(Spider):
                 "operator_wikidata": self.operators[camera["organizationCenterId"]][1],
             }
             apply_category(Categories.SURVEILLANCE_CAMERA, properties)
-            properties["extras"]["contact:webcam"] = "https://www.newengland511.org/tooltip/Cameras/{}".format(properties["ref"])
+            properties["extras"]["contact:webcam"] = "https://www.newengland511.org/tooltip/Cameras/{}".format(
+                properties["ref"]
+            )
             properties["extras"]["camera:type"] = "fixed"
             yield Feature(**properties)
