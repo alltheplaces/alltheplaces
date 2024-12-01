@@ -6,6 +6,7 @@ class LouisianaDepartmentOfTransportationAndDevelopmentUSSpider(TravelIQSpider):
     item_attributes = {
         "operator": "Louisiana Department of Transportation and Development",
         "operator_wikidata": "Q2400783",
+        "state": "LA",
     }
     api_endpoint = "https://511la.org/api/v2/"
     api_key = "7a43f543af71472db8ff3c01c84aea45"

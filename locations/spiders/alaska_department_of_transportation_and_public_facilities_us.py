@@ -6,6 +6,7 @@ class AlaskaDepartmentOfTransportationAndPublicFacilitiesUSSpider(TravelIQSpider
     item_attributes = {
         "operator": "Alaska Department of Transportation & Public Facilities",
         "operator_wikidata": "Q4708536",
+        "state": "AK",
     }
     api_endpoint = "https://511.alaska.gov/api/v2/"
     api_key = "7bafc2d1931749e9b7933450c5aefd5d"
