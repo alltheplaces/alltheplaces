@@ -26,6 +26,11 @@ class WashingtonStateDepartmentOfTransportationUSSpider(JSONBlobSpider):
         return parse_js_object(response.text)["features"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if "www.tripcheck.com" in feature["attributes"]["ImageURL"]:
+            # Some cameras from the Oregon Department of Transportation are
+            # included. Ignore these cameras as Washington State is not the
+            # authoritative source of such camera information.
+            return
         item["ref"] = str(feature["attributes"]["CameraID"])
         item["name"] = feature["attributes"]["CameraTitle"]
         item["lat"], item["lon"] = Transformer.from_crs("epsg:3857", "epsg:4326").transform(
