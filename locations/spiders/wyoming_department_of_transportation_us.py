@@ -9,7 +9,12 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class WyomingDepartmentOfTransportationUSSpider(JSONBlobSpider):
     name = "wyoming_department_of_transportation_us"
-    item_attributes = {"operator": "Wyoming Department of Transportation", "operator_wikidata": "Q8040331", "state": "WY", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "Wyoming Department of Transportation",
+        "operator_wikidata": "Q8040331",
+        "state": "WY",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["map.wyoroad.info"]
     start_urls = ["https://map.wyoroad.info/wti511map-data/webcameras_v2.json"]
     locations_key = "features"
