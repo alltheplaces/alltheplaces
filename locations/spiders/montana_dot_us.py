@@ -10,7 +10,7 @@ from locations.storefinders.alltheplaces import AllThePlacesSpider
 # Very similar to South Caroline DOT, but pulls in some cameras surrounding the state!
 class MontanaDotUSSpider(AllThePlacesSpider):
     name = "montana_dot_us"
-    start_urls = ["https://mt.cdn.iteris-atis.com/geojson/icons/metadata/icons.cameras.geojson"]
+    start_urls = ["https://mt.cdn.iteris-atis.com/geojson/icons/metadata/icons.rwis.geojson"]
 
     def post_process_feature(
         self, item: Feature, source_feature: dict, response: Response, **kwargs
@@ -20,6 +20,7 @@ class MontanaDotUSSpider(AllThePlacesSpider):
         camera = extras["cameras"][0]
         name = item["name"] = camera["description"]
         item["image"] = camera["image"]
+
         if "canada" in name.lower():
             item["country"] = "CA"
         else:
@@ -32,5 +33,7 @@ class MontanaDotUSSpider(AllThePlacesSpider):
                 item["operator"] = "Montana DOT"
                 item["operator_wikidata"] = "Q5558259"
                 item["website"] = "https://www.511mt.net/"
+
         apply_category(Categories.SURVEILLANCE_CAMERA, item)
+
         yield item
