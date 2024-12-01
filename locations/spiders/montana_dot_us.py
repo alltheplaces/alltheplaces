@@ -17,7 +17,13 @@ class MontanaDotUSSpider(AllThePlacesSpider):
     ) -> Iterable[Feature]:
         extras = item.pop("extras")
         item["ref"] = extras["id"]
-        camera = extras["cameras"][0]
+
+        cameras = extras.get("cameras")
+        if not cameras:
+            return
+
+        # TODO There can be multiple cameras per location, but we'll pick the first one for now
+        camera = cameras[0]
         name = item["name"] = camera["description"]
         item["image"] = camera["image"]
 
