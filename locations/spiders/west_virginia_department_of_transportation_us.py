@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class WestVirginiaDepartmentOfTransportationUS(JSONBlobSpider):
+class WestVirginiaDepartmentOfTransportationUSSpider(JSONBlobSpider):
     name = "west_virginia_department_of_transportation_us"
     item_attributes = {"operator": "West Virginia Department of Transportation", "operator_wikidata": "Q7986842", "state": "WV", "extras": Categories.SURVEILLANCE_CAMERA.value}
     allowed_domains = ["wv511.org"]
