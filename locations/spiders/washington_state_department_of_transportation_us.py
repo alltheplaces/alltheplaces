@@ -28,7 +28,9 @@ class WashingtonStateDepartmentOfTransportationUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["attributes"]["CameraID"])
         item["name"] = feature["attributes"]["CameraTitle"]
-        item["lat"], item["lon"] = Transformer.from_crs("epsg:3857", "epsg:4326").transform(feature["geometry"]["x"], feature["geometry"]["x"])
+        item["lat"], item["lon"] = Transformer.from_crs("epsg:3857", "epsg:4326").transform(
+            feature["geometry"]["x"], feature["geometry"]["x"]
+        )
         item["extras"]["contact:webcam"] = feature["attributes"]["ImageURL"]
         item["extras"]["camera:type"] = "fixed"
         yield item
