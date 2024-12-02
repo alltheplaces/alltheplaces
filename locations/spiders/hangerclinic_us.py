@@ -10,7 +10,7 @@ from locations.items import Feature
 
 
 class HangerclinicSpider(SitemapSpider):
-    name = "hangerclinic"
+    name = "hangerclinic_us"
     item_attributes = {"brand": "Hanger Clinic"}
     sitemap_urls = [
         "https://hangerclinic.com/locations-sitemap.xml",
