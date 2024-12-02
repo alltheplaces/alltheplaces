@@ -14,7 +14,7 @@ class BrillenDESpider(scrapy.Spider):
     item_attributes = {"brand": "brillen.de", "brand_wikidata": "Q105275794"}
 
     def start_requests(self):
-        for lat, lon in point_locations("eu_centroids_40km_radius_country.csv", "DE"):
+        for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", "DE"):
             # The api has some unknown maximum radius and doesn't respect
             # arbitrarily large radius values, so we use a latlng grid
             yield JsonRequest(
@@ -28,11 +28,13 @@ class BrillenDESpider(scrapy.Spider):
             # They also have "normal" opticians as partner stores. We're only
             # interested in their own branded shops.
             if location["store_name"].startswith("brillen.de"):
-                location["name"] = location.pop("store_name")
                 location["ref"] = location.pop("store_id")
                 location["postcode"] = location.pop("zip")
                 location["street_address"] = location.pop("street")
                 location["country"] = "DE"
                 item = DictParser.parse(location)
+                item["branch"] = item.pop("name").removeprefix("brillen.de ")
+                item["housenumber"] = location["street2"]
+                item["street"] = location["street1"]
 
                 yield item
