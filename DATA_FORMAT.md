@@ -4,7 +4,7 @@ The output of the periodic run of all spiders posted on https://www.alltheplaces
 
 ## Identifier
 
-Each GeoJSON feature will have an `id` field. The ID is a hash based on the `ref` and `@spider` fields and should be consistent between builds.
+Each GeoJSON feature will have an `id` field. The ID is a hash based on the `ref` and `@spider` fields and *should be* consistent between builds.
 
 Data consumers might use the `id` field to determine if new objects show up or disappear between builds. Occasionally, the authors of spiders will change the spider name or the website we spider will change the identifiers used for the store. In these cases, the ID field in our output will change dramatically. At this time, we don't make an attempt to link the old and new IDs. Also, in some cases a spider author is unable to find a stable identifier for an item and each run will get a unique identifier.
 
@@ -20,7 +20,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 
 | Name                  | Description |
 |-----------------------|---|
-| `ref`                 | A unique identifier for this feature inside this spider. The code that generates the output will remove duplicates based on the value of this key.
+| `ref`                 | A unique identifier for this feature inside this spider. The code that generates the output will remove duplicates based on the value of this key. It forms part of the feature [`id`](#identifier).
 | `@spider`             | The name of the spider that produced this feature. It is [specified in each spider](https://github.com/alltheplaces/alltheplaces/blob/11d9be56515ef0f6419e001b1950f69d28d4f400/locations/spiders/apple.py#L9), so it isn't necessarily related to the file name/class name of the spider, for example [99_bikes_au](https://github.com/alltheplaces/alltheplaces/blob/master/locations/spiders/99_bikes_au.py)
 | `@source_uri`         | A URI describing where this feature was obtained. This is not guranteed to be viewable in a web browser.
 | `branch`              | This is often the location specific part of a chain location's name, like the name of the mall or city it is in, without the brand name included.
