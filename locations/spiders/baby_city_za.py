@@ -4,7 +4,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -13,7 +13,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class BabyCityZASpider(CrawlSpider):
     name = "baby_city_za"
-    item_attributes = {"brand": "Baby City", "brand_wikidata": "Q116732888", "extras": Categories.SHOP_BABY_GOODS.value}
+    item_attributes = {"brand": "Baby City", "brand_wikidata": "Q116732888"}
     allowed_domains = ["www.babycity.co.za"]
     start_urls = ["https://www.babycity.co.za/find-a-store"]
     rules = [Rule(LinkExtractor(restrict_xpaths='//a[contains(@class, "store-info")]'), "parse")]
@@ -21,7 +21,9 @@ class BabyCityZASpider(CrawlSpider):
     def parse(self, response: Response) -> Iterable[Feature]:
         properties = {
             "ref": response.url,
-            "name": response.xpath('//h1[contains(@class, "store-title")]/span/text()').get(),
+            "branch": response.xpath('//h1[contains(@class, "store-title")]/span/text()')
+            .get()
+            .removeprefix("Baby City "),
             "addr_full": merge_address_lines(
                 response.xpath('//div[contains(@class, "shop-contact-address")]/text()').getall()
             ),
@@ -30,6 +32,7 @@ class BabyCityZASpider(CrawlSpider):
             "opening_hours": OpeningHours(),
         }
         extract_google_position(properties, response)
+        apply_category(Categories.SHOP_BABY_GOODS, properties)
         hours_text = " ".join(
             filter(
                 None,
