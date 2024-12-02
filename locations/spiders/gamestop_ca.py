@@ -1,34 +1,27 @@
+from typing import Any
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.spiders.gamestop_us import GAMESTOP_SHARED_ATTRIBUTES
 
 
 class GamestopCASpider(Spider):
     name = "gamestop_ca"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
-    allowed_domains = ["www.gamestop.ca"]
-    start_urls = ["https://www.gamestop.ca/StoreLocator/GetStoresForStoreLocatorByProduct"]
+    start_urls = ["https://www.gamestop.ca/api/store/GetNearestStoresByLocation?latitude=0&longitude=0&limit=1000"]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json():
-            for key, value in location.items():
-                if value == "undefined":
-                    location[key] = None
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full", None)
-            item["phone"] = location["Phones"]
-            yield from self.extract_hours(item, location)
-
-    @staticmethod
-    def extract_hours(item: Feature, location: dict):
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(location["Hours"])
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json():
+            item = DictParser.parse(store)
+            item["opening_hours"] = OpeningHours()
+            for day, time in store["hours"].items():
+                if time == "Closed":
+                    continue
+                open_time, close_time = time.split("–")
+                item["opening_hours"].add_range(
+                    day=day, open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M %p"
+                )
+            yield item
