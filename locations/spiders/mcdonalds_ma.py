@@ -4,6 +4,7 @@ import scrapy
 
 from locations.items import Feature
 from locations.spiders.mcdonalds import McdonaldsSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class McdonaldsMASpider(scrapy.Spider):
@@ -11,6 +12,7 @@ class McdonaldsMASpider(scrapy.Spider):
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.ma"]
     start_urls = ("http://www.mcdonalds.ma/nos-restaurants/r%C3%A9seau-maroc",)
+    user_agent = BROWSER_DEFAULT
 
     def parse_address(self, data):
         address = ""
