@@ -21,11 +21,23 @@ class BabyCityZASpider(CrawlSpider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//h1[contains(@class, "store-title")]/span/text()').get(),
-            "addr_full": merge_address_lines(response.xpath('//div[contains(@class, "shop-contact-address")]/text()').getall()),
+            "addr_full": merge_address_lines(
+                response.xpath('//div[contains(@class, "shop-contact-address")]/text()').getall()
+            ),
             "phone": response.xpath('//div[contains(@class, "phone-number")]/div/span/text()').get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
-        hours_text = " ".join(filter(None, map(str.strip, response.xpath('(//div[@class="product info detailed"]/div[contains(@class, "store-accordion-container")]/div[@class="accordion-item"])[1]/div[contains(@class, "accordion-content")]/span[contains(@class, "day-name")]//text()').getall())))
+        hours_text = " ".join(
+            filter(
+                None,
+                map(
+                    str.strip,
+                    response.xpath(
+                        '(//div[@class="product info detailed"]/div[contains(@class, "store-accordion-container")]/div[@class="accordion-item"])[1]/div[contains(@class, "accordion-content")]/span[contains(@class, "day-name")]//text()'
+                    ).getall(),
+                ),
+            )
+        )
         properties["opening_hours"].add_ranges_from_string(hours_text)
         yield Feature(**properties)
