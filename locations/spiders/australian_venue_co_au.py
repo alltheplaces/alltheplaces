@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories
-from locations.hours import OpeningHours, DAYS_EN, DAYS_3_LETTERS_FROM_SUNDAY
+from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.algolia import AlgoliaSpider
@@ -12,7 +12,11 @@ from locations.structured_data_spider import clean_facebook, clean_instagram
 
 class AustralianVenuCoAUSpider(AlgoliaSpider):
     name = "australian_venue_co_au"
-    item_attributes = {"operator": "Australian Venue Co.", "operator_wikidata": "Q122380559", "extras": Categories.PUB.value}
+    item_attributes = {
+        "operator": "Australian Venue Co.",
+        "operator_wikidata": "Q122380559",
+        "extras": Categories.PUB.value,
+    }
     api_key = "286bd36070d06e5bb729e498f0134e1f"
     app_id = "KLAM1K0ACF"
     index_name = "prod_venues"
@@ -28,5 +32,10 @@ class AustralianVenuCoAUSpider(AlgoliaSpider):
         item["opening_hours"] = OpeningHours()
         if isinstance(feature["opening_hours"].get("hours"), list):
             for day_hours in feature["opening_hours"]["hours"]:
-                item["opening_hours"].add_range(DAYS_EN[DAYS_3_LETTERS_FROM_SUNDAY[day_hours["open"]["day"]]], day_hours["open"]["time"], day_hours["close"]["time"], "%H%M")
+                item["opening_hours"].add_range(
+                    DAYS_EN[DAYS_3_LETTERS_FROM_SUNDAY[day_hours["open"]["day"]]],
+                    day_hours["open"]["time"],
+                    day_hours["close"]["time"],
+                    "%H%M",
+                )
         yield item
