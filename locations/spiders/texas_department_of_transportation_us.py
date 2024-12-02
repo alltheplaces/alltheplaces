@@ -17,10 +17,20 @@ class TexasDepartmentOfTransportationUSSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response) -> Iterable[JsonRequest]:
-        district_data = response.xpath('//script[contains(text(), "mainViewModel.initialize(")]/text()').get().split("mainViewModel.initialize(", 1)[1].split(");", 1)[0]
+        district_data = (
+            response.xpath('//script[contains(text(), "mainViewModel.initialize(")]/text()')
+            .get()
+            .split("mainViewModel.initialize(", 1)[1]
+            .split(");", 1)[0]
+        )
         districts = parse_js_object(district_data)["districts"]
         for district in districts:
-            yield JsonRequest(url="https://its.txdot.gov/its/DistrictIts/GetCctvStatusListByDistrict?districtCode={}".format(district["code"]), callback=self.parse_cameras)
+            yield JsonRequest(
+                url="https://its.txdot.gov/its/DistrictIts/GetCctvStatusListByDistrict?districtCode={}".format(
+                    district["code"]
+                ),
+                callback=self.parse_cameras,
+            )
 
     def parse_cameras(self, response: Response) -> Iterable[Feature]:
         for roadway, camera_list in response.json()["roadwayCctvStatuses"].items():
@@ -35,6 +45,9 @@ class TexasDepartmentOfTransportationUSSpider(Spider):
                     "lon": camera["longitude"],
                 }
                 apply_category(Categories.SURVEILLANCE_CAMERA, properties)
-                properties["extras"]["contact:webcam"] = "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId={}&districtCode={}".format(quote_plus(properties["ref"]), response.url.split("districtCode=", 1)[1])
+                properties["extras"]["contact:webcam"] = (
+                    "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId={}&districtCode={}".format(
+                        quote_plus(properties["ref"]), response.url.split("districtCode=", 1)[1]
+                    )
+                )
                 yield Feature(**properties)
-
