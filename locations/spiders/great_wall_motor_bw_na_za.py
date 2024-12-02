@@ -24,17 +24,17 @@ class GreatWallMotorBWNAZASpider(JSONBlobSpider):
         "brand_wikidata": "Q1117001",
     }
     start_urls = [
-        "https://www.gwm.co.za/_next/static/chunks/132-327146a73ab927d0.js",
-        "https://www.haval.co.za/_next/static/chunks/7645-1ac3fce7750412a0.js",
+        "https://www.gwm.co.za/_next/static/chunks/6008-111c581cb1050b46.js",
     ]
+    no_refs = True
 
     def extract_json(self, response):
-        return chompjs.parse_js_object(response.text.split("let a=")[1])
+        return chompjs.parse_js_object(response.text.split("let p=")[1])
 
     def post_process_item(self, item, response, location):
-        item["ref"] = location["cmscode"]
         item["branch"] = item.pop("name")
         item["addr_full"] = location["location"]
+        item["website"] = "https://www.gwm.co.za"
         try:
             int(item["addr_full"].split(",")[-1])
             item["postcode"] = item["addr_full"].split(",")[-1]
@@ -43,7 +43,6 @@ class GreatWallMotorBWNAZASpider(JSONBlobSpider):
             pass
         if item["state"] in ["Namibia", "Botswana"]:
             item.pop("state")
-
         if location["category"] == "Dealership":
             apply_category(Categories.SHOP_CAR, item)
         else:
