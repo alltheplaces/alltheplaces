@@ -10,7 +10,7 @@ from locations.storefinders.algolia import AlgoliaSpider
 from locations.structured_data_spider import clean_facebook, clean_instagram
 
 
-class AustralianVenuCompanyAUSpider(AlgoliaSpider):
+class AustralianVenueCompanyAUSpider(AlgoliaSpider):
     name = "australian_venue_company_au"
     item_attributes = {
         "operator": "Australian Venue Co.",
