@@ -1,15 +1,20 @@
 from typing import Iterable
 
-from scrapy.http import Response, Request
+from scrapy.http import Request, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class MississippiDepartmentOfTransportationUSSpider(JSONBlobSpider):
     name = "mississippi_department_of_transportation_us"
-    item_attributes = {"operator": "Mississippi Department of Transportation", "operator_wikidata": "Q5508391", "state": "MS", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "Mississippi Department of Transportation",
+        "operator_wikidata": "Q5508391",
+        "state": "MS",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["api.mdottraffic.com"]
     start_urls = ["https://api.mdottraffic.com/prod/v3/data/CameraImages"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -28,5 +33,7 @@ class MississippiDepartmentOfTransportationUSSpider(JSONBlobSpider):
             item["extras"]["camera:type"] = "dome"
         else:
             item["extras"]["camera:type"] = "fixed"
-        item["extras"]["contact:webcam"] = ";".join([feature["StillSourceHighQuality"], feature["AddressHLSHighQuality"]])
+        item["extras"]["contact:webcam"] = ";".join(
+            [feature["StillSourceHighQuality"], feature["AddressHLSHighQuality"]]
+        )
         yield item
