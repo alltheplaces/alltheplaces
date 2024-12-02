@@ -11,8 +11,7 @@ from locations.items import Feature
 # No location available
 class CancerResearchUkGBSpider(Spider):
     name = "cancer_research_uk_gb"
-    item_attributes = {"brand": "Cancer Research UK", "brand_wikidata": "Q326079"}
-    aallowed_domains = ["cancerresearchuk.org"]
+    item_attributes = {"brand": "Cancer Research UK", "brand_wikidata": "Q326079", "country": "GB"}
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
