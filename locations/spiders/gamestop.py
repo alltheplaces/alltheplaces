@@ -22,6 +22,7 @@ class GamestopSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
+            item["ref"] = " - ".join([str(item["ref"]), kwargs["country"]])
             item["website"] = f"https://www.gamestop.{kwargs['country']}"
             item["opening_hours"] = OpeningHours()
             for day, time in store["hours"].items():
