@@ -14,19 +14,24 @@ class GamestopSpider(Spider):
 
     def start_requests(self) -> Iterable[Request]:
         for country in ["ca", "de", "it"]:
-            url = (
-                f"https://www.gamestop.{country}/api/store/GetNearestStoresByLocation?latitude=0&longitude=0&limit=1000"
+            yield JsonRequest(
+                url="https://www.gamestop.{}/api/store/GetNearestStoresByLocation?latitude=0&longitude=0&limit=1000".format(
+                    country
+                ),
+                cb_kwargs={"country": country},
             )
-            yield JsonRequest(url=url, cb_kwargs={"country": country})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
-            item["ref"] = " - ".join([str(item["ref"]), kwargs["country"]])
+            item["branch"] = item.pop("name")
+            item["ref"] = "-".join([str(item["ref"]), kwargs["country"]])
+            item["country"] = kwargs["country"]
             item["website"] = f"https://www.gamestop.{kwargs['country']}"
             item["opening_hours"] = OpeningHours()
             for day, time in store["hours"].items():
                 if time == "Closed":
+                    item["opening_hours"].set_closed(day)
                     continue
                 open_time, close_time = time.split("–")
                 item["opening_hours"].add_range(
