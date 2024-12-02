@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class HangerclinicSpider(SitemapSpider):
+class HangerclinicUSSpider(SitemapSpider):
     name = "hangerclinic_us"
     item_attributes = {"brand": "Hanger Clinic"}
     sitemap_urls = [
