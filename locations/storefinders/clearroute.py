@@ -31,9 +31,15 @@ class ClearRouteSpider(Spider):
 
     def start_requests(self) -> Iterable[JsonRequest]:
         if "cameras" in self.features:
-            yield JsonRequest(url=f"https://{self.customer_id}.cdn.iteris-atis.com/geojson/icons/metadata/icons.cameras.geojson", callback=self.parse_cameras)
+            yield JsonRequest(
+                url=f"https://{self.customer_id}.cdn.iteris-atis.com/geojson/icons/metadata/icons.cameras.geojson",
+                callback=self.parse_cameras,
+            )
         if "rwis" in self.features:
-            yield JsonRequest(url=f"https://{self.customer_id}.cdn.iteris-atis.com/geojson/icons/metadata/icons.rwis.geojson", callback=self.parse_rwis)
+            yield JsonRequest(
+                url=f"https://{self.customer_id}.cdn.iteris-atis.com/geojson/icons/metadata/icons.rwis.geojson",
+                callback=self.parse_rwis,
+            )
 
     def parse_cameras(self, response: Response) -> Iterable[Feature]:
         for camera in response.json()["features"]:
@@ -47,13 +53,25 @@ class ClearRouteSpider(Spider):
             }
             apply_category(Categories.SURVEILLANCE_CAMERA, properties)
             if len(camera["properties"].get("cameras", [])) > 0:
-                properties["extras"]["contact:webcam"] = ";".join([view["image"] for view in camera["properties"].get("cameras")])
+                properties["extras"]["contact:webcam"] = ";".join(
+                    [view["image"] for view in camera["properties"].get("cameras")]
+                )
                 if len(camera["properties"]["cameras"]) > 1:
                     properties["extras"]["camera:type"] = "dome"
                 else:
                     properties["extras"]["camera:type"] = "fixed"
             elif camera.get("rtmp_url") or camera.get("rtsp_url") or camera.get("https_url") or camera.get("image_url"):
-                properties["extras"]["contact:webcam"] = ";".join(filter(None, [camera.get("rtmp_url"), camera.get("rtsp_url"), camera.get("https_url"), camera.get("image_url")]))
+                properties["extras"]["contact:webcam"] = ";".join(
+                    filter(
+                        None,
+                        [
+                            camera.get("rtmp_url"),
+                            camera.get("rtsp_url"),
+                            camera.get("https_url"),
+                            camera.get("image_url"),
+                        ],
+                    )
+                )
                 properites["extras"]["camera:type"] = "fixed"
             yield Feature(**properties)
 
@@ -69,18 +87,47 @@ class ClearRouteSpider(Spider):
             rwis_properties["ref"] = rwis_properties["ref"] + "_RWIS"
             apply_category(Categories.MONITORING_STATION, rwis_properties)
             if len(rwis["properties"].get("atmos", [])) > 0:
-                apply_yes_no(MonitoringTypes.AIR_HUMIDITY, rwis_properties, "relative_humidity" in rwis["properties"]["atmos"][0].keys(), False)
-                apply_yes_no(MonitoringTypes.AIR_TEMPERATURE, rwis_properties, "air_temperature" in rwis["properties"]["atmos"][0].keys() or "dewpoint_temperature" in rwis["properties"]["atmos"][0].keys(), False)
-                apply_yes_no(MonitoringTypes.PRECIPITATION, rwis_properties, "precip_accumulated" in rwis["properties"]["atmos"][0].keys() or "precip_rate" in rwis["properties"]["atmos"][0].keys(), False)
-                apply_yes_no(MonitoringTypes.WIND_DIRECTION, rwis_properties, "wind_direction" in rwis["properties"]["atmos"][0].keys(), False)
-                apply_yes_no(MonitoringTypes.WIND_SPEED, rwis_properties, "wind_speed" in rwis["properties"]["atmos"][0].keys(), False)
+                apply_yes_no(
+                    MonitoringTypes.AIR_HUMIDITY,
+                    rwis_properties,
+                    "relative_humidity" in rwis["properties"]["atmos"][0].keys(),
+                    False,
+                )
+                apply_yes_no(
+                    MonitoringTypes.AIR_TEMPERATURE,
+                    rwis_properties,
+                    "air_temperature" in rwis["properties"]["atmos"][0].keys()
+                    or "dewpoint_temperature" in rwis["properties"]["atmos"][0].keys(),
+                    False,
+                )
+                apply_yes_no(
+                    MonitoringTypes.PRECIPITATION,
+                    rwis_properties,
+                    "precip_accumulated" in rwis["properties"]["atmos"][0].keys()
+                    or "precip_rate" in rwis["properties"]["atmos"][0].keys(),
+                    False,
+                )
+                apply_yes_no(
+                    MonitoringTypes.WIND_DIRECTION,
+                    rwis_properties,
+                    "wind_direction" in rwis["properties"]["atmos"][0].keys(),
+                    False,
+                )
+                apply_yes_no(
+                    MonitoringTypes.WIND_SPEED,
+                    rwis_properties,
+                    "wind_speed" in rwis["properties"]["atmos"][0].keys(),
+                    False,
+                )
             yield Feature(**rwis_properties)
 
             if len(rwis["properties"].get("cameras", [])) > 0:
                 camera_properties = deepcopy(common_properties)
                 camera_properties["ref"] = camera_properties["ref"] + "_CAMERA"
                 apply_category(Categories.SURVEILLANCE_CAMERA, camera_properties)
-                camera_properties["extras"]["contact:webcam"] = ";".join([view["image"] for view in rwis["properties"]["cameras"]])
+                camera_properties["extras"]["contact:webcam"] = ";".join(
+                    [view["image"] for view in rwis["properties"]["cameras"]]
+                )
                 if len(rwis["properties"]["cameras"]) > 1:
                     camera_properties["extras"]["camera:type"] = "dome"
                 else:

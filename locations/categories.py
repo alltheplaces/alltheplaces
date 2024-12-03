@@ -829,6 +829,7 @@ class MonitoringTypes(Enum):
     """
     Monitored phenomena per https://wiki.openstreetmap.org/wiki/Tag:man_made=monitoring_station
     """
+
     AIR_HUMIDITY = "monitoring:air_humidity"
     AIR_PRESSURE = "monitoring:air_pressure"
     AIR_TEMPERATURE = "monitoring:air_temperature"
@@ -874,6 +875,7 @@ class MonitoringTypes(Enum):
     WIND = "monitoring:wind"
     WIND_DIRECTION = "monitoring:wind_direction"
     WIND_SPEED = "monitoring:wind_speed"
+
 
 class Drink(Enum):
     """
