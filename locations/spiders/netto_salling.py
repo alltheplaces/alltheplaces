@@ -13,11 +13,10 @@ class NettoSallingSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        for country in ["DE", "DK", "PL"]:
-            yield JsonRequest(
-                url="https://api.sallinggroup.com/v2/stores?country={}&geo?&radius=100&per_page=1000".format(country),
-                headers={"Authorization": "Bearer b1832498-0e22-436c-bd18-9ffa325dd846"},
-            )
+        yield JsonRequest(
+            url="https://api.sallinggroup.com/v2/stores?brand=netto&geo?&radius=100&per_page=100000",
+            headers={"Authorization": "Bearer b1832498-0e22-436c-bd18-9ffa325dd846"},
+        )
 
     def parse(self, response, **kwargs):
         for location in response.json():
