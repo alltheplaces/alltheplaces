@@ -9,8 +9,8 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class HomesenseSpider(CrawlSpider):
-    name = "homesense"
+class HomesenseUSSpider(CrawlSpider):
+    name = "homesense_us"
     item_attributes = {"brand": "HomeSense", "brand_wikidata": "Q16844433"}
     start_urls = ["https://us.homesense.com/all-stores"]
     rules = [Rule(LinkExtractor(allow="/store-details/"), callback="parse")]
