@@ -72,7 +72,7 @@ class ClearRouteSpider(Spider):
                         ],
                     )
                 )
-                properites["extras"]["camera:type"] = "fixed"
+                properties["extras"]["camera:type"] = "fixed"
             yield Feature(**properties)
 
     def parse_rwis(self, response: Response) -> Iterable[Feature]:
