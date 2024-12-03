@@ -21,6 +21,7 @@ class NettoSallingSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json():
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Netto ")
             item["lon"], item["lat"] = location["coordinates"]
             item["street_address"] = item.pop("street")
 
