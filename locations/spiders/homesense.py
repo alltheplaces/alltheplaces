@@ -5,7 +5,6 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -31,7 +30,6 @@ class HomesenseSpider(CrawlSpider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        # if "yonkers-ny-10710/0019" not in response.url or "totowa-nj-07512/0043" not in response.url:
         item = Feature()
         item["name"] = "-".join(
             [
@@ -43,5 +41,4 @@ class HomesenseSpider(CrawlSpider):
         item["ref"] = item["website"] = response.url
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
         item["lat"], item["lon"] = re.search(r"initMap\(([0-9-\.]+),\s*([0-9-\.]+)\);", response.text).groups()
-        item["opening_hours"] = OpeningHours()
         yield item
