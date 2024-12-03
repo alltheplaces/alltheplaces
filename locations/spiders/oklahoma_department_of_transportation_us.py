@@ -31,6 +31,6 @@ class OklahomaDepartmentOfTransportationUSSpider(JSONBlobSpider):
                     "lon": camera["longitude"],
                 }
                 apply_category(Categories.SURVEILLANCE_CAMERA, properties)
-                properties["extras"]["contact:webcam"] = (camera["streamDictionary"]["streamSrc"],)
+                properties["extras"]["contact:webcam"] = camera["streamDictionary"]["streamSrc"]
                 properties["extras"]["camera:type"] = "fixed"
                 yield Feature(**properties)
