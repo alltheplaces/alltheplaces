@@ -86,9 +86,7 @@ class SkodaSpider(scrapy.Spider):
             item["state"] = store["District"]
             item["country"] = response.meta["country_code"]
 
-            # Some of the coordinates have lat and lon switched. I noticed it in Austria.
-            # Thus if the country is different than the one returned by reverse geocoder, we nullify the coordinates.
-            # Chose nullification over switching because the sample I looked into even when switching back were not correct addresses were though
+            # Some of the coordinates have lat and lon switched and are usually bad.
             if result := reverse_geocoder.get((item["lat"], item["lon"]), mode=1, verbose=False):
                 if item["country"] != result["cc"]:
                     item["lon"] = None
