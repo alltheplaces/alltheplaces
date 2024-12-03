@@ -14,7 +14,12 @@ class OklahomaDepartmentOfTransportationUSSpider(JSONBlobSpider):
     start_urls = ["https://oktraffic.org/api/CameraPoles"]
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(self.start_urls[0], headers={"filter": '{"include":[{"relation":"mapCameras","scope":{"include":"streamDictionary","where":{"status":{"neq":"Out Of Service"},"type":"Web","blockAtis":{"neq":"1"}}}},{"relation":"cameraLocationLinks","scope":{"include":["linkedCameraPole","cameraPole"]}}]}'})
+        yield JsonRequest(
+            self.start_urls[0],
+            headers={
+                "filter": '{"include":[{"relation":"mapCameras","scope":{"include":"streamDictionary","where":{"status":{"neq":"Out Of Service"},"type":"Web","blockAtis":{"neq":"1"}}}},{"relation":"cameraLocationLinks","scope":{"include":["linkedCameraPole","cameraPole"]}}]}'
+            },
+        )
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for camera_pole in response.json():
@@ -26,6 +31,6 @@ class OklahomaDepartmentOfTransportationUSSpider(JSONBlobSpider):
                     "lon": camera["longitude"],
                 }
                 apply_category(Categories.SURVEILLANCE_CAMERA, properties)
-                properties["extras"]["contact:webcam"] = camera["streamDictionary"]["streamSrc"],
+                properties["extras"]["contact:webcam"] = (camera["streamDictionary"]["streamSrc"],)
                 properties["extras"]["camera:type"] = "fixed"
                 yield Feature(**properties)
