@@ -9,7 +9,11 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class ColoradoDepartmentOfTransportationUSSpider(JSONBlobSpider):
     name = "colorado_department_of_transportation_us"
-    item_attributes = {"operator": "Colorado Department of Transportation", "operator_wikidata": "Q2112717", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "Colorado Department of Transportation",
+        "operator_wikidata": "Q2112717",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["maps.cotrip.org"]
     start_urls = ["https://maps.cotrip.org/api/graphql"]
     locations_key = ["data", "mapFeaturesQuery", "mapFeatures"]
@@ -29,12 +33,15 @@ class ColoradoDepartmentOfTransportationUSSpider(JSONBlobSpider):
                     "nonClusterableUris": ["dashboard"],
                 },
                 "plowType": "plowCameras",
-            }
+            },
         }
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature["features"][0]["geometry"]["coordinates"][0] == 0 and feature["features"][0]["geometry"]["coordinates"][1] == 0:
+        if (
+            feature["features"][0]["geometry"]["coordinates"][0] == 0
+            and feature["features"][0]["geometry"]["coordinates"][1] == 0
+        ):
             # Coordinates are missing, therefore skip this camera.
             return
         item["ref"] = feature["uri"].removeprefix("camera/")
