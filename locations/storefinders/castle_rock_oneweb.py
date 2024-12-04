@@ -66,7 +66,7 @@ class CastleRockOneWebSpider(JSONBlobSpider):
         image_urls = [view["url"] for view in feature.get("views", [])]
         video_urls = []
         for image_url in filter(None, image_urls):
-            stream_name = image_url.split("/")[-1].split(".flv.png", 1)[0]
+            stream_name = image_url.split("/")[-1].split(".", 1)[0]
             video_urls = [self.video_url_template.format(stream_name)]
         item["extras"]["contact:webcam"] = ";".join(filter(None, image_urls + video_urls))
         yield item
