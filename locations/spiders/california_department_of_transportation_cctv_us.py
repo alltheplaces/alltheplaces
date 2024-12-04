@@ -9,7 +9,11 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class CaliforniaDepartmentOfTransportationCCTVUSSpider(JSONBlobSpider):
     name = "california_department_of_transportation_cctv_us"
-    item_attributes = {"operator": "California Department of Transportation", "operator_wikidata": "Q127743", "extras": Categories.SURVEILLANCE_CAMERA.value}
+    item_attributes = {
+        "operator": "California Department of Transportation",
+        "operator_wikidata": "Q127743",
+        "extras": Categories.SURVEILLANCE_CAMERA.value,
+    }
     allowed_domains = ["cwwp2.dot.ca.gov"]
     start_urls = [
         "https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json",
