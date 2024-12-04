@@ -9,7 +9,11 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MissouriDepartmentOfTransportationUSSpider(JSONBlobSpider):
     name = "missouri_department_of_transportation_us"
-    item_attributes = {"operator": "Missouri Department of Transportation", "operator_wikidata": "Q5557977", "state": "MO"}
+    item_attributes = {
+        "operator": "Missouri Department of Transportation",
+        "operator_wikidata": "Q5557977",
+        "state": "MO",
+    }
     allowed_domains = ["traveler.modot.org"]
     start_urls = ["https://traveler.modot.org/timconfig/feed/desktop/StreamingCams2.json"]
 
