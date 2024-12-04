@@ -6,6 +6,7 @@ class ColoradoDepartmentOfTransportationUSSpider(CastleRockOneWebSpider):
     item_attributes = {
         "operator": "Colorado Department of Transportation",
         "operator_wikidata": "Q2112717",
+        "state": "CO",
     }
     api_endpoint = "https://maps.cotrip.org/api/graphql"
     video_url_template = "https://publicstreamer2.cotrip.org/rtplive/{}/playlist.m3u8"

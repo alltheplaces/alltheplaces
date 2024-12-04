@@ -6,6 +6,7 @@ class IndianaDepartmentOfTransportationUSSpider(CastleRockOneWebSpider):
     item_attributes = {
         "operator": "Indiana Department of Transportation",
         "operator_wikidata": "Q4925393",
+        "state": "IN",
     }
     api_endpoint = "https://511in.org/api/graphql"
     video_url_template = "https://skysfs3.trafficwise.org/rtplive/{}/playlist.m3u8"
