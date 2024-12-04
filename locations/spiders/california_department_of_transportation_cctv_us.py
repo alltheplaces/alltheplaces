@@ -42,6 +42,6 @@ class CaliforniaDepartmentOfTransportationCctvUSSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["state"] = "CA"
-        item["extras"]["contact:webcam"] = ";".join([feature["video_url"], feature["image_url"]])
+        item["extras"]["contact:webcam"] = ";".join(filter(None, [feature["video_url"], feature["image_url"]]))
         item["extras"]["camera:type"] = "fixed"
         yield item
