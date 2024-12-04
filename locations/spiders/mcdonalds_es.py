@@ -1,3 +1,5 @@
+import re
+
 import scrapy
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -15,20 +17,31 @@ class McdonaldsESSpider(scrapy.Spider):
     start_urls = ["https://mcdonalds.es/api/restaurants?lat=36.721261&lng=-4.4212655&radius=500000000000&limit=10000"]
 
     def parse(self, response, **kwargs):
+        name_re = re.compile(r"mc ?donald['´'`]?s", re.IGNORECASE)
         for location in response.json()["restaurants"]:
             if location["open"] is True:
                 # some locations are not open yet
                 item = DictParser.parse(location)
+                item["branch"] = name_re.sub("", item.pop("name")).strip()
 
                 item["ref"] = location["site"]
                 item["postcode"] = location["cp"]
 
+                services = [i["id"] for i in location["services"]]
+                if "mccafe" in services:
+                    mccafe = item.deepcopy()
+                    mccafe["ref"] = "{}-mccafe".format(item["ref"])
+                    mccafe["brand"] = "McCafé"
+                    mccafe["brand_wikidata"] = "Q3114287"
+                    apply_category(Categories.CAFE, mccafe)
+                    yield mccafe
+
                 self.parse_opening_hours(item, location["schedules"].get("restaurant"))
 
-                services = [i["id"] for i in location["services"]]
                 apply_yes_no(Extras.DELIVERY, item, "delivery" in services)
                 apply_yes_no(Extras.TAKEAWAY, item, "takeaway" in services)
                 apply_yes_no(Extras.OUTDOOR_SEATING, item, "terrace" in services)
+                apply_yes_no(Extras.DRIVE_THROUGH, item, "mcauto" in services)
 
                 apply_category(Categories.FAST_FOOD, item)
 
@@ -43,4 +56,4 @@ class McdonaldsESSpider(scrapy.Spider):
             if day != "festive":
                 oh.add_range(day, times.get("start"), times.get("end"))
 
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh

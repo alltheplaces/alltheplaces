@@ -71,6 +71,8 @@ class Categories(Enum):
     SHOP_BOOKMAKER = {"shop": "bookmaker"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_BOAT = {"shop": "boat"}
+    SHOP_BOAT_PARTS = {"shop": "boat_parts"}
+    SHOP_BOAT_REPAIR = {"shop": "boat_repair"}
     SHOP_BUTCHER = {"shop": "butcher"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
@@ -309,21 +311,22 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
     ANTENNA = {"man_made": "antenna"}
-
+    MONITORING_STATION = {"man_made": "monitoring_station"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
 
 
 def apply_category(category, item: Feature):
     """
-    Apply categories to a Feature, where categories can be supplied
-    as a single Enum, or dictionary of key-value strings. If a
-    value for the category key is already defined, the new value for
-    the category key is appended rather than overwritten. When
-    appending the new value, the list of values is sorted and each
-    value is separated with a semi-colon.
-    :param category: Either an Enum member representing a single
-                     category to add, or a dictionary of key-value
-                     strings representing multiple categories to add.
+    Apply categories to a Feature, where categories can be supplied as a
+    single Enum, or dictionary of key-value strings. If a value for the
+    category key is already defined, the new value for the category key is
+    appended rather than overwritten. When appending the new value, the list
+    of values is sorted and each value is separated with a semi-colon. Any
+    duplication of values is avoided by ignoring second attempts to add an
+    already existing value.
+    :param category: Either an Enum member representing a single category to
+                     add, or a dictionary of key-value strings representing
+                     multiple categories to add.
     :param item: Feature to which categories should be added to.
     """
     if isinstance(category, Enum):
@@ -537,6 +540,8 @@ class PaymentMethods(Enum):
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
     APP = "payment:app"
     APPLE_PAY = "payment:apple_pay"
+    BANCOPOSTA = "payment:bancoposta"
+    BANCOMAT = "payment:bancomat"
     BCA_CARD = "payment:bca_card"
     BLIK = "payment:blik"
     CARDS = "payment:cards"
@@ -573,6 +578,7 @@ class PaymentMethods(Enum):
     PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
+    POSTEPAY = "payment:postepay"
     QUICPAY = "payment:quicpay"
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
@@ -687,12 +693,13 @@ class Clothes(Enum):
 
 def apply_clothes(clothes: [Clothes], item: Feature):
     """
-    Apply clothing categories to a Feature. If the Feature
-    already has clothing categories defined, this function will
-    append to the list of clothing categories rather than
-    overwriting existing clothing categories. When appending,
-    the list of clothing categories is sorted and then each value
-    is separated with a semi-colon.
+    Apply clothing categories to a Feature. If the Feature already has
+    clothing categories defined, this function will append to the list of
+    clothing categories rather than overwriting existing clothing categories.
+    When appending, the list of clothing categories is sorted and then each
+    value is separated with a semi-colon. Duplication of clothing categories
+    is avoided by ignoring subsequent attempts to add an already existing
+    clothing category.
     :param clothes: array of Clothes Enum members
     :param item: Feature which should have clothing categories applied.
     """
@@ -804,17 +811,70 @@ class HealthcareSpecialities(Enum):
 
 def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
     """
-    Apply healthcare specialities to a Feature. If the Feature
-    already has healthcare specialities defined, this function will
-    append to the list of healthcare specialities rather than
-    overwriting existing healthcare specialities. When appending,
-    the list of healthcare specialities is sorted and then each
-    value is separated with a semi-colon.
+    Apply healthcare specialities to a Feature. If the Feature already has
+    healthcare specialities defined, this function will append to the list of
+    healthcare specialities rather than overwriting existing healthcare
+    specialities. When appending, the list of healthcare specialities is
+    sorted and then each value is separated with a semi-colon. Duplication of
+    healthcare specialities is avoided by ignoring subsequent attempts to add
+    an already existing healthcare speciality.
     :param specialities: array of HealthcareSpecialities Enum members
     :param item: Feature which should have healthcare specialities applied.
     """
     for s in specialities:
         apply_category({"healthcare:speciality": s.value}, item)
+
+
+class MonitoringTypes(Enum):
+    """
+    Monitored phenomena per https://wiki.openstreetmap.org/wiki/Tag:man_made=monitoring_station
+    """
+
+    AIR_HUMIDITY = "monitoring:air_humidity"
+    AIR_PRESSURE = "monitoring:air_pressure"
+    AIR_TEMPERATURE = "monitoring:air_temperature"
+    AIR_QUALITY = "monitoring:air_quality"
+    BICYCLE = "monitoring:bicycle"  # counting bicycles
+    COSMIC_RAY = "monitoring:cosmic_ray"
+    DISSOLVED_OXYGEN = "monitoring:dissolved_oxygen"  # in water
+    FLOW_RATE = "monitoring:flow_rate"  # of water in a river
+    GLONASS = "monitoring:glonass"  # satellite ground station
+    GPS = "monitoring:gps"  # satellite ground station
+    GROUNDWATER = "monitoring:groundwater"
+    GROUNDWATER_LEVEL = "monitoring:groundwater_level"
+    METEORIC_ACTIVITY = "monitoring:meteoric_activity"
+    NOISE = "monitoring:noise"  # ambient sound levels
+    PARTICULATE_MATTER = "monitoring:particulate_matter"  # in air
+    PEDESTRIAN = "monitoring:pedestrian"  # counting pedestrians
+    PRECIPITATION = "monitoring:precipitation"  # rain and snow
+    RADIATION = "monitoring:radiation"
+    RAINFALL = "monitoring:rainfall"  # rain only
+    SALINITY = "monitoring:salinity"  # in water
+    SEISMIC_ACTIVITY = "monitoring:seismic_activity"
+    SHORTWAVE_RADIATION = "monitoring:shortwave_radiation"
+    SOLAR_RADIATION = "monitoring:solar_radiation"
+    SNOW = "monitoring:snow"
+    SNOW_DEPTH = "monitoring:snow_depth"
+    SNOW_DENSITY = "monitoring:snow_density"
+    SOIL_TEMPERATURE = "monitoring:soil_temperature"
+    SOIL_MOISTURE = "monitoring:soil_moisture"
+    TIDE_GAUGE = "monitoring:tide_gauge"
+    TRAFFIC = "monitoring:traffic"  # counting road vehicles
+    VISIBILITY = "monitoring:visibility"  # in air
+    WATER_CONDUCTIVITY = "monitoring:water_conductivity"
+    WATER_LEVEL = "monitoring:water_level"
+    WATER_NITRATE = "monitoring:water_nitrate"
+    WATER_NITRITE = "monitoring:water_nitrite"
+    WATER_PH = "monitoring:water_pH"
+    WATER_QUALITY = "monitoring:water_quality"
+    WATER_TEMPERATURE = "monitoring:water_temperature"
+    WATER_TURBIDITY = "monitoring:water_turbidity"
+    WATER_VELOCITY = "monitoring:water_velocity"
+    WATER_VOLUME = "monitoring:water_volume"
+    WEATHER = "monitoring:weather"
+    WIND = "monitoring:wind"
+    WIND_DIRECTION = "monitoring:wind_direction"
+    WIND_SPEED = "monitoring:wind_speed"
 
 
 class Drink(Enum):

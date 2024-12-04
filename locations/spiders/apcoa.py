@@ -10,7 +10,6 @@ class ApcoaSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "APCOA Parking", "brand_wikidata": "Q296108"}
     allowed_domains = [
         "www.apcoa.at",
-        "www.apcoa.be",
         "www.apcoa.dk",
         "www.apcoa.de",
         "www.apcoa.ie",
@@ -24,7 +23,6 @@ class ApcoaSpider(CrawlSpider, StructuredDataSpider):
     ]
     start_urls = [
         "https://www.apcoa.at/standorte/staedte/alle-staedte/",  # Austria
-        "https://www.apcoa.be/alle-locaties/",  # Belgium
         "https://www.apcoa.dk/alle-lokationer/",  # Denmark
         "https://www.apcoa.de/standorte/alle-standorte/",  # Germany
         "https://www.apcoa.ie/locations/all-locations/",  # Ireland

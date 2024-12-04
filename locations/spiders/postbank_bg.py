@@ -14,6 +14,7 @@ class PostbankBGSpider(scrapy.Spider):
     allowed_domains = ["www.postbank.bg"]
     start_urls = ["https://www.postbank.bg/bg-BG/api/locations/locations"]
     no_refs = True
+    requires_proxy = True
 
     def start_requests(self):
         return [

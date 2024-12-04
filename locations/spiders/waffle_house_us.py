@@ -28,8 +28,18 @@ class WaffleHouseUSSpider(Spider):
             item["extras"]["website:orders"] = location["custom"].get("online_order_link")
             item["operator"] = location["custom"]["operated_by"]
 
-            item["opening_hours"] = OpeningHours()
-            for day, times in zip(DAYS, location["businessHours"] or []):
-                item["opening_hours"].add_range(day, times[0], times[1].replace("00:00", "24:00"))
+            try:
+                item["opening_hours"] = self.parse_opening_hours(location["businessHours"] or [])
+            except:
+                self.logger.error("Error parsing opening hours: {}".format(location["businessHours"]))
 
             yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for day, times in zip(DAYS, rules):
+            if not times:
+                oh.set_closed(day)
+            else:
+                oh.add_range(day, times[0], times[1].replace("00:00", "24:00"))
+        return oh

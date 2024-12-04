@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 echo "git revision: ${GIT_COMMIT}"
 
 if [ -z "${S3_BUCKET}" ]; then
@@ -41,6 +40,35 @@ mkdir -p "${SPIDER_RUN_DIR}/logs"
 mkdir -p "${SPIDER_RUN_DIR}/stats"
 mkdir -p "${SPIDER_RUN_DIR}/output"
 SPIDER_COUNT=$(wc -l < "${SPIDER_RUN_DIR}/commands.txt" | tr -d ' ')
+
+# Send a message to Slack that we're starting
+if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+    (>&2 echo "Skipping Slack notification because SLACK_WEBHOOK_URL environment variable not set")
+else
+    curl -X POST \
+         --silent \
+         -H 'Content-type: application/json' \
+         --data "{\"text\": \"Starting run ${RUN_TIMESTAMP} with ${SPIDER_COUNT} spiders\"}" \
+         "${SLACK_WEBHOOK_URL}"
+
+    # Set a hook to send a message to Slack when the job completes, including the exit code
+    trap '{
+        retval=$?
+        if [ $retval -eq 0 ]; then
+            curl -X POST \
+                 --silent \
+                 -H "Content-type: application/json" \
+                 --data "{\"text\": \"Run ${RUN_TIMESTAMP} completed successfully with ${SPIDER_COUNT} spiders\"}" \
+                 "${SLACK_WEBHOOK_URL}"
+        else
+            curl -X POST \
+                 --silent \
+                 -H "Content-type: application/json" \
+                 --data "{\"text\": \"Run ${RUN_TIMESTAMP} failed with exit code ${retval} with ${SPIDER_COUNT} spiders\"}" \
+                 "${SLACK_WEBHOOK_URL}"
+        fi
+    }' EXIT
+fi
 
 (>&2 echo "Running ${SPIDER_COUNT} spiders ${PARALLELISM} at a time")
 xargs -t -L 1 -P "${PARALLELISM}" -a "${SPIDER_RUN_DIR}/commands.txt" -i sh -c "{} || true"
@@ -216,6 +244,21 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
+AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+aws s3 \
+    --endpoint-url="${R2_ENDPOINT_URL}" \
+    cp \
+    --only-show-errors \
+    latest.json \
+    "s3://${R2_BUCKET}/runs/latest.json"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't copy latest.json to R2")
+    exit 1
+fi
+
 (>&2 echo "Saved latest.json to https://data.alltheplaces.xyz/runs/latest.json")
 
 (>&2 echo "Creating history.json")
@@ -257,6 +300,21 @@ aws s3 cp \
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't copy history.json to S3")
+    exit 1
+fi
+
+AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+aws s3 \
+    --endpoint-url="${R2_ENDPOINT_URL}" \
+    cp \
+    --only-show-errors \
+    history.json \
+    "s3://${R2_BUCKET}/runs/history.json"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't copy history.json to R2")
     exit 1
 fi
 
@@ -321,7 +379,7 @@ if [ -z "${BUNNY_API_KEY}" ]; then
 else
     curl --request GET \
          --silent \
-         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Flatest.json&async=false' \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Falltheplaces.b-cdn.net%2Fruns%2Flatest.json&async=false' \
          --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 
@@ -335,7 +393,7 @@ else
 
     curl --request GET \
          --silent \
-         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Fhistory.json&async=false' \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Falltheplaces.b-cdn.net%2Fruns%2Fhistory.json&async=false' \
          --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 
@@ -349,7 +407,7 @@ else
 
     curl --request GET \
          --silent \
-         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Flatest%2Foutput%2F%2A&async=false' \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Falltheplaces.b-cdn.net%2Fruns%2Flatest%2Foutput%2F%2A&async=false' \
          --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 

@@ -6,11 +6,11 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class SocieteGeneraleSpider(SitemapSpider, StructuredDataSpider):
     name = "societe_generale"
-    item_attributes = {"brand_wikidata": "Q270363"}
-    allowed_domains = ["societegenerale.com", "agences.sg.fr"]
-    sitemap_urls = ["https://agences.sg.fr/banque-assurance/sitemap_agence_pois.xml"]
-    sitemap_rules = [("", "parse_sd")]
-    download_delay = 0.5
+    item_attributes = {"name": "SG", "brand": "SG", "brand_wikidata": "Q270363"}
+    allowed_domains = ["agences.sg.fr"]
+    sitemap_urls = ["https://agences.sg.fr/banque-assurance/sitemap_index.xml"]
+    sitemap_follow = ["particulier/sitemap_pois"]
+    sitemap_rules = [(r"banque-assurance/particulier/.+-id(\d+)$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Agence ").title()

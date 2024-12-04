@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -16,7 +17,7 @@ class LoblawsSpider(scrapy.Spider):
                 continue
             if i["locationType"] == "STORE":
                 if i["storeBannerId"] == "dominion":
-                    brand = "Dominion Stores"
+                    brand = "Dominion"
                     wikidata = "Q5291079"
                 elif i["storeBannerId"] == "extrafoods":
                     brand = "Extra Foods"
@@ -69,5 +70,7 @@ class LoblawsSpider(scrapy.Spider):
                     "country": i["address"]["country"],
                     "website": "https://www.loblaws.ca/store-locator/details/{}".format(i["storeId"]),
                 }
+
+                apply_category(Categories.SHOP_SUPERMARKET, properties)
 
                 yield Feature(**properties)
