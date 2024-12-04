@@ -21,9 +21,10 @@ class CastleRockOneWebSpider(JSONBlobSpider):
     To use, specify:
       - 'api_endpoint': mandatory parameter, the URL of the API endpoint
         ending '/api/graphql'.
-      - 'video_url_template': mandatory parameter, the formatter string of
+      - 'video_url_template': optional parameter, the formatter string of
         URLs of traffic camera video streams. Use "{}" as the variable
-        for the name of the feed (filename of the .m3u8 file).
+        for the name of the feed (filename of the .m3u8 file). If videos are
+        not available, omit this parameter.
     """
 
     api_endpoint: str = None
@@ -65,8 +66,10 @@ class CastleRockOneWebSpider(JSONBlobSpider):
             item["extras"]["camera:type"] = "fixed"
         image_urls = [view["url"] for view in feature.get("views", [])]
         video_urls = []
-        for image_url in filter(None, image_urls):
-            stream_name = image_url.split("/")[-1].split(".", 1)[0]
-            video_urls = [self.video_url_template.format(stream_name)]
+        if self.video_url_template:
+            for image_url in filter(None, image_urls):
+                stream_name = image_url.split("/")[-1].split(".", 1)[0]
+                video_urls = [self.video_url_template.format(stream_name)]
+                break
         item["extras"]["contact:webcam"] = ";".join(filter(None, image_urls + video_urls))
         yield item
