@@ -9,7 +9,7 @@ class VueCinemasSpider(SitemapSpider):
     name = "vue_cinemas"
     item_attributes = {"brand": "Vue", "brand_wikidata": "Q2535134"}
     sitemap_urls = ["https://www.myvue.com/sitemap.xml"]
-    sitemap_rules = [(r"/getting-here$", "parse")]
+    sitemap_rules = [(r"/whats-on$", "parse")]
 
     def parse(self, response, **kwargs):
         item = Feature()
