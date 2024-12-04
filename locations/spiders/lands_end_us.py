@@ -6,6 +6,7 @@ import xmltodict
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class LandsEndUSSpider(scrapy.Spider):
@@ -15,6 +16,7 @@ class LandsEndUSSpider(scrapy.Spider):
         "https://www.landsend.com/pp/StoreLocator?lat=42.7456634&lng=-90.4879916&radius=3000&S=S&L=L&C=undefined&N=N"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response, **kwargs):
         for xml_location in xmltodict.parse(response.text)["markers"]["marker"]:
