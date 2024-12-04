@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CaliforniaDepartmentOfTransportationCCTVUSSpider(JSONBlobSpider):
+class CaliforniaDepartmentOfTransportationCctvUSSpider(JSONBlobSpider):
     name = "california_department_of_transportation_cctv_us"
     item_attributes = {
         "operator": "California Department of Transportation",
