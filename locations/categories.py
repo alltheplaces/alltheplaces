@@ -311,7 +311,7 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
     ANTENNA = {"man_made": "antenna"}
-
+    MONITORING_STATION = {"man_made": "monitoring_station"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
 
 
@@ -823,6 +823,58 @@ def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: 
     """
     for s in specialities:
         apply_category({"healthcare:speciality": s.value}, item)
+
+
+class MonitoringTypes(Enum):
+    """
+    Monitored phenomena per https://wiki.openstreetmap.org/wiki/Tag:man_made=monitoring_station
+    """
+
+    AIR_HUMIDITY = "monitoring:air_humidity"
+    AIR_PRESSURE = "monitoring:air_pressure"
+    AIR_TEMPERATURE = "monitoring:air_temperature"
+    AIR_QUALITY = "monitoring:air_quality"
+    BICYCLE = "monitoring:bicycle"  # counting bicycles
+    COSMIC_RAY = "monitoring:cosmic_ray"
+    DISSOLVED_OXYGEN = "monitoring:dissolved_oxygen"  # in water
+    FLOW_RATE = "monitoring:flow_rate"  # of water in a river
+    GLONASS = "monitoring:glonass"  # satellite ground station
+    GPS = "monitoring:gps"  # satellite ground station
+    GROUNDWATER = "monitoring:groundwater"
+    GROUNDWATER_LEVEL = "monitoring:groundwater_level"
+    METEORIC_ACTIVITY = "monitoring:meteoric_activity"
+    NOISE = "monitoring:noise"  # ambient sound levels
+    PARTICULATE_MATTER = "monitoring:particulate_matter"  # in air
+    PEDESTRIAN = "monitoring:pedestrian"  # counting pedestrians
+    PRECIPITATION = "monitoring:precipitation"  # rain and snow
+    RADIATION = "monitoring:radiation"
+    RAINFALL = "monitoring:rainfall"  # rain only
+    SALINITY = "monitoring:salinity"  # in water
+    SEISMIC_ACTIVITY = "monitoring:seismic_activity"
+    SHORTWAVE_RADIATION = "monitoring:shortwave_radiation"
+    SOLAR_RADIATION = "monitoring:solar_radiation"
+    SNOW = "monitoring:snow"
+    SNOW_DEPTH = "monitoring:snow_depth"
+    SNOW_DENSITY = "monitoring:snow_density"
+    SOIL_TEMPERATURE = "monitoring:soil_temperature"
+    SOIL_MOISTURE = "monitoring:soil_moisture"
+    TIDE_GAUGE = "monitoring:tide_gauge"
+    TRAFFIC = "monitoring:traffic"  # counting road vehicles
+    VISIBILITY = "monitoring:visibility"  # in air
+    WATER_CONDUCTIVITY = "monitoring:water_conductivity"
+    WATER_LEVEL = "monitoring:water_level"
+    WATER_NITRATE = "monitoring:water_nitrate"
+    WATER_NITRITE = "monitoring:water_nitrite"
+    WATER_PH = "monitoring:water_pH"
+    WATER_QUALITY = "monitoring:water_quality"
+    WATER_TEMPERATURE = "monitoring:water_temperature"
+    WATER_TURBIDITY = "monitoring:water_turbidity"
+    WATER_VELOCITY = "monitoring:water_velocity"
+    WATER_VOLUME = "monitoring:water_volume"
+    WEATHER = "monitoring:weather"
+    WIND = "monitoring:wind"
+    WIND_DIRECTION = "monitoring:wind_direction"
+    WIND_SPEED = "monitoring:wind_speed"
 
 
 class Drink(Enum):
