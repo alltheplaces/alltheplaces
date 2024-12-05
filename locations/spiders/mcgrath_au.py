@@ -28,4 +28,5 @@ class McgrathAUSpider(SitemapSpider):
         item["branch"] = item.pop("name")
         item["website"] = response.url
         item["phone"] = "; ".join(filter(None, [office.get("phoneNumber"), office.get("phoneNumber2")]))
+        item["facebook"] = office.get("facebookUrl")
         yield item
