@@ -3,11 +3,17 @@ import itertools
 import json
 from typing import Any, Iterable, Iterator
 
+# Maps from Flight tags to Python array/struct type codes
 ARRAY_TYPES = {"O": "b", "o": "B", "S": "h", "s": "H", "L": "l", "l": "L", "G": "f", "g": "d", "M": "q", "m": "Q"}
 
 
 def parse_rsc(data_raw: Iterable[int]) -> Iterator[tuple[int, Any]]:
-    # based on https://github.com/alvarlagerlof/rsc-parser/blob/32f225ab8e0451b7e73144a269e9dd07e83f6fd1/packages/react-client/src/ReactFlightClient.ts#L1595
+    """Parse a React "Flight" stream, used for React Server Components.
+    There is no formal or human-readable specification for this format. The React source code for parsing it is here:
+    https://github.com/facebook/react/blob/e1378902bbb322aa1fe1953780f4b2b5f80d26b1/packages/react-client/src/ReactFlightClient.js
+    This code references that code (start with processBinaryChunk), but simplified to use iterators instead of a state
+    machine, and only returns JSON objects instead of fully deserializing.
+    """
     data = iter(data_raw)
     while True:
         row_id_str = bytes(itertools.takewhile(lambda c: c != ord(":"), data))
