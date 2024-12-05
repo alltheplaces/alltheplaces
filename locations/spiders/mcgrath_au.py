@@ -25,4 +25,5 @@ class McgrathAUSpider(SitemapSpider):
             )[-1]
         )[0][-1]["profile"]
         item = DictParser.parse(office)
+        item["branch"] = item.pop("name")
         yield item
