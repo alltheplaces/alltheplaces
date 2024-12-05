@@ -1,23 +1,28 @@
-import re
+import json
+from typing import Any
 
-from locations.storefinders.algolia import AlgoliaSpider
+import chompjs
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.dict_parser import DictParser
 
 
-class McgrathAUSpider(AlgoliaSpider):
+class McgrathAUSpider(SitemapSpider):
     name = "mcgrath_au"
     item_attributes = {
         "brand_wikidata": "Q105290661",
         "brand": "McGrath",
     }
-    api_key = "df963b4441c0cd860efa53894f15fd35"
-    app_id = "testingA3VXEX35KE"
-    index_name = "office"
+    sitemap_urls = ["https://www.mcgrath.com.au/sitemap/offices.xml"]
+    sitemap_rules = [(r"/offices/[-\w]+$", "parse")]
 
-    def post_process_item(self, item, response, feature):
-        item["branch"] = item.pop("name")
-        item["lat"] = feature["_geoloc"]["lat"]
-        item["lon"] = feature["_geoloc"]["lng"]
-        item["image"] = feature["image"]
-        slug = re.sub(r"\W+", "-", feature["name"].strip()).lower()
-        item["website"] = f"https://www.mcgrath.com.au/offices/{slug}-{feature['id']}"
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # coordinates are available in the JSON Blob only.
+        office = json.loads(
+            chompjs.parse_js_object(response.xpath('//script[contains(text(),"coordinates")]/text()').get())[-1].split(
+                ":", 1
+            )[-1]
+        )[0][-1]["profile"]
+        item = DictParser.parse(office)
         yield item
