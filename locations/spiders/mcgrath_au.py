@@ -27,4 +27,5 @@ class McgrathAUSpider(SitemapSpider):
         item = DictParser.parse(office)
         item["branch"] = item.pop("name")
         item["website"] = response.url
+        item["phone"] = "; ".join(filter(None, [office.get("phoneNumber"), office.get("phoneNumber2")]))
         yield item
