@@ -6,6 +6,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class McgrathAUSpider(SitemapSpider):
@@ -29,4 +30,7 @@ class McgrathAUSpider(SitemapSpider):
         item["website"] = response.url
         item["phone"] = "; ".join(filter(None, [office.get("phoneNumber"), office.get("phoneNumber2")]))
         item["facebook"] = office.get("facebookUrl")
+        if hours := office.get("openingHours"):
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours)
         yield item
