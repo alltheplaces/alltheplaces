@@ -27,6 +27,7 @@ class NandosSpider(scrapy.spiders.SitemapSpider):
         data = json.loads(script)
         site = DictParser.get_nested_key(data, "restaurants")[0]
         item = DictParser.parse(site)
+        item["branch"] = item.pop("name")
         item["website"] = item["ref"] = response.url
         yield item
 
@@ -35,5 +36,6 @@ class NandosSpider(scrapy.spiders.SitemapSpider):
         data = json.loads(script)
         if site := DictParser.get_nested_key(data, "restaurant"):
             item = DictParser.parse(site)
+            item["branch"] = item.pop("name")
             item["website"] = item["ref"] = response.url
             yield item
