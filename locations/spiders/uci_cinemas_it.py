@@ -27,7 +27,6 @@ class UciCinemasItSpider(JSONBlobSpider):
     def map_websites(self, response):
         links = response.css(".autocomplete-datasource .cinema a")
         for link in links:
-            print(repr(link.attrib))
             self.id_to_website[link.attrib["data-cr-id"]] = f"https://www.ucicinemas.it{link.attrib['href']}"
         yield JsonRequest(self.start_urls[0], headers=self.headers)
 
