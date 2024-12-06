@@ -2,7 +2,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 
 
 class $classname(CrawlSpider, StructuredDataSpider):
@@ -12,7 +12,7 @@ class $classname(CrawlSpider, StructuredDataSpider):
         # "brand": "$brand",
         # "brand_wikidata": "$brand_wikidata",
         # "operator": "$operator",
-        # "operator_wikidata": "$operator_wikidata"
+        # "operator_wikidata": "$operator_wikidata",
     }
     allowed_domains = ["$domain"]
     start_urls = ["$url"]
@@ -24,4 +24,5 @@ class $classname(CrawlSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item, response, ld_data):
+        # apply_category(Categories.SHOP_XYZ, item)
         yield item
