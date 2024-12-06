@@ -12,8 +12,7 @@ class $classname(CrawlSpider):
         # "brand": "$brand",
         # "brand_wikidata": "$brand_wikidata",
         # "operator": "$operator",
-        # "operator_wikidata": "$operator_wikidata",
-        # "extras": Categories.SHOP_XYZ.value
+        # "operator_wikidata": "$operator_wikidata"
     }
 
     rules = (Rule(LinkExtractor(allow=r"Items/"), callback="parse_item", follow=True),)
