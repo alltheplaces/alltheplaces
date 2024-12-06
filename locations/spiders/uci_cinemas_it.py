@@ -10,8 +10,6 @@ class UciCinemasItSpider(JSONBlobSpider):
     item_attributes = {
         "brand": "UCI Cinemas",
         "brand_wikidata": "Q521922",
-        # "operator": "None",
-        # "operator_wikidata": "None",
         "extras": Categories.CINEMA.value,
     }
     start_urls = ["https://www.ucicinemas.it/rest/v3/cinemas/"]
@@ -21,14 +19,10 @@ class UciCinemasItSpider(JSONBlobSpider):
         "Authorization": "Bearer SkAkzoScIbhb3uNcGdk8UL0XMIbvs5",
     }
     id_to_website = dict()
-    # requires_proxy = True  # Cloudflare bot protection used
+    requires_proxy = True  # Cloudflare bot protection used
 
     def start_requests(self):
         yield Request(self.http_page, callback=self.map_websites, dont_filter=True)
-
-    # def parse(self, response):
-    #    features = self.extract_json(response)
-    #    yield Request(self.http_page, cb_kwargs={"cinemas": features}, callback=self.enrich_list_from_html)
 
     def map_websites(self, response):
         links = response.css(".autocomplete-datasource .cinema a")
