@@ -29,7 +29,13 @@ class FreshstopZASpider(JSONBlobSpider):
             set_social_media(
                 item, SocialMedia.WHATSAPP, "+27 " + location.get("store_contact_info_whatsapp").lstrip("0")
             )
-        apply_yes_no(Extras.WIFI, item, "yes" in location.get("amenities_wifi"))
-        apply_yes_no(Extras.TOILETS, item, "yes" in location.get("amenities_bathroom"))
+        apply_yes_no(
+            Extras.WIFI, item, "yes" in location["amenities_wifi"] if location.get("amenities_wifi") else False
+        )
+        apply_yes_no(
+            Extras.TOILETS,
+            item,
+            "yes" in location["amenities_bathroom"] if location.get("amenities_bathroom") else False,
+        )
         apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
