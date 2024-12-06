@@ -2,6 +2,7 @@ import chompjs
 
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_IT, DAYS_EN, OpeningHours
+from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -16,7 +17,8 @@ class EcoStoreITSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         if location["status"] != "1":
-            return None
+            set_closed(item)
+            return item
         apply_category(Categories.SHOP_PRINTER_INK, item)
         item["addr_full"] = location["formatted_address_loc"]
         yield response.follow(
