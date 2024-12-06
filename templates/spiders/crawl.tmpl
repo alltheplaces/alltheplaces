@@ -3,6 +3,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 
 
 class $classname(CrawlSpider):
@@ -20,7 +21,7 @@ class $classname(CrawlSpider):
     rules = (Rule(LinkExtractor(allow=r"Items/"), callback="parse_item", follow=True),)
 
     def parse_item(self, response):
-        item = {}
+        item = Feature()
         # item["domain_id"] = response.xpath('//input[@id="sid"]/@value').get()
         # item["name"] = response.xpath('//div[@id="name"]').get()
         # item["description"] = response.xpath('//div[@id="description"]').get()
