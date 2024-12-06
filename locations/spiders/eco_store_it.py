@@ -15,6 +15,8 @@ class EcoStoreITSpider(JSONBlobSpider):
     start_urls = ["https://www.ecostore.it/wp-content/themes/pn-theme/models/services/stores/get-all-locations.json"]
 
     def post_process_item(self, item, response, location):
+        if location["status"] != "1":
+            return None
         apply_category(Categories.SHOP_PRINTER_INK, item)
         item["addr_full"] = location["formatted_address_loc"]
         yield response.follow(
