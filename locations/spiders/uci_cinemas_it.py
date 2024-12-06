@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class UciCinemasItSpider(JSONBlobSpider):
+class UciCinemasITSpider(JSONBlobSpider):
     name = "uci_cinemas_it"
     item_attributes = {"brand": "UCI Cinemas", "brand_wikidata": "Q521922"}
     start_urls = ["https://www.ucicinemas.it/rest/v3/cinemas/"]
