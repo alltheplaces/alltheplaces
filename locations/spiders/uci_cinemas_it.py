@@ -19,7 +19,7 @@ class UciCinemasItSpider(JSONBlobSpider):
         "Authorization": "Bearer SkAkzoScIbhb3uNcGdk8UL0XMIbvs5",
     }
     id_to_website = dict()
-    requires_proxy = True  # Cloudflare bot protection used
+    requires_proxy = "IT"  # Cloudflare bot protection used
 
     def start_requests(self):
         yield Request(self.http_page, callback=self.map_websites, dont_filter=True)
