@@ -15,50 +15,50 @@ These instructions were tested with Ubuntu 22.04.1 LTS on 2024-02-21.
 1. Install Python 3 and `pip`:
 
    ```
-   $ sudo apt-get update
-   $ sudo apt-get install -y python3 python3-pip python-is-python3
+   sudo apt-get update
+   sudo apt-get install -y python3 python3-pip python-is-python3
    ```
 
 1. Install `pyenv` and ensure the correct version of Python is available. The following is a summary of the steps, please refer to the [pyenv documentation](https://github.com/pyenv/pyenv#installation) for the most up-to-date instructions.
 
    ```
-   $ sudo apt-get install -y build-essential libssl-dev zlib1g-dev \
+   sudo apt-get install -y build-essential libssl-dev zlib1g-dev \
          libbz2-dev libreadline-dev libsqlite3-dev curl git \
          libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
          libffi-dev liblzma-dev
-   $ curl https://pyenv.run | bash
-   $ echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
-   $ echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
-   $ echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-   $ exec "$SHELL"
-   $ pyenv install 3.11
+   curl https://pyenv.run | bash
+   echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
+   echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
+   echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+   exec "$SHELL"
+   pyenv install 3.11
    ```
 
 1. Install `pipenv` and check that it runs:
 
    ```
-   $ pip install --user pipenv
-   $ pipenv --version
+   pip install --user pipenv
+   pipenv --version
    pipenv, version 2023.12.1
    ```
 
 1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
 
    ```
-   $ git clone git@github.com:alltheplaces/alltheplaces.git
+   git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
 1. Use `pipenv` to install the project dependencies:
 
    ```
-   $ cd alltheplaces
-   $ pipenv sync
+   cd alltheplaces
+   pipenv sync
    ```
 
 1. Test for successful project installation:
 
    ```
-   $ pipenv run scrapy
+   pipenv run scrapy
    ```
 
    If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
@@ -70,44 +70,44 @@ These instructions were tested with macOS 14.3.1 on 2024-02-21.
 1. Install Python 3 and `pip`:
 
    ```
-   $ brew install python@3
+   brew install python@3
    ```
 
 1. Install `pyenv` and ensure the correct version of Python is available. The following is a summary of the steps, please refer to the [pyenv documentation](https://github.com/pyenv/pyenv#installation) for the most up-to-date instructions.
 
    ```
-   $ brew install pyenv
-   $ echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
-   $ echo 'eval "$(pyenv init -)"' >> ~/.zshrc
-   $ exec "$SHELL"
-   $ pyenv install 3.11
+   brew install pyenv
+   echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
+   echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+   exec "$SHELL"
+   pyenv install 3.11
    ```
 
 1. Install `pipenv` and check that it runs:
 
    ```
-   $ brew install pipenv
-   $ pipenv --version
+   brew install pipenv
+   pipenv --version
    pipenv, version 2023.12.1
    ```
 
 1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
 
    ```
-   $ git clone git@github.com:alltheplaces/alltheplaces.git
+   git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
 1. Use `pipenv` to install the project dependencies:
 
    ```
-   $ cd alltheplaces
-   $ pipenv sync
+   cd alltheplaces
+   pipenv sync
    ```
 
 1. Test for successful project installation:
 
    ```
-   $ pipenv run scrapy
+   pipenv run scrapy
    ```
 
    If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
@@ -125,20 +125,20 @@ You can use Docker to run the project. This is a container-based development env
 1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
 
    ```
-   $ git clone git@github.com:alltheplaces/alltheplaces.git
+   git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
 1. Build the Docker image:
 
    ```
-   $ cd alltheplaces
-   $ docker build -t alltheplaces .
+   cd alltheplaces
+   docker build -t alltheplaces .
    ```
 
 1. Run the Docker container:
 
    ```
-   $ docker run -it alltheplaces
+   docker run -it alltheplaces
    ```
 
 ### Contributing code
