@@ -14,7 +14,6 @@ class $classname(JSONBlobSpider):
         # "operator_wikidata": "$operator_wikidata",
     }
     start_urls = ["$url"]
-    # no_refs = True
 
     def extract_json(self, response):
         return chompjs.parse_js_object(

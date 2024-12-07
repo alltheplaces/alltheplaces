@@ -20,7 +20,7 @@ class $classname(XMLFeedSpider):
 
     def parse_node(self, response, selector):
         item = Feature()
-        # item["name"] = selector.select("name").get()
+        # item["ref"] = selector.select("id").get()
         # item["website"] = selector.select("url").get()
         # apply_category(Categories.SHOP_XYZ, item)
         return item

@@ -22,6 +22,6 @@ class $classname(CrawlSpider):
 
     def parse_item(self, response):
         item = Feature()
-        # item["name"] = response.xpath('//div[@id="name"]').get()
+        # item["ref"] = response.xpath('//div[@id="store_id"]').get()
         # apply_category(Categories.SHOP_XYZ, item)
-        return item
+        yield item
