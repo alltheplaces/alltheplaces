@@ -9,7 +9,7 @@ from locations.dict_parser import DictParser
 class ToppsTilesGBSpider(Spider):
     name = "topps_tiles_gb"
     item_attributes = {"brand": "Topps Tiles", "brand_wikidata": "Q17026595"}
-    requires_proxy = True
+
 
     def start_requests(self):
         yield JsonRequest(
