@@ -203,6 +203,7 @@ class Categories(Enum):
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
     SHOP_WINE = {"shop": "wine"}
 
+    OFFICE_ARCHITECT = {"office": "architect"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_ENGINEER = {"office": "engineer"}
