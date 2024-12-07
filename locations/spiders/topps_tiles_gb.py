@@ -10,7 +10,6 @@ class ToppsTilesGBSpider(Spider):
     name = "topps_tiles_gb"
     item_attributes = {"brand": "Topps Tiles", "brand_wikidata": "Q17026595"}
 
-
     def start_requests(self):
         yield JsonRequest(
             url="https://www.toppstiles.co.uk/api/locateStore",
