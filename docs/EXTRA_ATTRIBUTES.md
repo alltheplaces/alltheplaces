@@ -2,7 +2,7 @@
 
 We provide the `Extras` enum from `location.categories`, as well as the `apply_yes_no` helper.
 
-This is great for modelling common (or even uncommon) atrributes like:
+This is great for modelling common (or even uncommon) attributes like:
 
 * Wheelchair accessibility
 * Wifi

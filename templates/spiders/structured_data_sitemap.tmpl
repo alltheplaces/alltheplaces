@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 
 
 class $classname(SitemapSpider, StructuredDataSpider):
@@ -12,7 +12,6 @@ class $classname(SitemapSpider, StructuredDataSpider):
         # "brand_wikidata": "$brand_wikidata",
         # "operator": "$operator",
         # "operator_wikidata": "$operator_wikidata",
-        # "extras": Categories.SHOP_XYZ.value
     }
     sitemap_urls = ["https://$domain/robots.txt"]
     sitemap_rules = [
@@ -21,4 +20,5 @@ class $classname(SitemapSpider, StructuredDataSpider):
     # wanted_types = ["GroceryStore"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        # apply_category(Categories.SHOP_XYZ, item)
         yield item
