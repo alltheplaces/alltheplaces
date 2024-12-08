@@ -69,6 +69,7 @@ class KipointITSpider(JSONBlobSpider):
         yield failure.request.cb_kwargs["item"]
 
     def parse_storepage(self, response, item):
+        item["website"] = response.url
         if orari := clean_strings(response.css(".orario .content *::text").getall()):
             oh = OpeningHours()
             orari = "; ".join(orari)
