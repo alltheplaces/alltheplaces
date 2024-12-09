@@ -1,4 +1,5 @@
-import re
+import json
+from typing import Any
 
 from scrapy import Request, Spider
 

@@ -6,4 +6,5 @@ if ! [ -z "${FILES}" ]; then
     pipenv run autoflake8 --in-place $FILES
     pipenv run isort $FILES
     pipenv run black $FILES
+    pipenv run python ci/check_spider_naming_consistency.py $FILES
 fi

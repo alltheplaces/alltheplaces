@@ -1,5 +1,8 @@
 from scrapy.spiders import CSVFeedSpider
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+
 
 class $classname(CSVFeedSpider):
     name = "$name"
@@ -14,7 +17,6 @@ class $classname(CSVFeedSpider):
         # "brand_wikidata": "$brand_wikidata",
         # "operator": "$operator",
         # "operator_wikidata": "$operator_wikidata",
-        # "extras": Categories.SHOP_XYZ.value
     }
 
     # Do any adaptations you need here
@@ -22,8 +24,8 @@ class $classname(CSVFeedSpider):
     #    return response
 
     def parse_row(self, response, row):
-        i = {}
-        #i["url"] = row["url"]
-        #i["name"] = row["name"]
-        #i["description"] = row["description"]
+        i = Feature()
+        # i["website"] = row["url"]
+        # i["ref"] = row["@id"]
+        # apply_category(Categories.SHOP_XYZ, i)
         return i
