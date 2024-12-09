@@ -1,5 +1,6 @@
 import chompjs
 
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -11,10 +12,8 @@ class $classname(JSONBlobSpider):
         # "brand_wikidata": "$brand_wikidata",
         # "operator": "$operator",
         # "operator_wikidata": "$operator_wikidata",
-        # "extras": Categories.SHOP_XYZ.value
     }
     start_urls = ["$url"]
-    # no_refs = True
 
     def extract_json(self, response):
         return chompjs.parse_js_object(
@@ -22,4 +21,5 @@ class $classname(JSONBlobSpider):
         )
 
     def post_process_item(self, item, response, location):
+        # apply_category(Categories.SHOP_XYZ, item)
         yield item
