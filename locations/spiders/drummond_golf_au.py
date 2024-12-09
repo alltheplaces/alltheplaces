@@ -18,7 +18,7 @@ class DrummondGolfAUSpider(scrapy.Spider):
             for store in json.loads(raw_data.group(1)):
                 item = DictParser.parse(store)
                 popup_html = Selector(text=store["popup_html"])
-                item["website"] = popup_html.xpath('//*[@class= "amlocator-link"]/@href').get()
+                item["website"] = popup_html.xpath('//*[@class= "amlocator-link"]/@href').get().replace(" ", "")
                 address_string = re.sub(r"\s+", " ", " ".join(filter(None, popup_html.xpath("//text()").getall())))
                 item["city"] = address_string.split("City: ", 1)[1].split(" Zip: ", 1)[0]
                 item["postcode"] = address_string.split("Zip: ", 1)[1].split(" Address: ", 1)[0]
