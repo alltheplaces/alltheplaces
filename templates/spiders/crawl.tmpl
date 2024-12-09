@@ -2,6 +2,9 @@ import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+
 
 class $classname(CrawlSpider):
     name = "$name"
@@ -13,14 +16,12 @@ class $classname(CrawlSpider):
         # "brand_wikidata": "$brand_wikidata",
         # "operator": "$operator",
         # "operator_wikidata": "$operator_wikidata",
-        # "extras": Categories.SHOP_XYZ.value
     }
 
     rules = (Rule(LinkExtractor(allow=r"Items/"), callback="parse_item", follow=True),)
 
     def parse_item(self, response):
-        item = {}
-        #item["domain_id"] = response.xpath('//input[@id="sid"]/@value').get()
-        #item["name"] = response.xpath('//div[@id="name"]').get()
-        #item["description"] = response.xpath('//div[@id="description"]').get()
-        return item
+        item = Feature()
+        # item["ref"] = response.xpath('//div[@id="store_id"]').get()
+        # apply_category(Categories.SHOP_XYZ, item)
+        yield item
