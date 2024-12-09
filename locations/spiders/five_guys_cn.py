@@ -22,4 +22,5 @@ class FiveGuysCNSpider(SitemapSpider, StructuredDataSpider):
             coordinates = chompjs.parse_js_object(parse.unquote(match.group(0)))
             item["lat"] = coordinates["latitude"]
             item["lon"] = coordinates["longitude"]
+        item["website"] = response.url
         yield item
