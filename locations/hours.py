@@ -642,6 +642,17 @@ DAYS_TR = {
     "Pazar": "Su",
 }
 
+DAYS_ID = {
+    "Senin": "Mo",
+    "Selasa": "Tu",
+    "Rabu": "We",
+    "Kamis": "Th",
+    "Jumat": "Fr",
+    "Sabtu": "Sa",
+    "Minggu": "Su",
+    "Ahad": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
