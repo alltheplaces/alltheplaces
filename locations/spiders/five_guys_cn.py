@@ -8,5 +8,5 @@ class FiveGuysCNSpider(SitemapSpider, StructuredDataSpider):
     name = "five_guys_cn"
     item_attributes = FIVE_GUYS_SHARED_ATTRIBUTES
     sitemap_urls = ["https://restaurants.fiveguys.cn/sitemap.xml"]
-    sitemap_rules = [(r"https://restaurants.fiveguys.cn/en_cn/[-\w]+$", "parse_sd")]
+    sitemap_rules = [(r"https://restaurants.fiveguys.cn/en_cn/[-\w&]+$", "parse_sd")]
     wanted_types = ["FastFoodRestaurant"]  # Explicitly mention the type to ignore duplicate linked data
