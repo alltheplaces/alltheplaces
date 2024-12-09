@@ -43,7 +43,7 @@ class TravelIQSpider(Spider):
     api_endpoint: str = ""
     api_key: str = ""
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         url_parts = urlparse(self.api_endpoint)
         yield Request(url=f"{url_parts.scheme}://{url_parts.netloc}/developers/doc", callback=self.parse_feature_types)
 

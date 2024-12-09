@@ -60,7 +60,7 @@ class JSONBlobSpider(Spider):
     locations_key: str | list[str] = None
     needs_json_request = False
 
-    def start_requests(self) -> Iterable[Request]:
+    def start_requests(self) -> Iterable[JsonRequest | Request]:
         if self.needs_json_request:
             for url in self.start_urls:
                 yield JsonRequest(url)
