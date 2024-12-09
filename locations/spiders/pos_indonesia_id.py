@@ -56,7 +56,7 @@ class PosIndonesiaIDSpider(Spider):
         )
 
     def parse_hours(self, response: Response, item: Feature) -> Iterable[Feature]:
-        if response.status == 400:
+        if response.status in self.handle_httpstatus_list:
             yield item
         else:
             days: dict[str, str | None] = response.json()["data"][0]
