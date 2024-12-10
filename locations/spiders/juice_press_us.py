@@ -6,6 +6,8 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.spiders.equinox import EquinoxSpider
+from locations.spiders.tesco_gb import set_located_in
 
 
 class JuicePressUSSpider(Spider):
@@ -21,10 +23,15 @@ class JuicePressUSSpider(Spider):
         )
         for store in raw_data:
             item = DictParser.parse(store)
+            item["addr_full"] = None
             item["street_address"] = item.pop("name")
             item["image"] = store["image"]
             item["ref"] = store["selector"]
 
             if float(item["lon"]) > 0:
                 item["lon"] = float(item["lon"]) * -1
+
+            if "Equinox" in item["street_address"]:
+                set_located_in(EquinoxSpider.item_attributes, item)
+
             yield item
