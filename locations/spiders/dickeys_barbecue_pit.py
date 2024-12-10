@@ -7,20 +7,26 @@ from scrapy.http import JsonRequest, Response
 from locations.dict_parser import DictParser
 
 
-class DickeysBarbecuePitUSSpider(Spider):
-    name = "dickeys_barbecue_pit_us"
+class DickeysBarbecuePitSpider(Spider):
+    name = "dickeys_barbecue_pit"
     item_attributes = {"brand": "Dickey's Barbecue Pit", "brand_wikidata": "Q19880747"}
-    start_urls = ["https://www.dickeys.com/locations"]
+    start_urls = [
+        "https://www.dickeys.com/locations",
+        "https://www.dickeys.com/ca/en-ca/locations",
+    ]
     build_id = ""
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         location_data = chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
         self.build_id = location_data.get("buildId")
+        api_url = f"https://www.dickeys.com/_next/data/{self.build_id}/locations"
+        if "/ca/" in response.url:
+            api_url = api_url.replace("/locations", "/ca/en-ca/locations")
         for state_info in location_data["props"]["pageProps"]["locations"]:
             for state in state_info["states"]:
                 state = state["stateName"].lower()
                 yield JsonRequest(
-                    url=f"https://www.dickeys.com/_next/data/{self.build_id}/locations/{state}.json".replace(" ", "-"),
+                    url=f"{api_url}/{state}.json".replace(" ", "-"),
                     callback=self.parse_cities,
                     cb_kwargs=dict(state=state),
                 )
@@ -28,9 +34,7 @@ class DickeysBarbecuePitUSSpider(Spider):
     def parse_cities(self, response: Response, state: str) -> Any:
         for city_info in response.json()["pageProps"]["stateCities"]:
             yield JsonRequest(
-                url=f"https://www.dickeys.com/_next/data/{self.build_id}/locations/{state}/{city_info['city'].lower()}.json".replace(
-                    " ", "-"
-                ),
+                url=response.url.replace(".json", f"/{city_info['city'].lower()}.json").replace(" ", "-"),
                 callback=self.parse_stores,
             )
 
