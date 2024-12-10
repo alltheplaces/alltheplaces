@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, Iterable
 
 import chompjs
-from scrapy import Spider
+from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -11,13 +11,17 @@ from locations.hours import OpeningHours, sanitise_day
 class DickeysBarbecuePitSpider(Spider):
     name = "dickeys_barbecue_pit"
     item_attributes = {"brand": "Dickey's Barbecue Pit", "brand_wikidata": "Q19880747"}
-    start_urls = [
-        "https://www.dickeys.com/locations",
-        "https://www.dickeys.com/ca/en-ca/locations",
-    ]
+    COUNTRY_WEBSITE_MAP = {
+        "US": "https://www.dickeys.com/locations",
+        "CA": "https://www.dickeys.com/ca/en-ca/locations",
+    }
     build_id = ""
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def start_requests(self) -> Iterable[Request]:
+        for country in self.COUNTRY_WEBSITE_MAP.keys():
+            yield Request(url=self.COUNTRY_WEBSITE_MAP[country], cb_kwargs={"country": country})
+
+    def parse(self, response: Response, country: str) -> Any:
         location_data = chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
         self.build_id = location_data.get("buildId")
         api_url = f"https://www.dickeys.com/_next/data/{self.build_id}/locations"
@@ -29,7 +33,7 @@ class DickeysBarbecuePitSpider(Spider):
                 yield JsonRequest(
                     url=f"{api_url}/{state}.json".replace(" ", "-"),
                     callback=self.parse_cities,
-                    meta={"website": response.url, "state": state},
+                    meta={"website": response.url, "state": state, "country": country},
                 )
 
     def parse_cities(self, response: Response, **kwargs: Any) -> Any:
@@ -53,6 +57,7 @@ class DickeysBarbecuePitSpider(Spider):
                     " ", "-"
                 )
             )
+            item["country"] = response.meta["country"]
             item["opening_hours"] = OpeningHours()
             for rule in store.get("workingHours", []):
                 if day := sanitise_day(rule.get("label")):
