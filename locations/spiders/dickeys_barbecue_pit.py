@@ -45,4 +45,5 @@ class DickeysBarbecuePitSpider(Spider):
             item = DictParser.parse(store)
             item["street_address"] = item.pop("addr_full")
             item["addr_full"] = store.get("fullAddress")
+            item["branch"] = store.get("label")
             yield item
