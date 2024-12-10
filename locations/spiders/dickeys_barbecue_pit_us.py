@@ -16,13 +16,14 @@ class DickeysBarbecuePitUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         location_data = chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
         self.build_id = location_data.get("buildId")
-        for state_info in location_data["props"]["pageProps"]["locations"][0]["states"]:
-            state = state_info["stateName"].lower()
-            yield JsonRequest(
-                url=f"https://www.dickeys.com/_next/data/{self.build_id}/locations/{state}.json".replace(" ", "-"),
-                callback=self.parse_cities,
-                cb_kwargs=dict(state=state),
-            )
+        for state_info in location_data["props"]["pageProps"]["locations"]:
+            for state in state_info["states"]:
+                state = state["stateName"].lower()
+                yield JsonRequest(
+                    url=f"https://www.dickeys.com/_next/data/{self.build_id}/locations/{state}.json".replace(" ", "-"),
+                    callback=self.parse_cities,
+                    cb_kwargs=dict(state=state),
+                )
 
     def parse_cities(self, response: Response, state: str) -> Any:
         for city_info in response.json()["pageProps"]["stateCities"]:
