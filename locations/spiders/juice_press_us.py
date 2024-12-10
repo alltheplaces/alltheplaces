@@ -2,17 +2,16 @@ import re
 from typing import Any
 
 import chompjs
-import scrapy
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 
 
-class JuicePressUSSpider(scrapy.Spider):
+class JuicePressUSSpider(Spider):
     name = "juice_press_us"
     item_attributes = {"brand": "Juice Press", "brand_wikidata": "Q27150131"}
     start_urls = ["https://www.juicepress.com/pages/location"]
-    no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = list(
@@ -23,4 +22,6 @@ class JuicePressUSSpider(scrapy.Spider):
         for store in raw_data:
             item = DictParser.parse(store)
             item["street_address"] = item.pop("name")
+            item["image"] = store["image"]
+            item["ref"] = store["selector"]
             yield item
