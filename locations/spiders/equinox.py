@@ -1,6 +1,8 @@
-import json
+from typing import Any
+from urllib.parse import urljoin
 
 import scrapy
+from scrapy.http import Response
 
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
@@ -8,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class EquinoxSpider(scrapy.Spider):
     name = "equinox"
-    item_attributes = {"brand": "Equinox Fitness", "brand_wikidata": "Q5384535"}
+    item_attributes = {"brand": "Equinox", "brand_wikidata": "Q5384535"}
     allowed_domains = ["cdn.contentful.com"]
     start_url = "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
     user_agent = BROWSER_DEFAULT
@@ -22,12 +24,12 @@ class EquinoxSpider(scrapy.Spider):
     def start_requests(self):
         yield scrapy.Request(self.start_url, callback=self.parse, headers=self.headers, meta={"skip": 0})
 
-    def parse(self, response):
-        data = json.loads(response.text)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        data = response.json()
         for item in data["items"]:
             fields = item["fields"]
             yield Feature(
-                name=fields["name"],
+                branch=fields["name"].removeprefix("Equinox "),
                 street_address=fields["address"],
                 city=fields["city"],
                 state=fields["state"],
@@ -35,7 +37,7 @@ class EquinoxSpider(scrapy.Spider):
                 country=fields["country"],
                 phone=fields["phoneNumber"],
                 ref=fields["facilityId"],
-                website=response.urljoin(fields["clubDetailPageURL"]),
+                website=urljoin("https://www.equinox.com/", fields["clubDetailPageURL"]),
             )
         records_read = data["skip"] + data["limit"]
         if records_read < data["total"]:
