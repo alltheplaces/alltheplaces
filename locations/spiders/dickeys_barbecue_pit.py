@@ -5,6 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, sanitise_day
 
 
 class DickeysBarbecuePitSpider(Spider):
@@ -52,4 +53,8 @@ class DickeysBarbecuePitSpider(Spider):
                     " ", "-"
                 )
             )
+            item["opening_hours"] = OpeningHours()
+            for rule in store.get("workingHours", []):
+                if day := sanitise_day(rule.get("label")):
+                    item["opening_hours"].add_range(day, rule.get("opened"), rule.get("closed"), time_format="%I:%M %p")
             yield item
