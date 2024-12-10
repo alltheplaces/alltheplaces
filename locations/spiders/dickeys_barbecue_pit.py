@@ -28,14 +28,15 @@ class DickeysBarbecuePitSpider(Spider):
                 yield JsonRequest(
                     url=f"{api_url}/{state}.json".replace(" ", "-"),
                     callback=self.parse_cities,
-                    cb_kwargs=dict(state=state),
+                    meta={"website": response.url, "state": state},
                 )
 
-    def parse_cities(self, response: Response, state: str) -> Any:
+    def parse_cities(self, response: Response, **kwargs: Any) -> Any:
         for city_info in response.json()["pageProps"]["stateCities"]:
             yield JsonRequest(
                 url=response.url.replace(".json", f"/{city_info['city'].lower()}.json").replace(" ", "-"),
                 callback=self.parse_stores,
+                meta=response.meta,
             )
 
     def parse_stores(self, response: Response, **kwargs: Any) -> Any:
@@ -46,4 +47,9 @@ class DickeysBarbecuePitSpider(Spider):
             item["street_address"] = item.pop("addr_full")
             item["addr_full"] = store.get("fullAddress")
             item["branch"] = store.get("label")
+            item["website"] = (
+                f'{response.meta["website"]}/{response.meta["state"]}/{item["city"].lower()}/{store["slug"]}'.replace(
+                    " ", "-"
+                )
+            )
             yield item
