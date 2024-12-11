@@ -19,4 +19,5 @@ class DuskNZSpider(AmastyStoreLocatorSpider):
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["addr_full"] = clean_address(popup_html.xpath("//text()").getall())
         item["branch"] = item.pop("name")
+        item["website"] = f'https://www.duskcandles.co.nz/store-locator/dusk-{item["branch"].lower()}/'
         yield item
