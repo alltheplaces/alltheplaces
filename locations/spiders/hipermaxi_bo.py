@@ -1,27 +1,35 @@
-from typing import Iterable
+from typing import Any, Iterable
 
-from scrapy.http import Response
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
-class HipermaxiBOSpider(AgileStoreLocatorSpider):
+class HipermaxiBOSpider(Spider):
     name = "hipermaxi_bo"
     item_attributes = {
         "brand_wikidata": "Q81968262",
         "brand": "Hipermaxi",
     }
-    allowed_domains = [
-        "hipermaxi.com",
-    ]
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature["slug"].startswith("farmacia-"):
-            apply_category(Categories.PHARMACY, item)
-        if feature["slug"].startswith("drugstore-"):
-            apply_category(Categories.SHOP_CHEMIST, item)
-        if feature["slug"].startswith("hipermaxi-"):
-            apply_category(Categories.SHOP_SUPERMARKET, item)
-        yield item
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(
+            url="https://tienda-api.hipermaxi.com/api/v1/markets/activos?IdMarket=0&IdTipoServicio=0",
+            headers={
+                "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZEFwbGljYWNpb24iOiIyMDIwMDAyIiwiSWRVc3VhcmlvIjoiNjI3NjY3IiwiSWRQZXJmaWwiOiIxMDAwIiwic3ViIjoiMCIsInJvbGUiOiJ1c2VyIiwiQWNjZXNvIjoiNyIsImV4cCI6MTczMzkxODY3NiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo3MTAwIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo3MTAwIn0.0H2LXYMBc5cTpYGLKtpwqKgyOjz5fgjLkcyP4Vq1QKc"
+            },
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for locations in response.json()["Dato"]:
+            for location_info in locations["Locatarios"]:
+                item = Feature()
+                item["ref"] = location_info.get("IdSucursal")
+                item["lat"] = location_info.get("Latitud")
+                item["lon"] = location_info.get("Longitud")
+                item["branch"] = (
+                    location_info.get("Descripcion", "").removeprefix("FARMACIA ").removeprefix("HIPERMAXI ")
+                )
+                item["street_address"] = location_info.get("Direccion")
+                yield item
