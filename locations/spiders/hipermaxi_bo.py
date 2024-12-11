@@ -3,7 +3,7 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -39,4 +39,7 @@ class HipermaxiBOSpider(Spider):
                     item["nsi_id"] = "N/A"
                 elif location_info.get("TipoServicio", {}).get("Descripcion") == "Supermercado":
                     apply_category(Categories.SHOP_SUPERMARKET, item)
+                services = [service.get("Descripcion", "").upper() for service in location_info.get("TipoEntregas", [])]
+                apply_yes_no(Extras.DELIVERY, item, "DELIVERY" in services)
+                apply_yes_no(Extras.TAKEAWAY, item, "RECOGER EN SUCURSAL" in services)
                 yield item
