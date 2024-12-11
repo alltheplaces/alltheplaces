@@ -44,4 +44,5 @@ class HipermaxiBOSpider(Spider):
                 apply_yes_no(Extras.TAKEAWAY, item, "RECOGER EN SUCURSAL" in services)
                 if whatsapp := location_info.get("ContactoWhatsapp"):
                     set_social_media(item, SocialMedia.WHATSAPP, whatsapp)
+                item["website"] = "https://www.hipermaxi.com/sucursales"
                 yield item
