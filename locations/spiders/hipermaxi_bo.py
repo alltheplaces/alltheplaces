@@ -4,6 +4,7 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HipermaxiBOSpider(Spider):
@@ -31,5 +32,5 @@ class HipermaxiBOSpider(Spider):
                 item["branch"] = (
                     location_info.get("Descripcion", "").removeprefix("FARMACIA ").removeprefix("HIPERMAXI ")
                 )
-                item["street_address"] = location_info.get("Direccion")
+                item["street_address"] = clean_address(location_info.get("Direccion"), min_length=3)
                 yield item
