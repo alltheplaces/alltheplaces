@@ -4,7 +4,7 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.items import Feature
+from locations.items import Feature, SocialMedia, set_social_media
 from locations.pipelines.address_clean_up import clean_address
 
 
@@ -42,4 +42,6 @@ class HipermaxiBOSpider(Spider):
                 services = [service.get("Descripcion", "").upper() for service in location_info.get("TipoEntregas", [])]
                 apply_yes_no(Extras.DELIVERY, item, "DELIVERY" in services)
                 apply_yes_no(Extras.TAKEAWAY, item, "RECOGER EN SUCURSAL" in services)
+                if whatsapp := location_info.get("ContactoWhatsapp"):
+                    set_social_media(item, SocialMedia.WHATSAPP, whatsapp)
                 yield item
