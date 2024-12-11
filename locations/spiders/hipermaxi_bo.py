@@ -3,6 +3,7 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -33,4 +34,9 @@ class HipermaxiBOSpider(Spider):
                     location_info.get("Descripcion", "").removeprefix("FARMACIA ").removeprefix("HIPERMAXI ")
                 )
                 item["street_address"] = clean_address(location_info.get("Direccion"), min_length=3)
+                if location_info.get("TipoServicio", {}).get("Descripcion") == "Farmacia":
+                    apply_category(Categories.PHARMACY, item)
+                    item["nsi_id"] = "N/A"
+                elif location_info.get("TipoServicio", {}).get("Descripcion") == "Supermercado":
+                    apply_category(Categories.SHOP_SUPERMARKET, item)
                 yield item
