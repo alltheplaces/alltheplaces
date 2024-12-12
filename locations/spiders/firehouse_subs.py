@@ -121,13 +121,13 @@ class FirehouseSubsSpider(Spider):
                             item["opening_hours"].add_range(day, open_time, close_time, "%H:%M:%S")
 
                 apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"])
-                apply_yes_no(Extras.DRIVE_THROUGH, item, location["hasDriveThru"], False)
-                apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"], False)
-                apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"], False)
-                apply_yes_no(Extras.WIFI, item, location["hasWifi"], False)
+                apply_yes_no(Extras.DRIVE_THROUGH, item, location["hasDriveThru"])
+                apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"])
+                apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"])
+                apply_yes_no(Extras.WIFI, item, location["hasWifi"])
                 apply_yes_no(Extras.HALAL, item, location["isHalal"])
-                apply_yes_no(Extras.KIDS_AREA, item, location.get("hasPlayground"), False)
-                apply_yes_no(Extras.BREAKFAST, item, location.get("hasBreakfast"), False)
+                apply_yes_no(Extras.KIDS_AREA, item, location["hasPlayground"])
+                apply_yes_no(Extras.BREAKFAST, item, location["hasBreakfast"])
                 yield item
             yield self.make_request(country, response.meta["offset"] + response.meta["limit"])
 
