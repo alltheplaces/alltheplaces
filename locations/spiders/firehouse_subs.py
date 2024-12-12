@@ -96,6 +96,8 @@ class FirehouseSubsSpider(Spider):
                 item["street_address"] = merge_address_lines(
                     [location["address"]["address1"], location["address"]["address2"]]
                 )
+                if isinstance(item["email"], list):
+                    item["email"] = ";".join(item["email"])
                 yield item
             self.offset += self.limit
             yield self.make_request(self.offset)
