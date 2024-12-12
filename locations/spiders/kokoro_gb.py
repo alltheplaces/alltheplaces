@@ -4,25 +4,20 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.structured_data_spider import extract_phone
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class KokoroGBSpider(Spider):
     name = "kokoro_gb"
-    item_attributes = {"brand": "Kokoro", "brand_wikidata": "Q117050264"}
-    start_urls = ["https://kokorouk.com/branches/"]
+    item_attributes = {"brand_wikidata": "Q117050264"}
+    start_urls = ["https://kokorouk.com/locations/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("//article"):
+        for location in response.xpath('//div[contains(@class, "wp-block-group-is-layout-flex")]'):
             item = Feature()
-            item["ref"] = item["branch"] = location.xpath("h4/text()").get()
-            item["addr_full"] = (
-                location.xpath('p[contains(text(), "Address: ")]/text()').get().removeprefix("Address: ")
-            )
-            extract_phone(item, location)
-            extract_google_position(item, location)
+            item["ref"] = item["branch"] = location.xpath("h2/text()").get()
+            item["addr_full"] = merge_address_lines(location.xpath("p/text()").getall())
 
             apply_category(Categories.FAST_FOOD, item)
 
