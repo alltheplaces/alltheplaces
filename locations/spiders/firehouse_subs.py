@@ -102,6 +102,7 @@ class FirehouseSubsSpider(Spider):
                 if location["operator_id"]:
                     item["operator"] = location["operator"]
                     item["extras"]["operator:ref"] = str(location["operator_id"])
+                item["website"] = f'https://www.firehousesubs.com/store-locator/store/{item["ref"]}'
                 yield item
             self.offset += self.limit
             yield self.make_request(self.offset)
