@@ -1,9 +1,11 @@
+import re
 from typing import Any, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -30,8 +32,8 @@ class FirehouseSubsSpider(Spider):
                 satOpen
                 sunClose
                 sunOpen
-                thrClose
-                thrOpen
+                thuClose: thrClose
+                thuOpen: thrOpen
                 tueClose
                 tueOpen
                 wedClose
@@ -107,5 +109,19 @@ class FirehouseSubsSpider(Spider):
                 item["website"] = f'https://www.firehousesubs.{country}/store-locator/store/{item["ref"]}'.replace(
                     ".us", ".com"
                 )
+                if hours := location["diningRoomHours"]:
+                    item["opening_hours"] = OpeningHours()
+                    for day in DAYS_3_LETTERS:
+                        day = day.lower()
+                        open_time = self.extract_time(hours.get(f"{day}Open"))
+                        close_time = self.extract_time(hours.get(f"{day}Close"))
+
+                        if open_time and close_time:
+                            item["opening_hours"].add_range(day, open_time, close_time, "%H:%M:%S")
                 yield item
             yield self.make_request(country, response.meta["offset"] + response.meta["limit"])
+
+    @staticmethod
+    def extract_time(time_str: str) -> str:
+        match = re.search(r"(\d{2}:\d{2}:\d{2})", time_str) if time_str else None
+        return match.group(1) if match else ""
