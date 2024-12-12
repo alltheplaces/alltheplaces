@@ -99,6 +99,9 @@ class FirehouseSubsSpider(Spider):
                 item["branch"] = item.pop("name")
                 if isinstance(item["email"], list):
                     item["email"] = ";".join(item["email"])
+                if location["operator_id"]:
+                    item["operator"] = location["operator"]
+                    item["extras"]["operator:ref"] = str(location["operator_id"])
                 yield item
             self.offset += self.limit
             yield self.make_request(self.offset)
