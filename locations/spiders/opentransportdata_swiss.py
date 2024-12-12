@@ -204,7 +204,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
     @staticmethod
     def parse_date(d):
         if d and not d.startswith("9999"):
-            return datetime.date.fromisoformat(d).isoformat()
+            return datetime.datetime.strptime(d, "%d.%m.%Y").date()
         else:
             return None
 
