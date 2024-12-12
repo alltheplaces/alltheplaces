@@ -10,12 +10,10 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class FirehouseSubsSpider(Spider):
     name = "firehouse_subs"
     item_attributes = {"brand": "Firehouse Subs", "brand_wikidata": "Q5451873"}
-    offset = 0
-    limit = 50
 
-    def make_request(self, offset: int, limit: int = limit) -> JsonRequest:
+    def make_request(self, country: str, offset: int, limit: int = 50) -> JsonRequest:
         return JsonRequest(
-            url="https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_fhs_us/default",
+            url=f"https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_fhs_{country}/default",
             data={
                 "operationName": "GetRestaurants",
                 "query": """
@@ -82,12 +80,15 @@ class FirehouseSubsSpider(Spider):
             """,
                 "variables": {"offset": offset, "limit": limit},
             },
+            meta=dict(country=country, offset=offset, limit=limit),
         )
 
     def start_requests(self) -> Iterable[Request]:
-        yield self.make_request(self.offset)
+        for country in ["us", "ca"]:
+            yield self.make_request(country, 0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        country = response.meta["country"]
         if locations := response.json()["data"].get("allRestaurants"):
             for location in locations:
                 if location["status"] != "Open":
@@ -102,7 +103,9 @@ class FirehouseSubsSpider(Spider):
                 if location["operator_id"]:
                     item["operator"] = location["operator"]
                     item["extras"]["operator:ref"] = str(location["operator_id"])
-                item["website"] = f'https://www.firehousesubs.com/store-locator/store/{item["ref"]}'
+                item["country"] = country
+                item["website"] = f'https://www.firehousesubs.{country}/store-locator/store/{item["ref"]}'.replace(
+                    ".us", ".com"
+                )
                 yield item
-            self.offset += self.limit
-            yield self.make_request(self.offset)
+            yield self.make_request(country, response.meta["offset"] + response.meta["limit"])
