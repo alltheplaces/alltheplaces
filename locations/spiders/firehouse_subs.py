@@ -4,6 +4,7 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -118,6 +119,15 @@ class FirehouseSubsSpider(Spider):
 
                         if open_time and close_time:
                             item["opening_hours"].add_range(day, open_time, close_time, "%H:%M:%S")
+
+                apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"])
+                apply_yes_no(Extras.DRIVE_THROUGH, item, location["hasDriveThru"], False)
+                apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"], False)
+                apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"], False)
+                apply_yes_no(Extras.WIFI, item, location["hasWifi"], False)
+                apply_yes_no(Extras.HALAL, item, location["isHalal"])
+                apply_yes_no(Extras.KIDS_AREA, item, location.get("hasPlayground"), False)
+                apply_yes_no(Extras.BREAKFAST, item, location.get("hasBreakfast"), False)
                 yield item
             yield self.make_request(country, response.meta["offset"] + response.meta["limit"])
 
