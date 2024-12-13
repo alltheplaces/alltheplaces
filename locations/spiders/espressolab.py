@@ -2,9 +2,10 @@ import re
 from typing import Iterable
 
 import scrapy
-from scrapy import http
-from locations.pipelines.address_clean_up import clean_address
 from lxml import etree
+from scrapy import http
+
+from locations.pipelines.address_clean_up import clean_address
 
 STORES_PAGE_URL = "https://espressolab.com/subeler/"
 WEBSITE_ROOT = "https://espressolab.com"
@@ -13,6 +14,7 @@ STORE_NAME_XPATH = "//h1/text()"
 STORE_ADDRESS_XPATH = "//div[contains(@class, 'address')]"
 MAP_SCRIPT_XPATH = "/html/head/script[7]/text()"
 MAP_SCRIPT_REGEX = re.compile(r"google\.maps\.LatLng\([ ]*([-0-9.]*)[ ]*,[ ]*([-0-9.]*)[ ]*\);")
+
 
 class EspressolabSpider(scrapy.Spider):
     name = "espressolab"
@@ -29,7 +31,7 @@ class EspressolabSpider(scrapy.Spider):
         name = response.xpath(STORE_NAME_XPATH).get()
         address = extract_text(response.xpath(STORE_ADDRESS_XPATH).get())
         latitude, longitude = extract_coords(response.xpath(MAP_SCRIPT_XPATH).get())
-        
+
         item = {
             "ref": response.url.split("/")[-2],
             "name": name,
@@ -46,6 +48,7 @@ def extract_text(address_element: str | None) -> str | None:
         return None
     node = etree.fromstring(address_element)
     return clean_address("".join(node.itertext()).strip())
+
 
 def extract_coords(script: str) -> tuple[float, float] | None:
     coords = MAP_SCRIPT_REGEX.findall(script)[0]
