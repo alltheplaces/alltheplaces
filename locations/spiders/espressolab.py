@@ -19,7 +19,9 @@ class EspressolabSpider(scrapy.Spider):
         yield scrapy.Request(url="https://espressolab.com/subeler/", callback=self.parse_stores_page)
 
     def parse_stores_page(self, response: http.HtmlResponse):
-        for url_path in response.xpath("/html/body/form/div[4]/div[4]/div[1]/div/div/div/div[1]/div/div/div[2]/ul/li/a/@href").getall():
+        for url_path in response.xpath(
+            "/html/body/form/div[4]/div[4]/div[1]/div/div/div/div[1]/div/div/div[2]/ul/li/a/@href"
+        ).getall():
             yield scrapy.Request(url="https://espressolab.com" + url_path, callback=self.parse_store_page)
 
     def parse_store_page(self, response: http.HtmlResponse):
