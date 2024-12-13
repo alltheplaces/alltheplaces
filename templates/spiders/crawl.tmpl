@@ -1,0 +1,27 @@
+import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+
+
+class $classname(CrawlSpider):
+    name = "$name"
+    allowed_domains = ["$domain"]
+    start_urls = ["$url"]
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+    }
+
+    rules = (Rule(LinkExtractor(allow=r"Items/"), callback="parse_item", follow=True),)
+
+    def parse_item(self, response):
+        item = Feature()
+        # item["ref"] = response.xpath('//div[@id="store_id"]').get()
+        # apply_category(Categories.SHOP_XYZ, item)
+        yield item

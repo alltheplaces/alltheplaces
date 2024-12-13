@@ -15,7 +15,7 @@ class AveraUSSpider(Spider):
     allowed_domains = ["www.avera.org"]
     start_urls = ["https://www.avera.org/api/locations/all"]
     user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60}
     requires_proxy = "US"
 
     def parse(self, response):

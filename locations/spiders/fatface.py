@@ -1,41 +1,46 @@
+import re
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Request, Rule
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from locations.hours import DAYS_3_LETTERS, OpeningHours
+from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class FatfaceSpider(CrawlSpider):
     name = "fatface"
     item_attributes = {"brand": "FATFACE", "brand_wikidata": "Q5437186"}
-    allowed_domains = ["www.fatface.com", "us.fatface.com"]
-    start_urls = [
-        "https://www.fatface.com/stores",  # GB
-        "https://us.fatface.com/stores",  # US and CA
-        "https://www.fatface.com/international/stores",  # IE
-    ]
+    start_urls = ["https://www.fatface.com/countryselect"]
     rules = [
-        Rule(LinkExtractor(allow="/store/"), callback="parse", follow=False),
-        Rule(LinkExtractor(allow="/international/store/"), callback="parse", follow=False),
+        Rule(LinkExtractor(allow=r"https://www.fatface.com/[a-z]{2}/en"), callback="parse"),
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
-        for url in self.start_urls:
-            if "/international/" in url:
-                yield Request(url=url, cookies={"selectedLocale": "en_IE"})
-            elif "us.fatface.com" in url:
-                yield Request(url=url, cookies={"selectedLocale": "en_US"})
-            else:
-                yield Request(url)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield Request(url=f'{response.url.strip("/")}/store-locator', callback=self.parse_stores)
 
-    def parse(self, response):
-        MicrodataParser.convert_to_json_ld(response.selector)
-        item = LinkedDataParser.parse(response, "Store")
-        if item:
-            item["ref"] = response.url
-            item["name"] = item["name"].strip()
-            item["lat"] = response.xpath("//@data-latitude").get()
-            item["lon"] = response.xpath("//@data-longitude").get()
-            item.pop("image")
+    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.xpath('//li[@class="vs-store"]'):
+            item = Feature()
+            item["branch"] = store.xpath(".//button/strong/text()").get()
+            store_details = store.xpath('.//*[@class="vs-store-address"]/text()').getall()
+            hours_start_index = len(store_details)
+            for index, info in enumerate(store_details):
+                if any(day in info for day in DAYS_3_LETTERS):
+                    hours_start_index = index
+                    break
+            address = store_details[:hours_start_index]
+            # check for phone
+            if not re.search(r"[A-Za-z]+", address[-1]):
+                item["phone"] = address[-1]
+                address = address[:-1]
+            item["ref"] = item["addr_full"] = clean_address(address)
+            item["country"] = response.url.split("/")[3]
+            item["website"] = response.url
+            if hours_start_index < len(store_details):
+                item["opening_hours"] = OpeningHours()
+                for rule in store_details[hours_start_index:]:
+                    item["opening_hours"].add_ranges_from_string(rule)
             yield item

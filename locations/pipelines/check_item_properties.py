@@ -58,6 +58,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "name", (str,))
         check_field(item, spider, "brand", (str,))
         check_field(item, spider, "operator", (str,))
+        check_field(item, spider, "branch", (str,))
 
         if coords := get_lat_lon(item):
             lat, lon = coords

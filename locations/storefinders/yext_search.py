@@ -3,10 +3,11 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import PaymentMethods, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class YextSearchSpider(Spider):
@@ -25,58 +26,70 @@ class YextSearchSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["entities"]:
             item = Feature()
-
-            item["ref"] = location["url"]
-            item["name"] = location["profile"]["name"]
+            profile = location["profile"]
+            item = DictParser.parse(profile)
+            item["ref"] = profile["meta"]["uid"]
+            item["branch"] = profile.get("geomodifier")
 
             item["street_address"] = merge_address_lines(
                 [
-                    location["profile"]["address"]["line1"],
-                    location["profile"]["address"]["line2"],
-                    location["profile"]["address"]["line3"],
+                    profile["address"]["line1"],
+                    profile["address"]["line2"],
+                    profile["address"]["line3"],
                 ]
             )
-            item["city"] = location["profile"]["address"]["city"]
-            item["state"] = location["profile"]["address"]["region"]
-            item["country"] = location["profile"]["address"]["countryCode"]
-            item["postcode"] = location["profile"]["address"]["postalCode"]
 
-            coords = location["profile"].get("displayCoordinate") or location["profile"].get("yextDisplayCoordinate")
-            item["lat"] = coords["lat"]
-            item["lon"] = coords["long"]
+            if profile.get("websiteUrl") is not None and "?" in profile.get("websiteUrl"):
+                item["website"] = profile.get("websiteUrl", "").split("?", 1)[0]
+            else:
+                item["website"] = profile.get("websiteUrl")
+            if menu_url := profile.get("menuUrl"):
+                item["extras"]["website:menu"] = menu_url
+            if order_url := profile.get("orderUrl"):
+                item["extras"]["website:orders"] = order_url.split("?")[0]
 
-            item["website"] = location["profile"].get("websiteUrl", "").split("?", 1)[0]
+            phones = []
+            for phone_type in ["localPhone", "mainPhone", "mobilePhone", "alternatePhone"]:
+                phone = profile.get(phone_type)
+                if phone:
+                    phones.append(phone.get("number"))
+            if len(phones) > 0:
+                item["phone"] = "; ".join(phones)
 
-            emails = location["profile"].get("emails")
+            emails = profile.get("emails")
             if emails:
-                item["email"] = emails[0]
+                item["email"] = "; ".join(emails)
 
-            item["facebook"] = location["profile"].get("facebookPageUrl")
+            if facebook_vanity := profile.get("facebookVanityUrl"):
+                if not facebook_vanity.startswith("http"):
+                    item["facebook"] = "https://www.facebook.com/" + facebook_vanity
+                else:
+                    item["facebook"] = facebook_vanity
+            elif facebook_profile := profile.get("facebookPageUrl"):
+                item["facebook"] = facebook_profile
 
-            if location["profile"].get("googlePlaceId"):
-                item["extras"]["ref:google"] = location["profile"].get("googlePlaceId")
+            if profile.get("googlePlaceId"):
+                item["extras"]["ref:google"] = profile.get("googlePlaceId")
 
-            if payment_methods := location["profile"].get("paymentOptions"):
-                apply_yes_no(PaymentMethods.CASH, item, "Cash" in payment_methods, False)
-                apply_yes_no(PaymentMethods.CHEQUE, item, "Check" in payment_methods, False)
-                apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in payment_methods, False)
-                apply_yes_no(PaymentMethods.VISA, item, "Visa" in payment_methods, False)
-                apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_methods, False)
-                apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in payment_methods, False)
+            YextAnswersSpider.parse_payment_methods(self, profile, item)
 
-            item["opening_hours"] = self.parse_opening_hours(location)
+            item["opening_hours"] = self.parse_opening_hours(profile.get("hours"))
+            if oh := self.parse_opening_hours(profile.get("deliveryHours")):
+                item["extras"]["opening_hours:delivery"] = oh.as_opening_hours()
 
             yield from self.parse_item(location, item) or []
 
+        yield from self.request_next_page(response, **kwargs)
+
+    def request_next_page(self, response: Response, **kwargs: Any) -> Any:
         pager = response.json()["queryParams"]
         offset = int(pager["offset"][0])
         page_size = int(pager["per"][0])
         if offset + page_size < response.json()["response"]["count"]:
             yield self.make_request(offset + page_size)
 
-    def parse_opening_hours(self, location: dict, **kwargs: Any) -> OpeningHours | None:
+    def parse_opening_hours(self, hours: dict, **kwargs: Any) -> OpeningHours | None:
         oh = OpeningHours()
-        hours = location["profile"].get("hours")
         if not hours:
             return None
         normal_hours = hours.get("normalHours")
@@ -84,7 +97,7 @@ class YextSearchSpider(Spider):
             return None
         for day in normal_hours:
             if day.get("isClosed"):
-                continue
+                oh.set_closed(day["day"].title())
             for interval in day.get("intervals", []):
                 oh.add_range(day["day"].title(), str(interval["start"]).zfill(4), str(interval["end"]).zfill(4), "%H%M")
         return oh

@@ -46,7 +46,7 @@ class CarbonHealthUSSpider(Spider):
             item["name"] = self.item_attributes["brand"]
 
             item["image"] = f"https://images.carbonhealth.com/{location['coverImageId']}/2x.jpg"
-            item["extras"]["ref:google"] = location["googlePlaceId"]
+            item["extras"]["ref:google"] = location.get("googlePlaceId")
             item["website"] = f"https://carbonhealth.com/locations/{location['slug']}"
 
             address = location["address"]

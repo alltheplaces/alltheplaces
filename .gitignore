@@ -105,6 +105,7 @@ ENV/
 !locations/searchable_points/*.json
 !locations/searchable_points/*.geojson
 !locations/searchable_points/*.csv
+!locations/searchable_points/iseadgg/*.csv
 
 *zip
 commands.txt

@@ -31,7 +31,6 @@ class BurgerKingBRSpider(scrapy.Spider):
                 continue
             item = DictParser.parse(poi)
             item["state"] = poi["administrativeArea"]
-            item["website"] = "https://www.burgerking.com.br"
             self.parse_hours(item, poi)
             self.parse_services(item, poi)
             yield item

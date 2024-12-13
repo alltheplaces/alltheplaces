@@ -8,12 +8,10 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.user_agents import CHROME_LATEST
 
 
 class MetroCashAndCarrySpider(SitemapSpider):
     name = "metro_cash_and_carry"
-    user_agent = CHROME_LATEST
     requires_proxy = True
     sitemap_rules = [
         # A better way to get all shop URLs was not found.
@@ -48,7 +46,7 @@ class MetroCashAndCarrySpider(SitemapSpider):
         )
 
     def get_sitemaps(self, response: Response):
-        country_urls = response.xpath("//div[@id='metro-and-makro']//a[@href and not(@class)]/@href").getall()
+        country_urls = response.xpath("//div[@class='teaser__body__content']//a/@href").getall()
         for url in country_urls:
             if url.startswith("http"):
                 yield Request(urljoin(url, "sitemap.xml"), callback=self._parse_sitemap)

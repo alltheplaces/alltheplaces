@@ -3,7 +3,7 @@ import re
 from scrapy import Request
 from scrapy.http import JsonRequest
 
-from locations.spiders.john_lewis import JohnLewisSpider
+from locations.spiders.john_lewis_gb import JohnLewisGBSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -34,8 +34,8 @@ class ReissGBSpider(StructuredDataSpider):
         item.pop("facebook", None)
         item.pop("twitter", None)
         if "John Lewis" in item["name"]:
-            item["located_in"] = JohnLewisSpider.item_attributes["brand"]
-            item["located_in_wikidata"] = JohnLewisSpider.item_attributes["brand_wikidata"]
+            item["located_in"] = JohnLewisGBSpider.item_attributes["brand"]
+            item["located_in_wikidata"] = JohnLewisGBSpider.item_attributes["brand_wikidata"]
         elif "Fenwick" in item["name"]:
             item["located_in"] = "Fenwick"
             item["located_in_wikidata"] = "Q5443673"

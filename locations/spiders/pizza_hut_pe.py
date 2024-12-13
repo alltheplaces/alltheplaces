@@ -68,5 +68,4 @@ class PizzaHutPESpider(scrapy.Spider):
             store = location["node"]["store"]
             item = DictParser.parse(store)
             item["lon"], item["lat"] = store["address"]["position"]["coordinates"]
-            item["website"] = "https://www.pizzahut.com.pe/"
             yield item

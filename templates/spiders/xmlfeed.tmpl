@@ -1,0 +1,26 @@
+from scrapy.spiders import XMLFeedSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+
+
+class $classname(XMLFeedSpider):
+    name = "$name"
+    allowed_domains = ["$domain"]
+    start_urls = ["$url"]
+    iterator = "iternodes"  # you can change this; see the docs
+    itertag = "item"  # change it accordingly
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+    }
+
+    def parse_node(self, response, selector):
+        item = Feature()
+        # item["ref"] = selector.select("id").get()
+        # item["website"] = selector.select("url").get()
+        # apply_category(Categories.SHOP_XYZ, item)
+        return item

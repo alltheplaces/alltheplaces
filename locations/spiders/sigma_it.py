@@ -1,7 +1,11 @@
+from typing import Iterable
+
 from scrapy import Request
+from scrapy.http import Response
 
 from locations.categories import Categories
-from locations.hours import DAYS_IT, OpeningHours
+from locations.hours import CLOSED_IT, DAYS_IT, OpeningHours
+from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
@@ -10,11 +14,11 @@ class SigmaITSpider(AgileStoreLocatorSpider):
     item_attributes = {"brand": "Sigma", "brand_wikidata": "Q3977979", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.supersigma.com"]
 
-    def parse_item(self, item, location):
-        item["website"] = "https://www.supersigma.com/pdv/" + location["slug"] + "/"
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
+        item["website"] = "https://www.supersigma.com/pdv/" + feature["slug"] + "/"
         yield Request(url=item["website"], meta={"item": item}, callback=self.parse_hours)
 
-    def parse_hours(self, response):
+    def parse_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
         item["website"] = response.url  # Capture any redirected URL
         hours_string = " ".join(
@@ -24,5 +28,5 @@ class SigmaITSpider(AgileStoreLocatorSpider):
         )
         if hours_string:
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_IT)
+            item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_IT, closed=CLOSED_IT)
         yield item

@@ -1,34 +1,49 @@
-import html
 from datetime import datetime
 
-from scrapy.spiders import SitemapSpider
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-from locations.hours import DAYS
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
-class NettoSallingSpider(SitemapSpider, StructuredDataSpider):
+class NettoSallingSpider(Spider):
     name = "netto_salling"
     item_attributes = {"brand": "Netto", "brand_wikidata": "Q552652"}
-    sitemap_urls = [
-        "https://www.netto.de/sitemap.xml",
-        "https://www.netto.dk/sitemap.xml",
-        "https://www.netto.pl/sitemap.xml",
-    ]
-    sitemap_rules = [
-        ("/geschaefte/", "parse_sd"),
-        ("/butikker/", "parse_sd"),
-        ("/sklepy/", "parse_sd"),
-    ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["name"] = html.unescape(ld_data["name"])
-        ld_data["address"]["streetAddress"] = html.unescape(ld_data["address"]["streetAddress"])
-        ld_data["address"]["addressLocality"] = html.unescape(ld_data["address"]["addressLocality"])
+    def start_requests(self):
+        yield JsonRequest(
+            url="https://api.sallinggroup.com/v2/stores?brand=netto&geo?&radius=100&per_page=100000",
+            headers={"Authorization": "Bearer b1832498-0e22-436c-bd18-9ffa325dd846"},
+        )
 
-        for oh in ld_data.get("openingHoursSpecification", []):
-            if oh.get("dayOfWeek"):
+    def parse(self, response, **kwargs):
+        for location in response.json():
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Netto ")
+            item["lon"], item["lat"] = location["coordinates"]
+            item["street_address"] = item.pop("street")
+
+            try:
+                item["opening_hours"] = self.parse_opening_hours(location["hours"])
+            except:
+                self.logger.error("Error parsing opening hours")
+
+            yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            if rule["type"] != "store":
                 continue
-            if oh.get("validFrom", "") == oh.get("validThrough"):
-                # No day, but we've got a day range of 1 day.
-                oh["dayOfWeek"] = DAYS[datetime.strptime(oh["validFrom"], "%Y-%m-%d").weekday()]
+            day = DAYS[datetime.strptime(rule["date"], "%Y-%m-%d").weekday()]
+            if rule["closed"] is True:
+                oh.set_closed(day)
+            else:
+                oh.add_range(
+                    day,
+                    datetime.fromisoformat(rule["open"]).timetuple(),
+                    datetime.fromisoformat(rule["close"].replace("T24:00:00", "T23:59:00")).timetuple(),
+                )
+        return oh

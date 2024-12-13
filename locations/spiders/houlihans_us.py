@@ -1,40 +1,28 @@
-import re
+import json
+from typing import Any
 
 from scrapy import Request, Spider
+from scrapy.http import Response
 
-from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
 class HoulihansUSSpider(Spider):
     name = "houlihans_us"
     item_attributes = {"brand": "Houlihan's", "brand_wikidata": "Q5913100s"}
     allowed_domains = ["houlihans.com"]
-    start_urls = ["https://houlihans.com/Locations"]
-    # Some location pages were observed to redirect back to the location list page.
-    custom_settings = {"REDIRECT_ENABLED": False}
+    start_urls = ["https://www.houlihans.com/store-locator/"]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield Request(url=url, callback=self.parse_location_urls)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in json.loads(response.xpath('//*[@type="application/ld+json"]/text()').get())["subOrganization"]:
+            item = DictParser.parse(store)
+            item["ref"] = item["website"]
+            apply_category(Categories.RESTAURANT, item)
+            yield Request(url=item["website"], callback=self.parse_location, meta={"item": item})
 
-    def parse_location_urls(self, response):
-        for location_url in response.xpath('//li[@class="locations"]/a[not(@id="mars")]/@href').getall():
-            yield Request(url="https://houlihans.com" + location_url)
-
-    def parse(self, response):
-        properties = {
-            "ref": response.url,
-            "name": re.sub(r"\s+", " ", response.xpath('//h1[@class="loc-name"]/text()').get()).strip(),
-            "addr_full": re.sub(
-                r"\s+", " ", " ".join(response.xpath('//p[@class="loc-address"]/a/text()').getall())
-            ).strip(),
-            "phone": response.xpath('//p[@class="loc-phone"]/a/text()').get().strip(),
-            "website": response.url,
-        }
-        hours_string = " ".join(
-            filter(None, response.xpath('//p[@class="loc-hours"]/following-sibling::p[not(@*)]').getall())
-        )
-        properties["opening_hours"] = OpeningHours()
-        properties["opening_hours"].add_ranges_from_string(hours_string)
-        yield Feature(**properties)
+    def parse_location(self, response, **kwargs):
+        item = response.meta["item"]
+        item["lat"] = response.xpath("//@data-gmaps-lat").get()
+        item["lon"] = response.xpath("//@data-gmaps-lng").get()
+        yield item

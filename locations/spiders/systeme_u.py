@@ -1,19 +1,20 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 
 
-class SystemeUSpider(scrapy.Spider):
+class SystemeUSpider(SitemapSpider):
     name = "systeme_u"
     item_attributes = {"brand": "Systeme U", "brand_wikidata": "Q2529029"}
     allowed_domains = ["magasins-u.com"]
-    start_urls = [
+    sitemap_urls = [
         "https://www.magasins-u.com/sitemap.xml",
     ]
+    sitemap_rules = [(r"com\/(magasin|station)\/", "parse_stores")]
     requires_proxy = "FR"  # Proxy or other captcha drama?
     brands = {
         "uexpress": {"brand": "U Express", "brand_wikidata": "Q2529029"},
@@ -79,7 +80,7 @@ class SystemeUSpider(scrapy.Spider):
         if m := re.search(r"/(magasin|station)/(uexpress|superu|marcheu|hyperu)-\w+", response.url):
             if m.group(1) == "magasin":
                 apply_category(Categories.SHOP_SUPERMARKET, properties)
-                hours_xpath = '//div[@class="u-horaire"]//tr[@class="u-horaire__line-day"]'
+                hours_xpath = '//div[@id="magasin-tab"]//div[@class="u-horaire"]//tr[@class="u-horaire__line-day"]'
             else:
                 apply_category(Categories.FUEL_STATION, properties)
                 hours_xpath = '//div[@class="u-station__magasin"]/p[2]/text()'
@@ -96,16 +97,3 @@ class SystemeUSpider(scrapy.Spider):
             pass
 
         yield Feature(**properties)
-
-    def parse(self, response):
-        xml = scrapy.selector.Selector(response)
-        xml.remove_namespaces()
-
-        urls = xml.xpath("//loc/text()").extract()
-        for url in urls:
-            try:
-                type = re.search(r"com\/(.*?)\/", url).group(1)
-                if type in ["magasin", "station"]:
-                    yield scrapy.Request(url, callback=self.parse_stores)
-            except:
-                pass

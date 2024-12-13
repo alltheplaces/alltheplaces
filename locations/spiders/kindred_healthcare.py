@@ -1,65 +1,29 @@
-import json
-import re
+from typing import Any
 
-import scrapy
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
+from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
-class KindredHealthcareSpider(scrapy.Spider):
+class KindredHealthcareSpider(SitemapSpider):
     name = "kindred_healthcare"
-    item_attributes = {"brand": "Kindred Healthcare", "brand_wikidata": "Q921363"}
-    allowed_domains = ["www.kindredhospitals.com"]
-    start_urls = [
-        "https://www.kindredhospitals.com/sitemap/sitemap.xml",
+    item_attributes = {"brand": "Kindred Healthcare", "brand_wikidata": "Q921363", "country": "US"}
+    sitemap_urls = [
+        "https://www.kindredhospitals.com/sitemap.xml",
     ]
-    download_delay = 0.3
+    sitemap_rules = [(r"https://www.kindredhospitals.com/locations/[a-z-0-9]+/[a-z-0-9]+$", "parse")]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+    }
 
-    def parse_location(self, response):
-        is_location_page = response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-        )
-
-        if is_location_page:
-            data = json.loads(
-                response.xpath(
-                    '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-                ).extract_first()
-            )
-
-            facility_type = data["@type"]
-            if facility_type == "Hospital":  # Keep refs consistent
-                ref = re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1)
-            else:
-                ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-
-            properties = {
-                "name": data["name"],
-                "ref": ref,
-                "street_address": data["address"]["streetAddress"],
-                "city": data["address"]["addressLocality"],
-                "state": data["address"]["addressRegion"],
-                "postcode": data["address"]["postalCode"],
-                "country": data["address"]["addressCountry"],
-                "phone": data.get("contactPoint", {}).get("telephone"),
-                "website": data.get("url") or response.url,
-                "lat": float(data["geo"]["latitude"]),
-                "lon": float(data["geo"]["longitude"]),
-                "extras": {"facility_type": facility_type},
-            }
-
-            yield Feature(**properties)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        locations = response.xpath('//url/loc/text()[contains(., "locations")]').extract()
-
-        for location_url in locations:
-            # For transitional care hospitals, reduce redundant requests by using just the contact-us pages
-            if "transitional-care-hospitals" in location_url and "contact-us" not in location_url:
-                continue
-            # Do the same thing for the behavioral health pages
-            if "behavioral-health" in location_url and "contact-us" not in location_url:
-                continue
-
-            yield scrapy.Request(location_url, callback=self.parse_location)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["name"] = response.xpath("//h1/text()").get()
+        item["addr_full"] = clean_address(response.xpath('//*[@class="cmp-text"]/p/text()').get())
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get().replace(".", "")
+        item["ref"] = item["website"] = response.url
+        extract_google_position(item, response)
+        yield item

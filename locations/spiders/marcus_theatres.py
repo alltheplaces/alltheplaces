@@ -8,6 +8,7 @@ class MarcusTheatresSpider(scrapy.Spider):
     item_attributes = {"brand": "Marcus Theatres", "brand_wikidata": "Q64083352"}
     allowed_domains = ["marcustheatres.com"]
     start_urls = ("http://www.marcustheatres.com/theatre-locations/",)
+    requires_proxy = True  # Imperva
 
     def parse(self, response):
         response.selector.remove_namespaces()

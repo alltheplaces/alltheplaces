@@ -1,88 +1,94 @@
-import csv
-import re
+from typing import Iterable
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.geo import point_locations
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.searchable_points import open_searchable_points
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
+
+# Full list of features: https://www.starbucks.co.uk/api/v2/storeFeatures/
+FEATURES_MAPPING = {
+    "DT": Extras.DRIVE_THROUGH,
+    "GO": Extras.WIFI,
+    "OS": Extras.OUTDOOR_SEATING,
+    "WF": Extras.WIFI,
+    "XO": PaymentMethods.APP,
+}
 
 
 class StarbucksEUSpider(scrapy.Spider):
     name = "starbucks_eu"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
-    allowed_domains = ["starbucks.co.uk"]
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
 
     def start_requests(self):
-        base_url = "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
+        base_url = "https://www.starbucks.co.uk/api/v2/stores/?filter[coordinates][latitude]={}&filter[coordinates][longitude]={}&filter[radius]=250"
 
-        with open_searchable_points("eu_centroids_20km_radius_country.csv") as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                yield scrapy.http.Request(
-                    url=base_url.format(lat=point["latitude"], lon=point["longitude"]),
-                    callback=self.parse,
-                )
+        for lat, lon in point_locations("eu_centroids_20km_radius_country.csv"):
+            yield scrapy.Request(base_url.format(lat, lon))
 
-    def parse(self, response):
-        data = response.json()
+    def parse(self, response) -> Iterable[Feature]:
+        for poi in response.json().get("data", []):
+            # Help to DictParser a bit
+            attributes = poi.pop("attributes", {})
+            coordinates = poi.pop("coordinates", {})
+            address = attributes.pop("address", {})
+            poi = {**poi, **attributes, **coordinates, **address}
 
-        for place in data["stores"]:
-            try:
-                street, postal_city = place["address"].strip().split("\n")
-            except:
-                street, addr_2, postal_city = place["address"].strip().split("\n")
+            item = DictParser.parse(poi)
+            item["ref"] = poi["storeNumber"]
+            item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines(
+                [poi.get("streetAddressLine1"), poi.get("streetAddressLine2"), poi.get("streetAddressLine3")]
+            )
+            self.parse_hours(item, poi)
+            self.parse_features(item, poi)
+            apply_category(Categories.COFFEE_SHOP, item)
+            yield item
 
-            # https://github.com/alltheplaces/alltheplaces/pull/8993#issuecomment-2254338471
-            # starbucks_eu.geojson has "addr:full": "undefined, BA11 4QE Frome", "addr:street_address": "undefined"
-            if street.lower() == "undefined":
-                street = None
+    def parse_hours(self, item: Feature, poi: dict):
+        hours = poi.get("openHours") or {}
 
-            try:
-                city_hold = re.search(
-                    r"\s([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)(\s|,\s)([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)\s([0-9]*)$",
-                    postal_city,
-                ).groups()
-                res = [i for i in city_hold if i]
+        if poi.get("open24x7") is True or hours.get("open24x7") is True:
+            item["opening_hours"] = "24/7"
+            return
 
-                if ", " in res:
-                    city = "".join(res)
+        if not hours:
+            return
+
+        try:
+            oh = OpeningHours()
+            for day_name, data in hours.items():
+                if day_name == "open24x7":
+                    # Already handled above
+                    continue
+
+                day = DAYS_EN.get(day_name.title())
+
+                if data is None or data.get("open") is False:
+                    oh.set_closed(day)
+                    continue
+
+                open_time = data.get("openTime")
+                close_time = data.get("closeTime")
+                if data.get("open24Hours") is True:
+                    open_time = "00:00"
+                    close_time = "23:59"
+                oh.add_range(day, open_time, close_time, time_format="%H:%M:%S")
+            item["opening_hours"] = oh
+        except Exception as e:
+            self.logger.warning(f"Failed to parse hours: {e}, {poi.get('openHours')}, {poi.get('storeNumber')}")
+            self.crawler.stats.inc_value(f"atp/{self.name}/hours/fail")
+
+    def parse_features(self, item, poi):
+        if features := poi.get("features", []):
+            for feature in features:
+                if match := FEATURES_MAPPING.get(feature.get("code")):
+                    apply_yes_no(match, item, True)
                 else:
-                    city = " ".join(res)
-
-                postal = postal_city.replace(city, "").strip()
-            except:
-                city = postal_city
-                postal = postal_city
-
-            drivethrough = "no"
-            app = "no"
-            wifi = "no"
-            for am in place["amenities"]:
-                if am["type"] == "car":
-                    drivethrough = "yes"
-                elif am["type"] == "mobile-order-pay":
-                    app = "yes"
-                elif am["type"] == "wifi":
-                    wifi = "wlan"
-
-            properties = {
-                "ref": place["id"],
-                "name": place["name"],
-                "street_address": street,
-                "city": city,
-                "postcode": postal,
-                "addr_full": place["address"].strip().replace("\n", ", "),
-                "lat": place["coordinates"]["lat"],
-                "lon": place["coordinates"]["lng"],
-                "phone": place["phoneNumber"],
-                "extras": {
-                    "drive_through": drivethrough,
-                    "payment:app": app,
-                    "internet_access": wifi,
-                },
-            }
-
-            apply_category(Categories.COFFEE_SHOP, properties)
-
-            yield Feature(**properties)
+                    self.crawler.stats.inc_value(
+                        f"atp/{self.name}/features/fail/{feature.get('code')}/{feature.get('name')}"
+                    )

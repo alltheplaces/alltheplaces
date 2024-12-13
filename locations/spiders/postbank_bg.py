@@ -10,10 +10,11 @@ from locations.items import Feature
 
 class PostbankBGSpider(scrapy.Spider):
     name = "postbank_bg"
-    item_attributes = {"brand": "Postbank", "brand_wikidata": "Q7234083", "country": "BG"}
+    item_attributes = {"brand": "Пощенска банка", "brand_wikidata": "Q7234083", "country": "BG"}
     allowed_domains = ["www.postbank.bg"]
     start_urls = ["https://www.postbank.bg/bg-BG/api/locations/locations"]
     no_refs = True
+    requires_proxy = True
 
     def start_requests(self):
         return [

@@ -17,6 +17,5 @@ class TacoBellNLSpider(Spider):
             item["name"] = restaurant.xpath('.//*[@class = "storename"]/text()').get()
             item["addr_full"] = restaurant.xpath('.//*[@class = "findus_addr"]/text()').get()
             item["phone"] = restaurant.xpath('.//*[@class = "store-mobile"]//text()').get()
-            item["website"] = "https://tacobell.nl/"
             extract_google_position(item, response)
             yield item

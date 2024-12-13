@@ -5,7 +5,7 @@ from scrapy import Request, Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 COUNTRY_TO_LANGUAGE = {
@@ -74,12 +74,16 @@ class LePainQuotidienSpider(Spider):
             )
 
             oh = OpeningHours()
-            for period in location["regularHours"]["periods"]:
-                oh.add_range(
-                    period["openDay"],
-                    time_dict_to_struct(period.get("openTime")),
-                    time_dict_to_struct(period.get("closeTime")),
-                )
+            if location.get("regularHours"):
+                for period in location["regularHours"]["periods"]:
+                    oh.add_range(
+                        period["openDay"],
+                        time_dict_to_struct(period.get("openTime")),
+                        time_dict_to_struct(period.get("closeTime")),
+                    )
+            else:
+                # Temporarily closed
+                oh.set_closed(DAYS)
             item["opening_hours"] = oh
 
             delivery_options = {partner for partner, url in location["deliveryOptions"].items() if url != ""}

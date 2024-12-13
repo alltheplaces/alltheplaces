@@ -1,0 +1,31 @@
+from scrapy.spiders import CSVFeedSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+
+
+class $classname(CSVFeedSpider):
+    name = "$name"
+    allowed_domains = ["$domain"]
+    start_urls = ["$url"]
+    #headers = ["id", "name", "description", "image_link"]
+    #delimiter = "\t"
+
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+    }
+
+    # Do any adaptations you need here
+    #def adapt_response(self, response):
+    #    return response
+
+    def parse_row(self, response, row):
+        i = Feature()
+        # i["website"] = row["url"]
+        # i["ref"] = row["@id"]
+        # apply_category(Categories.SHOP_XYZ, i)
+        return i

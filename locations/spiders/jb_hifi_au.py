@@ -1,6 +1,10 @@
 import re
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.algolia import AlgoliaSpider
 
@@ -12,7 +16,7 @@ class JbHifiAUSpider(AlgoliaSpider):
     app_id = "VTVKM5URPX"
     index_name = "shopify_store_locations"
 
-    def process_trading_hours(self, store_hours):
+    def extract_opening_hours(self, store_hours: dict) -> OpeningHours:
         opening_hours = OpeningHours()
         for day in store_hours:
             if "NULL" not in day.get("OpeningTime", "NULL") and "NULL" not in day.get("ClosingTime", "NULL"):
@@ -20,31 +24,31 @@ class JbHifiAUSpider(AlgoliaSpider):
                     DAYS_3_LETTERS_FROM_SUNDAY[day["DayOfWeek"]], day["OpeningTime"], day["ClosingTime"]
                 )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
-    def post_process_item(self, item, response, location):
-        if location.get("displayOnWeb") != "p":
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature.get("displayOnWeb") != "p":
             return
 
-        if location["locationType"] == 2:
+        if feature["locationType"] == 2:
             item["brand"] = item["name"] = "JB Hi-Fi Home"
         else:
             del item["name"]
 
-        item["ref"] = location["shopId"]
-        item["branch"] = location["storeName"]
+        item["ref"] = feature["shopId"]
+        item["branch"] = feature["storeName"]
         item["street_address"] = clean_address(
             [
-                location["storeAddress"]["Line1"],
-                location["storeAddress"].get("Line2"),
-                location["storeAddress"].get("Line3"),
+                feature["storeAddress"]["Line1"],
+                feature["storeAddress"].get("Line2"),
+                feature["storeAddress"].get("Line3"),
             ]
         )
-        item["lat"] = location["_geoloc"]["lat"]
-        item["lon"] = location["_geoloc"]["lng"]
-        item["opening_hours"] = self.process_trading_hours(location["normalTradingHours"])
+        item["lat"] = feature["_geoloc"]["lat"]
+        item["lon"] = feature["_geoloc"]["lng"]
+        item["opening_hours"] = self.extract_opening_hours(feature["normalTradingHours"])
 
-        slug = re.sub(r"\W+", "-", location["storeName"]).lower()
+        slug = re.sub(r"\W+", "-", feature["storeName"]).lower()
         item["website"] = f"https://www.jbhifi.com.au/pages/{slug}"
 
         yield item

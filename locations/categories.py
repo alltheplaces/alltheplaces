@@ -9,7 +9,7 @@ from locations.items import Feature
 # cannot be done through NSI related pipeline magic then a spider is free to apply any
 # categories and attributes itself. This file provides some help in that area. It certainly
 # reduces the number of finger fumble mistypes which are the inevitable by-product
-# of lots of string bashing. If ever NSI / ATP where to change / augment the category scheme
+# of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
@@ -17,6 +17,9 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     PARKING = {"amenity": "parking"}
+    SCHOOL = {"amenity": "school"}
+    UNIVERSITY = {"amenity": "university"}
+    COLLEGE = {"amenity": "college"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -32,7 +35,10 @@ class Categories(Enum):
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
+    CLUB_SCOUT = {"club": "scout"}
+
     CRAFT_CARPENTER = {"craft": "carpenter"}
+    CRAFT_CATERER = {"craft": "caterer"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
@@ -43,10 +49,11 @@ class Categories(Enum):
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
-    INDUSTRIAL_WAREHOUSE = {"industrial": "warehouse"}
+    INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
+    LEISURE_PARK = {"leisure": "park"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -64,6 +71,8 @@ class Categories(Enum):
     SHOP_BOOKMAKER = {"shop": "bookmaker"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_BOAT = {"shop": "boat"}
+    SHOP_BOAT_PARTS = {"shop": "boat_parts"}
+    SHOP_BOAT_REPAIR = {"shop": "boat_repair"}
     SHOP_BUTCHER = {"shop": "butcher"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
@@ -182,6 +191,7 @@ class Categories(Enum):
     SHOP_TRADE = {"shop": "trade"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TRUCK = {"shop": "truck"}
+    SHOP_TRUCK_PARTS = {"shop": "truck_parts"}
     SHOP_TRUCK_REPAIR = {"shop": "truck_repair"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VACUUM_CLEANER = {"shop": "vacuum_cleaner"}
@@ -193,11 +203,14 @@ class Categories(Enum):
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
     SHOP_WINE = {"shop": "wine"}
 
+    OFFICE_ARCHITECT = {"office": "architect"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
 
     TOURISM_APARTMENT = {"tourism": "apartment"}
@@ -242,6 +255,9 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MEDICAL_IMAGING = {
+        "healthcare": "medical_imaging"
+    }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MOTEL = {"tourism": "motel"}
@@ -257,6 +273,7 @@ class Categories(Enum):
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
+    POST_PARTNER = {"post_office": "post_partner"}
     PREP_SCHOOL = {"amenity": "prep_school"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
@@ -272,10 +289,13 @@ class Categories(Enum):
     VETERINARY = {"amenity": "veterinary"}
     WATER_RESCUE = {"emergency": "water_rescue"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
+    MORTUARY = {"amenity": "mortuary"}
 
     DATA_CENTRE = {"telecom": "data_center"}
 
+    VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
+    VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
 
@@ -292,21 +312,22 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
     ANTENNA = {"man_made": "antenna"}
-
+    MONITORING_STATION = {"man_made": "monitoring_station"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
 
 
 def apply_category(category, item: Feature):
     """
-    Apply categories to a Feature, where categories can be supplied
-    as a single Enum, or dictionary of key-value strings. If a
-    value for the category key is already defined, the new value for
-    the category key is appended rather than overwritten. When
-    appending the new value, the list of values is sorted and each
-    value is separated with a semi-colon.
-    :param category: Either an Enum member representing a single
-                     category to add, or a dictionary of key-value
-                     strings representing multiple categories to add.
+    Apply categories to a Feature, where categories can be supplied as a
+    single Enum, or dictionary of key-value strings. If a value for the
+    category key is already defined, the new value for the category key is
+    appended rather than overwritten. When appending the new value, the list
+    of values is sorted and each value is separated with a semi-colon. Any
+    duplication of values is avoided by ignoring second attempts to add an
+    already existing value.
+    :param category: Either an Enum member representing a single category to
+                     add, or a dictionary of key-value strings representing
+                     multiple categories to add.
     :param item: Feature to which categories should be added to.
     """
     if isinstance(category, Enum):
@@ -448,10 +469,13 @@ class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     BACKUP_GENERATOR = "backup_generator"
+    BAR = "bar"
     BARBEQUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CAR_PARTS = "service:vehicle:car_parts"
+    CAR_REPAIR = "service:vehicle:car_repair"
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
@@ -459,27 +483,37 @@ class Extras(Enum):
     COMPUTING = "service:computer"
     COPYING = "service:copy"
     DELIVERY = "delivery"
+    DOG = "dog"
     DRINKING_WATER = "drinking_water"
     DRIVE_THROUGH = "drive_through"
     FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
     HALAL = "diet:halal"
+    HIGH_CHAIR = "highchair"
     ICE_CREAM = "ice_cream"
     INDOOR_SEATING = "indoor_seating"
+    KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
+    LIVE_MUSIC = "live_music"
+    MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
+    NEW_CAR_SALES = "service:vehicle:new_car_sales"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
     PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PETS_ALLOWED = "pets_allowed"
+    PHOTO_PRINTING = "service:photo_printing"
     PICNIC_TABLES = "picnic_table"
     PRINTING = "service:print"
+    RESERVATION = "reservation"
+    RESERVATION_REQUIRED = "reservation=required"
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
     SHOWERS = "shower"
+    SMOKING = "smoking"
     SMOKING_AREA = "smoking=isolated"
     SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
@@ -487,8 +521,13 @@ class Extras(Enum):
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
+    TYRE_SERVICES = "service:vehicle:tyres"
+    USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
+    VEGAN = "diet:vegan"
+    VEGETARIAN = "diet:vegetarian"
     WHEELCHAIR = "wheelchair"
+    WHEELCHAIR_LIMITED = "wheelchair=limited"
     WIFI = "internet_access=wlan"
 
 
@@ -502,10 +541,13 @@ class PaymentMethods(Enum):
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
     APP = "payment:app"
     APPLE_PAY = "payment:apple_pay"
+    BANCOPOSTA = "payment:bancoposta"
+    BANCOMAT = "payment:bancomat"
     BCA_CARD = "payment:bca_card"
     BLIK = "payment:blik"
     CARDS = "payment:cards"
     CASH = "payment:cash"
+    CASH_ONLY = "payment:cash=only"
     CHEQUE = "payment:cheque"
     COINS = "payment:coins"
     CONTACTLESS = "payment:contactless"
@@ -527,19 +569,26 @@ class PaymentMethods(Enum):
     MASTER_CARD = "payment:mastercard"
     MASTER_CARD_CONTACTLESS = "payment:mastercard_contactless"
     MASTER_CARD_DEBIT = "payment:mastercard_debit"
+    MERCADO_PAGO = "payment:mercado_pago"
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
     MIR = "payment:mir"
+    MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
+    PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
+    POWERCARD = "payment:powercard"
+    POSTEPAY = "payment:postepay"
     QUICPAY = "payment:quicpay"
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
     SATISPAY = "payment:satispay"
     SBP = "payment:sbp"  # https://www.cbr.ru/eng/psystem/sfp/
+    SODEXO = "payment:sodexo"
     TWINT = "payment:twint"
     UNIONPAY = "payment:unionpay"
+    UPI = "payment:upi"  # https://www.upichalega.com/
     VISA = "payment:visa"
     VISA_CONTACTLESS = "payment:visa_contactless"
     VISA_DEBIT = "payment:visa_debit"
@@ -547,6 +596,18 @@ class PaymentMethods(Enum):
     V_PAY = "payment:v_pay"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
+
+
+payment_method_aliases = {
+    "Amex": PaymentMethods.AMERICAN_EXPRESS,
+    "Check": PaymentMethods.CHEQUE,
+    "China UnionPay": PaymentMethods.UNIONPAY,
+    "Discover": PaymentMethods.DISCOVER_CARD,
+    "Diners": PaymentMethods.DINERS_CLUB,
+    "Maestro (Ausland)": PaymentMethods.MAESTRO,
+    "MasterCard": PaymentMethods.MASTER_CARD,
+    "PowerCard": PaymentMethods.POWERCARD,
+}
 
 
 class FuelCards(Enum):
@@ -633,12 +694,13 @@ class Clothes(Enum):
 
 def apply_clothes(clothes: [Clothes], item: Feature):
     """
-    Apply clothing categories to a Feature. If the Feature
-    already has clothing categories defined, this function will
-    append to the list of clothing categories rather than
-    overwriting existing clothing categories. When appending,
-    the list of clothing categories is sorted and then each value
-    is separated with a semi-colon.
+    Apply clothing categories to a Feature. If the Feature already has
+    clothing categories defined, this function will append to the list of
+    clothing categories rather than overwriting existing clothing categories.
+    When appending, the list of clothing categories is sorted and then each
+    value is separated with a semi-colon. Duplication of clothing categories
+    is avoided by ignoring subsequent attempts to add an already existing
+    clothing category.
     :param clothes: array of Clothes Enum members
     :param item: Feature which should have clothing categories applied.
     """
@@ -750,33 +812,124 @@ class HealthcareSpecialities(Enum):
 
 def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
     """
-    Apply healthcare specialities to a Feature. If the Feature
-    already has healthcare specialities defined, this function will
-    append to the list of healthcare specialities rather than
-    overwriting existing healthcare specialities. When appending,
-    the list of healthcare specialities is sorted and then each
-    value is separated with a semi-colon.
-    :param clothes: array of HealthcareSpecialities Enum members
+    Apply healthcare specialities to a Feature. If the Feature already has
+    healthcare specialities defined, this function will append to the list of
+    healthcare specialities rather than overwriting existing healthcare
+    specialities. When appending, the list of healthcare specialities is
+    sorted and then each value is separated with a semi-colon. Duplication of
+    healthcare specialities is avoided by ignoring subsequent attempts to add
+    an already existing healthcare speciality.
+    :param specialities: array of HealthcareSpecialities Enum members
     :param item: Feature which should have healthcare specialities applied.
     """
     for s in specialities:
         apply_category({"healthcare:speciality": s.value}, item)
 
 
-# TODO: something similar for fuel types
-def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelCards):
-    """Apply appropriate payment method tag to an item if given string is found in an enum."""
-    if not payment_method:
-        return
-    map = {}
-    for payment in enum:
-        variations = DictParser.get_variations(payment.name.replace("_", "-"))
-        variations.add(payment.name.replace("_", " ").lower())
-        variations.add(payment.name.replace("_", " ").title())
-        variations.add(payment.name.replace("_", " ").upper())
-        for variation in variations:
-            map[variation] = payment.name
+class MonitoringTypes(Enum):
+    """
+    Monitored phenomena per https://wiki.openstreetmap.org/wiki/Tag:man_made=monitoring_station
+    """
 
-    if payment := map.get(payment_method):
-        apply_yes_no(enum[payment], item, True)
-        return True
+    AIR_HUMIDITY = "monitoring:air_humidity"
+    AIR_PRESSURE = "monitoring:air_pressure"
+    AIR_TEMPERATURE = "monitoring:air_temperature"
+    AIR_QUALITY = "monitoring:air_quality"
+    BICYCLE = "monitoring:bicycle"  # counting bicycles
+    COSMIC_RAY = "monitoring:cosmic_ray"
+    DISSOLVED_OXYGEN = "monitoring:dissolved_oxygen"  # in water
+    FLOW_RATE = "monitoring:flow_rate"  # of water in a river
+    GLONASS = "monitoring:glonass"  # satellite ground station
+    GPS = "monitoring:gps"  # satellite ground station
+    GROUNDWATER = "monitoring:groundwater"
+    GROUNDWATER_LEVEL = "monitoring:groundwater_level"
+    METEORIC_ACTIVITY = "monitoring:meteoric_activity"
+    NOISE = "monitoring:noise"  # ambient sound levels
+    PARTICULATE_MATTER = "monitoring:particulate_matter"  # in air
+    PEDESTRIAN = "monitoring:pedestrian"  # counting pedestrians
+    PRECIPITATION = "monitoring:precipitation"  # rain and snow
+    RADIATION = "monitoring:radiation"
+    RAINFALL = "monitoring:rainfall"  # rain only
+    SALINITY = "monitoring:salinity"  # in water
+    SEISMIC_ACTIVITY = "monitoring:seismic_activity"
+    SHORTWAVE_RADIATION = "monitoring:shortwave_radiation"
+    SOLAR_RADIATION = "monitoring:solar_radiation"
+    SNOW = "monitoring:snow"
+    SNOW_DEPTH = "monitoring:snow_depth"
+    SNOW_DENSITY = "monitoring:snow_density"
+    SOIL_TEMPERATURE = "monitoring:soil_temperature"
+    SOIL_MOISTURE = "monitoring:soil_moisture"
+    TIDE_GAUGE = "monitoring:tide_gauge"
+    TRAFFIC = "monitoring:traffic"  # counting road vehicles
+    VISIBILITY = "monitoring:visibility"  # in air
+    WATER_CONDUCTIVITY = "monitoring:water_conductivity"
+    WATER_LEVEL = "monitoring:water_level"
+    WATER_NITRATE = "monitoring:water_nitrate"
+    WATER_NITRITE = "monitoring:water_nitrite"
+    WATER_PH = "monitoring:water_pH"
+    WATER_QUALITY = "monitoring:water_quality"
+    WATER_TEMPERATURE = "monitoring:water_temperature"
+    WATER_TURBIDITY = "monitoring:water_turbidity"
+    WATER_VELOCITY = "monitoring:water_velocity"
+    WATER_VOLUME = "monitoring:water_volume"
+    WEATHER = "monitoring:weather"
+    WIND = "monitoring:wind"
+    WIND_DIRECTION = "monitoring:wind_direction"
+    WIND_SPEED = "monitoring:wind_speed"
+
+
+class Drink(Enum):
+    """
+    Drink categories per https://wiki.openstreetmap.org/wiki/Key:drink:*
+    """
+
+    BEER = "drink:beer"
+    CIDER = "drink:cider"
+    COCKTAIL = "drink:cocktail"
+    COFFEE = "drink:coffee"
+    COLA = "drink:cola"
+    CRAFT_BEER = "drink:craft_beer"
+    ESPRESSO = "drink:espresso"
+    JUICE = "drink:juice"
+    LIQUOR = "drink:liquor"
+    SOFT_DRINK = "drink:soft_drink"
+    SPARKLING_WINE = "drink:sparkling_wine"
+    TEA = "drink:tea"
+    VODKA = "drink:vodka"
+    WATER = "drink:water"
+    WHISKY = "drink:whisky"
+    WINE = "drink:wine"
+
+
+# TODO: something similar for fuel types
+def map_payment(item: Feature, source_payment_method_name: str, enum: PaymentMethods | FuelCards):
+    """Apply appropriate payment method tag to an item if given string is found in an enum."""
+    if not source_payment_method_name:
+        return
+    payment_method_names: list[str] = [pm.name for pm in enum] + list(payment_method_aliases.keys())
+    mapping = {}
+    for payment_method_name in payment_method_names:
+        variations = DictParser.get_variations(payment_method_name.replace("_", "-"))
+        variations.add(payment_method_name.replace("_", " ").lower())
+        variations.add(payment_method_name.replace("_", " ").title())
+        variations.add(payment_method_name.replace("_", " ").upper())
+
+        # Singularize for "cards" vs "card"
+        if payment_method_name.endswith("S"):
+            variations = variations | DictParser.get_variations(payment_method_name.replace("_", "-")[:-1])
+            variations.add(payment_method_name.replace("_", " ").lower()[:-1])
+            variations.add(payment_method_name.replace("_", " ").title()[:-1])
+            variations.add(payment_method_name.replace("_", " ").upper()[:-1])
+
+        for variation in variations:
+            mapping[variation] = payment_method_name
+
+    if payment_method_name := mapping.get(source_payment_method_name):
+        if payment_method_name in [pm.name for pm in enum]:
+            apply_yes_no(enum[payment_method_name], item, True)
+            return True
+        elif payment_method_name in payment_method_aliases.keys():
+            apply_yes_no(payment_method_aliases[payment_method_name], item, True)
+            return True
+
+    return False

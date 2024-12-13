@@ -147,34 +147,36 @@ class OmvSpider(scrapy.Spider):
         item["brand"] = response.meta["brand"]
         item["brand_wikidata"] = response.meta["brand_wikidata"]
         item["country"] = response.meta["country"]
-        self.parse_hours(item, details)
+        self.parse_hours(item, details.get("opening_hours"))
         self.parse_attribute(item, data, "siteFeatures", SITE_FEATURES_MAP)
         self.parse_attribute(item, data, "paymentDetails", PAYMENT_METHODS_MAP)
         apply_category(Categories.FUEL_STATION, item)
         # TODO: fuel types are provided as images, parse them somehow. OCR?
         yield item
 
-    def parse_hours(self, item, details):
+    def parse_hours(self, item, opening_hours):
         """
         Example opening hours string:
             "dayOfWeek=1,closed=FALSE,from=05:00,to=22:00#dayOfWeek=2,closed=FALSE,from=05:00,to=22:00"
+            "dayOfWeek=1,closed=TRUE#dayOfWeek=2,closed=FALSE,from=05:00,to=22:00"
         """
         oh = OpeningHours()
-        hours = details.get("opening_hours")
         try:
-            if hours:
-                for day in hours.split("#"):
-                    day_of_week, closed, from_time, to_time = day.split(",")
-                    day_of_week = day_of_week.split("=")[1]
-                    closed = closed.split("=")[1]
-                    from_time = from_time.split("=")[1]
-                    to_time = to_time.split("=")[1]
-                    if closed == "TRUE":
+            if opening_hours:
+                for day in opening_hours.split("#"):
+                    ranges = day.split(",")
+                    day_of_week = ranges[0].split("=")[1]
+                    time_ranges = ranges[1:]
+                    if "closed=TRUE" in time_ranges[0]:
                         continue
-                    oh.add_range(DAYS[int(day_of_week) - 1], from_time, to_time)
+                    else:
+                        time_from, time_to = time_ranges[1:]
+                        from_time = time_from.split("=")[1]
+                        to_time = time_to.split("=")[1]
+                        oh.add_range(DAYS[int(day_of_week) - 1], from_time, to_time)
                 item["opening_hours"] = oh.as_opening_hours()
         except Exception as e:
-            self.logger.error(f"Error parsing hours: {hours}, {e}")
+            self.logger.error(f"Error parsing hours: {opening_hours}, {e}")
 
     def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict):
         for attribute in data.get(attribute_name, []):

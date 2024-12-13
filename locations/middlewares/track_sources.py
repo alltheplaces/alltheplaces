@@ -13,6 +13,8 @@ class TrackSourcesMiddleware:
     def _process_item(self, response, item: Item, spider: Spider):
         if not isinstance(item, Item):
             return
+        if not isinstance(item.get("extras"), dict):
+            item["extras"] = {}
 
         if not item["extras"].get("@source_uri"):
             item["extras"]["@source_uri"] = response.url

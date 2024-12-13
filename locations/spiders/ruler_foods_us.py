@@ -9,7 +9,7 @@ class RulerFoodsUSSpider(StoreLocatorPlusSelfSpider):
     name = "ruler_foods_us"
     item_attributes = {"brand": "Ruler Foods", "brand_wikidata": "Q17125470"}
     allowed_domains = ["rulerfoods.com"]
-    searchable_points_files = ["us_centroids_iseadgg_458km_radius.csv"]
+    iseadgg_countries_list = ["US"]
     search_radius = 500
     max_results = 50
 

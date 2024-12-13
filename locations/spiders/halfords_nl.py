@@ -12,6 +12,7 @@ class HalfordsNLSpider(Spider):
     name = "halfords_nl"
     item_attributes = {"brand": "Halfords", "brand_wikidata": "Q3398786"}
     start_urls = ["https://www.halfords.nl/halfords-winkels/"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         store_urls = response.xpath('//*[@class="amlocator-store-list"]//*[@href]/@href').getall()

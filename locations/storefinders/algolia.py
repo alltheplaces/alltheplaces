@@ -1,28 +1,37 @@
+from typing import Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-
-# API documentation:
-# https://www.algolia.com/doc/rest-api/search/
-#
-# To use this spider, specify the API key and application ID as sent in the
-# headers of a query request, as well as the name of the "index" found in either
-# the request URL or in query parameters in the request body. Override
-# parse_item to extract attributes from each object. Optionally set the HTTP
-# Referer to the store search page.
+from locations.items import Feature
 
 
 class AlgoliaSpider(Spider):
+    """
+    Documentation of the Algolia API is available at:
+    https://www.algolia.com/doc/rest-api/search/
+
+    To use this spider, specify the API key and application ID as sent in the
+    headers of a query request, as well as the name of the "index" found in
+    either the request URL or in query parameters in the request body.
+    Override post_process_item to extract attributes from each object.
+    Optionally set `referer` as the HTTP Referer header of the store search
+    page.
+    """
+
     dataset_attributes = {"source": "api", "api": "algolia"}
 
-    api_key = ""
-    app_id = ""
-    index_name = ""
-    referer = None
+    api_key: str = ""
+    app_id: str = ""
+    index_name: str = ""
+    myfilter: str | None = None
+    referer: str | None = None
 
-    def _make_request(self, page=None):
+    def _make_request(self, page: int | None = None) -> JsonRequest:
         params = "hitsPerPage=1000"
+        if self.myfilter is not None:
+            params += f"&filters={self.myfilter}"
         if page is not None:
             params += f"&page={page}"
 
@@ -43,22 +52,22 @@ class AlgoliaSpider(Spider):
             },
         )
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         yield self._make_request(None)
 
-    def parse(self, response):
+    def parse(self, response: Response) -> Iterable[Feature | JsonRequest]:
         result = response.json()["results"][0]
-        for location in result["hits"]:
-            self.pre_process_data(location)
-            item = DictParser.parse(location)
-            yield from self.post_process_item(item, response, location) or []
+        for feature in result["hits"]:
+            self.pre_process_data(feature)
+            item = DictParser.parse(feature)
+            yield from self.post_process_item(item, response, feature) or []
 
         if result["page"] + 1 < result["nbPages"]:
             yield self._make_request(result["page"] + 1)
 
-    def post_process_item(self, item, response, location):
+    def pre_process_data(self, location: dict) -> None:
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item
-
-    def pre_process_data(self, location, **kwargs):
-        """Override with any pre-processing on the item."""

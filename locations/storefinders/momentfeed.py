@@ -13,7 +13,9 @@ class MomentFeedSpider(Spider):
     MomentFeed (owned by Uberall)
     https://momentfeed.com/
 
-    To use, specify `api_key` and optionally, `page_size`
+    To use, specify:
+      - `api_key`: mandatory parameter
+      - `page_size`: optional parameter, default value is 100
     """
 
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
@@ -22,7 +24,7 @@ class MomentFeedSpider(Spider):
 
     def start_requests(self):
         yield JsonRequest(
-            url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page=1"
+            url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.api_key}&pageSize={self.page_size}&page=1"
         )
 
     def parse(self, response: Response):
@@ -58,9 +60,9 @@ class MomentFeedSpider(Spider):
             yield from self.parse_item(item, feature, store_info)
 
         if len(response.json()) == self.page_size:
-            page = int(urllib.parse.parse_qs(urllib.parse.urlparse(response.url).query)["page"][0])
+            next_page = int(urllib.parse.parse_qs(urllib.parse.urlparse(response.url).query)["page"][0]) + 1
             yield JsonRequest(
-                url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page={page + 1}"
+                url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.api_key}&pageSize={self.page_size}&page={next_page}"
             )
 
     def parse_item(self, item: Feature, feature: dict, store_info: dict):

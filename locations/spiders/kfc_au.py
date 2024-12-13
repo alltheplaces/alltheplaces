@@ -25,7 +25,7 @@ class KfcAUSpider(scrapy.Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            if location["code"] == "1000" or location["code"] == "1001":
+            if location["code"] == "1000" or location["code"] == "1001" or "testing" in location["name"]:
                 # Ignore dummy stores used for internal testing/development
                 continue
             item["ref"] = location["code"]
@@ -49,6 +49,7 @@ class KfcAUSpider(scrapy.Spider):
             details_url = (
                 "https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/details/" + web_path
             )
+            item["branch"] = item.pop("name").removeprefix("KFC ")
             yield JsonRequest(
                 url=details_url, headers={"x-tenant-id": self.tenant_id}, meta={"item": item}, callback=self.parse_hours
             )

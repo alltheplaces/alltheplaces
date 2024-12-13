@@ -4,7 +4,6 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, day_range
 
 
 class MontblancSpider(Spider):
@@ -57,11 +56,5 @@ class MontblancSpider(Spider):
             item["state"] = (location.get("state") or {}).get("defaultName")
             item["country"] = ((location.get("city") or {}).get("country") or {}).get("defaultName")
             item["website"] = "https://stores.montblanc.com/boutique/{}".format(location["id"])
-
-            item["opening_hours"] = OpeningHours()
-            for rule in location["openTimes"]:
-                item["opening_hours"].add_days_range(
-                    day_range(rule["startDay"], rule["endDay"]), rule["startTime"], rule["endTime"]
-                )
 
             yield item

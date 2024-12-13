@@ -1,24 +1,16 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class ErbertAndGerbertsSpider(scrapy.Spider):
+class ErbertAndGerbertsSpider(SitemapSpider):
     name = "erbert_and_gerberts"
     item_attributes = {"brand": "Erbert & Gerbert's", "brand_wikidata": "Q5385097"}
     allowed_domains = ["erbertandgerberts.com"]
-    start_urls = ["https://www.erbertandgerberts.com/store-sitemap.xml"]
+    sitemap_urls = ["https://www.erbertandgerberts.com/store-sitemap.xml"]
+    sitemap_rules = [(r"/locations/", "parse_store")]
     user_agent = BROWSER_DEFAULT
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        city_urls = response.xpath("//url/loc/text()").extract()
-        for path in city_urls:
-            yield scrapy.Request(
-                path.strip(),
-                callback=self.parse_store,
-            )
 
     def parse_store(self, response):
         properties = {

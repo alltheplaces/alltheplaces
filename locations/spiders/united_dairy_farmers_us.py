@@ -34,7 +34,7 @@ class UnitedDairyFarmersUSSpider(scrapy.Spider):
             properties = {
                 "ref": data[9].split(":")[1],
                 "name": "United Dairy Farmers",
-                "addr_full": data[1].split(":")[1],
+                "street_address": data[1].split(":")[1],
                 "city": data[3].split(":")[1],
                 "state": data[4].split(":")[1],
                 "postcode": data[5].split(":")[1],

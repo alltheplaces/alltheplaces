@@ -5,6 +5,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -39,6 +40,7 @@ class WellstarUSSpider(scrapy.Spider):
     item_attributes = {"brand": "WellStar Health System", "brand_wikidata": "Q7981073"}
     allowed_domains = ["www.wellstar.org"]
     start_urls = ("https://www.wellstar.org/locations",)
+    requires_proxy = "US"  # Cloudflare geoblocking in use
 
     def start_requests(self):
         url = "https://www.wellstar.org/api/LocationSearchApi/GetLocations"
@@ -49,7 +51,7 @@ class WellstarUSSpider(scrapy.Spider):
             "accept": "application/json, text/javascript, */*; q=0.01",
             "sec-ch-ua-mobile": "?0",
             "__requestverificationtoken": "Y0cuJinQRzvtT-kjKKyPZOlZPu0JU48XSyIvEl1p__yzZF4621s-0YUAkImeXkjGgLB7GyZlv8rYby0uII9LChhFlrKiWiDb2Va5skX-TmM1",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36",
+            "user-agent": BROWSER_DEFAULT,
             "content-type": "application/json",
             "origin": "https://www.wellstar.org",
             "sec-fetch-site": "same-origin",

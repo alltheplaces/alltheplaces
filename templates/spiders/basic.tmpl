@@ -1,0 +1,17 @@
+import scrapy
+
+
+class $classname(scrapy.Spider):
+    name = "$name"
+    allowed_domains = ["$domain"]
+    start_urls = ["$url"]
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+    }
+
+    def parse(self, response):
+        pass

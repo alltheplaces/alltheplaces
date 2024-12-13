@@ -2,7 +2,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class CrateandbarrelSpider(CrawlSpider, StructuredDataSpider):
@@ -10,7 +9,7 @@ class CrateandbarrelSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["www.crateandbarrel.com"]
     item_attributes = {"brand": "Crate & Barrel", "brand_wikidata": "Q5182604"}
     start_urls = ["https://www.crateandbarrel.com/stores/list-state/retail-stores"]
-    user_agent = BROWSER_DEFAULT
+    requires_proxy = True
     rules = [
         Rule(
             LinkExtractor(allow=r"stores\/list-state\/retail-stores\/([a-zA-Z]{2})$"),

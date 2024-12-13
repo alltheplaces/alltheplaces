@@ -45,14 +45,16 @@ class PepSpider(Spider):
             item["name"] = location.get("description")
 
             if location.get("description").startswith("PEP Cell"):
-                item["brand"] = "Pep Cell"
+                item["brand"] = "PEP Cell"
                 item["brand_wikidata"] = "Q128802743"
             elif location.get("description").startswith("PEP Home"):
-                item["brand"] = "Pep Home"
+                item["brand"] = "PEP Home"
                 item["brand_wikidata"] = "Q128802022"
             else:
-                item["brand"] = "Pep"
+                item["brand"] = "PEP"
                 item["brand_wikidata"] = "Q7166182"
+
+            item["branch"] = item.pop("name").replace(item["brand"], "").strip()
 
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(

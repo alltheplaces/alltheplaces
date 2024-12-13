@@ -27,7 +27,7 @@ class LandiCHSpider(SitemapSpider):
         "garage": Categories.SHOP_CAR_REPAIR,
         "laden": Categories.SHOP_SUPERMARKET,
         "landgarage": Categories.SHOP_CAR_REPAIR,
-        "landi": Categories.SHOP_SUPERMARKET,
+        "landi": Categories.SHOP_COUNTRY_STORE,
         "mofag": Categories.SHOP_MOTORCYCLE,
         "moto": Categories.SHOP_MOTORCYCLE,
         "motobene": Categories.SHOP_MOTORCYCLE_REPAIR,
@@ -48,7 +48,7 @@ class LandiCHSpider(SitemapSpider):
         "zweiradtechnik": Categories.SHOP_MOTORCYCLE_REPAIR,
         "zweiradwerkstatt": Categories.SHOP_MOTORCYCLE_REPAIR,
     }
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60}
 
     def parse(self, response):
         lat, lon = self.parse_lat_lon(response)

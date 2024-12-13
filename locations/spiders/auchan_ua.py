@@ -21,7 +21,6 @@ class AuchanUASpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["city"] = store["city_ru"]
             item["ref"] = store["code"]
-            item["website"] = "https://auchan.ua/"
             item["opening_hours"] = OpeningHours()
             if store["hours"] not in ["Зачинено", "Зачинений"]:
                 open_time, close_time = store["hours"].split("-")

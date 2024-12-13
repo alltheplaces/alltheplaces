@@ -14,6 +14,7 @@ class TruworthsSpider(Spider):
         "Identity": {"brand": "Identity", "brand_wikidata": "Q116378109"},
         "Loads of Living": {"brand": "Loads of Living", "brand_wikidata": "Q116418933"},
         "Office London": {"brand": "Office London", "brand_wikidata": "Q116418894"},
+        "YDE": {"brand": "YDE", "brand_wikidata": "Q130063413"},
     }
 
     def parse(self, response, **kwargs):
@@ -30,7 +31,10 @@ class TruworthsSpider(Spider):
 
             if brand := self.BRANDS.get(clean_location["companyName"]):
                 item.update(brand)
+            else:
+                self.crawler.stats.inc_value(f'atp/{self.name}/unknown_brand/{clean_location["companyName"]}')
 
+            item["branch"] = item.pop("name").replace(item.get("brand", ""), "").strip()
             apply_category(Categories.SHOP_CLOTHES, item)
 
             yield item

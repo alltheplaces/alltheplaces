@@ -1,15 +1,20 @@
 import re
 
+import chompjs
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.user_agents import FIREFOX_LATEST
 
 
 class TeslaSpider(scrapy.Spider):
     name = "tesla"
     item_attributes = {"brand": "Tesla", "brand_wikidata": "Q478214"}
     requires_proxy = True
+    custom_settings = {
+        "USER_AGENT": FIREFOX_LATEST,
+    }
 
     def start_requests(self):
         yield scrapy.Request(
@@ -33,13 +38,18 @@ class TeslaSpider(scrapy.Spider):
             )
 
     def parse_location(self, response):
-        location_data = response.json()
+        # Many responses have false error message appended to the json data, clean them to get a proper json
+        location_data = chompjs.parse_js_object(response.text)
         if isinstance(location_data, list):
             return
         feature = DictParser.parse(location_data)
         feature["ref"] = location_data.get("location_id")
         feature["street_address"] = location_data["address_line_1"].replace("<br />", ", ")
         feature["state"] = location_data.get("province_state") or None
+
+        # Deal with https://github.com/alltheplaces/alltheplaces/issues/10892
+        if "email" in location_data and isinstance(location_data["email"], dict) and "value" in location_data["email"]:
+            feature["email"] = location_data["email"]["value"]
 
         if "supercharger" in location_data.get("location_type"):
             apply_category(Categories.CHARGING_STATION, feature)

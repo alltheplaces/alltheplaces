@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -50,14 +51,15 @@ class CAndASpider(scrapy.Spider):
             flags = json.loads(store.xpath("./@data-flags").get())
             phone = store.xpath('./div[@class="addressBox"]/p[@class="Kontakt"]/a[@href]/text()').get()
             address = [i.strip() for i in store.xpath('./div[@class="addressBox"]/p[@class="address"]/text()').getall()]
-            hours = [
-                i.xpath("./@data-day").get()[0:2]
-                + " "
-                + i.xpath("./@data-openingtime").get()
-                + "-"
-                + i.xpath("./@data-closingtime").get()
-                for i in store.xpath('./div[@class="addressBox"]/p[@class="openingHours hideopeninghours"]')
-            ]
+            opening_hours = OpeningHours()
+            for i in store.xpath('./div[@class="addressBox"]/p[@class="openingHours hideopeninghours"]'):
+                opening_time = i.xpath("./@data-openingtime").get()
+                closing_time = i.xpath("./@data-closingtime").get()
+
+                # Only keep days where none of opening and closing times are "00:00"
+                if not opening_time == "00:00" and not closing_time == "00:00":
+                    day = i.xpath("./@data-day").get()
+                    opening_hours.add_range(day, opening_time, closing_time)
 
             try:
                 postcode, city = re.findall(self.postcode_pattern, address[1])[0]
@@ -74,7 +76,7 @@ class CAndASpider(scrapy.Spider):
                 "name": store.xpath('./div[@class="addressBox"]/p[@class="store"]/text()').get(),
                 "phone": phone.replace("Tel: ", "") if phone else None,
                 "country": country,
-                "opening_hours": "; ".join(hours),
+                "opening_hours": opening_hours.as_opening_hours(),
                 "street_address": address[0],
                 "postcode": postcode,
                 "city": city,

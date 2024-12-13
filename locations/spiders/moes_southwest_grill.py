@@ -14,6 +14,7 @@ class MoesSouthwestGrillSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"locations\.moes\.com/.*/.*/.*$", "parse_sd"),
     ]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if name := item.get("name"):

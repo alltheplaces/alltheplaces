@@ -21,8 +21,9 @@ class GiuntiAlPuntoITSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day, rule in location["store"]["hours"].items():
                 if rule["close"]:
-                    continue
-                item["opening_hours"].add_range(day, rule["morningOpen"], rule["morningClose"])
-                item["opening_hours"].add_range(day, rule["eveningOpen"], rule["eveningClose"])
+                    item["opening_hours"].add_range(day, "closed", "closed")
+                else:
+                    item["opening_hours"].add_range(day, rule["morningOpen"], rule["morningClose"])
+                    item["opening_hours"].add_range(day, rule["eveningOpen"], rule["eveningClose"])
 
             yield item

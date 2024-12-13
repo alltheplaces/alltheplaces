@@ -9,5 +9,5 @@ class PrimantiBrosUSSpider(YextAnswersSpider):
     experience_key = "locator"
 
     def parse_item(self, location, item):
-        item["website"] = location["data"].get("landingPageUrl")
+        item["website"] = location.get("landingPageUrl")
         yield item

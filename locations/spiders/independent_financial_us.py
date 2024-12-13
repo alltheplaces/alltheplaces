@@ -1,18 +1,20 @@
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
 from locations.categories import Categories, apply_category
-from locations.storefinders.yext_answers import YextAnswersSpider
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class IndependentFinancialUSSpider(YextAnswersSpider):
+class IndependentFinancialUSSpider(SitemapSpider, StructuredDataSpider):
     name = "independent_financial_us"
     item_attributes = {"brand": "Independent Financial", "brand_wikidata": "Q6016398"}
-    api_key = "ee4600854cf5501c53831bf944472e57"
-    experience_key = "independent-financial-search"
+    sitemap_urls = ["https://locations.ifinancial.com/sitemap.xml"]
+    sitemap_rules = [(r"https://locations.ifinancial.com/\w+/[a-z-0-9]+/[a-z-0-9]+", "parse_sd")]
 
-    def parse_item(self, location, item):
-        if location["data"]["type"] == "atm":
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        if "/atm" in response.url:
             apply_category(Categories.ATM, item)
-        elif location["data"]["type"] == "location":
-            apply_category(Categories.BANK, item)
         else:
-            self.logger.error("Unknown location type: {}".format(location["data"]["type"]))
+            apply_category(Categories.BANK, item)
         yield item

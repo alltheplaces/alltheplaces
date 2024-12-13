@@ -17,6 +17,11 @@ class HouseAUSpider(Spider):
             "brand_wikidata": "",
             "extras": Categories.SHOP_HOUSEHOLD_LINEN.value,
         },
+        "HOUSEB&B -": {
+            "brand": "House Bed & Bath",
+            "brand_wikidata": "",
+            "extras": Categories.SHOP_HOUSEHOLD_LINEN.value,
+        },
         "House": {"brand": "House", "brand_wikidata": "Q117921987", "extras": Categories.SHOP_HOUSEWARE.value},
     }
 

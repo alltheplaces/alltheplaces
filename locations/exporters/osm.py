@@ -49,7 +49,8 @@ class OSMExporter(XmlItemExporter):
 
     def _export_xml_field(self, name, serialized_value, depth):
         self._beautify_indent(depth=depth)
-        assert isinstance(serialized_value, str)
+        if not isinstance(serialized_value, str):
+            raise Exception("{} is {} not str".format(name, type(serialized_value).__name__))
         self.xg.startElement("tag", {"k": name, "v": serialized_value})
         self.xg.endElement("tag")
         self._beautify_newline()

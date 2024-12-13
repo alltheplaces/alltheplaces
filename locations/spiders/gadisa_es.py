@@ -39,7 +39,7 @@ class GadisaESSpider(Spider):
                 "city": location["pob"],
                 "state": location["prov"],
                 "postcode": location["cp"],
-                "phone": location["tel"],
+                "phone": location.get("tel"),
                 "opening_hours": OpeningHours(),
             }
             properties.update(self.brands[location["sec"]])

@@ -11,6 +11,7 @@ class IntersportGRSpider(scrapy.Spider):
     name = "intersport_gr"
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
     start_urls = ["https://www.intersport.gr/el/etairia/katastimata/"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath('//*[@data-control="box"]'):
@@ -22,5 +23,4 @@ class IntersportGRSpider(scrapy.Spider):
                 store.xpath('.//a[contains(text(),"Περισσότερα")]/@href').get()
             )
             item["branch"] = store.xpath('.//li[@class="name"]/text()').get()
-            item["name"] = None
             yield item
