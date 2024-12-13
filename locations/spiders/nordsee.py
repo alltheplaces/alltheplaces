@@ -21,4 +21,5 @@ class NordseeSpider(JSONBlobSpider):
         if item.get("state") in ["AT", "DE"]:
             item["country"] = item.pop("state")
         item["website"] = response.url
+        item["phone"] = item["phone"].replace("\\/", "") if item.get("phone") else None
         yield item
