@@ -20,4 +20,5 @@ class NordseeSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if item.get("state") in ["AT", "DE"]:
             item["country"] = item.pop("state")
+        item["website"] = response.url
         yield item
