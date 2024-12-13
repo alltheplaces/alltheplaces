@@ -19,68 +19,67 @@ class FirehouseSubsSpider(Spider):
             url=f"https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_fhs_{country}/default",
             data={
                 "operationName": "GetRestaurants",
-                "query": """
-                query GetRestaurants($offset: Int, $limit: Int) {allRestaurants(offset: $offset, limit: $limit) {
-                ref:_id
-                environment
-                chaseMerchantId
-                diningRoomHours {
-                friClose
-                friOpen
-                monClose
-                monOpen
-                satClose
-                satOpen
-                sunClose
-                sunOpen
-                thuClose: thrClose
-                thuOpen: thrOpen
-                tueClose
-                tueOpen
-                wedClose
-                wedOpen
-                }
-                driveThruLaneType
-                email
-                operator: franchiseGroupName
-                operator_id: franchiseGroupId
-                frontCounterClosed
-                hasBreakfast
-                hasBurgersForBreakfast
-                hasCurbside
-                hasDineIn
-                hasCatering
-                hasDelivery
-                hasDriveThru
-                hasMobileOrdering
-                hasParking
-                hasPlayground
-                hasTakeOut
-                hasWifi
-                hasLoyalty
-                hasPickupWindow
-                isHalal
-                latitude
-                longitude
-                mobileOrderingStatus
-                name
-                number
-                parkingType
-                phoneNumber
-                playgroundType
-                address: physicalAddress {
-                  address1
-                  address2
-                  city
-                  country
-                  postalCode
-                  state: stateProvinceShort
-                }
-                status
-                vatNumber
-              }
-            }
-            """,
+                "query": """query GetRestaurants($offset: Int, $limit: Int) {
+                    allRestaurants(offset: $offset, limit: $limit) {
+                        ref: _id
+                        environment
+                        chaseMerchantId
+                        diningRoomHours {
+                            friClose
+                            friOpen
+                            monClose
+                            monOpen
+                            satClose
+                            satOpen
+                            sunClose
+                            sunOpen
+                            thuClose: thrClose
+                            thuOpen: thrOpen
+                            tueClose
+                            tueOpen
+                            wedClose
+                            wedOpen
+                        }
+                        driveThruLaneType
+                        email
+                        operator: franchiseGroupName
+                        operator_id: franchiseGroupId
+                        frontCounterClosed
+                        hasBreakfast
+                        hasBurgersForBreakfast
+                        hasCurbside
+                        hasDineIn
+                        hasCatering
+                        hasDelivery
+                        hasDriveThru
+                        hasMobileOrdering
+                        hasParking
+                        hasPlayground
+                        hasTakeOut
+                        hasWifi
+                        hasLoyalty
+                        hasPickupWindow
+                        isHalal
+                        latitude
+                        longitude
+                        mobileOrderingStatus
+                        name
+                        number
+                        parkingType
+                        phoneNumber
+                        playgroundType
+                        address: physicalAddress {
+                            address1
+                            address2
+                            city
+                            country
+                            postalCode
+                            state: stateProvinceShort
+                        }
+                        status
+                        vatNumber
+                    }
+                }""",
                 "variables": {"offset": offset, "limit": limit},
             },
             meta=dict(country=country, offset=offset, limit=limit),
@@ -100,7 +99,7 @@ class FirehouseSubsSpider(Spider):
                 item["street_address"] = merge_address_lines(
                     [location["address"]["address1"], location["address"]["address2"]]
                 )
-                item["branch"] = item.pop("name")
+                item["branch"] = item.pop("name").removeprefix("Firehouse Subs ")
                 if isinstance(item["email"], list):
                     item["email"] = ";".join(item["email"])
                 if location["operator_id"]:
