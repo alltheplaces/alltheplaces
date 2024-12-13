@@ -8,12 +8,6 @@ from scrapy import http
 from locations.categories import Categories, apply_category
 from locations.pipelines.address_clean_up import clean_address
 
-STORES_PAGE_URL = "https://espressolab.com/subeler/"
-WEBSITE_ROOT = "https://espressolab.com"
-STORE_LINKS_XPATH = "/html/body/form/div[4]/div[4]/div[1]/div/div/div/div[1]/div/div/div[2]/ul/li/a/@href"
-STORE_NAME_XPATH = "//h1/text()"
-STORE_ADDRESS_XPATH = "//div[contains(@class, 'address')]"
-MAP_SCRIPT_XPATH = "/html/head/script[7]/text()"
 MAP_SCRIPT_REGEX = re.compile(r"google\.maps\.LatLng\([ ]*([-0-9.]*)[ ]*,[ ]*([-0-9.]*)[ ]*\);")
 
 
@@ -22,16 +16,16 @@ class EspressolabSpider(scrapy.Spider):
     item_attributes = {"brand": "Espressolab", "brand_wikidata": "Q97599059"}
 
     def start_requests(self) -> Iterable[scrapy.Request]:
-        yield scrapy.Request(url=STORES_PAGE_URL, callback=self.parse_stores_page)
+        yield scrapy.Request(url="https://espressolab.com/subeler/", callback=self.parse_stores_page)
 
     def parse_stores_page(self, response: http.HtmlResponse):
-        for url_path in response.xpath(STORE_LINKS_XPATH).getall():
-            yield scrapy.Request(url=WEBSITE_ROOT + url_path, callback=self.parse_store_page)
+        for url_path in response.xpath("/html/body/form/div[4]/div[4]/div[1]/div/div/div/div[1]/div/div/div[2]/ul/li/a/@href").getall():
+            yield scrapy.Request(url="https://espressolab.com" + url_path, callback=self.parse_store_page)
 
     def parse_store_page(self, response: http.HtmlResponse):
-        name = response.xpath(STORE_NAME_XPATH).get()
-        address = extract_text(response.xpath(STORE_ADDRESS_XPATH).get())
-        latitude, longitude = extract_coords(response.xpath(MAP_SCRIPT_XPATH).get())
+        name = response.xpath("//h1/text()").get()
+        address = extract_text(response.xpath("//div[contains(@class, 'address')]").get())
+        latitude, longitude = extract_coords(response.xpath("/html/head/script[7]/text()").get())
 
         item = {
             "ref": response.url.split("/")[-2],
