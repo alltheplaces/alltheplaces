@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.spiders.aw_restaurants import AwRestaurantsSpider
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.spiders.ljsilvers import LjsilversSpider
-from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
+from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
 
 brands_map = {
     "KA": [KFC_SHARED_ATTRIBUTES, AwRestaurantsSpider.item_attributes],
