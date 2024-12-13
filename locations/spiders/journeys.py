@@ -11,7 +11,6 @@ class JourneysSpider(StructuredDataSpider):
     name = "journeys"
     item_attributes = {"brand": "Journeys", "brand_wikidata": "Q61994838"}
     start_urls = ["https://www.journeys.com/stores", "https://www.journeys.ca/stores"]
-    requires_proxy = True
     time_format = "%I:%M %p"
 
     def parse(self, response, **kwargs):
