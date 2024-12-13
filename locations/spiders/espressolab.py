@@ -5,6 +5,7 @@ import scrapy
 from lxml import etree
 from scrapy import http
 
+from locations.categories import Categories, apply_category
 from locations.pipelines.address_clean_up import clean_address
 
 STORES_PAGE_URL = "https://espressolab.com/subeler/"
@@ -39,6 +40,8 @@ class EspressolabSpider(scrapy.Spider):
             "lat": latitude,
             "lon": longitude,
         }
+
+        apply_category(Categories.COFFEE_SHOP, item)
 
         yield item
 
