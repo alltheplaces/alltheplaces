@@ -4,8 +4,8 @@ from geonamescache import GeonamesCache
 from locations.dict_parser import DictParser
 
 
-class FloorAndDecorSpider(scrapy.Spider):
-    name = "floor_and_decor"
+class FloorAndDecorUSSpider(scrapy.Spider):
+    name = "floor_and_decor_us"
     item_attributes = {"brand": "Floor and Decor", "brand_wikidata": "Q56280964"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
