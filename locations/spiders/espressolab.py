@@ -30,13 +30,15 @@ class EspressolabSpider(scrapy.Spider):
         address = extract_text(response.xpath("//div[contains(@class, 'address')]").get())
         latitude, longitude = extract_coords(response.xpath("/html/head/script[7]/text()").get())
 
-        item = Feature(**{
-            "ref": response.url.split("/")[-2],
-            "name": name,
-            "addr_full": address,
-            "lat": latitude,
-            "lon": longitude,
-        })
+        item = Feature(
+            **{
+                "ref": response.url.split("/")[-2],
+                "name": name,
+                "addr_full": address,
+                "lat": latitude,
+                "lon": longitude,
+            }
+        )
 
         apply_category(Categories.COFFEE_SHOP, item)
 
