@@ -1,4 +1,3 @@
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -15,6 +14,6 @@ class SonyGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:
             item = DictParser.parse(location)
-            item.pop("website") #website is not specific for the store
+            item.pop("website")  # website is not specific for the store
             if "Sony" in item["name"]:
                 yield item
