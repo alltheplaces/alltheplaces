@@ -5,7 +5,7 @@ from typing import Iterable
 from scrapy.http import Response
 from scrapy.selector.unified import Selector
 
-from locations.hours import OpeningHours, DAYS_DE, DELIMITERS_DE
+from locations.hours import DAYS_DE, DELIMITERS_DE, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
