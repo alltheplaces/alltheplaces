@@ -1,6 +1,6 @@
-import json
 
 from scrapy import Spider
+
 from locations.dict_parser import DictParser
 
 
