@@ -12,6 +12,8 @@ class PudoTRSpider(scrapy.Spider):
     def parse(self, response):
         for item in response.json():
             d = DictParser.parse(item)
+            d["branch"] = item["name"]
+            d["name"] = f"{self.item_attributes['brand']} {item['name']}"
             d["state"] = item["city"]  # this is province / il in Turkish
             d["city"] = item["county"]  # this is district / ilçe in Turkish
             neighborhood = item["district"]
