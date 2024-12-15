@@ -3,8 +3,7 @@ import re
 
 from scrapy.spiders import Spider
 
-from locations import hours
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, DAYS_DE, DELIMITERS_DE
 from locations.items import Feature
 
 
@@ -12,10 +11,8 @@ class CallAPizzaDESpider(Spider):
     name = "call_a_pizza_de"
     item_attributes = {"brand": "Call a Pizza", "brand_wikidata": "Q1027107"}
     start_urls = ["https://www.call-a-pizza.de/bestellen"]
-    DAYS_DE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
-    DAYS2EN = dict(zip(DAYS_DE, hours.DAYS))
-    RE_DAYS_DE = "(:?" + "|".join(DAYS_DE) + ")"
-    RE_OPENING_DAYS = re.compile(f"{DAYS_DE}|{DAYS_DE} - {DAYS_DE}")
+    RE_OPENING_DAYS = re.compile(OpeningHours.any_day_extraction_regex(days=DAYS_DE, delimiters=DELIMITERS_DE))
+    RE_DELIMITERS = re.compile(OpeningHours.delimiters_regex(delimiters=DELIMITERS_DE))
     RE_HOURS = re.compile(r"(\d\d:\d\d) - (\d\d:\d\d)")
 
     def parse(self, response, **kwargs):
@@ -53,21 +50,13 @@ class CallAPizzaDESpider(Spider):
     def extract_opening_hours(self, store):
         opening = OpeningHours()
         for days_line in store.xpath('descendant::div[@class="bestellen_oph_left"]'):
-            opening_days = days_line.xpath("(b|.)/text()").get().strip()
+            opening_days = "".join(days_line.xpath("(b|.)/text()").getall())
             if self.RE_OPENING_DAYS.match(opening_days):
                 hours_line = (
                     days_line.xpath('following-sibling::div[@class="bestellen_oph_right"]/text()').get().strip()
                 )
                 match = self.RE_HOURS.match(hours_line)
                 if match:
-                    opening.add_days_range(self.map_opening_days(opening_days), match.group(1), match.group(2))
+                    day_interval = opening.days_in_day_range(self.RE_DELIMITERS.split(opening_days), days=DAYS_DE)
+                    opening.add_days_range(day_interval, match.group(1), match.group(2))
         return opening
-
-    def map_opening_days(self, days_string):
-        days = days_string.split(" - ")
-        if len(days) == 1:
-            return [self.DAYS2EN[days[0]]]
-        else:
-            from_index = self.DAYS_DE.index(days[0])
-            to_index = self.DAYS_DE.index(days[1])
-            return list(map(lambda i: hours.DAYS[i], range(from_index, to_index)))
