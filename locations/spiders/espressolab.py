@@ -8,6 +8,7 @@ from scrapy import http
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 MAP_SCRIPT_REGEX = re.compile(r"google\.maps\.LatLng\([ ]*([-0-9.]*)[ ]*,[ ]*([-0-9.]*)[ ]*\);")
 
@@ -15,6 +16,9 @@ MAP_SCRIPT_REGEX = re.compile(r"google\.maps\.LatLng\([ ]*([-0-9.]*)[ ]*,[ ]*([-
 class EspressolabSpider(scrapy.Spider):
     name = "espressolab"
     item_attributes = {"brand": "Espressolab", "brand_wikidata": "Q97599059"}
+    
+    user_agent = BROWSER_DEFAULT
+    require_proxy = True
 
     def start_requests(self) -> Iterable[scrapy.Request]:
         yield scrapy.Request(url="https://espressolab.com/subeler/", callback=self.parse_stores_page)
