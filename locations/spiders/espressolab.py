@@ -6,6 +6,7 @@ from lxml import etree
 from scrapy import http
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 MAP_SCRIPT_REGEX = re.compile(r"google\.maps\.LatLng\([ ]*([-0-9.]*)[ ]*,[ ]*([-0-9.]*)[ ]*\);")
@@ -29,13 +30,13 @@ class EspressolabSpider(scrapy.Spider):
         address = extract_text(response.xpath("//div[contains(@class, 'address')]").get())
         latitude, longitude = extract_coords(response.xpath("/html/head/script[7]/text()").get())
 
-        item = {
+        item = Feature(**{
             "ref": response.url.split("/")[-2],
             "name": name,
             "addr_full": address,
             "lat": latitude,
             "lon": longitude,
-        }
+        })
 
         apply_category(Categories.COFFEE_SHOP, item)
 
