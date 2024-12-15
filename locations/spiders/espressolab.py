@@ -16,7 +16,7 @@ MAP_SCRIPT_REGEX = re.compile(r"google\.maps\.LatLng\([ ]*([-0-9.]*)[ ]*,[ ]*([-
 class EspressolabSpider(scrapy.Spider):
     name = "espressolab"
     item_attributes = {"brand": "Espressolab", "brand_wikidata": "Q97599059"}
-    
+
     user_agent = BROWSER_DEFAULT
     require_proxy = True
 
