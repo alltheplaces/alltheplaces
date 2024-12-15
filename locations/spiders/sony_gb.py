@@ -15,5 +15,6 @@ class SonyGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:
             item = DictParser.parse(location)
+            delete item["website"] #website is not specific for the store
             if "Sony" in item["name"]:
                 yield item
