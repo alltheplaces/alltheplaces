@@ -1,36 +1,38 @@
-import json
-from typing import Any
+import re
 
-import chompjs
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.react_server_components import parse_rsc
 
 
-class McgrathAUSpider(SitemapSpider):
+class McgrathAUSpider(Spider):
     name = "mcgrath_au"
     item_attributes = {
         "brand_wikidata": "Q105290661",
         "brand": "McGrath",
     }
-    sitemap_urls = ["https://www.mcgrath.com.au/sitemap/offices.xml"]
-    sitemap_rules = [(r"/offices/[-\w]+$", "parse")]
+    start_urls = ["https://www.mcgrath.com.au/api/search/getOfficeSearchSuggestion"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        # coordinates are available in the JSON Blob only.
-        office = json.loads(
-            chompjs.parse_js_object(response.xpath('//script[contains(text(),"coordinates")]/text()').get())[-1].split(
-                ":", 1
-            )[-1]
-        )[0][-1]["profile"]
-        item = DictParser.parse(office)
+    def parse(self, response):
+        for office in response.json()["data"]:
+            slug = re.sub(r"\W+", "-", office["name"].strip()).lower()
+            yield Request(
+                f"https://www.mcgrath.com.au/offices/{slug}-{office['id']}",
+                callback=self.parse_office,
+                headers={"RSC": "1"},
+            )
+
+    def parse_office(self, response):
+        data = dict(parse_rsc(response.body))[2][0][3]
+        item = DictParser.parse(data["profile"])
+
         item["branch"] = item.pop("name")
         item["website"] = response.url
-        item["phone"] = "; ".join(filter(None, [office.get("phoneNumber"), office.get("phoneNumber2")]))
-        item["facebook"] = office.get("facebookUrl")
-        if hours := office.get("openingHours"):
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours)
+
+        oh = OpeningHours()
+        oh.add_ranges_from_string(data["profile"]["openingHours"])
+        item["opening_hours"] = oh.as_opening_hours()
+
         yield item
