@@ -2,6 +2,7 @@ import re
 
 from scrapy import Request, Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -35,5 +36,7 @@ class HealthhubSGSpider(Spider):
             item = DictParser.parse(location)
             if location.get("Open24H") == "Y":
                 item["opening_hours"] = "Mo-Su 00:00-24:00"
+
+            apply_category(Categories.HOSPITAL, item)
 
             yield item
