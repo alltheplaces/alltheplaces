@@ -3,6 +3,7 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -24,4 +25,9 @@ class BurgerKingGTSpider(Spider):
             location = result.get("restaurant")
             item = DictParser.parse(location)
             item["geometry"] = location.get("point")
+            apply_yes_no(Extras.KIDS_AREA, item, location.get("kidsZone"))
+            apply_yes_no(Extras.BREAKFAST, item, location.get("breakfast"))
+            apply_yes_no(Extras.DELIVERY, item, location.get("delivery"))
+            apply_yes_no(Extras.WIFI, item, location.get("wifi"))
+            apply_yes_no(Extras.SELF_CHECKOUT, item, location.get("selfService"))
             yield item
