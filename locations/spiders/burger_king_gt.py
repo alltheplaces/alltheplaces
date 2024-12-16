@@ -23,4 +23,5 @@ class BurgerKingGTSpider(Spider):
         if result := response.json().get("data"):
             location = result.get("restaurant")
             item = DictParser.parse(location)
+            item["geometry"] = location.get("point")
             yield item
