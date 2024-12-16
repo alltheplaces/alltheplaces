@@ -35,6 +35,10 @@ class EasyPointTRSpider(scrapy.Spider):
 
     def parse(self, response):
         for item in response.json()["result"]:
+            # fix malformed coordinates before giving it to the parser
+            item["latitude"] = parse_float_like_coordinate(item["latitude"])
+            item["longitude"] = parse_float_like_coordinate(item["longitude"])
+            
             d = DictParser.parse(item)
             d["opening_hours"] = parse_opening_hours(item["workingDays"])
             if d["phone"] or d["phone"] == "":
@@ -126,3 +130,30 @@ def parse_parcel_from(item: dict) -> str:
         return "yes"
     else:
         return text
+
+def parse_float_like_coordinate(coord: str) -> float | None:
+    if coord == "":
+        return None
+    allowed_chars = "0123456789.,"
+    cleaned_coord = "".join(filter(lambda char: char in allowed_chars, coord))
+
+    if cleaned_coord == "":
+        return None
+
+    cleaned2_chars = []
+    added_decimal_point = False
+    for i, char in enumerate(cleaned_coord):
+        if char in ",.":
+            if (i == 0 # first char cannot be a separator
+                or i == len(cleaned_coord) - 1 # last char cannot be a separator
+                or cleaned_coord[i - 1] == "," # cannot have two separators in a row
+                ):
+                continue
+            if not added_decimal_point:
+                cleaned2_chars.append(".")
+                added_decimal_point = True
+        else:
+            cleaned2_chars.append(char)
+
+    return float("".join(cleaned2_chars))
+    
