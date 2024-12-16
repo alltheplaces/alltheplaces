@@ -14,6 +14,8 @@ class BurgerKingGTSpider(Spider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
 
     def start_requests(self) -> Iterable[Request]:
+        # https://api.bk.gt/v1/restaurant/nearby?latitude=14.587041&longitude=-90.5210362 this API currently leads to
+        # HTTP Error 500, but might fetch more POIs if works.
         for city in city_locations("GT", 1000):
             yield JsonRequest(
                 url="https://api.bk.gt/v1/geolocation/verifyLatLng",
