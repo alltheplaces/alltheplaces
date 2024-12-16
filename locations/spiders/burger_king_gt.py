@@ -25,6 +25,7 @@ class BurgerKingGTSpider(Spider):
             location = result.get("restaurant")
             item = DictParser.parse(location)
             item["geometry"] = location.get("point")
+            item["branch"] = item.pop("name").removeprefix("BK ").removeprefix("Burger King ")
             apply_yes_no(Extras.KIDS_AREA, item, location.get("kidsZone"))
             apply_yes_no(Extras.BREAKFAST, item, location.get("breakfast"))
             apply_yes_no(Extras.DELIVERY, item, location.get("delivery"))
