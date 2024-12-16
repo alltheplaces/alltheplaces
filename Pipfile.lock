@@ -1314,11 +1314,11 @@
         },
         "phonenumbers": {
             "hashes": [
-                "sha256:bb95dbc0d9979c51f7ad94bcd780784938958861fbb4b75a2fe39ccd3d58954a",
-                "sha256:e05ac6fb7b98c6d719a87ea895b9fc153673b4a51f455ec9afaf557ef4629da6"
+                "sha256:e803210038ece9d208b129e3023dc20e656a820d6bf6f1cb0471d4164f54bada",
+                "sha256:fdc371ea6a4da052beb1225de63963d5a2fddbbff2bb53e3a957f360e0185f80"
             ],
             "index": "pypi",
-            "version": "==8.13.50"
+            "version": "==8.13.52"
         },
         "phpserialize": {
             "hashes": [
