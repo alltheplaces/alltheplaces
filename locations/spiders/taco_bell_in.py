@@ -13,6 +13,7 @@ class TacoBellINSpider(Spider):
     name = "taco_bell_in"
     item_attributes = TACO_BELL_SHARED_ATTRIBUTES
     start_urls = ["https://www.tacobell.co.in/find-us"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//div[@class="find-Us-Branches"]'):
