@@ -1,7 +1,9 @@
 from typing import Any
+
 import chompjs
 import scrapy
 from scrapy.http import Response
+
 from locations.dict_parser import DictParser
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
