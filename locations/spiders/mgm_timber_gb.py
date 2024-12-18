@@ -12,6 +12,7 @@ class MgmTimberGBSpider(YextAnswersSpider):
 
     def parse_item(self, location, item):
         apply_category(Categories.TRADE_BUILDING_SUPPLIES, item)
+        apply_category(Categories.SHOP_TRADE, item)
         slug = location["slug"]
         item["website"] = f"https://www.mgmtimber.co.uk/branch-locator/{slug}"
         item["street_address"] = merge_address_lines([location["address"]["line1"], location["address"].get("line2")])
