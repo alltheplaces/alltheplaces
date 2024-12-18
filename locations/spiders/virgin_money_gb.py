@@ -1,5 +1,5 @@
-from locations.storefinders.woosmap import WoosmapSpider
 from locations.categories import Categories, apply_category
+from locations.storefinders.woosmap import WoosmapSpider
 
 
 class VirginMoneyGBSpider(WoosmapSpider):
