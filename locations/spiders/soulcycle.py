@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class SoulcycleSpider(CrawlSpider, StructuredDataSpider):
     name = "soulcycle"
-    item_attributes = {"brand": "Soulcycle", "brand_wikidata": "Q17084730"}
+    item_attributes = {"brand": "SoulCycle", "brand_wikidata": "Q17084730"}
     start_urls = ("https://www.soul-cycle.com/studios/all/",)
     rules = [
         Rule(LinkExtractor(allow="/studios/"), callback="parse_sd"),
