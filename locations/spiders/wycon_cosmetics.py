@@ -10,7 +10,7 @@ class WyconCosmeticsSpider(Spider):
 
     def start_requests(self):
         yield scrapy.FormRequest(
-            url=f"https://www.wyconcosmetics.com/index.php",
+            url="https://www.wyconcosmetics.com/index.php",
             formdata={
                 "extension": "geo",
                 "controller": "places",
