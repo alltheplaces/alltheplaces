@@ -89,6 +89,7 @@ class Categories(Enum):
     SHOP_CHOCOLATE = {"shop": "chocolate"}
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_COFFEE = {"shop": "coffee"}
+    SHOP_COLLECTOR = {"shop": "collector"}
     SHOP_COMPUTER = {"shop": "computer"}
     SHOP_CONFECTIONERY = {"shop": "confectionery"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
@@ -203,6 +204,7 @@ class Categories(Enum):
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
     SHOP_WINE = {"shop": "wine"}
 
+    OFFICE_ARCHITECT = {"office": "architect"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_ENGINEER = {"office": "engineer"}

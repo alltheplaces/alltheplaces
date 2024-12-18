@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 class EastOfEnglandCoopSpider(SitemapSpider):
     name = "east_of_england_coop"
     item_attributes = {
-        "brand": "East of England Co-op",
+        "brand": "East of England CO-OP",
         "brand_wikidata": "Q5329759",
         "country": "GB",
     }

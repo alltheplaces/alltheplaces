@@ -17,7 +17,9 @@ class OpentransportdataSwissSpider(scrapy.Spider):
     name = "opentransportdata_swiss"
     allowed_domains = ["opentransportdata.swiss"]
     dataset_attributes = {
-        "attribution": "required",
+        # https://opentransportdata.swiss/en/authorised-databases/
+        # https://opentransportdata.swiss/en/terms-of-use/#511_Exemption_for_databases
+        "attribution": "optional",
         "attribution:name": "OpenTransportData.swiss",
         "attribution:wikidata": "Q97319754",
         "license:website": "https://opentransportdata.swiss/en/terms-of-use/",
@@ -204,7 +206,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
     @staticmethod
     def parse_date(d):
         if d and not d.startswith("9999"):
-            return datetime.date.fromisoformat(d).isoformat()
+            return datetime.datetime.strptime(d, "%d.%m.%Y").date()
         else:
             return None
 

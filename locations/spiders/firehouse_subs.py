@@ -1,103 +1,136 @@
 import re
+from typing import Any, Iterable
 
-import geonamescache
-import scrapy
-from scrapy.http import JsonRequest
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-
-DAY_MAPPING = {
-    "Sunday": "Su",
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-}
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_3_LETTERS, OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class FirehouseSubsSpider(scrapy.Spider):
+class FirehouseSubsSpider(Spider):
     name = "firehouse_subs"
     item_attributes = {"brand": "Firehouse Subs", "brand_wikidata": "Q5451873"}
-    allowed_domains = ["firehousesubs.com"]
 
-    def start_requests(self):
-        for state in geonamescache.GeonamesCache().get_us_states().keys() | ["PR"]:
-            yield JsonRequest(url=f"https://www.firehousesubs.com/FindLocations/GetLocationsByState/?state={state}")
+    def make_request(self, country: str, offset: int, limit: int = 50) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_fhs_{country}/default",
+            data={
+                "operationName": "GetRestaurants",
+                "query": """query GetRestaurants($offset: Int, $limit: Int) {
+                    allRestaurants(offset: $offset, limit: $limit) {
+                        ref: _id
+                        environment
+                        chaseMerchantId
+                        diningRoomHours {
+                            friClose
+                            friOpen
+                            monClose
+                            monOpen
+                            satClose
+                            satOpen
+                            sunClose
+                            sunOpen
+                            thuClose: thrClose
+                            thuOpen: thrOpen
+                            tueClose
+                            tueOpen
+                            wedClose
+                            wedOpen
+                        }
+                        driveThruLaneType
+                        email
+                        operator: franchiseGroupName
+                        operator_id: franchiseGroupId
+                        frontCounterClosed
+                        hasBreakfast
+                        hasBurgersForBreakfast
+                        hasCurbside
+                        hasDineIn
+                        hasCatering
+                        hasDelivery
+                        hasDriveThru
+                        hasMobileOrdering
+                        hasParking
+                        hasPlayground
+                        hasTakeOut
+                        hasWifi
+                        hasLoyalty
+                        hasPickupWindow
+                        isHalal
+                        latitude
+                        longitude
+                        mobileOrderingStatus
+                        name
+                        number
+                        parkingType
+                        phoneNumber
+                        playgroundType
+                        address: physicalAddress {
+                            address1
+                            address2
+                            city
+                            country
+                            postalCode
+                            state: stateProvinceShort
+                        }
+                        status
+                        vatNumber
+                    }
+                }""",
+                "variables": {"offset": offset, "limit": limit},
+            },
+            meta=dict(country=country, offset=offset, limit=limit),
+        )
 
-    def parse(self, response):
-        for store_json_data in response.json():
-            addr_full = None
-            address = store_json_data.get("address")
-            address2 = store_json_data.get("address2")
-            if address:
-                addr_full = address
-            if address2:
-                addr_full += f", {address2}"
+    def start_requests(self) -> Iterable[Request]:
+        for country in ["us", "ca"]:
+            yield self.make_request(country, 0)
 
-            store_page_url = store_json_data.get("moreInfoUrl")
-
-            properties = {
-                # 'siteId' appears to be the publicly facing store number.  I would prefer to use it, but
-                # it comes back as null for some stores.  'id' also appears in the data, reliably.
-                # So use it instead.
-                "ref": store_json_data.get("id"),
-                "name": store_json_data.get("title"),
-                "street_address": addr_full,
-                "city": store_json_data.get("city"),
-                "state": store_json_data.get("state"),
-                "postcode": store_json_data.get("zip"),
-                "phone": store_json_data.get("phone"),
-                "website": store_page_url,
-                "lon": store_json_data.get("longitude"),
-                "lat": store_json_data.get("latitude"),
-            }
-
-            # The JSON has today's hours, but we have to visit the store page
-            # to find hours for every day of the week.
-            if store_page_url:
-                yield scrapy.http.Request(
-                    url=store_page_url,
-                    method="GET",
-                    callback=self.add_hours,
-                    cb_kwargs={"properties": properties},
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        country = response.meta["country"]
+        if locations := response.json()["data"].get("allRestaurants"):
+            for location in locations:
+                if location["status"] != "Open":
+                    continue
+                item = DictParser.parse(location)
+                item["street_address"] = merge_address_lines(
+                    [location["address"]["address1"], location["address"]["address2"]]
                 )
-            else:
-                yield Feature(**properties)
+                item["branch"] = item.pop("name").removeprefix("Firehouse Subs ")
+                if isinstance(item["email"], list):
+                    item["email"] = ";".join(item["email"])
+                if location["operator_id"]:
+                    item["operator"] = location["operator"]
+                    item["extras"]["operator:ref"] = str(location["operator_id"])
+                item["country"] = country
+                item["website"] = f'https://www.firehousesubs.{country}/store-locator/store/{item["ref"]}'.replace(
+                    ".us", ".com"
+                )
+                if hours := location["diningRoomHours"]:
+                    item["opening_hours"] = OpeningHours()
+                    for day in DAYS_3_LETTERS:
+                        day = day.lower()
+                        open_time = self.extract_time(hours.get(f"{day}Open"))
+                        close_time = self.extract_time(hours.get(f"{day}Close"))
 
-    def add_hours(self, response, properties):
-        opening_hours = OpeningHours()
+                        if open_time and close_time:
+                            item["opening_hours"].add_range(day, open_time, close_time, "%H:%M:%S")
 
-        # Hours are listed in markup as a series of list items, one for each
-        # day of the week.
-        li_hours = response.xpath('//div[@class="hours"]//ol//li')
+                apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"])
+                apply_yes_no(Extras.DRIVE_THROUGH, item, location["hasDriveThru"])
+                apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"])
+                apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"])
+                apply_yes_no(Extras.WIFI, item, location["hasWifi"])
+                apply_yes_no(Extras.HALAL, item, location["isHalal"])
+                apply_yes_no(Extras.KIDS_AREA, item, location["hasPlayground"])
+                apply_yes_no(Extras.BREAKFAST, item, location["hasBreakfast"])
+                yield item
+            yield self.make_request(country, response.meta["offset"] + response.meta["limit"])
 
-        for li in li_hours:
-            day = li.xpath('./span[@class="day"]/text()').get()
-            times = li.xpath('./span[@class="time"]/text()').get()
-            # "Coming Soon" stores may not have times listed yet
-            if not times:
-                continue
-
-            # Times for each day listed in a format like this:  10:30am - 9:00pm
-            # Note:
-            # - Whitespace is inconsistent
-            # - Some stores may have extra information after; e.g., "10:30am - 9:00pm (drive-thru opens 9:30)"
-            regex = re.compile(r"^\s*(\d{1,2}:\d{2}\s*[a|p]m)\s*-\s*(\d{1,2}:\d{2}\s*[a|p]m)")
-            match = re.search(regex, times)
-            if not match or len(match.groups()) != 2:
-                continue
-
-            open_time = match.group(1)
-            close_time = match.group(2)
-
-            # Across pages, we see inconsistent whitespace in the times. Remove it all.
-            open_time = open_time.replace(" ", "")
-            close_time = close_time.replace(" ", "")
-
-            opening_hours.add_range(DAY_MAPPING[day], open_time, close_time, time_format="%I:%M%p")
-
-        properties["opening_hours"] = opening_hours.as_opening_hours()
-        yield Feature(**properties)
+    @staticmethod
+    def extract_time(time_str: str) -> str:
+        match = re.search(r"(\d{2}:\d{2}:\d{2})", time_str) if time_str else None
+        return match.group(1) if match else ""
