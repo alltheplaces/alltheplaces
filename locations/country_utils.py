@@ -1,8 +1,10 @@
+import re
 import unicodedata
 from urllib.parse import urlparse
 
 import geonamescache
 from babel import Locale, UnknownLocaleError
+import pycountry
 
 
 def strip_accents(s):
