@@ -9,6 +9,6 @@ class MgmTimberGBSpider(YextAnswersSpider):
     experience_key = "donaldson-locator"
     locale = "en_GB"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def parse_item(self, location, item):
         apply_category(Categories.TRADE_BUILDING_SUPPLIES, item)
         yield item
