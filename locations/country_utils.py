@@ -1,8 +1,10 @@
+import re
 import unicodedata
 from urllib.parse import urlparse
 
 import geonamescache
 from babel import Locale, UnknownLocaleError
+import pycountry
 
 
 def strip_accents(s):
@@ -71,11 +73,27 @@ class CountryUtils:
                 return "GB"
         return None
 
-    def country_code_from_spider_name(self, spider_name):
+    def country_code_from_spider_name(self, spider_name: str) -> str | None:
         if isinstance(spider_name, str):
-            splits = [split for split in spider_name.split("_") if len(split) == 2]
-            if len(splits) == 1:  # Skip multiple countries e.g. homebase_gb_ie
-                return self._convert_to_iso2_country_code(splits)
+            if country_code_candidates := re.search(r"(?:_([a-z]{2}))+$", spider_name):
+                if len(country_code_candidates.groups()) == 1:
+                    country_code = country_code_candidates.group(1).upper()
+                    if country_code in [country.alpha_2 for country in pycountry.countries]:
+                        # Only one valid ISO 3166-1 alpha-2 code is present at
+                        # the end of the spider name.
+                        return country_code
+                elif len(country_code_candidates.groups()) == 2:
+                    last_country_code = country_code_candidates.group(2).upper()
+                    second_last_country_code = country_code_candidates.group(1).upper()
+                    if last_country_code in [country.alpha_2 for country in pycountry.countries]:
+                        if second_last_country_code in [country.alpha_2 for country in pycountry.countries]:
+                            # Two valid ISO 3166-1 alpha-2 codes present in
+                            # spider name. Therefore a single code can't be
+                            # extracted just from the spider name.
+                            return None
+                        # Only one valid ISO 3166-1 alpha-2 code is present at
+                        # the end of the spider name.
+                        return last_country_code.upper()
         return None
 
     def country_code_from_url(self, url):

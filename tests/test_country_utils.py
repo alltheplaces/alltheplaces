@@ -36,11 +36,17 @@ def test_country_code_from_spider_name():
     assert not country_utils.country_code_from_spider_name([1, 2, 3])
     assert not country_utils.country_code_from_spider_name("fails")
     assert not country_utils.country_code_from_spider_name("fails_xx")
+    assert not country_utils.country_code_from_spider_name("fails_XX")
     assert not country_utils.country_code_from_spider_name("fails_gbr")
     assert "ES" == country_utils.country_code_from_spider_name("spider_es")
     assert "GB" == country_utils.country_code_from_spider_name("spider_UK")
     assert "GB" == country_utils.country_code_from_spider_name("spider_GB")
     assert "GB" == country_utils.country_code_from_spider_name("spider_with_more_words_GB")
+    assert not country_utils.country_code_from_spider_name("spider_GB_ES_FR")
+    assert not country_utils.country_code_from_spider_name("spider_GB_ES")
+    assert not country_utils.country_code_from_spider_name("spider_gb_ES")
+    assert "FR" == country_utils.country_code_from_spider_name("spider_xx_FR")
+    assert "FR" == country_utils.country_code_from_spider_name("spider_XX_FR")
 
 
 def test_get_locale():

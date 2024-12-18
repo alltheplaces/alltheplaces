@@ -7,6 +7,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Iterable
 
+import pycountry
 import scrapy
 
 from locations.hours import OpeningHours
@@ -50,6 +51,38 @@ class Feature(scrapy.Item):
         if not self._values.get("extras"):
             self.__setitem__("extras", {})
 
+    def has_valid_country_code(self) -> bool:
+        """
+        Determine if the feature's country is a valid ISO 3166-1 alpha-2 code.
+
+        :return: True or False for whether the feature's country is a valid
+                 ISO 3166-1 alpha-2 code.
+        """
+        if not self.get("country"):
+            return False
+        if self["country"] not in [country.alpha_2 for country in pycountry.countries]:
+            return False
+        return True
+
+    def get_iso_3166_2_code(self) -> str | None:
+        """
+        Return an ISO 3166-2 code (both first and second parts combined with
+        a hyphen joining the parts) if the feature has a valid ISO 3166-2
+        country and state defined. Otherwise return None.
+
+        :return: ISO 3166-2 code or None if a code cannot be generated for
+                 the feature's defined country and state.
+        """
+        if not self.get("country"):
+            return None
+        if not self.get("state"):
+            return None
+        if not self.has_valid_country_code():
+            return None
+        for subdivision in pycountry.subdivisions.get(country_code=self["country"]):
+            if self["state"] in [subdivision.code.split("-", 1)[1], subdivision.name]:
+                return subdivision.code
+        return None
 
 def get_lat_lon(item: Feature) -> (float, float):
     if geometry := item.get("geometry"):
