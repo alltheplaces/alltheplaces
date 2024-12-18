@@ -89,6 +89,7 @@ class Categories(Enum):
     SHOP_CHOCOLATE = {"shop": "chocolate"}
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_COFFEE = {"shop": "coffee"}
+    SHOP_COLLECTOR = {"shop": "collector"}
     SHOP_COMPUTER = {"shop": "computer"}
     SHOP_CONFECTIONERY = {"shop": "confectionery"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
