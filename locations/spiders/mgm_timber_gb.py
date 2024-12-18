@@ -1,6 +1,6 @@
 from locations.categories import Categories, apply_category
-from locations.storefinders.yext_answers import YextAnswersSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class MgmTimberGBSpider(YextAnswersSpider):
