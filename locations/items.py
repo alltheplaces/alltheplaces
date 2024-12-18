@@ -84,6 +84,7 @@ class Feature(scrapy.Item):
                 return subdivision.code
         return None
 
+
 def get_lat_lon(item: Feature) -> (float, float):
     if geometry := item.get("geometry"):
         if isinstance(geometry, dict):

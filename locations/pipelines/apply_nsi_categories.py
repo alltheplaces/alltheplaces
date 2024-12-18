@@ -239,7 +239,9 @@ class ApplyNSICategoriesPipeline:
         if location_code is None:
             return False
         if nsi_entry["locationSet"].get("exclude"):
-            excluded_location_codes = list(map(lambda x: x.replace(".geojson", ""), nsi_entry["locationSet"]["exclude"]))
+            excluded_location_codes = list(
+                map(lambda x: x.replace(".geojson", ""), nsi_entry["locationSet"]["exclude"])
+            )
             if location_code.lower().split("-")[0] in excluded_location_codes:
                 return False
             if location_code.lower() in excluded_location_codes:
