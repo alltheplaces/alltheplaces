@@ -4,6 +4,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.linked_data_parser import LinkedDataParser
 
@@ -32,6 +33,7 @@ class PizzaHutINSpider(Spider):
                     if ld_item := item_element.get("item"):
                         item = LinkedDataParser.parse_ld(ld_item)
                         item["ref"] = item["website"] = ld_item["url"].split("?utm_source")[0]
+                        apply_category(Categories.RESTAURANT, item)
                         yield item
 
         if current_page < self.final_page:
