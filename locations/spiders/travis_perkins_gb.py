@@ -31,7 +31,7 @@ class TravisPerkinsGBSpider(Spider):
                   __typename
                 }
               }
-            
+
               fragment TpplcBranchFields on TpplcBranch {
                 name
                 id
