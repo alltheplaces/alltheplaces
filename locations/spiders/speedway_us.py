@@ -1,29 +1,27 @@
-import json
 import re
 from typing import Any, Iterable
 
 import scrapy
 from scrapy import Request, Spider
-from scrapy.http import Response, JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class SpeedwayUSSpider(Spider):
     name = "speedway_us"
     item_attributes = {"brand": "Speedway", "brand_wikidata": "Q7575683"}
-    custom_settings = {"ROBOTSTXT_OBEY":False, "DOWNLOAD_TIMEOUT": 210}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 210}
 
     def start_requests(self) -> Iterable[Request]:
-        yield scrapy.Request(url="https://www.speedway.com/locations",callback=self.parse_cookies)
+        yield scrapy.Request(url="https://www.speedway.com/locations", callback=self.parse_cookies)
 
-    def parse_cookies(self,response,**kwargs):
+    def parse_cookies(self, response, **kwargs):
         for token_string in response.headers.getlist("Set-Cookie"):
             if "accessToken" not in str(token_string):
                 continue
-            token  = re.search(r'accessToken%22%3A%22(.*)%22%7D;',str(token_string)).group(1)
+            token = re.search(r"accessToken%22%3A%22(.*)%22%7D;", str(token_string)).group(1)
             url = "https://apis.7-eleven.com/v5/stores/graphql"
             query = """query stores(
   $brand: String,
@@ -72,28 +70,31 @@ class SpeedwayUSSpider(Spider):
   }
 }
 """
-            data = ({
-                        "query": query,
-                        "variables": {
-                "brand": "speedway",
-                "radius": 2000000,
-                "limit": 4000,
-                "offset": 0,
-                "lat": 36.778261,
-                "lon": -119.4179324,
-                "curr_lat": 36.778261,
-                "curr_lon": -119.4179324,
-                "filters": []
-              }
-            })
-            headers = {'Authorization': 'Bearer '+token,
-              'Content-Type': 'application/json',"Accept":"application/json, text/plain, */*"}
-            yield JsonRequest(url=url, method="POST",headers=headers,data=data,callback=self.parse_details)
+            data = {
+                "query": query,
+                "variables": {
+                    "brand": "speedway",
+                    "radius": 2000000,
+                    "limit": 4000,
+                    "offset": 0,
+                    "lat": 36.778261,
+                    "lon": -119.4179324,
+                    "curr_lat": 36.778261,
+                    "curr_lon": -119.4179324,
+                    "filters": [],
+                },
+            }
+            headers = {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+            }
+            yield JsonRequest(url=url, method="POST", headers=headers, data=data, callback=self.parse_details)
 
     def parse_details(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]["stores"]:
             item = DictParser.parse(store)
             item["street_address"] = item.pop("addr_full")
             item["website"] = "https://www.speedway.com/"
-            apply_category(Categories.FUEL_STATION,item)
+            apply_category(Categories.FUEL_STATION, item)
             yield item
