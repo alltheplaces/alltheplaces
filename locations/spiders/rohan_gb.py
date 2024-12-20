@@ -3,8 +3,6 @@ from typing import Any
 from urllib.parse import urljoin
 
 from scrapy.http import Response
-
-# from scrapy.http import HtmlResponse
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
