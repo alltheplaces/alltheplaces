@@ -13,11 +13,10 @@ class SonestaSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"email"}
 
     def post_process_item(self, item, response, ld_data):
-        # TODO: Establish why this is not just mapped for the Hotel type
-        item["lat"] = ld_data["latitude"]
-        item["lon"] = ld_data["longitude"]
-
-        # TODO: The responses include a PostalAddress as well, ie: https://validator.schema.org/#url=https%3A%2F%2Fwww.sonesta.com%2Fsonesta-simply-suites%2Fal%2Fbirmingham%2Fsonesta-simply-suites-birmingham-hoover
-        # However this is not readily parsed.
-
-        yield item
+        # Pages without lat lon are test pages
+        lat = ld_data.get("latitude")
+        lon = ld_data.get("longitude")
+        if lat and lon:
+            item["lat"] = lat
+            item["lon"] = lon
+            yield item

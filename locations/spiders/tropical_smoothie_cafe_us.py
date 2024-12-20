@@ -15,7 +15,7 @@ class TropicalSmoothieCafeUSSpider(YextAnswersSpider):
     feature_type = "restaurants"
 
     def parse_item(self, location, item):
-        item["email"] = location["data"].get("c_franchiseeEmail")
-        if amenities := location["data"].get("c_locationPageServices"):
+        item["email"] = location.get("c_franchiseeEmail")
+        if amenities := location.get("c_locationPageServices"):
             apply_yes_no(Extras.WIFI, item, "Wifi" in amenities, False)
         yield item

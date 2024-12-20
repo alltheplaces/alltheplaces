@@ -33,14 +33,15 @@ class GoReviewApiSpider(JSONBlobSpider):
 
     def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
-            if feature["trading_status"] != "Open":
-                continue
+            if feature.get("trading_status"):
+                if feature.get("trading_status") != "Open":
+                    continue
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
 
             item["website"] = feature["local_page_url"]
 
-            if item.get("attributes") is not None:
+            if feature.get("attributes") is not None:
                 apply_yes_no(Extras.DELIVERY, item, "Delivery" in feature.get("attributes"))
                 apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-through" in feature.get("attributes"))
                 apply_yes_no(Extras.TAKEAWAY, item, "Takeaway" in feature.get("attributes"))

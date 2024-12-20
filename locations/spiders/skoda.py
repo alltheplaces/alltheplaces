@@ -1,5 +1,6 @@
 from typing import Any
 
+import reverse_geocoder
 import scrapy
 from scrapy.http import JsonRequest, Response
 
@@ -84,6 +85,13 @@ class SkodaSpider(scrapy.Spider):
             item["ref"] = store["GlobalId"]
             item["state"] = store["District"]
             item["country"] = response.meta["country_code"]
+
+            # Some of the coordinates have lat and lon switched and are usually bad.
+            if result := reverse_geocoder.get((item["lat"], item["lon"]), mode=1, verbose=False):
+                if item["country"] != result["cc"]:
+                    item["lon"] = None
+                    item["lat"] = None
+
             if store.get("HasSales"):
                 apply_category(Categories.SHOP_CAR, item)
                 apply_yes_no("service:vehicle:car_repair", item, store.get("HasServices"), True)

@@ -1,9 +1,8 @@
-from html import unescape
 from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, Fuel, apply_yes_no
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.hours import DAYS_EN
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
@@ -11,13 +10,13 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class BuceesUSSpider(WPStoreLocatorSpider):
     name = "bucees_us"
-    item_attributes = {"brand": "Buc-ee's", "brand_wikidata": "Q4982335", "extras": Categories.FUEL_STATION.value}
+    item_attributes = {"brand": "Buc-ee's", "brand_wikidata": "Q4982335"}
     allowed_domains = ["buc-ees.com"]
     days = DAYS_EN
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = unescape("name")
+        item["ref"] = item.pop("name").removeprefix("#").split(" ", 1)[0]
 
         apply_yes_no(Fuel.DIESEL, item, True)
         apply_yes_no("car_wash", item, "carwash" in feature["terms"])
@@ -29,5 +28,7 @@ class BuceesUSSpider(WPStoreLocatorSpider):
 
         apply_yes_no(Fuel.ADBLUE, item, "def-at-pump" in feature["terms"])
         apply_yes_no("fuel:ethanol_free", item, "ethanol-free" in feature["terms"])
+
+        apply_category(Categories.FUEL_STATION, item)
 
         yield item

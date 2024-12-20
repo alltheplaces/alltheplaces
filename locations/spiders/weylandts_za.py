@@ -19,7 +19,8 @@ class WeylandtsZASpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["ref"] = location["link"]
         item["website"] = "https://www.weylandts.co.za/" + item["ref"]
-        item["image"] = "https://m2.weylandts.co.za/media/" + location["image"]
+        if image := location.get("image"):
+            item["image"] = "https://m2.weylandts.co.za/media/" + image
         item["branch"] = item.pop("name")
         if location["city"] == "Distribution Centers":
             item.pop("city")

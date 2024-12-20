@@ -1,8 +1,8 @@
 from locations.spiders.hungry_lion_za import HUNGRY_LION_SHARED_ATTRIBUTES
-from locations.storefinders.go_review import GoReviewSpider
+from locations.storefinders.location_bank import LocationBankSpider
 
 
-class HungryLionAOSpider(GoReviewSpider):
+class HungryLionAOSpider(LocationBankSpider):
     name = "hungry_lion_ao"
     item_attributes = HUNGRY_LION_SHARED_ATTRIBUTES
-    start_urls = ["https://hlainfo.goreview.co.za/store-locator"]
+    client_id = "c4a1835e-1e57-449e-978e-544e05ab074e"

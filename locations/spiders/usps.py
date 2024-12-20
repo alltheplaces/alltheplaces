@@ -36,13 +36,17 @@ class UspsSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for store in response.json().get("locations", []):
+            if zip4 := store.get("zip4"):
+                postcode = store["zip5"] + "-" + zip4
+            else:
+                postcode = store["zip5"]
             properties = {
                 "ref": store["locationID"],
                 "name": store["locationName"],
                 "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
-                "postcode": store["zip5"] + "-" + store["zip4"],
+                "postcode": postcode,
                 "country": "US",
                 "lat": store["latitude"],
                 "lon": store["longitude"],

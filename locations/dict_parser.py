@@ -47,6 +47,8 @@ class DictParser:
         "branch-name",
         # ES
         "nombre",
+        # IT
+        "nome",
     ]
 
     house_number_keys = [
@@ -86,6 +88,7 @@ class DictParser:
         "address-line1",
         "line1",
         "address-line-one",
+        "address-street",
         # JP
         "町域以下住所",  # "address below town limits"
         # IT
@@ -130,6 +133,7 @@ class DictParser:
         "store-state",
         "store-province",
         "storeProvince",
+        "prefecture",
         # JP
         "都道府県",  # "prefecture"
         # IT
@@ -166,6 +170,7 @@ class DictParser:
         "store-zip",
         "store-zip-code",
         "store-zipcode",
+        "address-zip",
         # JP
         "郵便番号",  # "post code"
         # DE
@@ -264,6 +269,7 @@ class DictParser:
         "store-hours",
         # IT
         "orario",
+        "orari",
     ]
 
     @staticmethod

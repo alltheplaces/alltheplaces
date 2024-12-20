@@ -1,10 +1,10 @@
 import json
-import re
 
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BayshoreHealthcareSpider(scrapy.Spider):
@@ -31,12 +31,8 @@ class BayshoreHealthcareSpider(scrapy.Spider):
         stores = json.loads(response.body)
 
         for store in stores["result"]["entries"]:
-            full_addr = store["address"]
-            addr = re.search(r"^(.*?)<", full_addr).groups()[0]
-            city = re.search(r">(.*?),", full_addr).groups()[0]
-            state = re.search(r",\s([A-Z]{2})\s", full_addr).groups()[0]
-            postal = re.search(r",\s[A-Z]{2}\s(.*)$", full_addr).groups()[0]
-
+            if addr_full := store.get("address"):
+                addr_full = clean_address(addr_full)
             coords = store["latlng"].split(",")
             lat = coords[0]
             lng = coords[1]
@@ -44,10 +40,7 @@ class BayshoreHealthcareSpider(scrapy.Spider):
             properties = {
                 "ref": store["id"],
                 "name": store["name"],
-                "street_address": addr,
-                "city": city,
-                "state": state,
-                "postcode": postal,
+                "addr_full": addr_full,
                 "country": "CA",
                 "lat": lat,
                 "lon": lng,

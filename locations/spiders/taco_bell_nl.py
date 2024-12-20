@@ -2,7 +2,7 @@ from scrapy.spiders import Spider
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
+from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
 
 
 class TacoBellNLSpider(Spider):
