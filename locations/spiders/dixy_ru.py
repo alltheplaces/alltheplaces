@@ -20,6 +20,7 @@ class DixyRUSpider(scrapy.Spider):
             item["ref"] = store["id"]
             item["addr_full"] = store["balloonContentBody"]
             item["lat"], item["lon"] = store["geometry"]["coordinates"]
+            item["website"] = "https://dixy.ru/"
             item["opening_hours"] = OpeningHours()
             if store["balloonContentFooter"] == "Круглосуточно":
                 item["opening_hours"] = "24/7"
