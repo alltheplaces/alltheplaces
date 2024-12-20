@@ -1,14 +1,11 @@
-from datetime import datetime
-from typing import Iterable
+from typing import Any
 
-from scrapy import FormRequest, Request, Spider
+import scrapy
+from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
-from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+from locations.hours import OpeningHours
 
 
 # TODO: Hertz also owns Dollar and Thrifty (https://en.wikipedia.org/wiki/Hertz_Global_Holdings
@@ -16,85 +13,43 @@ from locations.user_agents import BROWSER_DEFAULT
 class HertzSpider(Spider):
     name = "hertz"
     item_attributes = {"brand": "Hertz", "brand_wikidata": "Q1543874"}
-    custom_settings = {"CONCURRENT_REQUESTS": 1}  # Let's be more gentle with the API
-    token = None
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {
-        "DEFAULT_REQUEST_HEADERS": {
-            "user-agent": BROWSER_DEFAULT,
-            "accept": "*/*",
-            "accept-language": "en-US",
-            "origin": "https://www.hertz.com",
-            "referer": "https://www.hertz.com/",
-        }
-    }
+    start_urls = ["https://api.hertz.com/rest/geography/country"]
 
-    def start_requests(self):
-        url = "https://api.hertz.io/api/login/token"
-        headers = {
-            "authorization": "Basic NjM5U0pXeTVUM2xJOXdpeHdVOUE3Q1JRUXpzQVpsT0RqclJ6dDdQeU1FRTpfYUR4UlA3ZVFORGNHLWt5LWY1MDhHSjlaQVdvRHoyMll2YjNqREZKZ2lv",
-            "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
-        }
-
-        formdata = {
-            "grant_type": "client_credentials",
-        }
-        yield FormRequest(url, headers=headers, formdata=formdata, callback=self.parse_token)
-
-    def parse_token(self, response: Response):
-        self.token = response.json().get("access_token")
-        yield from self.get_locations_page(url="https://api.hertz.io/v1/locations/HERTZ?_page=1&_size=1000")
-
-    def get_locations_page(self, url: str):
-        yield Request(
-            url,
-            headers={
-                "authorization": f"Bearer {self.token}",
-                "correlation-id": "2eb91a71-31da-48e7-901d-a9437a9b3975",
-            },
-            callback=self.parse,
-        )
-
-    def parse(self, response: Response) -> Iterable[Feature]:
-        response = response.json()
-        for poi in response["data"]:
-            poi = poi["data"]
-            item = DictParser.parse(poi)
-            item["ref"] = poi.get("oag")
-            item["branch"] = item.pop("name")
-            item["country"] = poi.get("countryCode")
-            item["street_address"] = poi.get("address2")
-            item["extras"]["check_date"] = (
-                datetime.strptime(poi.get("lastUpdated"), "%a %b %d %H:%M:%S UTC %Y").strftime("%Y-%m-%d")
-                if poi.get("lastUpdated")
-                else None
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for country_data in response.json()["data"]["model"]:
+            country_name = country_data["name"]
+            country_code = country_data["value"]
+            yield scrapy.Request(
+                url="https://api.hertz.com/rest/geography/city/country/{}".format(country_code),
+                callback=self.parse_city,
+                cb_kwargs={"country_name": country_name, "country_code": country_code},
             )
-            item["extras"]["fax"] = poi.get("fax")
-            item["website"] = (
-                (
-                    "https://www.hertz.com/rentacar/location/"
-                    + (poi["country"] + "/" if poi["country"] else "")
-                    + (item["state"] + "/" if item["state"] else "")
-                    + (item["city"] + "/" if item["city"] else "")
-                    + (item["ref"] if item["ref"] else "")
+
+    def parse_city(self, response, **kwargs):
+        for city_info in response.json()["data"]["model"]:
+            city_name = city_info["name"]
+            yield scrapy.Request(
+                url="https://api.hertz.com/rest/location/country/{}/city/{}".format(kwargs["country_code"], city_name),
+                callback=self.parse_details,
+            )
+
+    def parse_details(self, response, **kwargs):
+        for shop in response.json()["data"]["locations"]:
+            item = DictParser.parse(shop)
+            item["ref"] = shop["extendedOAGCode"]
+            item["email"] = shop["loc_email"]
+            item["website"] = "/".join(
+                ["https://www.hertz.com/us/en/location", shop["country_name"], shop["city"], shop["extendedOAGCode"]]
+            )
+            item["street_address"] = shop.get("streetAddressLine1")
+            if shop.get("streetAddressLine2", ""):
+                item["addr_full"] = "".join(
+                    [
+                        shop.get("streetAddressLine1", ""),
+                        shop.get("streetAddressLine2", ""),
+                        shop.get("streetAddressLine3", ""),
+                    ]
                 )
-                .lower()
-                .replace(" ", "")
-            )
-            item["extras"]["type"] = poi.get("type")
-
-            oh = OpeningHours()
-            for day, day_hours in poi.get("openHours", {}).items():
-                day = DAYS_EN.get(day.title())
-                if not day_hours:
-                    oh.set_closed(day)
-                    continue
-                for hours in day_hours:
-                    oh.add_range(day, hours["start"], hours["end"])
-            item["opening_hours"] = oh
-
-            apply_category(Categories.CAR_RENTAL, item)
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(ranges_string=shop["hours"])
             yield item
-
-        if next_page := response["_links"].get("next", {}).get("href"):
-            yield from self.get_locations_page(next_page)
