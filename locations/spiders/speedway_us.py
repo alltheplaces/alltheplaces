@@ -1,73 +1,100 @@
+import re
 from typing import Any, Iterable
 
-from scrapy import FormRequest, Request, Spider
-from scrapy.http import Response
+import scrapy
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
 class SpeedwayUSSpider(Spider):
     name = "speedway_us"
     item_attributes = {"brand": "Speedway", "brand_wikidata": "Q7575683"}
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
-
-    def make_request(self, offset: int) -> FormRequest:
-        return FormRequest(
-            url="https://www.speedway.com/locations/search",
-            formdata={
-                "StartIndex": str(offset),
-                "Limit": "1000",
-                "Latitude": "0",
-                "Longitude": "0",
-                "Radius": "20000",
-            },
-            meta={"offset": offset},
-        )
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 210}
 
     def start_requests(self) -> Iterable[Request]:
-        yield self.make_request(0)
+        yield scrapy.Request(url="https://www.speedway.com/locations", callback=self.parse_cookies)
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath('//section[@class="c-location-card"]'):
-            item = Feature()
-            item["ref"] = location.xpath("@data-costcenter").get()
-            item["lat"] = location.xpath("@data-latitude").get()
-            item["lon"] = location.xpath("@data-longitude").get()
-            item["state"] = location.xpath("@data-state").get()
-            item["website"] = response.urljoin(location.xpath(".//a/@href").get())
-            item["addr_full"] = location.xpath(".//@data-location-address").get()
-            item["street_address"] = location.xpath('.//h2[@data-location-info-window-data="address"]/text()').get()
-            item["phone"] = location.xpath('.//li[data-location-details="phone"]/text()').get()
+    def parse_cookies(self, response, **kwargs):
+        for token_string in response.headers.getlist("Set-Cookie"):
+            if "accessToken" not in str(token_string):
+                continue
+            token = re.search(r"accessToken%22%3A%22(.*)%22%7D;", str(token_string)).group(1)
+            url = "https://apis.7-eleven.com/v5/stores/graphql"
+            query = """query stores(
+  $brand: String,
+  $lat: String,
+  $lon: String,
+  $radius: Float,
+  $limit: Int,
+  $offset: Int,
+  $curr_lat: String,
+  $curr_lon: String,
+  $filters: [String]
+) {
+  stores(
+    brand: $brand,
+    lat: $lat,
+    lon: $lon,
+    radius: $radius,
+    limit: $limit,
+    offset: $offset,
+    curr_lat: $curr_lat,
+    curr_lon: $curr_lon,
+    filters: $filters
+  ) {
+    id
+    brand_id
+    brand {
+      name
+    }
+    distance
+    distance_label
+    hours
+    is_open_for_business
+    address
+    city
+    phone
+    state
+    country
+    postal_code
+    lat
+    lon
+    fuel_data
+    services {
+      title
+      slug
+    }
+  }
+}
+"""
+            data = {
+                "query": query,
+                "variables": {
+                    "brand": "speedway",
+                    "radius": 2000000,
+                    "limit": 4000,
+                    "offset": 0,
+                    "lat": 36.778261,
+                    "lon": -119.4179324,
+                    "curr_lat": 36.778261,
+                    "curr_lon": -119.4179324,
+                    "filters": [],
+                },
+            }
+            headers = {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+            }
+            yield JsonRequest(url=url, method="POST", headers=headers, data=data, callback=self.parse_details)
 
-            amenities = location.xpath(
-                './/div[@class="c-location-options--amenities"]/ul[@class="c-location-options__list"]/li/span/text()'
-            ).getall()
-            fuels = location.xpath(
-                './/div[@class="c-location-options--fuel"]/ul[@class="c-location-options__list"]/li/span/text()'
-            ).getall()
-
-            if "Open 24 Hours" in amenities:
-                item["opening_hours"] = "24/7"
-
-            # TODO: "Money Orders" "Propane Exchange"
-            apply_yes_no(Extras.ATM, item, "ATM" in amenities)
-            apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in amenities)
-            apply_yes_no(Fuel.PROPANE, item, "Propane Exchange" in amenities)
-            # TODO: DEF Plus Premium Unleaded
-            apply_yes_no(Fuel.DIESEL, item, "Auto Diesel" in fuels)
-            apply_yes_no(Fuel.E85, item, "E-85" in fuels)
-            apply_yes_no(Fuel.E15, item, "E15" in fuels)
-            apply_yes_no(Fuel.E20, item, "E20" in fuels)
-            apply_yes_no(Fuel.E30, item, "E30" in fuels)
-            apply_yes_no(Fuel.ETHANOL_FREE, item, "Ethanol Free" in fuels)
-            apply_yes_no(Fuel.KEROSENE, item, "Kerosene" in fuels)
-            apply_yes_no(Fuel.OCTANE_90, item, "Plus 90" in fuels)
-            apply_yes_no(Fuel.OCTANE_91, item, "Plus 91" in fuels)
-
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["data"]["stores"]:
+            item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full")
+            item["website"] = "https://www.speedway.com/"
             apply_category(Categories.FUEL_STATION, item)
-
             yield item
-
-        if response.meta["offset"] < int(response.xpath('//input[@id="totalsearchresults"]/@value').get()):
-            yield self.make_request(response.meta["offset"] + 1000)
