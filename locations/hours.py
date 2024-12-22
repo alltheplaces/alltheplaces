@@ -895,7 +895,7 @@ class OpeningHours:
 
     def set_closed_missing_days(self):
         for day in DAYS:
-            if defined := self.day_hours.get(day, None):
+            if self.day_hours.get(day, None):
                 pass
             else:
                 self.days_closed.add(day)
