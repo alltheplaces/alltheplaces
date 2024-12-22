@@ -69,6 +69,7 @@ class PosteItalianeITSpider(JSONBlobSpider):
         elif tipo == "PuntoPoste":
             self.post_process_punto_poste(item, location)
         elif tipo == "PuntoPosteLocker":
+            item["ref"] = location["frazionario"]
             apply_category(Categories.PARCEL_LOCKER, item)
             item.update(self.POSTE_BRAND)
             self.apply_hours(item, location["orari"])
@@ -78,15 +79,19 @@ class PosteItalianeITSpider(JSONBlobSpider):
             self.post_process_merchant(item, location)
         else:
             self.crawler.stats.inc_value(f"atp/{self.name}/unknown_type/{tipo}")
+        if vat := location.get("partitaIva"):
+            item["extras"]["ref:vatin"] = "IT" + vat.rjust(11, "0")
         if fax := location.get("fax"):
             item["extras"]["contact:fax"] = fax
         yield item
 
     def post_process_ufficio_postale(self, item, location):
+        item["ref"] = location["frazionario"]
         item["branch"] = item["name"]
         item["name"] = f'Ufficio Postale {item["branch"]}'
         item.update(self.POSTE_BRAND)
         apply_category(Categories.POST_OFFICE, item)
+        item["extras"]["post_office"] = "bureau"
         self.apply_hours(item, location["orari"])
         for s in location["servizi"]:
             apply_yes_no(Extras.WIFI, item, s["codice"] == "WIFI")
@@ -94,12 +99,14 @@ class PosteItalianeITSpider(JSONBlobSpider):
             apply_yes_no(Extras.ATM, item, s["codice"] == "ATMH24")
 
     def post_process_spazio_filatelico(self, item, location):
+        item["ref"] = location["frazionario"]
         item.update(self.POSTE_BRAND)
         apply_category(Categories.SHOP_COLLECTOR, item)
         item["extras"]["collector"] = "coins;medals;postcards;stamps"
         self.apply_hours(item, location["orari"])
 
     def post_process_punto_poste(self, item, location):
+        item["ref"] = location["frazionario"]
         apply_category(Categories.POST_PARTNER, item)
         item["extras"].update(self.PUNTO_POSTE_BRAND)
         item["extras"]["ref:poste_italiane"] = item["ref"]
@@ -131,7 +138,6 @@ class PosteItalianeITSpider(JSONBlobSpider):
             item["extras"]["collection_times:signed"] = "no"
 
     def post_process_merchant(self, item, location):
-        item["extras"]["ref:vatin"] = "IT" + location["partitaIva"]
         apply_yes_no(PaymentMethods.BANCOPOSTA, item, True)
         apply_yes_no(PaymentMethods.POSTEPAY, item, True)
         codice = location["categoriaMerchant"]["codice"]

@@ -272,10 +272,7 @@ def check_file(file_path: Path) -> Tuple[Path, List[str]]:
 def main():
     # Find all Python files in the spiders directory
     spider_root = os.path.join(os.path.dirname(__file__), "../locations/spiders")
-    if len(sys.argv) > 1:
-        python_files = [os.path.relpath(f, start=spider_root) for f in sys.argv[1:] if f.endswith(".py")]
-    else:
-        python_files = [f for f in os.listdir(spider_root) if f.endswith(".py")]
+    python_files = [f for f in os.listdir(spider_root) if f.endswith(".py")]
 
     # use multiprocessing map to check all files in parallel
     with ThreadPoolExecutor() as executor:
