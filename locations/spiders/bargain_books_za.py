@@ -12,25 +12,21 @@ class BargainBooksZASpider(Spider):
     no_refs = True
 
     def parse(self, response):
-        for province_div in response.xpath('.//div[@class="et_pb_code_inner"]'):
-            province = province_div.xpath(".//h2/text()").get()
-            for location in province_div.xpath('.//tbody[@class="row-hover"]/tr'):
-                item = Feature()
-                item["branch"] = location.xpath('.//td[@class="column-1"]/text()').get()
-                item["phone"] = location.xpath('.//td[@class="column-2"]/text()').get()
-                addresses = location.xpath('.//td[@class="column-3"]/text()').getall()
-                item["addr_full"] = clean_address([addresses[0], province])
-                item["state"] = province
-                if len(addresses) > 2:
-                    item["email"] = addresses[2].replace("\n", "")
+        for store in response.xpath('//tbody/tr'):
+            item = Feature()
+            item["branch"] = store.xpath('.//td[@class="column-1"]/text()').get()
+            item["phone"] = store.xpath('.//td[@class="column-2"]/text()').get()
+            item["addr_full"] = store.xpath('.//td[@class="column-3"]/text()[1]').get()
+            item["website"] = "https://www.bargainbooks.co.za/"
+            if email:= store.xpath('.//td[@class="column-3"]/text()[2]').get():
+                item["email"] = email
+            item["opening_hours"] = OpeningHours()
+            for day, column in [("Monday-Thursday ", "4"), ("Friday ", "5"), ("Saturday ", "6"), ("Sunday ", "7")]:
+                try:
+                    item["opening_hours"].add_ranges_from_string(
+                        day + store.xpath(f'.//td[@class="column-{column}"]/text()').get()
+                    )
+                except TypeError:  # In case a cell is blank
+                    pass
 
-                item["opening_hours"] = OpeningHours()
-                for day, column in [("Monday-Thursday ", "4"), ("Friday ", "5"), ("Saturday ", "6"), ("Sunday ", "7")]:
-                    try:
-                        item["opening_hours"].add_ranges_from_string(
-                            day + location.xpath(f'.//td[@class="column-{column}"]/text()').get()
-                        )
-                    except TypeError:  # In case a cell is blank
-                        pass
-
-                yield item
+            yield item
