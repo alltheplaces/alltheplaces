@@ -16,7 +16,7 @@ class DinoPLSpider(Spider):
 
     def start_requests(self):
         yield Request(
-            url="https://marketdino.pl/external/map/_next/static/chunks/pages/index-d599ac5e0a5fa37c.js",
+            url="https://marketdino.pl/external/map/_next/static/chunks/pages/index-484403574d28a5a1.js",
             callback=self.parse_decryption_params,
         )
 
