@@ -49,6 +49,7 @@ class DinoPLSpider(Spider):
             item = DictParser.parse(location["properties"])
             item.pop("name", None)
             item["geometry"] = location["geometry"]
+            item["website"] = "https://marketdino.pl/map"
             item["opening_hours"] = OpeningHours()
             if week_hours := location["properties"].get("weekHours"):
                 item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th", "Fr", "Sa"], *week_hours.split("-", 1))
