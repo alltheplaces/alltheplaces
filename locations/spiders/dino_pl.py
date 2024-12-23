@@ -1,8 +1,10 @@
 import json
 import re
+from typing import Any
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -13,10 +15,12 @@ class DinoPLSpider(Spider):
     item_attributes = {"brand": "Dino", "brand_wikidata": "Q11694239"}
     allowed_domains = ["marketdino.pl"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://marketdino.pl/external/map/index.html"]
 
-    def start_requests(self):
-        yield Request(
-            url="https://marketdino.pl/external/map/_next/static/chunks/pages/index-484403574d28a5a1.js",
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Search for the desired JavaScript file
+        yield response.follow(
+            url=response.xpath('//script[contains(@src,"_next/static/chunks/pages/index-")]/@src').get(""),
             callback=self.parse_decryption_params,
         )
 
