@@ -8,9 +8,16 @@ from locations.structured_data_spider import extract_phone
 class AnacondaAUSpider(SitemapSpider):
     name = "anaconda_au"
     item_attributes = {"brand": "Anaconda", "brand_wikidata": "Q105981238"}
-    sitemap_urls = ["https://www.anacondastores.com/sitemap/store/store-sitemap.xml?queueittoken=e_anacondastores~ts_1734696784~ce_true~rt_safetynet~h_ac92d04c49398e4c2ab95fe4feb139a25cbb1c5fef669943615738fd8b2d024b"]
-    sitemap_rules = [("https://www.anacondastores.com/store/.+","parse_store",)]
-    custom_settings = {"ROBOTSTXT_OBEY":False}
+    sitemap_urls = [
+        "https://www.anacondastores.com/sitemap/store/store-sitemap.xml?queueittoken=e_anacondastores~ts_1734696784~ce_true~rt_safetynet~h_ac92d04c49398e4c2ab95fe4feb139a25cbb1c5fef669943615738fd8b2d024b"
+    ]
+    sitemap_rules = [
+        (
+            "https://www.anacondastores.com/store/.+",
+            "parse_store",
+        )
+    ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_store(self, response):
         properties = {
