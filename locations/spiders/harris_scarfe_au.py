@@ -11,9 +11,8 @@ from locations.items import Feature
 class HarrisScarfeAUSpider(SitemapSpider):
     name = "harris_scarfe_au"
     item_attributes = {"brand": "Harris Scarfe", "brand_wikidata": "Q5665029"}
-    sitemap_urls = ["https://www.harrisscarfe.com.au/sitemap/store/store-sitemap.xml"]
-    sitemap_rules = [(r"^https:\//www\.harrisscarfe\.com\.au\/store\/(?!online)", "parse")]
-    allowed_domains = ["www.harrisscarfe.com.au"]
+    sitemap_urls = ["https://www.harrisscarfe.com.au/sitemap/store/store-sitemap.xml?queueittoken=e_harrisscarfe~ts_1734950356~ce_true~rt_safetynet~h_03afd3fd079b81a4185484a4329694c58554f14cefb91dd5a1ae291868e652e4"]
+    sitemap_rules = [(r"^https://www\.harrisscarfe\.com\.au/store/(?!online)[^/]+/[^/]+/\d+$", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
