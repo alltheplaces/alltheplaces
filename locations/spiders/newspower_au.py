@@ -1,4 +1,3 @@
-
 from locations.storefinders.storeify import StoreifySpider
 
 
