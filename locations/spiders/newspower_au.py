@@ -1,9 +1,4 @@
-from chompjs import parse_js_object
-from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.storeify import StoreifySpider
 
 
