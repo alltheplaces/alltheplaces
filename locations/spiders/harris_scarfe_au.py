@@ -1,12 +1,10 @@
 import html
 import re
+import unicodedata
 from typing import Any
 
 import scrapy
-import unicodedata
 from scrapy.http import Response
-
-from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -16,10 +14,7 @@ class HarrisScarfeAUSpider(scrapy.Spider):
     name = "harris_scarfe_au"
     item_attributes = {"brand": "Harris Scarfe", "brand_wikidata": "Q5665029"}
     start_urls = ["https://www.harrisscarfe.com.au/sitemap/store/store-sitemap.xml"]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "REDIRECT_ENABLED": True
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False, "REDIRECT_ENABLED": True}
     handle_httpstatus_list = [302]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -36,7 +31,7 @@ class HarrisScarfeAUSpider(scrapy.Spider):
         yield scrapy.Request(url=url, headers={"cookie": token}, callback=self.parse_store_urls)
 
     def parse_store_urls(self, response, **kwargs):
-        for link in response.xpath('//urlset//url//loc/text()').getall():
+        for link in response.xpath("//urlset//url//loc/text()").getall():
             yield scrapy.Request(url=link, callback=self.parse_store)
 
     def parse_store(self, response):
