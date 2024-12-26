@@ -1,16 +1,38 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any
+import scrapy
+from scrapy.http import Response
 
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import extract_phone
 
-
-class AnacondaAUSpider(SitemapSpider):
+class AnacondaAUSpider(scrapy.Spider):
     name = "anaconda_au"
     item_attributes = {"brand": "Anaconda", "brand_wikidata": "Q105981238"}
-    sitemap_urls = ["https://www.anacondastores.com/sitemap/store/store-sitemap.xml?queueittoken=e_anacondastores~ts_1734696784~ce_true~rt_safetynet~h_ac92d04c49398e4c2ab95fe4feb139a25cbb1c5fef669943615738fd8b2d024b"]
-    sitemap_rules = [("https://www.anacondastores.com/store/.+","parse_store",)]
-    custom_settings = {"ROBOTSTXT_OBEY":False}
+    start_urls = ["https://www.anacondastores.com/sitemap/store/store-sitemap.xml"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "REDIRECT_ENABLED" : True
+    }
+    handle_httpstatus_list = [302]
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        token_request_url = str(response.headers.getlist("Location")[0].decode("utf-8"))
+        yield scrapy.Request(url=token_request_url,callback=self.parse_token_request)
+
+    def parse_token_request(self,response):
+        token_request_url = str(response.headers.getlist("Location")[0].decode("utf-8"))
+        yield scrapy.Request(url=token_request_url, callback=self.parse_token)
+
+    def parse_token(self,response):
+        url = str(response.headers.getlist("Location")[0].decode("utf-8"))
+        token = str(response.headers.getlist("Set-Cookie")[0].decode("utf-8"))
+        yield scrapy.Request(url=url,headers={"cookie":token}, callback=self.parse_store_urls)
+
+    def parse_store_urls(self,response,**kwargs):
+        for link in response.xpath('//urlset//url//loc/text()').getall():
+            yield scrapy.Request(url = link, callback=self.parse_store)
+
 
     def parse_store(self, response):
         properties = {
