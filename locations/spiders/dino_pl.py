@@ -29,7 +29,7 @@ class DinoPLSpider(Spider):
             key = m.group(1)
         if m := re.search(r"""\.from\([\n ]*['"]([0-9a-f]{32})['"],[\n ]*['"]hex['"][\n ]*\)""", response.text):
             iv = m.group(1)
-        if m := re.search(r"a[\s=]+\"(.+?)\",", response.text):
+        if m := re.search(r"[a-z]\s*=\s*\"([0-9a-f]{40})\",", response.text):
             access_token = m.group(1)
         yield Request(
             url="https://api.marketdino.pl/api/v1/dino_content/geofile/",
