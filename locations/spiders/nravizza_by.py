@@ -19,6 +19,6 @@ class NravizzaBYSpider(Spider):
         ):
             item = DictParser.parse(location)
             item["street_address"] = item.pop("name")
-            if item.get("website") == 'null':
+            if item.get("website") == "null":
                 item.pop("website")
             yield item
