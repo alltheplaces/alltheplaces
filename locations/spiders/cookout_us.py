@@ -20,4 +20,5 @@ class CookoutUSSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["street_address"] = item.pop("addr_full")
             item["branch"] = store.get("store")
+            item["website"] = "https://cookout.com/locations/"
             yield item
