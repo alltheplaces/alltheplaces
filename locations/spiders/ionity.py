@@ -55,7 +55,7 @@ class IonitySpider(Spider):
                             name
                             street_address: address
                             location {
-                             type 
+                             type
                              coordinates
                             }
                             city
