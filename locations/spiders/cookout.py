@@ -15,6 +15,8 @@ class CookoutSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
+            if store.get("coming_soon"):
+                continue
             item = DictParser.parse(store)
             item["street_address"] = item.pop("addr_full")
             item["branch"] = store.get("store")
