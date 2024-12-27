@@ -1,6 +1,9 @@
-import scrapy
+from typing import Any
 
-from locations.items import Feature
+import scrapy
+from scrapy.http import Response
+
+from locations.dict_parser import DictParser
 
 
 class CookoutSpider(scrapy.Spider):
@@ -10,25 +13,8 @@ class CookoutSpider(scrapy.Spider):
         "https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat=40.71278&lng=-74.00597&max_results=500&search_radius=1000"
     ]
 
-    def parse(self, response):
-        data = response.json()
-
-        for store in data:
-            properties = {
-                "ref": store["id"],
-                "name": store["store"],
-                "website": store["url"],
-                "street_address": store.get("address"),
-                "city": store.get("city"),
-                "state": store.get("state"),
-                "postcode": store.get("zip"),
-                "country": store.get("country"),
-                "lon": float(store["lng"]),
-                "lat": float(store["lat"]),
-            }
-
-            phone = store["phone"]
-            if phone:
-                properties["phone"] = phone
-
-            yield Feature(**properties)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json():
+            item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full")
+            yield item
