@@ -1,34 +1,16 @@
-import logging
-import os
 import re
 
 import scrapy
 
 from locations.items import Feature
-from locations.searchable_points import open_searchable_points
-
-STATES = ["NC", "AL", "GA", "KY", "MD", "MS", "SC", "TN", "VA", "WV"]
 
 
 class CookoutSpider(scrapy.Spider):
     name = "cookout"
     item_attributes = {"brand": "Cook Out", "brand_wikidata": "Q5166992"}
-    allowed_domains = ["cookout.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    def start_requests(self):
-        base_url = "https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lng}&max_results=300&search_radius=500"
-
-        logging.info(os.path.dirname(os.path.realpath(__file__)))
-        logging.info(os.getcwd())
-
-        with open_searchable_points("us_centroids_100mile_radius_state.csv") as points:
-            next(points)
-            for point in points:
-                _, lat, lon, state = point.strip().split(",")
-                if state in STATES:
-                    url = base_url.format(lat=lat, lng=lon)
-                    yield scrapy.Request(url=url, callback=self.parse)
+    start_urls = [
+        "https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat=40.71278&lng=-74.00597&max_results=500&search_radius=1000"
+    ]
 
     def store_hours(self, store_hours):
         m = re.findall(r"<tr><td>(\w*)<\/td><td><time>([0-9: APM-]*)</time></td></tr>", store_hours)
