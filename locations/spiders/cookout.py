@@ -17,4 +17,5 @@ class CookoutSpider(scrapy.Spider):
         for store in response.json():
             item = DictParser.parse(store)
             item["street_address"] = item.pop("addr_full")
+            item["branch"] = store.get("store")
             yield item
