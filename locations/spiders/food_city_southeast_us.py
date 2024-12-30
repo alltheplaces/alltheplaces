@@ -1,4 +1,7 @@
+from typing import Any
+
 from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
@@ -11,17 +14,19 @@ class FoodCitySoutheastUSSpider(Spider):
         "brand": "Food City",
         "brand_wikidata": "Q16981107",
     }
+    page_size = 10
 
     def _make_request(self, offset):
         return Request(
-            f"https://www.foodcity.com/index.php?vica=ctl_storelocations&vicb=showNextStoresForStoreSelector&pageCount={offset}"
+            f"https://www.foodcity.com/index.php?vica=ctl_storelocations&vicb=showNextStoresForStoreSelector&pageCount={offset}",
+            meta=dict(offset=offset),
         )
 
     def start_requests(self):
         yield self._make_request(0)
 
-    def parse(self, response):
-        listings = response.css("div.store-listing")
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        listings = response.xpath('//*[contains(@id,"store-listing")]')
 
         for store_listing in listings:
             item = Feature()
@@ -43,9 +48,8 @@ class FoodCitySoutheastUSSpider(Spider):
             apply_yes_no(Extras.DELIVERY, item, bool(store_listing.xpath(".//img[@src='/images/home-delivery.png']")))
             yield item
 
-        if len(listings) == 10:
-            currentOffset = int(response.xpath("//input[@id='pageCount']/@value").get())
-            yield self._make_request(currentOffset + len(listings))
+        if len(listings) == self.page_size:
+            yield self._make_request(response.meta["offset"] + self.page_size)
 
     def parse_opening_hours(self, lines):
         oh = OpeningHours()
