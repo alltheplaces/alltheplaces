@@ -6,6 +6,7 @@ from scrapy.http import Response
 from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class FoodCitySoutheastUSSpider(Spider):
@@ -34,7 +35,9 @@ class FoodCitySoutheastUSSpider(Spider):
             item["lon"] = store_listing.xpath("@data-lng").get()
             item["ref"] = store_listing.xpath("@data-id").get()
             item["website"] = f"https://www.foodcity.com/stores/store-details/{item['ref']}"
-            item["street_address"] = store_listing.xpath(".//span[@class='street-address']/text()").get()
+            item["addr_full"] = clean_address(store_listing.xpath(".//*[@class='location']/p/text()").getall()).split(
+                "miles"
+            )[-1]
             item["city"] = store_listing.xpath(".//span[@class='city']/text()").get()
             item["state"] = store_listing.xpath(".//abbr[@class='state']/text()").get()
             item["postcode"] = store_listing.xpath(".//span[@class='postal-code']/text()").get()
