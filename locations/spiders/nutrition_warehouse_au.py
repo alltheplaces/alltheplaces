@@ -25,5 +25,6 @@ class NutritionWarehouseAUSpider(Spider):
             item["ref"] = store.get("g_id")
             item["branch"] = item.pop("name").removeprefix("Nutrition Warehouse ")
             item["name"] = self.item_attributes["brand"]
+            item["addr_full"] = store.get("complete_address")
             apply_category(Categories.SHOP_NUTRITION_SUPPLEMENTS, item)
             yield item
