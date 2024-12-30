@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, sanitise_day
 
 
 class NutritionWarehouseAUSpider(Spider):
@@ -26,5 +27,14 @@ class NutritionWarehouseAUSpider(Spider):
             item["branch"] = item.pop("name").removeprefix("Nutrition Warehouse ")
             item["name"] = self.item_attributes["brand"]
             item["addr_full"] = store.get("complete_address")
+            item["opening_hours"] = OpeningHours()
+            for rule in store.get("opening_hours", []):
+                if day := sanitise_day(rule.get("day")):
+                    hours = rule.get("time")
+                    if not hours:
+                        continue
+                    open_time, close_time = hours.split("-") if "-" in hours else ("", "")
+                    item["opening_hours"].add_range(day, open_time.strip(), close_time.strip(), time_format="%I:%M %p")
+
             apply_category(Categories.SHOP_NUTRITION_SUPPLEMENTS, item)
             yield item
