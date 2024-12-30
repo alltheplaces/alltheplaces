@@ -1,8 +1,10 @@
 import json
 import re
+from typing import Any
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -13,10 +15,12 @@ class DinoPLSpider(Spider):
     item_attributes = {"brand": "Dino", "brand_wikidata": "Q11694239"}
     allowed_domains = ["marketdino.pl"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://marketdino.pl/external/map/index.html"]
 
-    def start_requests(self):
-        yield Request(
-            url="https://marketdino.pl/external/map/_next/static/chunks/pages/index-d599ac5e0a5fa37c.js",
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Search for the desired JavaScript file
+        yield response.follow(
+            url=response.xpath('//script[contains(@src,"_next/static/chunks/pages/index-")]/@src').get(""),
             callback=self.parse_decryption_params,
         )
 
@@ -25,8 +29,11 @@ class DinoPLSpider(Spider):
             key = m.group(1)
         if m := re.search(r"""\.from\([\n ]*['"]([0-9a-f]{32})['"],[\n ]*['"]hex['"][\n ]*\)""", response.text):
             iv = m.group(1)
+        if m := re.search(r"[a-z]\s*=\s*\"([0-9a-f]{40})\",", response.text):
+            access_token = m.group(1)
         yield Request(
             url="https://api.marketdino.pl/api/v1/dino_content/geofile/",
+            headers={"Authorization": f"token {access_token}"},
             meta={"key": key, "iv": iv},
             callback=self.parse_encrypted_geojson,
         )
