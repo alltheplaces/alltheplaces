@@ -23,5 +23,7 @@ class NutritionWarehouseAUSpider(Spider):
         for store in response.json()["data"]:
             item = DictParser.parse(store)
             item["ref"] = store.get("g_id")
+            item["branch"] = item.pop("name").removeprefix("Nutrition Warehouse ")
+            item["name"] = self.item_attributes["brand"]
             apply_category(Categories.SHOP_NUTRITION_SUPPLEMENTS, item)
             yield item
