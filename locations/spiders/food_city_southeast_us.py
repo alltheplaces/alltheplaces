@@ -30,9 +30,12 @@ class FoodCitySoutheastUSSpider(Spider):
         listings = response.xpath('//*[contains(@id,"store-listing")]')
 
         for store_listing in listings:
+            lat = store_listing.xpath("@data-lat").get()
+            lon = store_listing.xpath("@data-lng").get()
+            if lat == "0":
+                continue  # skip duplicate store data without coordinates
             item = Feature()
-            item["lat"] = store_listing.xpath("@data-lat").get()
-            item["lon"] = store_listing.xpath("@data-lng").get()
+            item["lat"], item["lon"] = lat, lon
             item["ref"] = store_listing.xpath("@data-id").get()
             item["website"] = f"https://www.foodcity.com/stores/store-details/{item['ref']}"
             item["addr_full"] = clean_address(store_listing.xpath(".//*[@class='location']/p/text()").getall()).split(
