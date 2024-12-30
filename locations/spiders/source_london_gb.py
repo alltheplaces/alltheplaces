@@ -1,7 +1,6 @@
 from typing import Iterable
 
-import scrapy
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
