@@ -38,7 +38,7 @@ class FoodCitySoutheastUSSpider(Spider):
             item["addr_full"] = clean_address(store_listing.xpath(".//*[@class='location']/p/text()").getall()).split(
                 "miles"
             )[-1]
-            item["phone"] = store_listing.xpath(".//div[@class='tel']/a/@href").get()
+            item["phone"] = store_listing.xpath(".//a[contains(@href,'tel')]/@href").get()
             item["opening_hours"] = self.parse_opening_hours(
                 store_listing.xpath(".//label[text()='Store Hours']/../text()").getall()
             )
