@@ -1,31 +1,60 @@
+from typing import Any, Iterable
+
+import chompjs
 import scrapy
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.obi_eu import OBI_SHARED_ATTRIBUTES
 
 
 class ObiRUSpider(scrapy.Spider):
     name = "obi_ru"
-    allowed_domains = ["obi.ru"]
     item_attributes = OBI_SHARED_ATTRIBUTES
-    start_urls = ["https://obi.ru/graphql?hash=2872797852"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = "RU"
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response):
-        for poi in response.json()["data"]["offlineStores"]:
-            if poi["source_code"] in ["668", "default"]:
-                # Exclude test pois
-                continue
-            item = DictParser.parse(poi)
-            item["ref"] = poi["source_code"]
-            if not poi["enabled"]:
-                item["extras"]["end_date"] = "yes"
-            try:
-                oh = OpeningHours()
-                oh.add_ranges_from_string(poi.get("schedule"), DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU)
-                item["opening_hours"] = oh.as_opening_hours()
-            except Exception as e:
-                self.logger.warning(f'Fail to parse hours: {poi.get("schedule")}, {e}')
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(
+            url="https://obi.ru/graphql",
+            data={
+                "query": """
+                  query OfflineStores {
+                    offlineStores {
+                        cash_register_description
+                        city
+                        description
+                        email
+                        enabled
+                        fax
+                        frontend_description
+                        is_central
+                        is_pickup_location_active
+                        latitude
+                        longitude
+                        name
+                        phone
+                        postcode
+                        region
+                        region_id
+                        schedule
+                        source_code
+                        street
+                        url_key
+                    }
+                }
+                """,
+            },
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # HTML response contains JSON data
+        for store in chompjs.parse_js_object(response.text)["data"]["offlineStores"]:
+            if "Тест" in store["name"] or "Default" in store["name"]:
+                continue  # Exclude test POIs
+            item = DictParser.parse(store)
+            item["ref"] = store.get("source_code")
+            item["street_address"] = item.pop("street")
             yield item
