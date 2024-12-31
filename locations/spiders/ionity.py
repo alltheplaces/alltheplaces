@@ -26,7 +26,10 @@ class IonitySpider(Spider):
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["items"]:
             location.update(location.pop("address"))
+            if "Ionity" not in location["label"].title():
+                continue
             item = DictParser.parse(location)
             item["street_address"] = item.pop("street")
+            item["branch"] = location["label"].title().removeprefix("Ionity ")
             apply_category(Categories.CHARGING_STATION, item)
             yield item
