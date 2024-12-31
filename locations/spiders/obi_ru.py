@@ -61,6 +61,7 @@ class ObiRUSpider(scrapy.Spider):
             item["ref"] = store.get("source_code")
             item["street_address"] = item.pop("street")
             item["branch"] = item.pop("name").removeprefix("ОБИ ")
+            item["phone"] = item["phone"].split("доб")[0] if item.get("phone") else None
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(
                 store.get("schedule"), DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU
