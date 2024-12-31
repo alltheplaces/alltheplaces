@@ -6,6 +6,7 @@ from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.obi_eu import OBI_SHARED_ATTRIBUTES
 
@@ -54,7 +55,13 @@ class ObiRUSpider(scrapy.Spider):
         for store in chompjs.parse_js_object(response.text)["data"]["offlineStores"]:
             if "Тест" in store["name"] or "Default" in store["name"]:
                 continue  # Exclude test POIs
+            if "не работает" in store["schedule"]:  # not operating
+                continue
             item = DictParser.parse(store)
             item["ref"] = store.get("source_code")
             item["street_address"] = item.pop("street")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(
+                store.get("schedule"), DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU
+            )
             yield item
