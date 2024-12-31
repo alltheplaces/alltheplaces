@@ -12,6 +12,7 @@ class InvitroRUSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["MedicalBusiness"]
     json_parser = "chompjs"
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
