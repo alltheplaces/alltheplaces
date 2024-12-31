@@ -53,7 +53,7 @@ class ObiRUSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # HTML response contains JSON data
         for store in chompjs.parse_js_object(response.text)["data"]["offlineStores"]:
-            if "Тест" in store["name"] or "Default" in store["name"]:
+            if any(keyword in store["name"] for keyword in ["Тест", "Default"]):
                 continue  # Exclude test POIs
             if "не работает" in store["schedule"]:  # not operating
                 continue
