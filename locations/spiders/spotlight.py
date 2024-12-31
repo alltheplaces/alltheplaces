@@ -18,7 +18,6 @@ class SpotlightSpider(scrapy.Spider):
     ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
-        "REDIRECT_ENABLED": True,
     }
     handle_httpstatus_list = [302]
 
