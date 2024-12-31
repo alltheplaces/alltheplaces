@@ -10,6 +10,11 @@ from locations.dict_parser import DictParser
 class IonitySpider(Spider):
     name = "ionity"
     item_attributes = {"brand": "Ionity", "brand_wikidata": "Q42717773"}
+    SOCKET_MAP = {
+        "CHAdeMO": "chademo",
+        "Type 2": "type2",
+        "CCS": "type2_combo",
+    }
 
     # Ionity API found from its payment website: https://payment.ionity.eu/dashboard
 
@@ -32,4 +37,8 @@ class IonitySpider(Spider):
             item["street_address"] = item.pop("street")
             item["branch"] = location["label"].title().removeprefix("Ionity ")
             apply_category(Categories.CHARGING_STATION, item)
+
+            for connector in location.get("connectors", []):
+                if match := self.SOCKET_MAP.get(connector["type"]):
+                    item["extras"][f"socket:{match}:output"] = f'{connector["power"]} kW'
             yield item
