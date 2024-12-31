@@ -10,12 +10,13 @@ class AuchanLUSpider(scrapy.Spider):
 
     def start_requests(self):
         yield JsonRequest(
-            url="https://api.auchan.com/corp/cms/v4/lu/template/stores",
-            headers={"X-Gravitee-Api-Key": "f303247f-d0d9-4036-9232-6b9cca51ca6d"},
+            url="https://api.ari.auchan.com/ari/digit/portal-cms/lu/template/stores?context=push-stores-list",
+            headers={"X-Gravitee-Api-Key": "226ec165-1e26-45c8-a5ed-25a2cd3c5329"},
         )
 
     def parse(self, response, **kwargs):
         for store in response.json():
             store.update(store.pop("address"))
             item = DictParser.parse(store)
+            item["website"] = "https://www.auchan.lu/fr/retail/"+store["pageName"]
             yield item
