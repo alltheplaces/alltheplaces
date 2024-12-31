@@ -60,6 +60,7 @@ class ObiRUSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["ref"] = store.get("source_code")
             item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name").removeprefix("ОБИ ")
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(
                 store.get("schedule"), DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU
