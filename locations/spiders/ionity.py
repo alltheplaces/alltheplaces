@@ -36,6 +36,7 @@ class IonitySpider(Spider):
             item = DictParser.parse(location)
             item["street_address"] = item.pop("street")
             item["branch"] = location["label"].title().removeprefix("Ionity ")
+            item["website"] = f'https://payment.ionity.eu/charger-detail/{location["id"]}'
             apply_category(Categories.CHARGING_STATION, item)
 
             for connector in location.get("connectors", []):
