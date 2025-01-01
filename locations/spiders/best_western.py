@@ -5,6 +5,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -22,7 +23,8 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
     allowed_domains = ["bestwestern.com"]
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels.xml"]
     sitemap_rules = [(r"/en_US/book/[-\w]+/[-\w]+/propertyCode\.\d+\.html$", "parse_hotel")]
-    custom_settings = {
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 3,
