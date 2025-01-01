@@ -24,7 +24,7 @@ class GlassonsSpider(Spider):
         for location_ref, location in locations.items():
             item = DictParser.parse(location)
             item["name"] = location["label"]
-            item["addr_full"] = re.sub(r"\s+", " ", item["addr_full"]).strip()
+            item["street_address"] = re.sub(r"\s+", " ", item["addr_full"]).strip()
             item["website"] = (
                 "https://www.glassons.com/store-locations/"
                 + location["region"].lower()

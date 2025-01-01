@@ -98,7 +98,7 @@ class ToyotaAfricaSpider(CrawlSpider):
             return
 
         item["phone"] = response.xpath('.//div[@class="contact-info"]/.//a[contains(@href, "tel")]/@href').get()
-        item["addr_full"] = clean_address(response.xpath('.//div[@class="location-info"]/div/text()').getall())
+        item["street_address"] = clean_address(response.xpath('.//div[@class="location-info"]/div/text()').getall())
         item["website"] = response.url
 
         extract_google_position(item, response)

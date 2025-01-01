@@ -33,7 +33,7 @@ class BarrheadTravelGBSpider(CrawlSpider):
             if "day" in text:
                 address_last_index = index - 1
                 break
-        item["addr_full"] = merge_address_lines(store_info[: address_last_index + 1])
+        item["street_address"] = merge_address_lines(store_info[: address_last_index + 1])
         item["phone"] = response.xpath('//*[contains(text(), "Call Us")]/ancestor::p/text()').get()
         item["email"] = response.xpath('//a[contains(@href, "mailto")]/text()').get()
         extract_google_position(item, response)

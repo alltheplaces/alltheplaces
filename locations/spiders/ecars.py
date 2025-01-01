@@ -29,6 +29,6 @@ class EcarsSpider(Spider):
                 continue
 
             item = DictParser.parse(location)
-            item["addr_full"] = location["dn"]
+            item["street_address"] = location["dn"]
             apply_category(Categories.CHARGING_STATION, item)
             yield item

@@ -24,7 +24,7 @@ class FairmontSpider(Spider):
             item["city"] = location.xpath("./city/text()").get()
             item["state"] = location.xpath("./province/text()").get()
             item["country"] = location.xpath("./country/text()").get()
-            item["addr_full"] = location.xpath("./address/text()").get()
+            item["street_address"] = location.xpath("./address/text()").get()
             item["website"] = "https://www.fairmont.com{}".format(slug)
             item["extras"]["fax"] = location.xpath("./fax/text()").get()
             item["extras"]["rooms"] = location.xpath("./guestrooms/text()").get()

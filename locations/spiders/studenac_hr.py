@@ -23,7 +23,7 @@ class StudenacHRSpider(CrawlSpider):
         item["website"] = response.url
         item["lat"] = response.xpath("//div[@class='marker']/@data-lat").get()
         item["lon"] = response.xpath("//div[@class='marker']/@data-lng").get()
-        item["addr_full"] = response.xpath("//div[@class='marketsingle__header']//h2/text()").get()
+        item["street_address"] = response.xpath("//div[@class='marketsingle__header']//h2/text()").get()
 
         hours = response.xpath("//div[@class='marketsingle__workhours']//ul/li")
         oh = OpeningHours()

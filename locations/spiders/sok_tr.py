@@ -49,7 +49,7 @@ class SokTRSpider(scrapy.Spider):
             item["country"] = "TR"
             item["phone"] = store.get("phone")
             item["street_address"] = clean_address(store["address"])
-            item["addr_full"] = merge_address_lines([item["street_address"], item["city"], item["state"]])
+            item["street_address"] = merge_address_lines([item["street_address"], item["city"], item["state"]])
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item
