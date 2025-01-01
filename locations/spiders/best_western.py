@@ -25,6 +25,7 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [(r"/en_US/book/[-\w]+/[-\w]+/propertyCode\.\d+\.html$", "parse_hotel")]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 300 * 1000,
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 3,
