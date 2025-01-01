@@ -59,7 +59,7 @@ class StarbucksJPSpider(JSONBlobSpider):
 
         item["state"] = location["fields"].get("address_1")
         item["city"] = location["fields"].get("address_2")
-        item["addr_full"] = location["fields"].get("address_5")
+        item["street_address"] = location["fields"].get("address_5")
 
         item["extras"]["addr:state:ja"] = item["state"]
         item["extras"]["addr:city:ja"] = item["city"]

@@ -40,7 +40,7 @@ class BurgerKingESPTSpider(scrapy.Spider):
 
                 item["ref"] = store["bkcode"]
                 item["name"] = "Burger King"
-                item["addr_full"] = store["address"]
+                item["street_address"] = store["address"]
                 item["country"] = country
                 item["opening_hours"] = opening_hours.as_opening_hours()
                 item["extras"] = {

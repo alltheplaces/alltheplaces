@@ -19,7 +19,7 @@ class AbsaZASpider(JSONBlobSpider):
             # there are a number of "dealer" types, ignore
             return
 
-        item["addr_full"] = clean_address(item["addr_full"])
+        item["street_address"] = clean_address(item["addr_full"])
         try:
             int(item["addr_full"].split(" ")[0])
             item["housenumber"] = item["addr_full"].split(" ")[0]

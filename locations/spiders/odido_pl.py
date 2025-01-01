@@ -14,7 +14,7 @@ class OdidoPLSpider(SitemapSpider):
     def parse(self, response, **kwargs):
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["addr_full"] = response.xpath('//*[@class="store-address"]/text()').get()
+        item["street_address"] = response.xpath('//*[@class="store-address"]/text()').get()
         extract_google_position(item, response)
         date_time = response.css(".date-time")
         if date_time:

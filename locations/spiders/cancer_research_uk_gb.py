@@ -46,7 +46,7 @@ class CancerResearchUkGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["results"]:
             item = Feature()
-            item["addr_full"] = location["shop_address"]["raw"]
+            item["street_address"] = location["shop_address"]["raw"]
             item["phone"] = location.get("shop_phone_number", {}).get("raw")
             item["postcode"] = location["postcode"]["raw"]
             item["branch"] = location["title"]["raw"]
