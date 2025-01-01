@@ -20,7 +20,7 @@ class AsterPharmacyAESpider(Spider):
             item = Feature()
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
-            item["addr_full"] = location["locationname"]
+            item["street_address"] = location["locationname"]
             item["city"] = location["city"]
             item["phone"] = location["mobilenumber"]
 

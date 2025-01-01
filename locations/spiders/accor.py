@@ -77,7 +77,7 @@ class AccorSpider(WoosmapSpider):
             item.update(match)
         else:
             self.crawler.stats.inc_value(f"atp/accor/unknown_brand/{brand_id}")
-        item["addr_full"] = item.pop("street_address")
+        item["street_address"] = item.pop("street_address")
         item["website"] = f"https://all.accor.com/hotel/{item['ref']}/index.en.shtml"
         apply_category(Categories.HOTEL, item)
         yield item

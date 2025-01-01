@@ -24,7 +24,7 @@ class CashbuildSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
-        item["addr_full"] = location["physical_address"]
+        item["street_address"] = location["physical_address"]
         item["country"] = CASHBUILD_COUNTRIES.get(str(location["country_id"]))
         item["website"] = location["external_url"]
         item["opening_hours"] = OpeningHours()

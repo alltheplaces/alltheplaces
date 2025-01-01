@@ -56,7 +56,7 @@ class GovCmaFuelGBSpider(Spider):
         for location in response.json()["stations"]:
             item = Feature()
             item["ref"] = location["site_id"]
-            item["addr_full"] = location["address"]
+            item["street_address"] = location["address"]
             item["postcode"] = location.get("postcode")
             item["lat"] = location["location"]["latitude"]
             item["lon"] = location["location"]["longitude"]

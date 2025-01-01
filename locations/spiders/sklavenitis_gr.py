@@ -32,7 +32,7 @@ class SklavenitisGRSpider(JSONBlobSpider):
         item["image"] = location["Image"]
         item["phone"] = item["phone"].split("tel:")[1].split("'>")[0]
         if " | " in item["addr_full"]:
-            store_type, item["addr_full"] = item["addr_full"].split(" | ")
+            store_type, item["street_address"] = item["addr_full"].split(" | ")
             # TODO: Someone with local knowledge may wish to map more detailed attributes
             if "Supermarket" in store_type:
                 pass

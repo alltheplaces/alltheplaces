@@ -25,7 +25,7 @@ class CrownDecoratingCentresGBSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["StoreCode"]
             item.pop("name", None)
-            item["addr_full"] = ", ".join(
+            item["street_address"] = ", ".join(
                 filter(None, map(str.strip, [location.get("Address1"), location.get("Address2")]))
             )
             item["website"] = "https://www.crowndecoratingcentres.co.uk" + location["Url"]

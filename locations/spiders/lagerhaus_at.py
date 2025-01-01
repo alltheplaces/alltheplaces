@@ -18,7 +18,7 @@ class LagerhausATSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["name"] = response.xpath("//h1").xpath("normalize-space()").get()
-        item["addr_full"] = response.xpath('//*[@class="A5SKTxfddRWFz7lYLFXx"]').xpath("normalize-space()").get()
+        item["street_address"] = response.xpath('//*[@class="A5SKTxfddRWFz7lYLFXx"]').xpath("normalize-space()").get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
         item["opening_hours"] = OpeningHours()

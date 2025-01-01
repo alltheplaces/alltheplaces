@@ -21,7 +21,7 @@ class VinmonopoletNOSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location.get("name")
             item["branch"] = item.pop("name")
-            item["addr_full"] = location["address"].get("formattedAddress")
+            item["street_address"] = location["address"].get("formattedAddress")
             item["website"] = "https://www.vinmonopolet.no/butikk/" + item["ref"]
             item["phone"] = location["address"].get("phone")
 

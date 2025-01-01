@@ -27,7 +27,7 @@ class LeonSpider(Spider):
             if item["ref"] == "a-title-for-this-restaurant-and-another-one":
                 continue
 
-            item["addr_full"] = store["address"].get("fullAddress")
+            item["street_address"] = store["address"].get("fullAddress")
 
             oh = OpeningHours()
             for rule in store.get("restaurantOpeningTimes", {}).get("openingTimes", []):

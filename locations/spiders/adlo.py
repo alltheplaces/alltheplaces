@@ -76,7 +76,7 @@ class AdloSpider(CrawlSpider):
                 web = "https://" + web
             item["website"] = web
         item["name"] = response.xpath("//div[@class='predajna']/h1/text()[normalize-space()]").get()
-        item["addr_full"] = response.xpath("//div[contains(., 'Address:')]/text()[normalize-space()]").get()
+        item["street_address"] = response.xpath("//div[contains(., 'Address:')]/text()[normalize-space()]").get()
         item["country"] = country
         extract_google_position(item, response)
         extract_phone(item, response)

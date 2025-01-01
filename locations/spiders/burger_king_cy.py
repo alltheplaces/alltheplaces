@@ -15,5 +15,5 @@ class BurgerKingCYSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["ref"] = location["nid"]
         item["branch"] = item.pop("name").replace("Burger King ", "")
-        item["addr_full"] = item.pop("street")
+        item["street_address"] = item.pop("street")
         yield item

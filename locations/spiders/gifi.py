@@ -47,7 +47,7 @@ class GifiSpider(Spider):
             item["branch"] = item.pop("name").removeprefix("Gifi ")
             item["city"] = location["city"]["name"]
             item["street_address"] = merge_address_lines([location["street1"], location["street2"]])
-            item["addr_full"] = merge_address_lines(location["formatted_address"])
+            item["street_address"] = merge_address_lines(location["formatted_address"])
             item["lat"] = location["_geoloc"]["lat"]
             item["lon"] = location["_geoloc"]["lng"]
             item["image"] = location["pictures"][0]

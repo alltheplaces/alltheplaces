@@ -23,7 +23,7 @@ class LillyBGSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location_id
             desc_html = Selector(text=location["description"])
-            item["addr_full"] = re.sub(
+            item["street_address"] = re.sub(
                 r"\s+",
                 " ",
                 unescape(desc_html.xpath("//p[1]/text()").get("").replace("Адрес:", "").replace("\\xA0", " ")),

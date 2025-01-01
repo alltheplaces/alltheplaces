@@ -27,7 +27,7 @@ class OtpbankHUSpider(Spider):
         for location in response.json():
             item = Feature()
             item["ref"] = location["id"]
-            item["addr_full"] = location["address"]
+            item["street_address"] = location["address"]
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
 

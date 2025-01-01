@@ -73,7 +73,7 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
         item["street_address"] = row.get("Street")
         item["city"] = row.get("Town")
         item["postcode"] = row.get("Postcode")
-        item["addr_full"] = clean_address(
+        item["street_address"] = clean_address(
             [
                 row.get("Street"),
                 row.get("Locality"),

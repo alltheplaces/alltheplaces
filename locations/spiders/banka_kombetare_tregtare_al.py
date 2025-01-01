@@ -14,7 +14,7 @@ class BankaKombetareTregtareALSpider(Spider):
             item = Feature()
             item["ref"] = location["oid"].strip()
             item["name"] = location["unitName"]
-            item["addr_full"] = location["unitAddress"]
+            item["street_address"] = location["unitAddress"]
             item["city"] = location["uniCity"]
             item["lat"] = location["unitCordNDec"]
             item["lon"] = location["unitCordEDec"]
