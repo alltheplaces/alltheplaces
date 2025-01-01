@@ -22,7 +22,7 @@ class ZdorovyyGorodRUSpider(scrapy.Spider):
             store = chompjs.parse_js_object(store_data)
             item = DictParser.parse(store)
             store_html = Selector(text=store["HTML"])
-            item["addr_full"] = (
+            item["street_address"] = (
                 store_html.xpath('//*[@class="title"]/a/text()').get(default="").replace("Здоровый Город, ", "")
             )
             item["website"] = response.urljoin(store_html.xpath('//*[@class="title"]/a/@href').get())

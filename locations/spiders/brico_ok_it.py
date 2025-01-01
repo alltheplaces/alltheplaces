@@ -11,7 +11,7 @@ class BricoOkITSpider(XMLFeedSpider):
     def parse_node(self, response, selector):
         item = Feature()
         item["name"] = selector.xpath("location/text()").get()
-        item["addr_full"] = selector.xpath("address/text()").get()
+        item["street_address"] = selector.xpath("address/text()").get()
         item["lat"] = selector.xpath("latitude/text()").get()
         item["lon"] = selector.xpath("longitude/text()").get()
         item["email"] = selector.xpath("email/text()").get()

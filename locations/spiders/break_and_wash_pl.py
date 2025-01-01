@@ -31,7 +31,7 @@ class BreakAndWashPLSpider(Spider):
             item["lon"] = lon
             html = Selector(text=content)
             item["branch"] = html.xpath("//h5/text()").get()
-            item["addr_full"] = merge_address_lines(html.xpath("//p/text()").getall())
+            item["street_address"] = merge_address_lines(html.xpath("//p/text()").getall())
 
             item["extras"]["access"] = ACCESS_MAP.get(colour)
 

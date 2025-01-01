@@ -25,7 +25,7 @@ class RosticsRUSpider(scrapy.Spider):
                 continue
             contacts = store.get("contacts")
             item["phone"] = contacts.get("phoneNumber")
-            item["addr_full"] = contacts.get("streetAddress", {}).get("ru")
+            item["street_address"] = contacts.get("streetAddress", {}).get("ru")
             item["city"] = contacts.get("city", {}).get("ru")
             lat, lon = contacts.get("coordinates", {}).get("geometry", {}).get("coordinates", [])
             item["lat"] = lat
