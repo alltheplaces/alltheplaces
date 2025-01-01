@@ -19,5 +19,5 @@ class DunkinSASpider(Spider):
     def parse(self, response, **kwargs):
         for store in json.loads(response.json()["d"]):
             item = DictParser.parse(store)
-            item["addr_full"] = store.get("fullAddress")
+            item["street_address"] = store.get("fullAddress")
             yield item

@@ -58,7 +58,7 @@ class AviaEUSpider(Spider):
             station = location.xpath('.//a[@class="station-title"]')
             item["name"] = station.xpath("./text()").get()
             item["website"] = station.xpath("./@href").get()
-            item["addr_full"] = clean_address(location.xpath('.//*[@class="st-address-text"]//text()').getall())
+            item["street_address"] = clean_address(location.xpath('.//*[@class="st-address-text"]//text()').getall())
             extract_google_position(item, location)
             station_title = item["name"].title()
             if any(brand_key.title() in station_title for brand_key in self.IGNORED_BRANDS):

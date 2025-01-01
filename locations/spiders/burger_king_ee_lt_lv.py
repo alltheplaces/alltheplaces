@@ -14,7 +14,7 @@ class BurgerKingEELTLVSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = location["heading"].replace("Burger King ", "")
-        item["addr_full"] = clean_address(location["addressLines"])
+        item["street_address"] = clean_address(location["addressLines"])
         item["opening_hours"] = OpeningHours()
         if "drive-thru" in location["workingHours"].lower():
             hours, drive_through_hours = location["workingHours"].lower().split("drive-thru", 1)
