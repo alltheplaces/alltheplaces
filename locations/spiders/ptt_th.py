@@ -52,7 +52,7 @@ class PttTHSpider(Spider):
             item["ref"] = location["id"]
             item["lat"] = location["lat"]
             item["lon"] = location["lng"]
-            item["addr_full"] = location["address"]
+            item["street_address"] = location["address"]
             item["city"] = location["province_name"]
             item["website"] = item["extras"]["website:th"] = location["link_share"]
             item["extras"]["website:en"] = location["link_share"].replace("/th?", "/en?")

@@ -16,7 +16,7 @@ class PizzaHutSGSpider(scrapy.Spider):
             poi.update(poi.pop("collectionPointGeoLocation"))
             item = DictParser.parse(poi)
             item["ref"] = poi.get("autoId")
-            item["addr_full"] = poi.get("collectionPointAddress1")
+            item["street_address"] = poi.get("collectionPointAddress1")
             item["postcode"] = poi.get("collectionPointPostalCode")
             apply_category(Categories.RESTAURANT, item)
 
