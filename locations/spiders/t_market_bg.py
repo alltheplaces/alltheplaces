@@ -18,7 +18,7 @@ class TMarketBGSpider(SitemapSpider):
     def parse(self, response):
         item = Feature()
         extract_google_position(item, response)
-        item["addr_full"] = (
+        item["street_address"] = (
             response.xpath('//p[contains(text(), "Адрес:")]/following-sibling::p[1]/text()').get(default="").strip()
             if response.xpath('//p[contains(text(), "Адрес:")]')
             else None
