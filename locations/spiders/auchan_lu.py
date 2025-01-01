@@ -18,5 +18,11 @@ class AuchanLUSpider(scrapy.Spider):
         for store in response.json():
             store.update(store.pop("address"))
             item = DictParser.parse(store)
-            item["website"] = "https://www.auchan.lu/fr/retail/" + store["pageName"]
+
+            item["website"] = item["extras"]["website:fr"] = "https://www.auchan.lu/fr/retail/{}".format(
+                store["pageName"]
+            )
+            item["extras"]["website:en"] = "https://www.auchan.lu/en/retail/{}".format(store["pageName"])
+            item["extras"]["website:de"] = "https://www.auchan.lu/de/retail/{}".format(store["pageName"])
+
             yield item
