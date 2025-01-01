@@ -33,27 +33,16 @@ class GameGBSpider(CrawlSpider, StructuredDataSpider):
     requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if "street_address" in item:
-            street_address = item["street_address"]
-            street_address = street_address.replace("GAME", "").replace("Game", "")
-            street_address = clean_address(street_address)
+        item["branch"] = item.pop("name").removeprefix("Game ")
 
-            # Normalise a couple of exceptions
-            item["street_address"] = (
-                street_address.replace("sports Direct", "Sports Direct")
-                .replace("SportsDirect", "Sports Direct")
-                .replace("Sports Direct 1st Floor", "Sports Direct, 1st Floor")
-                .replace("Sports Direct Unit F2", "Sports Direct, Unit F2")
-                .replace("Sports Direct DW", "Sports Direct")
-                .replace("Sports Direct Middlesbrough Linth", "Sports Direct")
-                .replace("Sports Direct, Frasers", "House of Fraser")
-                .replace("House Of Fraser", "House of Fraser")
-            )
-
-            if located_in := re.match(r"(?i)c\/o ([\w ]+), (.+)", item["street_address"]):
-                item["located_in"] = located_in.group(1)
-                item["located_in_wikidata"] = self.located_in_brands.get(located_in.group(1))
-                item["street_address"] = located_in.group(2)
+        item["located_in"] = response.xpath('//div[@class="WithinMainStore"]/div/img/@alt').get()
+        item["located_in_wikidata"] = self.located_in_brands.get(item["located_in"])
+        item["lat"] = response.xpath("//@data-latitude").get()
+        item["lon"] = response.xpath("//@data-longitude").get()
+        item["addr_full"] = clean_address(
+            response.xpath('//div[@class="StoreFinderList"]/text()').getall()
+        ).removeprefix("Game, ")
+        item["country"] = re.search(r'"countryCode":"(\w\w)",', response.text).group(1)
 
         if item.get("twitter") == "@GAMEdigital":
             item["twitter"] = None
