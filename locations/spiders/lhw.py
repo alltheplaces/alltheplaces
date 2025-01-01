@@ -30,7 +30,7 @@ class LhwSpider(scrapy.Spider):
         for poi in pois:
             item = DictParser.parse(poi)
             item.pop("street_address")
-            item["addr_full"] = (
+            item["street_address"] = (
                 poi.get("Address1")
                 if not poi.get("Address2")
                 else ", ".join([poi.get("Address1"), poi.get("Address2")])
