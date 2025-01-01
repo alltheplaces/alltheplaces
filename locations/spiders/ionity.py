@@ -1,6 +1,7 @@
-import re
+from typing import Any, Iterable
 
-from scrapy import Spider
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -9,23 +10,36 @@ from locations.dict_parser import DictParser
 class IonitySpider(Spider):
     name = "ionity"
     item_attributes = {"brand": "Ionity", "brand_wikidata": "Q42717773"}
-    start_urls = ["https://ionity.eu/location.json"]
-    no_refs = True
+    SOCKET_MAP = {
+        "CHAdeMO": "chademo",
+        "Type 2": "type2",
+        "CCS": "type2_combo",
+    }
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["locations"]:
-            if location["status"] == "0":
-                continue  # Under construction
+    # Ionity API found from its payment website: https://payment.ionity.eu/dashboard
 
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(url="https://ionity-api.ionity.cloud/api/v1/user/collective")
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield JsonRequest(
+            url="https://ionity-api.ionity.cloud/api/v2/charging-point",
+            headers={"Authorization": f'Bearer {response.json()["accessToken"]}'},
+            callback=self.parse_locations,
+        )
+
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["items"]:
+            location.update(location.pop("address"))
+            if "Ionity" not in location["label"].title():
+                continue
             item = DictParser.parse(location)
-
-            item["street_address"] = location["adress"]
-            item["postcode"] = location["plz"]
-
-            if "Station open 24/7" in location["description"]:
-                item["opening_hours"] = "24/7"
-
-            if m := re.search(r"Number of CCS Chargers: (\d+)", location["description"]):
-                item["extras"]["socket:CCS"] = m.group(1)
+            item["street_address"] = item.pop("street")
+            item["branch"] = location["label"].title().removeprefix("Ionity ")
+            item["website"] = f'https://payment.ionity.eu/charger-detail/{location["id"]}'
             apply_category(Categories.CHARGING_STATION, item)
+
+            for connector in location.get("connectors", []):
+                if match := self.SOCKET_MAP.get(connector["type"]):
+                    item["extras"][f"socket:{match}:output"] = f'{connector["power"]} kW'
             yield item
