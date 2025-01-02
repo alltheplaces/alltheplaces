@@ -31,6 +31,7 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
         "DOWNLOAD_DELAY": 3,
         "ROBOTSTXT_OBEY": False,
     }
+    requires_proxy = True
 
     def parse_hotel(self, response):
         hotel_details = response.xpath('//div[@id="hotel-details-info"]/@data-hoteldetails').get()
