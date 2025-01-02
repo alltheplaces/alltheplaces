@@ -36,6 +36,7 @@ class KayJewelersSpider(scrapy.Spider):
                 item["lon"], item["lat"] = coords[0], coords[1]
 
                 self.opening_hours(poi["ExtraData"].get("HoursOfOpStruct"), item)
+                item["street_address"] = item.pop("addr_full", None)
                 yield item
 
     def opening_hours(self, hours, item):
