@@ -5,8 +5,16 @@ from scrapy.spiders import XMLFeedSpider
 from scrapy.utils.spider import iterate_spider_output
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+
+
+def set_closed_missing_days(oph):
+    for day in DAYS:
+        if oph.day_hours.get(day, None):
+            pass
+        else:
+            oph.days_closed.add(day)
 
 
 class SinsaySpider(XMLFeedSpider):
@@ -41,8 +49,7 @@ class SinsaySpider(XMLFeedSpider):
         item["city"] = ps[1].get()
         if phone := ps[3].get().replace("tel. ", ""):
             item["phone"] = phone
-        oh = OpeningHours()
+        item["opening_hours"] = oh = OpeningHours()
         oh.add_ranges_from_string(", ".join(ps[4:].getall()))
-        oh.set_closed_missing_days()
-        item["opening_hours"] = oh
+        set_closed_missing_days(oh)
         return item

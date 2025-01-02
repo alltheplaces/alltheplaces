@@ -893,13 +893,6 @@ class OpeningHours:
             self.day_hours.pop(day, None)
             self.days_closed.add(day)
 
-    def set_closed_missing_days(self):
-        for day in DAYS:
-            if self.day_hours.get(day, None):
-                pass
-            else:
-                self.days_closed.add(day)
-
     def add_range(self, day, open_time, close_time, time_format="%H:%M", closed=CLOSED_EN):
         day = sanitise_day(day)
 
