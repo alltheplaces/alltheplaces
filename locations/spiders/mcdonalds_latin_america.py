@@ -45,7 +45,7 @@ class McdonaldsLatinAmericaSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["code"]
             if location["country"] in ["AR", "PR"]:
-                item["addr_full"] = location["address"]
+                item["street_address"] = location["address"]
                 item.pop("street_address", None)
             else:
                 item["street_address"] = location["address"]
