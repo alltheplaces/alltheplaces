@@ -74,7 +74,7 @@ class NextSpider(Spider):
             item = DictParser.parse(location)
 
             item["ref"] = location["location_id"]
-            item["name"] = location["branch_name"]
+            item["branch"] = item.pop("name")
             item["website"] = response.url
 
             item["opening_hours"] = self.store_hours(location)
