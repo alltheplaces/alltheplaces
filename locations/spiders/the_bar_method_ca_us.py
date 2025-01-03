@@ -1,6 +1,6 @@
 import re
 
-from scrapy import Spider
+from scrapy import Request, Spider
 
 from locations.items import Feature
 
@@ -18,7 +18,7 @@ class TheBarMethodCAUSSpider(Spider):
         for path in city_urls:
             if path == "https://barmethod.com/locations/bar-online/":
                 continue
-            yield scrapy.Request(
+            yield Request(
                 path.strip(),
                 callback=self.parse_store,
             )
