@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class DepartmentVeteransAffairsSpider(scrapy.Spider):
     name = "department_veterans_affairs"
-    item_attributes = {"brand": "Department Veterans Affairs", "brand_wikidata": "Q592576"}
+    item_attributes = {"operator": "Veterans Health Administration", "operator_wikidata": "Q6580225"}
     allowed_domains = ["api.va.gov"]
 
     def start_requests(self):
@@ -56,7 +56,6 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
             if not isinstance(place_info.get("phone"), list):
                 item["phone"] = place_info.get("phone", {}).get("main")
                 item["extras"]["fax"] = place_info.get("phone", {}).get("fax")
-            item["extras"]["type"] = row["type"]
             item["opening_hours"] = self.parse_hours(place_info.get("hours"))
 
             if "clinic" in item["name"].lower():
