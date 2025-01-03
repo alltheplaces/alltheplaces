@@ -1,4 +1,3 @@
-import re
 import unicodedata
 from urllib.parse import urlparse
 
