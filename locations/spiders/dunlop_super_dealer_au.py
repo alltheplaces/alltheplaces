@@ -3,7 +3,7 @@ from typing import Iterable
 
 from scrapy import Request, Selector
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
@@ -11,11 +11,7 @@ from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 class DunlopSuperDealerAUSpider(AmastyStoreLocatorSpider):
     name = "dunlop_super_dealer_au"
-    item_attributes = {
-        "brand": "Dunlop Super Dealer",
-        "brand_wikidata": "Q131625949",
-        "extras": Categories.SHOP_TYRES.value,
-    }
+    item_attributes = {"brand": "Dunlop Super Dealer", "brand_wikidata": "Q131625949"}
     allowed_domains = ["www.dunlopsuperdealer.com.au"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
@@ -31,6 +27,7 @@ class DunlopSuperDealerAUSpider(AmastyStoreLocatorSpider):
         if not item["name"].startswith("Dunlop Super Dealer "):
             return
 
+        item["branch"] = item.pop("name").removeprefix("Dunlop Super Dealer ")
         item["street_address"] = item.pop("addr_full")
 
         match feature["state"]:
@@ -64,9 +61,14 @@ class DunlopSuperDealerAUSpider(AmastyStoreLocatorSpider):
                 break_end = day["break_to"]["hours"] + ":" + day["break_to"]["minutes"]
                 close_time = day["to"]["hours"] + ":" + day["to"]["minutes"]
                 if break_start == break_end:
-                    item["opening_hours"].add_range(day_name.title(), open_time, close_time)
+                    if open_time == close_time == "00:00":
+                        item["opening_hours"].set_closed(day_name)
+                    else:
+                        item["opening_hours"].add_range(day_name, open_time, close_time)
                 else:
                     item["opening_hours"].add_range(day_name.title(), open_time, break_start)
                     item["opening_hours"].add_range(day_name.title(), break_end, close_time)
+
+        apply_category(Categories.SHOP_TYRES, item)
 
         yield item
