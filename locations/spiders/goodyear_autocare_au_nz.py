@@ -38,8 +38,9 @@ class GoodyearAutocareAUNZSpider(Spider):
             if not location["url"].startswith("goodyear-autocare-"):
                 continue
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Goodyear Autocare ")
             item["ref"] = location["entity_id"]
-            item["street"] = unescape(item["street"])
+            item["street_address"] = unescape(item.pop("street"))
             item["country"] = location["country_id"]
             item["website"] = "https://www.goodyearautocare.com.au/store-locator/" + location["url"]
             item["opening_hours"] = OpeningHours()
