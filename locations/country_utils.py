@@ -127,7 +127,8 @@ class CountryUtils:
             if self.gc.get_countries().get(candidate):
                 return candidate
             if candidate == "UK":
-                # United Kingdom uses the ccTLD of "GB" (Great Britain)
+                # United Kingdom uses the ccTLD of "UK" but the corresponding
+                # ISO 3166-1 alpha-2 code is "GB" for Great Britain.
                 return "GB"
             if candidate == "AC":
                 # Ascension Island uses the ccTLD of "AC" but the
