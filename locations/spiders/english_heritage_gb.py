@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
+
 class EnglishHeritageGBSpider(JSONBlobSpider):
     name = "english_heritage_gb"
     item_attributes = {"brand": "English Heritage", "brand_wikidata": "Q936287"}
@@ -14,8 +15,6 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
             "user-agent": BROWSER_DEFAULT,
         },
     }
-
-
 
     def post_process_item(self, item, response, location):
         item["website"] = urljoin("https://www.english-heritage.org.uk", location["Path"])
