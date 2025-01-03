@@ -11,7 +11,11 @@ from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 class DunlopSuperDealerAUSpider(AmastyStoreLocatorSpider):
     name = "dunlop_super_dealer_au"
-    item_attributes = {"brand": "Dunlop Super Dealer", "brand_wikidata": "Q131625949", "extras": Categories.SHOP_TYRES.value}
+    item_attributes = {
+        "brand": "Dunlop Super Dealer",
+        "brand_wikidata": "Q131625949",
+        "extras": Categories.SHOP_TYRES.value,
+    }
     allowed_domains = ["www.dunlopsuperdealer.com.au"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

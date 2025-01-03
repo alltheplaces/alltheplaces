@@ -1,4 +1,3 @@
-from json import loads
 import re
 from typing import Iterable
 
@@ -10,6 +9,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+
 
 class AdvantageNZSpider(JSONBlobSpider):
     name = "advantage_nz"
@@ -30,12 +30,22 @@ class AdvantageNZSpider(JSONBlobSpider):
         extra_attributes_selector = Selector(text=feature["contentString"])
 
         feature["name"] = extra_attributes_selector.xpath('//h4[@class="mb-2"]/text()').get().strip()
-        feature["address"] = merge_address_lines(extra_attributes_selector.xpath('//p[@class="mb-2"]/a//text()').getall())
-        feature["phone"] = extra_attributes_selector.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "").strip()
-        feature["website"] = extra_attributes_selector.xpath('//p/a[contains(@href, "https://advantagetyres.co.nz/store/")]/@href').get().strip()
+        feature["address"] = merge_address_lines(
+            extra_attributes_selector.xpath('//p[@class="mb-2"]/a//text()').getall()
+        )
+        feature["phone"] = (
+            extra_attributes_selector.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "").strip()
+        )
+        feature["website"] = (
+            extra_attributes_selector.xpath('//p/a[contains(@href, "https://advantagetyres.co.nz/store/")]/@href')
+            .get()
+            .strip()
+        )
         feature["ref"] = feature["website"].split("/")[-2]
 
-        hours_text = re.sub(r"\s+", " ", " ".join(extra_attributes_selector.xpath('//p[@class="mb-1"]//li//text()').getall())).strip()
+        hours_text = re.sub(
+            r"\s+", " ", " ".join(extra_attributes_selector.xpath('//p[@class="mb-1"]//li//text()').getall())
+        ).strip()
         feature["opening_hours"] = hours_text
 
         return feature
