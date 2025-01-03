@@ -1,4 +1,3 @@
-import re
 import unicodedata
 from urllib.parse import urlparse
 
@@ -87,13 +86,24 @@ class CountryUtils:
         """
         if isinstance(spider_name, str):
             spider_name_parts = spider_name.split("_")
-            country_code_candidates = list(map(str.upper, filter(lambda x: len(x) == 2 and x.upper() in [country.alpha_2 for country in pycountry.countries], spider_name_parts)))
+            country_code_candidates = list(
+                map(
+                    str.upper,
+                    filter(
+                        lambda x: len(x) == 2 and x.upper() in [country.alpha_2 for country in pycountry.countries],
+                        spider_name_parts,
+                    ),
+                )
+            )
             if len(country_code_candidates) == 1:
                 if country_code_candidates[-1].lower() == spider_name_parts[-1]:
                     return country_code_candidates[-1]
             elif len(country_code_candidates) >= 2:
                 if country_code_candidates[-1].lower() == spider_name_parts[-1]:
-                    if country_code_candidates[-1].lower() == spider_name_parts[-1] and country_code_candidates[-2].lower() != spider_name_parts[-2]:
+                    if (
+                        country_code_candidates[-1].lower() == spider_name_parts[-1]
+                        and country_code_candidates[-2].lower() != spider_name_parts[-2]
+                    ):
                         return country_code_candidates[-1]
         return None
 
@@ -125,6 +135,7 @@ class CountryUtils:
                 # Helena, Ascension and Tristan de Cunha.
                 return "SH"
         return None
+
 
 def get_locale(country_code: str) -> str | None:
     """
