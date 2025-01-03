@@ -1,5 +1,3 @@
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 
 
 class EnglishHeritageGBSpider(JSONBlobSpider):
