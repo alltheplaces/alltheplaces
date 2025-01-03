@@ -143,8 +143,6 @@ LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
-
 DEFAULT_PLAYWRIGHT_SETTINGS = {
     "PLAYWRIGHT_BROWSER_TYPE": "firefox",
     "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
