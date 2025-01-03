@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 class GoodyearAutocareAUNZSpider(Spider):
     name = "goodyear_autocare_au_nz"
     item_attributes = {"brand": "Goodyear Autocare", "brand_wikidata": "Q620875", "extras": Categories.SHOP_TYRES.value}
-    allowed_domains = ["www.goodyearautocare.com.au"]
+    allowed_domains = ["www.goodyearautocare.com.au", "www.goodyear.co.nz"]
     start_urls = [
         "https://www.goodyearautocare.com.au/slocator/json/search/",
         "https://www.goodyear.co.nz/slocator/json/search/",
