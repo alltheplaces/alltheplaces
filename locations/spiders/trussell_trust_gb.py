@@ -39,8 +39,8 @@ class TrussellTrustGBSpider(Spider):
                 item["email"] = food_bank[8]
                 item["phone"] = food_bank[9]
                 item["ref"] = food_bank[10]
-                item["lat"] = food_bank[-2]
-                item["lon"] = food_bank[-1]
+                item["lat"] = food_bank[-1]
+                item["lon"] = food_bank[-2]
                 item["street"] = food_bank[3]
                 if food_bank[5] != "null":
                     item["state"] = food_bank[5]
