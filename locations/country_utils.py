@@ -99,12 +99,11 @@ class CountryUtils:
                 if country_code_candidates[-1].lower() == spider_name_parts[-1]:
                     return country_code_candidates[-1]
             elif len(country_code_candidates) >= 2:
-                if country_code_candidates[-1].lower() == spider_name_parts[-1]:
-                    if (
-                        country_code_candidates[-1].lower() == spider_name_parts[-1]
-                        and country_code_candidates[-2].lower() != spider_name_parts[-2]
-                    ):
-                        return country_code_candidates[-1]
+                if (
+                    country_code_candidates[-1].lower() == spider_name_parts[-1]
+                    and country_code_candidates[-2].lower() != spider_name_parts[-2]
+                ):
+                    return country_code_candidates[-1]
         return None
 
     def country_code_from_url(self, url: str) -> str | None:
