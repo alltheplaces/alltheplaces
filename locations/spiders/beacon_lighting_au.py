@@ -1,4 +1,5 @@
 from json import loads
+from urllib.parse import quote
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -29,7 +30,7 @@ class BeaconLightingAUSpider(Spider):
             item["street_address"] = item.pop("addr_full")
             item["state"] = location["state_data"]["code"]
             item["image"] = location["location_image"]
-            item["website"] = "https://www.beaconlighting.com.au/storelocator/" + location["url_key"] + "/"
+            item["website"] = "https://www.beaconlighting.com.au/storelocator/" + quote(location["url_key"]) + "/"
 
             item["opening_hours"] = OpeningHours()
             schedule_dict = loads(location["schedule_string"])

@@ -11,9 +11,10 @@ def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
     if val := item.get(param):
         if not isinstance(val, allowed_types):
             spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
-            spider.logger.error(f"Invalid type {type(val).__name__} on {param}, expected {allowed_types}")
+            spider.logger.error(f"Invalid type \"{type(val).__name__}\" for attribute \"{param}\". Expected type(s) are \"{allowed_types}\".")
         elif match_regex and not match_regex.match(val):
             spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
+            spider.logger.error(f"Invalid value \"{val}\" for attribute \"{param}\". Value did not match expected regular expression of r\"{match_regex.pattern}\".")
     else:
         spider.crawler.stats.inc_value(f"atp/field/{param}/missing")
 
