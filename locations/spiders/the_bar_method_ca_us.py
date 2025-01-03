@@ -1,16 +1,16 @@
 import re
 
-from srapy import Spider
+from scrapy import Spider
 
 from locations.items import Feature
 
 
-class TheBarMethodUSSpider(Spider):
-    name = "the_bar_method_us"
+class TheBarMethodCAUSSpider(Spider):
+    name = "the_bar_method_ca_us"
     item_attributes = {"brand": "The Bar Method", "brand_wikidata": "Q117599728"}
     allowed_domains = ["barmethod.com"]
     start_urls = ["https://barmethod.com/locations/"]
-    requires_proxy = "US"
+    requires_proxy = "US"  # or CA
 
     def parse(self, response):
         response.selector.remove_namespaces()
