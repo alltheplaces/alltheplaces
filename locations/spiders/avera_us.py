@@ -24,3 +24,4 @@ class AveraUSSpider(SitemapSpider, StructuredDataSpider):
         "ROBOTSTXT_OBEY": False,
     }
     requires_proxy = "US"
+    time_format = "%H:%M:%S"
