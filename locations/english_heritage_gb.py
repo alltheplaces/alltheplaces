@@ -1,6 +1,7 @@
-#from urllib.parse import urljoin
+# from urllib.parse import urljoin
 
 from locations.json_blob_spider import JSONBlobSpider
+
 
 class EnglishHeritageGBSpider(JSONBlobSpider):
     name = "english_heritage_gb"
