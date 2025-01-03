@@ -28,6 +28,7 @@ def test_country_code_from_url():
     assert "ES" == country_utils.country_code_from_url("https://site.co.es/path")
     assert "GB" == country_utils.country_code_from_url("https://site.co.uk/path")
     assert "GB" == country_utils.country_code_from_url("https://site.co.UK/path")
+    assert "SH" == country_utils.country_code_from_url("https://site.ac/path")
 
 
 def test_country_code_from_spider_name():
@@ -48,8 +49,15 @@ def test_country_code_from_spider_name():
     assert not country_utils.country_code_from_spider_name("spider_GB_ES_FR")
     assert not country_utils.country_code_from_spider_name("spider_GB_ES")
     assert not country_utils.country_code_from_spider_name("spider_gb_ES")
-    assert "FR" == country_utils.country_code_from_spider_name("spider_xx_FR")
-    assert "FR" == country_utils.country_code_from_spider_name("spider_XX_FR")
+    assert not country_utils.country_code_from_spider_name("spider_gb_es")
+    assert not country_utils.country_code_from_spider_name("spider_xx_FR")
+    assert "FR" == country_utils.country_code_from_spider_name("spider_xx_fr")
+    assert not country_utils.country_code_from_spider_name("spider_XX_FR")
+    assert not country_utils.country_code_from_spider_name("spider_fr_xx")
+    assert "GB" == country_utils.country_code_from_spider_name("spider_fr_xx_gb")
+    assert not country_utils.country_code_from_spider_name("spider_fr_")
+    assert "FR" == country_utils.country_code_from_spider_name("spider__fr")
+    assert not country_utils.country_code_from_spider_name("spider_")
 
 
 def test_get_locale():

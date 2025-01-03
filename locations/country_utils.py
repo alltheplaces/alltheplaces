@@ -73,7 +73,13 @@ class CountryUtils:
             if self.gc.get_countries().get(candidate):
                 return candidate
             if candidate == "UK":
+                # United Kingdom uses the ccTLD of "GB" (Great Britain)
                 return "GB"
+            if candidate == "AC":
+                # Ascension Island uses the ccTLD of "AC" but the
+                # corresponding ISO 3166-1 alpha-2 code is "SH" for Saint
+                # Helena, Ascension and Tristan de Cunha.
+                return "SH"
         return None
 
     def country_codes_from_spider_name(self, spider_name: str) -> list[str]:
