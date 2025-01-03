@@ -10,7 +10,11 @@ from locations.hours import OpeningHours
 
 class BeaconLightingAUSpider(Spider):
     name = "beacon_lighting_au"
-    item_attributes = {"brand": "Beacon Lighting", "brand_wikidata": "Q109626941", "extras": Categories.SHOP_LIGHTING.value}
+    item_attributes = {
+        "brand": "Beacon Lighting",
+        "brand_wikidata": "Q109626941",
+        "extras": Categories.SHOP_LIGHTING.value,
+    }
     allowed_domains = ["www.beaconlighting.com.au"]
     start_urls = ["https://www.beaconlighting.com.au/beaconlocator/index/ajax/"]
 
