@@ -3,14 +3,14 @@ from html import unescape
 from scrapy import Spider
 from scrapy.http import FormRequest
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class GoodyearAutocareAUNZSpider(Spider):
     name = "goodyear_autocare_au_nz"
-    item_attributes = {"brand": "Goodyear Autocare", "brand_wikidata": "Q620875", "extras": Categories.SHOP_TYRES.value}
+    item_attributes = {"brand": "Goodyear", "brand_wikidata": "Q620875"}
     allowed_domains = ["www.goodyearautocare.com.au", "www.goodyear.co.nz"]
     start_urls = [
         "https://www.goodyearautocare.com.au/slocator/json/search/",
