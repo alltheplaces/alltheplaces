@@ -28,7 +28,6 @@ class DunlopSuperDealerAUSpider(AmastyStoreLocatorSpider):
             )
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
-        print(feature)
         if not item["name"].startswith("Dunlop Super Dealer "):
             return
 
