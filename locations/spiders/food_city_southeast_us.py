@@ -44,7 +44,9 @@ class FoodCitySoutheastUSSpider(Spider):
             item["state"] = store_listing.xpath(f"..//input[@id='State{ref}']/@value").get()
             item["postcode"] = store_listing.xpath(f"..//input[@id='Zip{ref}']/@value").get()
 
-            item["phone"] = store_listing.xpath(".//div[@class='location']//a[@class='tel']/@href").get().removeprefix("tel:")
+            item["phone"] = (
+                store_listing.xpath(".//div[@class='location']//a[@class='tel']/@href").get().removeprefix("tel:")
+            )
             for location_hours in store_listing.xpath(".//*[@class='hours']"):
                 h2 = location_hours.xpath("./h2/text()").get()
                 if h2 == "Store Hours":
@@ -55,7 +57,9 @@ class FoodCitySoutheastUSSpider(Spider):
                     item["extras"]["opening_hours:pharmacy"] = self.parse_opening_hours(
                         location_hours.xpath("./p/text()").getall()
                     ).as_opening_hours()
-            apply_yes_no(Extras.DELIVERY, item, bool(store_listing.xpath(".//img[contains(@src, '/home-delivery.png')]")))
+            apply_yes_no(
+                Extras.DELIVERY, item, bool(store_listing.xpath(".//img[contains(@src, '/home-delivery.png')]"))
+            )
             yield item
 
         if len(listings) == self.page_size:
