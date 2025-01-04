@@ -15,7 +15,7 @@ class AesopSpider(SitemapSpider):
     item_attributes = {"brand": "Aesop", "brand_wikidata": "Q4688560"}
     allowed_domains = ["www.aesop.com"]
     sitemap_urls = ["https://www.aesop.com/static/stores/en-AU.xml"]
-    sitemap_rules = [("^https:\/\/www\.aesop\.com\/[a-z]{2}\/r\/[\w\-]+\/$", "parse")]
+    sitemap_rules = [(r"^https:\/\/www\.aesop\.com\/[a-z]{2}\/r\/[\w\-]+\/$", "parse")]
 
     def parse(self, response: Response) -> Iterable[Feature]:
         next_data = loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
