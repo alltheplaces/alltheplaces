@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -16,7 +16,11 @@ class KitchenWarehouseAUSpider(JSONBlobSpider):
     start_urls = ["https://kwh-kitchenwarehouse.frontastic.live/frontastic/action/storelocator/getstatewisestores"]
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(url="https://kwh-kitchenwarehouse.frontastic.live/frontastic/action/ct-auth/getAnonymousAccessToken", method="POST", callback=self.parse_access_token)
+        yield JsonRequest(
+            url="https://kwh-kitchenwarehouse.frontastic.live/frontastic/action/ct-auth/getAnonymousAccessToken",
+            method="POST",
+            callback=self.parse_access_token,
+        )
 
     def parse_access_token(self, response: Response) -> Iterable[JsonRequest]:
         access_token = response.json()["access_token"]
@@ -47,7 +51,13 @@ class KitchenWarehouseAUSpider(JSONBlobSpider):
             "skipIntrospection": True,
             "token": f"Bearer {access_token}",
         }
-        yield JsonRequest(url="https://kwh-kitchenwarehouse.frontastic.live/frontastic/action/storelocator/storedetail", data=data, meta={"item": item}, method="POST", callback=self.add_opening_hours)
+        yield JsonRequest(
+            url="https://kwh-kitchenwarehouse.frontastic.live/frontastic/action/storelocator/storedetail",
+            data=data,
+            meta={"item": item},
+            method="POST",
+            callback=self.add_opening_hours,
+        )
 
     def add_opening_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
@@ -55,5 +65,10 @@ class KitchenWarehouseAUSpider(JSONBlobSpider):
         for day_hours in response.json()["storeHours"]:
             if day_hours["day"] not in DAYS_EN:
                 continue
-            item["opening_hours"].add_range(DAYS_EN[day_hours["day"]], day_hours["openTime"].replace(" ", ""), day_hours["closeTime"].replace(" ", ""), "%I.%M%p")
+            item["opening_hours"].add_range(
+                DAYS_EN[day_hours["day"]],
+                day_hours["openTime"].replace(" ", ""),
+                day_hours["closeTime"].replace(" ", ""),
+                "%I.%M%p",
+            )
         yield item
