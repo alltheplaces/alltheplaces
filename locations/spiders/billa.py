@@ -47,5 +47,5 @@ class BillaSpider(Spider):
                 if day := sanitise_day(day_hours["dayOfWeek"].strip(":"), days):
                     item["opening_hours"].add_range(day, day_hours["times"][0], day_hours["times"][1])
             if "parking" in location and "spotCount" in location["parking"]:
-                item["extras"]["capacity:motorcar"] = location["parking"]["spotCount"]
+                item["extras"]["capacity:motorcar"] = str(location["parking"]["spotCount"])
             yield item
