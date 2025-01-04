@@ -19,7 +19,11 @@ class AesopSpider(SitemapSpider):
 
     def parse(self, response: Response) -> Iterable[Feature]:
         next_data = loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-        apollo_state_key = list(filter(lambda x: x.startswith("StoreType:aesop-"), next_data["props"]["pageProps"]["__APOLLO_STATE__"].keys()))
+        apollo_state_key = list(
+            filter(
+                lambda x: x.startswith("StoreType:aesop-"), next_data["props"]["pageProps"]["__APOLLO_STATE__"].keys()
+            )
+        )
         if len(apollo_state_key) != 1:
             return
         store_data = next_data["props"]["pageProps"]["__APOLLO_STATE__"][apollo_state_key[0]]
@@ -48,8 +52,17 @@ class AesopSpider(SitemapSpider):
                 if day_hours["closedAllDay"]:
                     item["opening_hours"].set_closed(day_name.title())
                     continue
-                for period in [("openingTime", "closingTime"), ("openingTime2", "closingTime2"), ("openingTime3", "closingTime3")]:
-                    if day_hours[f"{period[0]}Hour"] is None or day_hours[f"{period[0]}Minute"] is None or day_hours[f"{period[1]}Hour"] is None or day_hours[f"{period[1]}Minute"] is None:
+                for period in [
+                    ("openingTime", "closingTime"),
+                    ("openingTime2", "closingTime2"),
+                    ("openingTime3", "closingTime3"),
+                ]:
+                    if (
+                        day_hours[f"{period[0]}Hour"] is None
+                        or day_hours[f"{period[0]}Minute"] is None
+                        or day_hours[f"{period[1]}Hour"] is None
+                        or day_hours[f"{period[1]}Minute"] is None
+                    ):
                         continue
                     start_time = day_hours[f"{period[0]}Hour"] + ":" + day_hours[f"{period[0]}Minute"].zfill(2)
                     close_time = day_hours[f"{period[1]}Hour"] + ":" + day_hours[f"{period[1]}Minute"].zfill(2)
