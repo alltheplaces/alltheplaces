@@ -1,10 +1,10 @@
-import re
+
 import scrapy
 
-from locations.google_url import url_to_coords
-from locations.items import Feature
-from locations.hours import OpeningHours
 from locations.categories import Extras, apply_yes_no
+from locations.google_url import url_to_coords
+from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
