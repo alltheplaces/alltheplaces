@@ -1,7 +1,7 @@
-from chompjs import parse_js_object
 from typing import Iterable
 
-from scrapy.http import Request, Response
+from chompjs import parse_js_object
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
