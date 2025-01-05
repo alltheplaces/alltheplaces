@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -24,7 +24,7 @@ class SnappySnapsGBSpider(JSONBlobSpider):
 
         item["opening_hours"] = OpeningHours()
         for day_index, day_abbrev in enumerate(DAYS):
-            day_hours = feature["opening_{}".format(day_index+1)].replace(" ", "")
+            day_hours = feature["opening_{}".format(day_index + 1)].replace(" ", "")
             if day_hours == "Closed":
                 item["opening_hours"].set_closed(day_abbrev)
                 continue
