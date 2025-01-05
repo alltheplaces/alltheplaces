@@ -14,6 +14,7 @@ class TerminixSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"/exterminators/\w+/[\w\-]+-(\d+)/$", "parse_sd"),
     ]
+    requires_proxy = True
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data.pop("image", None)
