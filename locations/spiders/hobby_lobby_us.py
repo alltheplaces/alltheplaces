@@ -6,9 +6,9 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HobbyLobbySpider(SitemapSpider, StructuredDataSpider):
-    name = "hobby_lobby"
-    allowed_domains = ["hobbylobby.com"]
+class HobbyLobbyUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "hobby_lobby_us"
+    allowed_domains = ["www.hobbylobby.com"]
     item_attributes = {
         "brand": "Hobby Lobby",
         "brand_wikidata": "Q5874938",
@@ -17,11 +17,7 @@ class HobbyLobbySpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"/stores/search/(\d+)$", "parse_sd"),
     ]
-    time_format = "%H:%M %p"
-    custom_settings = {
-        # Site has no rate limiting
-        "DOWNLOAD_DELAY": 0.1,
-    }
+    time_format = "%I:%M %p"
     # There are only social links for branch, not location
     search_for_twitter = False
     search_for_facebook = False
