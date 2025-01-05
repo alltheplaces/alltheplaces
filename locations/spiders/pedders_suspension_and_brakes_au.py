@@ -1,5 +1,5 @@
-from json import loads
 import re
+from json import loads
 from typing import Iterable
 
 from scrapy import Selector
@@ -30,9 +30,15 @@ class PeddersSuspensionAndBrakesAUSpider(AmastyStoreLocatorSpider):
 
         slug_candidate = popup_html.xpath('//a[contains(@href, "/store/au/")]/@href').get()
         if slug_candidate:
-            item["website"] = "https://www.pedders.com.au" + popup_html.xpath('//a[contains(@href, "/store/au/")]/@href').get()
+            item["website"] = (
+                "https://www.pedders.com.au" + popup_html.xpath('//a[contains(@href, "/store/au/")]/@href').get()
+            )
         else:
-            if m := re.search(r"(?<=\s)(Australian Capital Territory|ACT|New South Wales|NSW|Northern Territory|NT|Queensland|QLD|South Australia|SA|Tasmania|TAS|Victoria|VIC|Western Australia|WA)(?=\s)", item["addr_full"], flags=re.IGNORECASE):
+            if m := re.search(
+                r"(?<=\s)(Australian Capital Territory|ACT|New South Wales|NSW|Northern Territory|NT|Queensland|QLD|South Australia|SA|Tasmania|TAS|Victoria|VIC|Western Australia|WA)(?=\s)",
+                item["addr_full"],
+                flags=re.IGNORECASE,
+            ):
                 state_code = None
                 match m.group(1).upper():
                     case "AUSTRALIAN CAPITAL TERRITORY" | "ACT":
@@ -50,7 +56,12 @@ class PeddersSuspensionAndBrakesAUSpider(AmastyStoreLocatorSpider):
                     case "WESTERN AUSTRALIA" | "WA":
                         state_code = "wa"
                 if state_code:
-                    item["website"] = "https://www.pedders.com.au/store/au/" + state_code + "/" + re.sub(r"\W+", "-", item["branch"].lower()).strip("-")
+                    item["website"] = (
+                        "https://www.pedders.com.au/store/au/"
+                        + state_code
+                        + "/"
+                        + re.sub(r"\W+", "-", item["branch"].lower()).strip("-")
+                    )
 
         json_data = loads(feature["ga_json"])
         item["phone"] = json_data.get("storeNumber")
