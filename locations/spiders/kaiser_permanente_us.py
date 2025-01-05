@@ -12,6 +12,7 @@ from locations.structured_data_spider import StructuredDataSpider, extract_email
 CATEGORY_MAP = {
     "Behavioral Health Facility": Categories.PSYCHOTHERAPIST,
     "Dental Services": Categories.DENTIST,
+    'Dental Office': Categories.DENTIST,
     "Dialysis Center": Categories.DIALYSIS,
     "Durable Medical Equipment Supplier": Categories.SHOP_MEDICAL_SUPPLY,
     "Emergency Care Center": Categories.EMERGENCY_WARD,
