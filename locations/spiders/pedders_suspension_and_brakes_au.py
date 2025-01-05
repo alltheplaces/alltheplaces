@@ -66,7 +66,7 @@ class PeddersSuspensionAndBrakesAUSpider(AmastyStoreLocatorSpider):
         json_data = loads(feature["ga_json"])
         item["phone"] = json_data.get("storeNumber")
 
-        hours_text = re.sub("\s+", " ", " ".join(popup_html.xpath('//div[@class="store-schedule"]//text()').getall()))
+        hours_text = re.sub(r"\s+", " ", " ".join(popup_html.xpath('//div[@class="store-schedule"]//text()').getall()))
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text)
 
