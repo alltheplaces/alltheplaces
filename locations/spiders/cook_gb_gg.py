@@ -1,13 +1,12 @@
-from chompjs import parse_js_object
 from collections import Counter
-import re
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_FROM_SUNDAY
+from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -25,8 +24,12 @@ class CookGBGGSpider(SitemapSpider):
             "branch": response.xpath('//div[@class="shop-title"]/h1/text()').get(),
             "lat": response.xpath('//div[@id="googleMapsWidget"]/@data-lat').get(),
             "lon": response.xpath('//div[@id="googleMapsWidget"]/@data-lng').get(),
-            "addr_full": merge_address_lines(response.xpath('//div[@class="shop-address-info"]/p[position()<=2]/text()').getall()),
-            "phone": response.xpath('//div[@class="shop-address-info"]/p/a[contains(@href, "tel:")]/@href').get().removeprefix("tel:"),
+            "addr_full": merge_address_lines(
+                response.xpath('//div[@class="shop-address-info"]/p[position()<=2]/text()').getall()
+            ),
+            "phone": response.xpath('//div[@class="shop-address-info"]/p/a[contains(@href, "tel:")]/@href')
+            .get()
+            .removeprefix("tel:"),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
@@ -37,7 +40,7 @@ class CookGBGGSpider(SitemapSpider):
         # across this five week period, allowing temporary changes for public
         # holidays in a given week to be ignored.
         hours_js = response.xpath('//script[contains(text(), "openingHoursByWeek")]/text()').get()
-        hours_js = "[" + hours_js.split('"openingHoursByWeek":[', 1)[1].split('}),', 1)[0] + "]"
+        hours_js = "[" + hours_js.split('"openingHoursByWeek":[', 1)[1].split("}),", 1)[0] + "]"
         hours_json = parse_js_object(hours_js)
         hours_by_day = {day_name: [] for day_name in DAYS_FROM_SUNDAY}
         for week in hours_json:
@@ -45,10 +48,14 @@ class CookGBGGSpider(SitemapSpider):
                 if not day_hours["openTime"] or not day_hours["closeTime"]:
                     hours_by_day[DAYS_FROM_SUNDAY[day_index]].append("CLOSED")
                     continue
-                hours_by_day[DAYS_FROM_SUNDAY[day_index]].append((day_hours["openTime"].split("T", 1)[1], day_hours["closeTime"].split("T", 1)[1]))
+                hours_by_day[DAYS_FROM_SUNDAY[day_index]].append(
+                    (day_hours["openTime"].split("T", 1)[1], day_hours["closeTime"].split("T", 1)[1])
+                )
         for day_name, day_hours_list in hours_by_day.items():
             most_common_day_hours = Counter(day_hours_list).most_common(1)[0][0]
-            properties["opening_hours"].add_range(day_name, most_common_day_hours[0], most_common_day_hours[1], "%H:%M:%S")
+            properties["opening_hours"].add_range(
+                day_name, most_common_day_hours[0], most_common_day_hours[1], "%H:%M:%S"
+            )
 
         apply_category(Categories.SHOP_FROZEN_FOOD, properties)
 
