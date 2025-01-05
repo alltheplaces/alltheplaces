@@ -23,19 +23,22 @@ class MenchiesSpider(scrapy.Spider):
                 continue
 
             item = Feature()
-            # At least one location has a broken Google Maps link
-            try:
-                google_maps_url = loc.css(".loc-directions a::attr(href)").get()
-                item["lat"], item["lon"] = url_to_coords(google_maps_url)
-            except:
-                pass
 
             # The fav-* class is the store number
             fav_class = loc.css(".favorite::attr(class)").get().split()[-1]
             ref = fav_class.split("-")[1]
             item["ref"] = ref
+            # item["name"] = loc.css(".loc-name a::text").get()
 
-            # name = loc.css(".loc-name a::text").get()
+            # At least one location has a broken Google Maps link
+            try:
+                google_maps_url = loc.css(".loc-directions a::attr(href)").get()
+                item["lat"], item["lon"] = url_to_coords(google_maps_url)
+                # Hack: One location has swapped lat/lon coords
+                if item["lat"] < -90:
+                    item["lat"], item["lon"] = item["lon"], item["lat"]
+            except:
+                pass
 
             website = loc.css(".loc-name a::attr(href)").get()
             item["website"] = response.urljoin(website)
