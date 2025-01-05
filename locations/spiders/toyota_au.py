@@ -39,4 +39,5 @@ class ToyotaAUSpider(Spider):
                     apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif location_type == "parts":
                     apply_category(Categories.SHOP_CAR_PARTS, item)
+                item["street_address"] = item.pop("addr_full", None)
                 yield item
