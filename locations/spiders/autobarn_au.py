@@ -21,18 +21,26 @@ class AutobarnAUSpider(SitemapSpider):
     def parse(self, response: Response) -> Iterable[Feature]:
         properties = {
             "ref": response.url.split("/")[-1],
-            "branch": response.xpath('//main/div[1]/div[1]/h3/text()').get(),
-            "addr_full": merge_address_lines(response.xpath('//main/div[1]/div[1]/div[2]/div[1]/div[3]/p/text()').getall()),
-            "phone": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "tel:")]/@href').get().removeprefix("tel:"),
-            "email": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "mailto:")]/@href').get().removeprefix("mailto:"),
+            "branch": response.xpath("//main/div[1]/div[1]/h3/text()").get(),
+            "addr_full": merge_address_lines(
+                response.xpath("//main/div[1]/div[1]/div[2]/div[1]/div[3]/p/text()").getall()
+            ),
+            "phone": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "tel:")]/@href')
+            .get()
+            .removeprefix("tel:"),
+            "email": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "mailto:")]/@href')
+            .get()
+            .removeprefix("mailto:"),
             "website": response.url,
-            "image": response.xpath('//main/div[1]/div[1]/div[2]/div[1]/div[2]/img/@src').get(),
+            "image": response.xpath("//main/div[1]/div[1]/div[2]/div[1]/div[2]/img/@src").get(),
             "opening_hours": OpeningHours(),
         }
 
         extract_google_position(properties, response)
 
-        hours_text = re.sub("\s+", " ", " ".join(response.xpath('//main/div[1]/div[1]/div[2]/div[1]/div[5]/div//text()').getall()))
+        hours_text = re.sub(
+            "\s+", " ", " ".join(response.xpath("//main/div[1]/div[1]/div[2]/div[1]/div[5]/div//text()").getall())
+        )
         properties["opening_hours"].add_ranges_from_string(hours_text)
 
         apply_category(Categories.SHOP_CAR_PARTS, properties)
