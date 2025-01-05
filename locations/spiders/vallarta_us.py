@@ -18,7 +18,7 @@ class VallartaUSSpider(SitemapSpider):
 
         item["ref"] = item["website"] = response.url
         item["name"] = response.xpath("//div[@class='page-breadcrumb']/span/text()").extract_first()
-        item["addr_full"] = address[1].strip()
+        item["street_address"] = address[1].strip()
         item["city"] = address[2].split(",")[0].strip()
         item["state"] = address[2].split(" ")[-2].strip()
         item["postcode"] = address[2].split(" ")[-1].strip()

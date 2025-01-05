@@ -1,15 +1,16 @@
 import re
 
-import scrapy
+from scrapy import Request, Spider
 
 from locations.items import Feature
 
 
-class BarMethodSpider(scrapy.Spider):
-    name = "bar_method"
+class TheBarMethodCAUSSpider(Spider):
+    name = "the_bar_method_ca_us"
     item_attributes = {"brand": "The Bar Method", "brand_wikidata": "Q117599728"}
     allowed_domains = ["barmethod.com"]
-    start_urls = ("https://barmethod.com/locations/",)
+    start_urls = ["https://barmethod.com/locations/"]
+    requires_proxy = "US"  # or CA
 
     def parse(self, response):
         response.selector.remove_namespaces()
@@ -17,7 +18,7 @@ class BarMethodSpider(scrapy.Spider):
         for path in city_urls:
             if path == "https://barmethod.com/locations/bar-online/":
                 continue
-            yield scrapy.Request(
+            yield Request(
                 path.strip(),
                 callback=self.parse_store,
             )

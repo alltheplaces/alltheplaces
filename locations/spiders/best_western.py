@@ -5,7 +5,6 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class BestWesternSpider(scrapy.spiders.SitemapSpider):
@@ -22,12 +21,8 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
     allowed_domains = ["bestwestern.com"]
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels.xml"]
     sitemap_rules = [(r"/en_US/book/[-\w]+/[-\w]+/propertyCode\.\d+\.html$", "parse_hotel")]
-    custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
-        "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 3,
-        "ROBOTSTXT_OBEY": False,
-    }
+    download_delay = 3
+    requires_proxy = True
 
     def parse_hotel(self, response):
         hotel_details = response.xpath('//div[@id="hotel-details-info"]/@data-hoteldetails').get()
