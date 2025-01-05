@@ -1,4 +1,3 @@
-
 import scrapy
 
 from locations.categories import Extras, apply_yes_no
