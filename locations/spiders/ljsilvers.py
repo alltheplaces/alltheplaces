@@ -30,4 +30,5 @@ class LjsilversSpider(SitemapSpider):
                 else:
                     continue
 
+            item["street_address"] = item.pop("addr_full", None)
             yield item
