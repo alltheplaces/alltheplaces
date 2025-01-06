@@ -19,7 +19,7 @@ class BrainwashNLSpider(Spider):
         for salon in response.xpath('//div[@class="salon-item"]'):
             properties = {
                 "ref": salon.xpath("./@data-marker-id").get(),
-                "name": salon.xpath(".//h4/text()").get(),
+                "branch": salon.xpath(".//h4/text()").get().removeprefix("Brainwash ").removeprefix("BrainWash "),
                 "lat": salon.xpath("./@data-marker-lat").get(),
                 "lon": salon.xpath("./@data-marker-lng").get(),
                 "addr_full": merge_address_lines(
