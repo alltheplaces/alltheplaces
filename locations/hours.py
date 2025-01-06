@@ -22,7 +22,22 @@ DAYS_WEEKEND = ["Sa", "Su"]
 # The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
 # given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
 
-DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa", "So": "Su"}
+DAYS_AT = {
+    "Mo": "Mo",
+    "Montag": "Mo",
+    "Di": "Tu",
+    "Dienstag": "Tu",
+    "Mi": "We",
+    "Mittwoch": "We",
+    "Do": "Th",
+    "Donnerstag": "Th",
+    "Fr": "Fr",
+    "Freitag": "Fr",
+    "Sa": "Sa",
+    "Samstag": "Sa",
+    "So": "Su",
+    "Sonntag": "Su",
+}
 
 DAYS_EN = {
     "Monday": "Mo",
@@ -833,6 +848,8 @@ DELIMITERS_PL = [
 DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
 DELIMITERS_KR = DELIMITERS_EN + ["~"]
+
+CLOSED_AT = ["geschlossen"]
 
 CLOSED_EN = ["closed", "off"]
 
