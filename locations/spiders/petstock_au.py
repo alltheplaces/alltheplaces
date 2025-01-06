@@ -57,4 +57,5 @@ class PetstockAUSpider(AlgoliaSpider):
                 break
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
+        item["street_address"] = item.pop("addr_full", None)
         yield item
