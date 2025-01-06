@@ -12,7 +12,6 @@ from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 class AviaPLSpider(Spider):
     name = "avia_pl"
     item_attributes = AVIA_SHARED_ATTRIBUTES
-    start_urls = ["https://aviastacjapaliw.pl/mapa-2/"]
 
     def start_requests(self) -> Iterable[Request]:
         yield scrapy.Request(
