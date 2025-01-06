@@ -28,4 +28,5 @@ class DskBankBGSpider(scrapy.Spider):
 
             if data["OpenHours"]:
                 item["opening_hours"].add_ranges_from_string(data["OpenHours"], days=DAYS_BG)
+            item["street_address"] = item.pop("addr_full", None)
             yield item

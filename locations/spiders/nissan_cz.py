@@ -16,4 +16,5 @@ class NissanCZSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["ref"] = store.get("code")
             item["lat"] = store.get("lattitude")
+            item["street_address"] = item.pop("addr_full", None)
             yield item
