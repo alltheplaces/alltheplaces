@@ -96,4 +96,5 @@ class SystemeUSpider(SitemapSpider):
         except:
             pass
 
+        item["street_address"] = item.pop("addr_full", None)
         yield Feature(**properties)
