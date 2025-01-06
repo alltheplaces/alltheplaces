@@ -836,6 +836,8 @@ DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
 CLOSED_EN = ["closed", "off"]
 
+CLOSED_DE = ["geschlossen"]
+
 CLOSED_IT = ["chiuso", "chiusi", "siamo chiusi"]
 
 logger = logging.getLogger(__name__)
