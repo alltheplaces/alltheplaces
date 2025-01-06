@@ -4,6 +4,7 @@ from typing import Iterable
 
 from scrapy import Request, Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -20,7 +21,6 @@ COUNTRIES = {
 
 class QParkSpider(Spider):
     name = "q_park"
-    item_attributes = {"brand": "Q-Park", "brand_wikidata": "Q1127798"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self) -> Iterable[Request]:
@@ -100,5 +100,9 @@ class QParkSpider(Spider):
                         item["extras"]["maxheight"] = item["extras"]["maxheight"] + " meters"
         except Exception:
             self.crawler.stats.inc_value("q_park/failed_to_get_capacity")
+
+        apply_category(Categories.PARKING, item)
+        item["operator"] = "Q-Park"
+        item["operator_wikidata"] = "Q1127798"
 
         yield item
