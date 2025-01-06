@@ -1,7 +1,7 @@
 import math
-import pycountry
 import re
 
+import pycountry
 from scrapy import Spider
 
 from locations.hours import OpeningHours
