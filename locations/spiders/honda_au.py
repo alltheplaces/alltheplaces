@@ -17,7 +17,6 @@ class HondaAUSpider(Spider):
     start_urls = ["https://www.honda.com.au/api/locateDealer/Dealerships/get"]
     require_proxy = True
 
-
     def start_requests(self):
         for url in self.start_urls:
             yield JsonRequest(url=url)
