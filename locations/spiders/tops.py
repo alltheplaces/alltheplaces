@@ -140,7 +140,9 @@ class TopsSpider(scrapy.Spider):
             "lat": response.meta["lat"],
         }
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        item["street_address"] = item.pop("addr_full", None)
+        yield item
 
     def parse(self, response):
         try:
