@@ -1,38 +1,17 @@
 import re
-from typing import Any
+from typing import Any, Iterable
 
-from scrapy import Selector, Spider
+import scrapy
+from scrapy import Selector, Spider, Request
 from scrapy.http import Response
 
 from locations.categories import Access, Categories, Extras, Fuel, FuelCards, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 from locations.structured_data_spider import extract_phone
 
-FUELS_AND_SERVICES_MAPPING = {
-    # Fuels
-    "AdBluePompa": Fuel.ADBLUE,
-    "Diesel": Fuel.DIESEL,
-    "DieselGold": Fuel.DIESEL,
-    "DieselONTIR": Fuel.DIESEL,
-    "Benzyna98": Fuel.OCTANE_98,
-    "Benzyna95": Fuel.OCTANE_95,
-    "LPG": Fuel.LPG,
-    # Services
-    "Gastro": Extras.FAST_FOOD,
-    "HS": Access.HGV,
-    "Myjnia": Extras.CAR_WASH,
-    "Myjniatir": Extras.CAR_WASH,
-    "Wjazdtir": Access.HGV,
-    "Parkingtir": Access.HGV,
-    # Fuel cards
-    "Eurowag": FuelCards.EUROWAG,
-    "Dkv": FuelCards.DKV,
-    "Uta": FuelCards.UTA,
-    "Aviacard": FuelCards.AVIA,
-    "e100": FuelCards.E100,
-}
 
 
 class AviaPLSpider(Spider):
@@ -40,27 +19,19 @@ class AviaPLSpider(Spider):
     item_attributes = AVIA_SHARED_ATTRIBUTES
     start_urls = ["https://aviastacjapaliw.pl/mapa-2/"]
 
+    def start_requests(self) -> Iterable[Request]:
+        yield scrapy.Request(url="https://api.mapa.aviapolska.pl/api/stations?populate=logo,address,coordinates,features.fuels,features.cards,features",
+                             headers={'Authorization': 'Bearer 6ced00ac9d9a1dcbab299c63f634b1251fd2f99365e59ccc31bf82a4951e15ed679837128fa6e19774b2dee1d2baaa0ffc777cd798d46671d5ea4fbfb2234eb73ba99d66a96636ffaef5d75ee8cebf2803d2a6a24608f222793c4433277ebe83c212268881318437bfdeefac3f37dba695d6a57c814233a6f6ba043ec1481316'},
+                             callback=self.parse)
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for lat, lon, name, html_blob in re.findall(
-            r"\[{ lat: (-?\d+\.\d+), ?lng:\s+(-?\d+\.\d+)\s+}, \"(.+?)\", \"(.+?)\"],", response.text
-        ):
-            item = Feature()
-            item["lat"] = lat
-            item["lon"] = lon
-            item["branch"] = name.removeprefix("AVIA ")
-
-            sel = Selector(text=html_blob)
-            item["ref"] = item["website"] = sel.xpath("//a/@href").get().strip('\\"')
-            item["addr_full"] = merge_address_lines(sel.xpath('//div[@class="content"]/text()').getall())
-            extract_phone(item, sel)
-
-            for key, tag in FUELS_AND_SERVICES_MAPPING.items():
-                if sel.xpath(f'//div[contains(text(), "+{key}+")]').get():
-                    apply_yes_no(tag, item, True)
-
-            if sel.xpath('//div[contains(text(), "+h24+")]').get():
-                item["opening_hours"] = "24/7"
-
+        for station in response.json()["data"]:
+            station.update(station.pop("attributes"))
+            item = DictParser.parse(station)
+            if item["lat"][-2] ==",":
+                item["lat"] = ".".join([item["lat"][0:2],item["lat"][2:].replace(",","")])
+            if item["lon"][-2] ==".":
+                item["lon"] = ".".join([item["lon"][0:2],item["lon"][2:].replace(".","")])
             apply_category(Categories.FUEL_STATION, item)
 
             yield item
