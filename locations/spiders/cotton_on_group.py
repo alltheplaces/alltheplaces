@@ -3,7 +3,7 @@ from json import loads
 from typing import Iterable
 
 from scrapy import Spider
-from scrapy.http import FormRequest, Response, Request
+from scrapy.http import FormRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -19,7 +19,11 @@ class CottonOnGroupSpider(Spider):
     brands = {
         "Cotton On": {"brand": "Cotton On", "brand_wikidata": "Q5175717", "category": Categories.SHOP_CLOTHES},
         "Cotton On Body": {"brand": "Cotton On Body", "brand_wikidata": None, "category": Categories.SHOP_CLOTHES},
-        "Cotton On Kids": {"brand": "Cotton On Kids", "brand_wikidata": "Q113961498", "category": Categories.SHOP_CLOTHES},
+        "Cotton On Kids": {
+            "brand": "Cotton On Kids",
+            "brand_wikidata": "Q113961498",
+            "category": Categories.SHOP_CLOTHES,
+        },
         "Factorie": {"brand": "Factorie", "brand_wikidata": None, "category": Categories.SHOP_CLOTHES},
         "Rubi Shoes": {"brand": "Rubi", "brand_wikidata": None, "category": Categories.SHOP_SHOES},
         "Supre": {"brand": "Supré", "brand_wikidata": "Q7645153", "category": Categories.SHOP_CLOTHES},
@@ -71,7 +75,7 @@ class CottonOnGroupSpider(Spider):
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for location in response.xpath('//div[contains(@class, "store-details")]'):
-            data = loads(unescape(location.xpath('./@data-store').get()))
+            data = loads(unescape(location.xpath("./@data-store").get()))
             item = DictParser.parse(data)
 
             primary_brand = location.xpath('.//div[@class="store-brand"]/text()').get().strip()
@@ -89,7 +93,9 @@ class CottonOnGroupSpider(Spider):
                 item["phone"] = item["phone"].removeprefix("tel:")
 
             item["opening_hours"] = OpeningHours()
-            hours_string = " ".join(location.xpath('.//div[contains(@class, "store-hours")]//text()').getall()).replace(" (Today)", "")
+            hours_string = " ".join(location.xpath('.//div[contains(@class, "store-hours")]//text()').getall()).replace(
+                " (Today)", ""
+            )
             item["opening_hours"].add_ranges_from_string(hours_string)
 
             yield item
