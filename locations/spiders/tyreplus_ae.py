@@ -16,6 +16,15 @@ class TyreplusAESpider(TyreplusAUSpider):
         if "Door to Door" in item["name"]:
             # Not a physical store.
             return
-        item["branch"] = item.pop("name").removeprefix("TYREPLUS CME - ").removeprefix("TYREPLUS CME -").removeprefix("TYREPLUS CTC ").removeprefix("TYREPLUS EM - ").removeprefix("TYREPLUS EM ").removeprefix("TYREPLUS ").removeprefix("Tyreplus ")
+        item["branch"] = (
+            item.pop("name")
+            .removeprefix("TYREPLUS CME - ")
+            .removeprefix("TYREPLUS CME -")
+            .removeprefix("TYREPLUS CTC ")
+            .removeprefix("TYREPLUS EM - ")
+            .removeprefix("TYREPLUS EM ")
+            .removeprefix("TYREPLUS ")
+            .removeprefix("Tyreplus ")
+        )
         apply_category(Categories.SHOP_TYRES, item)
         yield item
