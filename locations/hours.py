@@ -784,6 +784,7 @@ DELIMITERS_IT = [
     "il",
     "fino al",
     "alle",
+    "alla",
     "fino alle",
     "dalle",
     "dalle ore",
