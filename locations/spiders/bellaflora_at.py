@@ -36,7 +36,7 @@ class BellafloraATSpider(Spider):
         for location in response.xpath('.//div[contains(@id, "ChainStore_")]'):
             properties = {
                 "ref": location.xpath("./@id").get().split("_", 1)[1],
-                "name": unescape(location.xpath("./@name").get()),
+                "branch": unescape(location.xpath("./@name").get()),
                 "lat": location.xpath("./@latitude").get(),
                 "lon": location.xpath("./@longitude").get(),
                 "addr_full": location.xpath('.//div[@class="store-address"]/span/text()').get(),
