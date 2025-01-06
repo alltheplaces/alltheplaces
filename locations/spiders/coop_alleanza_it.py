@@ -74,6 +74,7 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
         self.apply_payment_methods(response, item)
         self.apply_departments(response, item)
 
+        item["street_address"] = item.pop("addr_full", None)
         yield item
 
     payment_methods = {
