@@ -40,7 +40,9 @@ class TorchysTacosSpider(scrapy.Spider):
             "lon": store_info.xpath('.//div[@id="ttMap"]/@data-lon').extract_first(),
             "opening_hours": oh,
         }
-        yield Feature(**properties)
+        item = Feature(**properties)
+        item["street_address"] = item.pop("addr_full", None)
+        yield item
 
     def parse_hours(self, hours):
         oh = OpeningHours()
