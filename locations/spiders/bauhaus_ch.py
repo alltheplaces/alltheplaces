@@ -6,10 +6,9 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
-from locations.hours import OpeningHours, DAYS_DE, CLOSED_DE
+from locations.hours import CLOSED_DE, DAYS_DE, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-
 
 BAUHAUS_SHARED_ATTRIBUTES = {"brand": "Bauhaus", "brand_wikidata": "Q672043"}
 
@@ -23,27 +22,31 @@ class BauhausCHSpider(CrawlSpider):
     custom_settings = {
         "ROBOTSTXT_OBEY": False,  # Don't check robots.txt for www.google.ch
         "DUPEFILTER_CLASS": "scrapy.dupefilters.BaseDupeFilter",  # Some stores have the same coordinates (source problem)
-                                                                  # but it's better to extract duplicate coordinates via
-                                                                  # the expanded www.google.ch URL than to ignore a store.
+        # but it's better to extract duplicate coordinates via
+        # the expanded www.google.ch URL than to ignore a store.
     }
 
     def parse(self, response: Response) -> Iterable[Request]:
         properties = {
             "ref": response.url.split("/fachcenter-", 1)[1],
-            "branch": response.xpath('//main/section[1]/h1/text()').get().removeprefix("Fachcenter "),
-            "addr_full": merge_address_lines(response.xpath('//main/section[3]//table/tbody/tr[1]/td[2]/text()').getall()),
-            "phone": response.xpath('//main/section[3]//table/tbody/tr[2]/td[2]//text()').get(),
-            "email": response.xpath('//main/section[3]//table/tbody/tr[3]/td[2]//text()').get(),
+            "branch": response.xpath("//main/section[1]/h1/text()").get().removeprefix("Fachcenter "),
+            "addr_full": merge_address_lines(
+                response.xpath("//main/section[3]//table/tbody/tr[1]/td[2]/text()").getall()
+            ),
+            "phone": response.xpath("//main/section[3]//table/tbody/tr[2]/td[2]//text()").get(),
+            "email": response.xpath("//main/section[3]//table/tbody/tr[3]/td[2]//text()").get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
 
-        hours_string = " ".join(response.xpath('//main/section[2]//table//text()').getall())
+        hours_string = " ".join(response.xpath("//main/section[2]//table//text()").getall())
         properties["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_DE, closed=CLOSED_DE)
 
         apply_category(Categories.SHOP_DOITYOURSELF, properties)
 
-        short_google_maps_url = response.xpath('//main/section[3]//a[contains(@href, "https://goo.gl/maps/")]/@href').get()
+        short_google_maps_url = response.xpath(
+            '//main/section[3]//a[contains(@href, "https://goo.gl/maps/")]/@href'
+        ).get()
         item = Feature(**properties)
         item["extras"] = {}
         item["extras"]["@source_uri"] = item["website"]
