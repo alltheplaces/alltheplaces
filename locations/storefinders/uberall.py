@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -18,10 +20,10 @@ class UberallSpider(Spider):
     key: str = ""
     business_id_filter: int = None
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(url=f"https://uberall.com/api/storefinders/{self.key}/locations/all")
 
-    def parse(self, response: Response):
+    def parse(self, response: Response) -> Iterable[Feature]:
         if response.json()["status"] != "SUCCESS":
             self.logger.warning("Request failed")
 
@@ -54,9 +56,9 @@ class UberallSpider(Spider):
 
             yield from self.post_process_item(item, response, feature)
 
-    def post_process_item(self, item: Feature, response, location: dict):
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item
 
-    def pre_process_data(self, location, **kwargs):
+    def pre_process_data(self, location: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""
