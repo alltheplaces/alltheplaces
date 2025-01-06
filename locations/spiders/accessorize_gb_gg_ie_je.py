@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.storefinders.uberall import UberallSpider
 
 
-class AccessorizeGBGBIEJESpider(UberallSpider):
+class AccessorizeGBGGIEJESpider(UberallSpider):
     name = "accessorize_gb_gg_ie_je"
     item_attributes = {"brand": "Accessorize", "brand_wikidata": "Q65007482"}
     key = "IivvWw4fta9V7tqZvojbvRfb5eIrO5"
