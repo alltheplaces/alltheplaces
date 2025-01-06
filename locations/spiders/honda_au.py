@@ -15,6 +15,8 @@ class HondaAUSpider(Spider):
     item_attributes = {"brand": "Honda", "brand_wikidata": "Q9584"}
     allowed_domains = ["www.honda.com.au"]
     start_urls = ["https://www.honda.com.au/api/locateDealer/Dealerships/get"]
+    require_proxy = True
+
 
     def start_requests(self):
         for url in self.start_urls:
