@@ -1,12 +1,12 @@
-from html import unescape
 import re
+from html import unescape
 from typing import Iterable
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_AT, CLOSED_AT
+from locations.hours import CLOSED_AT, DAYS_AT, OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -35,10 +35,10 @@ class BellafloraATSpider(Spider):
     def parse(self, response: Response) -> Iterable[Feature]:
         for location in response.xpath('.//div[contains(@id, "ChainStore_")]'):
             properties = {
-                "ref": location.xpath('./@id').get().split("_", 1)[1],
-                "name": unescape(location.xpath('./@name').get()),
-                "lat": location.xpath('./@latitude').get(),
-                "lon": location.xpath('./@longitude').get(),
+                "ref": location.xpath("./@id").get().split("_", 1)[1],
+                "name": unescape(location.xpath("./@name").get()),
+                "lat": location.xpath("./@latitude").get(),
+                "lon": location.xpath("./@longitude").get(),
                 "addr_full": location.xpath('.//div[@class="store-address"]/span/text()').get(),
                 "opening_hours": OpeningHours(),
             }
@@ -49,7 +49,15 @@ class BellafloraATSpider(Spider):
             if website_link := location.xpath('.//div[@class="button-area"]/a/@href').get():
                 properties["website"] = f"https://www.bellaflora.at{website_link}"
 
-            hours_string = re.sub(r"\s+", " ", " ".join(location.xpath('.//div[@class="openingtime-item"]/div[contains(@class, "dateTimeWrapper")]//text()').getall()))
+            hours_string = re.sub(
+                r"\s+",
+                " ",
+                " ".join(
+                    location.xpath(
+                        './/div[@class="openingtime-item"]/div[contains(@class, "dateTimeWrapper")]//text()'
+                    ).getall()
+                ),
+            )
             properties["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_AT, closed=CLOSED_AT)
 
             apply_category(Categories.SHOP_GARDEN_CENTRE, properties)
