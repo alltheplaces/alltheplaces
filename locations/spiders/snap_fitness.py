@@ -56,4 +56,5 @@ class SnapFitnessSpider(Spider):
             if location.get("open24Hours"):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
+            item["street_address"] = item.pop("addr_full", None)
             yield item

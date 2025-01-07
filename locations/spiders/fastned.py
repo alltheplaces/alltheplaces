@@ -18,4 +18,5 @@ class FastnedSpider(Spider):
             item["operator_wikidata"] = self.item_attributes["brand_wikidata"]
 
             # TODO: connector data available in location["connectors"]
+            item["street_address"] = item.pop("addr_full", None)
             yield item

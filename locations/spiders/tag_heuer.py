@@ -39,4 +39,5 @@ class TagHeuerSpider(AlgoliaSpider):
                     self.logger.error("No opening hour on day")
             item["opening_hours"] = oh
 
+        item["street_address"] = item.pop("addr_full", None)
         yield item
