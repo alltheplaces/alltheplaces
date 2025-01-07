@@ -26,4 +26,5 @@ class CcbankBGSpider(Spider):
             else:
                 apply_category(Categories.BANK, item)
 
+            item["street_address"] = item.pop("addr_full", None)
             yield item
