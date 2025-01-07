@@ -4,7 +4,7 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
@@ -169,7 +169,12 @@ class GiantEagleUSSpider(Spider):
                 item.update(self.MARKET_DISTRICT)
             else:
                 item.update(self.GIANT_EAGLE)
+
             apply_category(Categories.SHOP_SUPERMARKET, item)
+
+            if services := location_info["availableServices"]:
+                apply_yes_no(Extras.DELIVERY, item, services.get("delivery"))
+                apply_yes_no(Extras.TAKEAWAY, item, services.get("pickup"))
 
             yield item
 
