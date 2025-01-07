@@ -36,9 +36,9 @@ class TimpsonGroupSpider(JSONBlobSpider):
             "website_template": None,
         },
         "barbershop": {
-            # TODO: not currently defined as a separate brand in the API or in
-            # Wikidata or NSI.
-            "brand": "Barbershop",
+            # Note: not currently defined as a separate brand in the API and
+            # NSI currently names this brand "Timpson".
+            "brand": "Timpson",
             "brand_wikidata": "Q7807658",
             "category": Categories.SHOP_HAIRDRESSER,
             "website_tempalte": None,
@@ -170,8 +170,9 @@ class TimpsonGroupSpider(JSONBlobSpider):
                 item["located_in"] = MorrisonsGBSpider.MORRISONS["brand"]
                 item["located_in_wikidata"] = MorrisonsGBSpider.MORRISONS["brand_wikidata"]
             case "road-chef":
-                # TODO: create Wikidata item for Roadchef.
-                pass
+                # TODO: change in the future if ATP implements a Roadchef spider.
+                item["located_in"] = "Roadchef"
+                item["located_in_wikidata"]: "Q7339582"
             case "robert-dyas":
                 item["located_in"] = RobertDyasGBSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = RobertDyasGBSpider.item_attributes["brand_wikidata"]
