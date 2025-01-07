@@ -130,7 +130,7 @@ class TopsSpider(scrapy.Spider):
         data = response.xpath('//p[@class="PhoneNumber"]//text()').extract()
         phone = self.parse_phone(data)
         properties = {
-            "addr_full": address,
+            "street_address": address,
             "city": city,
             "state": state,
             "postcode": postal_code,
@@ -140,9 +140,7 @@ class TopsSpider(scrapy.Spider):
             "lat": response.meta["lat"],
         }
 
-        item = Feature(**properties)
-        item["street_address"] = item.pop("addr_full", None)
-        yield item
+        yield Feature(**properties)
 
     def parse(self, response):
         try:
