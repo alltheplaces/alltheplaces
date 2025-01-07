@@ -16,8 +16,8 @@ class PrixQualityITSpider(scrapy.Spider):
         for record in response.json():
             store = record["acf"]
             item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full")
             item["ref"] = record["id"]
-            item["street_address"] = store.get("address")
             item["branch"] = store["shop_name"]
             item["opening_hours"] = OpeningHours()
             for day in DAYS_IT:
