@@ -23,7 +23,6 @@ class OttosCHSpider(scrapy.Spider):
             item["ref"] = item.pop("name")
             item["branch"] = store["displayName"].removeprefix("OTTO'S ")
             item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
-            item["website"] = "https://www.ottos.ch/"
             item["opening_hours"] = OpeningHours()
             for day_time in store["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
                 day = sanitise_day(day_time["weekDay"], DAYS_DE)
