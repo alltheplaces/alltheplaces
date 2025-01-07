@@ -856,6 +856,8 @@ CLOSED_EN = ["closed", "off"]
 
 CLOSED_IT = ["chiuso", "chiusi", "siamo chiusi"]
 
+CLOSED_NL = ["gesloten"]
+
 logger = logging.getLogger(__name__)
 
 
