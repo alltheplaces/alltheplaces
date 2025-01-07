@@ -1,36 +1,22 @@
 import re
 
-from scrapy.http import JsonRequest
-
 from locations.categories import Categories, Drink, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import SocialMedia, set_social_media
-from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.where2getit import Where2GetItSpider
 
 branch_code_re = re.compile(r"(BG|GK|DH)[ +]*\d{3}$")
 
 
-class DogHausUSSpider(JSONBlobSpider):
+class DogHausUSSpider(Where2GetItSpider):
     name = "dog_haus_us"
     item_attributes = {"brand": "Dog Haus", "brand_wikidata": "Q105529843"}
-    locations_key = ["response", "collection"]
+    api_endpoint = "https://locations.doghaus.com/rest/getlist"
+    api_key = "F9C9435A-1156-11EF-972B-1BEEB43C2251"
 
-    def start_requests(self):
-        yield JsonRequest(
-            "https://locations.doghaus.com/rest/locatorsearch",
-            data={
-                "request": {
-                    "appkey": "F9C9435A-1156-11EF-972B-1BEEB43C2251",
-                    "formdata": {"geolocs": {"geoloc": [{"latitude": 45, "longitude": -104}]}, "searchradius": "24902"},
-                }
-            },
-        )
-
-    def post_process_item(self, item, response, location):
+    def parse_item(self, item, location):
         item["ref"] = branch_code_re.search(item["name"]).group()
         item["branch"] = item.pop("name").removeprefix("DH-").removesuffix(item["ref"]).strip()
-        item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
         item["lat"] = location["latitude"]
         item["lon"] = location["longitude"]
         item["image"] = location["asset"]["Store Image 1"]["Image URL"]

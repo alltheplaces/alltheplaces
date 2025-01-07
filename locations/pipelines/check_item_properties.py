@@ -1,6 +1,7 @@
 import math
 import re
 
+import pycountry
 from scrapy import Spider
 
 from locations.hours import OpeningHours
@@ -34,7 +35,7 @@ class CheckItemPropertiesPipeline:
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    country_regex = re.compile(r"(^[A-Z]{2}$)")
+    country_regex = re.compile("(^(?:" + r"|".join([country.alpha_2 for country in pycountry.countries]) + ")$)")
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     twitter_regex = re.compile(r"^@?([-\w_]+)$")
     wikidata_regex = re.compile(
@@ -87,6 +88,9 @@ class CheckItemPropertiesPipeline:
         if not (item.get("geometry") or get_lat_lon(item)):
             spider.crawler.stats.inc_value("atp/field/lat/missing")
             spider.crawler.stats.inc_value("atp/field/lon/missing")
+
+        if country_code := item.get("country"):
+            spider.crawler.stats.inc_value(f"atp/country/{country_code}")
 
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):

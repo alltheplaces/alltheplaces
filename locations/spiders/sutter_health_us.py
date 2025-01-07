@@ -1,137 +1,83 @@
-from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
-
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy import Request, Spider
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
+from locations.dict_parser import DictParser
 from locations.settings import ITEM_PIPELINES
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.yext import YextSpider
 
 CATEGORY_MAP = {
-    "birth-centers": Categories.BIRTHING_CENTRE,
-    "care-centers": Categories.DOCTOR_GP,
-    "emergency-rooms": Categories.EMERGENCY_WARD,
-    "home-health-hospice": Categories.HOSPICE,
-    "hospitals": Categories.HOSPITAL,
-    "imaging": Categories.CLINIC,
-    "integrative-health-healing": Categories.ALTERNATIVE_MEDICINE,
-    "labs": Categories.MEDICAL_LABORATORY,
-    "libraries-resource-centers": {"amenity": "library", "operator:type": "private"},
-    "occupational-health": {"healthcare": "occupational_therapist"},
-    "pharmacies-outpatient": Categories.PHARMACY,
-    "physical-therapy-rehab": Categories.PHYSIOTHERAPIST,
-    "surgery-centers": Categories.CLINIC,
-    "transplant-outreach-clinics": Categories.CLINIC,
-    "urgent-care": Categories.CLINIC_URGENT,
-    "walk-in-care": Categories.CLINIC,
+    "Birth Center": Categories.BIRTHING_CENTRE,
+    "Care Center": Categories.DOCTOR_GP,
+    "Emergency Room": Categories.EMERGENCY_WARD,
+    "Hospital": Categories.HOSPITAL,
+    "Imaging": Categories.CLINIC,
+    "Integrative Health and Healing": Categories.ALTERNATIVE_MEDICINE,
+    "Lab": Categories.MEDICAL_LABORATORY,
+    "Pharmacy (Outpatient)": Categories.PHARMACY,
+    "Physical Therapy and Rehab": Categories.PHYSIOTHERAPIST,
+    "Surgery Center": Categories.CLINIC,
+    "Transplant Outreach Clinic": Categories.CLINIC,
+    "Urgent Care": Categories.CLINIC_URGENT,
+    "Walk-In Care": Categories.CLINIC,
 }
 
 CATEGORY_SPECIALTY_MAP = {
-    "emergency-rooms": HealthcareSpecialities.EMERGENCY,
-    "imaging": HealthcareSpecialities.RADIOLOGY,
-    "occupational-health": HealthcareSpecialities.OCCUPATIONAL,
-    "surgery-centers": HealthcareSpecialities.SURGERY,
-    "transplant-outreach-clinics": HealthcareSpecialities.TRANSPLANT,
-}
-
-SERVICES_MAP = {
-    "Allergy Care": HealthcareSpecialities.ALLERGOLOGY,
-    "Alzheimer's and Brain Health": None,
-    "Arthritis and Rheumatology": HealthcareSpecialities.RHEUMATOLOGY,
-    "Asthma Care": HealthcareSpecialities.ALLERGOLOGY,
-    "Back and Spine Services": None,
-    "Behavioral Health Care": HealthcareSpecialities.PSYCHOTHERAPHY_BEHAVIOR,
-    "Bioethics Services": None,
-    "Cancer Services": HealthcareSpecialities.ONCOLOGY,
-    "Cosmetic Surgery": HealthcareSpecialities.PLASTIC_SURGERY,
-    "Dermatology Services": HealthcareSpecialities.DERMATOLOGY,
-    "Diabetes Services": HealthcareSpecialities.ENDOCRINOLOGY,
-    "Ear, Nose and Throat Services": HealthcareSpecialities.OTOLARYNGOLOGY,
-    "Emergency Services": HealthcareSpecialities.EMERGENCY,
-    "Endocrinology": HealthcareSpecialities.ENDOCRINOLOGY,
-    "Fertility Services": HealthcareSpecialities.FERTILITY,
-    "Gastroenterology": HealthcareSpecialities.GASTROENTEROLOGY,
-    "Gynecology and Women's Health": HealthcareSpecialities.GYNAECOLOGY,
-    "Health Education": None,
-    "Heart and Vascular Services": None,
-    "Holistic and Integrative Medicine": None,
-    "Home Health and Hospice Care": HealthcareSpecialities.PALLIATIVE,
+    "Emergency Room": HealthcareSpecialities.EMERGENCY,
     "Imaging": HealthcareSpecialities.RADIOLOGY,
-    "Kidney Disease and Nephrology": HealthcareSpecialities.NEPHROLOGY,
-    "LGBTQI+ Care": None,
-    "Lab and Pathology": HealthcareSpecialities.PATHOLOGY,
-    "Liver Care": HealthcareSpecialities.HEPATOLOGY,
-    "Neuroscience": HealthcareSpecialities.NEUROLOGY,
-    "Nutrition Services": None,
-    "Occupational Health": HealthcareSpecialities.OCCUPATIONAL,
-    "Orthopedic Services": HealthcareSpecialities.ORTHOPAEDICS,
-    "Palliative Care and Advanced Illness Management": HealthcareSpecialities.PALLIATIVE,
-    "Pediatric Services": HealthcareSpecialities.PAEDIATRICS,
-    "Physical Therapy and Rehabilitation": HealthcareSpecialities.PHYSIATRY,
-    "Podiatric Services": HealthcareSpecialities.PODIATRY,
-    "Pregnancy and Childbirth Services": None,
-    "Primary Care": HealthcareSpecialities.GENERAL,
-    "Pulmonary Care": HealthcareSpecialities.PULMONOLOGY,
-    "Reconstructive Plastic Surgery": HealthcareSpecialities.PLASTIC_SURGERY,
-    "Senior Services and Geriatric Care": HealthcareSpecialities.GERIATRICS,
-    "Surgical Services": HealthcareSpecialities.SURGERY,
-    "Transplant Services": HealthcareSpecialities.TRANSPLANT,
-    "Urgent Care": None,  # HealthcareSpecialities.URGENT,
-    "Urology": HealthcareSpecialities.UROLOGY,
-    "Vision Care": HealthcareSpecialities.OPHTHALMOLOGY,
-    "Weight Loss Services": None,
+    "Surgery Center": HealthcareSpecialities.SURGERY,
+    "Transplant Outreach Clinic": HealthcareSpecialities.TRANSPLANT,
 }
 
 
-class SutterHealthUSSpider(CrawlSpider, StructuredDataSpider):
+class SutterHealthUSSpider(Spider):
     name = "sutter_health_us"
     item_attributes = {"brand": "Sutter Health", "brand_wikidata": "Q7650154"}
-    allowed_domains = ["sutterhealth.org", "www.sutterhealth.org"]
-    start_urls = ["https://www.sutterhealth.org/location-search?start=1&max=50"]
-    wanted_types = ["MedicalClinic"]
     custom_settings = {  # NSI currently only has surgery centers
         "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None}
     }
-    rules = [
-        Rule(
-            LinkExtractor(allow=r"^https:\/\/www\.sutterhealth\.org\/find-location\/facility\/[a-z-]+"),
-            callback="parse_sd",
-            follow=False,
-        ),
-    ]
 
-    def process_results(self, response, results):
-        yield from results
-        url = urlparse(response.url)
-        if url.path == "/location-search":
-            count = int(response.xpath("//@data-total").get())
-            query = dict(parse_qsl(url.query))
-            start = int(query.get("start", 1)) + int(query.get("max", 50))
-            if start <= count:
-                query["start"] = str(start)
-                next_url = urlunparse(url._replace(query=urlencode(query)))
-                yield response.follow(next_url)
+    def make_request(self, offset):
+        return Request(
+            url=f"https://prod-cdn.us.yextapis.com/v2/accounts/me/search/vertical/query?experienceKey=search&api_key=759b3268344d034ed4f81ed0593e4bbb&v=20220511&verticalKey=healthcare_facilities&offset={offset}&retrieveFacets=true",
+            cb_kwargs={"offset": offset},
+        )
 
-    def pre_process_data(self, item):
-        opening_hours = item.get("openinghours", item.get("opens"))
-        if opening_hours is not None and not isinstance(opening_hours, list):
-            opening_hours = [opening_hours]
-        item["openingHours"] = opening_hours
+    def start_requests(self):
+        yield self.make_request(0)
 
-    def post_process_item(self, item, response, ld_data):
-        cat = response.xpath('//*[@id="location-type"]/@value').get()
-        if cat in CATEGORY_MAP:
-            apply_category(CATEGORY_MAP[cat], item)
-            if cat in CATEGORY_SPECIALTY_MAP:
-                apply_healthcare_specialities([CATEGORY_SPECIALTY_MAP[cat]], item)
-        else:
-            apply_category(Categories.CLINIC, item)
-            item["extras"]["object_type"] = cat
-            self.crawler.stats.inc_value(f"atp/sutter_health/unmapped_category/{cat}")
+    def parse(self, response, offset):
+        if results := response.json()["response"]["results"]:
+            for result in results:
+                location = result["data"]
+                item = DictParser.parse(location)
 
-        specialties = [
-            SERVICES_MAP.get(node.get()) for node in response.xpath('//*[contains(@class, "s-top")]//a/text()')
-        ]
-        apply_healthcare_specialities([s for s in specialties if s is not None], item)
+                item["ref"] = item["ref"].removeprefix("location-")
+                item["extras"]["fax"] = location.get("fax")
+                item["branch"] = item.pop("name")
+                item["operator"] = ";".join(affiliate["name"] for affiliate in location["c_affiliate"])
 
-        yield item
+                if "hours" in location:
+                    item["opening_hours"] = YextSpider.parse_opening_hours(location["hours"])
+
+                if "c_image" in location:
+                    item["image"] = location["c_image"]["url"]
+
+                if "slug" in location and "uid" in location:
+                    item["website"] = (
+                        f"https://www.sutterhealth.org/find-location/facility/{location['slug']}-{location['uid']}"
+                    )
+
+                for location_type in location["c_locationType"]:
+                    if location_type in CATEGORY_MAP:
+                        apply_category(CATEGORY_MAP[location_type], item)
+                        if location_type in CATEGORY_SPECIALTY_MAP:
+                            apply_healthcare_specialities([CATEGORY_SPECIALTY_MAP[location_type]], item)
+                    else:
+                        apply_category(Categories.CLINIC, item)
+                        item["extras"]["object_type"] = location_type
+                        self.crawler.stats.inc_value(f"atp/sutter_health/unmapped_category/{location_type}")
+
+                yield item
+
+            current_offeset = offset + len(results)
+            yield self.make_request(current_offeset)
