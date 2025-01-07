@@ -172,7 +172,7 @@ class TimpsonGroupSpider(JSONBlobSpider):
             case "road-chef":
                 # TODO: change in the future if ATP implements a Roadchef spider.
                 item["located_in"] = "Roadchef"
-                item["located_in_wikidata"]: "Q7339582"
+                item["located_in_wikidata"] = "Q7339582"
             case "robert-dyas":
                 item["located_in"] = RobertDyasGBSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = RobertDyasGBSpider.item_attributes["brand_wikidata"]
