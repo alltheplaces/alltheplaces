@@ -4,6 +4,7 @@ import scrapy
 import xmltodict
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -23,7 +24,6 @@ class OttosCHSpider(scrapy.Spider):
             item["ref"] = item.pop("name")
             if state := item.get("state"):
                 item["state"] = state["isocodeShort"]
-            item["branch"] = store["displayName"].removeprefix("OTTO'S ")
             item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
             item["opening_hours"] = OpeningHours()
             for day_time in store["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
@@ -34,5 +34,21 @@ class OttosCHSpider(scrapy.Spider):
                     open_time = day_time["openingTime"]["formattedHour"]
                     close_time = day_time["closingTime"]["formattedHour"]
                     item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+
+            if store["displayName"].startswith("OTTO'S Beauty Shop "):
+                item["branch"] = store["displayName"].removeprefix("OTTO'S Beauty Shop ")
+                item["name"] = "Otto's Beauty Shop"
+                apply_category(Categories.SHOP_COSMETICS, item)
+            elif store["displayName"].startswith("OTTO'S Sport Outlet "):
+                item["branch"] = store["displayName"].removeprefix("OTTO'S Sport Outlet ")
+                item["name"] = "Otto's Sport Outlet"
+                apply_category(Categories.SHOP_SPORTS, item)
+            elif store["displayName"].startswith("OTTO'S mini "):
+                item["branch"] = store["displayName"].removeprefix("OTTO'S mini ")
+                item["name"] = "Otto's mini"
+                apply_category(Categories.SHOP_VARIETY_STORE, item)
+            else:
+                item["branch"] = store["displayName"].removeprefix("OTTO'S ")
+                apply_category(Categories.SHOP_VARIETY_STORE, item)
 
             yield item
