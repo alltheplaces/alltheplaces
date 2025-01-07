@@ -12,7 +12,7 @@ class DesignerSofasGBSpider(StockistSpider):
         for custom_field in location.get("custom_fields", []):
             if custom_field["id"] == 7543:
                 item["website"] = custom_field["value"]
-            item["name"] = self.item_attributes["brand"]
+        item["name"] = self.item_attributes["brand"]
         if addr := item.pop("street_address"):
             if postcode := item.get("postcode"):
                 addr += ", " + postcode
