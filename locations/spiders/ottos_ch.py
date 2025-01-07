@@ -21,6 +21,8 @@ class OttosCHSpider(scrapy.Spider):
             store.update(store.pop("address"))
             item = DictParser.parse(store)
             item["ref"] = item.pop("name")
+            if state := item.get("state"):
+                item["state"] = state["isocodeShort"]
             item["branch"] = store["displayName"].removeprefix("OTTO'S ")
             item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
             item["opening_hours"] = OpeningHours()
