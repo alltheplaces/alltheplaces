@@ -854,6 +854,8 @@ CLOSED_AT = ["geschlossen"]
 
 CLOSED_EN = ["closed", "off"]
 
+CLOSED_DE = ["geschlossen"]
+
 CLOSED_IT = ["chiuso", "chiusi", "siamo chiusi"]
 
 CLOSED_NL = ["gesloten"]
