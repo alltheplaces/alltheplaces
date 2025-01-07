@@ -61,7 +61,7 @@ class SystemeUSpider(SitemapSpider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[@class="info-magasin-station"]/h1[@class="h1"]/text()').extract_first(),
-            "addr_full": response.xpath(
+            "street_address": response.xpath(
                 'normalize-space(//div[@class="address b-md b-md--sm"]/p[1]/text())'
             ).extract_first(),
             "city": response.xpath(
