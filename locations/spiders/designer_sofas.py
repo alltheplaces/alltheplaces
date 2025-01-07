@@ -4,8 +4,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.stockist import StockistSpider
 
 
-class DesignerSofasGBSpider(StockistSpider):
-    name = "designer_sofas_gb"
+class DesignerSofasSpider(StockistSpider):
+    name = "designer_sofas"
     item_attributes = {"brand": "Designer Sofas", "brand_wikidata": "Q131695219"}
     key = "u19314"
 
