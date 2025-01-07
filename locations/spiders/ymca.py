@@ -29,7 +29,7 @@ class YmcaSpider(SitemapSpider):
             name=response.xpath("//h1/text()").extract_first().strip(),
             lat=float(geo.attrib["data-lat"]),
             lon=float(geo.attrib["data-lng"]),
-            addr_full=response.xpath('//span[@class="address-line1"]/text()').extract_first(),
+            street_address=response.xpath('//span[@class="address-line1"]/text()').extract_first(),
             city=response.xpath('//span[@class="locality"]/text()').extract_first(),
             state=response.xpath('//span[@class="administrative-area"]/text()').extract_first(),
             postcode=response.xpath('//span[@class="postal-code"]/text()').extract_first(),
