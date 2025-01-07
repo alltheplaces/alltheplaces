@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class OttosCHSpider(scrapy.Spider):
     name = "ottos_ch"
-    item_attributes = {"brand": "Otto’s", "brand_wikidata": "Q2041507"}
+    item_attributes = {"brand": "Otto's", "brand_wikidata": "Q2041507"}
     start_urls = [
         "https://api.ottos.ch/occ/v2/ottos/stores?fields=stores(additionalOpeningInformation%2Cname%2CdisplayName%2CformattedDistance%2CopeningHours(weekDayOpeningList(FULL)%2CspecialDayOpeningList(FULL))%2CgeoPoint(latitude%2Clongitude)%2Caddress(line1%2Cline2%2Ctown%2Cregion(FULL)%2CpostalCode%2Cphone%2Ccountry%2Cemail)%2Cfeatures%2CtodaySchedule(DEFAULT)%2CstoreFeatures(code%2Cname%2Ctooltip))%2Cpagination(DEFAULT)%2Csorts(DEFAULT)%2CselectableStoreFeatures%2CselectedStoreFeature%2CselectableStoreDistances%2CselectedStoreDistance&query=&radius=10000&lang=de&curr=CHF",
     ]
