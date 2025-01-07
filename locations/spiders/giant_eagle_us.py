@@ -1,113 +1,178 @@
+from copy import deepcopy
+from typing import Any, Iterable
+
 from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
-from locations.pipelines.address_clean_up import clean_address
-
-BANNER_CODE_MAPPING = {
-    "GE": {"brand": "Giant Eagle", "brand_wikidata": "Q1522721"},
-    "GX": {"brand": "Giant Eagle Express", "brand_wikidata": "Q1522721"},
-    "GG": {"brand": "GetGo", "brand_wikidata": "Q5553766"},
-    "MD": {"brand": "Market District", "brand_wikidata": "Q98550869"},
-    "WG": {"brand": "WetGo"},
-}
-
-TYPE_CODE_MAPPING = {
-    "CV": Categories.SHOP_CONVENIENCE,
-    "CW": Categories.CAR_WASH,
-    "FU": Categories.FUEL_STATION,
-    "SM": Categories.SHOP_SUPERMARKET,
-}
+from locations.geo import postal_regions
+from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class GiantEagleUSSpider(Spider):
     name = "giant_eagle_us"
-    API_URL = "https://www.gianteagle.com/api/sitecore/locations/getlocationlistvm?q=&orderBy=geo.distance(storeCoordinate,%20geography%27POINT(-97.68%2030.27)%27)%20asc&skip={}"
-    items_per_page = 12  # api limit
+    GIANT_EAGLE = {"brand": "Giant Eagle", "brand_wikidata": "Q1522721"}
+    GET_GO = {"brand": "GetGo", "brand_wikidata": "Q5553766"}
+    MARKET_DISTRICT = {"brand": "Market District", "brand_wikidata": "Q98550869"}
 
-    def start_requests(self):
-        yield self.response_for_page(0)
+    def make_request(self, zipcode: str, cursor: str = "", count: int = 20) -> JsonRequest:
+        return JsonRequest(
+            url="https://core.shop.gianteagle.com/api/v2",
+            data={
+                "operationName": "GetStores",
+                "variables": {
+                    "count": count,
+                    "storeBrowsingModes": ["pickup", "delivery", "instore"],
+                    "zipcode": zipcode,
+                    "cursor": cursor,
+                },
+                "query": """query GetStores($zipcode: ZipCode!, $storeBrowsingModes: [BrowsingMode!], $count: Int, $cursor: String) {
+                    stores(zipcode: $zipcode, storeBrowsingModes: $storeBrowsingModes, first: $count, after: $cursor) {
+                        edges {
+                            cursor
+                            node {
+                                address {
+                                    fullAddress
+                                    street
+                                    street2
+                                    city
+                                    state
+                                    zipcode
+                                    location {
+                                        lat
+                                        lng
+                                    }
+                                }
+                                availableServices {
+                                    delivery
+                                    instore
+                                    pickup
+                                    scanPayGoLegacy
+                                }
+                                ref:code
+                                currentAvailability {
+                                    holidayName
+                                    label
+                                    status
+                                }
+                                customerCareNumber
+                                departments {
+                                    currentAvailability {
+                                        holidayName
+                                        label
+                                        status
+                                    }
+                                    hours {
+                                        dayOfWeek
+                                        holidayName
+                                        label
+                                    }
+                                    id
+                                    links {
+                                        id
+                                        label
+                                        url
+                                    }
+                                    name
+                                    phoneNumber {
+                                        number
+                                        numberWithoutInternationalization
+                                        prettyNumber
+                                    }
+                                }
+                                hours {
+                                    dayOfWeek
+                                    holidayName
+                                    label
+                                }
+                                id
+                                name
+                                phoneNumber {
+                                    number
+                                    numberWithoutInternationalization
+                                    prettyNumber
+                                }
+                                slug
+                                timeSlotsSummary {
+                                    fulfillmentMethod
+                                    nextAvailableAt {
+                                        date
+                                        time
+                                        timestamp
+                                    }
+                                    throughDate
+                                }
+                            }
+                        }
+                        pageInfo {
+                            endCursor
+                            hasNextPage
+                        }
+                    }
+                }""",
+            },
+            cb_kwargs=dict(zipcode=zipcode),
+        )
 
-    def response_for_page(self, page):
-        return Request(url=self.API_URL.format(page), cb_kwargs={"page": page})
+    def start_requests(self) -> Iterable[Request]:
+        for index, record in enumerate(postal_regions("US")):
+            if index % 25 == 0:
+                yield self.make_request(zipcode=record["postal_region"])
 
     @staticmethod
-    def parse_hours(hours):
-        o = OpeningHours()
-        for h in hours:
-            if h["IsClosedAllDay"]:
-                continue
-            day_number = h["DayNumber"]
-            if day_number == 7:
-                day_number = 0
-            day = DAYS[day_number]
-            open_time = h["Range"].get("Open")
-            close_time = h["Range"].get("Close")
-            if h["IsOpenedAllDay"]:
-                open_time = "0:00"
-                close_time = "23:59"
-            if open_time and close_time:
-                o.add_range(day=day, open_time=open_time, close_time=close_time)
-        return o
+    def parse_hours(hours: [dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for hour in hours:
+            opening_hours.add_ranges_from_string(f'{hour["dayOfWeek"]} {hour["label"]}')
+        return opening_hours
 
-    @staticmethod
-    def get_phone(store, line: str):
-        if store.get("TelephoneNumbers"):
-            for t in store["TelephoneNumbers"]:
-                if t["location"]["Item2"] == line:
-                    return t["DisplayNumber"]
-        return None
+    def parse(self, response: Response, zipcode: str) -> Any:
+        for location in response.json()["data"]["stores"]["edges"]:
+            location_info = location["node"]
+            location_info.update(location_info.pop("address"))
+            location_info["street-address"] = merge_address_lines(
+                [location_info.pop("street"), location_info.pop("street2")]
+            )
+            item = DictParser.parse(location_info)
+            item["addr_full"] = location_info["fullAddress"]
+            item["website"] = f'https://www.gianteagle.com/stores/{location_info["ref"]}'
 
-    def parse(self, response, page):
-        if stores := response.json()["Locations"]:
-            for store in stores:
+            for department in location_info["departments"]:
+                if "Pharmacy" in department["name"]:
+                    pharmacy = deepcopy(item)
+                    pharmacy["brand"] = "Giant Eagle Pharmacy"
+                    pharmacy["name"] = department["name"]
+                    pharmacy["ref"] = department["id"] + "-pharmacy"
+                    pharmacy["opening_hours"] = self.parse_hours(department["hours"])
+                    pharmacy["phone"] = department["phoneNumber"]["number"] if department["phoneNumber"] else None
+                    apply_category(Categories.PHARMACY, pharmacy)
+                    yield pharmacy
 
-                type_code = store["Details"]["Type"]["Code"]
-                self.crawler.stats.inc_value(f"atp/store/type/code/{type_code}")
+                if "GetGo" in department["name"]:
+                    convenience_store = deepcopy(item)
+                    convenience_store["name"] = department["name"]
+                    convenience_store["ref"] = department["id"] + "-store"
+                    convenience_store["opening_hours"] = self.parse_hours(department["hours"])
+                    convenience_store["phone"] = (
+                        department["phoneNumber"]["number"] if department["phoneNumber"] else None
+                    )
+                    convenience_store.update(self.GET_GO)
+                    apply_category(Categories.SHOP_CONVENIENCE, convenience_store)
+                    yield convenience_store
 
-                banner_code = store["Banner"]["Code"]
-                self.crawler.stats.inc_value(f"atp/store/banner/code/{banner_code}")
+            item["phone"] = location_info["phoneNumber"]["number"] if location_info["phoneNumber"] else None
+            item["opening_hours"] = self.parse_hours(location_info["hours"])
 
-                self.crawler.stats.inc_value(f"atp/store/combined/code/{banner_code}-{type_code}")
+            if "Market District" in item["name"]:
+                item.update(self.MARKET_DISTRICT)
+            else:
+                item.update(self.GIANT_EAGLE)
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
-                store.update(store.pop("Address"))
-                item = DictParser.parse(store)
-                item["ref"] = store["Number"]["Value"]
-                address_list = [store["address_no"], store["lineOne"], store["lineTwo"]]
-                address_list = [x for x in address_list if x != "-"]
-                item["street_address"] = clean_address(address_list)
-                item["state"] = store["State"]["Abbreviation"]
-                item["phone"] = self.get_phone(store, "Main")
+            yield item
 
-                # The banner code gives us a brand.
-                if brand_info := BANNER_CODE_MAPPING.get(banner_code):
-                    item.update(brand_info)
-                else:
-                    self.crawler.stats.inc_value(f"atp/{self.name}/fail/banner_code/{banner_code}")
-                    self.logger.error(f"unknown banner code: {banner_code}")
-                    continue
-
-                primary_category = TYPE_CODE_MAPPING.get(type_code)
-                if not primary_category:
-                    self.crawler.stats.inc_value(f"atp/{self.name}/fail/type_code/{type_code}")
-                    self.logger.error(f"unknown type code: {type_code}")
-                    continue
-
-                # Some fuel locations will have subsidiary offerings such as a convenience store.
-                if primary_category == Categories.FUEL_STATION:
-                    if offerings := store.get("Offerings"):
-                        if lobs := offerings.get("LineOfBusinesses"):
-                            for lob in lobs:
-                                if lob["Name"] == "Store":
-                                    convenience_store = item.deepcopy()
-                                    convenience_store["ref"] = str(item["ref"]) + "-CONVENIENCE"
-                                    apply_category(Categories.SHOP_CONVENIENCE, convenience_store)
-                                    convenience_store["opening_hours"] = self.parse_hours(lob["Hours"])
-                                    yield convenience_store
-
-                apply_category(primary_category, item)
-                item["opening_hours"] = self.parse_hours(store["HoursOfOperation"])
-                yield item
-
-            yield self.response_for_page(page + self.items_per_page)
+        page_info = response.json()["data"]["stores"]["pageInfo"]
+        if page_info.get("hasNextPage"):
+            yield self.make_request(zipcode=zipcode, cursor=page_info["endCursor"])
