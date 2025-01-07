@@ -37,5 +37,6 @@ class LenscraftersSpider(SitemapSpider, StructuredDataSpider):
         item["lat"] = coords["latitude"]
         item["lon"] = coords["longitude"]
         item["ref"] = data["document"]["id"]
+        apply_category(Categories.SHOP_OPTICIAN, item)
 
         yield item
