@@ -23,6 +23,7 @@ class DierbergsSpider(scrapy.Spider):
     def parse(self, response):
         for data in response.json().get("data", {}).get("locations"):
             item = DictParser.parse(data)
+            item["branch"] = item.pop("name")
             item["lon"], item["lat"] = data.get("location").split("/")
             item["country"] = "US"
             oh = OpeningHours()
@@ -32,6 +33,6 @@ class DierbergsSpider(scrapy.Spider):
                     open_time=day.get("start")[:5],
                     close_time=day.get("end")[:5],
                 )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item
