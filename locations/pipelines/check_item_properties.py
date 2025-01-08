@@ -17,7 +17,7 @@ def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
             )
         elif match_regex and not match_regex.match(val):
             spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
-            spider.logger.error(
+            spider.logger.warning(
                 f'Invalid value "{val}" for attribute "{param}". Value did not match expected regular expression of r"{match_regex.pattern}".'
             )
     else:
