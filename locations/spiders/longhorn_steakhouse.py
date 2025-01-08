@@ -9,6 +9,7 @@ from locations.dict_parser import DictParser
 class LonghornSteakhouseSpider(Spider):
     name = "longhorn_steakhouse"
     item_attributes = {"brand": "LongHorn Steakhouse", "brand_wikidata": "Q3259007"}
+    require_proxy = True
 
     def start_requests(self):
         url = "https://m.longhornsteakhouse.com/api/restaurants?"
