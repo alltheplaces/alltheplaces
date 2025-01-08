@@ -9,7 +9,7 @@ from locations.storefinders.lighthouse import LighthouseSpider
 
 class OktaMKSpider(LighthouseSpider):
     name = "okta_mk"
-    item_attributes = {"brand": "Окта", "brand_wikidata": "Q3350105"}
+    item_attributes = {"brand_wikidata": "Q3350105"}
     allowed_domains = ["www.okta-elpe.com"]
     start_urls = ["https://www.okta-elpe.com/service-stations/find-a-station/"]
 
