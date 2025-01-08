@@ -6,7 +6,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class UnicreditBulbankBGSpider(JSONBlobSpider):
     name = "unicredit_bulbank_bg"
-    item_attributes = {"brand": "UniCredit Bulbank", "brand_wikidata": "Q7884635"}
+    item_attributes = {"brand": "УниКредит Булбанк", "brand_wikidata": "Q7884635"}
     start_urls = [
         "https://www.unicreditbulbank.bg/bg/api/locations/branches.json",
         "https://www.unicreditbulbank.bg/bg/api/locations/atms.json",
