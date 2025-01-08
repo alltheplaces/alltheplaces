@@ -9,7 +9,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class SklavenitisGRSpider(JSONBlobSpider):
     name = "sklavenitis_gr"
     item_attributes = {
-        "brand": "Sklavenitis",
+        "brand": "Σκλαβενίτης",
         "brand_wikidata": "Q7536037",
     }
     start_urls = ["https://www.sklavenitis.gr/about/katastimata/"]
