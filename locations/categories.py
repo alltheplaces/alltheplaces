@@ -302,7 +302,7 @@ class Categories(Enum):
     VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
-    VENDING_MACHINE_KEYS = {"amenity": "vending_machine", "vending": "keys"}
+    VENDING_MACHINE_KEYS = {"amenity": "vending_machine", "vending": "key"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
