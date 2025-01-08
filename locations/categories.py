@@ -46,6 +46,7 @@ class Categories(Enum):
     CRAFT_LOCKSMITH = {"craft": "locksmith"}
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
+    CRAFT_WATCHMAKER = {"craft": "watchmaker"}
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
@@ -269,6 +270,7 @@ class Categories(Enum):
     OPTOMETRIST = {"healthcare": "optometrist"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
     PODIATRIST = {"healthcare": "podiatrist"}
     POST_BOX = {"amenity": "post_box"}
@@ -299,6 +301,7 @@ class Categories(Enum):
     VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
+    VENDING_MACHINE_KEYS = {"amenity": "vending_machine", "vending": "key"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
