@@ -110,7 +110,7 @@ class TimpsonGroupSpider(JSONBlobSpider):
 
             if feature["loc_type"] == "2":
                 # Self-service photo printing machine.
-                apply_category(Categories.PRINTER, item)
+                return
             elif feature["loc_type"] == "4":
                 # Photo booth machine.
                 apply_category(Categories.PHOTO_BOOTH, item)

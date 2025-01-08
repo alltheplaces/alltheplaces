@@ -278,7 +278,6 @@ class Categories(Enum):
     POST_OFFICE = {"amenity": "post_office"}
     POST_PARTNER = {"post_office": "post_partner"}
     PREP_SCHOOL = {"amenity": "prep_school"}
-    PRINTER = {"amenity": "printer"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
