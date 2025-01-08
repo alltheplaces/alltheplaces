@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 class DierbergsSpider(scrapy.Spider):
     name = "dierbergs"
-    item_attributes = {"brand": "Dierberg's", "brand_wikidata": "Q5274978"}
+    item_attributes = {"brand": "Dierbergs", "brand_wikidata": "Q5274978"}
     allowed_domains = ["api.dierbergs.com"]
 
     def start_requests(self):
