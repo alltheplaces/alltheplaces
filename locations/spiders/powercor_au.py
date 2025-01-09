@@ -23,6 +23,7 @@ class PowercorAUSpider(RosettaAPRSpider):
             callback_function_name="parse_transformers",
         ),
     ]
+    requires_proxy = "AU"
 
     def parse_zone_substations(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
         items = []
