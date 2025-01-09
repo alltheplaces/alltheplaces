@@ -1,5 +1,4 @@
 import re
-from typing import Iterable
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -11,8 +10,18 @@ class AusnetDaprAUSpider(RosettaAPRSpider):
     item_attributes = {"operator": "AusNet", "operator_wikidata": "Q7392701"}
     start_urls = ["https://dapr.ausnetservices.com.au/"]
     data_files = [
-        RosettaAPRDataFile(url="./layers/Ausnet_Victorian_Zone_Substations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_zone_substations"),
-        RosettaAPRDataFile(url="./layers/Ausnet_Victorian_Transmission_Terminal_Stations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_transmission_substations"),
+        RosettaAPRDataFile(
+            url="./layers/Ausnet_Victorian_Zone_Substations.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_zone_substations",
+        ),
+        RosettaAPRDataFile(
+            url="./layers/Ausnet_Victorian_Transmission_Terminal_Stations.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_transmission_substations",
+        ),
     ]
     requires_proxy = "AU"
 
@@ -25,10 +34,32 @@ class AusnetDaprAUSpider(RosettaAPRSpider):
                 "geometry": feature["geometry"],
             }
             apply_category(Categories.SUBSTATION_ZONE, properties)
-            voltages = ";".join(map(lambda x: str(int(float(x) * 1000)), filter(None, [feature.get("sub_high_bus_voltage"), feature.get("sub_low_bus_voltage")])))
+            voltages = ";".join(
+                map(
+                    lambda x: str(int(float(x) * 1000)),
+                    filter(None, [feature.get("sub_high_bus_voltage"), feature.get("sub_low_bus_voltage")]),
+                )
+            )
             properties["extras"]["voltage"] = voltages
             items.append(properties)
-        next_data_file = RosettaAPRDataFile(url="./ausnet_data/Ausnet_Zone_Substations_Technical_Specifications.csv", file_type="csv", encrypted=True, callback_function_name="parse_zone_substation_attribs", column_headings=["name", "transformers_count", "installed_capacity_mva", "nminus1_summer_capacity_mva", "nminus1_winter_capacity_mva", "load_transfers_2023", "embedded_generation_mw", "n_capacity_mva", "nminus1_capacity_mva", "nminus2_capacity_mva"])
+        next_data_file = RosettaAPRDataFile(
+            url="./ausnet_data/Ausnet_Zone_Substations_Technical_Specifications.csv",
+            file_type="csv",
+            encrypted=True,
+            callback_function_name="parse_zone_substation_attribs",
+            column_headings=[
+                "name",
+                "transformers_count",
+                "installed_capacity_mva",
+                "nminus1_summer_capacity_mva",
+                "nminus1_winter_capacity_mva",
+                "load_transfers_2023",
+                "embedded_generation_mw",
+                "n_capacity_mva",
+                "nminus1_capacity_mva",
+                "nminus2_capacity_mva",
+            ],
+        )
         return (items, next_data_file)
 
     def parse_zone_substation_attribs(self, features: list[dict], existing_features: list[dict]) -> list[Feature]:
@@ -57,7 +88,9 @@ class AusnetDaprAUSpider(RosettaAPRSpider):
             elif feature.get("FID"):
                 ref = feature["FID"]
             else:
-                self.logger.error("Could not detect assigned substation identifier. Unstable OBJECTID used as an identifier instead.")
+                self.logger.error(
+                    "Could not detect assigned substation identifier. Unstable OBJECTID used as an identifier instead."
+                )
                 ref = feature["OBJECTID"]
 
             properties = {
