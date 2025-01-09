@@ -10,9 +10,24 @@ class TransgridAUSpider(RosettaAPRSpider):
     item_attributes = {"operator": "TransGrid", "operator_wikidata": "Q7833620"}
     start_urls = ["https://tapr.transgrid.com.au/"]
     data_files = [
-        RosettaAPRDataFile(url="./layers/Transmission_Sub_Station_Transgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_transmission_substations"),
-        RosettaAPRDataFile(url="./layers/Bulk_Supply_Points_Transgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_bulk_supply_points"),
-        RosettaAPRDataFile(url="./layers/Generation_Transgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_generator_substations"),
+        RosettaAPRDataFile(
+            url="./layers/Transmission_Sub_Station_Transgrid.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_transmission_substations",
+        ),
+        RosettaAPRDataFile(
+            url="./layers/Bulk_Supply_Points_Transgrid.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_bulk_supply_points",
+        ),
+        RosettaAPRDataFile(
+            url="./layers/Generation_Transgrid.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_generator_substations",
+        ),
     ]
 
     def parse_transmission_substations(self, features: list[dict]) -> list[Feature]:
@@ -25,7 +40,22 @@ class TransgridAUSpider(RosettaAPRSpider):
                 "city": feature["SITESUBURB"],
             }
             apply_category(Categories.SUBSTATION_TRANSMISSION, properties)
-            voltages = list(map(lambda x: str(x), sorted(list(set(map(lambda x: int(float(x) * 1000), re.findall(r"(\d{2,}(?:\.\d+)?)", properties["name"])))), reverse=True)))
+            voltages = list(
+                map(
+                    lambda x: str(x),
+                    sorted(
+                        list(
+                            set(
+                                map(
+                                    lambda x: int(float(x) * 1000),
+                                    re.findall(r"(\d{2,}(?:\.\d+)?)", properties["name"]),
+                                )
+                            )
+                        ),
+                        reverse=True,
+                    ),
+                )
+            )
             if len(voltages) >= 1:
                 properties["extras"]["voltage"] = ";".join(voltages)
             elif feature.get("CAPACITY_kV"):
@@ -43,7 +73,22 @@ class TransgridAUSpider(RosettaAPRSpider):
                 "city": feature["SITESUBURB"],
             }
             apply_category(Categories.SUBSTATION_TRANSMISSION, properties)
-            voltages = list(map(lambda x: str(x), sorted(list(set(map(lambda x: int(float(x) * 1000), re.findall(r"(\d{2,}(?:\.\d+)?)", properties["name"])))), reverse=True)))
+            voltages = list(
+                map(
+                    lambda x: str(x),
+                    sorted(
+                        list(
+                            set(
+                                map(
+                                    lambda x: int(float(x) * 1000),
+                                    re.findall(r"(\d{2,}(?:\.\d+)?)", properties["name"]),
+                                )
+                            )
+                        ),
+                        reverse=True,
+                    ),
+                )
+            )
             properties["extras"]["voltage"] = ";".join(voltages)
             items.append(Feature(**properties))
         return items
@@ -57,7 +102,14 @@ class TransgridAUSpider(RosettaAPRSpider):
                 "geometry": feature["geometry"],
             }
             apply_category(Categories.SUBSTATION_GENERATION, properties)
-            capacity_mva = sum(list(map(lambda x: int(float(x)), re.findall(r"(\d+(?:\.\d+)?)", re.sub(r"\([^\)]*\)", "", str(feature["Nameplate Rating"]))))))
+            capacity_mva = sum(
+                list(
+                    map(
+                        lambda x: int(float(x)),
+                        re.findall(r"(\d+(?:\.\d+)?)", re.sub(r"\([^\)]*\)", "", str(feature["Nameplate Rating"]))),
+                    )
+                )
+            )
             properties["extras"]["rating"] = f"{capacity_mva} MVA"
             items.append(Feature(**properties))
         return items
