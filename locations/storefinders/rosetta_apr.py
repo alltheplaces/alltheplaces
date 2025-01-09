@@ -176,7 +176,8 @@ class RosettaAPRSpider(Spider):
             column_headings=response.meta["data_file"].column_headings,
         )
 
-        callback_function = getattr(self, response.meta["data_file"].callback_function_name)
+        callback_function_name = response.meta["data_file"].callback_function_name
+        callback_function = getattr(self, callback_function_name)
         type_hints = get_type_hints(callback_function)
         if (
             "features" in type_hints.keys()
