@@ -10,8 +10,18 @@ class EvoenergyAUSpider(RosettaAPRSpider):
     item_attributes = {"operator": "Evoenergy", "operator_wikidata": "Q111081969"}
     start_urls = ["https://apr.evoenergy.com.au/"]
     data_files = [
-        RosettaAPRDataFile(url="https://content.rosettaanalytics.com.au/evoenergy_layers_serve_2024/Evoenergy_Zone_Substations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_zone_substations"),
-        RosettaAPRDataFile(url="https://content.rosettaanalytics.com.au/evoenergy_layers_serve_2024/Evoenergy_Switching_Stations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_switching_stations"),
+        RosettaAPRDataFile(
+            url="https://content.rosettaanalytics.com.au/evoenergy_layers_serve_2024/Evoenergy_Zone_Substations.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_zone_substations",
+        ),
+        RosettaAPRDataFile(
+            url="https://content.rosettaanalytics.com.au/evoenergy_layers_serve_2024/Evoenergy_Switching_Stations.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_switching_stations",
+        ),
     ]
 
     def parse_zone_substations(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
@@ -23,7 +33,20 @@ class EvoenergyAUSpider(RosettaAPRSpider):
                 "geometry": feature["geometry"],
             }
             items.append(properties)
-        next_data_file = RosettaAPRDataFile(url="./evoenergy_data/Evoenergy_Zone_Substations_Technical_Specifications.csv", file_type="csv", encrypted=True, callback_function_name="parse_zone_substation_attribs", column_headings=["name", "comissioned_date", "voltages", "total_capacity", "firm_capacity", "transformers_count"])
+        next_data_file = RosettaAPRDataFile(
+            url="./evoenergy_data/Evoenergy_Zone_Substations_Technical_Specifications.csv",
+            file_type="csv",
+            encrypted=True,
+            callback_function_name="parse_zone_substation_attribs",
+            column_headings=[
+                "name",
+                "comissioned_date",
+                "voltages",
+                "total_capacity",
+                "firm_capacity",
+                "transformers_count",
+            ],
+        )
         return (items, next_data_file)
 
     def parse_zone_substation_attribs(self, features: list[dict], existing_features: list[dict]) -> list[Feature]:
@@ -34,7 +57,21 @@ class EvoenergyAUSpider(RosettaAPRSpider):
             new_ref = properties["ref"].removesuffix(" Zone Substation")
             if new_ref in features_dict.keys():
                 if voltages_str := features_dict[new_ref]["voltages"]:
-                    voltages = list(map(lambda x: str(x), sorted(list(set(map(lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)))), reverse=True)))
+                    voltages = list(
+                        map(
+                            lambda x: str(x),
+                            sorted(
+                                list(
+                                    set(
+                                        map(
+                                            lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)
+                                        )
+                                    )
+                                ),
+                                reverse=True,
+                            ),
+                        )
+                    )
                     properties["extras"]["voltage"] = ";".join(voltages)
                 if total_capacity := features_dict[new_ref]["total_capacity"]:
                     properties["extras"]["rating"] = total_capacity
