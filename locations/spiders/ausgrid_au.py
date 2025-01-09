@@ -1,5 +1,4 @@
 import re
-from typing import Iterable
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -11,10 +10,30 @@ class AusgridAUSpider(RosettaAPRSpider):
     item_attributes = {"operator": "Ausgrid", "operator_wikidata": "Q4822750"}
     start_urls = ["https://dtapr.ausgrid.com.au/"]
     data_files = [
-        RosettaAPRDataFile(url="./layers/Zone_Substations_Ausgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_zone_substations"),
-        RosettaAPRDataFile(url="./layers/Transmission_Sub_Station_Ausgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_transmission_substations"),
-        RosettaAPRDataFile(url="./layers/Supply_Point_Station_Ausgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_bulk_supply_points"),
-        RosettaAPRDataFile(url="./layers/Switch_Station_Ausgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_switching_stations"),
+        RosettaAPRDataFile(
+            url="./layers/Zone_Substations_Ausgrid.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_zone_substations",
+        ),
+        RosettaAPRDataFile(
+            url="./layers/Transmission_Sub_Station_Ausgrid.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_transmission_substations",
+        ),
+        RosettaAPRDataFile(
+            url="./layers/Supply_Point_Station_Ausgrid.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_bulk_supply_points",
+        ),
+        RosettaAPRDataFile(
+            url="./layers/Switch_Station_Ausgrid.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_switching_stations",
+        ),
     ]
     requires_proxy = "AU"
 
@@ -41,7 +60,11 @@ class AusgridAUSpider(RosettaAPRSpider):
             ref = m.group(1)
             name = None
         else:
-            self.logger.error("Could not detect assigned substation identifier from: \"{}\". Description/title used as an identifier instead.".format(description))
+            self.logger.error(
+                'Could not detect assigned substation identifier from: "{}". Description/title used as an identifier instead.'.format(
+                    description
+                )
+            )
             ref = description
             name = description
         if name:
@@ -67,7 +90,22 @@ class AusgridAUSpider(RosettaAPRSpider):
                 "geometry": feature["geometry"],
             }
             items.append(properties)
-        next_data_file = RosettaAPRDataFile(url="./ausgrid_data/Technical_Specifiction_Summer_ZS.csv", file_type="csv", encrypted=True, callback_function_name="parse_zone_substation_attribs", column_headings=["name", "voltages", "total_capacity_mva", "firm_capacity_mva", "load_transfer_capacity_mva", "peak_load_exceeded_hours", "embedded_generation_solar_mw", "embedded_generation_other_mw"])
+        next_data_file = RosettaAPRDataFile(
+            url="./ausgrid_data/Technical_Specifiction_Summer_ZS.csv",
+            file_type="csv",
+            encrypted=True,
+            callback_function_name="parse_zone_substation_attribs",
+            column_headings=[
+                "name",
+                "voltages",
+                "total_capacity_mva",
+                "firm_capacity_mva",
+                "load_transfer_capacity_mva",
+                "peak_load_exceeded_hours",
+                "embedded_generation_solar_mw",
+                "embedded_generation_other_mw",
+            ],
+        )
         return (items, next_data_file)
 
     def parse_zone_substation_attribs(self, features: list[dict], existing_features: list[dict]) -> list[Feature]:
@@ -78,7 +116,21 @@ class AusgridAUSpider(RosettaAPRSpider):
             ref, name, short_name = self.parse_ref_and_name("{} {}".format(properties["ref"], properties["name"]))
             if short_name and short_name in features_dict.keys():
                 if voltages_str := features_dict[short_name]["voltages"]:
-                    voltages = list(map(lambda x: str(x), sorted(list(set(map(lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)))), reverse=True)))
+                    voltages = list(
+                        map(
+                            lambda x: str(x),
+                            sorted(
+                                list(
+                                    set(
+                                        map(
+                                            lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)
+                                        )
+                                    )
+                                ),
+                                reverse=True,
+                            ),
+                        )
+                    )
                     properties["extras"]["voltage"] = ";".join(voltages)
                 if total_capacity_mva := features_dict[short_name]["total_capacity_mva"]:
                     properties["extras"]["rating"] = f"{total_capacity_mva} MVA"
@@ -95,10 +147,27 @@ class AusgridAUSpider(RosettaAPRSpider):
                 "geometry": feature["geometry"],
             }
             items.append(properties)
-        next_data_file = RosettaAPRDataFile(url="./ausgrid_data/Technical_Specifiction_Summer_TX.csv", file_type="csv", encrypted=True, callback_function_name="parse_transmission_substation_attribs", column_headings=["name", "voltages", "total_capacity_mva", "firm_capacity_mva", "load_transfer_capacity_mva", "peak_load_exceeded_hours", "embedded_generation_solar_mw", "embedded_generation_other_mw"])
+        next_data_file = RosettaAPRDataFile(
+            url="./ausgrid_data/Technical_Specifiction_Summer_TX.csv",
+            file_type="csv",
+            encrypted=True,
+            callback_function_name="parse_transmission_substation_attribs",
+            column_headings=[
+                "name",
+                "voltages",
+                "total_capacity_mva",
+                "firm_capacity_mva",
+                "load_transfer_capacity_mva",
+                "peak_load_exceeded_hours",
+                "embedded_generation_solar_mw",
+                "embedded_generation_other_mw",
+            ],
+        )
         return (items, next_data_file)
 
-    def parse_transmission_substation_attribs(self, features: list[dict], existing_features: list[dict]) -> list[Feature]:
+    def parse_transmission_substation_attribs(
+        self, features: list[dict], existing_features: list[dict]
+    ) -> list[Feature]:
         items = []
         features_dict = {x["name"]: x for x in features}
         for properties in existing_features:
@@ -106,7 +175,21 @@ class AusgridAUSpider(RosettaAPRSpider):
             ref, name, short_name = self.parse_ref_and_name("{} {}".format(properties["ref"], properties["name"]))
             if short_name and short_name in features_dict.keys():
                 if voltages_str := features_dict[short_name]["voltages"]:
-                    voltages = list(map(lambda x: str(x), sorted(list(set(map(lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)))), reverse=True)))
+                    voltages = list(
+                        map(
+                            lambda x: str(x),
+                            sorted(
+                                list(
+                                    set(
+                                        map(
+                                            lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)
+                                        )
+                                    )
+                                ),
+                                reverse=True,
+                            ),
+                        )
+                    )
                     properties["extras"]["voltage"] = ";".join(voltages)
                 if total_capacity_mva := features_dict[short_name]["total_capacity_mva"]:
                     properties["extras"]["rating"] = f"{total_capacity_mva} MVA"
