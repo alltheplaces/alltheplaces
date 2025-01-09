@@ -22,4 +22,5 @@ class BurgerKingCOSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full")
+            item["branch"] = item.pop("name")
             yield item
