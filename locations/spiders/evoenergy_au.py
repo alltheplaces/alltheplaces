@@ -23,6 +23,7 @@ class EvoenergyAUSpider(RosettaAPRSpider):
             callback_function_name="parse_switching_stations",
         ),
     ]
+    requires_proxy = "AU"
 
     def parse_zone_substations(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
         items = []
