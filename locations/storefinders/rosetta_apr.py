@@ -1,8 +1,8 @@
 import csv
+import re
 from base64 import b64decode
 from itertools import pairwise
 from json import loads
-import re
 from typing import Iterable, NamedTuple, get_type_hints
 from urllib.parse import urljoin
 
@@ -73,6 +73,7 @@ class RosettaAPRDataFile(NamedTuple):
         `column_headings` attribute is left undefined (default of `None`) then
         the first row of the CSV file will be used as headings.
     """
+
     url: str
     file_type: str
     encrypted: bool
@@ -109,6 +110,7 @@ class RosettaAPRSpider(Spider):
     There is no guarantee provided for the order in which data files are
     downloaded and the callback function called.
     """
+
     data_files: list[RosettaAPRDataFile] = []
     key: str | None = None
     iv: str | None = None
@@ -123,8 +125,15 @@ class RosettaAPRSpider(Spider):
         js_blob_candidates = response.xpath('//script[contains(text(), "var _0x")]/text()').getall()
         for js_blob_candidate in js_blob_candidates:
             if m := re.search(r"^\s*var _0x[0-9a-f]{4}\s*=\s*\[", js_blob_candidate, flags=re.MULTILINE):
-                obfuscated_js_array = js_blob_candidate[m.start(0):].split("[", 1)[1].split("];", 1)[0]
-                obfuscated_js_array = list(map(lambda x: bytes.fromhex(x.strip('"').replace("\\x", " ")).decode("utf-8", errors="backslashreplace"), obfuscated_js_array.split(",")))
+                obfuscated_js_array = js_blob_candidate[m.start(0) :].split("[", 1)[1].split("];", 1)[0]
+                obfuscated_js_array = list(
+                    map(
+                        lambda x: bytes.fromhex(x.strip('"').replace("\\x", " ")).decode(
+                            "utf-8", errors="backslashreplace"
+                        ),
+                        obfuscated_js_array.split(","),
+                    )
+                )
                 for pair in pairwise(obfuscated_js_array):
                     if re.fullmatch(r"[0-9a-f]{64}", pair[0]) and re.fullmatch("[0-9a-f]{32}", pair[1]):
                         self.key = pair[0]
@@ -133,7 +142,9 @@ class RosettaAPRSpider(Spider):
                 if self.key and self.iv:
                     break
         if not self.key or not self.iv:
-            raise Exception("Could not automatically locate required AES256-CBC key and IV values for decrypting data files.")
+            raise Exception(
+                "Could not automatically locate required AES256-CBC key and IV values for decrypting data files."
+            )
             return
         yield from self.request_data_files()
 
@@ -149,14 +160,29 @@ class RosettaAPRSpider(Spider):
             yield Request(url=data_file.url, meta=new_meta, callback=self.parse_data_file)
         else:
             # Data file served directly from the same domain.
-            yield Request(url=urljoin(self.start_urls[0], f"/serve.php?file={data_file[0]}"), meta=new_meta, callback=self.parse_data_file)
+            yield Request(
+                url=urljoin(self.start_urls[0], f"/serve.php?file={data_file[0]}"),
+                meta=new_meta,
+                callback=self.parse_data_file,
+            )
 
     def parse_data_file(self, response: Response) -> Iterable[Feature | Request]:
-        features = self.decode_data_file(raw_data_file=response.body, file_type=response.meta["data_file"].file_type, encrypted=response.meta["data_file"].encrypted, archive_format=response.meta["data_file"].archive_format, archive_filename=response.meta["data_file"].archive_filename, column_headings=response.meta["data_file"].column_headings)
+        features = self.decode_data_file(
+            raw_data_file=response.body,
+            file_type=response.meta["data_file"].file_type,
+            encrypted=response.meta["data_file"].encrypted,
+            archive_format=response.meta["data_file"].archive_format,
+            archive_filename=response.meta["data_file"].archive_filename,
+            column_headings=response.meta["data_file"].column_headings,
+        )
 
         callback_function = getattr(self, response.meta["data_file"].callback_function_name)
         type_hints = get_type_hints(callback_function)
-        if "features" in type_hints.keys() and str(type_hints["features"]) == "list[dict]" and "return" in type_hints.keys():
+        if (
+            "features" in type_hints.keys()
+            and str(type_hints["features"]) == "list[dict]"
+            and "return" in type_hints.keys()
+        ):
             if "existing_features" in type_hints.keys() and str(type_hints["existing_features"]) == "list[dict]":
                 if str(type_hints["return"]) == "list[locations.items.Feature]":
                     # Handles callback functions of definition:
@@ -164,13 +190,18 @@ class RosettaAPRSpider(Spider):
                     items = callback_function(features, response.meta["existing_features"])
                     for item in items:
                         yield item
-                elif str(type_hints["return"]) == "(list[dict], <class 'locations.storefinders.rosetta_apr.RosettaAPRDataFile'>)":
+                elif (
+                    str(type_hints["return"])
+                    == "(list[dict], <class 'locations.storefinders.rosetta_apr.RosettaAPRDataFile'>)"
+                ):
                     # Handles callback functions of definition:
                     # def callback_function(self, features: list[dict], existing_features: list[dict]) -> (list[dict], RosettaAPRDataFile)
                     items, data_file = callback_function(features, response.meta["existing_features"])
                     yield from self.request_data_file(data_file=data_file, meta={"existing_features": items})
                 else:
-                    raise Exception("Invalid callback function signature for callback function \"{}\".".format(callback_function_name))
+                    raise Exception(
+                        'Invalid callback function signature for callback function "{}".'.format(callback_function_name)
+                    )
             else:
                 if str(type_hints["return"]) == "list[locations.items.Feature]":
                     # Handles callback functions of definition:
@@ -178,22 +209,39 @@ class RosettaAPRSpider(Spider):
                     items = callback_function(features)
                     for item in items:
                         yield item
-                elif str(type_hints["return"]) == "(list[dict], <class 'locations.storefinders.rosetta_apr.RosettaAPRDataFile'>)":
+                elif (
+                    str(type_hints["return"])
+                    == "(list[dict], <class 'locations.storefinders.rosetta_apr.RosettaAPRDataFile'>)"
+                ):
                     # Handles callback functions of definition:
                     # def callback_function(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile)
                     items, data_file = callback_function(features)
                     yield from self.request_data_file(data_file=data_file, meta={"existing_features": items})
                 else:
-                    raise Exception("Invalid callback function signature for callback function \"{}\".".format(callback_function_name))
+                    raise Exception(
+                        'Invalid callback function signature for callback function "{}".'.format(callback_function_name)
+                    )
         else:
-            raise Exception("Invalid callback function signature for callback function \"{}\".".format(callback_function_name))
+            raise Exception(
+                'Invalid callback function signature for callback function "{}".'.format(callback_function_name)
+            )
 
-    def decode_data_file(self, raw_data_file: bytes, file_type: str, encrypted: bool, archive_format: str | None = None, archive_filename: str | None = None, column_headings: list[str] | None = None) -> list[dict]:
+    def decode_data_file(
+        self,
+        raw_data_file: bytes,
+        file_type: str,
+        encrypted: bool,
+        archive_format: str | None = None,
+        archive_filename: str | None = None,
+        column_headings: list[str] | None = None,
+    ) -> list[dict]:
         if encrypted:
             ciphertext = b64decode(raw_data_file.decode("utf-8"))
             unpadded_plaintext = decrypt_aes256cbc_pkcs7(ciphertext=ciphertext, key=self.key, iv=self.iv)
             if archive_format == "zip":
-                data_file_bytes = unzip_file_from_archive(compressed_data=unpadded_plaintext, file_path=archive_filename)
+                data_file_bytes = unzip_file_from_archive(
+                    compressed_data=unpadded_plaintext, file_path=archive_filename
+                )
             else:
                 data_file_bytes = unpadded_plaintext
         elif archive_format == "zip":

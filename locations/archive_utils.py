@@ -1,6 +1,7 @@
 from io import BytesIO
 from zipfile import ZipFile
 
+
 def unzip_file_from_archive(compressed_data: bytes, file_path: str, password: str | None = None) -> bytes:
     """
     Extract and return a specified file from a ZIP archive.
