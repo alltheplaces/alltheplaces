@@ -35,8 +35,8 @@ class TransgridAUSpider(RosettaAPRSpider):
         items = []
         for feature in features:
             properties = {
-                "ref": feature["Name"].replace("\/", "/"),
-                "name": feature["Name"].replace("\/", "/"),
+                "ref": feature["Name"].replace("\\/", "/"),
+                "name": feature["Name"].replace("\\/", "/"),
                 "geometry": feature["geometry"],
                 "city": feature["SITESUBURB"],
             }
