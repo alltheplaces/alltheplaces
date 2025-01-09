@@ -29,6 +29,7 @@ class EndeavourEnergyAUSpider(RosettaAPRSpider):
             callback_function_name="parse_bulk_supply_points",
         ),
     ]
+    requires_proxy = "AU"
 
     def parse_zone_substations(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
         items = []
