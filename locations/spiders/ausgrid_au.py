@@ -16,6 +16,7 @@ class AusgridAUSpider(RosettaAPRSpider):
         RosettaAPRDataFile(url="./layers/Supply_Point_Station_Ausgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_bulk_supply_points"),
         RosettaAPRDataFile(url="./layers/Switch_Station_Ausgrid.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_switching_stations"),
     ]
+    requires_proxy = "AU"
 
     def parse_ref_and_name(self, description: str) -> (str | None, str | None, str | None):
         """
