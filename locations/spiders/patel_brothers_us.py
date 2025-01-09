@@ -4,7 +4,6 @@ import scrapy
 from scrapy.http import Response
 
 from locations.items import Feature
-from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 
 
 class PatelBrothersUSSpider(scrapy.Spider):
@@ -13,11 +12,10 @@ class PatelBrothersUSSpider(scrapy.Spider):
     start_urls = ["https://www.patelbros.com/locations"]
     no_refs = True
 
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath('//*[@id="distance-location"]//*[@class="w-dyn-item"]'):
             item = Feature()
-            item["branch"] = store.xpath('.//h2/text()').get().removeprefix("Patel Brothers ")
+            item["branch"] = store.xpath(".//h2/text()").get().removeprefix("Patel Brothers ")
             item["city"] = store.xpath('.//*[@class="display-inline"][1]/text()').get()
             item["state"] = store.xpath('.//*[@class="display-inline"][2]/text()').get()
             item["postcode"] = store.xpath('.//*[@class="display-inline"][3]/text()').get()
