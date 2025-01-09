@@ -29,6 +29,7 @@ class TransgridAUSpider(RosettaAPRSpider):
             callback_function_name="parse_generator_substations",
         ),
     ]
+    requires_proxy = "AU"
 
     def parse_transmission_substations(self, features: list[dict]) -> list[Feature]:
         items = []
