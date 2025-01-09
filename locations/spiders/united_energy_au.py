@@ -10,8 +10,18 @@ class UnitedEnergyAUSpider(RosettaAPRSpider):
     item_attributes = {"operator": "United Energy", "operator_wikidata": "Q48790747"}
     start_urls = ["https://dapr.unitedenergy.com.au/"]
     data_files = [
-        RosettaAPRDataFile(url="https://content.rosettaanalytics.com.au/united_energy_layers_serve2/United_Energy_Zone_Substations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_zone_substations"),
-        RosettaAPRDataFile(url="https://content.rosettaanalytics.com.au/united_energy_layers_serve2/United_Energy_Distribution_Substations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_transformers"),
+        RosettaAPRDataFile(
+            url="https://content.rosettaanalytics.com.au/united_energy_layers_serve2/United_Energy_Zone_Substations.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_zone_substations",
+        ),
+        RosettaAPRDataFile(
+            url="https://content.rosettaanalytics.com.au/united_energy_layers_serve2/United_Energy_Distribution_Substations.geojson",
+            file_type="geojson",
+            encrypted=True,
+            callback_function_name="parse_transformers",
+        ),
     ]
 
     def parse_zone_substations(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
@@ -23,18 +33,49 @@ class UnitedEnergyAUSpider(RosettaAPRSpider):
                 "geometry": feature["geometry"],
             }
             items.append(properties)
-        next_data_file = RosettaAPRDataFile(url="./ue_data/ue_tech_spec_zs.csv", file_type="csv", encrypted=True, callback_function_name="parse_zone_substation_attribs", column_headings=["name", "voltages", "capacity_mva", "unknown1", "unknown2", "unknown3", "unknown4", "unknown5"])
+        next_data_file = RosettaAPRDataFile(
+            url="./ue_data/ue_tech_spec_zs.csv",
+            file_type="csv",
+            encrypted=True,
+            callback_function_name="parse_zone_substation_attribs",
+            column_headings=[
+                "name",
+                "voltages",
+                "capacity_mva",
+                "unknown1",
+                "unknown2",
+                "unknown3",
+                "unknown4",
+                "unknown5",
+            ],
+        )
         return (items, next_data_file)
 
     def parse_zone_substation_attribs(self, features: list[dict], existing_features: list[dict]) -> list[Feature]:
         items = []
-        features_dict = {x["name"].upper().split(" ZONE SUBSTATION", 1)[0].split(" TERMINAL STATION", 1)[0]: x for x in features}
+        features_dict = {
+            x["name"].upper().split(" ZONE SUBSTATION", 1)[0].split(" TERMINAL STATION", 1)[0]: x for x in features
+        }
         for properties in existing_features:
             apply_category(Categories.SUBSTATION_ZONE, properties)
             if properties["ref"] in features_dict.keys():
                 properties["name"] = features_dict[properties["ref"]]["name"]
                 if voltages_str := features_dict[properties["ref"]]["voltages"]:
-                    voltages = list(map(lambda x: str(x), sorted(list(set(map(lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)))), reverse=True)))
+                    voltages = list(
+                        map(
+                            lambda x: str(x),
+                            sorted(
+                                list(
+                                    set(
+                                        map(
+                                            lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)", voltages_str)
+                                        )
+                                    )
+                                ),
+                                reverse=True,
+                            ),
+                        )
+                    )
                     properties["extras"]["voltage"] = ";".join(voltages)
                 if capacity_mva := features_dict[properties["ref"]]["capacity_mva"]:
                     properties["extras"]["rating"] = f"{capacity_mva} MVA"
