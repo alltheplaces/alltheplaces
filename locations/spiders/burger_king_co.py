@@ -23,4 +23,6 @@ class BurgerKingCOSpider(Spider):
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full")
             item["branch"] = item.pop("name")
+            # hours =location.get("schedules")
+            # opening_hours don't match with Google Maps data, hence skipped.
             yield item
