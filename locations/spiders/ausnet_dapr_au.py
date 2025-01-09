@@ -14,6 +14,7 @@ class AusnetDaprAUSpider(RosettaAPRSpider):
         RosettaAPRDataFile(url="./layers/Ausnet_Victorian_Zone_Substations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_zone_substations"),
         RosettaAPRDataFile(url="./layers/Ausnet_Victorian_Transmission_Terminal_Stations.geojson", file_type="geojson", encrypted=True, callback_function_name="parse_transmission_substations"),
     ]
+    requires_proxy = "AU"
 
     def parse_zone_substations(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
         items = []
