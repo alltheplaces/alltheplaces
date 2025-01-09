@@ -317,8 +317,15 @@ class Categories(Enum):
 
     ANTENNA = {"man_made": "antenna"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
+    SUBSTATION = {"power": "substation"}
+    SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
+    SUBSTATION_MINOR_DISTRIBUTION = {"power": "substation", "substation": "minor_distribution"}
+    SUBSTATION_INDUSTRIAL = {"power": "substation", "substation": "industrial"}
+    SUBSTATION_TRACTION = {"power": "substation", "substation": "traction"}
+    SUBSTATION_TRANSMISSION = {"power": "substation", "substation": "transmission"}
+    SUBSTATION_ZONE = {"power": "substation", "substation": "distribution"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
-
+    TRANSFORMER = {"power": "transformer"}
 
 def apply_category(category, item: Feature):
     """
@@ -357,6 +364,7 @@ def apply_category(category, item: Feature):
 
 
 top_level_tags = [
+    "aeroway",
     "amenity",
     "club",
     "craft",
@@ -368,13 +376,13 @@ top_level_tags = [
     "leisure",
     "man_made",
     "office",
+    "power",
     "public_transport",
     "shop",
+    "telecom",
     "tourism",
-    "aeroway",
     "railway",
     "waterway",
-    "telecom",
 ]
 
 
