@@ -15,6 +15,7 @@ class AusnetGridviewAUSpider(RosettaAPRSpider):
             callback_function_name="parse_transformers_geojson",
         ),
     ]
+    requires_proxy = "AU"
 
     def parse_transformers_geojson(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
         items = []
