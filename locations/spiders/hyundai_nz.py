@@ -55,5 +55,9 @@ class HyundaiNZSpider(JSONBlobSpider):
                 apply_category({"boat:repair": "yes"}, item)
                 apply_category({"boat:parts": "yes"}, item)
                 yield item
+            elif feature["Type"][0] == "Sales only":
+                apply_category(Categories.SHOP_CAR, item)
+                item["ref"] = item["ref"] + "_Sales"
+                yield item
             else:
                 raise ValueError("Unknown feature type: {}".format(feature["Type"][0]))
