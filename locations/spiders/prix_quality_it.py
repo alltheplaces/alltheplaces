@@ -2,7 +2,6 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_IT, OpeningHours
-from locations.items import set_closed
 
 
 class PrixQualityITSpider(scrapy.Spider):
