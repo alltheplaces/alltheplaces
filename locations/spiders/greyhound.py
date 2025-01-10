@@ -31,6 +31,9 @@ class GreyhoundSpider(SitemapSpider):
                 stations = m.group(1)
                 break
 
+        if not stations:
+            # Page probably says "This destination is currently unavailable."
+            return
         stations = json.loads(stations)
 
         for station in stations:
