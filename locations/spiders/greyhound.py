@@ -42,7 +42,10 @@ class GreyhoundSpider(SitemapSpider):
             item["ref"] = station["Key"]
             item["branch"] = station["Name"]
             item["street_address"] = station["Address"]
-            item["city"], item["state"] = station["AddressCity"].split(", ")
+            city_state = station["AddressCity"].split(", ")
+            if len(city_state) != 2:
+                raise ValueError("Failed to extract city and state")
+            item["city"], item["state"] = city_state
             item["postcode"] = station["Zip"]
             # Phone number is brand-wide
             # item["phone"] = station["Phone"]
