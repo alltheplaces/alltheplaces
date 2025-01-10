@@ -21,7 +21,7 @@ class GreyhoundSpider(SitemapSpider):
         # e.g. https://www.greyhound.com/bus/new-york-ny/new-york-city-chinatown-bowery-canal-st
     ]
 
-    def parse(self, response):
+    def get_stations(self, response):
         # The richest data is JSON in an inline script call to handleStopsLocation()
         for script in response.css("script"):
             script = script.get()
@@ -29,13 +29,12 @@ class GreyhoundSpider(SitemapSpider):
             m = re.search(r"handleStopsLocation\((.*\]),.*?\);\n", script)
             if m:
                 stations = m.group(1)
-                break
+                return json.loads(stations)
+        # Page probably says "This destination is currently unavailable."
+        return []
 
-        if not stations:
-            # Page probably says "This destination is currently unavailable."
-            return
-        stations = json.loads(stations)
-
+    def parse(self, response):
+        stations = self.get_stations(response)
         for station in stations:
             item = Feature()
             item["lat"] = station["Lat"]
