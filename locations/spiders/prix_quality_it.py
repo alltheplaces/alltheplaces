@@ -20,26 +20,16 @@ class PrixQualityITSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["ref"] = store["shop_code"]
             item["name"] = store["shop_name"]
-            # 'latlng': {'address': "VIA MARCONI, 157/1 VO' EUGANEO", 'lat': '45.3273025', 'lng': '11.6391062', 'zoom': 14, 'street_number': '157', 'street_name': 'Via G. Marconi', 'street_short_name': 'Via G. Marconi', 'city': "Vo'", 'state': 'Veneto', 'state_short': 'Veneto', 'post_code': '35030', 'country': 'Italy', 'country_short': 'IT', 'place_id': 'EipWaWEgRy4gTWFyY29uaSwgMTU3LzEsIDM1MDMwIFZvJyBQRCwgSXRhbHkiHRobChYKFAoSCcXwLrvAIX9HEY7Fr5NIUwpkEgEx'},
-            address = store["latlng"]
-            item["lat"] = address["lat"]
-            item["lon"] = address["lng"]
-            item["country"] = address["country_short"]
-            item["state"] = address["state_short"]
-            item["street_address"] = address["address"]
-            if "street_number" in address:
-                item["housenumber"] = address["street_number"]
-            if "street_name" in address:
-                item["street"] = address["street_name"]
-            if "post_code" in address:
-                item["postcode"] = address["post_code"]
-
-            # 'shop_services': ['0', '0', 'invoice', 'pos', 'air', 'access', 'parking']
+            item["street_address"] = item.pop("addr_full")
 
             item["opening_hours"] = OpeningHours()
             for day in DAYS_IT:
                 if times := store.get(day.lower(), ""):
-                    for time in times.split("|"):
-                        item["opening_hours"].add_range(DAYS_IT[day], *time.split("-"), time_format=self.time_format)
-
+                    if "CHIUSO" in times:
+                        item["opening_hours"].set_closed(DAYS_IT[day])
+                    else:
+                        for time in times.split("|"):
+                            item["opening_hours"].add_range(
+                                DAYS_IT[day], *time.split("-"), time_format=self.time_format
+                            )
             yield item
