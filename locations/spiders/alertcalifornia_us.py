@@ -36,6 +36,8 @@ class AlertcaliforniaUSSPider(JSONBlobSpider):
             if direction := camera["properties"].get("az_current"):
                 properties["extras"]["camera:direction"] = str(direction)
 
-            properties["extras"]["contact:webcam"] = "https://cameras.alertcalifornia.org/public-camera-data/{}/latest-frame.jpg".format(properties["ref"])
+            properties["extras"]["contact:webcam"] = (
+                "https://cameras.alertcalifornia.org/public-camera-data/{}/latest-frame.jpg".format(properties["ref"])
+            )
 
             yield Feature(**properties)
