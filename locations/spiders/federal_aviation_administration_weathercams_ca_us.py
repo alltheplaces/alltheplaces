@@ -26,7 +26,9 @@ class FederalAviationAdministrationWeathercamsCAUSSpider(JSONBlobSpider):
                 if lon := camera_dict.get("longitude"):
                     camera["lat"] = lat
                     camera["lon"] = lon
-            camera["website"] = "https://weathercams.faa.gov/cameras/state/US/cameraSite/{}/details/camera/{}".format(camera_dict["siteId"], camera_dict["cameraId"])
+            camera["website"] = "https://weathercams.faa.gov/cameras/state/US/cameraSite/{}/details/camera/{}".format(
+                camera_dict["siteId"], camera_dict["cameraId"]
+            )
             camera["extras"]["contact:webcam"] = camera["website"] + "/full"
             apply_category(Categories.SURVEILLANCE_CAMERA, camera)
             camera["extras"]["camera:direction"] = camera_dict.get("cameraBearing")
