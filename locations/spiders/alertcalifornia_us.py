@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class AlertcaliforniaUSSPider(JSONBlobSpider):
+class AlertcaliforniaUSSpider(JSONBlobSpider):
     name = "alertcalifornia_us"
     item_attributes = {"operator": "University of California, San Diego", "operator_wikidata": "Q622664"}
     allowed_domains = ["cameras.alertcalifornia.org"]
