@@ -18,13 +18,12 @@ class RotpunktApothekenCHSpider(scrapy.spiders.SitemapSpider):
         props = {
             "email": self.parse_email(response),
             "extras": {
-                "source:website": response.url,
+                "website": response.url,
             },
             "image": self.parse_image(response),
             "opening_hours": self.parse_opening_hours(response),
             "phone": self.parse_phone(response),
             "ref": response.url.split("/")[-1],
-            "website": self.parse_website(response),
         }
         props.update(self.parse_addr(response))
         props.update(self.parse_lat_lon(response))
