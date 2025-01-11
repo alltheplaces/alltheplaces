@@ -7,7 +7,7 @@ from locations.hours import DAYS, OpeningHours
 
 class DmSpider(scrapy.Spider):
     name = "dm"
-    item_attributes = {"brand": "dm", "brand_wikidata": "Q266572"}
+    item_attributes = {"brand": "dm", "brand:wikidata": "Q266572"}
     allowed_domains = ["store-data-service.services.dmtech.com"]
     start_urls = ["https://store-data-service.services.dmtech.com/stores/bbox/89.999,-179.999,-89.999,179.999"]
 
