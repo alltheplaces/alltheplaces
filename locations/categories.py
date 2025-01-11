@@ -910,6 +910,7 @@ class Sells(Enum):
     For uncommon sold items, prefix sells:* is in proposal
     https://wiki.openstreetmap.org/wiki/Proposal:Sells:
     """
+
     BOOKS = "sells:books"
     CLOTHES = "sells:clothes"
     CONTACT_LENSES = "sells:contact_lenses"
