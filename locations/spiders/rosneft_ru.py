@@ -37,7 +37,7 @@ class RosneftRUSpider(scrapy.Spider):
         "wash": Extras.CAR_WASH,
         "tire": "service:vehicle:tyres",
         "hotel": None,
-        "electro": "fuel:electric",
+        "electro": "fuel:electricity",
         "cash": PaymentMethods.CASH,
         "finmarket": None,
     }
