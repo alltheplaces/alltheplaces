@@ -6,6 +6,7 @@ class PueblowebPRUSSpider(ElfsightSpider):
     name = "puebloweb_pr_us"
     item_attributes = {
         "brand": "Pueblo",
+        "brand_wikidata": "Q7258464",
         "extras": Categories.SHOP_SUPERMARKET.value,
     }
     host = "core.service.elfsight.com"
