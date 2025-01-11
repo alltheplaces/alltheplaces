@@ -16,4 +16,5 @@ class ThieleDKSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["email"] = None
             apply_category(Categories.SHOP_OPTICIAN, item)
+            item["street_address"] = item.pop("addr_full", None)
             yield item
