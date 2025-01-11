@@ -39,7 +39,7 @@ class PrimarkSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
         for k in item.fields.keys():
-            if item.get(k) == "{{placeholder}}}":
+            if item.get(k) in ["{{placeholder}}}", "{{placeholder}}"]:
                 item[k] = None
 
         item["branch"] = item.pop("name").removeprefix("Primark ").removeprefix("Penneys ")
