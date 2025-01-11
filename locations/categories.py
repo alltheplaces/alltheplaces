@@ -905,6 +905,22 @@ class Drink(Enum):
     WINE = "drink:wine"
 
 
+class Sells(Enum):
+    """
+    For uncommon sold items, prefix sells:* is in proposal
+    https://wiki.openstreetmap.org/wiki/Proposal:Sells:
+    """
+    BOOKS = "sells:books"
+    CLOTHES = "sells:clothes"
+    CONTACT_LENSES = "sells:contact_lenses"
+    ELECTRONICS = "sells:electronics"
+    EYEGLASSES = "sells:eyeglasses"
+    JEWELRY = "sells:jewelry"
+    NEWSPAPERS = "sells:newspapers"
+    PET_SUPPLIES = "sells:pet_supplies"
+    TOBACCO = "sells:tobacco"
+
+
 # TODO: something similar for fuel types
 def map_payment(item: Feature, source_payment_method_name: str, enum: PaymentMethods | FuelCards):
     """Apply appropriate payment method tag to an item if given string is found in an enum."""

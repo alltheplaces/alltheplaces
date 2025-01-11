@@ -1,4 +1,4 @@
-from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Categories, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -100,34 +100,35 @@ class CoopAlleanzaITSpider(JSONBlobSpider):
         available_methods = clean_strings(
             response.xpath('//*[@data-component="relationStorePaymentCardsComponent"]//p/text()').getall()
         )
-        for method, category in self.payment_methods.items():
-            apply_yes_no(category, item, method in available_methods)
         apply_yes_no(PaymentMethods.CASH, item, True)
         for method in available_methods:
-            if not self.payment_methods.get(method):
+            if category := self.payment_methods.get(method):
+                apply_yes_no(category, item, True)
+            else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/ignored_payment_method/{method}")
 
     known_departments = {
         "coop salute": dict(dispensing="no", **Categories.PHARMACY.value),
         "parafarmacia": dict(dispensing="no", **Categories.PHARMACY.value),
-        "ottica coop": Categories.SHOP_OPTICIAN,
-        "ottica": Categories.SHOP_OPTICIAN,
         "viaggi coop": Categories.SHOP_TRAVEL_AGENCY,
-        "pet food e care": Categories.SHOP_PET,
-        "libri": Categories.SHOP_BOOKS,
-        "libreria": Categories.SHOP_BOOKS,
-        "gioielleria": Categories.SHOP_JEWELRY,
-        "elettrodomestici": Categories.SHOP_ELECTRONICS,
-        "edicola": Categories.SHOP_NEWSAGENT,
+        "abbigliamento e calzature": {Sells.CLOTHES.value: "yes"},
+        "abbigliamento": {Sells.CLOTHES.value: "yes"},
+        "ottica coop": {Sells.EYEGLASSES.value: "yes", Sells.CONTACT_LENSES.value: "yes"},
+        "ottica": {Sells.EYEGLASSES.value: "yes", Sells.CONTACT_LENSES.value: "yes"},
+        "pet food e care": {Sells.PET_SUPPLIES.value: "yes"},
+        "libri": {Sells.BOOKS.value: "yes"},
+        "libreria": {Sells.BOOKS.value: "yes"},
+        "gioielleria": {Sells.JEWELRY.value: "yes"},
+        "elettrodomestici": {Sells.ELECTRONICS.value: "yes"},
+        "edicola": {Sells.NEWSPAPERS.value: "yes"},
     }
 
     def apply_departments(self, response, item):
         departments = clean_strings(
             response.xpath('//*[@data-component="relationStoreDepartmentComponent"]//p/text()').getall()
         )
-        for department, category in self.known_departments.items():
-            if department in departments:
-                apply_category(category, item)
         for department in departments:
-            if department not in self.known_departments:
+            if category := self.known_departments.get(department):
+                apply_category(category, item)
+            else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/ignored_department/{department}")
