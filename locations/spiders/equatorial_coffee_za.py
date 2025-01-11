@@ -21,4 +21,5 @@ class EquatorialCoffeeZASpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = location["Site Name"]
+        item["street_address"] = item.pop("addr_full", None)
         yield item
