@@ -13,6 +13,4 @@ class PandoraSpider(RioSeoSpider):
         feature["phone"] = location.get("location_phone") or location.get("local_phone")
         feature["postcode"] = location.get("location_post_code") or location.get("post_code")
         feature["website"] = "https://stores.pandora.net/"
-        if location.get("Store Type_CS") == "Authorized Retailers":
-            feature["extras"]["secondary"] = "yes"
         yield feature
