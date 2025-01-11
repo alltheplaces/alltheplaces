@@ -27,14 +27,14 @@ class ToyotaAUSpider(Spider):
             for location_type in ["sales", "service", "parts"]:
                 if not location[location_type]:
                     continue
-                
+
                 item = DictParser.parse(location)
                 item["ref"] = location["branchCode"] + "_" + location_type
                 item["lat"] = location["refY"]
                 item["lon"] = location["refX"]
                 item["state"] = location["state"]
                 item["street_address"] = item.pop("addr_full", None)
-                
+
                 if location_type == "sales":
                     apply_category(Categories.SHOP_CAR, item)
                 elif location_type == "service":
