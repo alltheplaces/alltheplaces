@@ -128,6 +128,7 @@ COUNTRYCODE_COMPONENTS = {
     "UZ",
     "VE",
     "VN",
+    "XK",
     "ZA",
     "ZM",
     "ZW",
