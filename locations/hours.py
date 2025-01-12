@@ -1209,7 +1209,7 @@ class OpeningHours:
             days_regex
             + r"(?:\W+|"
             + OpeningHours.delimiters_regex(delimiters)
-            + r")((?:(?:\s*(?:,|/)?\s*)?"
+            + r")((?:(?:\s*(?:,|/|-)?\s*)?"
             + OpeningHours.time_of_day_regex(time_24h=time_24h)
             + OpeningHours.delimiters_regex(delimiters)
             + OpeningHours.time_of_day_regex(time_24h=time_24h)

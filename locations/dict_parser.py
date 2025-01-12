@@ -53,6 +53,7 @@ class DictParser:
 
     house_number_keys = [
         # EN
+        "housenumber",
         "house-number",
         "house-no",
         "street-number",
@@ -345,6 +346,8 @@ class DictParser:
             # TODO: Handle other potential country fields inside the dict?
         else:
             item["country"] = country
+
+        item["opening_hours"] = DictParser.get_first_key(obj, DictParser.hours_keys)
 
         contact = DictParser.get_first_key(obj, ["contact"])
         if not contact or not isinstance(contact, dict):
