@@ -12,9 +12,8 @@ class InpostITSpider(JSONBlobSpider):
     start_urls = []  # ["https://inpost.it/sites/default/files/points.json"]
     locations_key = "items"
 
-    nsi_id = "inpost-6b37ec"
     attributes = {"parcel_mail_in": "yes", "parcel_pickup": "yes"}
-    brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097"}
+    brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097", "nsi_id": "inpost-6b37ec"}
     brand_partner = {"post_office:brand": "InPost", "post_office:brand:wikidata": "Q3182097"}
 
     def start_requests(self):
@@ -26,14 +25,12 @@ class InpostITSpider(JSONBlobSpider):
         # this mapping comes from "load" js function in inpost webpage
         location = {
             "position": {"lat": v["l"]["a"], "lng": v["l"]["o"]},
-            "address": {
-                "street": v["e"],
-                "housenumber": v["b"],
-                "province": v["r"],
-                "post_code": v["o"],
-                "city": v["c"],
-                "full-address": merge_address_lines([f"{v['e']} {v['b']}", f"{v['o']} {v['c']}"]),
-            },
+            "full-address": merge_address_lines([f"{v['e']} {v['b']}", f"{v['o']} {v['c']}"]),
+            "street": v["e"],
+            "housenumber": v["b"],
+            "province": v["r"],
+            "post_code": v["o"],
+            "city": v["c"],
             "type": v["t"],
             "name": v["d"],  # originally, location_description
             "hours": v["h"],
@@ -61,7 +58,6 @@ class InpostITSpider(JSONBlobSpider):
         self.set_brand(item, location)
         item["website"] = response.urljoin("/" + self.parse_slug(item, location))
         if location["category"] == Categories.PARCEL_LOCKER:
-            item["nsi_id"] = self.nsi_id
             yield from self.post_process_locker(item, location)
         else:
             item["extras"]["ref:inpost"] = item["ref"]
