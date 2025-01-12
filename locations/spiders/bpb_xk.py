@@ -21,7 +21,7 @@ class BpbXKSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item.pop("name")  # title is address, not name
         item.pop("city")  # is not accurate
-        item["ref"] = f"{location.get('title','').replace(' ', '-')}-{location['type']}"
+        item["ref"] = f"{location.get('title', '').replace(' ', '-')}-{location['type']}"
         item["addr_full"] = location["title"]
         item["phone"] = Selector(text=location["text"]).xpath("//p/text()").re_first(r"Tel: (.*)")
         if location["type"] == 1:
