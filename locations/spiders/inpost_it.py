@@ -12,6 +12,7 @@ class InpostITSpider(JSONBlobSpider):
     locations_key = "items"
     requires_proxy = True
 
+    operator = {"operator": "InPost", "operator_wikidata": "Q3182097"}
     attributes = {"parcel_mail_in": "yes", "parcel_pickup": "yes"}
     brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097", "nsi_id": "inpost-6b37ec"}
     brand_partner = {"post_office:brand": "InPost", "post_office:brand:wikidata": "Q3182097"}
@@ -58,6 +59,7 @@ class InpostITSpider(JSONBlobSpider):
         item["website"] = response.urljoin("/" + self.parse_slug(item, location))
         self.clean_address(item, location)
         if location["category"] == Categories.PARCEL_LOCKER:
+            item.update(self.operator)
             yield from self.post_process_locker(item, location)
         else:
             item["extras"]["ref:inpost"] = item["ref"]
