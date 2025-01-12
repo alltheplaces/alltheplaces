@@ -80,8 +80,8 @@ class InpostITSpider(JSONBlobSpider):
 
     def clean_address(self, item, location):
         item["addr_full"] = [
-            f'{item["street"]} {item["housenumber"]}',
-            f'{item["postcode"]} {item["city"]}',
+            f'{item["street"] or ""} {item["housenumber"] or ""}',
+            f'{item["postcode"] or ""} {item["city"] or ""}',
         ]
         if item["housenumber"]:
             item["housenumber"] = item["housenumber"].lower()

@@ -52,8 +52,8 @@ class PaczkomatInpostPLSpider(InpostITSpider):
 
     def clean_address(self, item, poi):
         item["addr_full"] = [
-            f'{item["street"]} {item["housenumber"]}',
-            f'{item["city"]} {item["postcode"]}',
+            f'{item["street"] or ""} {item["housenumber"] or ""}',
+            f'{item["city"] or ""} {item["postcode"] or ""}',
         ]
         if "/" not in item["street"]:
             item["street"] = (
