@@ -3,7 +3,6 @@ import re
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class InpostITSpider(JSONBlobSpider):
@@ -11,6 +10,7 @@ class InpostITSpider(JSONBlobSpider):
     allowed_domains = ["inpost.it"]
     start_urls = []  # ["https://inpost.it/sites/default/files/points.json"]
     locations_key = "items"
+    requires_proxy = True
 
     attributes = {"parcel_mail_in": "yes", "parcel_pickup": "yes"}
     brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097", "nsi_id": "inpost-6b37ec"}
@@ -25,7 +25,6 @@ class InpostITSpider(JSONBlobSpider):
         # this mapping comes from "load" js function in inpost webpage
         location = {
             "position": {"lat": v["l"]["a"], "lng": v["l"]["o"]},
-            "full-address": merge_address_lines([f"{v['e']} {v['b']}", f"{v['o']} {v['c']}"]),
             "street": v["e"],
             "housenumber": v["b"],
             "province": v["r"],
@@ -57,6 +56,7 @@ class InpostITSpider(JSONBlobSpider):
         apply_category(self.attributes, item)
         self.set_brand(item, location)
         item["website"] = response.urljoin("/" + self.parse_slug(item, location))
+        self.clean_address(item, location)
         if location["category"] == Categories.PARCEL_LOCKER:
             yield from self.post_process_locker(item, location)
         else:
@@ -77,6 +77,14 @@ class InpostITSpider(JSONBlobSpider):
             item.update(self.brand_locker)
         else:
             apply_category(self.brand_partner, item)
+
+    def clean_address(self, item, location):
+        item["addr_full"] = [
+            f'{item["street"]} {item["housenumber"]}',
+            f'{item["postcode"]} {item["city"]}',
+        ]
+        if item["housenumber"]:
+            item["housenumber"] = item["housenumber"].lower()
 
     def post_process_locker(self, item, location):
         yield item
