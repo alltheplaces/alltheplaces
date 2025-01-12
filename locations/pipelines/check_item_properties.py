@@ -1,7 +1,7 @@
 import math
 import re
 
-import pycountry
+from geonamescache import GeonamesCache
 from scrapy import Spider
 
 from locations.hours import OpeningHours
@@ -25,6 +25,7 @@ def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
 
 
 class CheckItemPropertiesPipeline:
+    gc = GeonamesCache()
     # From https://github.com/django/django/blob/master/django/core/validators.py
     url_regex = re.compile(
         r"^(?:http)s?://"  # http:// or https://
@@ -35,7 +36,7 @@ class CheckItemPropertiesPipeline:
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    country_regex = re.compile("(^(?:" + r"|".join([country.alpha_2 for country in pycountry.countries]) + ")$)")
+    country_regex = re.compile("(^(?:" + r"|".join([country for country in gc.get_countries().keys()]) + ")$)")
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     twitter_regex = re.compile(r"^@?([-\w_]+)$")
     wikidata_regex = re.compile(
