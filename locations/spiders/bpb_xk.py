@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BpbXkSpider(JSONBlobSpider):
+class BpbXKSpider(JSONBlobSpider):
     name = "bpb_xk"
     item_attributes = {
         "brand": "Banka Për Biznes",
