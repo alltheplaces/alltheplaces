@@ -137,7 +137,7 @@ class MkrfRUSpider(Spider):
 
     def parse_category(self, item, poi_attributes):
         if category := poi_attributes.get("category"):
-            if category_tag := CATEGORY_MAPPING.get(category.get("sysName", {})):
+            if category_tag := CATEGORY_MAPPING.get(category.get("sysName", "")):
                 apply_category(category_tag, item)
 
     def parse_hours(self, item, poi_attributes):
