@@ -347,8 +347,6 @@ class DictParser:
         else:
             item["country"] = country
 
-        item["opening_hours"] = DictParser.get_first_key(obj, DictParser.hours_keys)
-
         contact = DictParser.get_first_key(obj, ["contact"])
         if not contact or not isinstance(contact, dict):
             contact = obj
