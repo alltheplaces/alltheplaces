@@ -11,7 +11,6 @@ from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.spiders.ljsilvers import LjsilversSpider
 from locations.spiders.sonic_drivein import SonicDriveinSpider
 from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
-from locations.spiders.walmart_us import WalmartUSSpider
 
 brands_map = {
     "KA": [KFC_SHARED_ATTRIBUTES, AwRestaurantsSpider.item_attributes],
@@ -19,7 +18,7 @@ brands_map = {
     "KFC": [KFC_SHARED_ATTRIBUTES],
     "KL": [KFC_SHARED_ATTRIBUTES, LjsilversSpider.item_attributes],
     "KT": [KFC_SHARED_ATTRIBUTES, TACO_BELL_SHARED_ATTRIBUTES],
-    "KW": [KFC_SHARED_ATTRIBUTES, WalmartUSSpider.item_attributes],
+    "KW": [KFC_SHARED_ATTRIBUTES],
     "Sonic": [SonicDriveinSpider.item_attributes],
     "Arbys": [ArbysUSSpider.item_attributes],
     "TB": [TACO_BELL_SHARED_ATTRIBUTES],
