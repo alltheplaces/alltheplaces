@@ -380,7 +380,7 @@ top_level_tags = [
 
 def get_category_tags(source: Feature | Enum | dict) -> dict:
     """
-    Retreive OpenStreetMap top level tags from a Feature, Enum or
+    Retrieve OpenStreetMap top level tags from a Feature, Enum or
     dict. All top level tags can exist on their own and do not
     require the presence of other tags. If the Feature, Enum or dict
     supplied contains other tags, these are ignored.

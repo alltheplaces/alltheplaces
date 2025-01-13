@@ -80,7 +80,7 @@ Missing by wikidata: 66
 ...
 ```
 
-Check carefully if this is simply a scraper missing a wikidata entry, or if it is truely missing a scraper.
+Check carefully if this is simply a scraper missing a wikidata entry, or if it is truly missing a scraper.
 
 ### Automatic POI categorisation
 
