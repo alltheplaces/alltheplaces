@@ -1,19 +1,17 @@
-from datetime import datetime
 from typing import Any
 
-from scrapy import Selector, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 from locations.spiders.arbys_us import ArbysUSSpider
 from locations.spiders.aw_restaurants import AwRestaurantsSpider
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.spiders.ljsilvers import LjsilversSpider
 from locations.spiders.sonic_drivein import SonicDriveinSpider
-from locations.spiders.walmart_us import WalmartUSSpider
 from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
+from locations.spiders.walmart_us import WalmartUSSpider
 
 brands_map = {
     "KA": [KFC_SHARED_ATTRIBUTES, AwRestaurantsSpider.item_attributes],
