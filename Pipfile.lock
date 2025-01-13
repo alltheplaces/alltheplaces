@@ -141,20 +141,20 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:786930d5f1cd13d03db59ff2abbb2b7ffc173fd66646d5d8bee07f316a5f16ca",
-                "sha256:f7851cb320dcb2a53fc73b4075187ec9b05d51291539601fa238623fdc0e8cd3"
+                "sha256:7d398f66a11e67777c189d1f58c0a75d9d60f98d0ee51b8817e828930bf19e4e",
+                "sha256:8e49416216a6e3a62c2a0c44fba4dd2852c85472e7b702516605b1363867d220"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==1.35.92"
+            "version": "==1.35.97"
         },
         "botocore": {
             "hashes": [
-                "sha256:caa7d5d857fed5b3d694b89c45f82b9f938f840e90a4eb7bf50aa65da2ba8f82",
-                "sha256:f94ae1e056a675bd67c8af98a6858d06e3927d974d6c712ed6e27bb1d11bee1d"
+                "sha256:88f2fab29192ffe2f2115d5bafbbd823ff4b6eb2774296e03ec8b5b0fe074f61",
+                "sha256:fed4f156b1a9b8ece53738f702ba5851b8c6216b4952de326547f349cc494f14"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.35.92"
+            "version": "==1.35.97"
         },
         "brotli": {
             "hashes": [
@@ -2215,12 +2215,12 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:74acf4bbfea6b417aae4d120776bd2b738ec5d63b13f387f61c2b5801a54c525",
-                "sha256:97a3b3245288e1c50de45ba1b67b3e2f60e74f520ce6486a69913afa99acb4b7"
+                "sha256:2c5ea98b5de0f35b3273255f5268e20cabccef4df408f31afc61cc16dce72c82",
+                "sha256:e640f3c788e902e5791ac91e16d848806fb3fc586558b12aa0eb76c44c261e55"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==1.36.33"
+            "version": "==1.36.38"
         },
         "black": {
             "hashes": [
@@ -2262,11 +2262,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:caa7d5d857fed5b3d694b89c45f82b9f938f840e90a4eb7bf50aa65da2ba8f82",
-                "sha256:f94ae1e056a675bd67c8af98a6858d06e3927d974d6c712ed6e27bb1d11bee1d"
+                "sha256:88f2fab29192ffe2f2115d5bafbbd823ff4b6eb2774296e03ec8b5b0fe074f61",
+                "sha256:fed4f156b1a9b8ece53738f702ba5851b8c6216b4952de326547f349cc494f14"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.35.92"
+            "version": "==1.35.97"
         },
         "cfgv": {
             "hashes": [
