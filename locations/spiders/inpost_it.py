@@ -48,7 +48,7 @@ class InpostITSpider(JSONBlobSpider):
         if not location["active"]:
             return None
 
-        if hours := location["opening_hours"]:
+        if hours := location["hours"]:
             if hours != "24/7":
                 item["opening_hours"] = OpeningHours()
                 self.parse_hours(item["opening_hours"], hours)
