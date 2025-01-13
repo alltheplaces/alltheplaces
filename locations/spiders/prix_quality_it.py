@@ -16,15 +16,16 @@ class PrixQualityITSpider(scrapy.Spider):
         for record in response.json():
             store = record["acf"]
             item = DictParser.parse(store)
-            item["street_address"] = item.pop("addr_full")
             item["ref"] = record["id"]
             item["branch"] = store["shop_name"]
+            item["street_address"] = item.pop("addr_full")
             item["opening_hours"] = OpeningHours()
+
             for day in DAYS_IT:
                 if times := store.get(day.lower(), ""):
                     if "CHIUSO" in times:
                         item["opening_hours"].set_closed(DAYS_IT[day])
                     else:
                         for time in times.split("|"):
-                            item["opening_hours"].add_range(DAYS_IT[day], *time.split("-"), time_format="%H:%M")
+                            item["opening_hours"].add_range(DAYS_IT[day], *time.split("-"))
             yield item
