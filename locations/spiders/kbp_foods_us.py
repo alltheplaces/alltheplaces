@@ -31,7 +31,6 @@ class KbpFoodsUSSpider(Spider):
     name = "kbp_foods_us"
     start_urls = ["https://kbpbrands.com/api/locations"]
     item_attributes = {"operator": "KBP Foods"}
-    brands = {}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
@@ -41,7 +40,7 @@ class KbpFoodsUSSpider(Spider):
             if brands := brands_map.get(store["type"].strip()):
                 for b in brands:
                     i = item.deepcopy()
-                    i["brand"] = "{}".format(b["brand"])
+                    i["ref"] = "{}-{}".format(item["ref"], b["brand"])
                     i.update(b)
                     yield i
             else:
