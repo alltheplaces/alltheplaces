@@ -50,6 +50,11 @@ class MidcountiesCooperativeGBSpider(Spider):
             elif store["tradingGroupId"] == 6:
                 item["brand"] = "Post Office"
                 item["brand_wikidata"] = "Q1783168"
+                # see https://www.midcounties.coop/our-businesses/post-office/
+                # "majority of these offices are located within our food stores, either in the larger supermarkets or in our convenience stores."
+                # some are separate branches and should be simply Categories.POST_OFFICE, without post_office=post_partner
+                # some are aspect of another shop and should use post_office=post_partner, without being marked as a standalone post office
+                # as there is no way to distinguish this cases, all get both
                 apply_category(Categories.POST_OFFICE.value | {"post_office": "post_partner"}, item)
 
             yield item
