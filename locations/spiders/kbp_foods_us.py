@@ -21,9 +21,8 @@ brands_map = {
     "KT": [KFC_SHARED_ATTRIBUTES, TACO_BELL_SHARED_ATTRIBUTES],
     "KW": [KFC_SHARED_ATTRIBUTES, WalmartUSSpider.item_attributes],
     "Sonic": [SonicDriveinSpider.item_attributes],
-    "Arbys": [
-        ArbysUSSpider.item_attributes,
-    ],
+    "Arbys": [ArbysUSSpider.item_attributes],
+    "TB": [TACO_BELL_SHARED_ATTRIBUTES],
 }
 
 
