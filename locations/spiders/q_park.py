@@ -9,14 +9,24 @@ from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 COUNTRIES = {
-    "be": {"lang": "nl-be", "poi": "bezienswaardigheden", "uri_path": "parkeren", "deals": "goedkoop-parkeren-in-"},
-    "de": {"lang": "en-gb", "poi": "poi", "uri_path": "cities", "deals": "gunstig-parken-in-"},
-    "dk": {"lang": "en-gb", "poi": "poi", "uri_path": "parking", "deals": "deals-on-parking-in-"},
-    "fr": {"lang": "en-gb", "poi": "poi", "uri_path": "cities", "deals": "deals"},
-    "ie": {"lang": "en-gb", "poi": "poi", "uri_path": "cities", "deals": "dublin-city-offers"},
-    "nl": {"lang": "en-gb", "poi": "poi", "uri_path": "parking", "deals": "cheap-parking-"},
-    "co.uk": {"lang": "en-gb", "poi": "poi", "uri_path": "cities", "deals": "deals"},
+    "be": {"lang": "nl-be", "poi": "bezienswaardigheden", "uri_path": "parkeren"},
+    "de": {"lang": "en-gb", "poi": "poi", "uri_path": "cities"},
+    "dk": {"lang": "en-gb", "poi": "poi", "uri_path": "parking"},
+    "fr": {"lang": "en-gb", "poi": "poi", "uri_path": "cities"},
+    "ie": {"lang": "en-gb", "poi": "poi", "uri_path": "cities"},
+    "nl": {"lang": "en-gb", "poi": "poi", "uri_path": "parking"},
+    "co.uk": {"lang": "en-gb", "poi": "poi", "uri_path": "cities"},
 }
+DEALS_KEYWORDS = [
+    "goedkoop-parkeren-",
+    "gunstig-parken",
+    "guenstig-parken",
+    "deals",
+    "dublin-city-offers",
+    "cheap-parking-",
+    "tilbud-paa-parkering-",
+    "cork-city-offers",
+]
 
 
 class QParkSpider(Spider):
@@ -47,7 +57,13 @@ class QParkSpider(Spider):
         hrefs = set(hrefs)
 
         for href in hrefs:
-            if f"/{country_info['poi']}/" not in href and f"{country_info['deals']}" not in href:
+            href_is_deal = False
+            for keyword in DEALS_KEYWORDS:
+                if keyword in href:
+                    href_is_deal = True
+            if href_is_deal:
+                continue
+            if f"/{country_info['poi']}/" not in href:
                 yield Request(
                     url=response.urljoin(href),
                     callback=self.parse_facility,
