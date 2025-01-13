@@ -1,4 +1,4 @@
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
@@ -21,9 +21,12 @@ class RaleysUSSpider(JSONBlobSpider):
 
     def start_requests(self):
         for domain in self.allowed_domains:
-            yield JsonRequest(
-                f"https://{domain}/api/store", data={"rows": 1000, "searchParameter": {"shippingMethod": "pickup"}}
-            )
+            yield Request(f"https://{domain}/stores", callback=self.start_api_request)
+
+    def start_api_request(self, response):
+        yield JsonRequest(
+            response.urljoin("/api/store"), data={"rows": 1000, "searchParameter": {"shippingMethod": "pickup"}}
+        )
 
     def post_process_item(self, item, response, location):
         item["ref"] = location["number"]
