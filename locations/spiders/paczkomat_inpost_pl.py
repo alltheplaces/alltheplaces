@@ -1,6 +1,6 @@
 from unidecode import unidecode
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.hours import DAYS_PL
 
 from .inpost_it import InpostITSpider
@@ -20,7 +20,7 @@ class PaczkomatInpostPLSpider(InpostITSpider):
             if location["category"] != Categories.PARCEL_LOCKER:
                 raise ValueError("Appkomat only expected for lockers")
             item.update(self.brand_app)
-            apply_category(self.brand_app_attributes, item)
+            item["extras"].update(self.brand_app_attributes)
         else:
             super().set_brand(item, location)
 

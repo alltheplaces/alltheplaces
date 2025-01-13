@@ -54,7 +54,7 @@ class InpostITSpider(JSONBlobSpider):
                 self.parse_hours(item["opening_hours"], hours)
 
         apply_category(location["category"], item)
-        apply_category(self.attributes, item)
+        item["extras"].update(self.attributes)
         self.set_brand(item, location)
         item["website"] = response.urljoin("/" + self.parse_slug(item, location))
         self.clean_address(item, location)
@@ -78,7 +78,7 @@ class InpostITSpider(JSONBlobSpider):
         if location["category"] == Categories.PARCEL_LOCKER:
             item.update(self.brand_locker)
         else:
-            apply_category(self.brand_partner, item)
+            item["extras"].update(self.brand_partner)
 
     def clean_address(self, item, location):
         item["addr_full"] = [
