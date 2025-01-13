@@ -35,6 +35,7 @@ class KbpFoodsUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
             item["street_address"] = item.pop("addr_full")
             apply_category(Categories.FAST_FOOD, item)
             if brands := brands_map.get(store["type"].strip()):
