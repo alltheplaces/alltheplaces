@@ -980,15 +980,33 @@ class OpeningHours:
 
         opening_hours = ""
 
+        # usually ; works fine as a separator between different days
+        # but it has an annoying quirk, in OpenStreetMap opening_hours syntax
+        # it overrides previous definitions
+        # so for example
+        # Mo-Sa 10:00-02:00; Su 09:00-02:00
+        # means that object is closed on midnight between Saturday and Sunday
+        # Mo-Sa 10:00-02:00, Su 09:00-02:00
+        # in turn means that object is open also during early Sunday hours
+        #
+        # All the Places is using a small section of entire opening_hous syntax
+        # so we need only check whether any time goes over midnight,
+        # in all other cases ; can be used safely
+        separator = ";"
+        for day in DAYS:
+            for h in self.day_hours[day]:
+                if h[1].tm_hour * 60 + h[1].tm_min < h[0].tm_hour * 60 + h[0].tm_min:
+                    separator = ","
+
         for day_group in day_groups:
             if not day_group["hours"]:
                 continue
             elif day_group["from_day"] == day_group["to_day"]:
-                opening_hours += "{from_day} {hours}; ".format(**day_group)
+                opening_hours += "{from_day} {hours}".format(**day_group) + separator + " "
             elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
-                opening_hours += "{hours}; ".format(**day_group)
+                opening_hours += "{hours}".format(**day_group) + separator + " "
             else:
-                opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
+                opening_hours += "{from_day}-{to_day} {hours}".format(**day_group) + separator + " "
         opening_hours = opening_hours[:-2]
 
         return opening_hours
