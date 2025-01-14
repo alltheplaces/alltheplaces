@@ -16,7 +16,6 @@ class RitasItalianIceSpider(SitemapSpider):
         item = Feature()
         item["ref"] = item["website"] = response.url
         item["name"] = response.xpath('//*[@class="wpsl-store-location"]/h2/text()').get()
-        item["addr_full"] = response.xpath('//*[@class="wpsl-address"]/text()').getall()
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/text()').get()
         extract_google_position(item, response)
         yield item
