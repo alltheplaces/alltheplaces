@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import quote
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -30,7 +31,7 @@ class CostcoGlobalSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = merge_address_lines([location["line1"], location["line2"]])
-            item["website"] = response.urljoin(item["website"].removeprefix("/store/").split("?", 1)[0])
+            item["website"] = response.urljoin(quote(item["website"].removeprefix("/store/").split("?", 1)[0]))
 
             item["ref"] = location["warehouseCode"]
 
