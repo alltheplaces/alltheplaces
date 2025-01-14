@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class CostcoGlobalSpider(Spider):
     name = "costco_global"
-    item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
+    item_attributes = {"brand_wikidata": "Q715583"}
     start_urls = [
         "https://www.costco.co.uk/store-finder/search?q=",
         "https://www.costco.com.au/store-finder/search?q=",
