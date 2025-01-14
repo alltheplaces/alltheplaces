@@ -14,7 +14,6 @@ BRAND_WIKIDATA = {
 
 class RaleysUSSpider(JSONBlobSpider):
     name = "raleys_us"
-    item_attributes = {"extras": Categories.SHOP_SUPERMARKET.value}
     custom_settings = {"DOWNLOAD_TIMEOUT": 55, "ROBOTSTXT_OBEY": False}
     locations_key = ["data"]
     allowed_domains = ["www.raleys.com"]
@@ -39,5 +38,7 @@ class RaleysUSSpider(JSONBlobSpider):
         # TODO: Is it safe to assume that all stores are open 7 days?
         oh.add_ranges_from_string(f"Mo-Su {location['storeHours'].removeprefix('Between ')}")
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
