@@ -1,12 +1,10 @@
 from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories
-from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 BRAND_WIKIDATA = {
     "Bel Air": "Q112922067",
-    "Nob Hill Foods": "Q121816894",
     "Raley's": "Q7286970",
     "Raley's ONE Market": "Q7286970",
 }
@@ -34,10 +32,5 @@ class RaleysUSSpider(JSONBlobSpider):
         item["brand"] = item["name"] = location["brand"]["name"]
         item["brand_wikidata"] = BRAND_WIKIDATA.get(location["brand"]["name"])
         item["street_address"] = item.pop("street")
-
-        oh = OpeningHours()
-        # TODO: Is it safe to assume that all stores are open 7 days?
-        oh.add_ranges_from_string(f"Mo-Su {location['storeHours'].removeprefix('Between ')}")
-        item["opening_hours"] = oh
 
         yield item
