@@ -32,7 +32,8 @@ class RaleysUSSpider(JSONBlobSpider):
         if brand := BRAND_MAP.get(location["brand"]["name"]):
             del item["name"]
             item.update(brand)
-        else:
+        elif self.name == "raleys_us":
+            # Only log an error for this spider. FoodCityArizonaUSSpider is a subclass that doesn't use the brand mapping.
             self.logger.error("Unexpected brand: {}".format(location["brand"]["name"]))
         item["street_address"] = item.pop("street")
 
