@@ -16,4 +16,5 @@ class SonyGBSpider(Spider):
             item = DictParser.parse(location)
             item.pop("website")  # website is not specific for the store
             if "Sony" in item["name"]:
+                item["phone"]=location.get("telephone")[0]
                 yield item
