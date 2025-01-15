@@ -70,8 +70,9 @@ class BurgerKingRUSpider(Spider):
         for location in response.json()["response"]["list"]:
             if location["status"] != 1:
                 continue
+            address_info = location.pop("name")  # name contains address info
             item = DictParser.parse(location)
-            item["street_address"] = location.pop("addr_full", None)
+            item["street_address"] = item.pop("addr_full", None) or address_info
             item["opening_hours"] = OpeningHours()
             for day_number, day_name in enumerate(DAYS):
                 day_hours = location["timetable"]["hall"][day_number]
