@@ -116,6 +116,7 @@ class JumboNLSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         stores_info = response.json()["data"]["storesByCoordinates"]
         for store in stores_info["stores"]:
+            store.update(store["location"].pop("address"))
             item = DictParser.parse(store)
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
