@@ -21,7 +21,6 @@ class OregonDotUSSpider(JSONBlobSpider):
         info = feature["attributes"]
         item = DictParser.parse(info)
         item["ref"] = info["cameraId"]
-        item["website"] = "https://tripcheck.com/"
         item["image"] = urllib.parse.quote("https://tripcheck.com/RoadCams/cams/" + info["filename"], safe=":/?=&")
         item["name"] = info["title"]
         item["extras"]["camera:type"] = "fixed"
