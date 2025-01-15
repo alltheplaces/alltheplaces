@@ -21,7 +21,8 @@ class OregonDotUSSpider(JSONBlobSpider):
         item = DictParser.parse(info)
         item["ref"] = info["cameraId"]
         item["website"] = "https://tripcheck.com/"
-        item["image"] = "https://tripcheck.com/RoadCams/cams/" + info["filename"]
+        if " " not in info["filename"]:
+            item["image"] = "https://tripcheck.com/RoadCams/cams/" + info["filename"]
         item["name"] = info["title"]
         item["extras"]["camera:type"] = "fixed"
         apply_category(Categories.SURVEILLANCE_CAMERA, item)
