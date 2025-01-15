@@ -25,7 +25,7 @@ def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
 
 
 class CheckItemPropertiesPipeline:
-    gc = GeonamesCache()
+    countries = GeonamesCache().get_countries().keys()
     # From https://github.com/django/django/blob/master/django/core/validators.py
     url_regex = re.compile(
         r"^(?:http)s?://"  # http:// or https://
@@ -36,7 +36,6 @@ class CheckItemPropertiesPipeline:
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    country_regex = re.compile("(^(?:" + r"|".join([country for country in gc.get_countries().keys()]) + ")$)")
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     twitter_regex = re.compile(r"^@?([-\w_]+)$")
     wikidata_regex = re.compile(
@@ -61,7 +60,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "city", (str,))
         check_field(item, spider, "state", (str,))
         check_field(item, spider, "postcode", (str,))
-        check_field(item, spider, "country", (str,), self.country_regex)
+        check_field(item, spider, "country", (str,))
         check_field(item, spider, "name", (str,))
         check_field(item, spider, "brand", (str,))
         check_field(item, spider, "operator", (str,))
@@ -70,6 +69,7 @@ class CheckItemPropertiesPipeline:
         self.check_geom(item, spider)
         self.check_twitter(item, spider)
         self.check_opening_hours(item, spider)
+        self.check_country(item, spider)
 
         if country_code := item.get("country"):
             spider.crawler.stats.inc_value(f"atp/country/{country_code}")
@@ -126,3 +126,10 @@ class CheckItemPropertiesPipeline:
                 spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
+
+    def check_country(self, item: Feature, spider: Spider):
+        if not isinstance(item.get("country"), str):
+            return
+        if item.get("country") not in self.countries:
+            spider.crawler.stats.inc_value("atp/field/{}/invalid".format("country"))
+            spider.logger.error('Invalid value "{}" for attribute "{}".'.format(item.get("country"), "country"))
