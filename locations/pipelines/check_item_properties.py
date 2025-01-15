@@ -1,11 +1,11 @@
 import math
 import re
 
-import pycountry
+from geonamescache import GeonamesCache
 from scrapy import Spider
 
 from locations.hours import OpeningHours
-from locations.items import get_lat_lon, set_lat_lon
+from locations.items import Feature, get_lat_lon, set_lat_lon
 
 
 def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
@@ -25,6 +25,7 @@ def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
 
 
 class CheckItemPropertiesPipeline:
+    countries = GeonamesCache().get_countries().keys()
     # From https://github.com/django/django/blob/master/django/core/validators.py
     url_regex = re.compile(
         r"^(?:http)s?://"  # http:// or https://
@@ -35,7 +36,6 @@ class CheckItemPropertiesPipeline:
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    country_regex = re.compile("(^(?:" + r"|".join([country.alpha_2 for country in pycountry.countries]) + ")$)")
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     twitter_regex = re.compile(r"^@?([-\w_]+)$")
     wikidata_regex = re.compile(
@@ -49,7 +49,7 @@ class CheckItemPropertiesPipeline:
     min_lon = -180.0
     max_lon = 180.0
 
-    def process_item(self, item, spider):  # noqa: C901
+    def process_item(self, item: Feature, spider: Spider):  # noqa: C901
         check_field(item, spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
         check_field(item, spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
         check_field(item, spider, "website", (str,), self.url_regex)
@@ -60,12 +60,23 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "city", (str,))
         check_field(item, spider, "state", (str,))
         check_field(item, spider, "postcode", (str,))
-        check_field(item, spider, "country", (str,), self.country_regex)
+        check_field(item, spider, "country", (str,))
         check_field(item, spider, "name", (str,))
         check_field(item, spider, "brand", (str,))
         check_field(item, spider, "operator", (str,))
         check_field(item, spider, "branch", (str,))
 
+        self.check_geom(item, spider)
+        self.check_twitter(item, spider)
+        self.check_opening_hours(item, spider)
+        self.check_country(item, spider)
+
+        if country_code := item.get("country"):
+            spider.crawler.stats.inc_value(f"atp/country/{country_code}")
+
+        return item
+
+    def check_geom(self, item: Feature, spider: Spider):
         if coords := get_lat_lon(item):
             lat, lon = coords
 
@@ -89,9 +100,7 @@ class CheckItemPropertiesPipeline:
             spider.crawler.stats.inc_value("atp/field/lat/missing")
             spider.crawler.stats.inc_value("atp/field/lon/missing")
 
-        if country_code := item.get("country"):
-            spider.crawler.stats.inc_value(f"atp/country/{country_code}")
-
+    def check_twitter(self, item: Feature, spider: Spider):
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
                 spider.crawler.stats.inc_value("atp/field/twitter/wrong_type")
@@ -102,6 +111,7 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
+    def check_opening_hours(self, item: Feature, spider: Spider):
         opening_hours = item.get("opening_hours")
         if opening_hours is not None:
             if isinstance(opening_hours, OpeningHours):
@@ -117,4 +127,9 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
 
-        return item
+    def check_country(self, item: Feature, spider: Spider):
+        if not isinstance(item.get("country"), str):
+            return
+        if item.get("country") not in self.countries:
+            spider.crawler.stats.inc_value("atp/field/{}/invalid".format("country"))
+            spider.logger.error('Invalid value "{}" for attribute "{}".'.format(item.get("country"), "country"))
