@@ -38,8 +38,10 @@ class HertzSpider(Spider):
             item = DictParser.parse(shop)
             item["ref"] = shop["extendedOAGCode"]
             item["email"] = shop["loc_email"]
+            country_name = shop["country_name"].replace(" ", "")
+            city_name = shop["city"].replace(" ", "")
             item["website"] = "/".join(
-                ["https://www.hertz.com/us/en/location", shop["country_name"], shop["city"], shop["extendedOAGCode"]]
+                ["https://www.hertz.com/us/en/location", country_name, city_name, shop["extendedOAGCode"]]
             )
             item["street_address"] = shop.get("streetAddressLine1")
             if shop.get("streetAddressLine2", ""):
