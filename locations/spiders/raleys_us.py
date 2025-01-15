@@ -8,7 +8,10 @@ BRAND_MAP = {
     "Nob Hill Foods": {"name": "Nob Hill Foods", "brand": "Nob Hill Foods"},
     "Raley's": {"brand": "Raley's", "brand_wikidata": "Q7286970"},
     "Raley's ONE Market": {"name": "Raley's O-N-E Market", "brand": "Raley's", "brand_wikidata": "Q7286970"},
+    "Food City": {"brand": "Food City", "brand_wikidata": "Q130253202"},
 }
+
+# FoodCityArizonaUSSpider inherits this spider
 
 
 class RaleysUSSpider(JSONBlobSpider):
@@ -27,15 +30,16 @@ class RaleysUSSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item, response, location):
+        item["street_address"] = item.pop("street")
         item["ref"] = location["number"]
+
         item["website"] = response.urljoin(f"/store/{location['number']}")
+
         if brand := BRAND_MAP.get(location["brand"]["name"]):
             del item["name"]
             item.update(brand)
-        elif self.name == "raleys_us":
-            # Only log an error for this spider. FoodCityArizonaUSSpider is a subclass that doesn't use the brand mapping.
+        else:
             self.logger.error("Unexpected brand: {}".format(location["brand"]["name"]))
-        item["street_address"] = item.pop("street")
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
