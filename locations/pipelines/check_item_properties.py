@@ -5,7 +5,7 @@ from geonamescache import GeonamesCache
 from scrapy import Spider
 
 from locations.hours import OpeningHours
-from locations.items import get_lat_lon, set_lat_lon
+from locations.items import Feature, get_lat_lon, set_lat_lon
 
 
 def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
@@ -50,7 +50,7 @@ class CheckItemPropertiesPipeline:
     min_lon = -180.0
     max_lon = 180.0
 
-    def process_item(self, item, spider):  # noqa: C901
+    def process_item(self, item: Feature, spider: Spider):  # noqa: C901
         check_field(item, spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
         check_field(item, spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
         check_field(item, spider, "website", (str,), self.url_regex)
@@ -67,6 +67,16 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "operator", (str,))
         check_field(item, spider, "branch", (str,))
 
+        self.check_geom(item, spider)
+        self.check_twitter(item, spider)
+        self.check_opening_hours(item, spider)
+
+        if country_code := item.get("country"):
+            spider.crawler.stats.inc_value(f"atp/country/{country_code}")
+
+        return item
+
+    def check_geom(self, item: Feature, spider: Spider):
         if coords := get_lat_lon(item):
             lat, lon = coords
 
@@ -90,9 +100,7 @@ class CheckItemPropertiesPipeline:
             spider.crawler.stats.inc_value("atp/field/lat/missing")
             spider.crawler.stats.inc_value("atp/field/lon/missing")
 
-        if country_code := item.get("country"):
-            spider.crawler.stats.inc_value(f"atp/country/{country_code}")
-
+    def check_twitter(self, item: Feature, spider: Spider):
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
                 spider.crawler.stats.inc_value("atp/field/twitter/wrong_type")
@@ -103,6 +111,7 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
+    def check_opening_hours(self, item: Feature, spider: Spider):
         opening_hours = item.get("opening_hours")
         if opening_hours is not None:
             if isinstance(opening_hours, OpeningHours):
@@ -117,5 +126,3 @@ class CheckItemPropertiesPipeline:
                 spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
-
-        return item
