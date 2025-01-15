@@ -118,6 +118,7 @@ class JumboNLSpider(Spider):
         for store in stores_info["stores"]:
             store.update(store["location"].pop("address"))
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name").removeprefix("Jumbo ")
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 time = store["openingHours"][day.lower()]
