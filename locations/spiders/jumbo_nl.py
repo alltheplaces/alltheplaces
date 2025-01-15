@@ -1,4 +1,6 @@
+from datetime import datetime, timezone
 from typing import Any, Iterable
+from zoneinfo import ZoneInfo
 
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
@@ -118,12 +120,20 @@ class JumboNLSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 time = store["openingHours"][day.lower()]
-                if open_time := time["opensAt"]:
-                    open_time = open_time.replace(":00.000Z", "")
-                if close_time := time["closesAt"]:
-                    close_time = close_time.replace(":00.000Z", "")
-                item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+                open_time = time["opensAt"]
+                close_time = time["closesAt"]
+                if open_time and close_time:
+                    open_time = self.calculate_local_time(time["opensAt"])
+                    close_time = self.calculate_local_time(time["closesAt"])
+                    item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
             yield item
 
         if stores_info["page"] < stores_info["totalPages"] - 1:  # page starts from zero
             yield self.make_request(stores_info["page"] + 1)
+
+    def calculate_local_time(self, time_string: str) -> str:
+        utc_time = datetime.strptime(time_string, "%H:%M:%S.%fZ").replace(
+            year=datetime.today().year, month=datetime.today().month, day=datetime.today().day, tzinfo=timezone.utc
+        )
+        local_time = utc_time.astimezone(ZoneInfo("Europe/Amsterdam"))
+        return local_time.strftime("%H:%M")
