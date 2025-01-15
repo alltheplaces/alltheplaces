@@ -62,6 +62,5 @@ class TravelexSpider(scrapy.Spider):
                     "notes": row.get("notes"),
                     "terminal": row.get("terminal"),
                 }
-                if response.meta.get("country") == "nl":
-                    item["brand"] = "GWK Travelex"
+
                 yield item
