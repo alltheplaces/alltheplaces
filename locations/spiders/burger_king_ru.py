@@ -1,4 +1,10 @@
+import re
+from typing import Any, Iterable
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -10,15 +16,57 @@ class BurgerKingRUSpider(Spider):
     name = "burger_king_ru"
     item_attributes = {"brand": "Бургер Кинг", "brand_wikidata": "Q177054"}
     allowed_domains = ["orderapp.burgerkingrus.ru"]
-    start_urls = ["https://orderapp.burgerkingrus.ru/api/v3/restaurant/list"]
     user_agent = BROWSER_DEFAULT
+    api_url = "https://orderapp.burgerkingrus.ru/api/v3/restaurant/list"
     requires_proxy = "RU"  # Qrator bot blocking in use
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield Request(url=url)
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(
+            url=self.api_url,
+        )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        if "RSA PRIVATE KEY" in response.text:  # set cookies using the response received if expected JSON is not there
+            sp_id = ""
+            rsa_key_pem = ""
+            encrypted_text = ""
+            if match := re.search(r"\"spid=(\w+)\"", response.text):
+                sp_id = match.group(1)
+            if match := re.search(r"(-+BEGIN RSA PRIVATE KEY-+.+?-+END RSA PRIVATE KEY-+)", response.text, re.DOTALL):
+                rsa_key_pem = match.group(1)
+            if match := re.search(r"crypto.Cipher.decrypt\(\"(\w+)\",", response.text):
+                encrypted_text = match.group(1)
+
+            private_key_pem = rsa_key_pem.encode("utf-8")
+
+            # Encrypted ciphertext (as bytes)
+            encrypted_text = bytes.fromhex(encrypted_text)
+
+            # Load the private key
+            private_key = serialization.load_pem_private_key(
+                private_key_pem,
+                password=None,
+            )
+
+            # Decrypt the ciphertext
+            decrypted_text = private_key.decrypt(encrypted_text, padding.PKCS1v15())
+
+            sp_sc = decrypted_text.decode("utf-8")
+
+            yield JsonRequest(
+                url=self.api_url,
+                cookies={
+                    "spid": sp_id,
+                    "spsc": sp_sc,
+                },
+                callback=self.parse_locations,
+                dont_filter=True,
+            )
+
+        else:
+            yield from self.parse_locations(response)
+
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["list"]:
             if location["status"] != 1:
                 continue
