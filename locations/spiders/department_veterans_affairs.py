@@ -65,7 +65,7 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
             elif "urgent care" in item["name"].lower():
                 apply_category(Categories.CLINIC_URGENT, item)
             else:
-                apply_category(Categories.CLINIC, item)
+                apply_category({"amenity": "healthcare"}, item)
 
             yield item
 

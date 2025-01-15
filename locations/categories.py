@@ -380,7 +380,7 @@ top_level_tags = [
 
 def get_category_tags(source: Feature | Enum | dict) -> dict:
     """
-    Retreive OpenStreetMap top level tags from a Feature, Enum or
+    Retrieve OpenStreetMap top level tags from a Feature, Enum or
     dict. All top level tags can exist on their own and do not
     require the presence of other tags. If the Feature, Enum or dict
     supplied contains other tags, these are ignored.
@@ -465,7 +465,7 @@ class Fuel(Enum):
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
-    ELECTRIC = "fuel:electric"  # Electric vehicle charger
+    ELECTRIC = "fuel:electricity"  # Electric vehicle charger
 
 
 class Extras(Enum):
@@ -903,6 +903,23 @@ class Drink(Enum):
     WATER = "drink:water"
     WHISKY = "drink:whisky"
     WINE = "drink:wine"
+
+
+class Sells(Enum):
+    """
+    For uncommon sold items, prefix sells:* is in proposal
+    https://wiki.openstreetmap.org/wiki/Proposal:Sells:
+    """
+
+    BOOKS = "sells:books"
+    CLOTHES = "sells:clothes"
+    CONTACT_LENSES = "sells:contact_lenses"
+    ELECTRONICS = "sells:electronics"
+    EYEGLASSES = "sells:eyeglasses"
+    JEWELRY = "sells:jewelry"
+    NEWSPAPERS = "sells:newspapers"
+    PET_SUPPLIES = "sells:pet_supplies"
+    TOBACCO = "sells:tobacco"
 
 
 # TODO: something similar for fuel types

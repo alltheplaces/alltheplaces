@@ -44,7 +44,7 @@ BRANDS_MAPPING = {
     "Slovnaft": ("Slovnaft", "Q1587563"),
     "TOTAL": ("Total", "Q154037"),
     "LOTOS": ("Lotos", "Q1256909"),
-    "TOTAL ACCESS": ("Total Access", "Q154037"),
+    "TOTAL ACCESS": ("TotalEnergies", "Q154037"),
     "ex-OMV": ("MOL", "Q549181"),
 }
 

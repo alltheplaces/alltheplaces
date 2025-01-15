@@ -15,6 +15,7 @@ class IccuITSpider(JSONBlobSpider):
     name = "iccu_it"
     allowed_domains = ["opendata.anagrafe.iccu.sbn.it"]
     start_urls = ["https://opendata.anagrafe.iccu.sbn.it/biblioteche.zip"]
+    requires_proxy = True  # scraping from server times out
 
     dataset_attributes = {
         "attribution": "optional",

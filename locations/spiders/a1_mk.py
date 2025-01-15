@@ -28,7 +28,7 @@ class A1MKSpider(Spider):
             item["name"] = location.get("nameMK")
             item["extras"]["name:mk"] = location.get("nameMK")
             item["extras"]["name:en"] = location.get("nameEN")
-            item["extras"]["name:al"] = location.get("nameAL")
+            item["extras"]["name:sq"] = location.get("nameAL")
             item["street_address"] = location.get("addressMK")
             item["city"] = location["city"].get("nameMK")
             item["opening_hours"] = OpeningHours()
