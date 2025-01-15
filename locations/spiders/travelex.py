@@ -60,6 +60,7 @@ class TravelexSpider(scrapy.Spider):
             stores = category.get("stores")
             for row in stores:
                 item = DictParser.parse(row)
+                item["branch"] = item.pop("name")
                 item["addr_full"] = row.get("formattedAddress")
                 item["extras"] = {
                     "directions": row.get("directions"),
