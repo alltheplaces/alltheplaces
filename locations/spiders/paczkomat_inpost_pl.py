@@ -10,9 +10,9 @@ class PaczkomatInpostPLSpider(InpostITSpider):
     name = "paczkomat_inpost_pl"
     allowed_domains = ["inpost.pl"]
 
-    brand_locker = {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254", "nsi_id": "paczkomatinpost-ce4e28"}
+    brand_locker = {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254"}
     brand_partner = {"post_office:brand": "Paczkomat InPost", "post_office:brand:wikidata": "Q110970254"}
-    brand_app = {"brand": "Appkomat InPost", "nsi_id": "appkomatinpost-ce4e28"}
+    brand_app = {"brand": "Appkomat InPost", "nsi_id": "N/A"}
     brand_app_attributes = {"app_operated": "only", "not:brand:wikidata": "Q110970254", "amenity": "parcel_locker"}
 
     def set_brand(self, item, location):
