@@ -165,6 +165,7 @@ class MolSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for poi in response.json():
+            poi.update(poi.pop("gpsPosition"))
             item = DictParser.parse(poi)
             item["ref"] = poi.get("code")
             item["street_address"] = item.pop("addr_full", None)
