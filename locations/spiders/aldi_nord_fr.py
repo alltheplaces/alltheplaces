@@ -8,7 +8,7 @@ class AldiNordFRSpider(UberallSpider):
     key = "ALDINORDFR_Mmljd17th8w26DMwOy4pScWk4lCvj5"
 
     def post_process_item(self, item, response, location):
-        item["branch"] = item.pop("name").removeprefix("ALDI ")
+        item["branch"] = item.pop("name").removeprefix("ALDI").strip()
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
