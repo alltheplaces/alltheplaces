@@ -166,6 +166,8 @@ class MolSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for poi in response.json():
             poi.update(poi.pop("gpsPosition"))
+            if not poi.get("latitude") and not poi.get("address"):  # not enough location data
+                continue
             poi.pop("county", None)  # sometimes contains country info
             item = DictParser.parse(poi)
             item["ref"] = poi.get("code")
