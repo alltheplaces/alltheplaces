@@ -53,28 +53,35 @@ BRANDS_MAPPING = {
 }
 
 FUEL_MAPPING = {
-    "AdBlue": Fuel.ADBLUE,
-    "CNG (Comprimed natural gas, in tank)": None,
-    "EVO 100 Plus (GASOLINE PREMIUM)": Fuel.OCTANE_100,
+    "ADBLUE": Fuel.ADBLUE,
+    "BLUE DIESEL": Fuel.DIESEL,
+    "CNG": Fuel.CNG,
+    "DIESEL": Fuel.DIESEL,
+    "DYNAMIC DIESEL": Fuel.DIESEL,
+    "EVO 100 PLUS (GASOLINE PREMIUM)": Fuel.OCTANE_100,
+    "EVO 100 PLUS": Fuel.OCTANE_100,
+    "EVO 100": Fuel.OCTANE_100,
     "EVO 95": Fuel.OCTANE_95,
     "EVO 95 PLUS": Fuel.OCTANE_95,
-    "EUROSUPER 100 Class Plus": Fuel.OCTANE_100,
+    "EVO 98 PLUS": Fuel.OCTANE_98,
+    "EUROSUPER 100 CLASS PLUS": Fuel.OCTANE_100,
     "EUROSUPER 95": Fuel.OCTANE_95,
-    "EUROSUPER 95 Class Plus": Fuel.OCTANE_95,
-    "EVO Diesel": Fuel.DIESEL,
+    "EUROSUPER 95 CLASS PLUS": Fuel.OCTANE_95,
+    "EVO DIESEL": Fuel.DIESEL,
     "EURODIESEL": Fuel.DIESEL,
-    "EURODIESEL Class Plus": Fuel.DIESEL,
+    "EURODIESEL CLASS PLUS": Fuel.DIESEL,
     "EVO DIESEL PLUS WINTER DIESEL": Fuel.COLD_WEATHER_DIESEL,
-    "EVO Diesel Plus (DIESEL PREMIUM)": Fuel.DIESEL,
-    "LPG ": Fuel.LPG,
-    "MOL Racing Fuel": "fuel:octane_102",
-    "Maingrade 95": Fuel.OCTANE_95,
-    "Premium Gasoline": Fuel.OCTANE_95,
-    "Premium Diesel": Fuel.DIESEL,
-    "Maingrade Diesel": Fuel.DIESEL,
-    "Maingrade 95 Plus": Fuel.OCTANE_95,
+    "EVO DIESEL PLUS (DIESEL PREMIUM)": Fuel.DIESEL,
+    "EVO DIESEL PLUS": Fuel.DIESEL,
+    "LPG": Fuel.LPG,
+    "MOL RACING FUEL": "fuel:octane_102",
+    "MAINGRADE 95": Fuel.OCTANE_95,
+    "PREMIUM GASOLINE": Fuel.OCTANE_95,
+    "PREMIUM DIESEL": Fuel.DIESEL,
+    "MAINGRADE DIESEL": Fuel.DIESEL,
+    "MAINGRADE 95 PLUS": Fuel.OCTANE_95,
     "RACING 102": "fuel:octane_102",
-    "XXL Diesel": Fuel.DIESEL,
+    "XXL DIESEL": Fuel.DIESEL,
 }
 
 SERVICES_MAPPING = {
@@ -187,6 +194,8 @@ class MolSpider(scrapy.Spider):
     def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict) -> Any:
         for attribute in data.get(attribute_name, {}).get("values", []):
             name = attribute.get("name")
+            if attribute_name == "fuelsAndAdditives":
+                name = name.upper() if name else ""
             if tag := mapping.get(name):
                 apply_yes_no(tag, item, True)
             else:
