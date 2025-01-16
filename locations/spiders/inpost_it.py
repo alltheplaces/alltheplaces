@@ -1,6 +1,6 @@
 import re
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -13,7 +13,6 @@ class InpostITSpider(JSONBlobSpider):
     requires_proxy = True
 
     operator = {"operator": "InPost", "operator_wikidata": "Q3182097"}
-    attributes = {"parcel_mail_in": "yes", "parcel_pickup": "yes"}
     brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097"}
     brand_partner = {"post_office:brand": "InPost", "post_office:brand:wikidata": "Q3182097"}
 
@@ -54,7 +53,8 @@ class InpostITSpider(JSONBlobSpider):
                 self.parse_hours(item["opening_hours"], hours)
 
         apply_category(location["category"], item)
-        item["extras"].update(self.attributes)
+        apply_yes_no(Extras.PARCEL_MAIL_IN, item, True)
+        apply_yes_no(Extras.PARCEL_PICKUP, item, True)
         self.set_brand(item, location)
         item["website"] = response.urljoin("/" + self.parse_slug(item, location))
         self.clean_address(item, location)
