@@ -1,5 +1,8 @@
+from typing import Any, Iterable
+
 import scrapy
-from scrapy.http import FormRequest
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import (
     Access,
@@ -12,7 +15,6 @@ from locations.categories import (
     apply_yes_no,
 )
 from locations.dict_parser import DictParser
-from locations.geo import country_coordinates
 from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
 
 COUNTRIES = {
@@ -147,38 +149,28 @@ CARDS_MAPPING = {
 class MolSpider(scrapy.Spider):
     name = "mol"
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    download_timeout = 90
 
-    def start_requests(self):
-        country_coords = country_coordinates(return_lookup=True)
+    def start_requests(self) -> Iterable[Request]:
         for country in COUNTRIES.values():
-            if coords := country_coords.get(country):
-                yield FormRequest(
-                    url="https://tankstellenfinder.molaustria.at/en/portlet/routing/along_latlng.json",
-                    formdata={
-                        "country": country,
-                        "lat": coords[0],
-                        "lng": coords[1],
-                    },
-                    meta={"country": country},
-                )
-
-    def parse(self, response):
-        for poi in response.json():
-            yield FormRequest(
-                url="https://tankstellenfinder.molaustria.at/en/portlet/routing/station_info.json",
-                formdata={"id": poi["id"]},
-                callback=self.parse_poi,
-                meta=response.meta,
+            yield JsonRequest(
+                url="https://tankstellenfinder.molaustria.at/api.php",
+                data={
+                    "api": "stations",
+                    "mode": "country",
+                    "input": country,
+                },
+                meta={"country": country},
             )
 
-    def parse_poi(self, response):
-        if poi := response.json():
-            fs = poi.get("fs")
-            item = DictParser.parse(fs)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for poi in response.json():
+            item = DictParser.parse(poi)
+            item["ref"] = poi.get("code")
             item["street_address"] = item.pop("addr_full", None)
             item["country"] = response.meta.get("country")
-            item["phone"] = "; ".join(filter(None, [fs.get("fs_phone_num"), fs.get("fs_mobile_num")]))
-            self.parse_attribute(item, poi, "products", FUEL_MAPPING)
+            item["phone"] = "; ".join(filter(None, [poi.get("phoneNum"), poi.get("mobileNum")]))
+            self.parse_attribute(item, poi, "fuelsAndAdditives", FUEL_MAPPING)
             self.parse_attribute(item, poi, "cards", CARDS_MAPPING)
             self.parse_attribute(item, poi, "services", SERVICES_MAPPING)
             self.parse_brand(item, poi)
@@ -186,38 +178,36 @@ class MolSpider(scrapy.Spider):
             apply_category(Categories.FUEL_STATION, item)
             yield item
 
-    def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict):
-        for attribute in data.get(attribute_name, []):
+    def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict) -> Any:
+        for attribute in data.get(attribute_name, {}).get("values", []):
             name = attribute.get("name")
             if tag := mapping.get(name):
                 apply_yes_no(tag, item, True)
             else:
                 self.crawler.stats.inc_value(f"atp/mol/{attribute_name}/failed/{name}")
 
-    def parse_brand(self, item, poi):
-        if brand_details := BRANDS_MAPPING.get(poi.get("brand", {}).get("name")):
+    def parse_brand(self, item, poi) -> Any:
+        if brand_details := BRANDS_MAPPING.get(poi.get("brand")):
             brand, brand_wikidata = brand_details
             item["brand"] = brand
             item["brand_wikidata"] = brand_wikidata
         else:
-            self.crawler.stats.inc_value(f"atp/mol/unknown_brands/{poi.get('brand', {}).get('name')}")
+            self.crawler.stats.inc_value(f"atp/mol/unknown_brands/{poi.get('brand')}")
 
-    def parse_hours(self, item, poi):
-        fs = poi.get("fs", {})
+    def parse_hours(self, item, poi) -> Any:
+        hours = poi.get("openedHours", {})
         oh = OpeningHours()
         try:
-            for k, v in fs.items():
+            for k, v in hours.items():
                 # There are winter and summer hours available.
                 # to keep it simple parse only winter hours.
-                if k.startswith("opn_hrs_wtr_"):
-                    days = k.split("_")[-1]
+                if k.startswith("openedWinter"):
+                    day = k.split("openedWinter")[-1]
                     time_open, time_close = v.split("-")
-                    if days == "wd":
+                    if day == "WeekDay":
                         oh.add_days_range(NAMED_DAY_RANGES_EN.get("Weekdays"), time_open, time_close)
-                    elif days == "sat":
-                        oh.add_range("Sa", time_open, time_close)
-                    elif days == "sun":
-                        oh.add_range("Sa", time_open, time_close)
+                    else:
+                        oh.add_range(day, time_open, time_close)
             item["opening_hours"] = oh.as_opening_hours()
         except Exception as e:
-            self.logger.warning(f"Failed to parse hours: {fs}, {e}")
+            self.logger.warning(f"Failed to parse hours: {hours}, {e}")
