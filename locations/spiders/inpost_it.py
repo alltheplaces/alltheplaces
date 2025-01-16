@@ -14,7 +14,7 @@ class InpostITSpider(JSONBlobSpider):
 
     operator = {"operator": "InPost", "operator_wikidata": "Q3182097"}
     attributes = {"parcel_mail_in": "yes", "parcel_pickup": "yes"}
-    brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097", "nsi_id": "inpost-6b37ec"}
+    brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097"}
     brand_partner = {"post_office:brand": "InPost", "post_office:brand:wikidata": "Q3182097"}
 
     def start_requests(self):
