@@ -29,6 +29,9 @@ class HandelsbankenSESpider(scrapy.Spider):
                 oh_json = json.loads(options.get("value"))
                 for day in oh_json:
                     oh.add_range(DAYS[int(day.get("Weekday"))], day.get("Open"), day.get("Close"))
+            if website := store.get("url"):
+                if website.startswith("www."):
+                    website = website.replace("www.", "https://www.")
             properties = {
                 "ref": str(store.get("id")),
                 "name": store.get("name"),
@@ -39,7 +42,7 @@ class HandelsbankenSESpider(scrapy.Spider):
                 "street_address": store.get("streetName"),
                 "phone": store.get("phone"),
                 "email": store.get("email"),
-                "website": store.get("url"),
+                "website": website,
                 "lat": store.get("location").get("lat"),
                 "lon": store.get("location").get("lng"),
                 "opening_hours": oh,
