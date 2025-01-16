@@ -26,7 +26,7 @@ class InpostITSpider(JSONBlobSpider):
         location = {
             "position": {"lat": v["l"]["a"], "lng": v["l"]["o"]},
             "street": v["e"],
-            "housenumber": v["b"],
+            "house-number": v["b"],
             "province": v["r"],
             "post_code": v["o"],
             "city": v["c"],
@@ -48,7 +48,9 @@ class InpostITSpider(JSONBlobSpider):
             return None
 
         if hours := location["hours"]:
-            if hours != "24/7":
+            if hours == "24/7":
+                item["opening_hours"] = hours
+            else:
                 item["opening_hours"] = OpeningHours()
                 self.parse_hours(item["opening_hours"], hours)
 
