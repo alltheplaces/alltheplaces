@@ -1,6 +1,6 @@
 from unidecode import unidecode
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_yes_no
 from locations.hours import DAYS_PL
 
 from .inpost_it import InpostITSpider
@@ -13,14 +13,14 @@ class PaczkomatInpostPLSpider(InpostITSpider):
     brand_locker = {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254"}
     brand_partner = {"post_office:brand": "Paczkomat InPost", "post_office:brand:wikidata": "Q110970254"}
     brand_app = {"brand": "Appkomat InPost", "nsi_id": "N/A"}
-    brand_app_attributes = {"app_operated": "only", "not:brand:wikidata": "Q110970254", "amenity": "parcel_locker"}
 
     def set_brand(self, item, location):
         if item["ref"].endswith("APP"):
             if location["category"] != Categories.PARCEL_LOCKER:
                 raise ValueError("Appkomat only expected for lockers")
             item.update(self.brand_app)
-            item["extras"].update(self.brand_app_attributes)
+            apply_yes_no("app_operated=only", item, True)
+            item["extras"]["not:brand:wikidata"] = "Q110970254"
         else:
             super().set_brand(item, location)
 
