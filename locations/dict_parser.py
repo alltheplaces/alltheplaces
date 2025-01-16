@@ -53,7 +53,6 @@ class DictParser:
 
     house_number_keys = [
         # EN
-        "housenumber",
         "house-number",
         "house-no",
         "street-number",
