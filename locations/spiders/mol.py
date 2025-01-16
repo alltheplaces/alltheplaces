@@ -40,14 +40,16 @@ BRANDS_MAPPING = {
     "INA": ("INA", "Q1662137"),
     "MOL": ("MOL", "Q549181"),
     "MOL (AGIP)": ("MOL", "Q549181"),
-    "MOL Ceska Republika": ("MOL", "Q549181"),
+    "MOL CESKA REPUBLIKA": ("MOL", "Q549181"),
     "MOLPLUGEE": ("MOL", "Q549181"),
-    "PapOil": ("PapOil", None),
-    "Slovnaft": ("Slovnaft", "Q1587563"),
+    "PAPOIL": ("PapOil", None),
+    "SLOVNAFT": ("Slovnaft", "Q1587563"),
     "TOTAL": ("Total", "Q154037"),
     "LOTOS": ("Lotos", "Q1256909"),
     "TOTAL ACCESS": ("TotalEnergies", "Q154037"),
-    "ex-OMV": ("MOL", "Q549181"),
+    "EX-OMV": ("MOL", "Q549181"),
+    "TIFON": ("Tifon", None),
+    "ENERGOPETROL": ("Energopetrol", "Q120433"),
 }
 
 FUEL_MAPPING = {
@@ -191,7 +193,8 @@ class MolSpider(scrapy.Spider):
                 self.crawler.stats.inc_value(f"atp/mol/{attribute_name}/failed/{name}")
 
     def parse_brand(self, item, poi) -> Any:
-        if brand_details := BRANDS_MAPPING.get(poi.get("brand")):
+        brand_key = poi["brand"].upper() if poi.get("brand") else ""
+        if brand_details := BRANDS_MAPPING.get(brand_key):
             brand, brand_wikidata = brand_details
             item["brand"] = brand
             item["brand_wikidata"] = brand_wikidata
