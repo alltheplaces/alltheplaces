@@ -13,7 +13,7 @@ class UnitedColorsOfBenettonSpider(WoosmapSpider):
         item.pop("website")
         if "@" not in item.get("email"):
             item.pop("email")
-        if re.match(r"^[a-zA-Z]@[a-zA-Z]$", item["email"]):
+        elif re.match(r"^[a-zA-Z]@[a-zA-Z]$", item["email"]):
             item.pop("email")
         if "null" in item.get("phone"):
             item.pop("phone")
