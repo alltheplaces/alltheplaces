@@ -224,6 +224,6 @@ class MolSpider(scrapy.Spider):
                         oh.add_days_range(NAMED_DAY_RANGES_EN.get("Weekdays"), time_open, time_close)
                     else:
                         oh.add_range(day, time_open, time_close)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         except Exception as e:
             self.logger.warning(f"Failed to parse hours: {hours}, {e}")
