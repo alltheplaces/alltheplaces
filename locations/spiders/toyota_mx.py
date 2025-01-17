@@ -1,15 +1,15 @@
 from typing import Iterable
 
+import scrapy
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 
 
-class ToyotaMXSpider(JSONBlobSpider):
+class ToyotaMXSpider(scrapy.Spider):
     name = "toyota_mx"
     item_attributes = TOYOTA_SHARED_ATTRIBUTES
     start_urls = ["https://www.toyota.mx/graphql/execute.json/tmex/distributorByStates"]
