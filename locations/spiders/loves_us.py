@@ -19,6 +19,7 @@ class LovesUSSpider(scrapy.Spider):
             if store["isHotel"] is True:
                 continue  # ChoiceHotelsSpider
             item = DictParser.parse(store)
+            item["name"] = None
             item["ref"] = store.get("number")
             item["website"] = "https://www.loves.com/locations/{}".format(store["number"])
 
