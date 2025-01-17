@@ -1,6 +1,7 @@
-import re
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -88,15 +89,16 @@ PAYMENT_METHODS_MAP = {
 
 class OmvSpider(scrapy.Spider):
     name = "omv"
-    start_urls = ["https://www.omv.at/de-at/tanken/tankstellensuche"]
+    start_urls = ["https://app.wigeogis.com/kunden/omv/data/getconfig.php"]
     download_delay = 0.10
     api_url = "https://app.wigeogis.com/kunden/omv/data/getresults.php"
     details_url = "https://app.wigeogis.com/kunden/omv/data/details.php"
+    hash = ""
+    ts = ""
 
-    def parse(self, response):
-        javascript_code = response.xpath("//script[contains(., 'var IConfHash')]/text()").get()
-        iconf_hash = re.search(r"var IConfHash = '([^']+)'", javascript_code).group(1)
-        iconf_ts = re.search(r"var IConfTs = '([^']+)'", javascript_code).group(1)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        self.hash = str(response.json()["hash"])
+        self.ts = str(response.json()["ts"])
 
         for brand, brand_data in BRANDS_AND_COUNTRIES.items():
             for country in brand_data["countries"]:
@@ -108,33 +110,31 @@ class OmvSpider(scrapy.Spider):
                         "VEHICLE": "CAR",
                         "MODE": "NEXTDOOR",
                         "ANZ": "1000",
-                        "HASH": iconf_hash,
-                        "TS": iconf_ts,
+                        "HASH": self.hash,
+                        "TS": self.ts,
                     },
                     callback=self.parse_pois,
                     meta={
                         "country": country,
                         "brand": brand_data["brand"],
                         "brand_wikidata": brand_data["brand_wikidata"],
-                        "HASH": iconf_hash,
-                        "TS": iconf_ts,
                     },
                 )
 
-    def parse_pois(self, response):
+    def parse_pois(self, response: Response, **kwargs: Any) -> Any:
         for poi in response.json():
             yield scrapy.FormRequest(
                 url=self.details_url,
                 formdata={
                     "ID": poi["sid"],
-                    "HASH": response.meta["HASH"],
-                    "TS": response.meta["TS"],
+                    "HASH": self.hash,
+                    "TS": self.ts,
                 },
                 callback=self.parse_poi,
                 meta=response.meta,
             )
 
-    def parse_poi(self, response):
+    def parse_poi(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
         details = data.get("siteDetails", {})
         item = DictParser.parse(details)
