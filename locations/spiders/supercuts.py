@@ -1,9 +1,8 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, day_range
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class SupercutsSpider(scrapy.Spider):
@@ -28,7 +27,8 @@ class SupercutsSpider(scrapy.Spider):
 
     def parse_state(self, response):
         for salon in response.json():
-            yield scrapy.Request(url ="https://api.regiscorp.com/sis/api/salon?salon-number={}".format(int(salon['salonId'])),
+            yield scrapy.Request(
+                url="https://api.regiscorp.com/sis/api/salon?salon-number={}".format(int(salon["salonId"])),
                 callback=self.parse_salon,
             )
 
@@ -36,14 +36,16 @@ class SupercutsSpider(scrapy.Spider):
         data = response.json()
         item = DictParser.parse(data)
         item["ref"] = data["salon_number"]
-        item["branch"] = item.pop("name").replace(str(data["salon_number"])+"-","").replace(str(data["salon_number"])+" - ","")
-        if address2:=data["address2"]:
-            item["street_address"] = merge_address_lines([item["street_address"],address2])
+        item["branch"] = (
+            item.pop("name").replace(str(data["salon_number"]) + "-", "").replace(str(data["salon_number"]) + " - ", "")
+        )
+        if address2 := data["address2"]:
+            item["street_address"] = merge_address_lines([item["street_address"], address2])
         item["website"] = data["booking_url"]
         item["opening_hours"] = OpeningHours()
-        for day,time in data["store_hours"].items():
+        for day, time in data["store_hours"].items():
             day = day
             open_time = time["open"]
             close_time = time["close"]
-            item["opening_hours"].add_range(day=day,open_time=open_time,close_time=close_time,time_format= "%I:%M %p")
+            item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p")
         yield item
