@@ -163,17 +163,16 @@ class OmvSpider(scrapy.Spider):
         oh = OpeningHours()
         try:
             if opening_hours:
-                for day in opening_hours.split("#"):
-                    ranges = day.split(",")
-                    day_of_week = ranges[0].split("=")[1]
-                    time_ranges = ranges[1:]
-                    if "closed=TRUE" in time_ranges[0]:
-                        continue
+                for rule_str in opening_hours.split("#"):
+                    rule = {}
+                    for prop in rule_str.split(","):
+                        k, v = prop.split("=")
+                        rule[k] = v
+
+                    if rule.get("closed") == "TRUE":
+                        oh.set_closed(DAYS[int(rule["dayOfWeek"]) - 1])
                     else:
-                        time_from, time_to = time_ranges[1:]
-                        from_time = time_from.split("=")[1]
-                        to_time = time_to.split("=")[1]
-                        oh.add_range(DAYS[int(day_of_week) - 1], from_time, to_time)
+                        oh.add_range(DAYS[int(rule["dayOfWeek"]) - 1], rule["from"], rule["to"])
                 item["opening_hours"] = oh
         except Exception as e:
             self.logger.error(f"Error parsing hours: {opening_hours}, {e}")
