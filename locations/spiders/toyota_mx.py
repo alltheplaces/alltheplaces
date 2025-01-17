@@ -19,7 +19,6 @@ class ToyotaMXSpider(scrapy.Spider):
             state = data["state"]
             for store in data["distributors"]:
                 item = DictParser.parse(store)
-                item["website"] = "https://www.toyota.mx"
                 item["ref"] = store["dealerCode"]
                 item["addr_full"] = store["address"]["plaintext"]
                 item["state"] = state
