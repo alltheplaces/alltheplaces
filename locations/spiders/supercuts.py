@@ -44,7 +44,6 @@ class SupercutsSpider(scrapy.Spider):
         item["website"] = data["booking_url"]
         item["opening_hours"] = OpeningHours()
         for day, time in data["store_hours"].items():
-            day = day
             open_time = time["open"]
             close_time = time["close"]
             item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p")
