@@ -38,7 +38,7 @@ class LincolnshireCooperativeSpider(SitemapSpider):
         item = LinkedDataParser.parse_ld(ld_item)
 
         if item.get("image"):
-            item["image"] = item["image"].replace("https://www.lincolnshire.coophttps://", "https://")
+            item["image"] = item["image"].replace("//www.lincolnshire.coophttps://", "https://")
 
         if item.get("phone"):
             item["phone"] = item["phone"].replace(" (24 hours)", "")
