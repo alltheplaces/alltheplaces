@@ -25,6 +25,8 @@ class LovesSpider(scrapy.Spider):
             if "speedco" in store["mapPinUrl"].lower():
                 item.update(self.SPEEDCO)
                 apply_category(Categories.SHOP_TRUCK_REPAIR, item)
+            elif "countrystore" in store["mapPinUrl"].lower():
+                apply_category(Categories.FUEL_STATION, item)
             else:
                 apply_category({"highway": "services"}, item)
             yield item
