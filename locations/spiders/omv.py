@@ -174,7 +174,7 @@ class OmvSpider(scrapy.Spider):
                         from_time = time_from.split("=")[1]
                         to_time = time_to.split("=")[1]
                         oh.add_range(DAYS[int(day_of_week) - 1], from_time, to_time)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
         except Exception as e:
             self.logger.error(f"Error parsing hours: {opening_hours}, {e}")
 
