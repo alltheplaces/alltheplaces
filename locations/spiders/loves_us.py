@@ -7,8 +7,8 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class LovesSpider(scrapy.Spider):
-    name = "loves"
+class LovesUSSpider(scrapy.Spider):
+    name = "loves_us"
     SPEEDCO = {"brand": "Speedco", "brand_wikidata": "Q112455073"}
     item_attributes = {"brand": "Love's", "brand_wikidata": "Q1872496"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
