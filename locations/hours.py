@@ -902,8 +902,9 @@ class OpeningHours:
         """
         Mark days where the location has stated they are closed; as opposed to simply not provided or known from survey hours.
 
-        This differs slightly to https://wiki.openstreetmap.org/wiki/Key:opening_hours; in that 'off' or 'closed'
-        are more frequently output.
+        This matches the syntax of https://wiki.openstreetmap.org/wiki/Key:opening_hours.
+        Use of this in All the Places is more common than in OpenStreetMap where use of 'off' or 'closed'
+        is quite uncommon.
 
         Recommended to use with an appropriate helper to pass a specific string or list, ie:
         `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
