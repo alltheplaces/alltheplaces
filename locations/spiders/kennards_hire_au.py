@@ -17,6 +17,10 @@ class KennardsHireAUSpider(JSONBlobSpider):
     start_urls = ["https://www.kennards.com.au/api/data/branches"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if not feature.get("latitude") or not feature.get("longitude"):
+            # Not a valid plant hire location - head office/warehouse/etc
+            return
+
         item["ref"] = str(feature["code"])
         item["branch"] = item.pop("name", None)
         item["street_address"] = merge_address_lines(
