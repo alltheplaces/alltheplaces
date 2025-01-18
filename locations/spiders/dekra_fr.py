@@ -10,7 +10,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class DekraFRSpyter(Spider):
+class DekraFRSpider(Spider):
     name = "dekra_fr"
     item_attributes = {"brand_wikidata": "Q383711"}
     start_urls = ["https://www.dekra-pl.com/scripts/franceMobile.js"]
