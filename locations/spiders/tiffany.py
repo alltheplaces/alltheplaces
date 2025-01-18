@@ -1,3 +1,5 @@
+import urllib
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -38,7 +40,9 @@ class TiffanySpider(Spider):
                 "https://www.tiffany.com/jewelry-stores/" + location["storeSeoAttributes"][0]["canonicalUrlkeyword"]
             )
             if location["store"]["storePhoto"] != "/shared/images/stores/store_location.jpg":
-                item["image"] = "https://www.tiffany.com" + location["store"]["storePhoto"]
+                item["image"] = urllib.parse.quote(
+                    "https://www.tiffany.com" + location["store"]["storePhoto"], safe=":/?=&"
+                )
             opening_soon = False
             for store_hours in location["storeHours"]:
                 if store_hours.get("storeHourTypeId", 0) == 1:
