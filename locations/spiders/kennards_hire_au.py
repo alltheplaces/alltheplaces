@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -19,7 +19,9 @@ class KennardsHireAUSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["code"])
         item["branch"] = item.pop("name", None)
-        item["street_address"] = merge_address_lines([feature["address"].get("streetLine1"), feature["address"].get("streetLine2")])
+        item["street_address"] = merge_address_lines(
+            [feature["address"].get("streetLine1"), feature["address"].get("streetLine2")]
+        )
         item["city"] = feature["address"].get("suburb")
         item["state"] = feature["address"].get("state")
         item["postcode"] = feature["address"].get("postcode")
@@ -34,7 +36,9 @@ class KennardsHireAUSpider(JSONBlobSpider):
             if not day_hours.get("openingTime") or not day_hours.get("closingTime"):
                 item["opening_hours"].set_closed(day_hours["title"])
                 continue
-            item["opening_hours"].add_range(day_hours["title"], day_hours["openingTime"], day_hours["closingTime"], "%I:%M%p")
+            item["opening_hours"].add_range(
+                day_hours["title"], day_hours["openingTime"], day_hours["closingTime"], "%I:%M%p"
+            )
 
         apply_category(Categories.SHOP_PLANT_HIRE, item)
 
