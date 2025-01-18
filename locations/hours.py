@@ -684,7 +684,7 @@ DAYS_ID = {
 }
 
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
-# A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
+# A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
 DAYS_BY_FREQUENCY = [
     DAYS_EN,
