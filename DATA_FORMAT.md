@@ -54,10 +54,14 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `nsi_id`              | The [Name Suggestion Index](https://nsi.guide/) (NSI) ID for the feature. NSI IDs aren't stable, so you may require [old NSI data](https://github.com/osmlab/name-suggestion-index/tree/main/dist) if you are working with old ATP data.
 | `end_date`            | `end_date=yes` is applied when given location is closed at unknown date and can be assumed to not operate right now, `end_date` may also have values in year-month-day format, including future dates for planned closures. If the POI has been deleted entirely in the source data, ATP will stop returning the former POI.
 
+All translatable property values are supplied in the primary local language and are UTF-8 strings. For example, `name` or `branch` for a feature in Japan will typically be Japanese UTF-8 encoded text (ISO 639-1 alpha-2 code of "ja"). Address fields are also typically supplied in the primary local langauge. If other translations are available for a property value, the translated property values are supplied as [extra fields](#extras). Continuing the example of a feature in Japan, if an English translation for `name` or `branch` is additionally available, it will be present as `name:en` or `branch:en` as an [extra field](#extras). Language code suffixes are lower case ISO 639-1 alpha-2 codes.
+
 ### Extras
 
 Spiders can also include extra fields that will show up but aren't necessarily documented outside their source code.
 We aim for them to be consistent with [OpenStreetMap tagging](https://wiki.openstreetmap.org/wiki/Main_Page).
+Extra field keys and values are provided as an `extras` dictionary (within `properties` for GeoJSON output).
+
 If enough spiders find interesting things to include in an extra property, it might be included here in the documentation in the future.
 
 ## Opening Hours
