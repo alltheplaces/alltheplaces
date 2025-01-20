@@ -15,7 +15,12 @@ class AusnetGridviewAUSpider(RosettaAPRSpider):
             callback_function_name="parse_transformers_geojson",
         ),
     ]
-    requires_proxy = "AU"
+    # Note: data centre IP addresses appear to be blocked. requires_proxy="AU"
+    # would usually be a workaround however Zyte API limits HTTP response
+    # bodies to 10MB which is not large enough to download the data files.
+    #
+    # Reference:
+    # https://docs.zyte.com/zyte-api/faq.html#is-there-a-response-size-limit
 
     def parse_transformers_geojson(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
         items = []
