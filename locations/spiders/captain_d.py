@@ -7,7 +7,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -44,4 +44,6 @@ class CaptainDSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name").title()
+        if all(rule.get("opens") == "" for rule in ld_data.get("openingHoursSpecification", [])):
+            set_closed(item)
         yield item
