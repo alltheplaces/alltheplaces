@@ -1299,11 +1299,11 @@
         },
         "phonenumbers": {
             "hashes": [
-                "sha256:e803210038ece9d208b129e3023dc20e656a820d6bf6f1cb0471d4164f54bada",
-                "sha256:fdc371ea6a4da052beb1225de63963d5a2fddbbff2bb53e3a957f360e0185f80"
+                "sha256:b7308f21837defa567b4f961925b6c652dd5148f3e0fadbd158a10758cc63d91",
+                "sha256:fa7b93e12b3ac9baa7b056061cfcbe4de406039f720bb539dc240bed9cc43da2"
             ],
             "index": "pypi",
-            "version": "==8.13.52"
+            "version": "==8.13.53"
         },
         "phpserialize": {
             "hashes": [
