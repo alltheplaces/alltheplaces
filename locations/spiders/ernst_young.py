@@ -2,6 +2,7 @@ from typing import Any
 
 import scrapy
 from scrapy.http import Response
+
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
