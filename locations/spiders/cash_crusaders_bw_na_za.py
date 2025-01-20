@@ -16,4 +16,7 @@ class CashCrusadersBWNAZASpider(LocationBankSpider):
                     else:
                         number = cta["url"]
                     set_social_media(item, SocialMedia.WHATSAPP, number)
+        if email := item.get("email"):
+            if ";" in email:
+                item["email"] = email.split(";")[0]
         yield item
