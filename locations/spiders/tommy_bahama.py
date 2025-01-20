@@ -1,4 +1,5 @@
 import json
+import urllib
 
 from scrapy import Request
 
@@ -51,6 +52,8 @@ class TommyBahamaSpider(StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item["ref"] = item.pop("name")
+
+        item["website"] = urllib.parse.quote(item["website"], safe=":/?=&")
 
         oh = OpeningHours()
         for day, times in zip(
