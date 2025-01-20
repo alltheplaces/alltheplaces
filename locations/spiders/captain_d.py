@@ -25,3 +25,18 @@ class CaptainDSpider(CrawlSpider, StructuredDataSpider):
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for slug in re.findall(r"\"localpage_url_id\"[:\s]+\"(.+?)\"", response.text):
             yield Request(url=urljoin(response.url.replace("site-map", "ll"), f"{slug}/"), callback=self.parse_sd)
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        if hours := ld_data.get("openingHoursSpecification"):
+            # Monday closing time is missing, assuming same as Tuesday's closing time, based on Google Maps data
+            monday_index, tuesday_index = None, None
+            for index, rule in enumerate(hours):
+                if rule.get("dayOfWeek") == ["Monday"]:
+                    monday_index = index
+                if rule.get("dayOfWeek") == ["Tuesday"]:
+                    tuesday_index = index
+            if monday_index is not None and tuesday_index is not None:
+                if hours[monday_index]["opens"] == hours[tuesday_index]["opens"] and not hours[monday_index]["closes"]:
+                    ld_data["openingHoursSpecification"][monday_index]["closes"] = ld_data["openingHoursSpecification"][
+                        tuesday_index
+                    ]["closes"]
