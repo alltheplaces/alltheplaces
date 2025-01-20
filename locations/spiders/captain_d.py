@@ -7,6 +7,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -40,3 +41,7 @@ class CaptainDSpider(CrawlSpider, StructuredDataSpider):
                     ld_data["openingHoursSpecification"][monday_index]["closes"] = ld_data["openingHoursSpecification"][
                         tuesday_index
                     ]["closes"]
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").title()
+        yield item
