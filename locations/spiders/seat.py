@@ -2,13 +2,13 @@ import scrapy
 import xmltodict
 from scrapy import Request
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class SeatSpider(scrapy.Spider):
     name = "seat"
-    item_attributes = {"brand": "SEAT", "brand_wikidata": "Q188217", "extras": Categories.SHOP_CAR.value}
+    item_attributes = {"brand": "SEAT", "brand_wikidata": "Q188217"}
     COUNTRY_DEALER_LOCATOR_MAP = {
         "fr": "trouver-un-distributeur",
         "it": "concessionari",
@@ -42,6 +42,7 @@ class SeatSpider(scrapy.Spider):
             item["street_address"] = item.pop("street", "")
             item["phone"] = store.get("phone1")
             item["extras"]["fax"] = store.get("fax1")
+            apply_category(Categories.SHOP_CAR, item)
             yield item
 
     def repair_website(self, item):
