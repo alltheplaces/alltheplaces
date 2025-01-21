@@ -1,7 +1,9 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.open_graph_spider import OpenGraphSpider
-from locations.pipelines.extract_gb_postcode import extract_gb_postcode
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class LoungesGBSpider(SitemapSpider, OpenGraphSpider):
@@ -12,8 +14,9 @@ class LoungesGBSpider(SitemapSpider, OpenGraphSpider):
 
     def post_process_item(self, item, response, **kwargs):
         item["name"] = item["name"].split(" - ")[0].strip()
-        lounge_header = response.xpath('//section[@class="lounge-header"]')
-        if postcode := extract_gb_postcode(lounge_header.get()):
-            if postcode[0].isalpha():
-                item["postcode"] = postcode
+
+        lounge_header = merge_address_lines(response.xpath('//section[@class="lounge-header"]/p//text()').getall())
+        if m := re.match(r"(.+)(?: •|,) ([\d ]+) •", lounge_header):
+            item["addr_full"], item["phone"] = m.groups()
+
         yield item
