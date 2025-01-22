@@ -5,6 +5,7 @@ from scrapy import FormRequest, Request
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
+from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -64,4 +65,8 @@ class BurgerKingKRSpider(JSONBlobSpider):
             services = [service["storeServiceName"] for service in services]
             apply_yes_no(Extras.DRIVE_THROUGH, item, "드라이브스루" in services, False)
             apply_yes_no(Extras.DELIVERY, item, "딜리버리" in services, False)
+
+        item["opening_hours"] = OpeningHours()
+        for days_key, days_val in [("storTimeDays", DAYS_WEEKDAY), ("storTimeWeekend", DAYS_WEEKEND)]:
+            item["opening_hours"].add_days_range(days_val, *location[days_key].split("~"))
         yield item
