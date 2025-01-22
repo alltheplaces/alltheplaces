@@ -61,6 +61,7 @@ class BurgerKingKRSpider(JSONBlobSpider):
         item["lon"] = location["storCoordX"]
         item["branch"] = location["storNm"]
         item["addr_full"] = location["storAddr"]
+        item["phone"] = location["storTelNo"]
         if services := location.get("storeServiceCodeList"):
             services = [service["storeServiceName"] for service in services]
             apply_yes_no(Extras.DRIVE_THROUGH, item, "드라이브스루" in services, False)
