@@ -16,18 +16,17 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
         },
     }
 
-
     def post_process_item(self, item, response, location):
         item["website"] = urljoin("https://www.english-heritage.org.uk", location["Path"])
         item["extras"]["tourism"] = "attraction"
 
-    # FACILITIES location["SelectedFacilityList"]
-    # 172 cafe/restaurant
-    # 173 dog friendly
-    # 174 family favourites
-    # 175 picnic seating
-    # 176 play area
-    # 177 Wheelchair access
+        # FACILITIES location["SelectedFacilityList"]
+        # 172 cafe/restaurant
+        # 173 dog friendly
+        # 174 family favourites
+        # 175 picnic seating
+        # 176 play area
+        # 177 Wheelchair access
 
         if 172 in location["SelectedFacilityList"]:
             item["extras"]["amenity"] = "restaurant"
@@ -41,14 +40,14 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
         if 177 in location["SelectedFacilityList"]:
             item["extras"]["wheelchair"] = "yes"
 
-    # CATEGORIES location["PrimaryPropertyType"]
-    # building:church 1 Abbeys and churches
-    # building:castle 2 Castles and Forts
-    # leisure:garden 3 Gardens
-    # building:yes,historic:castle 4 Houses and Palaces
-    # historic:building,building:yes 5 Medieval and Tudor
-    # historic=archaeological_site, historic:civilization=prehistoric  6 Prehistoric
-    # historic=archaeological_site, historic:civilization=roman 7 Roman
+        # CATEGORIES location["PrimaryPropertyType"]
+        # building:church 1 Abbeys and churches
+        # building:castle 2 Castles and Forts
+        # leisure:garden 3 Gardens
+        # building:yes,historic:castle 4 Houses and Palaces
+        # historic:building,building:yes 5 Medieval and Tudor
+        # historic=archaeological_site, historic:civilization=prehistoric  6 Prehistoric
+        # historic=archaeological_site, historic:civilization=roman 7 Roman
 
         if location["PrimaryPropertyType"] == 1:
             item["extras"]["building"] = "church"
