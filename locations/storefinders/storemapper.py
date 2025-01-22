@@ -21,7 +21,7 @@ from locations.items import Feature
 
 class StoremapperSpider(Spider):
     """
-    Storemapper (https://www.storemapper.com/) is an emedded map based store locator.
+    Storemapper (https://www.storemapper.com/) is an embedded map based store locator.
 
     API docs are available via https://help.storemapper.com/category/4313-advanced-settings-and-customisation
 

@@ -11,6 +11,7 @@ CATEGORY_MAPPING = {
     "biblioteki": Categories.LIBRARY,
     "dvorcy-kultury-i-kluby": Categories.COMMUNITY_CENTRE,
     "parki": Categories.LEISURE_PARK,
+    "Музеи и галереи": Categories.MUSEUM,
 }
 
 MUSEUM_TYPES = {
@@ -137,8 +138,14 @@ class MkrfRUSpider(Spider):
 
     def parse_category(self, item, poi_attributes):
         if category := poi_attributes.get("category"):
-            if category_tag := CATEGORY_MAPPING.get(category.get("sysName", {})):
+            # Category field is inconsistent across datasets
+            category_value = category.get("sysName", category.get("name", ""))
+            if category_tag := CATEGORY_MAPPING.get(category_value):
                 apply_category(category_tag, item)
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/category/failed/{category_value}")
+        else:
+            self.crawler.stats.inc_value(f"atp/{self.name}/category/missing")
 
     def parse_hours(self, item, poi_attributes):
         if working_schedule := poi_attributes.get("workingSchedule"):

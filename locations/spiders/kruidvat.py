@@ -3,6 +3,7 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
@@ -39,4 +40,7 @@ class KruidvatSpider(scrapy.Spider):
                 item["ref"] = item["website"] = "https://www.kruidvat.nl/" + store.xpath(".//url/text()").get()
             else:
                 item["ref"] = item["website"] = "https://www.kruidvat.be/" + store.xpath(".//url/text()").get()
+
+            apply_category(Categories.SHOP_CHEMIST, item)
+
             yield item

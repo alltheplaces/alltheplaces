@@ -104,6 +104,8 @@ class JSONBlobSpider(Spider):
 
     def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
+            if feature is None:
+                continue
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
             yield from self.post_process_item(item, response, feature) or []

@@ -1,3 +1,4 @@
+import urllib
 from typing import Iterable
 
 from scrapy.http import Response
@@ -20,8 +21,7 @@ class OregonDotUSSpider(JSONBlobSpider):
         info = feature["attributes"]
         item = DictParser.parse(info)
         item["ref"] = info["cameraId"]
-        item["website"] = "https://tripcheck.com/"
-        item["image"] = "https://tripcheck.com/RoadCams/cams/" + info["filename"]
+        item["image"] = urllib.parse.quote("https://tripcheck.com/RoadCams/cams/" + info["filename"], safe=":/?=&")
         item["name"] = info["title"]
         item["extras"]["camera:type"] = "fixed"
         apply_category(Categories.SURVEILLANCE_CAMERA, item)

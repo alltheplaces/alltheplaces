@@ -1,54 +1,54 @@
-import json
-import re
+from typing import Any
 
 import scrapy
+import xmltodict
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_DE, OpeningHours
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class OttosCHSpider(scrapy.Spider):
     name = "ottos_ch"
-    item_attributes = {"brand": "Otto’s", "brand_wikidata": "Q2041507"}
-    allowed_domains = ["www.ottos.ch"]
-    start_urls = ("https://www.ottos.ch/de/ottos-filialen",)
+    item_attributes = {"brand": "Otto's", "brand_wikidata": "Q2041507"}
+    start_urls = [
+        "https://api.ottos.ch/occ/v2/ottos/stores?fields=stores(additionalOpeningInformation%2Cname%2CdisplayName%2CformattedDistance%2CopeningHours(weekDayOpeningList(FULL)%2CspecialDayOpeningList(FULL))%2CgeoPoint(latitude%2Clongitude)%2Caddress(line1%2Cline2%2Ctown%2Cregion(FULL)%2CpostalCode%2Cphone%2Ccountry%2Cemail)%2Cfeatures%2CtodaySchedule(DEFAULT)%2CstoreFeatures(code%2Cname%2Ctooltip))%2Cpagination(DEFAULT)%2Csorts(DEFAULT)%2CselectableStoreFeatures%2CselectedStoreFeature%2CselectableStoreDistances%2CselectedStoreDistance&query=&radius=10000&lang=de&curr=CHF",
+    ]
 
-    def parse(self, response):
-        opening_hours = {}
-        for store in response.xpath("//span[@data-amid]"):
-            key = store.css(".location_header").xpath("text()").get()
-            opening_hours[key] = self.parse_opening_hours(store)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in xmltodict.parse(response.text)["StoreFinderSearchPageWsDTO"]["stores"]["stores"]:
+            store.update(store.pop("address"))
+            item = DictParser.parse(store)
+            item["ref"] = item.pop("name")
+            if state := item.get("state"):
+                item["state"] = state["isocodeShort"]
+            item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
+            item["opening_hours"] = OpeningHours()
+            for day_time in store["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
+                day = sanitise_day(day_time["weekDay"], DAYS_DE)
+                if day_time["closed"] == "true":
+                    item["opening_hours"].set_closed(day)
+                else:
+                    open_time = day_time["openingTime"]["formattedHour"]
+                    close_time = day_time["closingTime"]["formattedHour"]
+                    item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
 
-        js = re.search("jsonLocations:(.*),", response.text).group(1)
-        for store in json.loads(js)["items"]:
-            props = {
-                "lat": float(store["lat"]),
-                "lon": float(store["lng"]),
-                "name": "Otto’s",
-                "city": store["city"],
-                "country": store["country"],
-                "opening_hours": opening_hours.get(store["name"]),
-                "phone": store["phone"],
-                "postcode": store["zip"],
-                "ref": store["id"],
-                "street_address": store["address"],
-            }
-            item = Feature(**props)
-            apply_category(Categories.SHOP_VARIETY_STORE, item)
+            if store["displayName"].startswith("OTTO'S Beauty Shop "):
+                item["branch"] = store["displayName"].removeprefix("OTTO'S Beauty Shop ")
+                item["name"] = "Otto's Beauty Shop"
+                apply_category(Categories.SHOP_COSMETICS, item)
+            elif store["displayName"].startswith("OTTO'S Sport Outlet "):
+                item["branch"] = store["displayName"].removeprefix("OTTO'S Sport Outlet ")
+                item["name"] = "Otto's Sport Outlet"
+                apply_category(Categories.SHOP_SPORTS, item)
+            elif store["displayName"].startswith("OTTO'S mini "):
+                item["branch"] = store["displayName"].removeprefix("OTTO'S mini ")
+                item["name"] = "Otto's mini"
+                apply_category(Categories.SHOP_VARIETY_STORE, item)
+            else:
+                item["branch"] = store["displayName"].removeprefix("OTTO'S ")
+                apply_category(Categories.SHOP_VARIETY_STORE, item)
+
             yield item
-
-    @staticmethod
-    def parse_opening_hours(store):
-        oh = OpeningHours()
-        s = store.xpath('div[@class="all_schedule"]//text()').getall()
-        for i, text in enumerate([t.strip() for t in s]):
-            tokens = text.split()
-            if len(tokens) != 2 or tokens[0] not in DAYS_DE:
-                continue
-            day = DAYS_DE[tokens[0]]
-            h = s[i + 1].split()
-            if len(h) != 3 or h[1] != "-":
-                continue
-            oh.add_range(day, h[0], h[2])
-        return oh.as_opening_hours()

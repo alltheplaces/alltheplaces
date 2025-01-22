@@ -273,6 +273,7 @@ class InsightsCommand(ScrapyCommand):
 
         # First data set to merge into the output table is wikidata tag count info from OSM.
         # There are a lot of unique wikidata codes so use paging on the taginfo service.
+        re_qcode = re.compile(r"^Q\d+")
         osm_url_template = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page={}&rp=999&qtype=value"
         for page in range(1, 1000):
             response = requests.get(osm_url_template.format(page))
@@ -283,7 +284,8 @@ class InsightsCommand(ScrapyCommand):
                 # We've run of the end of OSM wikidata entries.
                 break
             for r in entries:
-                lookup_code(r["value"])["osm_count"] = r["count"]
+                if re_qcode.match(r["value"]):
+                    lookup_code(r["value"])["osm_count"] = r["count"]
 
         # Now load each wikidata entry in the NSI dataset and merge into our wikidata table.
         nsi = NSI()
