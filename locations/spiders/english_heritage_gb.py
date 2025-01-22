@@ -29,16 +29,16 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
     # 176 play area
     # 177 Wheelchair access
 
-        if location["SelectedFacilityList"] contains 172:
+        if 172 in location["SelectedFacilityList"]:
             item["extras"]["amenity"] = "restaurant"
-        if location["SelectedFacilityList"] contains 173:
+        if 173 in location["SelectedFacilityList"]:
             item["extras"]["pets_allowed"] = "yes"
             item["extras"]["dog"] = "yes"
-        if location["SelectedFacilityList"] contains 175:
+        if 175 in location["SelectedFacilityList"]:
             item["extras"]["leisure"] = "picnic_site"
-        if location["SelectedFacilityList"] contains 176:
+        if 176 in location["SelectedFacilityList"]:
             item["extras"]["leisure"] = "playground"
-        if location["SelectedFacilityList"] contains 177:
+        if 177 in location["SelectedFacilityList"]:
             item["extras"]["wheelchair"] = "yes"
 
     # CATEGORIES location["PrimaryPropertyType"]
