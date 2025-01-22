@@ -22,15 +22,14 @@ class AvalonUSSpider(SitemapSpider):
         location = json.loads(script[start:end])
         item = DictParser.parse(location)
         item["ref"] = location["communityId"]
-        item["brand"] = location["classification"]
+        item["brand"] = location.get("classification")
         item["image"] = response.css("img.communitybanner-img::attr(src)").get()
 
-        oh = OpeningHours()
-        for line in location["officeHours"]:
-            oh.add_ranges_from_string(line)
-        item["extras"]["opening_hours:office"] = oh.as_opening_hours()
-
-        features = {f["icon"].removesuffix(".svg") for f in location["features"]}
+        features = {}
+        for f in location["features"]:
+            if f.get("icon"):
+                icon = f["icon"].removesuffix(".svg")
+                features[icon] = icon
         apply_yes_no(Extras.AIR_CONDITIONING, item, "/attribute-icons/airconditioning" in features)
         apply_yes_no(Extras.AIR_CONDITIONING, item, "airconditioning" in features)
         apply_yes_no(Extras.WHEELCHAIR, item, "adaaccessible" in features)
@@ -42,4 +41,9 @@ class AvalonUSSpider(SitemapSpider):
         if "smokefree" in features:
             apply_yes_no(Extras.SMOKING, item, False, False)
 
-        yield item
+        oh = OpeningHours()
+        if opening_data := location.get("officeHours"):
+            for line in opening_data:
+                oh.add_ranges_from_string(line)
+            item["extras"]["opening_hours:office"] = oh.as_opening_hours()
+            yield item
