@@ -5,11 +5,12 @@ from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
 
+
 class OpticalCenterSpider(SitemapSpider, StructuredDataSpider):
     name = "optical_center"
     item_attributes = {"brand": "Optical Center", "brand_wikidata": "Q3354448"}
     sitemap_urls = ["https://optician.optical-center.co.uk/sitemap.xml"]
-    sitemap_rules = [("https://optician.optical-center.co.uk/","parse_sd")]
+    sitemap_rules = [("https://optician.optical-center.co.uk/", "parse_sd")]
     sitemap_follow = ["locationsitemap"]
     download_delay = 1
     requires_proxy = True
