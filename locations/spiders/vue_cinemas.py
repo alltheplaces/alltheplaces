@@ -17,10 +17,15 @@ class VueCinemasSpider(SitemapSpider):
         jsondata = response.xpath("//script[@id='__NEXT_DATA__']/text()").get()
         cinemadata = json.loads(jsondata)["props"]["pageProps"]["layoutData"]["sitecore"]["context"]["cinema"]
 
-        item["lat"], item["lon"] = cinemadata["cinemaLocationCoordinates"]["value"].split(",")
         item["website"] = response.url.replace("/whats-on", "")
         item["ref"] = item["website"].replace("https://www.myvue.com/cinema/", "")
         item["name"] = "Vue Cinema"
         item["branch"] = item["ref"].replace("-", " ").title()
-        item["addr_full"] = cinemadata["cinemaAddress"]["value"].replace("\n", ",")
+        if cinemadata:
+            item["lat"], item["lon"] = cinemadata["cinemaLocationCoordinates"]["value"].split(",")
+            item["addr_full"] = cinemadata["cinemaAddress"]["value"].replace("\n", ",")
+        else:
+            address_parts = response.xpath("//address/text()").getall()
+            item["addr_full"] = merge_address_lines(address_parts)
+
         yield item
