@@ -16,13 +16,30 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
         },
     }
 
+
+    def post_process_item(self, item, response, location):
+        item["website"] = urljoin("https://www.english-heritage.org.uk", location["Path"])
+        item["extras"]["tourism"] = "attraction"
+
     # FACILITIES location["SelectedFacilityList"]
     # 172 cafe/restaurant
     # 173 dog friendly
     # 174 family favourites
     # 175 picnic seating
     # 176 play area
-    # 177 Wheelchair access
+    # 177 Wheelchair access  
+
+        if location["SelectedFacilityList"] contains 172:
+            item["extras"]["amenity"] = "restaurant"
+        if location["SelectedFacilityList"] contains 173:
+            item["extras"]["pets_allowed"] = "yes"
+            item["extras"]["dog"] = "yes"
+        if location["SelectedFacilityList"] contains 175:
+            item["extras"]["leisure"] = "picnic_site"
+        if location["SelectedFacilityList"] contains 176:
+            item["extras"]["leisure"] = "playground"
+        if location["SelectedFacilityList"] contains 177:
+            item["extras"]["wheelchair"] = "yes"
 
     # CATEGORIES location["PrimaryPropertyType"]
     # building:church 1 Abbeys and churches
@@ -32,22 +49,6 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
     # historic:building,building:yes 5 Medieval and Tudor
     # historic=archaeological_site, historic:civilization=prehistoric  6 Prehistoric
     # historic=archaeological_site, historic:civilization=roman 7 Roman
-
-    def post_process_item(self, item, response, location):
-        item["website"] = urljoin("https://www.english-heritage.org.uk", location["Path"])
-        item["extras"]["tourism"] = "attraction"
-
-        if location["SelectedFacilityList"] == 172:
-            item["extras"]["amenity"] = "restaurant"
-        if location["SelectedFacilityList"] == 173:
-            item["extras"]["pets_allowed"] = "yes"
-            item["extras"]["dog"] = "yes"
-        if location["SelectedFacilityList"] == 175:
-            item["extras"]["leisure"] = "picnic_site"
-        if location["SelectedFacilityList"] == 176:
-            item["extras"]["leisure"] = "playground"
-        if location["SelectedFacilityList"] == 177:
-            item["extras"]["wheelchair"] = "yes"
 
         if location["PrimaryPropertyType"] == 1:
             item["extras"]["building"] = "church"
