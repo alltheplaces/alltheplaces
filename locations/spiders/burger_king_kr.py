@@ -7,13 +7,12 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingKRSpider(JSONBlobSpider):
     download_timeout = 60
     name = "burger_king_kr"
-    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
+    item_attributes = {"brand_wikidata": "Q177054"}
     locations_key = ["body", "storInfo"]
 
     def start_requests(self) -> Iterable[JsonRequest | Request]:
