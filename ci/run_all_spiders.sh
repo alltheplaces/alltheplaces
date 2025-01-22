@@ -87,7 +87,7 @@ scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN
 (>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
 tippecanoe --cluster-distance=25 \
-           --drop-rate=1 \
+           --drop-rate=g \
            --maximum-zoom=13 \
            --cluster-maxzoom=g \
            --layer="alltheplaces" \
