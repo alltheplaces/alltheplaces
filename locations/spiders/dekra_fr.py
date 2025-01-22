@@ -25,7 +25,7 @@ class DekraFRSpider(Spider):
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["ref"] = response.url.rsplit("/", 1)[0]
+        item["ref"] = response.url.removeprefix("https://www.dekra-pl.com/centre-detail/")
         item["branch"] = response.xpath('//div[@id="title_dekra"]/text()').get().removeprefix("DEKRA ")
         item["street_address"] = response.xpath(
             '//div[@class="centre-dekra centre-dekra-adresse address-container"]/div[2]/text()'
