@@ -64,4 +64,7 @@ class BurgerKingKRSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         for days_key, days_val in [("storTimeDays", DAYS_WEEKDAY), ("storTimeWeekend", DAYS_WEEKEND)]:
             item["opening_hours"].add_days_range(days_val, *location[days_key].split("~"))
+
+        item["website"] = "https://www.burgerking.co.kr/store/{}".format(item["ref"])
+
         yield item
