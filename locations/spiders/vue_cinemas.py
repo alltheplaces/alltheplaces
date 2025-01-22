@@ -1,9 +1,8 @@
 import json
+
 from scrapy.spiders import SitemapSpider
 
-from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class VueCinemasSpider(SitemapSpider):
@@ -15,12 +14,12 @@ class VueCinemasSpider(SitemapSpider):
     def parse(self, response, **kwargs):
         item = Feature()
         jsondata = response.xpath("//script[@id='__NEXT_DATA__']/text()").get()
-        cinemadata=json.loads(jsondata)["props"]["pageProps"]["layoutData"]["sitecore"]["context"]["cinema"]
+        cinemadata = json.loads(jsondata)["props"]["pageProps"]["layoutData"]["sitecore"]["context"]["cinema"]
 
-        item["lat"],item["lon"] = cinemadata["cinemaLocationCoordinates"]["value"].split(",")
+        item["lat"], item["lon"] = cinemadata["cinemaLocationCoordinates"]["value"].split(",")
         item["website"] = response.url.replace("/whats-on", "")
-        item["ref"] = item["website"].replace("https://www.myvue.com/cinema/","")
+        item["ref"] = item["website"].replace("https://www.myvue.com/cinema/", "")
         item["name"] = "Vue Cinema"
-        item["branch"] = item["ref"].replace("-"," ").title()
-        item["addr_full"] = cinemadata["cinemaAddress"]["value"].replace("\n",",")
+        item["branch"] = item["ref"].replace("-", " ").title()
+        item["addr_full"] = cinemadata["cinemaAddress"]["value"].replace("\n", ",")
         yield item
