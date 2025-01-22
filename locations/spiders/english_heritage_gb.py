@@ -35,9 +35,37 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["website"] = urljoin("https://www.english-heritage.org.uk", location["Path"])
-        # apply_category(Categories.TOURISM_ATTRACTION, item)
+        item["extras"]["tourism"] = "attraction"
 
-        # if location["PrimaryPropertyType"] == 1:
-        #    apply_category(Categories.CHURCH, item)
+        if location["SelectedFacilityList"] == 172:
+            item["extras"]["amenity"] = "restaurant"
+        if location["SelectedFacilityList"] == 173:
+            item["extras"]["pets_allowed"] = "yes"
+            item["extras"]["dog"] = "yes"
+        if location["SelectedFacilityList"] == 175:
+            item["extras"]["leisure"] = "picnic_site"
+        if location["SelectedFacilityList"] == 176:
+            item["extras"]["leisure"] = "playground"
+        if location["SelectedFacilityList"] == 177:
+            item["extras"]["wheelchair"] = "yes"
+
+        if location["PrimaryPropertyType"] == 1:
+            item["extras"]["building"] = "church"
+        if location["PrimaryPropertyType"] == 2:
+            item["extras"]["building"] = "castle"
+        if location["PrimaryPropertyType"] == 3:
+            item["extras"]["leisure"] = "garden"
+        if location["PrimaryPropertyType"] == 4:
+            item["extras"]["building"] = "yes"
+            item["extras"]["historic"] = "building"
+        if location["PrimaryPropertyType"] == 5:
+            item["extras"]["building"] = "yes"
+            item["extras"]["historic"] = "building"
+        if location["PrimaryPropertyType"] == 6:
+            item["extras"]["historic"] = "archaeological_site"
+            item["extras"]["historic:civilization"]="prehistoric"
+        if location["PrimaryPropertyType"] == 7:
+            item["extras"]["historic"] = "archaeological_site"
+            item["extras"]["historic:civilization"]="roman"  
 
         yield item
