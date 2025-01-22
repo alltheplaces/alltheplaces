@@ -25,7 +25,8 @@ class PocztaPolskaPLSpider(Spider):
             url=self.start_url,
             method="POST",
             formdata=self.formdata,
-            callback=self.parse,
+            callback=self.parse,headers={'Referer': 'https://www.poczta-polska.pl/znajdz-punkt/',}
+
         )
 
     def parse(self, response, **kwargs):
