@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 import scrapy
@@ -37,7 +38,11 @@ class HertzSpider(Spider):
         for shop in response.json()["data"]["locations"]:
             item = DictParser.parse(shop)
             item["ref"] = shop["extendedOAGCode"]
-            item["email"] = shop["loc_email"]
+            if email := shop.get("loc_email"):
+                match = re.search(r"([-\w_.+]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", email)
+                if match:
+                    item["email"] = match.group(1)
+
             country_name = shop["country_name"].replace(" ", "")
             city_name = shop["city"].replace(" ", "")
             item["website"] = "/".join(
@@ -53,5 +58,6 @@ class HertzSpider(Spider):
                     ]
                 )
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(ranges_string=shop["hours"])
+            if opening_data := shop.get("hours"):
+                item["opening_hours"].add_ranges_from_string(ranges_string=opening_data)
             yield item
