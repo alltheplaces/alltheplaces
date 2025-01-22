@@ -27,7 +27,7 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
     # 174 family favourites
     # 175 picnic seating
     # 176 play area
-    # 177 Wheelchair access  
+    # 177 Wheelchair access
 
         if location["SelectedFacilityList"] contains 172:
             item["extras"]["amenity"] = "restaurant"
