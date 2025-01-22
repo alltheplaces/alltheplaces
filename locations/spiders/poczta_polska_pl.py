@@ -9,26 +9,19 @@ from locations.items import Feature
 class PocztaPolskaPLSpider(Spider):
     name = "poczta_polska_pl"
     item_attributes = {"brand": "Poczta Polska", "brand_wikidata": "Q168833"}
-    start_url = "https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/find-markers.php"
-
-    formdata = {
-        "tab": "tabPostOffice",
-        "lng": "19",
-        "lat": "52",
-        "province": "0",
-        "district": "0",
-        "ppmapBox_Days": "dni robocze",
-    }
 
     def start_requests(self):
         yield FormRequest(
-            url=self.start_url,
-            method="POST",
-            formdata=self.formdata,
-            callback=self.parse,
-            headers={
-                "Referer": "https://www.poczta-polska.pl/znajdz-punkt/",
+            url="https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/find-markers.php",
+            formdata={
+                "tab": "tabPostOffice",
+                "lng": "19",
+                "lat": "52",
+                "province": "0",
+                "district": "0",
+                "ppmapBox_Days": "dni robocze",
             },
+            headers={"Referer": "https://www.poczta-polska.pl/znajdz-punkt/"},
         )
 
     def parse(self, response, **kwargs):
