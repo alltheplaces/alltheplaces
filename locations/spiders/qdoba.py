@@ -15,4 +15,5 @@ class QdobaSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if ld_data.get("geo"):
+            item["name"] = None
             yield item
