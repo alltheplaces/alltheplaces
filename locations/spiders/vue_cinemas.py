@@ -3,6 +3,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class VueCinemasSpider(SitemapSpider):
