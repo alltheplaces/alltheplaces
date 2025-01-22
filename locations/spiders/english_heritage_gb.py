@@ -63,9 +63,9 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
             item["extras"]["historic"] = "building"
         if location["PrimaryPropertyType"] == 6:
             item["extras"]["historic"] = "archaeological_site"
-            item["extras"]["historic:civilization"]="prehistoric"
+            item["extras"]["historic:civilization"] = "prehistoric"
         if location["PrimaryPropertyType"] == 7:
             item["extras"]["historic"] = "archaeological_site"
-            item["extras"]["historic:civilization"]="roman"  
+            item["extras"]["historic:civilization"] = "roman"
 
         yield item
