@@ -17,42 +17,37 @@ class BurgerKingKRSpider(JSONBlobSpider):
     locations_key = ["body", "storInfo"]
 
     def start_requests(self) -> Iterable[JsonRequest | Request]:
-        headers = {
-            "accept": "*/*",
-            "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-        }
-        data = {
-            "message": json.dumps(
-                {
-                    "header": {
-                        "result": True,
-                        "error_code": "",
-                        "error_text": "",
-                        "info_text": "",
-                        "message_version": "",
-                        "login_session_id": "",
-                        "trcode": "BKR0343",
-                        "cd_call_chnn": "01",
-                    },
-                    "body": {
-                        "dataCount": "2000",
-                        "membershipYn": "",
-                        "orderType": "01",
-                        "page": "1",
-                        "searchKeyword": "",
-                        "serviceCode": [],
-                        "sort": "02",
-                        "yCoordinates": "37.5726506",
-                        "xCoordinates": "126.9810922",
-                        "isAllYn": "Y",
-                    },
-                }
-            )
-        }
         yield FormRequest(
             url="https://www.burgerking.co.kr/burgerking/BKR0343.json",
-            headers=headers,
-            formdata=data,
+            headers={"accept": "*/*"},
+            formdata={
+                "message": json.dumps(
+                    {
+                        "header": {
+                            "result": True,
+                            "error_code": "",
+                            "error_text": "",
+                            "info_text": "",
+                            "message_version": "",
+                            "login_session_id": "",
+                            "trcode": "BKR0343",
+                            "cd_call_chnn": "01",
+                        },
+                        "body": {
+                            "dataCount": "2000",
+                            "membershipYn": "",
+                            "orderType": "01",
+                            "page": "1",
+                            "searchKeyword": "",
+                            "serviceCode": [],
+                            "sort": "02",
+                            "yCoordinates": "37.5726506",
+                            "xCoordinates": "126.9810922",
+                            "isAllYn": "Y",
+                        },
+                    }
+                )
+            },
         )
 
     def post_process_item(self, item, response, location):
