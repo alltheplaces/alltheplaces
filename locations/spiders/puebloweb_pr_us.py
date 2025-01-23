@@ -5,8 +5,8 @@ from locations.storefinders.elfsight import ElfsightSpider
 class PueblowebPRUSSpider(ElfsightSpider):
     name = "puebloweb_pr_us"
     item_attributes = {
-        "brand": "Pueblo Supermarkets",
-        "brand_wikidata": "Pueblo Supermarkets",
+        "brand": "Pueblo",
+        "brand_wikidata": "Q7258464",
         "extras": Categories.SHOP_SUPERMARKET.value,
     }
     host = "core.service.elfsight.com"
