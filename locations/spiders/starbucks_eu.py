@@ -46,6 +46,9 @@ class StarbucksEUSpider(scrapy.Spider):
             item["street_address"] = merge_address_lines(
                 [poi.get("streetAddressLine1"), poi.get("streetAddressLine2"), poi.get("streetAddressLine3")]
             )
+            item["website"] = (
+                f'https://www.starbucks.co.uk/store-locator/{item["ref"]}/{item["branch"].lower().replace(" ", "-").replace("(", "").replace(")", "")}'
+            )
             self.parse_hours(item, poi)
             self.parse_features(item, poi)
             apply_category(Categories.COFFEE_SHOP, item)
