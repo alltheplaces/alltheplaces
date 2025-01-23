@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class VinniesAUSpider(Spider):
     name = "vinnies_au"
-    item_attributes = {"brand": "Vinnies", "brand_wikidata": "Q117547405", "extras": Categories.SHOP_CHARITY.value}
+    item_attributes = {"brand": "Vinnies", "brand_wikidata": "Q7592120", "extras": Categories.SHOP_CHARITY.value}
     allowed_domains = ["cms.vinnies.org.au"]
     start_urls = ["https://cms.vinnies.org.au/api/shops/get"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
