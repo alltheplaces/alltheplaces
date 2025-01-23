@@ -13,6 +13,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class PepSpider(Spider):
     name = "pep"
     start_urls = ["https://www.pepstores.com/cdn/shop/t/3/assets/env.js"]
+    brands = {
+        "PEP": ("PEP", "Q7166182"),
+        "PEP Cell": ("PEP Cell", "Q128802743"),
+        "PEP Home": ("PEP Home", "Q128802022"),
+    }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         if api_key := re.search(r"middleware_api_key=\"(.+?)\"", response.text):
@@ -33,16 +38,7 @@ class PepSpider(Spider):
             if not location.get("latitude") and not item["street_address"]:  # Not enough address info
                 continue
 
-            if item["name"].startswith("PEP Cell"):
-                item["brand"] = "PEP Cell"
-                item["brand_wikidata"] = "Q128802743"
-            elif item["name"].startswith("PEP Home"):
-                item["brand"] = "PEP Home"
-                item["brand_wikidata"] = "Q128802022"
-            else:
-                item["brand"] = "PEP"
-                item["brand_wikidata"] = "Q7166182"
-
+            item["brand"], item["brand_wikidata"] = self.brands.get(location["brand"].strip()) or self.brands["PEP"]
             item["branch"] = item.pop("name").replace(item["brand"], "").strip()
 
             item["opening_hours"] = OpeningHours()
