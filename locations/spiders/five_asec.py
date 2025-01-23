@@ -8,7 +8,7 @@ from locations.items import Feature
 
 
 class FiveAsecSpider(SitemapSpider):
-    name = "5asec"
+    name = "five_asec"
     item_attributes = {"brand": "5àsec", "brand_wikidata": "Q2817899"}
     sitemap_urls = ["https://www.5asec.fr/sitemap.xml"]
     sitemap_rules = [(r"fr/fr/trouvez-votre-pressing-5asec/[^/]+/[^/]+/([^/]+)$", "parse")]
