@@ -5,6 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class PepSpider(Spider):
@@ -25,6 +26,7 @@ class PepSpider(Spider):
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
+            item["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
 
             if item["name"].startswith("PEP Cell"):
                 item["brand"] = "PEP Cell"
