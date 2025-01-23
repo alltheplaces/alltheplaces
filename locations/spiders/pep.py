@@ -1,3 +1,4 @@
+import json
 import re
 from typing import Any
 
@@ -5,6 +6,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -42,5 +44,14 @@ class PepSpider(Spider):
                 item["brand_wikidata"] = "Q7166182"
 
             item["branch"] = item.pop("name").replace(item["brand"], "").strip()
+
+            item["opening_hours"] = OpeningHours()
+            if hours_text := location.get("openingHours") or location.get("opening_hours"):
+                opening_hours = json.loads(hours_text)
+                for rule in opening_hours:
+                    if day := sanitise_day(rule):
+                        item["opening_hours"].add_range(
+                            day, opening_hours[rule]["open"], opening_hours[rule]["close"], "%H:%M:%S"
+                        )
 
             yield item
