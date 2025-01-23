@@ -1,7 +1,6 @@
 import json
 import re
 
-import chompjs
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -38,7 +37,12 @@ class MigrosCHSpider(SitemapSpider):
 
     def parse(self, response):
 
-        data = json.loads(re.search(r'({.*})\]n',response.xpath('//*[contains(text(),"initialActiveStore")]/text()').get().replace('\\',"")).group(1))
+        data = json.loads(
+            re.search(
+                r"({.*})\]n",
+                response.xpath('//*[contains(text(),"initialActiveStore")]/text()').get().replace("\\", ""),
+            ).group(1)
+        )
         store = data["initialActiveStore"]
         loc = store["location"]
         for market in store["markets"]:
