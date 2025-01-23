@@ -1,11 +1,13 @@
+from datetime import datetime
 from typing import Iterable
 
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
@@ -30,7 +32,7 @@ class StarbucksEUSpider(scrapy.Spider):
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv"):
             yield scrapy.Request(base_url.format(lat, lon))
 
-    def parse(self, response) -> Iterable[Feature]:
+    def parse(self, response: Response) -> Iterable[Feature]:
         for poi in response.json().get("data", []):
             # Help to DictParser a bit
             attributes = poi.pop("attributes", {})
@@ -50,9 +52,9 @@ class StarbucksEUSpider(scrapy.Spider):
             yield item
 
     def parse_hours(self, item: Feature, poi: dict):
-        hours = poi.get("openHours") or {}
+        hours = poi.get("openHours", [])
 
-        if poi.get("open24x7") is True or hours.get("open24x7") is True:
+        if poi.get("open24x7") is True:
             item["opening_hours"] = "24/7"
             return
 
@@ -61,20 +63,15 @@ class StarbucksEUSpider(scrapy.Spider):
 
         try:
             oh = OpeningHours()
-            for day_name, data in hours.items():
-                if day_name == "open24x7":
-                    # Already handled above
-                    continue
-
-                day = DAYS_EN.get(day_name.title())
-
-                if data is None or data.get("open") is False:
+            for rule in hours:
+                day = datetime.fromisoformat(rule.get("date")).strftime("%A")
+                if rule.get("open") is False:
                     oh.set_closed(day)
                     continue
 
-                open_time = data.get("openTime")
-                close_time = data.get("closeTime")
-                if data.get("open24Hours") is True:
+                open_time = rule.get("openTime")
+                close_time = rule.get("closeTime")
+                if rule.get("open24Hours") is True:
                     open_time = "00:00"
                     close_time = "23:59"
                 oh.add_range(day, open_time, close_time, time_format="%H:%M:%S")
