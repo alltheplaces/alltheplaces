@@ -1,53 +1,35 @@
+import re
+from typing import Any
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class PepSpider(Spider):
     name = "pep"
-    allowed_domains = ["pepstores.com"]
-    start_urls = ["https://www.pepstores.com/graphql?operationName=nearbyStores"]
+    start_urls = ["https://www.pepstores.com/cdn/shop/t/3/assets/env.js"]
 
-    def start_requests(self):
-        graphql_query = """query nearbyStores($brandId: String, $latitude: Float, $longitude: Float, $radius: Int) {
-          nearbyStores(
-            brandId: $brandId
-            latitude: $latitude
-            longitude: $longitude
-            radius: $radius
-          ) {
-              address
-              branch_id
-              business_hours
-              description
-              distance
-              latitude
-              longitude
-              store_brand
-              telephone_number
-              __typename
-            }
-        }"""
-        data = {
-            "operationName": "nearbyStores",
-            "variables": {"brandId": "pep", "latitude": -22, "longitude": 24, "radius": 2000},
-            "query": graphql_query,
-        }
-        for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", data=data)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        if api_key := re.search(r"middleware_api_key=\"(.+?)\"", response.text):
+            token = api_key.group(1)
+            yield JsonRequest(
+                url="https://pep.commercebridge.tech/rest/v1/store/locator?limit=10000",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                },
+                callback=self.parse_locations,
+            )
 
-    def parse(self, response):
-        for location in response.json()["data"]["nearbyStores"]:
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json():
             item = DictParser.parse(location)
 
-            item["name"] = location.get("description")
-
-            if location.get("description").startswith("PEP Cell"):
+            if item["name"].startswith("PEP Cell"):
                 item["brand"] = "PEP Cell"
                 item["brand_wikidata"] = "Q128802743"
-            elif location.get("description").startswith("PEP Home"):
+            elif item["name"].startswith("PEP Home"):
                 item["brand"] = "PEP Home"
                 item["brand_wikidata"] = "Q128802022"
             else:
@@ -55,14 +37,5 @@ class PepSpider(Spider):
                 item["brand_wikidata"] = "Q7166182"
 
             item["branch"] = item.pop("name").replace(item["brand"], "").strip()
-
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(
-                # 00H00-00H00 was interpreted as being open all day, but has the opposite meaning
-                location["business_hours"]
-                .replace("00H00-00H00", "closed")
-                .replace("\\n", " ")
-                .replace("H", ":")
-            )
 
             yield item
