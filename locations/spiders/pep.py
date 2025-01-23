@@ -28,6 +28,9 @@ class PepSpider(Spider):
             item = DictParser.parse(location)
             item["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
 
+            if not location.get("latitude") and not item["street_address"]:  # Not enough address info
+                continue
+
             if item["name"].startswith("PEP Cell"):
                 item["brand"] = "PEP Cell"
                 item["brand_wikidata"] = "Q128802743"
