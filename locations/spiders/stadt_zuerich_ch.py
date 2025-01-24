@@ -65,6 +65,8 @@ class StadtZuerichCHSpider(scrapy.Spider):
     def parse(self, response):
         for f in response.json()["features"]:
             if item := self.parse_item(f):
+                if item["ref"] == "vap105184":
+                    continue
                 yield item
 
     def parse_item(self, f):
