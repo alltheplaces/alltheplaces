@@ -15,11 +15,9 @@ class JDWetherspoonSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in chompjs.parse_js_object(
-            response.xpath('//script[@id="filter-google-maps-js-after"]/text()').get()
+            response.xpath('//*[contains(text(),"pubsData")]/text()').get()
         ):
             item = DictParser.parse(location)
-            item["name"] = html.unescape(item["name"])
-            item["image"] = location["featured_image"]
             item["ref"] = item["website"]
 
             yield item
