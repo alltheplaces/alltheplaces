@@ -17,6 +17,7 @@ class AlphaBankGRSpider(Spider):
         for branch in data.get("Branches", []):
             item = self.parse_poi(branch)
             apply_category(Categories.BANK, item)
+            item["branch"] = item.pop("name")
 
             yield item
 
