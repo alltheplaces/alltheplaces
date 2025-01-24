@@ -38,16 +38,14 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
         # historic=archaeological_site, historic:civilization=roman 7 Roman
 
         if location["PrimaryPropertyType"] == 1:
-            item["extras"]["building"] = "church"
+            item["extras"]["historic"] = "church"
         if location["PrimaryPropertyType"] == 2:
-            item["extras"]["building"] = "castle"
+            item["extras"]["historic"] = "castle"
         if location["PrimaryPropertyType"] == 3:
             item["extras"]["leisure"] = "garden"
         if location["PrimaryPropertyType"] == 4:
-            item["extras"]["building"] = "yes"
             item["extras"]["historic"] = "building"
         if location["PrimaryPropertyType"] == 5:
-            item["extras"]["building"] = "yes"
             item["extras"]["historic"] = "building"
         if location["PrimaryPropertyType"] == 6:
             item["extras"]["historic"] = "archaeological_site"
