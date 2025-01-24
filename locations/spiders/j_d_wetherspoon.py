@@ -16,5 +16,6 @@ class JDWetherspoonSpider(Spider):
         for location in chompjs.parse_js_object(response.xpath('//*[contains(text(),"pubsData")]/text()').get()):
             item = DictParser.parse(location)
             item["ref"] = item["website"]
+            item["image"] = location["featured_image"]
 
             yield item
