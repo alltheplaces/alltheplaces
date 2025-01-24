@@ -5,18 +5,20 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PizzaHutIESpider(SitemapSpider):
     name = "pizza_hut_ie"
     item_attributes = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q191615"}
     sitemap_urls = ["https://www.pizzahutdelivery.ie/sitemap.xml"]
-    sitemap_rules = [(r"pizzahutdelivery\.ie/index\.php\?s=\w+", "parse")]
+    sitemap_rules = [(r"https:\/\/www\.pizzahutdelivery\.ie\/locations\/(?!.*\.pdf)[^\/]+(?:\/)?", "parse")]
 
     def parse(self, response, **kwargs):
-        if address := response.xpath('//*[contains(text(),"ADDRESS")]/following-sibling::div/text()').get():
+        if address := clean_address(response.xpath('.//*[@class="store-address"]/text()').get()):
             item = Feature()
             item["ref"] = item["website"] = response.url
+            item["name"] = response.xpath('.//*[@class=" xs-text-center h1-store-name"]/text()').get()
             item["addr_full"] = address
             item["phone"] = response.xpath('//a[contains(@href, "tel:")]/text()').get()
             item["opening_hours"] = OpeningHours()
