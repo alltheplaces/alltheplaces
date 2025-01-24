@@ -1,6 +1,4 @@
-from urllib.parse import urljoin
-
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Extras, apply_category, apply_yes_no
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -14,8 +12,9 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
     user_agent = BROWSER_DEFAULT
 
     def post_process_item(self, item, response, location):
-        item["website"] = urljoin("https://www.english-heritage.org.uk", location["Path"])
-        item["extras"]["tourism"] = "attraction"
+        item["website"] = response.urljoin(location["Path"])
+
+        apply_category({"tourism": "attraction"}, item)
 
         # FACILITIES location["SelectedFacilityList"]
         # 172 cafe/restaurant
