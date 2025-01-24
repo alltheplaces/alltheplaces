@@ -10,20 +10,20 @@ from locations.items import Feature
 
 CATEGORY_MAPPING = {
     1: {"brand": "Macrocenter", "brand_wikidata": "Q123194881", "extras": Categories.SHOP_SUPERMARKET.value},
-    2: {"brand": "Migros", "brand_wikidata": "Q1754510", "extras": Categories.SHOP_SUPERMARKET.value},
+    2: {"brand": "Migros", "brand_wikidata": "Q680727", "extras": Categories.SHOP_SUPERMARKET.value},
     5: {
         # 5M Migros is just bigger version of Migros, as well as MM and MMM
         "brand": "Migros",
-        "brand_wikidata": "Q1754510",
+        "brand_wikidata": "Q680727",
         "extras": Categories.SHOP_SUPERMARKET.value,
     },
-    8: {"brand": "Migros Jet", "brand_wikidata": "Q1754510", "extras": Categories.SHOP_CONVENIENCE.value},
+    8: {"brand": "Migros Jet", "brand_wikidata": "Q680727", "extras": Categories.SHOP_CONVENIENCE.value},
     10: {"brand": "Kiosk", "extras": Categories.SHOP_CONVENIENCE.value},
     12: {"brand": "Mion", "extras": Categories.SHOP_CHEMIST.value},
     13: {
         # Migros Toptan aka wholesale
         "brand": "Migros",
-        "brand_wikidata": "Q1754510",
+        "brand_wikidata": "Q680727",
         "extras": Categories.SHOP_WHOLESALE.value,
     },
 }
@@ -31,7 +31,7 @@ CATEGORY_MAPPING = {
 
 class MigrosTRSpider(scrapy.Spider):
     name = "migros_tr"
-    item_attributes = {"brand": "Migros", "brand_wikidata": "Q1754510"}
+    item_attributes = {"brand": "Migros", "brand_wikidata": "Q680727"}
 
     def start_requests(self) -> Iterable[scrapy.Request]:
         yield Request("https://api.migroskurumsal.com/api/StoreLocation/GetStoresWithDetails", method="POST")
