@@ -1,5 +1,6 @@
 from urllib.parse import urljoin
 
+from locations.categories import Extras, apply_yes_no
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -24,17 +25,9 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
         # 176 play area
         # 177 Wheelchair access
 
-        if 172 in location["SelectedFacilityList"]:
-            item["extras"]["amenity"] = "restaurant"
-        if 173 in location["SelectedFacilityList"]:
-            item["extras"]["pets_allowed"] = "yes"
-            item["extras"]["dog"] = "yes"
-        if 175 in location["SelectedFacilityList"]:
-            item["extras"]["leisure"] = "picnic_site"
-        if 176 in location["SelectedFacilityList"]:
-            item["extras"]["leisure"] = "playground"
-        if 177 in location["SelectedFacilityList"]:
-            item["extras"]["wheelchair"] = "yes"
+        apply_yes_no("food", item, 172 in location["SelectedFacilityList"])
+        apply_yes_no(Extras.PETS_ALLOWED, item, 173 in location["SelectedFacilityList"])
+        apply_yes_no(Extras.WHEELCHAIR, item, 177 in location["SelectedFacilityList"])
 
         # CATEGORIES location["PrimaryPropertyType"]
         # building:church 1 Abbeys and churches
