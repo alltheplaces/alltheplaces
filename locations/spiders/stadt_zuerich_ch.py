@@ -11,7 +11,7 @@ from locations.materials import MATERIALS_DE
 class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]
-    download_timeout = 15
+    download_timeout = 20
 
     dataset_attributes = {
         "attribution": "optional",
