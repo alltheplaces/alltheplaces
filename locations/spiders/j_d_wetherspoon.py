@@ -1,3 +1,4 @@
+import html
 from typing import Any
 
 import chompjs
@@ -15,7 +16,8 @@ class JDWetherspoonSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in chompjs.parse_js_object(response.xpath('//*[contains(text(),"pubsData")]/text()').get()):
             item = DictParser.parse(location)
-            item["ref"] = item["website"]
+            item["name"] = html.unescape(item["name"])
             item["image"] = location["featured_image"]
+            item["ref"] = item["website"]
 
             yield item
