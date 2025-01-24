@@ -12,7 +12,7 @@ class PizzaHutIESpider(SitemapSpider):
     name = "pizza_hut_ie"
     item_attributes = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q191615"}
     sitemap_urls = ["https://www.pizzahutdelivery.ie/sitemap.xml"]
-    sitemap_rules = [(r"https:\/\/www\.pizzahutdelivery\.ie\/locations\/(?!.*\.pdf)[^\/]+(?:\/)?", "parse")]
+    sitemap_rules = [(r"pizzahutdelivery\.ie\/locations\/(?!.*\.pdf)[^\/]+(?:\/)?", "parse")]
 
     def parse(self, response, **kwargs):
         if address := clean_address(response.xpath('.//*[@class="store-address"]/text()').get()):
