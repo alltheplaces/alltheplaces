@@ -23,7 +23,7 @@ class AlphaBankGRSpider(Spider):
         for atm in data.get("Atms", []):
             item = self.parse_poi(atm)
             apply_category(Categories.ATM, item)
-            item["branch"] = atm.get("BranchId")
+            item["branch"] = item.pop("name")
 
             yield item
 
