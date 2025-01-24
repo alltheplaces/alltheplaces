@@ -39,7 +39,7 @@ class BurgerKingBRSpider(scrapy.Spider):
             oh = OpeningHours()
             missing_weekdays = self.parse_regular_hours(poi, oh)
             self.parse_special_hours(poi, oh, missing_weekdays)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         except Exception as e:
             self.logger.warning(f"Failed to parse hours: {e}, {poi}")
 
