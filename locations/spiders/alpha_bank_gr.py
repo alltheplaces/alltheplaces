@@ -17,19 +17,18 @@ class AlphaBankGRSpider(Spider):
         for branch in data.get("Branches", []):
             item = self.parse_poi(branch)
             apply_category(Categories.BANK, item)
-            item["branch"] = item.pop("name")
 
             yield item
 
         for atm in data.get("Atms", []):
             item = self.parse_poi(atm)
             apply_category(Categories.ATM, item)
-            item["branch"] = item.pop("name")
 
             yield item
 
     def parse_poi(self, poi):
         item = DictParser.parse(poi)
+        item["branch"] = item.pop("name")
         item["street_address"] = poi.get("AddressMain")
         item["city"] = poi.get("Cityname")
         if poi.get("AccesWeeklyDesc", "") == "Όλο το 24ωρο":
