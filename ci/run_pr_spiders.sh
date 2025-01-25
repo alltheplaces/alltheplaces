@@ -204,6 +204,7 @@ do
             # Warn if the email is not very unique across all the outputs
             unique_emails=$(jq '.features|map(.properties.email) | unique | length' ${OUTFILE})
             unique_email_rate=$(echo "scale=2; ${unique_emails} / ${FEATURE_COUNT} * 100" | bc)
+            echo "${unique_emails} (${unique_email_rate}%) unique email addresses"
             if [ $(echo "${unique_email_rate} < 90" | bc) -eq 1 ]; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
             fi
