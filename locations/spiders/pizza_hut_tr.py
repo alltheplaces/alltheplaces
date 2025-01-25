@@ -11,6 +11,7 @@ class PizzaHutTRSpider(scrapy.Spider):
     name = "pizza_hut_tr"
     item_attributes = PizzaHutUSSpider.PIZZA_HUT
     start_urls = ["https://www.pizzahut.com.tr/static/js/main.c39af298.chunk.js"]
+    download_timeout = 90
 
     def parse(self, response, **kwargs):
         if match := re.search(r"Username[:\s]+\"(.+?)\"[\s,]+Password[:\s]+\"(.+?)\"", response.text):
