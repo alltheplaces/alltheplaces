@@ -182,30 +182,29 @@ do
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
             dupe_dropped=$(jq '."dupefilter/filtered" // 0' "${STATSFILE}")
-            dupe_percent=$(echo "scale=2; ${dupe_dropped} / ${FEATURE_COUNT} * 100" | bc)
-            if [ $(echo "${dupe_percent} > 30" | bc) -eq 1 ]; then
+            dupe_percent=$(awk -v dd="${dupe_dropped}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (dd / fc) * 100 }')
+            if awk -v dp="${dupe_percent}" 'BEGIN { exit !(dp > 30) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
             fi
 
             # Warn if the image URL is not very unique across all the outputs
             unique_image_urls=$(jq '.features|map(.properties.image) | unique | length' ${OUTFILE})
-            unique_image_url_rate=$(echo "scale=2; ${unique_image_urls} / ${FEATURE_COUNT} * 100" | bc)
-            if [ $(echo "${unique_image_url_rate} < 50" | bc) -eq 1 ]; then
+            unique_image_url_rate=$(awk -v uiu="${unique_image_urls}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (uiu / fc) * 100 }')
+            if awk -v uir="${unique_image_url_rate}" 'BEGIN { exit !(uir < 50) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
             fi
 
             # Warn if the phone number is not very unique across all the outputs
             unique_phones=$(jq '.features|map(.properties.phone) | unique | length' ${OUTFILE})
-            unique_phone_rate=$(echo "scale=2; ${unique_phones} / ${FEATURE_COUNT} * 100" | bc)
-            if [ $(echo "${unique_phone_rate} < 90" | bc) -eq 1 ]; then
+            unique_phone_rate=$(awk -v up="${unique_phones}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (up / fc) * 100 }')
+            if awk -v upr="${unique_phone_rate}" 'BEGIN { exit !(upr < 90) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
             fi
 
             # Warn if the email is not very unique across all the outputs
             unique_emails=$(jq '.features|map(.properties.email) | unique | length' ${OUTFILE})
-            unique_email_rate=$(echo "scale=2; ${unique_emails} / ${FEATURE_COUNT} * 100" | bc)
-            echo "${unique_emails} (${unique_email_rate}%) unique email addresses"
-            if [ $(echo "${unique_email_rate} < 90" | bc) -eq 1 ]; then
+            unique_email_rate=$(awk -v ue="${unique_emails}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (ue / fc) * 100 }')
+            if awk -v rate="${unique_email_rate}" 'BEGIN { exit !(rate < 90) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
             fi
 
