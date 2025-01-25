@@ -188,23 +188,23 @@ do
             fi
 
             # Warn if the image URL is not very unique across all the outputs
-            unique_image_urls=$(jq '.features|map(.properties.image) | unique | length' ${OUTFILE})
-            unique_image_url_rate=$(awk -v uiu="${unique_image_urls}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (uiu / fc) * 100 }')
-            if awk -v uir="${unique_image_url_rate}" 'BEGIN { exit !(uir < 50) }'; then
+            unique_image_urls=$(jq '.features | map(.properties.image) | map(select(. != null)) | unique | length' ${OUTFILE})
+            unique_image_url_rate=$(awk -v uiu="${unique_image_urls}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && uiu > 0) { printf "%.2f", (uiu / fc) * 100 } else { printf "0.00" } }')
+            if awk -v uiu="${unique_image_urls}" -v uir="${unique_image_url_rate}" 'BEGIN { exit !(uir < 50 && uiu > 0) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
             fi
 
             # Warn if the phone number is not very unique across all the outputs
-            unique_phones=$(jq '.features|map(.properties.phone) | unique | length' ${OUTFILE})
-            unique_phone_rate=$(awk -v up="${unique_phones}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (up / fc) * 100 }')
-            if awk -v upr="${unique_phone_rate}" 'BEGIN { exit !(upr < 90) }'; then
+            unique_phones=$(jq '.features | map(.properties.phone) | map(select(. != null)) | unique | length' ${OUTFILE})
+            unique_phone_rate=$(awk -v up="${unique_phones}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && up > 0) { printf "%.2f", (up / fc) * 100 } else { printf "0.00" } }')
+            if awk -v up="${unique_phones}" -v upr="${unique_phone_rate}" 'BEGIN { exit !(upr < 90 && up > 0) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
             fi
 
             # Warn if the email is not very unique across all the outputs
-            unique_emails=$(jq '.features|map(.properties.email) | unique | length' ${OUTFILE})
-            unique_email_rate=$(awk -v ue="${unique_emails}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (ue / fc) * 100 }')
-            if awk -v rate="${unique_email_rate}" 'BEGIN { exit !(rate < 90) }'; then
+            unique_emails=$(jq '.features | map(.properties.email) | map(select(. != null)) | unique | length' ${OUTFILE})
+            unique_email_rate=$(awk -v ue="${unique_emails}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && ue > 0) { printf "%.2f", (ue / fc) * 100 } else { printf "0.00" } }')
+            if awk -v ue="${unique_emails}" -v uer="${unique_email_rate}" 'BEGIN { exit !(uer < 90 && ue > 0) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
             fi
 
