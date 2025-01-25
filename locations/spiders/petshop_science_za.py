@@ -3,7 +3,6 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
 
 
 class PetshopScienceZASpider(Spider):
@@ -19,18 +18,11 @@ class PetshopScienceZASpider(Spider):
 
     def parse(self, response):
         for location in response.json()["stores"]:
+            location.update(location.pop("address"))
             item = DictParser.parse(location)
             item["ref"] = item.pop("name")
-            item["branch"] = location["displayName"]
-            item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
-            item["city"] = location["address"].get("town")
-            try:
-                item["state"] = location["address"].get("region").get("name")
-            except:
-                pass
-            item["postcode"] = location["address"].get("postalCode")
-            item["phone"] = location["address"].get("phone")
-            item["email"] = location["address"].get("email")
+            if state := item.get("state"):
+                item["state"] = state
             item["website"] = "https://www.petshopscience.co.za/store-finder/country/ZA/" + location["name"]
             if "openingHours" in location:
                 item["opening_hours"] = OpeningHours()
