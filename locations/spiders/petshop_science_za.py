@@ -22,7 +22,7 @@ class PetshopScienceZASpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = item.pop("name")
             if state := item.get("state"):
-                item["state"] = state.get("name")
+                item["state"] = state
             item["website"] = "https://www.petshopscience.co.za/store-finder/country/ZA/" + location["name"]
             if "openingHours" in location:
                 item["opening_hours"] = OpeningHours()
