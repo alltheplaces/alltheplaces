@@ -38,6 +38,10 @@ class PepSpider(Spider):
             if not location.get("latitude") and not item["street_address"]:  # Not enough address info
                 continue
 
+            # Not unique to the POI
+            item.pop("image", None)
+            item.pop("email", None)
+
             item["brand"], item["brand_wikidata"] = self.brands.get(location["brand"].strip()) or self.brands["PEP"]
             item["branch"] = item.pop("name").replace(item["brand"], "").strip()
 
