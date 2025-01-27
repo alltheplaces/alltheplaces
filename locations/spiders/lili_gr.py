@@ -8,8 +8,8 @@ from locations.hours import DAYS_GR, OpeningHours
 
 
 class LillyGRSpider(Spider):
-    name = "lilly_gr"
-    item_attributes = {"brand": "Lilly", "brand_wikidata": "Q111764460"}
+    name = "lili_gr"
+    item_attributes = {"brand": "Lili", "brand_wikidata": "Q111764460"}
     allowed_domains = ["lilidrogerie.gr"]
     start_urls = ["https://lilidrogerie.gr/wp-json/v1/get-store/?lang=el"]
     no_refs = True
