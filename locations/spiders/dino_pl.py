@@ -18,7 +18,6 @@ class DinoPLSpider(Spider):
     start_urls = ["https://marketdino.pl/external/map/index.html"]
     no_refs = True
 
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Search for the desired JavaScript file
         yield response.follow(
