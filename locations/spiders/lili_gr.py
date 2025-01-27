@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_GR, OpeningHours
 
 
-class LillyGRSpider(Spider):
+class LiliGRSpider(Spider):
     name = "lili_gr"
     item_attributes = {"brand": "Lili", "brand_wikidata": "Q111764460"}
     allowed_domains = ["lilidrogerie.gr"]
