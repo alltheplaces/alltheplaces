@@ -9,14 +9,14 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import CHROME_LATEST
 
 
 class BurgerKingRUSpider(Spider):
     name = "burger_king_ru"
     item_attributes = {"brand": "Бургер Кинг", "brand_wikidata": "Q177054"}
     allowed_domains = ["orderapp.burgerkingrus.ru"]
-    user_agent = BROWSER_DEFAULT
+    user_agent = CHROME_LATEST
     api_url = "https://orderapp.burgerkingrus.ru/api/v3/restaurant/list"
     requires_proxy = True  # Qrator bot blocking in use
 
