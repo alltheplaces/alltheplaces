@@ -18,7 +18,6 @@ class BurgerKingRUSpider(Spider):
     allowed_domains = ["orderapp.burgerkingrus.ru"]
     user_agent = CHROME_LATEST
     api_url = "https://orderapp.burgerkingrus.ru/api/v3/restaurant/list"
-    requires_proxy = True  # Qrator bot blocking in use
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
