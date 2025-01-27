@@ -8,7 +8,7 @@ from locations.hours import DAYS_SR, OpeningHours
 
 class A1RSSpider(Spider):
     name = "a1_rs"
-    item_attributes = {"brand": "A1", "brand_wikidata": "Q826186"}
+    item_attributes = {"brand_wikidata": "Q826186"}
     allowed_domains = ["a1.rs"]
     start_urls = ["https://a1.rs/o-a1/prodaja/prodajna_mesta_mapa"]
 

@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class A3SportCZSpider(Spider):
     name = "a3_sport_cz"
-    item_attributes = {"brand": "A3 Sport", "brand_wikidata": "Q58170961"}
+    item_attributes = {"brand_wikidata": "Q58170961"}
     allowed_domains = ["www.a3sport.cz"]
     start_urls = ["https://www.a3sport.cz/prodejny?type=json&ver=1"]
 
