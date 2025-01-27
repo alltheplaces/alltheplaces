@@ -1,13 +1,14 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class ApcoaSpider(CrawlSpider, StructuredDataSpider):
     name = "apcoa"
-    item_attributes = {"brand": "APCOA Parking", "brand_wikidata": "Q296108"}
+    item_attributes = {"operator": "APCOA Parking", "operator_wikidata": "Q296108"}
     allowed_domains = [
         "www.apcoa.at",
         "www.apcoa.dk",
@@ -58,4 +59,7 @@ class ApcoaSpider(CrawlSpider, StructuredDataSpider):
         item["website"] = response.url
         item["image"] = None
         extract_google_position(item, response)
+
+        apply_category(Categories.PARKING, item)
+
         yield item

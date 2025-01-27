@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class CitroenSpider(scrapy.Spider):
     name = "citroen"
-    item_attributes = {"brand": "Citroen", "brand_wikidata": "Q6746"}
+    item_attributes = {"brand": "Citroën", "brand_wikidata": "Q6746"}
     start_urls = [
         "https://www.citroen.co.uk/apps/atomic/DealersServlet?path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvdWsvZW4%3D&searchType=latlong",
         "https://www.citroen.be/apps/atomic/DealersServlet?distance=30000&latitude=50.84439&longitude=4.35608&maxResults=1000&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvYmVsZ2l1bS9mcl9mcg%3D%3D&searchType=latlong",

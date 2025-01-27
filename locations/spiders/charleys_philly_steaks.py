@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class CharleysPhillySteaksSpider(SitemapSpider, StructuredDataSpider):
     name = "charleys_philly_steaks"
-    item_attributes = {"brand": "Charley's Philly Steaks", "brand_wikidata": "Q1066777"}
+    item_attributes = {"brand": "Charleys Philly Steaks", "brand_wikidata": "Q1066777"}
     sitemap_urls = ["https://www.charleys.com/robots.txt"]
     sitemap_follow = ["locations"]
     sitemap_rules = [(r"/locations/([^/]+)/$", "parse")]

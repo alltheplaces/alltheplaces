@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BluepearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
     name = "bluepearl_pet_hospital_us"
-    item_attributes = {"brand": "BluePearl Pet Hospital", "brand_wikidata": "Q4928764"}
+    item_attributes = {"brand": "BluePearl", "brand_wikidata": "Q4928764"}
     allowed_domains = ["bluepearlvet.com"]
     sitemap_urls = ["https://bluepearlvet.com/hospital-sitemap.xml"]
     sitemap_rules = [(r"\/hospital\/[\w\-]+\/$", "parse_sd")]

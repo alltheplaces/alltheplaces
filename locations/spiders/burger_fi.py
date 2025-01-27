@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class BurgerFISpider(scrapy.Spider):
     name = "burger_fi"
-    item_attributes = {"brand": "Burger Fi", "brand_wikidata": "Q39045496"}
+    item_attributes = {"brand": "BurgerFi", "brand_wikidata": "Q39045496"}
     allowed_domains = ["api.dineengine.io"]
     start_urls = ("https://api.dineengine.io/burgerfi/custom/dineengine/vendor/olo/restaurants?includePrivate=false",)
 
@@ -17,7 +17,7 @@ class BurgerFISpider(scrapy.Spider):
 
             properties = {
                 "ref": r.xpath("@id").extract_first(),
-                "name": r.xpath("@name").extract_first(),
+                "branch": r.xpath("@name").extract_first(),
                 "street_address": r.xpath("@streetaddress").extract_first(),
                 "phone": r.xpath("@telephone").extract_first(),
                 "city": r.xpath("@city").extract_first(),

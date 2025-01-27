@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class CoopersHawkSpider(scrapy.Spider):
     name = "coopers_hawk"
-    item_attributes = {"brand": "Cooper's Hawk", "brand_wikidata": "Q64411347"}
+    item_attributes = {"brand": "Cooper's Hawk", "brand_wikidata": "Q17511079"}
     allowed_domains = ["chwinery.com"]
     start_urls = ("https://chwinery.com/locations",)
 

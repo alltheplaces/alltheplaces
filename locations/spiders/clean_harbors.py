@@ -6,7 +6,7 @@ from locations.items import Feature
 class CleanHarborsSpider(scrapy.Spider):
     # download_delay = 0.2
     name = "clean_harbors"
-    item_attributes = {"brand": "Clean Harbors", "brand_wikidata": "Q5130494"}
+    item_attributes = {"operator": "Clean Harbors", "operator_wikidata": "Q5130494"}
     allowed_domains = ["cleanharbors.com"]
     start_urls = ("https://www.cleanharbors.com/locations/united-states",)
 

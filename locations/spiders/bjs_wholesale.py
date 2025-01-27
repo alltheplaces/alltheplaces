@@ -4,7 +4,7 @@ from datetime import datetime
 
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -14,11 +14,7 @@ DAY_MAPPING = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 class BjsWholesaleSpider(scrapy.Spider):
     name = "bjs_wholesale"
-    item_attributes = {
-        "brand": "BJ's Wholesale",
-        "brand_wikidata": "Q4835754",
-        "extras": Categories.SHOP_WHOLESALE.value,
-    }
+    item_attributes = {"brand": "BJ's Wholesale Club", "brand_wikidata": "Q4835754"}
     allowed_domains = ["bjs.com"]
     start_urls = [
         "https://api.bjs.com/digital/live/apis/v1.0/clublocatorpage/statetowns/10201",
@@ -63,7 +59,7 @@ class BjsWholesaleSpider(scrapy.Spider):
         data = response.json()["Stores"]["PhysicalStore"][0]
 
         properties = {
-            "name": data["Description"][0]["displayStoreName"],
+            "branch": data["Description"][0]["displayStoreName"],
             "ref": data["storeName"],
             "street_address": clean_address(data["addressLine"]),
             "city": data["city"].strip(),
@@ -79,6 +75,8 @@ class BjsWholesaleSpider(scrapy.Spider):
         hours = self.parse_hours([attr for attr in data["Attribute"] if attr["name"] == "Hours of Operation"])
         if hours:
             properties["opening_hours"] = hours
+
+        apply_category(Categories.SHOP_WHOLESALE, properties)
 
         yield Feature(**properties)
 

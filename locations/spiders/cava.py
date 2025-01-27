@@ -7,7 +7,7 @@ from locations.items import Feature
 class CavaSpider(scrapy.Spider):
     name = "cava"
     allowed_domains = ["www.cava.com"]
-    item_attributes = {"brand": "Cava", "brand_wikidata": "Q85751038"}
+    item_attributes = {"brand": "CAVA", "brand_wikidata": "Q85751038"}
     start_urls = ("https://cava.com/locations/",)
 
     def parse(self, response):

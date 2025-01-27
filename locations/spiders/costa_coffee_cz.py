@@ -1,18 +1,17 @@
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class CostaCoffeeCZSpider(scrapy.Spider):
     name = "costa_coffee_cz"
     brands = {
-        "costa": {"brand": "Costa Coffee", "brand_wikidata": "Q608845", "extras": Categories.COFFEE_SHOP.value},
-        "express": {
-            "brand": "Costa Express",
-            "brand_wikidata": "Q113556385",
-            "extras": Categories.VENDING_MACHINE_COFFEE.value,
-        },
+        "costa": ({"brand": "Costa", "brand_wikidata": "Q608845"}, Categories.COFFEE_SHOP),
+        "express": (
+            {"brand": "Costa Express", "brand_wikidata": "Q113556385"},
+            Categories.VENDING_MACHINE_COFFEE,
+        ),
     }
     SHELL = {"brand": "Shell", "brand_wikidata": "Q154950"}
     start_urls = ["https://loc.costa-coffee.cz/locator/"]
@@ -31,7 +30,8 @@ class CostaCoffeeCZSpider(scrapy.Spider):
             item["website"] = response.url
             store_type = shop.xpath("./@data-type").get()
             if brand := self.brands.get(store_type):
-                item.update(brand)
+                item.update(brand[0])
+                apply_category(brand[1], item)
             if "SHELL" in item["name"].upper():
                 item["located_in"], item["located_in_wikidata"] = self.SHELL.values()
             yield item

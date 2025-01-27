@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class CostaCoffeeGGGBIMJESpider(Spider):
     name = "costa_coffee_gg_gb_im_je"
-    item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
+    item_attributes = {"brand": "Costa", "brand_wikidata": "Q608845"}
     allowed_domains = ["www.costa.co.uk"]
     start_urls = ["https://www.costa.co.uk/api/mdm/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # No robots.txt. 404 HTML page returned instead.

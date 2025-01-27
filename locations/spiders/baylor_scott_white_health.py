@@ -7,7 +7,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class BaylorScottWhiteHealthSpider(scrapy.Spider):
     name = "baylor_scott_white_health"
-    item_attributes = {"brand": "Baylor Scott & White Health", "brand_wikidata": "Q41568258"}
+    item_attributes = {"operator": "Baylor Scott & White Health", "operator_wikidata": "Q41568258"}
     allowed_domains = ["phyndapi.bswapi.com"]
     base_url = "https://phyndapi.bswapi.com/V4/Places/GetLocations"
 

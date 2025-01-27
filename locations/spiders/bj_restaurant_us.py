@@ -13,7 +13,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 class BjRestaurantUSSpider(Spider):
     name = "bj_restaurant_us"
-    item_attributes = {"brand": "BJ's Restaurant & Brewery", "brand_wikidata": "Q4835755"}
+    item_attributes = {"brand": "BJ's", "brand_wikidata": "Q4835755"}
     start_urls = ["https://www.bjsrestaurants.com/sitemap"]
     rules = [Rule(LinkExtractor(r"https://www.bjsrestaurants.com/locations/\w\w/\w+"), "parse")]
 
