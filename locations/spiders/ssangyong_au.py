@@ -1,7 +1,6 @@
 from typing import Iterable
 
 from chompjs import parse_js_object
-
 from scrapy import Spider
 from scrapy.http import Request, Response
 
@@ -19,7 +18,9 @@ class SsangyongAUSpider(Spider):
 
     def parse(self, response: Response) -> Iterable[Request]:
         for external_script in response.xpath('//script[contains(@src, "/_next/static/chunks/")]/@src').getall():
-            yield Request(url="https://{}{}".format(self.allowed_domains[0], external_script), callback=self.parse_js_file)
+            yield Request(
+                url="https://{}{}".format(self.allowed_domains[0], external_script), callback=self.parse_js_file
+            )
 
     def parse_js_file(self, response: Response) -> Iterable[Feature]:
         if '=JSON.parse(\'[{"ID":' in response.text:
@@ -41,7 +42,13 @@ class SsangyongAUSpider(Spider):
                     sales_item["phone"] = feature.get("DealerTelephone")
                     sales_item["email"] = feature.get("DealerEmail")
                     sales_item["opening_hours"] = OpeningHours()
-                    sales_item["opening_hours"].add_ranges_from_string("Mon-Fri: {}, Sat: {}, Sun: {}".format(feature.get("DealerOpenMonFri") or "closed", feature.get("DealerOpenSaturday") or "closed", feature.get("DealerOpenSunday") or "closed"))
+                    sales_item["opening_hours"].add_ranges_from_string(
+                        "Mon-Fri: {}, Sat: {}, Sun: {}".format(
+                            feature.get("DealerOpenMonFri") or "closed",
+                            feature.get("DealerOpenSaturday") or "closed",
+                            feature.get("DealerOpenSunday") or "closed",
+                        )
+                    )
                     apply_category(Categories.SHOP_CAR, sales_item)
                     yield sales_item
                 if feature.get("IsServiceStore"):
@@ -50,7 +57,13 @@ class SsangyongAUSpider(Spider):
                     service_item["phone"] = feature.get("ServiceTelephone")
                     service_item["email"] = feature.get("ServiceEmail")
                     service_item["opening_hours"] = OpeningHours()
-                    service_item["opening_hours"].add_ranges_from_string("Mon-Fri: {}, Sat: {}, Sun: {}".format(feature.get("ServiceOpenMonFri") or "closed", feature.get("ServiceOpenSaturday") or "closed", feature.get("ServiceOpenSunday") or "closed"))
+                    service_item["opening_hours"].add_ranges_from_string(
+                        "Mon-Fri: {}, Sat: {}, Sun: {}".format(
+                            feature.get("ServiceOpenMonFri") or "closed",
+                            feature.get("ServiceOpenSaturday") or "closed",
+                            feature.get("ServiceOpenSunday") or "closed",
+                        )
+                    )
                     apply_category(Categories.SHOP_CAR_REPAIR, service_item)
                     yield service_item
                 if feature.get("IsPartsStore"):
@@ -59,6 +72,12 @@ class SsangyongAUSpider(Spider):
                     parts_item["phone"] = feature.get("PartsTelephone")
                     parts_item["email"] = feature.get("PartsEmail")
                     parts_item["opening_hours"] = OpeningHours()
-                    parts_item["opening_hours"].add_ranges_from_string("Mon-Fri: {}, Sat: {}, Sun: {}".format(feature.get("PartsOpenMonFri") or "closed", feature.get("PartsOpenSaturday") or "closed", feature.get("PartsOpenSunday") or "closed"))
+                    parts_item["opening_hours"].add_ranges_from_string(
+                        "Mon-Fri: {}, Sat: {}, Sun: {}".format(
+                            feature.get("PartsOpenMonFri") or "closed",
+                            feature.get("PartsOpenSaturday") or "closed",
+                            feature.get("PartsOpenSunday") or "closed",
+                        )
+                    )
                     apply_category(Categories.SHOP_CAR_PARTS, parts_item)
                     yield parts_item
