@@ -33,4 +33,5 @@ class KfcITSpider(Spider):
                         oph.add_range(DAYS_IT[day["label_day"]], "closed", "closed")
             accessible = any(map(lambda s: s["code"] == "DISABLED", store["services"]))
             apply_yes_no("wheelchair", item, accessible, apply_positive_only=False)
+            item["street_address"] = item.pop("addr_full", None)
             yield item

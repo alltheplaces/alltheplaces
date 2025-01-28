@@ -34,4 +34,5 @@ class HarcourtsSpider(JSONBlobSpider):
             item["country"] = "FJ"
         item["ref"] = "https://harcourts.net" + location["url"]
         item["website"] = "https://harcourts.net" + location["url"]
+        item["street_address"] = item.pop("addr_full", None)
         yield item

@@ -4,6 +4,7 @@ import time
 from collections import defaultdict
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
 DAYS_3_LETTERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 DAYS_3_LETTERS_FROM_SUNDAY = DAYS_3_LETTERS[-1:] + DAYS_3_LETTERS[:-1]
 DAYS_FULL = [
@@ -18,10 +19,25 @@ DAYS_FULL = [
 DAYS_WEEKDAY = ["Mo", "Tu", "We", "Th", "Fr"]
 DAYS_WEEKEND = ["Sa", "Su"]
 
-# The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
+# The below DAYS dicts are provided to be used with sanitise_day in order for us to do best attempts at matching the
 # given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
 
-DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa", "So": "Su"}
+DAYS_AT = {
+    "Mo": "Mo",
+    "Montag": "Mo",
+    "Di": "Tu",
+    "Dienstag": "Tu",
+    "Mi": "We",
+    "Mittwoch": "We",
+    "Do": "Th",
+    "Donnerstag": "Th",
+    "Fr": "Fr",
+    "Freitag": "Fr",
+    "Sa": "Sa",
+    "Samstag": "Sa",
+    "So": "Su",
+    "Sonntag": "Su",
+}
 
 DAYS_EN = {
     "Monday": "Mo",
@@ -668,7 +684,7 @@ DAYS_ID = {
 }
 
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
-# A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
+# A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
 DAYS_BY_FREQUENCY = [
     DAYS_EN,
@@ -783,6 +799,7 @@ DELIMITERS_IT = [
     "il",
     "fino al",
     "alle",
+    "alla",
     "fino alle",
     "dalle",
     "dalle ore",
@@ -833,9 +850,17 @@ DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
 DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
+CLOSED_AT = ["geschlossen"]
+
 CLOSED_EN = ["closed", "off"]
 
+CLOSED_DE = ["geschlossen"]
+
 CLOSED_IT = ["chiuso", "chiusi", "siamo chiusi"]
+
+CLOSED_NL = ["gesloten"]
+
+CLOSED_TH = ["ปิดทำการ"]
 
 logger = logging.getLogger(__name__)
 
@@ -879,8 +904,9 @@ class OpeningHours:
         """
         Mark days where the location has stated they are closed; as opposed to simply not provided or known from survey hours.
 
-        This differs slightly to https://wiki.openstreetmap.org/wiki/Key:opening_hours; in that 'off' or 'closed'
-        are more frequently output.
+        This matches the syntax of https://wiki.openstreetmap.org/wiki/Key:opening_hours.
+        Use of this in All the Places is more common than in OpenStreetMap where use of 'off' or 'closed'
+        is quite uncommon.
 
         Recommended to use with an appropriate helper to pass a specific string or list, ie:
         `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
@@ -1186,7 +1212,7 @@ class OpeningHours:
             days_regex
             + r"(?:\W+|"
             + OpeningHours.delimiters_regex(delimiters)
-            + r")((?:(?:\s*(?:,|/)?\s*)?"
+            + r")((?:(?:\s*(?:,|/|-)?\s*)?"
             + OpeningHours.time_of_day_regex(time_24h=time_24h)
             + OpeningHours.delimiters_regex(delimiters)
             + OpeningHours.time_of_day_regex(time_24h=time_24h)

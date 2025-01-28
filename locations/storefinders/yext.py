@@ -88,22 +88,27 @@ class YextSpider(Spider):
                     )
 
             if "hours" in location:
-                item["opening_hours"] = OpeningHours()
-                for day_name, day_intervals in location["hours"].items():
-                    if day_name == "holidayHours":
-                        continue
-                    if "isClosed" in day_intervals and day_intervals["isClosed"]:
-                        continue
-                    if "openIntervals" not in day_intervals:
-                        continue
-                    for interval in day_intervals["openIntervals"]:
-                        item["opening_hours"].add_range(day_name.title(), interval["start"], interval["end"])
+                item["opening_hours"] = self.parse_opening_hours(location["hours"])
 
             yield from self.parse_item(item, location) or []
 
         next_offset = response.meta["offset"] + self.page_limit
         if next_offset < response.json()["response"]["count"]:
             yield from self.request_page(next_offset)
+
+    @staticmethod
+    def parse_opening_hours(hours):
+        oh = OpeningHours()
+        for day_name, day_intervals in hours.items():
+            if day_name == "holidayHours":
+                continue
+            if "isClosed" in day_intervals and day_intervals["isClosed"]:
+                continue
+            if "openIntervals" not in day_intervals:
+                continue
+            for interval in day_intervals["openIntervals"]:
+                oh.add_range(day_name.title(), interval["start"], interval["end"])
+        return oh
 
     def parse_item(self, item, location, **kwargs):
         yield item

@@ -46,6 +46,7 @@ class Categories(Enum):
     CRAFT_LOCKSMITH = {"craft": "locksmith"}
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
+    CRAFT_WATCHMAKER = {"craft": "watchmaker"}
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
@@ -269,6 +270,7 @@ class Categories(Enum):
     OPTOMETRIST = {"healthcare": "optometrist"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
     PODIATRIST = {"healthcare": "podiatrist"}
     POST_BOX = {"amenity": "post_box"}
@@ -299,6 +301,7 @@ class Categories(Enum):
     VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
+    VENDING_MACHINE_KEYS = {"amenity": "vending_machine", "vending": "key"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
@@ -314,7 +317,15 @@ class Categories(Enum):
 
     ANTENNA = {"man_made": "antenna"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
+    SUBSTATION = {"power": "substation"}
+    SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
+    SUBSTATION_MINOR_DISTRIBUTION = {"power": "substation", "substation": "minor_distribution"}
+    SUBSTATION_INDUSTRIAL = {"power": "substation", "substation": "industrial"}
+    SUBSTATION_TRACTION = {"power": "substation", "substation": "traction"}
+    SUBSTATION_TRANSMISSION = {"power": "substation", "substation": "transmission"}
+    SUBSTATION_ZONE = {"power": "substation", "substation": "distribution"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
+    TRANSFORMER = {"power": "transformer"}
 
 
 def apply_category(category, item: Feature):
@@ -354,6 +365,7 @@ def apply_category(category, item: Feature):
 
 
 top_level_tags = [
+    "aeroway",
     "amenity",
     "club",
     "craft",
@@ -365,19 +377,19 @@ top_level_tags = [
     "leisure",
     "man_made",
     "office",
+    "power",
     "public_transport",
     "shop",
+    "telecom",
     "tourism",
-    "aeroway",
     "railway",
     "waterway",
-    "telecom",
 ]
 
 
 def get_category_tags(source: Feature | Enum | dict) -> dict:
     """
-    Retreive OpenStreetMap top level tags from a Feature, Enum or
+    Retrieve OpenStreetMap top level tags from a Feature, Enum or
     dict. All top level tags can exist on their own and do not
     require the presence of other tags. If the Feature, Enum or dict
     supplied contains other tags, these are ignored.
@@ -462,7 +474,7 @@ class Fuel(Enum):
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
-    ELECTRIC = "fuel:electric"  # Electric vehicle charger
+    ELECTRIC = "fuel:electricity"  # Electric vehicle charger
 
 
 class Extras(Enum):
@@ -502,6 +514,7 @@ class Extras(Enum):
     NEW_CAR_SALES = "service:vehicle:new_car_sales"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
+    PARCEL_MAIL_IN = "parcel_mail_in"
     PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
@@ -900,6 +913,23 @@ class Drink(Enum):
     WATER = "drink:water"
     WHISKY = "drink:whisky"
     WINE = "drink:wine"
+
+
+class Sells(Enum):
+    """
+    For uncommon sold items, prefix sells:* is in proposal
+    https://wiki.openstreetmap.org/wiki/Proposal:Sells:
+    """
+
+    BOOKS = "sells:books"
+    CLOTHES = "sells:clothes"
+    CONTACT_LENSES = "sells:contact_lenses"
+    ELECTRONICS = "sells:electronics"
+    EYEGLASSES = "sells:eyeglasses"
+    JEWELRY = "sells:jewelry"
+    NEWSPAPERS = "sells:newspapers"
+    PET_SUPPLIES = "sells:pet_supplies"
+    TOBACCO = "sells:tobacco"
 
 
 # TODO: something similar for fuel types

@@ -11,6 +11,7 @@ from locations.materials import MATERIALS_DE
 class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]
+    download_timeout = 20
 
     dataset_attributes = {
         "attribution": "optional",
@@ -64,6 +65,8 @@ class StadtZuerichCHSpider(scrapy.Spider):
     def parse(self, response):
         for f in response.json()["features"]:
             if item := self.parse_item(f):
+                if item["ref"] == "vap105184":
+                    continue
                 yield item
 
     def parse_item(self, f):
@@ -103,7 +106,8 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "wvz_brunnen": self.parse_fountain,
             "zweiradabstellplaetze_p": self.parse_bicycle_parking,
         }.get(id.split(".")[0]):
-            tags.update(parser(props))
+            if parser(props) is not None:
+                tags.update(parser(props))
 
         item = {
             "addr_full": tags.pop("addr:full", None),
@@ -209,14 +213,15 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "Beide": {"amenity": "bicycle_parking", "motorcycle": "yes"},
         }.get(p["name"])
         operator, operator_wikidata = self.operators["Tiefbauamt"]
-        tags.update(
-            {
-                "capacity": str(int(p.get("anzahl_pp", 0))) or None,
-                "name": None,
-                "operator": operator,
-                "operator:wikidata": operator_wikidata,
-            }
-        )
+        if tags is not None:
+            tags.update(
+                {
+                    "capacity": str(int(p.get("anzahl_pp", 0))) or None,
+                    "name": None,
+                    "operator": operator,
+                    "operator:wikidata": operator_wikidata,
+                }
+            )
         return tags
 
     def parse_fountain(self, p):

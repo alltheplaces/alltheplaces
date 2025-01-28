@@ -1,43 +1,31 @@
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
 
-from locations.hours import DAYS_EN, OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
+import scrapy
+from scrapy import Request
+
+from locations.dict_parser import DictParser
 
 
-class PradaSpider(SitemapSpider, StructuredDataSpider):
+class PradaSpider(scrapy.Spider):
     name = "prada"
     item_attributes = {"brand": "Prada", "brand_wikidata": "Q193136"}
-    allowed_domains = ["www.prada.com"]
-    sitemap_urls = ["https://www.prada.com/us/en/sitemap.xml"]
-    sitemap_rules = [("/store-locator/store", "parse_sd")]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item.pop("image")
-        item.pop("facebook")
-        item.pop("twitter")
-        item["ref"] = response.xpath('//div[contains(@class, "singleStore")]/@data-store-id').extract_first()
-
-        # Note that some stores open and close multiple times per day, hence the somewhat complicated OpeningHours extraction that follows.
-        hours_raw = (
-            ld_data["openingHours"]
-            .replace("--", "0:00 am - 0:00 am")
-            .replace("-", "")
-            .replace(" am", "AM")
-            .replace(" pm", "PM")
-            .split()
+    def make_request(self, offset: int):
+        return scrapy.Request(
+            url="https://cdn.yextapis.com/v2/accounts/me/search/vertical/query?api_key=61119b3d853ae12bf41e7bd9501a718b&v=20220511&limit=50&experienceKey=prada-experience&verticalKey=prada-locations&retrieveFacets=true&offset={}".format(
+                offset
+            ),
+            cb_kwargs={"offset": offset},
         )
-        oh = OpeningHours()
-        current_day = None
-        start_time = None
-        for segment in hours_raw:
-            if segment in DAYS_EN:
-                current_day = DAYS_EN[segment]
-            elif start_time is None:
-                start_time = segment
-            else:
-                if start_time != "0:00AM" and segment != "0:00AM":
-                    oh.add_range(current_day, start_time, segment, "%I:%M%p")
-                start_time = None
-        item["opening_hours"] = oh.as_opening_hours()
 
-        yield item
+    def start_requests(self) -> Iterable[Request]:
+        yield self.make_request(0)
+
+    def parse(self, response, **kwargs):
+        if raw_data := response.json()["response"]["results"]:
+            for store in raw_data:
+                item = DictParser.parse(store["data"])
+                item["website"] = "https://www.prada.com/us/en/store-locator/" + store["data"]["slug"]
+                yield item
+            current_offeset = kwargs["offset"] + 50
+            yield self.make_request(current_offeset)

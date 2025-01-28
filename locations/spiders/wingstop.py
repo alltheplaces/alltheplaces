@@ -14,7 +14,7 @@ class WingstopSpider(scrapy.Spider):
             lat=store_json["latitude"],
             lon=store_json["longitude"],
             name=store_json["name"],
-            addr_full=store_json["streetaddress"],
+            street_address=store_json["streetaddress"],
             city=store_json["city"],
             state=store_json["state"],
             postcode=store_json["zip"],

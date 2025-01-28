@@ -49,4 +49,5 @@ class BydAutoAUSpider(Spider):
                 case _:
                     self.logger.error("Unknown location type cannot be parsed: {}".format(location["mapBadge"]))
 
+            item["street_address"] = item.pop("addr_full", None)
             yield item

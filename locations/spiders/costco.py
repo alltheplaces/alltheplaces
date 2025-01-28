@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -10,11 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class CostcoSpider(SitemapSpider, StructuredDataSpider):
     name = "costco"
-    item_attributes = {
-        "brand": "Costco",
-        "brand_wikidata": "Q715583",
-        "extras": Categories.SHOP_WHOLESALE.value,
-    }
+    item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
     allowed_domains = ["www.costco.com"]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -40,5 +36,7 @@ class CostcoSpider(SitemapSpider, StructuredDataSpider):
             if m := re.match(self.oh, rule):
                 days = day_range(m.group(1), m.group(2)) if m.group(2) else [m.group(1)]
                 item["opening_hours"].add_days_range(days, m.group(3), m.group(4), "%I:%M%p")
+
+        apply_category(Categories.SHOP_WHOLESALE, item)
 
         yield item

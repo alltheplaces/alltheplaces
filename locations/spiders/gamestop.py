@@ -40,4 +40,5 @@ class GamestopSpider(Spider):
                     close_time=close_time.strip(),
                     time_format="%I:%M %p" if ".ca" in response.url else "%H:%M",
                 )
+            item["street_address"] = item.pop("addr_full", None)
             yield item
