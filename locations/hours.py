@@ -951,10 +951,39 @@ class OpeningHours:
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
 
+    @staticmethod
+    def time_struct_instance(hour, minutes):
+        return time.struct_time((1900, 1, 1, hour, minutes, 0, 0, 1, -1))
+
     def as_opening_hours(self) -> str:
         day_groups = []
         this_day_group = None
 
+        # usually ; works fine as a separator between different days
+        # but it has an annoying quirk, in OpenStreetMap opening_hours syntax
+        # it overrides previous definitions
+        # so for example
+        # Mo-Sa 10:00-02:00; Su 09:00-02:00
+        # means that object is closed on midnight between Saturday and Sunday
+        # Mo-Sa 10:00-02:00; Su 00:00-02:00,09:00-02:00
+        # in turn means that object is open also during early Sunday hours
+        #
+        # All the Places is using a small section of entire opening_hous syntax
+        # so we need only check whether time goes over midnight and split it
+        # in two regular ranges
+        day_hours_midnight_split = defaultdict(set)
+        for index, day in enumerate(DAYS):
+            for h in self.day_hours[day]:
+                if h[0].tm_hour * 60 + h[0].tm_min > h[1].tm_hour * 60 + h[1].tm_min:
+                    # start hour is greater than end hour, indicating that it is
+                    # an over-midnight range
+                    day_hours_midnight_split[day].add((h[0], OpeningHours.time_struct_instance(23, 59)))
+                    next_day = DAYS[(index + 1) % len(DAYS)]
+                    day_hours_midnight_split[next_day].add((OpeningHours.time_struct_instance(0, 0), h[1]))
+                    if next_day in self.days_closed:
+                        del self.days_closed[next_day]
+                else:
+                    day_hours_midnight_split[day].add(h)
         for day in DAYS:
             if day in self.days_closed:
                 hours = "closed"
@@ -965,7 +994,7 @@ class OpeningHours:
                         time.strftime("%H:%M", h[0]),
                         time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
                     )
-                    for h in sorted(self.day_hours[day])
+                    for h in sorted(day_hours_midnight_split[day])
                 )
 
             if not this_day_group:
@@ -980,33 +1009,15 @@ class OpeningHours:
 
         opening_hours = ""
 
-        # usually ; works fine as a separator between different days
-        # but it has an annoying quirk, in OpenStreetMap opening_hours syntax
-        # it overrides previous definitions
-        # so for example
-        # Mo-Sa 10:00-02:00; Su 09:00-02:00
-        # means that object is closed on midnight between Saturday and Sunday
-        # Mo-Sa 10:00-02:00, Su 09:00-02:00
-        # in turn means that object is open also during early Sunday hours
-        #
-        # All the Places is using a small section of entire opening_hous syntax
-        # so we need only check whether any time goes over midnight,
-        # in all other cases ; can be used safely
-        separator = ";"
-        for day in DAYS:
-            for h in self.day_hours[day]:
-                if h[1].tm_hour * 60 + h[1].tm_min < h[0].tm_hour * 60 + h[0].tm_min:
-                    separator = ","
-
         for day_group in day_groups:
             if not day_group["hours"]:
                 continue
             elif day_group["from_day"] == day_group["to_day"]:
-                opening_hours += "{from_day} {hours}".format(**day_group) + separator + " "
+                opening_hours += "{from_day} {hours}; ".format(**day_group)
             elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
-                opening_hours += "{hours}".format(**day_group) + separator + " "
+                opening_hours += "{hours}; ".format(**day_group)
             else:
-                opening_hours += "{from_day}-{to_day} {hours}".format(**day_group) + separator + " "
+                opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
         opening_hours = opening_hours[:-2]
 
         return opening_hours
