@@ -36,7 +36,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
 
     def handle_wheelchair_overview(self, response):
         # The download URL changes daily with every database dump.
-        link = next(l for l in response.xpath("//a/@href").getall() if l.endswith("bfr_haltestellendaten.csv"))
+        link = next(href for href in response.xpath("//a/@href").getall() if href.endswith("bfr_haltestellendaten.csv"))
         yield scrapy.Request(link, callback=self.handle_wheelchair_data)
 
     def handle_wheelchair_data(self, response):
