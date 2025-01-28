@@ -11,7 +11,7 @@ from locations.items import Feature
 
 class EvereveUSSpider(scrapy.Spider):
     name = "evereve_us"
-    item_attributes = {"brand": "EVEREVE", "brand_wikidata": "Q69891997"}
+    item_attributes = {"brand": "Evereve", "brand_wikidata": "Q69891997"}
     start_urls = ["https://evereve.com/apps/wesupply/store-locator"]
 
     def parse(self, response: Response) -> Iterable[Feature]:

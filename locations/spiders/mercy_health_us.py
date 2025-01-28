@@ -64,7 +64,7 @@ HEALTHCARE_CATEGORIES = {
 
 class MercyHealthUSSpider(SitemapSpider, StructuredDataSpider):
     name = "mercy_health_us"
-    item_attributes = {"brand": "Mercy Health", "brand_wikidata": "Q5053169"}
+    item_attributes = {"operator": "Mercy Health", "operator_wikidata": "Q5053169"}
     allowed_domains = ["www.mercy.com"]
     sitemap_urls = ["https://www.mercy.com/sitemap.xml"]
     sitemap_rules = [

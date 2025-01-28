@@ -9,7 +9,7 @@ from locations.hours import DAYS, OpeningHours
 class GelsonsSpider(scrapy.spiders.SitemapSpider):
     name = "gelsons"
     item_attributes = {
-        "brand": "Gelson's Markets",
+        "brand": "Gelson's",
         "brand_wikidata": "Q16993993",
         "country": "US",
     }

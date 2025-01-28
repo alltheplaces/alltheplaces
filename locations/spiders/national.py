@@ -21,7 +21,7 @@ HEADERS = {
 
 class NationalSpider(scrapy.Spider):
     name = "national"
-    item_attributes = {"brand": "National Car Rental", "brand_wikidata": "Q1424142"}
+    item_attributes = {"brand": "National", "brand_wikidata": "Q1424142"}
 
     def start_requests(self):
         yield scrapy.Request(

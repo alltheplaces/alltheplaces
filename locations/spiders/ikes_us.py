@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class IkesUSSpider(SitemapSpider, StructuredDataSpider):
     name = "ikes_us"
-    item_attributes = {"brand": "Ike's Love & Sandwiches", "brand_wikidata": "Q112028897"}
+    item_attributes = {"operator": "Ike's Love and Sandwiches", "operator_wikidata": "Q112028897"}
     sitemap_urls = ["https://locations.ikessandwich.com/robots.txt"]
     sitemap_rules = [(r"https://locations.ikessandwich.com/[a-z]{2}/[-\w]+/[-\w]+", "parse_sd")]
 

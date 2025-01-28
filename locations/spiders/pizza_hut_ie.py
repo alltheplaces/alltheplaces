@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class PizzaHutIESpider(SitemapSpider):
     name = "pizza_hut_ie"
-    item_attributes = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q191615"}
+    item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     sitemap_urls = ["https://www.pizzahutdelivery.ie/sitemap.xml"]
     sitemap_rules = [(r"pizzahutdelivery\.ie\/locations\/(?!.*\.pdf)[^\/]+(?:\/)?", "parse")]
 
