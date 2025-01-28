@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from scrapy.http import JsonRequest, Response
@@ -7,6 +8,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import ITEM_PIPELINES
 
@@ -89,4 +91,23 @@ class FedexSpider(CrawlSpider):
                 item["brand"] = "FedEx Express"
             if category := self.CATEGORY_MAP.get(item["name"]):
                 apply_category(category, item)
+
+            item["opening_hours"] = OpeningHours()
+            for rule in location_info.get("hours", {}).get("normalHours", []):
+                if day := sanitise_day(rule.get("day")):
+                    if rule.get("isClosed"):
+                        item["opening_hours"].set_closed(day)
+                    for shift in rule.get("intervals", []):
+                        if shift.get("start") and shift.get("end"):
+                            open_time = self.clean_hours(str(shift["start"]))
+                            close_time = self.clean_hours(str(shift["end"]))
+                            item["opening_hours"].add_range(day, open_time, close_time)
+
             yield item
+
+    def clean_hours(self, hours: str) -> str:
+        if not hours:
+            return ""
+        hours = hours.zfill(4) if ":" not in hours else hours.zfill(5)
+        hours = re.sub(r"(\d{2})(\d{2})", r"\1:\2", hours)
+        return hours
