@@ -74,6 +74,15 @@ class FedexSpider(CrawlSpider):
                 ]
             )
             item["phone"] = location_info.get("mainPhone", {}).get("number")
+            item["phone"] = "; ".join(
+                filter(
+                    None,
+                    [
+                        location_info.get("mainPhone", {}).get("number"),
+                        location_info.get("mobilePhone", {}).get("number"),
+                    ],
+                )
+            )
             item["name"] = item["name"].split("(Permit to Enter)")[0].strip().replace("Centre", "Center")
             if "FedEx Express" in item["name"]:
                 item["brand"] = "FedEx Express"
