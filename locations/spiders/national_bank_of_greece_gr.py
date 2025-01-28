@@ -30,6 +30,7 @@ class NationalBankOfGreeceGRSpider(Spider):
                 item = self.parse_poi(poi)
                 apply_category(Categories.BANK, item)
                 item["ref"] = poi.get("BranchId")
+                item["branch"] = item.pop("name")
                 item["phone"] = poi.get("PhoneOne")
 
                 yield item
