@@ -968,7 +968,7 @@ class OpeningHours:
         # Mo-Sa 10:00-02:00; Su 00:00-02:00,09:00-02:00
         # in turn means that object is open also during early Sunday hours
         #
-        # All the Places is using a small section of entire opening_hous syntax
+        # All the Places is using a small section of entire opening_hours syntax
         # so we need only check whether time goes over midnight and split it
         # in two regular ranges
         day_hours_midnight_split = defaultdict(set)
