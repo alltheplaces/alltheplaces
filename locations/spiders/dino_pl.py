@@ -16,6 +16,7 @@ class DinoPLSpider(Spider):
     allowed_domains = ["marketdino.pl"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://marketdino.pl/external/map/index.html"]
+    no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Search for the desired JavaScript file
@@ -44,14 +45,11 @@ class DinoPLSpider(Spider):
             aesgcm.decrypt(bytes.fromhex(response.meta["iv"]), bytes.fromhex(response.text), None).decode("utf-8")
         )
         for location in geojson["features"]:
-            if location["properties"]["status"] != "MARKET OTWARTY":  # "MARKET OPEN"
-                continue
             item = DictParser.parse(location["properties"])
-            item.pop("name", None)
             item["geometry"] = location["geometry"]
             item["opening_hours"] = OpeningHours()
-            if week_hours := location["properties"].get("weekHours"):
+            if week_hours := location["properties"]["weekHours"]:
                 item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th", "Fr", "Sa"], *week_hours.split("-", 1))
-            if sun_hours := location["properties"].get("sundayHours"):
+            if sun_hours := location["properties"]["sundayHours"]:
                 item["opening_hours"].add_range("Su", *sun_hours.split("-", 1))
             yield item
