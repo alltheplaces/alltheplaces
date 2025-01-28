@@ -15,7 +15,7 @@ Station = namedtuple("Station", "name operator city country means")
 
 class OpentransportdataSwissSpider(scrapy.Spider):
     name = "opentransportdata_swiss"
-    allowed_domains = ["opentransportdata.swiss"]
+    allowed_domains = ["opentransportdata.swiss", "r2.cloudflarestorage.com"]
     dataset_attributes = {
         # https://opentransportdata.swiss/en/authorised-databases/
         # https://opentransportdata.swiss/en/terms-of-use/#511_Exemption_for_databases
@@ -28,16 +28,16 @@ class OpentransportdataSwissSpider(scrapy.Spider):
         "website": "https://opentransportdata.swiss/",
     }
 
-    dataset_pattern = "https://opentransportdata.swiss/en/dataset/%s/permalink"
+    dataset_pattern = "https://data.opentransportdata.swiss/en/dataset/%s/permalink"
 
     def start_requests(self):
-        url = "https://opentransportdata.swiss/de/dataset/bfr-rollstuhl"
+        url = "https://data.opentransportdata.swiss/de/dataset/bfr-rollstuhl"
         yield scrapy.Request(url, callback=self.handle_wheelchair_overview)
 
     def handle_wheelchair_overview(self, response):
         # The download URL changes daily with every database dump.
-        h = response.xpath("//a[@download='BfR_Haltestellendaten.csv']/@href")
-        yield scrapy.Request(h.get(), callback=self.handle_wheelchair_data)
+        link = next(l for l in response.xpath("//a/@href").getall() if l.endswith("bfr_haltestellendaten.csv"))
+        yield scrapy.Request(link, callback=self.handle_wheelchair_data)
 
     def handle_wheelchair_data(self, response):
         # The data feed supplies seperate properties for railbound
