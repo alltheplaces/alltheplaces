@@ -36,6 +36,8 @@ class SsangyongAUSpider(Spider):
                     "postcode": str(feature.get("DealerPostcode")),
                     "website": feature.get("DealerWebsite"),
                 }
+                if properties["website"] and not properties["website"].startswith("http"):
+                    properties["website"] = "https://" + properties["website"]
                 if feature.get("IsSalesStore"):
                     sales_item = Feature(**properties)
                     sales_item["ref"] = str(feature["DealerCode"]) + "_Sales"
