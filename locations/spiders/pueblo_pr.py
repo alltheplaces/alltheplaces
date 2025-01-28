@@ -2,8 +2,8 @@ from locations.categories import Categories
 from locations.storefinders.elfsight import ElfsightSpider
 
 
-class PueblowebPRUSSpider(ElfsightSpider):
-    name = "puebloweb_pr_us"
+class PuebloPRSpider(ElfsightSpider):
+    name = "pueblo_pr"
     item_attributes = {
         "brand": "Pueblo",
         "brand_wikidata": "Q7258464",
