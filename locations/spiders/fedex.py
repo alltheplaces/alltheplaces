@@ -97,11 +97,12 @@ class FedexSpider(CrawlSpider):
                 if day := sanitise_day(rule.get("day")):
                     if rule.get("isClosed"):
                         item["opening_hours"].set_closed(day)
-                    for shift in rule.get("intervals", []):
-                        if shift.get("start") and shift.get("end"):
-                            open_time = self.clean_hours(str(shift["start"]))
-                            close_time = self.clean_hours(str(shift["end"]))
-                            item["opening_hours"].add_range(day, open_time, close_time)
+                    else:
+                        for shift in rule.get("intervals", []):
+                            if shift.get("start") and shift.get("end"):
+                                open_time = self.clean_hours(str(shift["start"]))
+                                close_time = self.clean_hours(str(shift["end"]))
+                                item["opening_hours"].add_range(day, open_time, close_time)
 
             yield item
 
