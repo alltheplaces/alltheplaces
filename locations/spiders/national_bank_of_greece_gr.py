@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 class NationalBankOfGreeceGRSpider(Spider):
     name = "national_bank_of_greece_gr"
-    item_attributes = {"brand": "National Bank of Greece", "brand_wikidata": "Q1816028"}
+    item_attributes = {"brand_wikidata": "Q1816028", "country": "GR"}
 
     def start_requests(self):
         url = "https://www.nbg.gr/sitecore/api/layout/render/jss?item=%2Fidiwtes%2Fkatastimata-atm&sc_lang=el&sc_apikey=%7B029DC798-60FC-4E8D-94BF-6A8AF0AAE4DA%7D"

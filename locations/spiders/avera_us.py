@@ -7,10 +7,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class AveraUSSpider(SitemapSpider, StructuredDataSpider):
     name = "avera_us"
-    item_attributes = {
-        "brand": "Avera",
-        "brand_wikidata": "Q4828238",
-    }
+    item_attributes = {"operator": "Avera Health", "operator_wikidata": "Q4828238"}
     sitemap_urls = ["https://www.avera.org/sitemap.xml"]
     sitemap_rules = [(r"https://www.avera.org/locations/profile/[-\w]+", "parse_sd")]
     user_agent = BROWSER_DEFAULT

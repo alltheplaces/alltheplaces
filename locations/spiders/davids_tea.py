@@ -12,7 +12,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class DavidsTeaSpider(JSONBlobSpider):
     name = "davids_tea"
-    item_attributes = {"brand": "David's Tea", "brand_wikidata": "Q3019129"}
+    item_attributes = {"brand": "DavidsTea", "brand_wikidata": "Q3019129"}
     start_urls = ["https://davidstea.com/apps/store-locator/"]
 
     def extract_json(self, response: Response) -> list:

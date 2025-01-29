@@ -6,7 +6,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class XlBygNOSpider(scrapy.Spider):
     name = "xl_byg_no"
-    item_attributes = {"brand": "XL-BYG", "brand_wikidata": "Q10720798"}
+    item_attributes = {"brand": "XL-Bygg", "brand_wikidata": "Q10720798"}
     start_urls = [
         "https://api.xlbygg.getadigital.cloud/store/stores?customProperty.Key=web&customProperty.Value=xlbygg"
     ]

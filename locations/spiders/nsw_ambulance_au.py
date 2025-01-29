@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class NswAmbulanceAUSpider(Spider):
     name = "nsw_ambulance_au"
-    item_attributes = {"operator": "New South Wales Ambulance", "operator_wikidata": "Q4741948"}
+    item_attributes = {"operator": "NSW Ambulance", "operator_wikidata": "Q4741948"}
     allowed_domains = ["portal.spatial.nsw.gov.au"]
     start_urls = [
         "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Health_Facilities/FeatureServer/0/query?f=geojson"

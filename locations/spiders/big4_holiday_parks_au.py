@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class Big4HolidayParksAUSpider(JSONBlobSpider):
     name = "big4_holiday_parks_au"
-    item_attributes = {"brand": "BIG4 Holiday Parks", "brand_wikidata": "Q18636678"}
+    item_attributes = {"brand": "Big 4 Holiday Parks", "brand_wikidata": "Q18636678"}
     allowed_domains = ["www.big4.com.au"]
     start_urls = ["https://www.big4.com.au/park-directory"]
 

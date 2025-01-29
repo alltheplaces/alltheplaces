@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class SingaporePostSGSpider(Spider):
     name = "singapore_post_sg"
-    item_attributes = {"brand": "Singapore Post", "brand_wikidata": "Q4049531"}
+    item_attributes = {"operator": "Singapore Post", "operator_wikidata": "Q4049531"}
 
     def start_requests(self) -> Iterable[Request]:
         # We need to collect cookies, locate-us-type is important

@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class SolaSalonStudiosSpider(Spider):
     name = "sola_salon_studios"
-    item_attributes = {"brand": "Sola Salon Studios", "brand_wikidata": "Q64337426"}
+    item_attributes = {"brand": "Sola Salons", "brand_wikidata": "Q64337426"}
     allowed_domains = ["platform.solasalonstudios.com", "www.solasalonstudios.com"]
     start_urls = ["https://platform.solasalonstudios.com/v1/get-web-locations-list"]
 

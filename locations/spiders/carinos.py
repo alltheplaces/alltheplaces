@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class CarinosSpider(scrapy.Spider):
     name = "carinos"
-    item_attributes = {"brand": "Carino's Italian", "brand_wikidata": "Q5039637"}
+    item_attributes = {"brand": "Johnny Carino's", "brand_wikidata": "Q5039637"}
     allowed_domains = ["carinos.com"]
     start_urls = ["https://www.carinos.com/locations/#/"]
 

@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class CasinoFRSpider(CrawlSpider, StructuredDataSpider):
     name = "casino_fr"
-    item_attributes = {"brand": "Casino Supermarchés", "brand_wikidata": "Q89029184"}
+    item_attributes = {"brand_wikidata": "Q89029184"}
     allowed_domains = ["magasins.supercasino.fr"]
     start_urls = ["https://magasins.supercasino.fr/fr"]
     rules = [Rule(LinkExtractor("/supermarche/"), "parse_sd")]

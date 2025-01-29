@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class VitaliaSpider(CrawlSpider):
     name = "vitalia"
-    item_attributes = {"brand": "Vitalia Reformhaus", "brand_wikidata": "Q2528558"}
+    item_attributes = {"brand": "VITALIA Reformhaus", "brand_wikidata": "Q2528558"}
     allowed_domains = ["www.vitalia-reformhaus.de"]
     start_urls = ["https://www.vitalia-reformhaus.de/marktfinder"]
     rules = [

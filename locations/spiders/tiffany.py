@@ -11,7 +11,7 @@ from locations.user_agents import FIREFOX_LATEST
 
 class TiffanySpider(Spider):
     name = "tiffany"
-    item_attributes = {"brand": "Tiffany", "brand_wikidata": "Q1066858"}
+    item_attributes = {"brand": "Tiffany & Company", "brand_wikidata": "Q1066858"}
     allowed_domains = ["www.tiffany.com"]
     start_urls = ["https://www.tiffany.com/content/tiffany-n-co/_jcr_content/servlets/storeslist.1.json"]
     user_agent = FIREFOX_LATEST  # ATP and older user agents are blocked.

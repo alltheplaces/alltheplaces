@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class GreyhoundSpider(SitemapSpider):
     name = "greyhound"
-    item_attributes = {"brand": "Greyhound", "brand_wikidata": "Q755309"}
+    item_attributes = {"brand": "Greyhound", "brand_wikidata": "Q755309", "nsi_id": "N/A"}
     allowed_domains = ["greyhound.com"]
     sitemap_urls = ["https://www.greyhound.com/robots.txt"]
     sitemap_rules = [
