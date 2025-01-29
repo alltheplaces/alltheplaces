@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -22,7 +23,7 @@ class CityOfMelbourneToiletsAUSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["np_assetid"])
-        item["addr_full"] = feature["st_description"]
+        item["addr_full"] = re.split(r"Public Toilet\s+-\s+\d+\s+-\s+", feature["st_description"], flags=re.IGNORECASE)[-1]
 
         apply_category(Categories.TOILETS, item)
         apply_category({"access": "yes"}, item)
