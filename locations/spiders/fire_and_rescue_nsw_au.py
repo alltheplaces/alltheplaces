@@ -34,5 +34,5 @@ class FireAndRescueNswAUSpider(SitemapSpider):
             ).get(),
         }
         extract_google_position(properties, response)
-        apply_category(Categories.FIRE_STATION, item)
+        apply_category(Categories.FIRE_STATION, properties)
         yield Feature(**properties)
