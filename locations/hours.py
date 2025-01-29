@@ -981,7 +981,7 @@ class OpeningHours:
                     next_day = DAYS[(index + 1) % len(DAYS)]
                     day_hours_midnight_split[next_day].add((OpeningHours.time_struct_instance(0, 0), h[1]))
                     if next_day in self.days_closed:
-                        del self.days_closed[next_day]
+                        self.days_closed.remove(next_day)
                 else:
                     day_hours_midnight_split[day].add(h)
         for day in DAYS:
