@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class NswStateEmergencyServiceAUSpider(Spider):
     name = "nsw_state_emergency_service_au"
-    item_attributes = {"operator": "New South Wales State Emergency Service", "operator_wikidata": "Q7011790"}
+    item_attributes = {"operator": "NSW State Emergency Service", "operator_wikidata": "Q7011790", "nsi_id": "N/A"}
     allowed_domains = ["portal.spatial.nsw.gov.au"]
     start_urls = [
         "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/3/query?f=geojson"
@@ -28,8 +28,7 @@ class NswStateEmergencyServiceAUSpider(Spider):
             if properties["name"][:4] == "ACT ":
                 properties["state"] = "ACT"
             if " HEADQUARTERS" in properties["name"]:
-                apply_category({"office": "government"}, properties)
-                apply_category({"government": "emergency"}, properties)
+                apply_category({"office": "government", "government": "emergency"}, properties)
             elif "MARINE RESCUE " in properties["name"]:
                 apply_category({"emergency": "water_rescue"}, properties)
             elif (
@@ -39,6 +38,5 @@ class NswStateEmergencyServiceAUSpider(Spider):
             ):
                 apply_category({"amenity": "rescue_station"}, properties)
             else:
-                apply_category({"office": "government"}, properties)
-                apply_category({"government": "emergency"}, properties)
+                apply_category({"office": "government", "government": "emergency"}, properties)
             yield Feature(**properties)

@@ -13,7 +13,7 @@ class OrlenSpider(scrapy.Spider):
     name = "orlen"
     custom_settings = {"ROBOTSTXT_OBEY": False}
     brand_mappings = {
-        "ORLEN": {"brand": "Orlen", "brand_wikidata": "Q971649"},
+        "ORLEN": {"brand": "Orlen Paczka", "brand_wikidata": "Q110457879"},  # ?
         "BLISKA": {"brand": "Bliska", "brand_wikidata": "Q4016378"},
         "CPN": {"brand": "CPN"},
         "Petrochemia": {"brand": "Petrochemia"},

@@ -4,7 +4,7 @@ from locations.storefinders.traveliq import TravelIQSpider
 class LouisianaDepartmentOfTransportationAndDevelopmentUSSpider(TravelIQSpider):
     name = "louisiana_department_of_transportation_and_development_us"
     item_attributes = {
-        "operator": "Louisiana Department of Transportation and Development",
+        "operator": "Louisiana Department of Transportation & Development",
         "operator_wikidata": "Q2400783",
         "state": "LA",
     }

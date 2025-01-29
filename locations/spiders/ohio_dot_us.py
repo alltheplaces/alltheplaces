@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class OhioDotUSSpider(JSONBlobSpider):
     name = "ohio_dot_us"
-    item_attributes = {"operator": "Ohio DOT", "operator_wikidata": "Q4955209"}
+    item_attributes = {"operator": "Ohio Department of Transportation", "operator_wikidata": "Q4955209"}
     start_urls = ["https://api.ohgo.com/roadmarkers/TrafficSpeedAndAlertMarkers"]
     locations_key = "CameraMarkers"
 

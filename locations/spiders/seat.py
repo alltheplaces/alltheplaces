@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 
 class SeatSpider(scrapy.Spider):
     name = "seat"
-    item_attributes = {"brand": "SEAT", "brand_wikidata": "Q188217"}
+    item_attributes = {"brand": "Seat", "brand_wikidata": "Q188217"}
     COUNTRY_DEALER_LOCATOR_MAP = {
         "fr": "trouver-un-distributeur",
         "it": "concessionari",

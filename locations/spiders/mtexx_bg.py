@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class MtexxBGSpider(Spider):
     name = "mtexx_bg"
-    item_attributes = {"operator": "M-texx", "operator_wikidata": "Q122947768"}
+    item_attributes = {"operator": "M-Texx", "operator_wikidata": "Q122947768"}
     allowed_domains = ["m-texx.com"]
     start_urls = ["https://m-texx.com/locations"]
     no_refs = True
