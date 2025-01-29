@@ -75,7 +75,6 @@ class FedexSpider(CrawlSpider):
                     location_info["address"]["line3"],
                 ]
             )
-            item["phone"] = location_info.get("mainPhone", {}).get("number")
             item["phone"] = "; ".join(
                 filter(
                     None,
