@@ -127,10 +127,12 @@ def test_multiple_times():
     o3.add_range("Tu", "09:00", "12:00")
     assert o3.as_opening_hours() == "Tu 09:00-12:00,15:00-17:00"
 
+
 def test_simple_over_midnight():
     o = OpeningHours()
     o.add_range("Mo", "07:00", "02:00")
     assert o.as_opening_hours() == "Mo 07:00-24:00; Tu 00:00-02:00"
+
 
 def test_hours_over_midnight_overide_closed_days_on_next_day():
     o = OpeningHours()
@@ -138,11 +140,13 @@ def test_hours_over_midnight_overide_closed_days_on_next_day():
     o.set_closed("Tu")
     assert o.as_opening_hours() == "Mo 07:00-24:00; Tu 00:00-02:00"
 
+
 def test_hours_over_midnight_removed_when_start_day_set_to_closed():
     o = OpeningHours()
     o.add_range("Mo", "07:00", "02:00")
     o.set_closed("Mo")
     assert o.as_opening_hours() == "Mo closed"
+
 
 def test_over_midnight():
     o = OpeningHours()
@@ -154,7 +158,9 @@ def test_over_midnight():
     o.add_range("Sa", "07:00", "02:00")
     o.add_range("Su", "05:00", "03:00")
 
-    assert o.as_opening_hours() == "Mo 00:00-03:00,07:00-24:00; Tu-Sa 00:00-02:00,07:00-24:00; Su 00:00-02:00,05:00-24:00"
+    assert (
+        o.as_opening_hours() == "Mo 00:00-03:00,07:00-24:00; Tu-Sa 00:00-02:00,07:00-24:00; Su 00:00-02:00,05:00-24:00"
+    )
 
 
 def test_sanitise_days():
