@@ -968,7 +968,7 @@ class OpeningHours:
         # so we need only check whether time goes over midnight and split it
         # in two regular ranges
         day_hours_midnight_split = defaultdict(set)
-        time_format="%H:%M"
+        time_format = "%H:%M"
         midnight_end = time.strptime(f"23:59", time_format)
         midnight_start = time.strptime(f"00:00", time_format)
         for index, day in enumerate(DAYS):
