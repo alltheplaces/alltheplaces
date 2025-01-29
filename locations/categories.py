@@ -52,6 +52,7 @@ class Categories(Enum):
 
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
+    LEISURE_DOG_PARK = {"leisure": "dog_park"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
     LEISURE_PARK = {"leisure": "park"}
@@ -227,11 +228,14 @@ class Categories(Enum):
     AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
     BAR = {"amenity": "bar"}
+    BARBECUE = {"amenity": "bbq"}
     BENCH = {"amenity": "bench"}
     BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
     BLOOD_BANK = {"healthcare": "blood_bank"}
     BLOOD_DONATION = {"healthcare": "blood_donation"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
+    BOTTLE_REFILL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "bottle_refill"}
+    BUBBLER = {"amenity": "drinking_water", "fountain": "bubbler"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
     CANTEEN = {"amenity": "canteen"}
@@ -248,6 +252,7 @@ class Categories(Enum):
     DEFIBRILLATOR = {"emergency": "defibrillator"}
     DIALYSIS = {"healthcare": "dialysis"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
+    DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     FAST_FOOD = {"amenity": "fast_food"}
     FIRE_STATION = {"amenity": "fire_station"}
@@ -285,11 +290,14 @@ class Categories(Enum):
     REHABILITATION = {"healthcare": "rehabilitation"}
     RESCUE_BUOY = {"emergency": "rescue_buoy"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
+    SHARPS_WASTE_BASKET = {"amenity": "waste_basket", "waste": "sharps"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
     TELEPHONE = {"amenity": "telephone"}
+    TOILETS = {"amenity": "toilets"}
     RESTAURANT = {"amenity": "restaurant"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VETERINARY = {"amenity": "veterinary"}
+    WASTE_BASKET = {"amenity": "waste_basket"}
     WATER_RESCUE = {"emergency": "water_rescue"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
     MORTUARY = {"amenity": "mortuary"}
@@ -483,7 +491,7 @@ class Extras(Enum):
     BABY_CHANGING_TABLE = "changing_table"
     BACKUP_GENERATOR = "backup_generator"
     BAR = "bar"
-    BARBEQUES = "bbq"
+    BARBECUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
@@ -502,6 +510,7 @@ class Extras(Enum):
     FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
+    FEMALE = "female"
     HALAL = "diet:halal"
     HIGH_CHAIR = "highchair"
     ICE_CREAM = "ice_cream"
@@ -509,6 +518,7 @@ class Extras(Enum):
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
     LIVE_MUSIC = "live_music"
+    MALE = "male"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
     NEW_CAR_SALES = "service:vehicle:new_car_sales"
@@ -536,6 +546,7 @@ class Extras(Enum):
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     TYRE_SERVICES = "service:vehicle:tyres"
+    UNISEX = "unisex"
     USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
     VEGAN = "diet:vegan"

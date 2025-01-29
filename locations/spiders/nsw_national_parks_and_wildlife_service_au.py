@@ -56,7 +56,7 @@ class NswNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
                     )
                 elif campground_detail.xpath('./th[contains(text(), "Facilities")]'):
                     facilities = campground_detail.xpath("./td/text()").get().lower()
-                    apply_yes_no(Extras.BARBEQUES, item, "barbecue facilities" in facilities, False)
+                    apply_yes_no(Extras.BARBECUES, item, "barbecue facilities" in facilities, False)
                     apply_yes_no(Extras.PICNIC_TABLES, item, "picnic tables" in facilities, False)
                     apply_yes_no(Extras.TOILETS, item, "toilets" in facilities, False)
                     apply_yes_no(Extras.DRINKING_WATER, item, "drinking water" in facilities, False)
