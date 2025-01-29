@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -12,7 +12,9 @@ class CityOfMelbourneToiletsAUSpider(JSONBlobSpider):
     name = "city_of_melbourne_toilets_au"
     item_attributes = {"operator": "City of Melbourne", "operator_wikidata": "Q1919098"}
     allowed_domains = ["maps.melbourne.vic.gov.au"]
-    start_urls = ["https://maps.melbourne.vic.gov.au/weave/services/v1/feature/getFeatures?shape=POLYGON((278984.5214999998%205773194.2749,278984.5214999998%205853194.1042,361023.5938999998%205853194.1042,361023.5938999998%205773194.2749,278984.5214999998%205773194.2749))&entityId=lyr_publictoilet&datadefinition=__dd__ar_public_toilet&outCrs=EPSG:4326&inCrs=EPSG:7855&operation=intersects&returnCentroid=true&returnFirst=false"]
+    start_urls = [
+        "https://maps.melbourne.vic.gov.au/weave/services/v1/feature/getFeatures?shape=POLYGON((278984.5214999998%205773194.2749,278984.5214999998%205853194.1042,361023.5938999998%205853194.1042,361023.5938999998%205773194.2749,278984.5214999998%205773194.2749))&entityId=lyr_publictoilet&datadefinition=__dd__ar_public_toilet&outCrs=EPSG:4326&inCrs=EPSG:7855&operation=intersects&returnCentroid=true&returnFirst=false"
+    ]
     locations_key = "features"
 
     def pre_process_data(self, feature: dict) -> None:
