@@ -86,8 +86,16 @@ class FedexSpider(CrawlSpider):
             )
             item["extras"]["fax"] = location_info.get("fax", {}).get("number")
             item["name"] = item["name"].split("(Permit to Enter)")[0].strip().replace("Centre", "Center")
-            if "FedEx Express" in item["name"]:
-                item["brand"] = "FedEx Express"
+
+            if "FedEx Express" in item["name"]:  # e.g. FedEx Express FR, FedEx Express Poland
+                item["name"] = item["brand"] = "FedEx Express"
+
+            if location_page_name := location_info.get(
+                "c_pagesName"
+            ):  # Not consistent, can't be used for deciding category
+                if "FedEx at " in location_page_name:
+                    item["located_in"] = location_page_name.split("FedEx at ")[1]
+
             if category := self.CATEGORY_MAP.get(item["name"]):
                 apply_category(category, item)
 
