@@ -1,6 +1,8 @@
 import json
 
+#from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MindGBSpider(JSONBlobSpider):
@@ -8,17 +10,24 @@ class MindGBSpider(JSONBlobSpider):
     item_attributes = {"brand": "Mind", "brand_wikidata": "Q3314763"}
     start_urls = ["https://www.mind.org.uk/mind-charity-shops/find-our-local-mind-shops/"]
     requires_proxy = True
-    # custom_settings = {
-    #    "USER_AGENT": BROWSER_DEFAULT,
-    #    "ROBOTSTXT_OBEY": False,
-    # }
 
-    def extract_json(self, response):
-        script = response.xpath("//script[contains(text(), 'const locations')]/text()").get()
-        starter = "const locations = "
-        begin = script.find(starter) + len(starter)
-        end = script.find('";', begin + 1) + 1
-        return json.loads(json.loads(script[begin:end]))
+    def find_between(self, text, first, last):
+        start = text.index(first) + len(first)
+        end = text.index(last, start)
+        return text[start:end]
 
-    def post_process_item(self, item, response, feature):
-        yield item
+    def parse(self, response):
+        data = self.find_between(response.text, "const locations = ", ";").replace(";", "")
+        json_data = json.loads(data)
+        for location in json_data:
+            item["name"] = 'Mind Charity Shop'
+            item["branch"] = location["name"]
+            item["lat"],item["lon"] = location["position"]["lat"],location["position"]["lon"]
+            html = location["content"]
+            openinghours = html.xpath('//p/text()').getall()
+            address,phone = openinghours[-1].split("<br /><span>Phone:")
+            item["addr_full"] = address.replace("<br />","").replace("</span><span>",",")
+            item["phone"] = phone.xpath('//a/@href').get().replace("tel:","")
+            openinghours.pop()
+            print(openinghours)
+            yield item
