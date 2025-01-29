@@ -953,7 +953,8 @@ class OpeningHours:
 
     @staticmethod
     def time_struct_instance(hour, minutes):
-        return time.struct_time((1900, 1, 1, hour, minutes, 0, 0, 1, -1))
+        time_format="%H:%M"
+        return time.strptime(f"{hour}:{minutes}", time_format)
 
     def as_opening_hours(self) -> str:
         day_groups = []
