@@ -13,7 +13,6 @@ class MindGBSpider(JSONBlobSpider):
         "ROBOTSTXT_OBEY": False,
     }
 
-
     def extract_json(self, response):
         script = response.xpath("//script[contains(text(), 'const locations')]/text()").get()
         starter = "const locations = "
