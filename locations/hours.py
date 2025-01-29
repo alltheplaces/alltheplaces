@@ -951,11 +951,6 @@ class OpeningHours:
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
 
-    @staticmethod
-    def time_struct_instance(hour, minutes):
-        time_format="%H:%M"
-        return time.strptime(f"{hour}:{minutes}", time_format)
-
     def as_opening_hours(self) -> str:
         day_groups = []
         this_day_group = None
@@ -973,14 +968,17 @@ class OpeningHours:
         # so we need only check whether time goes over midnight and split it
         # in two regular ranges
         day_hours_midnight_split = defaultdict(set)
+        time_format="%H:%M"
+        midnight_end = time.strptime(f"23:59", time_format)
+        midnight_start = time.strptime(f"00:00", time_format)
         for index, day in enumerate(DAYS):
             for h in self.day_hours[day]:
                 if h[0].tm_hour * 60 + h[0].tm_min > h[1].tm_hour * 60 + h[1].tm_min:
                     # start hour is greater than end hour, indicating that it is
                     # an over-midnight range
-                    day_hours_midnight_split[day].add((h[0], OpeningHours.time_struct_instance(23, 59)))
+                    day_hours_midnight_split[day].add((h[0], midnight_end))
                     next_day = DAYS[(index + 1) % len(DAYS)]
-                    day_hours_midnight_split[next_day].add((OpeningHours.time_struct_instance(0, 0), h[1]))
+                    day_hours_midnight_split[next_day].add((midnight_start, h[1]))
                     if next_day in self.days_closed:
                         self.days_closed.remove(next_day)
                 else:
