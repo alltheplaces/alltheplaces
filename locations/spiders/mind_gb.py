@@ -1,8 +1,7 @@
 import json
 
-#from locations.hours import DAYS_FULL, OpeningHours
+# from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class MindGBSpider(JSONBlobSpider):
@@ -20,14 +19,14 @@ class MindGBSpider(JSONBlobSpider):
         data = self.find_between(response.text, "const locations = ", ";").replace(";", "")
         json_data = json.loads(data)
         for location in json_data:
-            item["name"] = 'Mind Charity Shop'
+            item["name"] = "Mind Charity Shop"
             item["branch"] = location["name"]
-            item["lat"],item["lon"] = location["position"]["lat"],location["position"]["lon"]
+            item["lat"], item["lon"] = location["position"]["lat"], location["position"]["lon"]
             html = location["content"]
-            openinghours = html.xpath('//p/text()').getall()
-            address,phone = openinghours[-1].split("<br /><span>Phone:")
-            item["addr_full"] = address.replace("<br />","").replace("</span><span>",",")
-            item["phone"] = phone.xpath('//a/@href').get().replace("tel:","")
+            openinghours = html.xpath("//p/text()").getall()
+            address, phone = openinghours[-1].split("<br /><span>Phone:")
+            item["addr_full"] = address.replace("<br />", "").replace("</span><span>", ",")
+            item["phone"] = phone.xpath("//a/@href").get().replace("tel:", "")
             openinghours.pop()
             print(openinghours)
             yield item
