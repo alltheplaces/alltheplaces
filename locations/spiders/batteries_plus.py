@@ -25,7 +25,8 @@ class BatteriesPlusSpider(Where2GetItSpider):
         self.apply_attribute("recycling:batteries", item, attributes, "has_recycling_batteries")
 
         oh = OpeningHours()
-        for day, (opening, closing) in zip(DAYS_FROM_SUNDAY, location["bho"]):
+        for day, hours in zip(DAYS_FROM_SUNDAY, location["bho"]):
+            opening, closing = hours[:2]
             if "9999" not in (opening, closing):
                 oh.add_range(day, opening, closing, time_format="%H%M")
         item["opening_hours"] = oh
