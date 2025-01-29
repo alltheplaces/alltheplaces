@@ -8,10 +8,11 @@ class MindGBSpider(JSONBlobSpider):
     name = "mind_gb"
     item_attributes = {"brand": "Mind", "brand_wikidata": "Q3314763"}
     start_urls = ["https://www.mind.org.uk/mind-charity-shops/find-our-local-mind-shops/"]
-    custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
-        "ROBOTSTXT_OBEY": False,
-    }
+    requires_proxy = True 
+    #custom_settings = {
+    #    "USER_AGENT": BROWSER_DEFAULT,
+    #    "ROBOTSTXT_OBEY": False,
+    #}
 
     def extract_json(self, response):
         script = response.xpath("//script[contains(text(), 'const locations')]/text()").get()
