@@ -969,8 +969,8 @@ class OpeningHours:
         # in two regular ranges
         day_hours_midnight_split = defaultdict(set)
         time_format = "%H:%M"
-        midnight_end = time.strptime(f"23:59", time_format)
-        midnight_start = time.strptime(f"00:00", time_format)
+        midnight_end = time.strptime("23:59", time_format)
+        midnight_start = time.strptime("00:00", time_format)
         for index, day in enumerate(DAYS):
             for h in self.day_hours[day]:
                 if h[0].tm_hour * 60 + h[0].tm_min > h[1].tm_hour * 60 + h[1].tm_min:
