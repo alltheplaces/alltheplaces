@@ -18,7 +18,9 @@ class AnacondaAUSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storeid').extract_first(),
-            "name": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storename').extract_first(),
+            "branch": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storename')
+            .extract_first()
+            .removeprefix("Anaconda "),
             "lat": response.xpath('//div[contains(@id, "maps_canvas")]/@data-latitude').extract_first(),
             "lon": response.xpath('//div[contains(@id, "maps_canvas")]/@data-longitude').extract_first(),
             "addr_full": " ".join(
