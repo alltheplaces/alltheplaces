@@ -331,6 +331,7 @@ class Categories(Enum):
 
     NATURAL_TREE = {"natural": "tree"}
 
+
 def apply_category(category, item: Feature):
     """
     Apply categories to a Feature, where categories can be supplied as a
