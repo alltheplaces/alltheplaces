@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class HobsonsBayCityCouncilMchHealthClinicsAUSpider(JSONBlobSpider):
-    name = "hobsons_bay_city_council_mch_health_clinics_au"
+class HobsonsBayCityCouncilMchNurseClinicsAUSpider(JSONBlobSpider):
+    name = "hobsons_bay_city_council_mch_nurse_clinics_au"
     item_attributes = {"operator": "Hobsons Bay City Council", "operator_wikidata": "Q56477824"}
     allowed_domains = ["services3.arcgis.com"]
     start_urls = [
