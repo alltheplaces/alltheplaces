@@ -8,7 +8,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day, DAYS_FR
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 
 
 class CasinoFRSpider(scrapy.Spider):
