@@ -20,15 +20,16 @@ class SevenBrewUSSpider(SitemapSpider):
 
     def parse(self, response):
         item = Feature()
-        item["name"] = response.xpath('//h1//text()').get()
-        item["street_address"] = response.xpath('//h5//text()').get()
-        item["addr_full"] = ",".join([item["street_address"],response.xpath('//em/text()').get()])
+        item["name"] = response.xpath("//h1//text()").get()
+        item["street_address"] = response.xpath("//h5//text()").get()
+        item["addr_full"] = ",".join([item["street_address"], response.xpath("//em/text()").get()])
         item["ref"] = item["website"] = response.url
         item["opening_hours"] = OpeningHours()
-        for day_time in response.xpath('//tbody/tr'):
-            day = day_time.xpath('./td[1]/text()').get()
-            open_time,close_time = day_time.xpath('./td[2]/text()').get().split('–')
-            item["opening_hours"].add_range(day=day.strip(),open_time=open_time.strip(),close_time=close_time.strip(),time_format="%I:%M%p")
+        for day_time in response.xpath("//tbody/tr"):
+            day = day_time.xpath("./td[1]/text()").get()
+            open_time, close_time = day_time.xpath("./td[2]/text()").get().split("–")
+            item["opening_hours"].add_range(
+                day=day.strip(), open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M%p"
+            )
         apply_category(Categories.SHOP_COFFEE, item)
         yield item
-
