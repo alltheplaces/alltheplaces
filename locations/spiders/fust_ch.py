@@ -26,6 +26,8 @@ class FustCHSpider(JSONBlobSpider):
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
+        if contact_info := feature.get("contactDetails"):
+            feature.update(contact_info[0])
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
