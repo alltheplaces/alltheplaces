@@ -3,9 +3,8 @@ import scrapy
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.geldmaat_nl import GeldmaatNLSpider
 from locations.user_agents import BROWSER_DEFAULT
-
-GELDMAAT = {"brand": "Geldmaat", "brand_wikidata": "Q74051230"}
 
 
 class AbnAmroNLSpider(scrapy.Spider):
@@ -47,7 +46,7 @@ class AbnAmroNLSpider(scrapy.Spider):
 
             location_type = store.get("locationType")
             if location_type == "CASHPOINT":
-                item.update(GELDMAAT)
+                item.update(GeldmaatNLSpider.item_attributes)
                 apply_category(Categories.ATM, item)
             elif location_type == "OFFICE":
                 apply_category(Categories.BANK, item)
