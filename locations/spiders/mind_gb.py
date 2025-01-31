@@ -16,7 +16,8 @@ class MindGBSpider(JSONBlobSpider):
         return text[start:end]
 
     def parse(self, response):
-        data = self.find_between(response.text, "const locations = ", ";").replace(";", "")
+        data = self.find_between(response.text, "const locations = ", ";\n")
+        print(data)
         json_data = json.loads(data)
         for location in json_data:
             item["name"] = "Mind Charity Shop"
