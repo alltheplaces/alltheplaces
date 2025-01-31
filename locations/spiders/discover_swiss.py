@@ -61,11 +61,15 @@ class DiscoverSwissSpider(scrapy.Spider):
     def parse_category(self, item):
         t = item.get("type")
         if t == "schema.org/LodgingBusiness":
-            subtype = item.get("starRating", {}).get("additionalType")
-            return {
-                "ServicedApartments": Categories.TOURISM_APARTMENT,
-                "swissLodge": Categories.TOURISM_HOSTEL,
-            }.get(subtype, Categories.HOTEL)
+            rating = item.get("starRating", {})
+            stars = rating.get("ratingValue")
+            subtype = rating.get("additionalType")
+            if subtype == "ServicedApartments":
+                return Categories.TOURISM_APARTMENT
+            elif subtype == "swissLodge" or stars == 0.5:
+                return Categories.TOURISM_HOSTEL
+            else:
+                return Categories.HOTEL
         return None
 
     def parse_payment(self, item, feature):
@@ -91,6 +95,10 @@ class DiscoverSwissSpider(scrapy.Spider):
     def parse_stars(self, item):
         if s := item.get("starRating"):
             stars = str(s.get("ratingValue", "")).rstrip(".0")
+            # The upstream feed encodes hostels as 0.5-star hotels.
+            # This is not an actual star rating for the hostel.
+            if stars == "0.5":
+                return None
             if s.get("superior"):
                 stars = stars + "S"
             return stars
