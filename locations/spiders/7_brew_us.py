@@ -13,36 +13,23 @@ class SevenBrewUSSpider(SitemapSpider):
         "brand": "7 Brew",
         "brand_wikidata": "Q127688691",
     }
-    sitemap_urls = ["https://7brew.com/location-sitemap.xml"]
+    sitemap_urls = ["https://7brew.com/sitemap.xml"]
     sitemap_rules = [
-        (r"/location/([-\w]+)/$", "parse"),
+        ("/location/", "parse"),
     ]
 
     def parse(self, response):
         item = Feature()
-
-        item["ref"] = response.url.split("/")[-2]
-        # Get coordinates from embedded Google Maps
-        marker = response.css(".location-map .marker")
-        item["lat"] = marker.attrib["data-lat"]
-        item["lon"] = marker.attrib["data-lng"]
-
-        contact = response.xpath("//h4[contains(text(), 'Contact')]/..")
-        item["branch"] = contact.css("p:last-of-type strong::text").get()
-        item["addr_full"] = contact.css("p:last-of-type::text").get()
-        item["phone"] = contact.css("a[href^='tel:']::attr(href)").get()
-        item["website"] = response.url
-
-        hours_rows = response.css(".hours-area table tr")
-        oh = OpeningHours()
-        for row in hours_rows:
-            day = row.css("td:first-child::text").get()
-            hours = row.css("td:last-child::text").get()
-            if not day or not hours:
-                continue
-
-            oh.add_ranges_from_string(f"{day}: {hours}")
-        item["opening_hours"] = oh.as_opening_hours()
-
+        item["name"] = response.xpath("//h1//text()").get()
+        item["street_address"] = response.xpath("//h5//text()").get()
+        item["addr_full"] = ",".join([item["street_address"], response.xpath("//em/text()").get()])
+        item["ref"] = item["website"] = response.url
+        item["opening_hours"] = OpeningHours()
+        for day_time in response.xpath("//tbody/tr"):
+            day = day_time.xpath("./td[1]/text()").get()
+            open_time, close_time = day_time.xpath("./td[2]/text()").get().split("–")
+            item["opening_hours"].add_range(
+                day=day.strip(), open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M%p"
+            )
         apply_category(Categories.SHOP_COFFEE, item)
-        return item
+        yield item
