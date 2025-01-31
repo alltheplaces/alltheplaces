@@ -1,5 +1,5 @@
 import json
-
+import re
 # from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -10,24 +10,30 @@ class MindGBSpider(JSONBlobSpider):
     start_urls = ["https://www.mind.org.uk/mind-charity-shops/find-our-local-mind-shops/"]
     requires_proxy = True
 
-    def find_after(self, text, first):
-        start = text.index(first) + len(first)
-        end = text.find("\n")
-        return text[start:end]
 
     def parse(self, response):
-        data = self.find_after(response.text, "const locations = ")[:-1]
-        print(data)
+        match = re.search(r"const locations = ([^\n]+)",response.text)
+        data = match.group(1)[:-1]
         json_data = json.loads(data)
         for location in json_data:
-            item["name"] = "Mind Charity Shop"
-            item["branch"] = location["name"]
-            item["lat"], item["lon"] = location["position"]["lat"], location["position"]["lon"]
-            # html = location["content"]
-            # openinghours = html.xpath("//p/text()").getall()
-            # address, phone = openinghours[-1].split("<br /><span>Phone:")
-            # item["addr_full"] = address.replace("<br />", "").replace("</span><span>", ",")
-            # item["phone"] = phone.xpath("//a/@href").get().replace("tel:", "")
-            # openinghours.pop()
-            # print(openinghours)
+            item=Feature()
+            item["name"] = 'Mind Charity Shop'
+            item["branch"] = location["name"].replace(" shop","").replace(" Mind","").replace(" Shop","")
+            item["ref"] = item["branch"]
+            item["lat"],item["lon"] = location["position"]["lat"],location["position"]["lng"]
+            temp = location["content"].replace("\n","")
+            temp = re.sub(r"</?(?:(p|ul|li|span|div))[^>]*>",",",temp).replace(",,",",")
+            print(temp)
+            if "Opening hours" in temp:
+                result = re.search(r"Opening hours(.*),,(.*?)(?:(Phone|Email))",temp)
+                hours = result.group(1)
+                address = result.group(2).replace("<br />","")
+                item["opening_hours"] = hours
+                item["addr_full"] = address
+            if "Phone:" in temp:
+                phone = re.search(r"Phone: <a href=\"tel:([^\"]*)\"",temp).group(1)
+                item["phone"] = phone
+            if "Email:" in temp:
+                email = re.search(r"Email: <a href=\"mailto:(.*)\"",temp).group(1)
+                item["email"] = email
             yield item
