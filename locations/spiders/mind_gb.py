@@ -1,6 +1,7 @@
 import json
 import re
 
+from locations.items import Feature
 # from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
