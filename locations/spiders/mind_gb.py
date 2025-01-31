@@ -10,13 +10,13 @@ class MindGBSpider(JSONBlobSpider):
     start_urls = ["https://www.mind.org.uk/mind-charity-shops/find-our-local-mind-shops/"]
     requires_proxy = True
 
-    def find_between(self, text, first, last):
+    def find_after(self, text, first):
         start = text.index(first) + len(first)
-        end = text.index(last, start)
+        end=data.find("\n")
         return text[start:end]
 
     def parse(self, response):
-        data = self.find_between(response.text, "const locations = ", ";\n")
+        data = self.find_after(response.text, "const locations = ")[:-1]
         print(data)
         json_data = json.loads(data)
         for location in json_data:
