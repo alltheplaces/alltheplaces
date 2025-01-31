@@ -1,9 +1,11 @@
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
+
+GELDMAAT = {"brand": "Geldmaat", "brand_wikidata": "Q74051230"}
 
 
 class AbnAmroNLSpider(scrapy.Spider):
@@ -25,7 +27,6 @@ class AbnAmroNLSpider(scrapy.Spider):
             item = Feature(
                 {
                     "ref": store.get("propRef"),
-                    "name": store.get("owner"),
                     "street_address": store.get("address"),
                     "postcode": store.get("zipCode"),
                     "city": store.get("city"),
@@ -34,9 +35,21 @@ class AbnAmroNLSpider(scrapy.Spider):
                     "opening_hours": oh,
                 }
             )
+
+            services = [s["functionality"] for s in store["services"]]
+            # SFG, Notes out
+            # MRA, Coins out
+            # MFG, Notes in
+            # MSA, Coins in
+            # SBA, Sealbags in
+            apply_yes_no(Extras.CASH_OUT, item, "SFG" in services or "MRA" in services)
+            apply_yes_no(Extras.CASH_IN, item, "MFG" in services or "MSA" in services)
+
             location_type = store.get("locationType")
             if location_type == "CASHPOINT":
+                item.update(GELDMAAT)
                 apply_category(Categories.ATM, item)
             elif location_type == "OFFICE":
                 apply_category(Categories.BANK, item)
+
             yield item
