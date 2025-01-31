@@ -23,7 +23,8 @@ class KiaAUSpider(Spider):
             if location["delYn"] == "Y":
                 continue  # Dealer deleted (probably franchised under a new name/dealer ID).
             item = DictParser.parse(location)
-            item["email"] = re.sub(r"[;,].*", "", item["email"])
+            if email := item.get("email"):
+                item["email"] = re.sub(r"[;,].*", "", email)
             item["ref"] = location.get("dealerCode", str(location["dealerSeq"]))
             item["name"] = location["dealerNm"]
             if website := item.get("website"):
