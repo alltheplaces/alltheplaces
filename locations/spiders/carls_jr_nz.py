@@ -16,7 +16,7 @@ class CarlsJrNZSpider(Spider):
     no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("//@data-block-json").getall():
+        for location in response.xpath("//@data-context").getall():
             store = json.loads(location)["location"]
             item = Feature()
             item["name"] = store.get("addressTitle")
