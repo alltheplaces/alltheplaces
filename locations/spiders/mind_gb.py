@@ -22,11 +22,11 @@ class MindGBSpider(JSONBlobSpider):
             item["name"] = "Mind Charity Shop"
             item["branch"] = location["name"]
             item["lat"], item["lon"] = location["position"]["lat"], location["position"]["lon"]
-            html = location["content"]
-            openinghours = html.xpath("//p/text()").getall()
-            address, phone = openinghours[-1].split("<br /><span>Phone:")
-            item["addr_full"] = address.replace("<br />", "").replace("</span><span>", ",")
-            item["phone"] = phone.xpath("//a/@href").get().replace("tel:", "")
-            openinghours.pop()
-            print(openinghours)
+            #html = location["content"]
+            #openinghours = html.xpath("//p/text()").getall()
+            #address, phone = openinghours[-1].split("<br /><span>Phone:")
+            #item["addr_full"] = address.replace("<br />", "").replace("</span><span>", ",")
+            #item["phone"] = phone.xpath("//a/@href").get().replace("tel:", "")
+            #openinghours.pop()
+            #print(openinghours)
             yield item
