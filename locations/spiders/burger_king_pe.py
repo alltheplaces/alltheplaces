@@ -5,6 +5,7 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -49,4 +50,10 @@ class BurgerKingPESpider(Spider):
             item["housenumber"] = location.get("exteriorNumber")
             item["street"] = item.pop("addr_full").replace("S/N", "")
             item["addr_full"] = merge_address_lines([item["housenumber"], item["street"], district])
+            item["opening_hours"] = OpeningHours()
+            for shift in location.get("hours", []):
+                open_time = shift.get("startHour")
+                close_time = shift.get("endHour")
+                if open_time and close_time:
+                    item["opening_hours"].add_days_range(DAYS, open_time, close_time)
             yield item
