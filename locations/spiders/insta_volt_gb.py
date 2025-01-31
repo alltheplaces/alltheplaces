@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class InstaVoltGBSpider(Spider):
     name = "insta_volt_gb"
-    item_attributes = {"brand": "InstaVolt", "brand_wikidata": "Q111173904"}
+    item_attributes = {"operator": "InstaVolt", "operator_wikidata": "Q111173904"}
     start_urls = ["https://instavolt.co.uk/find-electric-vehicle-charge-point-map/"]
 
     def parse(self, response, **kwargs):

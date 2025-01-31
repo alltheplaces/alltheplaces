@@ -10,14 +10,9 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class KindercareUSSpider(CrawlSpider, StructuredDataSpider):
     name = "kindercare_us"
-    item_attributes = {
-        "brand": "KinderCare Learning Centers",
-        "brand_wikidata": "Q6410551",
-    }
+    item_attributes = {"brand": "KinderCare", "brand_wikidata": "Q6410551"}
     allowed_domains = ["kindercare.com"]
-    start_urls = [
-        "https://www.kindercare.com/our-centers",
-    ]
+    start_urls = ["https://www.kindercare.com/our-centers"]
     rules = [
         Rule(
             LinkExtractor(restrict_xpaths=['//div[contains(@class, "link-index-results")]//li']),

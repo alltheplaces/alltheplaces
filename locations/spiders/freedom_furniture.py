@@ -7,7 +7,7 @@ from locations.hours import DAYS_EN, OpeningHours
 
 class FreedomFurnitureSpider(Spider):
     name = "freedom_furniture"
-    item_attributes = {"brand": "Freedom Furniture", "brand_wikidata": "Q5500546"}
+    item_attributes = {"brand": "Freedom", "brand_wikidata": "Q5500546"}
     allowed_domains = ["api-prod.freedom.com.au"]
     start_urls = [
         "https://api-prod.freedom.com.au/greenlitrest/v2/freedomfurniture/stores/country/AU?fields=FULL&lang=en&curr=AUD",

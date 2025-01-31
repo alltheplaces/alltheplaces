@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class TotalWineAndMoreUSSpider(Spider):
     name = "total_wine_and_more_us"
-    item_attributes = {"brand": "Total Wine & More", "brand_wikidata": "Q7828084"}
+    item_attributes = {"brand": "Total Wine", "brand_wikidata": "Q7828084"}
     allowed_domains = ["www.totalwine.com"]
     start_urls = ["https://www.totalwine.com/registry/"]
 

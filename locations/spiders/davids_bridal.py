@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class DavidsBridalSpider(Spider):
     name = "davids_bridal"
-    item_attributes = {"brand": "Davids Bridal", "brand_wikidata": "Q5230388"}
+    item_attributes = {"brand": "David's Bridal", "brand_wikidata": "Q5230388"}
     allowed_domains = ["www.davidsbridal.com"]
     start_urls = ["https://www.davidsbridal.com/api/graphql"]
 

@@ -1,18 +1,14 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NO, OpeningHours
 
 
 class Rema1000DKSpider(Spider):
     name = "rema_1000_dk"
-    item_attributes = {
-        "brand": "REMA 1000",
-        "brand_wikidata": "Q115768834",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    }
+    item_attributes = {"brand": "Rema 1000", "brand_wikidata": "Q28459"}
     allowed_domains = ["www.rema1000.dk"]
     start_urls = ["https://www.rema1000.dk/api/v2/stores"]
 
@@ -36,4 +32,7 @@ class Rema1000DKSpider(Spider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_NO)
             item["postcode"] = str(item["postcode"])
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+
             yield item

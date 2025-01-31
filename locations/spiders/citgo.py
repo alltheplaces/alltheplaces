@@ -12,7 +12,7 @@ TIME_PATTERN = re.compile(r"\d{2}:\d{2}")
 
 class CitgoSpider(scrapy.Spider):
     name = "citgo"
-    item_attributes = {"brand": "CITGO", "brand_wikidata": "Q2974437"}
+    item_attributes = {"brand": "Citgo", "brand_wikidata": "Q2974437"}
     allowed_domains = ["citgo.com"]
 
     start_urls = ["https://citgo.com/locator/store-locators/store-locator"]

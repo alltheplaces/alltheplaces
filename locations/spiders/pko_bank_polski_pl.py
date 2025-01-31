@@ -11,7 +11,7 @@ from locations.hours import DAYS_PL, DELIMITERS_PL, OpeningHours
 
 class PkoBankPolskiPLSpider(Spider):
     name = "pko_bank_polski_pl"
-    item_attributes = {"brand": "PKO Bank Polski", "brand_wikidata": "Q578832"}
+    item_attributes = {"brand": "PKO BP", "brand_wikidata": "Q578832"}
 
     def start_requests(self):
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "PL"):
