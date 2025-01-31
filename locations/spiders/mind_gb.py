@@ -12,7 +12,7 @@ class MindGBSpider(JSONBlobSpider):
 
     def find_after(self, text, first):
         start = text.index(first) + len(first)
-        end=text.find("\n")
+        end = text.find("\n")
         return text[start:end]
 
     def parse(self, response):
