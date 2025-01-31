@@ -52,6 +52,7 @@ class Categories(Enum):
 
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
+    LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
     LEISURE_PARK = {"leisure": "park"}
@@ -265,6 +266,7 @@ class Categories(Enum):
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
     NIGHTCLUB = {"amenity": "nightclub"}
+    NURSE_CLINIC = {"healthcare": "nurse"}
     NURSING_HOME = {"amenity": "social_facility", "social_facility": "nursing_home", "social_facility:for": "senior"}
     NUTRITIONIST = {"healthcare": "nutrition_counselling"}
     OPTOMETRIST = {"healthcare": "optometrist"}
@@ -327,6 +329,8 @@ class Categories(Enum):
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
     TRANSFORMER = {"power": "transformer"}
 
+    NATURAL_TREE = {"natural": "tree"}
+
 
 def apply_category(category, item: Feature):
     """
@@ -376,6 +380,7 @@ top_level_tags = [
     "landuse",
     "leisure",
     "man_made",
+    "natural",
     "office",
     "power",
     "public_transport",
