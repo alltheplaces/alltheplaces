@@ -20,7 +20,7 @@ class DiscoverSwissSpider(scrapy.Spider):
         # between Hotellerie Suisse (who runs the discover.swiss platform)
         # and the Swiss OpenStreetMap association.
         # https://osmfoundation.org/wiki/Licence/Waiver_and_Permission_Templates
-        "attribution": "mandatory",
+        "attribution": "required",
         "attribution:name": "discover.swiss",
         "attribution:wikidata": "Q131983936",
         "use:openstreetmap": "yes",
