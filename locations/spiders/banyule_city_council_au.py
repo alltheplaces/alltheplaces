@@ -23,14 +23,14 @@ class BanyuleCityCouncilAUSpider(JSONBlobSpider):
                 "244598c4-2d5c-4646-8776-cb6c95c9a69c",
                 "03a4b1b1-a7e0-4bde-b83a-5b4768c96b61",
                 "f1cdc1d3-5041-4db3-acd8-425d65ef8256",
-                "c5583c9d-15b5-419a-a7a6-fae3c406cfc4",  #Libraries
-                "8e840aad-2f8b-4426-8f75-401d44fec283",  #MCH
-                "57e35761-680e-48ef-ad0e-8355a7e5f9c9",  #Preschools
+                "c5583c9d-15b5-419a-a7a6-fae3c406cfc4",  # Libraries
+                "8e840aad-2f8b-4426-8f75-401d44fec283",  # MCH
+                "57e35761-680e-48ef-ad0e-8355a7e5f9c9",  # Preschools
             ],
             "LanguageCode": "en-AU",
             "MapId": "8b0f367d-0765-4ea7-8398-47ea239c9a95",
             "RefreshResults": True,
-            "UniqueId": None
+            "UniqueId": None,
         }
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
 
