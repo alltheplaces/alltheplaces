@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MelbourneCityCouncilPlaygroundsAUSpider(JSONBlobSpider):
     name = "melbourne_city_council_playgrounds_au"
-    item_attributes = {"operator": "Melbourne City Council", "operator_wikidata": "Q56477763"}
+    item_attributes = {"operator": "Melbourne City Council", "operator_wikidata": "Q56477763", "nsi_id": "N/A"}
     allowed_domains = ["maps.melbourne.vic.gov.au"]
     start_urls = [
         "https://maps.melbourne.vic.gov.au/weave/services/v1/feature/getFeatures?shape=POLYGON((278984.5214999998%205773194.2749,278984.5214999998%205853194.1042,361023.5938999998%205853194.1042,361023.5938999998%205773194.2749,278984.5214999998%205773194.2749))&entityId=lyr_playground&datadefinition=__dd__ar_playground&outCrs=EPSG:4326&inCrs=EPSG:7855&operation=intersects&returnCentroid=true&returnFirst=false"
