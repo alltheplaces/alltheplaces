@@ -14,7 +14,8 @@ class MelbourneCityCouncilTreesAUSpider(JSONBlobSpider):
     start_urls = [
         "https://data.melbourne.vic.gov.au/api/explore/v2.1/catalog/datasets/trees-with-species-and-dimensions-urban-forest/exports/json?lang=en&timezone=Australia%2FSydney"
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60}  # Large file to download
+    # Source data is a large file >50MB
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60, "DOWNLOAD_WARNSIZE": 134217728}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["com_id"])
