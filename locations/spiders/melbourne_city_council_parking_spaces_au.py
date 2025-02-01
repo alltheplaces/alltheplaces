@@ -179,7 +179,6 @@ class MelbourneCityCouncilParkingSpacesAUSpider(JSONBlobSpider):
         all_restrictions = response.meta["restrictions"]
         if feature["zone_number"] in all_restrictions.keys():
             restrictions = all_restrictions[feature["zone_number"]]
-            print(restrictions)
             item["extras"]["parking_space"] = restrictions["type"]
             for maxstay, hours in restrictions["maxstay:conditional"].items():
                 if maxstay == "1 hours":
