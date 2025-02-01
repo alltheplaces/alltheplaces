@@ -24,6 +24,14 @@ class MelbourneCityCouncilParkingSpacesAUSpider(JSONBlobSpider):
             callback=self.parse_parking_restrictions,
         )
 
+    # Ignore function complexity for the timebeing as a cleaner way of
+    # handling parking restrictions (a very complex tagging technique) is
+    # probably best implemented with a new ParkingRestrictions class (or
+    # similar) that currently doesn't exist. More use cases for
+    # a ParkingRestrictions class need to be identified because such class can
+    # be developed in a way that accomodates parking restrictions as
+    # implemented in a variety of countries of the world.
+    # flake8: noqa: C901
     def parse_parking_restrictions(self, response: Response) -> Iterable[JsonRequest]:
         restrictions = {}
         for zone in response.json():
