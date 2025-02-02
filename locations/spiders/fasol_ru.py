@@ -27,7 +27,7 @@ class FasolRUSpider(JSONBlobSpider):
                 item["opening_hours"] = oh
         except ValueError as e:
             self.logger.warning(f"Error parsing hours: {e}")
-            self.crawler.stats.inc_value(f"atp/hours/failed")
+            self.crawler.stats.inc_value("atp/hours/failed")
 
         apply_category(Categories.SHOP_CONVENIENCE, item)
 
