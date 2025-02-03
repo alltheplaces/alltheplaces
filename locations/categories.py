@@ -17,6 +17,7 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     PARKING = {"amenity": "parking"}
+    PARKING_SPACE = {"amenity": "parking_space"}
     SCHOOL = {"amenity": "school"}
     UNIVERSITY = {"amenity": "university"}
     COLLEGE = {"amenity": "college"}
@@ -58,6 +59,7 @@ class Categories(Enum):
     LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
+    LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -232,6 +234,7 @@ class Categories(Enum):
     BAR = {"amenity": "bar"}
     BARBECUE = {"amenity": "bbq"}
     BENCH = {"amenity": "bench"}
+    BICYCLE_REPAIR_STATION = {"amenity": "bicycle_repair_station"}
     BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
     BLOOD_BANK = {"healthcare": "blood_bank"}
     BLOOD_DONATION = {"healthcare": "blood_donation"}
@@ -328,6 +331,8 @@ class Categories(Enum):
 
     ANTENNA = {"man_made": "antenna"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
+    POWER_POLE = {"power": "pole"}
+    STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
     SUBSTATION = {"power": "substation"}
     SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
     SUBSTATION_MINOR_DISTRIBUTION = {"power": "substation", "substation": "minor_distribution"}

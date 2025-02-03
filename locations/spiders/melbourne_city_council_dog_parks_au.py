@@ -7,9 +7,9 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CityOfMelbourneDogParksAUSpider(JSONBlobSpider):
-    name = "city_of_melbourne_dog_parks_au"
-    item_attributes = {"operator": "City of Melbourne", "operator_wikidata": "Q1919098"}
+class MelbourneCityCouncilDogParksAUSpider(JSONBlobSpider):
+    name = "melbourne_city_council_dog_parks_au"
+    item_attributes = {"operator": "Melbourne City Council", "operator_wikidata": "Q56477763", "nsi_id": "N/A"}
     allowed_domains = ["maps.melbourne.vic.gov.au"]
     start_urls = [
         "https://maps.melbourne.vic.gov.au/weave/services/v1/feature/getFeatures?shape=POLYGON((278984.5214999998%205773194.2749,278984.5214999998%205853194.1042,361023.5938999998%205853194.1042,361023.5938999998%205773194.2749,278984.5214999998%205773194.2749))&entityId=lyr_dogoffleash&datadefinition=__dd__ar_dogoffleash&outCrs=EPSG:4326&inCrs=EPSG:7855&operation=intersects&returnCentroid=true&returnFirst=false"
