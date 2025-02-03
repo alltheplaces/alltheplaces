@@ -5,7 +5,6 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import clean_address
 
 
 class PizzaHutQASpider(Spider):
@@ -19,6 +18,6 @@ class PizzaHutQASpider(Spider):
         for store in response.json()["data"]:
             item = DictParser.parse(store)
             item["branch"] = item.pop("name").removeprefix("Pizza Hut ").removeprefix("Pizza hut ").strip()
-            item["street_address"] = clean_address([store.get("address1"), store.get("address2")])
+            item["street_address"] = item.pop("addr_full", None)
             apply_category(Categories.RESTAURANT, item)
             yield item
