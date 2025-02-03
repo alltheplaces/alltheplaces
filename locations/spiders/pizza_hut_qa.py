@@ -14,12 +14,11 @@ class PizzaHutQASpider(Spider):
 
     def start_requests(self):
         yield JsonRequest(
-            url="https://www.qatar.pizzahut.me/api/stores",
-            headers={"franchiseid": "3"},
+            url="https://www.qatar.pizzahut.me/api/customer/stores/1",
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["Data"]:
+        for store in response.json()["data"]:
             item = DictParser.parse(store)
             item["street_address"] = clean_address([store.get("address1"), store.get("address2")])
             item["website"] = "https://www.qatar.pizzahut.me/"
