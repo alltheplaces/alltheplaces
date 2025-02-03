@@ -327,6 +327,7 @@ class Categories(Enum):
 
     ANTENNA = {"man_made": "antenna"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
+    POWER_POLE = {"power": "pole"}
     STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
     SUBSTATION = {"power": "substation"}
     SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
