@@ -1,4 +1,3 @@
-
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -8,7 +7,7 @@ class HTPawnbrokersGBSpider(JSONBlobSpider):
     start_urls = ["https://as-handt-store-address-service.azurewebsites.net/api/AllStoreData"]
 
     def post_process_item(self, item, response, location):
-        item["branch"]=item.pop("name")
-        item["name"]="H&T Pawnbrokers"
+        item["branch"] = item.pop("name")
+        item["name"] = "H&T Pawnbrokers"
         if item["lat"]:
             yield item
