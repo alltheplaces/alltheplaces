@@ -53,10 +53,11 @@ class Categories(Enum):
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
     LEISURE_DOG_PARK = {"leisure": "dog_park"}
+    LEISURE_PARK = {"leisure": "park"}
     LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
-    LEISURE_PARK = {"leisure": "park"}
+    LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -231,6 +232,7 @@ class Categories(Enum):
     BAR = {"amenity": "bar"}
     BARBECUE = {"amenity": "bbq"}
     BENCH = {"amenity": "bench"}
+    BICYCLE_REPAIR_STATION = {"amenity": "bicycle_repair_station"}
     BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
     BLOOD_BANK = {"healthcare": "blood_bank"}
     BLOOD_DONATION = {"healthcare": "blood_donation"}
