@@ -36,4 +36,6 @@ class RadleyGBSpider(CrawlSpider):
         item["ref"] = response.url
         item["lat"] = response.xpath("//script/@latitude").get()
         item["lon"] = response.xpath("//script/@longitude").get()
+        item["addr_full"] = ", ".join(response.xpath("//div[@class='cmp-googlemaps__information--text']/p/text()").getall())
+
         yield item
