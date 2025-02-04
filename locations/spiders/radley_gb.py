@@ -1,11 +1,10 @@
 from typing import Any
 
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
-from scrapy.http import Response
 
 from locations.items import Feature
-from locations import google_url
 
 
 class RadleyGBSpider(CrawlSpider):
@@ -27,12 +26,11 @@ class RadleyGBSpider(CrawlSpider):
             LinkExtractor(allow=r"/stores/shops/([-\w]+)$"),
             callback="parse",
             follow=False,
-        )
-
+        ),
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        print (response)
+        print(response)
         item = Feature()
 
         item["website"] = response.url
