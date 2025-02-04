@@ -24,6 +24,7 @@ class MrBricolageBESpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["website"] = feature.get("urlStore")
+        item["facebook"] = feature.get("fb_url")
         item["opening_hours"] = OpeningHours()
         for index, rule in enumerate(json.loads(feature.get("hours", "[]"))):
             for shift in rule:
