@@ -40,7 +40,8 @@ class PorscheHoldingSpider(JSONBlobSpider):
     custom_settings = {
         "CONCURRENT_REQUESTS": 1,
         "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
-        "DOWNLOAD_DELAY": 10,  # API throws 429 very quickly
+        "DOWNLOAD_DELAY": 10,  # API throws 429 very quickly,
+        "RETRY_TIMES": 5,
     }
 
     def start_requests(self) -> Iterable[Request]:
