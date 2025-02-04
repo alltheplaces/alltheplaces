@@ -1,8 +1,11 @@
+import json
+import re
 from typing import Iterable
 
 import chompjs
 from scrapy.http import Response
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -21,4 +24,9 @@ class MrBricolageBESpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["website"] = feature.get("urlStore")
+        item["opening_hours"] = OpeningHours()
+        for index, rule in enumerate(json.loads(feature.get("hours", "[]"))):
+            for shift in rule:
+                if match := re.search(r"(\d\d:\d\d).+?(\d\d:\d\d)", shift):
+                    item["opening_hours"].add_range(DAYS[index], *match.groups())
         yield item
