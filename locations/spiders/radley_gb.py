@@ -30,7 +30,6 @@ class RadleyGBSpider(CrawlSpider):
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        print(response)
         item = Feature()
 
         item["website"] = response.url
