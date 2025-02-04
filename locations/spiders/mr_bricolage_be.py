@@ -23,6 +23,7 @@ class MrBricolageBESpider(JSONBlobSpider):
         )["stores"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Mr.Bricolage ")
         item["website"] = feature.get("urlStore")
         item["facebook"] = feature.get("fb_url")
         item["opening_hours"] = OpeningHours()
