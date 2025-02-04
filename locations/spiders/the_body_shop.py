@@ -1,4 +1,4 @@
-from typing import Iterable, Any
+from typing import Any, Iterable
 
 import scrapy
 from scrapy import Request
@@ -12,8 +12,13 @@ class TheBodyShopSpider(scrapy.Spider):
     item_attributes = {"brand": "The Body Shop", "brand_wikidata": "Q837851"}
 
     def start_requests(self) -> Iterable[Request]:
-        for country in ["uk","es","au","ca","de","sg","dk","se","nl","fr","pt","at"]:
-            yield JsonRequest(url= "https://api.thebodyshop.com/rest/v2/thebodyshop-{}/stores?fields=FULL&pageSize=1000".format(country),callback=self.parse)
+        for country in ["uk", "es", "au", "ca", "de", "sg", "dk", "se", "nl", "fr", "pt", "at"]:
+            yield JsonRequest(
+                url="https://api.thebodyshop.com/rest/v2/thebodyshop-{}/stores?fields=FULL&pageSize=1000".format(
+                    country
+                ),
+                callback=self.parse,
+            )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["stores"]:
