@@ -18,4 +18,5 @@ class FcbankingSpider(SitemapSpider, StructuredDataSpider):
         location = json.loads(response.xpath("//@data-location").get(""))
         item["lat"] = location.get("latLng", {}).get("latitude")
         item["lon"] = location.get("latLng", {}).get("longitude")
+        item["name"], item["branch"] = item["name"].removesuffix(" Office").split(" - ", 1)
         yield item
