@@ -127,6 +127,7 @@ class YextAnswersSpider(Spider):
 
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
             item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(location.get("deliveryHours"))
+            item["extras"]["happy_hours"] = self.parse_opening_hours(location.get("happyHours"))
 
             self.parse_payment_methods(location, item)
             self.parse_google_attributes(location, item)
@@ -136,10 +137,10 @@ class YextAnswersSpider(Spider):
         if len(response.json()["response"]["results"]) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
 
-    def parse_opening_hours(self, hours: dict, **kwargs: Any) -> OpeningHours | None:
-        oh = OpeningHours()
+    def parse_opening_hours(self, hours: dict, **kwargs: Any) -> str | None:
         if not hours:
             return None
+        oh = OpeningHours()
         for day, rule in hours.items():
             if not isinstance(rule, dict):
                 continue
