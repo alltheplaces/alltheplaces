@@ -3,6 +3,7 @@ import json
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -19,4 +20,5 @@ class FcbankingSpider(SitemapSpider, StructuredDataSpider):
         item["lat"] = location.get("latLng", {}).get("latitude")
         item["lon"] = location.get("latLng", {}).get("longitude")
         item["name"], item["branch"] = item["name"].removesuffix(" Office").split(" - ", 1)
+        apply_category(Categories.BANK, item)
         yield item
