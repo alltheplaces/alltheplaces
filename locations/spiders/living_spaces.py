@@ -18,6 +18,7 @@ class LivingSpacesSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["code"]
             item["branch"] = item.pop("name")
-            item["website"] = "https://www.livingspaces.com" + location["storePageUrl"]
+            if url := location.get("storePageUrl"):
+                item["website"] = "https://www.livingspaces.com" + url
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item
