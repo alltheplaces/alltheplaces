@@ -103,11 +103,12 @@ class YextAnswersSpider(Spider):
                 item["phone"] = "; ".join(phones)
 
             if emails := location.get("emails"):
-                item["email"] = "; ".join(emails)
+                item["email"] = ";".join(emails)
 
             item["extras"]["ref:google"] = location.get("googlePlaceId")
             item["twitter"] = location.get("twitterHandle")
             item["extras"]["contact:instagram"] = location.get("instagramHandle")
+            item["extras"]["fax"] = location.get("fax")
             if "facebookVanityUrl" in location:
                 item["facebook"] = clean_facebook(location["facebookVanityUrl"])
             else:
