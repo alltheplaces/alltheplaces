@@ -4,6 +4,7 @@ import chompjs
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -26,5 +27,14 @@ class Sport24Spider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         item["name"] = feature.get("type")
         item["street_address"] = item.pop("street")
+        if opening_hours := feature.get("openingHours"):
+            item["opening_hours"] = OpeningHours()
+            for rule in opening_hours:
+                if rule["openTime"].get("hours") and rule["closeTime"].get("hours"):
+                    open_time, close_time = [
+                        f"{hour}:00" for hour in [str(rule["openTime"]["hours"]), str(rule["closeTime"]["hours"])]
+                    ]
+                    item["opening_hours"].add_range(rule["openDay"], open_time, close_time)
+
         apply_category(Categories.SHOP_SPORTS, item)
         yield item
