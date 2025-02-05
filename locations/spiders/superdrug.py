@@ -41,7 +41,7 @@ class SuperdrugSpider(Spider):
             )
             item["addr_full"] = location["address"]["formattedAddress"]
             item["website"] = urljoin("https://www.superdrug.com/", location["url"])
-            item["phone"] = location["address"]["phone"]
+            item["phone"] = location["address"].get("phone")
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]["weekDayOpeningList"]:
