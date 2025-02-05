@@ -1,11 +1,12 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class HebePLSpider(scrapy.Spider):
     name = "hebe_pl"
-    item_attributes = {"brand": "Hebe", "brand_wikidata": "Q113093841"}
+    item_attributes = {"brand": "Hebe", "brand_wikidata": "q110952328"}
     start_urls = ["https://www.hebe.pl/sklepy"]
 
     def parse(self, response, **kwargs):
@@ -20,4 +21,5 @@ class HebePLSpider(scrapy.Spider):
             if len(city_postal) == 2:
                 item["city"] = city_postal[0].strip()
                 item["postcode"] = city_postal[1].strip()
+            apply_category(Categories.SHOP_CHEMIST, item)
             yield item
