@@ -669,7 +669,7 @@ class FuelCards(Enum):
     MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
     MOLGROUP_CARDS = "payment:molgroup_cards"  # https://www.molgroupcards.com/
     MORGAN_FUELS = "payment:morgan_fuels"
-    OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
+    OMV = "payment:omv_card"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
     SHELL = "payment:shell"
     SLOVNAFT = "payment:slovnaft"  # https://slovnaft.sk/en/
