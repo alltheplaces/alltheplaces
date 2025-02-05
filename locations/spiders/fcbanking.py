@@ -1,4 +1,5 @@
 import json
+import re
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
@@ -14,6 +15,12 @@ class FcbankingSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.fcbanking.com/robots.txt"]
     sitemap_rules = [(r"/branch-locations/[-\w]+/[-\w]+/[-\w]+/[-\w]+", "parse_sd")]
     wanted_types = ["BankOrCreditUnion"]  # Capture only url specific linked data
+    time_format = "%I:%M %p"
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data["openingHours"] = [
+            re.sub(r"([ap])\.m\.?", r"\1m", row).replace("\u2013", "-") for row in ld_data.get("openingHours", [])
+        ]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         location = json.loads(response.xpath("//@data-location").get(""))
