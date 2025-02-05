@@ -1,11 +1,12 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class BlyzenkoUASpider(scrapy.Spider):
     name = "blyzenko_ua"
-    item_attributes = {"brand_wikidata": "Q117670418"}
+    item_attributes = {"brand": "Близенько", "brand_wikidata": "Q117670418"}
     allowed_domains = ["blyzenko.ua"]
     start_urls = [
         "https://blyzenko.ua/wp-json/wp/v2/shops-list",
@@ -34,6 +35,7 @@ class BlyzenkoUASpider(scrapy.Spider):
             if "post_code" in shop_map:
                 item["postcode"] = shop_map["post_code"]
             item["country"] = shop_map["country_short"]
+            apply_category(Categories.SHOP_CONVENIENCE, item)
 
             # Open 7 days a week? Data contains:
             #  {'shop_start': '08:00', 'shop_time_end': '22:00'}
