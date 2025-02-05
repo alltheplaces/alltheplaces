@@ -16,6 +16,8 @@ class ZabkaPLSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
+            item["street_address"] = item.pop("street")
+
             item["opening_hours"] = OpeningHours()
             for day, hours in store.get("openingHours", {}).items():
                 if not hours:
