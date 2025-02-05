@@ -1,10 +1,9 @@
-import ast
 import json
 from typing import Iterable
 
 import scrapy
 from scrapy import Request
-from scrapy.http import Response, JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -15,7 +14,9 @@ class EvereveUSSpider(scrapy.Spider):
     item_attributes = {"brand": "Evereve", "brand_wikidata": "Q69891997"}
 
     def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(url = "https://evereve-prod.labs.wesupply.xyz/searchForStores",method="POST",callback=self.parse)
+        yield JsonRequest(
+            url="https://evereve-prod.labs.wesupply.xyz/searchForStores", method="POST", callback=self.parse
+        )
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for store in json.loads(response.json())["MetaData"].values():
@@ -23,4 +24,3 @@ class EvereveUSSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["ref"] = store["PlaceId"]
             yield item
-
