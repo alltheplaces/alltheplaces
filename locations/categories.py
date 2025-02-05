@@ -616,6 +616,7 @@ class PaymentMethods(Enum):
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
     POSTEPAY = "payment:postepay"
+    POSTFINANCE_CARD = "payment:postfinance_card"
     QUICPAY = "payment:quicpay"
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
@@ -640,9 +641,12 @@ payment_method_aliases = {
     "China UnionPay": PaymentMethods.UNIONPAY,
     "Discover": PaymentMethods.DISCOVER_CARD,
     "Diners": PaymentMethods.DINERS_CLUB,
+    "JCB Card": PaymentMethods.JCB,
     "Maestro (Ausland)": PaymentMethods.MAESTRO,
     "MasterCard": PaymentMethods.MASTER_CARD,
+    "PostFinance Card": PaymentMethods.POSTFINANCE_CARD,
     "PowerCard": PaymentMethods.POWERCARD,
+    "UnionPay": PaymentMethods.UNIONPAY,
 }
 
 
