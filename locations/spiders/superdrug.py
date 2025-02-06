@@ -45,7 +45,10 @@ class SuperdrugSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]["weekDayOpeningList"]:
-                if rule["closed"] is True:
+                if (
+                    rule["closed"] is True
+                    or rule["openingTime"]["formattedHour"] == rule["closingTime"]["formattedHour"] == "00:00"
+                ):
                     item["opening_hours"].set_closed(rule["weekDay"])
                 else:
                     item["opening_hours"].add_range(
