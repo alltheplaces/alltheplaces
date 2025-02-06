@@ -30,5 +30,4 @@ class KiaUSSpider(scrapy.Spider):
             item["website"] = f'https://www.kia.com/us/en/find-a-dealer/result?zipCode={dealer["zipCode"]}'
             apply_category(Categories.SHOP_CAR, item)
             item["extras"] = {"website_2": dealer.get("url")}
-            item["extras"]["service"] = "dealer;repair"
             yield item
