@@ -1,4 +1,5 @@
 from typing import Iterable
+from urllib.parse import urljoin
 
 from scrapy.http import Response
 
@@ -16,37 +17,44 @@ class HealiusAUSpider(JSONBlobSpider):
             "brand": "Abbott Pathology",
             "brand_wikidata": "Q126165721",
             "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.abbottpathology.com.au",
         },
         "DOREVITCH": {
             "brand": "Dorevitch Pathology",
             "brand_wikidata": "Q126165490",
             "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.dorevitch.com.au",
         },
         "LAVERTY": {
             "brand": "Laverty Pathology",
             "brand_wikidata": "Q105256033",
             "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.laverty.com.au",
         },
         "LUMUS": {
             "brand": "Lumus Imaging",
             "brand_wikidata": "Q130311754",
             # Note: Proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
             "category": Categories.MEDICAL_IMAGING,
+            "website": "https://www.lumusimaging.com.au",
         },
         "QML": {
             "brand": "QML Pathology",
             "brand_wikidata": "Q126165557",
             "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.qml.com.au",
         },
         "TML": {
             "brand": "TML Pathology",
             "brand_wikidata": "Q126165745",
             "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.tmlpath.com.au",
         },
         "WDP": {
             "brand": "Western Diagnostic Pathology",
             "brand_wikidata": "Q126165699",
             "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.wdp.com.au",
         },
     }
     allowed_domains = ["api.apps.healius.com.au"]
@@ -60,6 +68,7 @@ class HealiusAUSpider(JSONBlobSpider):
             if brand_code in self.brands.keys():
                 item["brand"] = self.brands[brand_code]["brand"]
                 item["brand_wikidata"] = self.brands[brand_code]["brand_wikidata"]
+                item["website"] = urljoin(self.brands[brand_code]["website"], f'/locations/{feature["url"]}')
                 apply_category(self.brands[brand_code]["category"], item)
             else:
                 raise ValueError("Unknown brand code: {}".format(brand_code))
