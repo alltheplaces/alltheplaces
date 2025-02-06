@@ -13,7 +13,6 @@ class BauhausCHSpider(WoosmapSpider):
     origin = "https://www.bauhaus.ch"
 
     def parse_item(self, item: Feature, feature: dict) -> Iterable[Feature]:
-        print(feature)
         item["branch"] = item.pop("name")
         item["website"] = "https://www.bauhaus.ch/de/s/service/fachcentren/fachcenter-{}".format(item["branch"].lower())
         yield item
