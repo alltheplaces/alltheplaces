@@ -63,17 +63,17 @@ class HealiusAUSpider(JSONBlobSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
         if brand_code := feature.get("logo"):
             brand_code = brand_code.upper()
             if brand_code in self.brands.keys():
-                item["brand"] = self.brands[brand_code]["brand"]
+                item["name"] = item["brand"] = self.brands[brand_code]["brand"]
                 item["brand_wikidata"] = self.brands[brand_code]["brand_wikidata"]
                 item["website"] = urljoin(self.brands[brand_code]["website"], f'/locations/{feature["url"]}')
                 apply_category(self.brands[brand_code]["category"], item)
             else:
                 raise ValueError("Unknown brand code: {}".format(brand_code))
 
-        item["branch"] = item.pop("name", None)
         item["street_address"] = item["addr_full"]
         item["addr_full"] = clean_address([feature.get("address"), feature.get("address2")])
         item["opening_hours"] = self.parse_opening_hours(feature)
