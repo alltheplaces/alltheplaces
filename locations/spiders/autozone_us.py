@@ -1,24 +1,15 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.storefinders.yext import YextSpider
 
 
-class AutozoneUSSpider(SitemapSpider, StructuredDataSpider):
+class AutozoneUSSpider(YextSpider):
     name = "autozone_us"
     item_attributes = {"brand": "AutoZone", "brand_wikidata": "Q4826087"}
-    sitemap_urls = ["https://www.autozone.com/locations/sitemap.xml"]
-    sitemap_rules = [(r"\/locations\/[a-z]{2}\/[\w\-]+\/[\w\-]+\.html$", "parse_sd")]
-    # Playwright is needed to obtain sitemap.xml or else the
-    # request is silently blocked and will time out.
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    user_agent = BROWSER_DEFAULT
+    drop_attributes = {"email", "twitter"}
+    api_key = "a427dc0cb3e4f080da0ebe74621b8020"
 
-    def post_process_item(self, item, response, ld_data):
-        item["ref"] = response.url
-        item.pop("facebook", None)
-        item.pop("twitter", None)
-        item.pop("image", None)
+    def parse_item(self, item, location, **kwargs):
+        item.pop("name", None)
+        item["extras"].pop("contact:instagram", None)
+        if item.get("facebook") in {"https://www.facebook.com/AutozoneMexico", "https://www.facebook.com/autozone"}:
+            del item["facebook"]
         yield item
