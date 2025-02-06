@@ -34,7 +34,5 @@ class SimBRSpider(Spider):
             else:
                 item["brand"] = station.get("bandeira")
 
-            item["extras"]["source"] = station
-
             apply_category(Categories.FUEL_STATION, item)
             yield item
