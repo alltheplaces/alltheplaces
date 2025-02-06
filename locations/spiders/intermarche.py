@@ -34,7 +34,6 @@ class IntermarcheSpider(scrapy.Spider):
         "brand_wikidata": "Q98278022",
     }
     item_attributes = {"country": "FR"}
-    requires_proxy = True
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DOWNLOAD_TIMEOUT": 180,
