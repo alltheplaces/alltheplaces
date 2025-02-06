@@ -114,14 +114,14 @@ def compute_hash(item: Item) -> str:
 def find_spider_class(spider_name: str):
     if not spider_name:
         return None
-    for spider_class in iter_spider_classes_in_all_modules():
+    for spider_class in iter_spider_classes_in_modules():
         if spider_name == spider_class.name:
             return spider_class
     return None
 
 
-def iter_spider_classes_in_all_modules() -> Generator[Type[Spider], Any, None]:
-    for mod in SPIDER_MODULES:
+def iter_spider_classes_in_modules(modules=SPIDER_MODULES) -> Generator[Type[Spider], Any, None]:
+    for mod in modules:
         for module in walk_modules(mod):
             for spider_class in iter_spider_classes(module):
                 yield spider_class
