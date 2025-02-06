@@ -25,7 +25,7 @@ class TheBodyShopSpider(scrapy.Spider):
             store.update(store.pop("address"))
             item = DictParser.parse(store)
             item.pop("name")
-            item["website"] = store["canonicalUrl"]
+            item.pop("website")
             item["branch"] = store["displayName"]
             if store.get("region"):
                 item["state"] = store["region"]["name"]
