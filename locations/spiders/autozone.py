@@ -1,8 +1,8 @@
 from locations.storefinders.yext import YextSpider
 
 
-class AutozoneUSSpider(YextSpider):
-    name = "autozone_us"
+class AutozoneSpider(YextSpider):
+    name = "autozone"
     item_attributes = {"brand": "AutoZone", "brand_wikidata": "Q4826087"}
     drop_attributes = {"email", "twitter"}
     api_key = "a427dc0cb3e4f080da0ebe74621b8020"
