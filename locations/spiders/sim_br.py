@@ -1,5 +1,3 @@
-import json
-
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
@@ -19,7 +17,7 @@ class SimBRSpider(Spider):
     start_urls = ["https://www.simrede.com.br/unidades"]
 
     def parse(self, response):
-        stations = json.loads(response.text)
+        stations = response.json()
 
         for station in stations:
             item = DictParser.parse(station)
