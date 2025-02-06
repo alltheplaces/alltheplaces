@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -15,38 +15,38 @@ class HealiusAUSpider(JSONBlobSpider):
         "ABBOTT": {
             "brand": "Abbott Pathology",
             "brand_wikidata": "Q126165721",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
         },
         "DOREVITCH": {
             "brand": "Dorevitch Pathology",
             "brand_wikidata": "Q126165490",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
         },
         "LAVERTY": {
             "brand": "Laverty Pathology",
             "brand_wikidata": "Q105256033",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
         },
         "LUMUS": {
             "brand": "Lumus Imaging",
             "brand_wikidata": "Q130311754",
             # Note: Proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
-            "extras": Categories.MEDICAL_IMAGING.value,
+            "category": Categories.MEDICAL_IMAGING,
         },
         "QML": {
             "brand": "QML Pathology",
             "brand_wikidata": "Q126165557",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
         },
         "TML": {
             "brand": "TML Pathology",
             "brand_wikidata": "Q126165745",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
         },
         "WDP": {
             "brand": "Western Diagnostic Pathology",
             "brand_wikidata": "Q126165699",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
         },
     }
     allowed_domains = ["api.apps.healius.com.au"]
@@ -60,7 +60,7 @@ class HealiusAUSpider(JSONBlobSpider):
             if brand_code in self.brands.keys():
                 item["brand"] = self.brands[brand_code]["brand"]
                 item["brand_wikidata"] = self.brands[brand_code]["brand_wikidata"]
-                item["extras"] = self.brands[brand_code]["extras"]
+                apply_category(self.brands[brand_code]["category"], item)
             else:
                 raise ValueError("Unknown brand code: {}".format(brand_code))
 
