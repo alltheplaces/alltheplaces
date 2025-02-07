@@ -21,11 +21,7 @@ class NswRuralFireServiceAUSpider(ArcGISFeatureServerSpider):
         item["state"] = "NSW"
         if "ACT RFS " in item["name"]:
             item["state"] = "ACT"
-        if (
-            " RFB" in item["name"]
-            or " FIRE CONTROL CENTRE" in item["name"]
-            or "ACT RFS " in item["name"]
-        ):
+        if " RFB" in item["name"] or " FIRE CONTROL CENTRE" in item["name"] or "ACT RFS " in item["name"]:
             apply_category(Categories.FIRE_STATION, item)
         else:
             apply_category({"office": "government", "government": "fire_service"}, item)

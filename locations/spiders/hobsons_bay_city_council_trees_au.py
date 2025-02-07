@@ -1,7 +1,7 @@
 import re
 from typing import Iterable
 
-from scrapy.http import Request, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature

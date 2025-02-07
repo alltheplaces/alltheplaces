@@ -21,7 +21,7 @@ class ArcGISFeatureServerSpider(Spider):
 
     Example:
         URL: https://services.arcgis.com/1234567890abcdef/ArcGIS/rest/services/Sample/FeatureServer/0
-        
+
         Properties:
         `host`: services.arcgis.com
         `context_path`: 1234567890abcdef/ArcGIS
@@ -66,20 +66,37 @@ class ArcGISFeatureServerSpider(Spider):
 
         server_capabilities = list(map(str.strip, layer_details["capabilities"].split(",")))
         if "Query" not in server_capabilities:
-            raise RuntimeError("ArcGIS Feature Server does not support a query method which ArcGISFeatureServerSpider expects.")
+            raise RuntimeError(
+                "ArcGIS Feature Server does not support a query method which ArcGISFeatureServerSpider expects."
+            )
 
         query_formats = list(map(str.strip, layer_details["supportedQueryFormats"].split(",")))
         if "geoJSON" not in query_formats:
-            raise RuntimeError("ArcGIS Feature Server does not support GeoJSON output which ArcGISFeatureServerSpider expects.")
+            raise RuntimeError(
+                "ArcGIS Feature Server does not support GeoJSON output which ArcGISFeatureServerSpider expects."
+            )
 
-        if layer_details.get("dateFieldsTimeReference") and layer_details["dateFieldsTimeReference"].get("timeZone") == "UTC" and layer_details.get("editingInfo") and layer_details["editingInfo"].get("dataLastEditDate"):
-            timestamp_of_last_edit = datetime.fromtimestamp(int(float(layer_details["editingInfo"]["dataLastEditDate"]) / 1000))
+        if (
+            layer_details.get("dateFieldsTimeReference")
+            and layer_details["dateFieldsTimeReference"].get("timeZone") == "UTC"
+            and layer_details.get("editingInfo")
+            and layer_details["editingInfo"].get("dataLastEditDate")
+        ):
+            timestamp_of_last_edit = datetime.fromtimestamp(
+                int(float(layer_details["editingInfo"]["dataLastEditDate"]) / 1000)
+            )
             self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
             current_timestamp = datetime.now()
             if current_timestamp - timestamp_of_last_edit > timedelta(days=365):
-                self.logger.warning("The requested layer is possibly outdated as layer data was last edited over 365 days ago on {}.".format(timestamp_of_last_edit.isoformat()))
+                self.logger.warning(
+                    "The requested layer is possibly outdated as layer data was last edited over 365 days ago on {}.".format(
+                        timestamp_of_last_edit.isoformat()
+                    )
+                )
         elif layer_details.get("editingInfo") and layer_details["editingInfo"].get("dataLastEditDate"):
-            self.logger.warning("Cannot extract date of last data edit for specified layer due to use of non-UTC timezone which ArcGISFeatureServerSpider doesn't currently support.")
+            self.logger.warning(
+                "Cannot extract date of last data edit for specified layer due to use of non-UTC timezone which ArcGISFeatureServerSpider doesn't currently support."
+            )
 
         output_fields = "*"
         if len(self.field_names) > 1:
@@ -87,7 +104,9 @@ class ArcGISFeatureServerSpider(Spider):
             output_field_names = []
             for field_name in self.field_names:
                 if field_name not in available_field_names:
-                    self.logger.warning("Spider requested that field `{}` be extracted for each feature in the layer but the layer doesn't have a field named `{}`. Field ignored.")
+                    self.logger.warning(
+                        "Spider requested that field `{}` be extracted for each feature in the layer but the layer doesn't have a field named `{}`. Field ignored."
+                    )
                     continue
                 output_field_names.append(field_name)
             output_fields = ",".join(output_field_names)
@@ -119,7 +138,11 @@ class ArcGISFeatureServerSpider(Spider):
                 # More results exist and need to be queried for.
                 current_offset = int(response.request.url.split("&resultOffset=", 1)[1].split("&", 1)[0])
                 next_offset = current_offset + max_record_count
-                yield JsonRequest(url=response.request.url.replace(f"&resultOffset={current_offset}", f"&resultOffset={next_offset}"), callback=self.parse_features, dont_filter=True)
+                yield JsonRequest(
+                    url=response.request.url.replace(f"&resultOffset={current_offset}", f"&resultOffset={next_offset}"),
+                    callback=self.parse_features,
+                    dont_filter=True,
+                )
 
     def pre_process_data(self, feature: dict) -> None:
         return

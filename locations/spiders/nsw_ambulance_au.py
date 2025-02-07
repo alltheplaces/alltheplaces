@@ -24,9 +24,7 @@ class NswAmbulanceAUSpider(ArcGISFeatureServerSpider):
             apply_category({"government": "emergency"}, item)
         elif " HELO AMBULANCE STATION" in item["name"]:
             apply_category({"emergency": "air_rescue_service"}, item)
-        elif (
-            " CFR" in item["name"] or " VAO" in item["name"]
-        ):
+        elif " CFR" in item["name"] or " VAO" in item["name"]:
             # Community First Responder (CFR) and Volunteer Ambulance Officer (VAO)
             apply_category({"emergency": "first_aid"}, item)
         else:

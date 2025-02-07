@@ -18,7 +18,7 @@ class PerthWifiAUSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["UNIT_ID"].split("#", 1)[1]
         item["state"] = "WA"
-        apply_category(Categories.ANTENNA, item )
+        apply_category(Categories.ANTENNA, item)
         item["extras"]["internet_access"] = "wlan"
         item["extras"]["internet_access:fee"] = "no"
         item["extras"]["internet_access:ssid"] = "Perth WiFi"
