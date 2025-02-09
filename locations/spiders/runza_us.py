@@ -1,3 +1,4 @@
+from locations.categories import apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -5,6 +6,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class RunzaUSSpider(JSONBlobSpider):
     name = "runza_us"
+    item_attributes = {"brand": "Runza", "brand_wikidata": "Q108795782"}
     start_urls = [
         "https://drupal.runza.com/api/locations?proximity[value]=15&proximity[source_configuration][origin][lat]=&proximity[source_configuration][origin][lon]="
     ]
@@ -20,6 +22,8 @@ class RunzaUSSpider(JSONBlobSpider):
         item["postcode"] = location["field_address"][0]["postal_code"]
         item["ref"] = location["uuid"][0]["value"]
         item.pop("name", None)
+
+        apply_category({"amenity": "fast_food", "cuisine": "chicken"}, item)
 
         if location["field_hide_dining_room_hours"][0]["value"] is False:
             oh = OpeningHours()
