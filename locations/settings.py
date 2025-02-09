@@ -109,6 +109,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
     "locations.pipelines.email_clean_up.EmailCleanUpPipeline": 370,
+    "locations.pipelines.geojson_geometry_reprojection.GeoJSONGeometryReprojectionPipeline": 380,
     "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
     "locations.pipelines.drop_logo.DropLogoPipeline": 550,

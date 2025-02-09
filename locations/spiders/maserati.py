@@ -1,6 +1,7 @@
 import scrapy
 
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
 class MaseratiSpider(scrapy.Spider):
@@ -16,18 +17,12 @@ class MaseratiSpider(scrapy.Spider):
 
     def parse(self, response):
         for row in response.json().get("data", {}).get("results", {}).get("features"):
-            properties = {
-                "ref": row.get("properties", {}).get("otm_id"),
-                "name": row.get("properties", {}).get("dealername"),
-                "country": row.get("properties", {}).get("countryIsoCode2"),
-                "city": row.get("properties", {}).get("city"),
-                "lat": row.get("geometry", {}).get("coordinates")[1],
-                "lon": row.get("geometry", {}).get("coordinates")[0],
-                "phone": row.get("properties", {}).get("phone"),
-                "email": row.get("properties", {}).get("emailAddr"),
-                "street_address": row.get("properties", {}).get("address"),
-                "postcode": row.get("properties", {}).get("postcode"),
-                "website": row.get("properties", {}).get("url"),
-            }
-
-            yield Feature(**properties)
+            row.update(row.pop("properties"))
+            item = DictParser.parse(row)
+            item["ref"] = row.get("otm_id")
+            item["street_address"] = item.pop("addr_full")
+            item["country"] = row["countryIsoCode2"]
+            item["email"] = row["emailAddr"]
+            item["name"] = row["dealername"]
+            apply_category(Categories.SHOP_CAR, item)
+            yield item

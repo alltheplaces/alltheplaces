@@ -1,13 +1,11 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class PfChangsSpider(SitemapSpider, StructuredDataSpider):
+class PfChangsSpider(YextAnswersSpider):
     name = "pf_changs"
     item_attributes = {"brand": "P.F. Chang's", "brand_wikidata": "Q5360181"}
-    allowed_domains = ["www.pfchangs.com"]
-    sitemap_urls = ["https://www.pfchangs.com/locations/sitemap.xml"]
-    sitemap_rules = [(r"/locations/[-\w]+/[-\w]+/[-\w]+/[-\w]+/[-\w]+.html$", "parse_sd")]
-    wanted_types = ["Restaurant"]
-    drop_attributes = {"image"}
+    endpoint = "https://prod-cdn.us.yextapis.com/v2/accounts/me/search/vertical/query"
+    api_key = "74fc62da2a16bf5d87424b94f3bfddcc"
+    experience_key = "locator"
+    feature_type = "restaurants"
+    drop_attributes = {"contact:instagram", "twitter"}
