@@ -38,11 +38,13 @@ class GeoJSONGeometryReprojectionPipeline:
         if original_projection == 4326:
             # Already in expected EPSG:4326 projection.
             return item
-        lat, lon = Transformer.from_crs(original_projection, 4326).transform(item["geometry"]["coordinates"][0], item["geometry"]["coordinates"][1])
+        lat, lon = Transformer.from_crs(original_projection, 4326).transform(
+            item["geometry"]["coordinates"][0], item["geometry"]["coordinates"][1]
+        )
         new_geometry = {
             "type": "Point",
             "crs": {"type": "name", "properties": {"name": "EPSG:4326"}},
-            "coordinates": [lon, lat]
+            "coordinates": [lon, lat],
         }
         item["geometry"] = new_geometry
         return item
