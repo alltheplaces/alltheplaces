@@ -38,13 +38,10 @@ class GeoJSONGeometryReprojectionPipeline:
         transformer = Transformer.from_crs(original_projection, 4326)
         new_geometry = {
             "type": "Point",
-            "crs": {
-                "type": "name",
-                "properties": {
-                    "name": "EPSG:4326"
-                }
-            },
-            "coordinates": list(transformer.transform(item["geometry"]["coordinates"][1], item["geometry"]["coordinates"][0]))
+            "crs": {"type": "name", "properties": {"name": "EPSG:4326"}},
+            "coordinates": list(
+                transformer.transform(item["geometry"]["coordinates"][1], item["geometry"]["coordinates"][0])
+            ),
         }
         item["geometry"] = new_geometry
         return item

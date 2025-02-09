@@ -30,6 +30,7 @@ class TreePlotterSpider(Spider):
 
     If data cleanup is required, override the `post_process_item` method.
     """
+
     host: str = "pg-cloud.com"
     folder: str = ""
     layer_name: str = ""
@@ -54,7 +55,12 @@ class TreePlotterSpider(Spider):
             "params[args][tableName]": "species",
             "params[args][lookUpToos]": "",
         }
-        yield FormRequest(url=f"https://{self.host}/main/server/db.php", formdata=formdata, method="POST", callback=self.parse_species_list)
+        yield FormRequest(
+            url=f"https://{self.host}/main/server/db.php",
+            formdata=formdata,
+            method="POST",
+            callback=self.parse_species_list,
+        )
 
     def parse_species_list(self, response: Response) -> Iterable[FormRequest]:
         for species_id, species_details in response.json()["results"].items():
@@ -65,7 +71,7 @@ class TreePlotterSpider(Spider):
                 self._species[species_id]["genus"] = genus
             if common_name := species_details.get("common_name"):
                 self._species[species_id]["taxon:en"] = common_name
-            #elif alias := species_details.get("alias"):
+            # elif alias := species_details.get("alias"):
             #    self._species[species_id]["taxon:en"] = species["alias"]
         yield from self.request_tree_ids()
 
@@ -88,14 +94,23 @@ class TreePlotterSpider(Spider):
             "params[args][filtersPkg][settings][andor]": "AND",
             "params[args][filtersPkg][settings][boundToResults]": "1",
         }
-        yield FormRequest(url=f"https://{self.host}/main/server/db.php", formdata=formdata, method="POST", callback=self.parse_tree_ids)
+        yield FormRequest(
+            url=f"https://{self.host}/main/server/db.php",
+            formdata=formdata,
+            method="POST",
+            callback=self.parse_tree_ids,
+        )
 
     def parse_tree_ids(self, response: Response) -> Iterable[FormRequest]:
         tree_ids = response.json()["results"]["pids"]
         if len(tree_ids) != response.json()["results"]["total"]["count"]:
-            raise RuntimeError("Requested up to 1000000 features (of a total of {}) but only received {} features.".format(response.json()["results"]["total"]["count"], len(tree_ids)))
+            raise RuntimeError(
+                "Requested up to 1000000 features (of a total of {}) but only received {} features.".format(
+                    response.json()["results"]["total"]["count"], len(tree_ids)
+                )
+            )
         for offset in range(0, len(tree_ids), 1000):
-            tree_ids_list = tree_ids[offset:offset+1000]
+            tree_ids_list = tree_ids[offset : offset + 1000]
             yield from self.request_tree_details(tree_ids_list)
 
     def request_tree_details(self, tree_ids_list: list[int]) -> Iterable[FormRequest]:
@@ -110,7 +125,12 @@ class TreePlotterSpider(Spider):
             "params[args][pids]": ",".join(map(str, tree_ids_list)),
             "params[args][geomField]": "geom",
         }
-        yield FormRequest(url=f"https://{self.host}/main/server/db.php", formdata=formdata, method="POST", callback=self.parse_tree_details)
+        yield FormRequest(
+            url=f"https://{self.host}/main/server/db.php",
+            formdata=formdata,
+            method="POST",
+            callback=self.parse_tree_details,
+        )
 
     def parse_tree_details(self, response: Response) -> Iterable[Feature]:
         for tree in response.json()["results"]["trees"]["geojson"]["features"]:
@@ -128,7 +148,9 @@ class TreePlotterSpider(Spider):
                 continue
             species_id = str(tree["properties"]["species_common"])
             if species_id not in self._species.keys():
-                self.logger.warning("Tree with PID={} has unknown species {}.".format(tree["properties"]["pid"], species_id))
+                self.logger.warning(
+                    "Tree with PID={} has unknown species {}.".format(tree["properties"]["pid"], species_id)
+                )
             else:
                 properties["extras"].update(self._species[species_id])
             if dbh_cm := tree["properties"].get("dbh_cm"):
