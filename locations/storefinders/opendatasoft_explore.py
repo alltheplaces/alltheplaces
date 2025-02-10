@@ -38,6 +38,7 @@ class OpendatasoftExploreSpider(Spider):
          requested dataset. This may indicate the data publisher has changed
          the schema of the dataset to omit, rename or replace a field.
     """
+
     dataset_attributes = {"source": "api", "api": "opendatasoft"}
 
     api_endpoint: str = ""
@@ -50,7 +51,9 @@ class OpendatasoftExploreSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 120, "DOWNLOAD_WARNSIZE": 268435456}
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(url=urljoin(self.api_endpoint, f"catalog/datasets/{self.dataset_id}"), callback=self.parse_dataset_metadata)
+        yield JsonRequest(
+            url=urljoin(self.api_endpoint, f"catalog/datasets/{self.dataset_id}"), callback=self.parse_dataset_metadata
+        )
 
     def parse_dataset_metadata(self, response: Response) -> Iterable[JsonRequest]:
         metadata = response.json()["metas"]["default"]
@@ -58,7 +61,11 @@ class OpendatasoftExploreSpider(Spider):
         self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
         current_timestamp = datetime.now(UTC)
         if current_timestamp - timestamp_of_last_edit > timedelta(days=365):
-            self.logger.warning("The requested dataset is possibly outdated as it was last edited over 365 days ago on {}.".format(timestamp_of_last_edit.isoformat()))
+            self.logger.warning(
+                "The requested dataset is possibly outdated as it was last edited over 365 days ago on {}.".format(
+                    timestamp_of_last_edit.isoformat()
+                )
+            )
 
         url_parameters = ""
         if len(self.field_names) > 0:
@@ -66,14 +73,25 @@ class OpendatasoftExploreSpider(Spider):
             output_field_names = []
             for field_name in self.field_names:
                 if field_name not in available_field_names:
-                    self.logger.warning("Spider requested that field `{}` be extracted for each feature in the dataset but the dataset doesn't have a field named `{}`. Field ignored.".format(field_name, field_name))
+                    self.logger.warning(
+                        "Spider requested that field `{}` be extracted for each feature in the dataset but the dataset doesn't have a field named `{}`. Field ignored.".format(
+                            field_name, field_name
+                        )
+                    )
                     continue
                 output_field_names.append(field_name)
             output_fields = ",".join(map(quote_plus, output_field_names))
             url_parameters = f"?select={output_fields}"
 
-        self.logger.info("Exporting and downloading requested dataset `{}`. This may take a few minutes to complete.".format(self.dataset_id))
-        yield JsonRequest(url=urljoin(self.api_endpoint, f"catalog/datasets/{self.dataset_id}/exports/geojson{url_parameters}"), callback=self.parse_dataset_records)
+        self.logger.info(
+            "Exporting and downloading requested dataset `{}`. This may take a few minutes to complete.".format(
+                self.dataset_id
+            )
+        )
+        yield JsonRequest(
+            url=urljoin(self.api_endpoint, f"catalog/datasets/{self.dataset_id}/exports/geojson{url_parameters}"),
+            callback=self.parse_dataset_records,
+        )
 
     def parse_dataset_records(self, response: Response) -> Iterable[Feature]:
         features = response.json()["features"]
