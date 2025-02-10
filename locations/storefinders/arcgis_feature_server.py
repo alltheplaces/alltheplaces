@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Iterable
 
 from scrapy import Spider
@@ -13,13 +13,13 @@ class ArcGISFeatureServerSpider(Spider):
     Official documentation of the ArcGIS Feature Server query API:
     https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer/
 
-    To use this store finder, specify a `host`, a `context`, a `service` and a
-    `layer`. If the server type is `MapServer instead of the default
-    `FeatureServer`, optionally set `server_type` to be `MapServer`.
-    Optionally specify `fields` if it is beneficial to only work with a subset
-    of all fields available within the layer. These attributes can be
-    extracted from URLS as follows:
-      https://{host}/{context_path}/rest/services/{service_id}/FeatureServer/{layer_id}
+    To use this store finder, specify a `host`, a `context_path`, a
+    `service_id` and a `layer_id`. If the server type is `MapServer` instead
+    of the default `FeatureServer`, optionally set `server_type` to be
+    `MapServer`. Optionally specify `field_names` if it is  beneficial to only
+    work with a subset of all fields available within the layer. These
+    attributes can be extracted from URLs as follows:
+      https://{host}/{context_path}/rest/services/{service_id}/{server_type}/{layer_id}
 
     Example:
         URL: https://services.arcgis.com/1234567890abcdef/ArcGIS/rest/services/Sample/FeatureServer/0
@@ -46,8 +46,8 @@ class ArcGISFeatureServerSpider(Spider):
       1. Source data has a last data modification timestamp greater than 365
          days ago. This warning is a prompt to double check the latest source
          data is in use and that the brand/operator hasn't changed systems for
-         publshing geographic information about features.
-      2. A field defined in the `fields` attribute is not present in the
+         publishing geographic information about features.
+      2. A field defined in the `field_names` attribute is not present in the
          requested layer. This may indicate the data publisher has changed the
          schema of the feature layer to omit, rename or replace a field.
     """
@@ -91,10 +91,10 @@ class ArcGISFeatureServerSpider(Spider):
             and layer_details["editingInfo"].get("dataLastEditDate")
         ):
             timestamp_of_last_edit = datetime.fromtimestamp(
-                int(float(layer_details["editingInfo"]["dataLastEditDate"]) / 1000)
+                int(float(layer_details["editingInfo"]["dataLastEditDate"]) / 1000), UTC
             )
             self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
-            current_timestamp = datetime.now()
+            current_timestamp = datetime.now(UTC)
             if current_timestamp - timestamp_of_last_edit > timedelta(days=365):
                 self.logger.warning(
                     "The requested layer is possibly outdated as layer data was last edited over 365 days ago on {}.".format(
@@ -113,7 +113,9 @@ class ArcGISFeatureServerSpider(Spider):
             for field_name in self.field_names:
                 if field_name not in available_field_names:
                     self.logger.warning(
-                        "Spider requested that field `{}` be extracted for each feature in the layer but the layer doesn't have a field named `{}`. Field ignored."
+                        "Spider requested that field `{}` be extracted for each feature in the layer but the layer doesn't have a field named `{}`. Field ignored.".format(
+                            field_name, field_name
+                        )
                     )
                     continue
                 output_field_names.append(field_name)
