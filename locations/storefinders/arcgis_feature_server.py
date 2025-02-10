@@ -14,10 +14,12 @@ class ArcGISFeatureServerSpider(Spider):
     https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer/
 
     To use this store finder, specify a `host`, a `context_path`, a
-    `service_id` and a `layer_id`. Optionally specify `field_names` if it is
-    beneficial to only work with a subset of all fields available within the
-    layer. These attributes can be extracted from URLs as follows:
-      https://{host}/{context_path}/rest/services/{service_id}/FeatureServer/{layer_id}
+    `service_id` and a `layer_id`. If the server type is `MapServer` instead
+    of the default `FeatureServer`, optionally set `server_type` to be
+    `MapServer`. Optionally specify `field_names` if it is  beneficial to only
+    work with a subset of all fields available within the layer. These
+    attributes can be extracted from URLs as follows:
+      https://{host}/{context_path}/rest/services/{service_id}/{server_type}/{layer_id}
 
     Example:
         URL: https://services.arcgis.com/1234567890abcdef/ArcGIS/rest/services/Sample/FeatureServer/0
@@ -26,6 +28,7 @@ class ArcGISFeatureServerSpider(Spider):
         `host`: services.arcgis.com
         `context_path`: 1234567890abcdef/ArcGIS
         `service_id`: Sample
+        `server_type`: FeatureServer
         `layer_id`: 0
 
     Each feature within the specified layer is run through `DictParser.parse`
@@ -54,11 +57,16 @@ class ArcGISFeatureServerSpider(Spider):
     host: str = ""
     context_path: str = ""
     service_id: str = ""
+    server_type: str = "FeatureServer"  # Or "MapServer"
     layer_id: str = ""
     field_names: list[str] = []
 
+    # robots.txt does not exist and instead returns a HTTP 404 page which
+    # triggers a number of Scrapy warning messages.
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+
     def start_requests(self) -> Iterable[JsonRequest]:
-        layer_details_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/FeatureServer/{self.layer_id}?f=json"
+        layer_details_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}?f=json"
         yield JsonRequest(url=layer_details_url, callback=self.parse_layer_details)
 
     def parse_layer_details(self, response: Response) -> Iterable[JsonRequest]:
@@ -117,7 +125,7 @@ class ArcGISFeatureServerSpider(Spider):
         if max_record_count := layer_details["maxRecordCount"]:
             max_record_count_fields = f"&resultOffset=0&resultRecordCount={max_record_count}"
 
-        query_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/FeatureServer/{self.layer_id}/query?where=1%3D1&outFields={output_fields}&outSR=4326{max_record_count_fields}&f=geojson"
+        query_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}/query?where=1%3D1&outFields={output_fields}&outSR=4326{max_record_count_fields}&f=geojson"
         yield JsonRequest(url=query_url, callback=self.parse_features)
 
     def parse_features(self, response: Response) -> Iterable[Feature]:
