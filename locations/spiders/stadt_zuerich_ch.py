@@ -240,7 +240,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "ref": "wvz-%s" % p["brunnennummer"],
             "sculpture:material": sculpture_material,
             "sculpture:material:wikidata": sculpture_material_wikidata,
-            "start_date": str(p.get("baujahr", "")),
+            "start_date": str(p.get("baujahr") or ""),
             "trough:material": trough_material,
             "trough:material:wikidata": trough_material_wikidata,
         }
