@@ -31,6 +31,7 @@ class Categories(Enum):
     SAUNA = {"leisure": "sauna"}
 
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
+    HIGHWAY_TRAFFIC_SIGNALS = {"highway": "traffic_signals"}
 
     ENFORCEMENT_AVERAGE_SPEED = {"enforcement": "average_speed"}
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
