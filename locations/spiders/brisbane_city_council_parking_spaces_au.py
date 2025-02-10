@@ -56,14 +56,18 @@ class BrisbaneCityCouncilParkingSpacesAUSpider(ArcGISFeatureServerSpider):
                     continue
                 restriction_times.add_ranges_from_string(f"{days_applicable}: {hours_range}")
         else:
-            restriction_times.add_ranges_from_string("{}: {}".format(feature["OPERATIONAL_DAY"], feature["OPERATIONAL_TIME"]))
+            restriction_times.add_ranges_from_string(
+                "{}: {}".format(feature["OPERATIONAL_DAY"], feature["OPERATIONAL_TIME"])
+            )
 
         if feature["MAX_STAY_HRS"]:
             max_stay_hours = int(feature["MAX_STAY_HRS"].replace("4P-12P", "12"))
             if max_stay_hours == 1:
                 item["extras"]["maxstay:conditional"] = "1 hour @ ({})".format(restriction_times.as_opening_hours())
             else:
-                item["extras"]["maxstay:conditional"] = "{} hours @ ({})".format(max_stay_hours, restriction_times.as_opening_hours())
+                item["extras"]["maxstay:conditional"] = "{} hours @ ({})".format(
+                    max_stay_hours, restriction_times.as_opening_hours()
+                )
 
         item["extras"]["fee:conditional"] = "yes @ ({})".format(restriction_times.as_opening_hours())
 
@@ -72,15 +76,25 @@ class BrisbaneCityCouncilParkingSpacesAUSpider(ArcGISFeatureServerSpider):
             if feature["MC_BAYS"] and int(feature["MC_BAYS"]) > 0:
                 vehicle_type = "motorcar:"
             if feature["TAR_RATE_WEEKDAY"] and feature["TAR_RATE_AH_WE"]:
-                item["extras"][f"{vehicle_type}charge:conditional"] = "{} AUD/hour @ (Mo-Fr 07:00-19:00); {} AUD/hour @ (Mo-Fr 19:00-24:00; Sa-Su 07:00-19:00)".format(feature["TAR_RATE_WEEKDAY"], feature["TAR_RATE_AH_WE"])
-            elif feature["TAR_RATE_WEEKDAY"] and not feature ["TAR_RATE_AH_WE"]:
-                item["extras"][f"{vehicle_type}charge:conditional"] = "{} AUD/hour @ (Mo-Fr 07:00-19:00)".format(feature["TAR_RATE_WEEKDAY"])
+                item["extras"][f"{vehicle_type}charge:conditional"] = (
+                    "{} AUD/hour @ (Mo-Fr 07:00-19:00); {} AUD/hour @ (Mo-Fr 19:00-24:00; Sa-Su 07:00-19:00)".format(
+                        feature["TAR_RATE_WEEKDAY"], feature["TAR_RATE_AH_WE"]
+                    )
+                )
+            elif feature["TAR_RATE_WEEKDAY"] and not feature["TAR_RATE_AH_WE"]:
+                item["extras"][f"{vehicle_type}charge:conditional"] = "{} AUD/hour @ (Mo-Fr 07:00-19:00)".format(
+                    feature["TAR_RATE_WEEKDAY"]
+                )
             elif not feature["TAR_RATE_WEEKDAY"] and feature["TAR_RATE_AH_WE"]:
-                item["extras"][f"{vehicle_type}charge:conditional"] = "{} AUD/hour @ (Mo-Fr 19:00-11:59; Sa-Su 07:00-19:00)".format(feature["TAR_RATE_AH_WE"])
+                item["extras"][f"{vehicle_type}charge:conditional"] = (
+                    "{} AUD/hour @ (Mo-Fr 19:00-11:59; Sa-Su 07:00-19:00)".format(feature["TAR_RATE_AH_WE"])
+                )
         if feature["MC_BAYS"] and int(feature["MC_BAYS"]) > 0 and feature["MC_RATE"]:
             vehicle_type = ""
             if feature["VEH_BAYS"] and int(feature["VEH_BAYS"]) > 0:
                 vehicle_type = "motorcycle:"
-            item["extras"][f"{vehicle_type}charge:conditional"] = "{} AUD/hour @ ({})".format(feature["MC_RATE"], restriction_times.as_opening_hours())
+            item["extras"][f"{vehicle_type}charge:conditional"] = "{} AUD/hour @ ({})".format(
+                feature["MC_RATE"], restriction_times.as_opening_hours()
+            )
 
         yield item
