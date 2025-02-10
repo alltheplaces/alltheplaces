@@ -83,8 +83,7 @@ class ArcGISFeatureServerSpider(Spider):
             and layer_details["editingInfo"].get("dataLastEditDate")
         ):
             timestamp_of_last_edit = datetime.fromtimestamp(
-                int(float(layer_details["editingInfo"]["dataLastEditDate"]) / 1000),
-                UTC
+                int(float(layer_details["editingInfo"]["dataLastEditDate"]) / 1000), UTC
             )
             self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
             current_timestamp = datetime.now(UTC)
@@ -106,7 +105,9 @@ class ArcGISFeatureServerSpider(Spider):
             for field_name in self.field_names:
                 if field_name not in available_field_names:
                     self.logger.warning(
-                        "Spider requested that field `{}` be extracted for each feature in the layer but the layer doesn't have a field named `{}`. Field ignored.".format(field_name, field_name)
+                        "Spider requested that field `{}` be extracted for each feature in the layer but the layer doesn't have a field named `{}`. Field ignored.".format(
+                            field_name, field_name
+                        )
                     )
                     continue
                 output_field_names.append(field_name)
