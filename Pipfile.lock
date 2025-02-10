@@ -1302,11 +1302,11 @@
         },
         "phonenumbers": {
             "hashes": [
-                "sha256:b7308f21837defa567b4f961925b6c652dd5148f3e0fadbd158a10758cc63d91",
-                "sha256:fa7b93e12b3ac9baa7b056061cfcbe4de406039f720bb539dc240bed9cc43da2"
+                "sha256:4c32e3c941b24e5ce28d2211f624f0fef08462781e3d7e5e85192275cfd6c680",
+                "sha256:97624ada7260daafd09538baa6574b14cb9151cf29c5b22d9278abd050957edf"
             ],
             "index": "pypi",
-            "version": "==8.13.53"
+            "version": "==8.13.54"
         },
         "phpserialize": {
             "hashes": [
