@@ -1,6 +1,6 @@
-from pyproj import Transformer
 from typing import Iterable
 
+from pyproj import Transformer
 from scrapy.http import Request, Response
 from scrapy.selector import Selector
 from scrapy.spiders import XMLFeedSpider
@@ -13,7 +13,9 @@ class MerriBekCityCouncilLibrariesAUSpider(XMLFeedSpider):
     name = "merri_bek_city_council_libraries_au"
     item_attributes = {"operator": "Merri-bek City Council", "operator_wikidata": "Q30267291", "state": "VIC"}
     allowed_domains = ["www.merri-bek.vic.gov.au"]
-    start_urls = ["https://www.merri-bek.vic.gov.au/Proxy/proxy.ashx?https%3A%2F%2Fgeo.moreland.vic.gov.au%2Fgeoserver%2FMoreland%2Fows"]
+    start_urls = [
+        "https://www.merri-bek.vic.gov.au/Proxy/proxy.ashx?https%3A%2F%2Fgeo.moreland.vic.gov.au%2Fgeoserver%2FMoreland%2Fows"
+    ]
     iterator = "xml"
     namespaces = [
         ("gml", "http://www.opengis.net/gml"),
@@ -34,9 +36,7 @@ class MerriBekCityCouncilLibrariesAUSpider(XMLFeedSpider):
 		</ogc:Filter>
 	</wfs:Query>
 </wfs:GetFeature>"""
-        headers = {
-            "Content-Type": "application/xml"
-        }
+        headers = {"Content-Type": "application/xml"}
         yield Request(url=self.start_urls[0], body=request_body, headers=headers, method="POST")
 
     def parse_node(self, response: Response, selector: Selector) -> Iterable[Feature]:
@@ -49,9 +49,17 @@ class MerriBekCityCouncilLibrariesAUSpider(XMLFeedSpider):
             "phone": selector.xpath("./Moreland:MCC_Facilities/Moreland:Phone/text()").get(),
             "email": selector.xpath("./Moreland:MCC_Facilities/Moreland:Email/text()").get(),
         }
-        source_projection = int(selector.xpath("./Moreland:MCC_Facilities/Moreland:the_geom/gml:Point/@srsName").get().split("#", 1)[1])
-        lon_source, lat_source = selector.xpath("./Moreland:MCC_Facilities/Moreland:the_geom/gml:Point/gml:coordinates/text()").get().split(",", 1)
-        properties["lat"], properties["lon"] = Transformer.from_crs(source_projection, 4326).transform(lon_source, lat_source)
+        source_projection = int(
+            selector.xpath("./Moreland:MCC_Facilities/Moreland:the_geom/gml:Point/@srsName").get().split("#", 1)[1]
+        )
+        lon_source, lat_source = (
+            selector.xpath("./Moreland:MCC_Facilities/Moreland:the_geom/gml:Point/gml:coordinates/text()")
+            .get()
+            .split(",", 1)
+        )
+        properties["lat"], properties["lon"] = Transformer.from_crs(source_projection, 4326).transform(
+            lon_source, lat_source
+        )
         apply_category(Categories.LIBRARY, properties)
         properties["extras"]["access"] = "yes"
         yield Feature(**properties)
