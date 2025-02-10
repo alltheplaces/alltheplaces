@@ -13,6 +13,7 @@ from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
+from locations.extensions.add_lineage import spider_class_to_lineage
 from locations.settings import SPIDER_MODULES
 
 mapping = (
@@ -134,6 +135,8 @@ def get_dataset_attributes(spider_name) -> {}:
     if not settings.get("ROBOTSTXT_OBEY", True):
         # See https://github.com/alltheplaces/alltheplaces/issues/4537
         dataset_attributes["spider:robots_txt"] = "ignored"
+    if not dataset_attributes.get("lineage"):
+        dataset_attributes["lineage"] = spider_class_to_lineage(spider_class)
     dataset_attributes["@spider"] = spider_name
     dataset_attributes["spider:collection_time"] = datetime.datetime.now().isoformat()
 
