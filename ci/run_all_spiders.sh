@@ -88,7 +88,7 @@ scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN
 
 tippecanoe --cluster-distance=25 \
            --drop-rate=g \
-           --maximum-zoom=13 \
+           --maximum-zoom=14 \
            --cluster-maxzoom=g \
            --layer="alltheplaces" \
            --read-parallel \
