@@ -55,6 +55,7 @@ class Categories(Enum):
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
     LEISURE_DOG_PARK = {"leisure": "dog_park"}
+    LEISURE_FITNESS_STATION = {"leisure": "fitness_station"}
     LEISURE_NATURE_RESERVE = {"leisure": "nature_reserve"}
     LEISURE_PARK = {"leisure": "park"}
     LEISURE_PITCH = {"leisure": "pitch"}
