@@ -42,7 +42,7 @@ class MerriBekCityCouncilSwimmingPoolsAUSpider(XMLFeedSpider):
 			</ogc:And>
 		</ogc:Filter>
 	</wfs:Query>
-</wfs:GetFeature>""" #noqa:W191,E101
+</wfs:GetFeature>"""  # noqa:W191,E101
         headers = {"Content-Type": "application/xml"}
         yield Request(url=self.start_urls[0], body=request_body, headers=headers, method="POST")
 
