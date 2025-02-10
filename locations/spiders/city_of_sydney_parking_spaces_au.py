@@ -36,12 +36,17 @@ class CityOfSydneyParkingSpacesAUSpider(ArcGISFeatureServerSpider):
         hours_fee_applicable = OpeningHours()
         hours_by_charge = {}
         for restriction_string in map(str.strip, feature.get("Popup", "").split(";")):
-            restriction_string = restriction_string.replace("1/4P", "0.25P").replace("1/2P", "0.5P").replace(" & PUBLIC HOLIDAYS", "")
+            restriction_string = (
+                restriction_string.replace("1/4P", "0.25P").replace("1/2P", "0.5P").replace(" & PUBLIC HOLIDAYS", "")
+            )
             if not restriction_string:
                 # Some blank conditional restriction strings exist and should
                 # be ignored.
                 continue
-            if m := re.search(r"^(\d{1,2}(?:\.\d{1,2})?)P\s+(\d{1,2}(?:\:\d{2})?(?:AM|PM)\s*-\s*\d{1,2}(?:\:\d{2})?(?:AM|PM))\s+((?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:-(?:MON|TUE|WED|THU|FRI|SAT|SUN))?),\s+\$(\d{1,2}(?:\.\d{2})?)\s+\/HR$", restriction_string):
+            if m := re.search(
+                r"^(\d{1,2}(?:\.\d{1,2})?)P\s+(\d{1,2}(?:\:\d{2})?(?:AM|PM)\s*-\s*\d{1,2}(?:\:\d{2})?(?:AM|PM))\s+((?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:-(?:MON|TUE|WED|THU|FRI|SAT|SUN))?),\s+\$(\d{1,2}(?:\.\d{2})?)\s+\/HR$",
+                restriction_string,
+            ):
                 max_stay = m.group(1)
                 time_range = m.group(2)
                 day_range = m.group(3)
@@ -57,9 +62,15 @@ class CityOfSydneyParkingSpacesAUSpider(ArcGISFeatureServerSpider):
                 self.logger.warning("Unable to parse parking restrictions string: {}".format(restriction_string))
 
         for max_stay, hours in hours_by_max_stay.items():
-            max_stay_string = f"{max_stay} hours".replace("1 hours", "1 hour").replace("0.25 hours", "15 minutes").replace("0.5 hours", "30 minutes")
+            max_stay_string = (
+                f"{max_stay} hours".replace("1 hours", "1 hour")
+                .replace("0.25 hours", "15 minutes")
+                .replace("0.5 hours", "30 minutes")
+            )
             if "maxstay:conditional" in item["extras"].keys():
-                item["extras"]["maxstay:conditional"] = item["extras"]["maxstay:conditional"] + "; {} @ ({})".format(max_stay_string, hours.as_opening_hours())
+                item["extras"]["maxstay:conditional"] = item["extras"]["maxstay:conditional"] + "; {} @ ({})".format(
+                    max_stay_string, hours.as_opening_hours()
+                )
             else:
                 item["extras"]["maxstay:conditional"] = "{} @ ({})".format(max_stay_string, hours.as_opening_hours())
 
@@ -67,7 +78,9 @@ class CityOfSydneyParkingSpacesAUSpider(ArcGISFeatureServerSpider):
 
         for charge, hours in hours_by_charge.items():
             if "charge:conditional" in item["extras"].keys():
-                item["extras"]["charge:conditional"] = item["extras"]["charge:conditional"] + "; {} AUD/hour @ ({})".format(charge, hours.as_opening_hours())
+                item["extras"]["charge:conditional"] = item["extras"][
+                    "charge:conditional"
+                ] + "; {} AUD/hour @ ({})".format(charge, hours.as_opening_hours())
             else:
                 item["extras"]["charge:conditional"] = "{} AUD/hour @ ({})".format(charge, hours.as_opening_hours())
 
