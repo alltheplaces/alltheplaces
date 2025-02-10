@@ -47,6 +47,7 @@ class BurgerKingPESpider(Spider):
         for location in response.json().get("data", []):
             location.update(location.pop("addressInformation"))
             item = DictParser.parse(location)
+            item["name"] = None
             item["housenumber"] = location.get("exteriorNumber")
             item["street"] = item.pop("addr_full").replace("S/N", "")
             item["addr_full"] = merge_address_lines([item["housenumber"], item["street"], district])
