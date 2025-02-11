@@ -30,7 +30,10 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
             {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "diagnostic_radiology"},
         ),
         ("SURGERY CENTER", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
-        ("AMBULATORY SURGERY CENTER", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
+        (
+            "AMBULATORY SURGERY CENTER",
+            {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"},
+        ),
         ("HOSPITAL - REHABILITATION", {"healthcare": "rehabilitation"}),
         ("URGENT CARE CENTER", Categories.CLINIC_URGENT),
         ("FREE STANDING EMERGENCY ROOM", Categories.CLINIC_URGENT),
