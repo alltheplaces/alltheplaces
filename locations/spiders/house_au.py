@@ -33,6 +33,7 @@ class HouseAUSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+
             for brand_name in self.brands.keys():
                 if item["name"].startswith(f"{brand_name} "):
                     item.update(self.brands[brand_name])
