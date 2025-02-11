@@ -11,7 +11,9 @@ class SaversGBSpider(JSONBlobSpider):
     item_attributes = {"brand": "Savers", "brand_wikidata": "Q7428189"}
     start_urls = ["https://www.savers.co.uk/stores/?country=GB"]
     user_agent = FIREFOX_LATEST
-    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
+    headers={"Host": "www.savers.co.uk"}
+    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},"ROBOTSTXT_OBEY": False}
+
 
     # def sitemap_filter(self, entries):
     #    for entry in entries:
