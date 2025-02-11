@@ -1,7 +1,8 @@
 from locations.json_blob_spider import JSONBlobSpider
+
 ##from locations.dict_parser import DictParser
-#from locations.hours import OpeningHours
-#from locations.pipelines.address_clean_up import merge_address_lines
+# from locations.hours import OpeningHours
+# from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import FIREFOX_LATEST
 
 
@@ -12,14 +13,14 @@ class SaversGBSpider(JSONBlobSpider):
     user_agent = FIREFOX_LATEST
     custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
 
-    #def sitemap_filter(self, entries):
+    # def sitemap_filter(self, entries):
     #    for entry in entries:
     #        if not entry["loc"].startswith("https://www.savers.co.uk/store/"):
     #            continue
     #        entry["loc"] = "https://www.savers.co.uk/store/page/{}".format(entry["loc"].split("/")[-1])
     #        yield entry
 
-    #def parse(self, response: Response, **kwargs: Any) -> Any:
+    # def parse(self, response: Response, **kwargs: Any) -> Any:
     #    location = response.json()
     #    item = DictParser.parse(location)
     #    item["website"] = None
