@@ -29,8 +29,8 @@ class PizzaHutVNSpider(scrapy.Spider):
             item = Feature()
             item["ref"] = store.get("store_code")
             item["lat"], item["lon"] = store.get("location", "").split(",")
-            item["name"] = store.get("name_vi")
-            item["extras"]["name:en"] = store.get("name_en")
+            item["branch"] = store.get("name_vi").removeprefix("Pizza Hut ")
+            item["extras"]["branch:en"] = store.get("name_en").removeprefix("Pizza Hut ")
             item["addr_full"] = store.get("add_vn")
             item["extras"]["addr:full:en"] = clean_address(store.get("add_en"))
             if store.get("Open_Time") and store.get("Close_Time"):
