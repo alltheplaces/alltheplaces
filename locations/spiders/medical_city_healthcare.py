@@ -24,7 +24,8 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
         (
             "IMAGING CENTER",
             {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "diagnostic_radiology"},
-        ),        (
+        ),
+        (
             "IMAGING DEPARTMENT",
             {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "diagnostic_radiology"},
         ),
