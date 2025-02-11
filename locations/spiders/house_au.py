@@ -14,15 +14,16 @@ class HouseAUSpider(Spider):
     brands = {
         "House Bed & Bath": {
             "brand": "House Bed & Bath",
-            "brand_wikidata": "",
+            "brand_wikidata": "Q126176210",
             "extras": Categories.SHOP_HOUSEHOLD_LINEN.value,
         },
         "HOUSEB&B -": {
             "brand": "House Bed & Bath",
-            "brand_wikidata": "",
+            "brand_wikidata": "Q126176210",
             "extras": Categories.SHOP_HOUSEHOLD_LINEN.value,
         },
         "House": {"brand": "House", "brand_wikidata": "Q117921987", "extras": Categories.SHOP_HOUSEWARE.value},
+        "HOUSE -": {"brand": "House", "brand_wikidata": "Q117921987", "extras": Categories.SHOP_HOUSEWARE.value},
     }
 
     def start_requests(self):
@@ -32,7 +33,6 @@ class HouseAUSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-
             for brand_name in self.brands.keys():
                 if item["name"].startswith(f"{brand_name} "):
                     item.update(self.brands[brand_name])
