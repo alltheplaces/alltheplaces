@@ -9,3 +9,7 @@ class IntersportFISpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
     start_urls = ["https://www.intersport.fi/fi/kaupat/"]
     rules = (Rule(LinkExtractor(restrict_xpaths='//a[@data-link="openStorePage"]'), callback="parse_sd"),)
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["lat"], item["lon"] = item["lon"], item["lat"]
+        yield item

@@ -9,6 +9,7 @@ class PgaTourSuperstoreUSSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand_wikidata": "Q125705404"}
     start_urls = ["https://www.pgatoursuperstore.com/stores"]
     rules = [Rule(LinkExtractor(r"stores/detail\?StoreID=(\d+)$"), "parse")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "Club Fittings" in item["name"]:

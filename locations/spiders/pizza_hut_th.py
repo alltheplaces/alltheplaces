@@ -28,7 +28,6 @@ class PizzaHutTHSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["addr_full"] = store.get("store_address")
             item["state"] = store.get("store_province")
-            item["website"] = "https://www.pizzahut.co.th/"
             apply_category(Categories.RESTAURANT, item)
 
             yield item

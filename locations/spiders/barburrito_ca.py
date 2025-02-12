@@ -1,4 +1,3 @@
-from html import unescape
 from typing import Iterable
 
 from phpserialize import unserialize
@@ -16,7 +15,7 @@ class BarburritoCASpider(WPStoreLocatorSpider):
     allowed_domains = ["www.barburrito.ca"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = unescape(item.pop("name"))
+        item["branch"] = item.pop("name")
         item.pop("addr_full", None)
         yield item
 

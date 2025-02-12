@@ -103,4 +103,5 @@ class MoveYourselfAUSpider(Spider):
                             location["depotype"]
                         )
                     )
+            item["street_address"] = item.pop("addr_full", None)
             yield item

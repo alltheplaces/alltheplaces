@@ -10,6 +10,7 @@ class LasikPlusUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.lasikplus.com/robots.txt"]
     sitemap_follow = ["lasik_location.xml"]
     sitemap_rules = [(r"/location/([^/]+-lasik-center)/$", "parse")]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url

@@ -25,6 +25,7 @@ class VrBankDESpider(SitemapSpider):
     sitemap_rules = [(r"-\d+\.html$", "parse_details")]
     user_agent = BROWSER_DEFAULT
     item_attributes = {"country": "DE", "extras": Categories.BANK.value}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
     def process_hours(self, store_hours):
         opening_hours = OpeningHours()

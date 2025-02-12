@@ -12,6 +12,7 @@ class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["AutomotiveBusiness", "LocalBusiness"]
     search_for_facebook = False
     search_for_twitter = False
+    drop_attributes = {"image"}
 
     def pre_process_data(self, ld_data, **kwargs):
         for rule in ld_data.get("openingHoursSpecification") or []:

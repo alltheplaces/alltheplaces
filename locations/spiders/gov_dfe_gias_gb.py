@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pyproj
 from scrapy.spiders import CSVFeedSpider
@@ -6,14 +6,16 @@ from scrapy.spiders import CSVFeedSpider
 from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
+from locations.settings import ITEM_PIPELINES
 
 
 class GovDfeGiasGBSpider(CSVFeedSpider):
     download_timeout = 400
     name = "gov_dfe_gias_gb"
-    today = datetime.today()
+    # Using yesterday because it may run early in the morning and 'today' may not be ready
+    yesterday = datetime.today() - timedelta(1)
     start_urls = [
-        f"https://ea-edubase-api-prod.azurewebsites.net/edubase/downloads/public/edubasealldata{today.year}{today.month:02d}{today.day:02d}.csv"
+        f"https://ea-edubase-api-prod.azurewebsites.net/edubase/downloads/public/edubasealldata{yesterday.year}{yesterday.month:02d}{yesterday.day:02d}.csv"
     ]
     dataset_attributes = {
         "license": "Open Government Licence v3.0",
@@ -22,8 +24,10 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
         "attribution": "required",
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
     }
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    skip_auto_cc_spider_name = True
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None},
+    }
     # British OSGB36 -> lat/lon (https://epsg.io/4326)
     coord_transformer = pyproj.Transformer.from_crs(27700, 4326)
 
@@ -46,7 +50,7 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
             and row["ReasonEstablishmentOpened (name)"] == "New Provision"
             and row["OpenDate"] != ""
         ):
-            item["extras"]["start_date"] = datetime.strptime(row["OpenDate"], "%d-%m-%Y")
+            item["extras"]["start_date"] = datetime.strptime(row["OpenDate"], "%d-%m-%Y").strftime("%Y-%m-%d")
         elif row["EstablishmentStatus (name)"] != "Open":
             return
 
@@ -79,7 +83,9 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
                 row.get("Postcode"),
             ]
         )
-        item["website"] = row.get("SchoolWebsite")
+        if website := row.get("SchoolWebsite"):
+            if not website.lower().startswith("http"):
+                item["website"] = "https://{}".format(website)
         item["phone"] = row.get("TelephoneNum")
         item["extras"]["ref:GB:uprn"] = row.get("UPRN")
 

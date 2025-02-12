@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -58,8 +58,17 @@ class JSONBlobSpider(Spider):
     locations_key = ["data", "locationData", "stores"]
     """
     locations_key: str | list[str] = None
+    needs_json_request = False
 
-    def extract_json(self, response: Response) -> dict | list:
+    def start_requests(self) -> Iterable[JsonRequest | Request]:
+        if self.needs_json_request:
+            for url in self.start_urls:
+                yield JsonRequest(url)
+        else:
+            for url in self.start_urls:
+                yield Request(url)
+
+    def extract_json(self, response: Response) -> dict | list[dict]:
         """
         Override this method to extract the main JSON content from the page. The default
         behaviour is to treat the returned body as JSON and treat it as an array of
@@ -95,6 +104,8 @@ class JSONBlobSpider(Spider):
 
     def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
+            if feature is None:
+                continue
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
             yield from self.post_process_item(item, response, feature) or []

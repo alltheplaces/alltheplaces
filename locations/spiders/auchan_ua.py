@@ -1,14 +1,14 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
 class AuchanUASpider(scrapy.Spider):
     name = "auchan_ua"
-    item_attributes = {"brand": "Auchan", "brand_wikidata": "Q4073419", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand_wikidata": "Q4073419"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
@@ -19,13 +19,15 @@ class AuchanUASpider(scrapy.Spider):
         for store in response.json()["data"]["getAuchanWarehouses"]["warehouses"]:
             store.update(store.pop("position"))
             item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full")
             item["city"] = store["city_ru"]
             item["ref"] = store["code"]
-            item["website"] = "https://auchan.ua/"
             item["opening_hours"] = OpeningHours()
             if store["hours"] not in ["Зачинено", "Зачинений"]:
                 open_time, close_time = store["hours"].split("-")
                 for day in DAYS:
                     item["opening_hours"].add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item

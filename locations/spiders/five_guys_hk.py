@@ -1,11 +1,12 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.spiders.five_guys_us import FiveGuysUSSpider
-from locations.structured_data_spider import StructuredDataSpider
+from locations.spiders.five_guys_au import FiveGuysAUSpider
 
 
-class FiveGuysHKSpider(SitemapSpider, StructuredDataSpider):
+class FiveGuysHKSpider(FiveGuysAUSpider):
     name = "five_guys_hk"
-    item_attributes = FiveGuysUSSpider.item_attributes
-    sitemap_urls = ["https://restaurants.fiveguys.com.hk/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/restaurants\.fiveguys\.com\.hk\/en_hk\/(?!search$)[^/]+$", "parse_sd")]
+    experience_key = "search-backend-hk"
+    locale = "en-HK"  # Using en because it has google attributes which gives lots of extra details (not present in zh-Hans-HK)
+
+    def process_websites(self, item) -> None:
+        item["extras"]["website:en"] = item["website"]
+        item["extras"]["website:zh"] = item["website"].replace("/en_hk/", "/")
+        item["website"] = item["extras"]["website:zh"]

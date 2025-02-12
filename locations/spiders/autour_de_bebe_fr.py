@@ -19,6 +19,7 @@ class AutourDeBebeFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"magasins\.autourdebebe\.com/.*/.*/.*/results$", "discover_store_details"),
     ]
+    drop_attributes = {"image"}
 
     def discover_store_details(self, response):
         urls = response.xpath('//a[contains(@href, "details")]/@href').extract()

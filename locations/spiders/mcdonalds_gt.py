@@ -9,13 +9,13 @@ from locations.spiders.mcdonalds import McdonaldsSpider
 class McdonaldsGTSpider(JSONBlobSpider):
     name = "mcdonalds_gt"
     item_attributes = McdonaldsSpider.item_attributes
-    acustom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://mcdonalds.com.gt/restaurantes"]
 
     def extract_json(self, response):
         return json.loads(response.xpath("//@data-page").get())["props"]["restaurants"]
 
     def post_process_item(self, item, response, location):
+        item["branch"] = item.pop("name")
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in location["categorias"])
 
         for oh_rules in (

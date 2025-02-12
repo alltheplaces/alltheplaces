@@ -31,6 +31,5 @@ class AviaFRSpider(Spider):
             item["name"] = store.get("Additional Company Info")
             item["state"] = store.get("Place")
             item["phone"] = store.get("Telephone No.")
-            item["website"] = "https://www.avia-france.fr/"
             apply_category(Categories.FUEL_STATION, item)
             yield item

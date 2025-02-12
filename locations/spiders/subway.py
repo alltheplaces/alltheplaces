@@ -9,7 +9,7 @@ class SubwaySpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["restaurants.subway.com"]
     sitemap_urls = ["https://restaurants.subway.com/sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
-    download_delay = 0
+    drop_attributes = {"image"}
 
     def pre_process_data(self, ld_data, **kwargs):
         if isinstance(ld_data["name"], list):

@@ -46,11 +46,12 @@ class HoneyBakedHamUSSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             days_from_sunday = DAYS[-1:] + DAYS[:-1]
-            for day_hours in attributes["storeHours"]:
-                if day_hours["closed"]:
-                    continue
-                item["opening_hours"].add_range(
-                    days_from_sunday[day_hours["dayOfTheWeek"]], day_hours["openTime"], day_hours["closeTime"]
-                )
+            if store_hours := attributes.get("storeHours"):
+                for day_hours in store_hours:
+                    if day_hours["closed"]:
+                        continue
+                    item["opening_hours"].add_range(
+                        days_from_sunday[day_hours["dayOfTheWeek"]], day_hours["openTime"], day_hours["closeTime"]
+                    )
 
             yield item

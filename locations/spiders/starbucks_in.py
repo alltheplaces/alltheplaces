@@ -2,12 +2,13 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class StarbucksINSpider(CrawlSpider, StructuredDataSpider):
     name = "starbucks_in"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     start_urls = ["https://tsb-stores.starbucksindia.net/"]
     rules = [
         Rule(LinkExtractor(allow=r"/Home$"), "parse_sd"),

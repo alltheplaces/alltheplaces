@@ -31,7 +31,6 @@ class AviaRSSpider(Spider):
             item["name"] = address_data.xpath(r"//h5/text()").get()
             item["addr_full"] = address_data.xpath(r"//p/text()").get()
             item["phone"] = address_data.xpath(r"//p[3]/text()").get()
-            item["website"] = "https://radunavia.rs/"
             for lat_lon in lat_lon_data:
                 if item["name"] in lat_lon:
                     item["lat"] = lat_lon[1]

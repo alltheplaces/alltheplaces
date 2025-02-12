@@ -10,6 +10,7 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://locations.mtb.com/robots.txt"]
     sitemap_rules = [(r"\.html$", "parse_sd")]
     wanted_types = ["FinancialService"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         cat = response.xpath('//span[@class="Hero-locationType"]/text()').get()
@@ -26,7 +27,5 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
                 # https://locations.mtb.com/ma/agawam/bank-branches-and-atms-agawam-ma-sa7000.html
                 return
             item["branch"] = item.pop("name").removeprefix("M&T Bank in ")
-
-        item["country"] = "US"
 
         yield item

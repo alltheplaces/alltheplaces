@@ -1,3 +1,5 @@
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+
 from scrapy.http import JsonRequest
 from scrapy.spiders import CSVFeedSpider
 from scrapy.utils.defer import maybe_deferred_to_future
@@ -239,9 +241,22 @@ class GbfsSpider(CSVFeedSpider):
     download_delay = 2
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
+    def get_authorized_url(self, url: str, authentication_info: str) -> str | None:
+        """Adds authentication_info to the url if it's not already part of it,
+        or returns None if authentication_info is a link to instructions."""
+        if authentication_info == "":
+            return url
+        if authentication_info.startswith("http"):
+            return None
+        parsed = urlparse(url)
+        qs = urlencode(parse_qsl(parsed.query) + parse_qsl(authentication_info))
+        parsed._replace(query=qs)
+        return urlunparse(parsed)
+
     def parse_row(self, response, row):
         """Queues downloads for every GBFS system manifest"""
-        yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
+        if url := self.get_authorized_url(row["Auto-Discovery URL"], row["Authentication Info"]):
+            yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
 
     def set_localized_name(self, item, itemkey, station, stationkey):
         """Utility function to set localized tags"""
@@ -259,15 +274,15 @@ class GbfsSpider(CSVFeedSpider):
         else:
             self.logger.error(f"Can't handle a localized {stationkey!r} of type {type(value)}")
 
-    def defer_request_feed(self, all_feeds, feed_name, deferreds):
+    def defer_request_feed(self, all_feeds, feed_name, deferreds, authentication_info):
         """Given the name of a GBFS feed, look for it in the feeds list, and
         queue an asynchronous download"""
         # List feeds by name.
         feeds = [feed for feed in all_feeds if feed["name"] == feed_name]
 
-        if len(feeds) > 0:
-            # If any feeds by that name exist, request the first.
-            deferreds.append(self.crawler.engine.download(JsonRequest(url=feeds[0]["url"])))
+        # If any feeds by that name exist, request the first.
+        if len(feeds) > 0 and (url := self.get_authorized_url(feeds[0]["url"], authentication_info)):
+            deferreds.append(self.crawler.engine.download(JsonRequest(url=url)))
             return True
         else:
             return False
@@ -342,19 +357,20 @@ class GbfsSpider(CSVFeedSpider):
 
         feeds = DictParser.get_nested_key(data, "feeds") or []
         deferreds = []
+        authentication_info = kwargs["Authentication Info"]
 
         # Network and operator information
-        has_system_information = self.defer_request_feed(feeds, "system_information", deferreds)
+        has_system_information = self.defer_request_feed(feeds, "system_information", deferreds, authentication_info)
 
         # Vehicle types, used to determine feature category
-        has_vehicle_types = self.defer_request_feed(feeds, "vehicle_types", deferreds)
+        has_vehicle_types = self.defer_request_feed(feeds, "vehicle_types", deferreds, authentication_info)
 
         # Information about each docking station
-        has_station_information = self.defer_request_feed(feeds, "station_information", deferreds)
+        has_station_information = self.defer_request_feed(feeds, "station_information", deferreds, authentication_info)
 
         # Current status of each docking station.
         # Only needed as fallback if station_information doesn't have vehicle type tags.
-        has_station_status = self.defer_request_feed(feeds, "station_status", deferreds)
+        has_station_status = self.defer_request_feed(feeds, "station_status", deferreds, authentication_info)
 
         if not has_station_information:
             # Can't proceed without station locations.

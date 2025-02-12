@@ -7,11 +7,12 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksAUSpider(scrapy.Spider):
     name = "starbucks_au"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     start_urls = ["https://www.starbucks.com.au/find-a-store/"]
 
     def parse(self, response, **kwargs):

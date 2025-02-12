@@ -20,6 +20,5 @@ class PizzaHutMYSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for store in response.json()["data"]["items"]:
             item = DictParser.parse(store)
-            item["website"] = "https://www.pizzahut.com.my/"
             apply_category(Categories.RESTAURANT, item)
             yield item

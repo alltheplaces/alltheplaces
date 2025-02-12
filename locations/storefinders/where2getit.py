@@ -155,6 +155,8 @@ class Where2GetItSpider(Spider):
             # No results returned for the provided API filter.
             return
         for location in response.json()["response"]["collection"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             if not item["ref"]:
                 item["ref"] = location["clientkey"]
@@ -162,6 +164,9 @@ class Where2GetItSpider(Spider):
                 [location.get("address1"), location.get("address2"), location.get("address3")]
             )
             yield from self.parse_item(item, location)
+
+    def pre_process_data(self, location: dict) -> None:
+        """Override with any pre-processing on the item."""
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item

@@ -1,5 +1,5 @@
 import re
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from scrapy import Selector
 from scrapy.http import Response
@@ -10,6 +10,7 @@ from locations.items import Feature
 def _get_possible_links(response: Response | Selector):
     yield from response.xpath('.//img[contains(@src, "maps/api/staticmap")]/@src').getall()
     yield from response.xpath('.//iframe[contains(@src, "maps/embed")]/@src').getall()
+    yield from response.xpath('.//iframe[contains(@src, "google")][contains(@src, "maps")]/@src').getall()
     yield from response.xpath(".//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
     yield from response.xpath(".//a[contains(@href, 'maps.apple.com')]/@href").getall()
     yield from [
@@ -37,7 +38,10 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
         queries = parse_qs(parsed_link.query)
         return queries.get(query_param, [])
 
-    url = url.replace("google.co.uk", "google.com")
+    url = unquote(url)
+
+    # replace alternative domains such as google.cz or google.co.uk with google.com
+    url = re.sub(r"google(\.[a-z]{2,3})?\.[a-z]{2,3}/", "google.com/", url)
 
     if match := re.search(r"@(-?\d+.\d+),\s?(-?\d+.\d+),[\d.]+[zm]", url):
         return float(match.group(1)), float(match.group(2))
@@ -90,8 +94,19 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
     elif "daddr" in url:
         for daddr in get_query_param(url, "daddr"):
             daddr = daddr.split(",")
-            if len(daddr) == 2:
-                return float(daddr[0]), float(daddr[1])
+            if len(daddr) == 1 and " " in daddr[0]:
+                daddr = daddr[0].split(" ")
+            fixed_coords = []
+            if any(["°" in coord for coord in daddr]):
+                for coord in daddr:
+                    if coord.endswith("N") or coord.endswith("E"):
+                        fixed_coords.append(coord.replace("°", "").removesuffix("N").removesuffix("E").strip())
+                    elif coord.endswith("S") or coord.endswith("W"):
+                        fixed_coords.append("-" + coord.replace("°", "").removesuffix("S").removesuffix("W").strip())
+            else:
+                fixed_coords = daddr
+            if len(fixed_coords) == 2:
+                return float(fixed_coords[0]), float(fixed_coords[1])
     elif "maps.apple.com" in url:
         for q in get_query_param(url, "q"):
             coords = q.split(",")

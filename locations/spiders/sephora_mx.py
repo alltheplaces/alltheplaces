@@ -31,5 +31,5 @@ class SephoraMXSpider(Spider):
                 properties["name"] = properties["name"].split(" - ", 1)[1]
             properties["ref"] = properties["name"].lower().replace(" ", "_")
             item = Feature(**properties)
-            apply_category(Categories.SHOP_BEAUTY, item)
+            apply_category(Categories.SHOP_COSMETICS, item)
             yield item

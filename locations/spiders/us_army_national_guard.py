@@ -11,11 +11,11 @@ class UsArmyNationalGuardSpider(scrapy.Spider):
         "brand_wikidata": "Q928670",
         "country": "US",
     }
-    allowed_domains = ["www.nationalguard.com"]
+    allowed_domains = ["nationalguard.com"]
 
     def start_requests(self):
         for state in GeonamesCache().get_us_states().keys() | ["USPR", "USGU", "USVI"]:
-            yield scrapy.Request(url="https://www.nationalguard.com/api/state/" + state)
+            yield scrapy.Request(url="https://nationalguard.com/api/state/" + state)
 
     def parse(self, response, **kwargs):
         data = response.json()

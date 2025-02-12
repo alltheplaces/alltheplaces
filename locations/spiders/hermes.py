@@ -7,7 +7,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class HermesSpider(scrapy.Spider):
     name = "hermes"
     item_attributes = {
-        "brand": "Hermes",
+        "brand": "Hermès",
         "brand_wikidata": "Q843887",
     }
     allowed_domains = ["hermes.com"]

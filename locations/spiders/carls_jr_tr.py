@@ -18,7 +18,6 @@ class CarlsJrTRSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["addr_full"] = clean_address(location.get("content").replace("<br>", ", ").replace("</br>", ""))
-            item["website"] = "https://www.carlsjr.com.tr/en/restaurant"
             location_html = Selector(text=location.get("address", ""))
             extract_google_position(item, location_html)
             yield item

@@ -12,3 +12,4 @@ class GncSpider(SitemapSpider, StructuredDataSpider):
         (r"^https://stores.gnc.com/all-stores-[^/]+/[^/]+/[^/]+$", "parse_sd"),
     ]
     wanted_types = ["HobbyShop"]
+    drop_attributes = {"image"}

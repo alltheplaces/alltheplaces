@@ -12,6 +12,7 @@ class AldiSudAUSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand_wikidata": "Q41171672"}
     sitemap_urls = ["https://store.aldi.com.au/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/store\.aldi\.com\.au\/\w+\/[-\w]+\/[-\w]+", "parse_sd")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("ALDI ")

@@ -14,6 +14,7 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
     }
     start_urls = ["https://www.nationwide.co.uk/branches/index.html"]
     rules = [Rule(LinkExtractor(allow=r"/branches/"), callback="parse_sd", follow=True)]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "permanently closed" in item["name"].lower():
@@ -25,12 +26,5 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
 
         if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
             item.pop("phone", None)
-
-        if (
-            "image" in item
-            and item["image"] is not None
-            and "https://www.bhf.org.uk/-/media/images/social/facebook-share-image_v5-1.png" in item["image"]
-        ):
-            item.pop("image", None)
 
         yield item

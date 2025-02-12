@@ -1,21 +1,16 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class SafewayCASpider(scrapy.Spider):
+class SafewayCASpider(SitemapSpider):
     name = "safeway_ca"
     item_attributes = {"brand": "Safeway", "brand_wikidata": "Q17111901"}
     allowed_domains = ["www.safeway.ca"]
-    start_urls = ("https://www.safeway.ca/store-sitemap.xml",)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for url in response.xpath("//loc/text()").extract():
-            if "/stores/" in url:
-                yield scrapy.Request(url, callback=self.parse_store)
+    sitemap_urls = ("https://www.safeway.ca/store-sitemap.xml",)
+    sitemap_rules = [(r"/stores/", "parse_store")]
 
     def parse_store(self, response):
         properties = {

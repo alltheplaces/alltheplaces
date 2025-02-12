@@ -1,5 +1,4 @@
 import re
-from html import unescape
 from typing import Iterable
 
 from scrapy.http import Response
@@ -27,7 +26,6 @@ class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("addr_full", None)
 
-        item["name"] = unescape(item["name"])
         if len(item["name"].split(" (")) > 1:
             old_name = item["name"]
             item["name"], located_in_tag = old_name.split(" (", 1)

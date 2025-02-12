@@ -1,24 +1,18 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class LowesFoodsSpider(scrapy.Spider):
+class LowesFoodsSpider(SitemapSpider):
     name = "lowes_foods"
     item_attributes = {"brand": "Lowes Foods", "brand_wikidata": "Q6693991"}
     allowed_domains = ["lowesfoods.com"]
     download_delay = 0.2
-    start_urls = ("https://www.lowesfoods.com/sitemap.xml",)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-        for url in urls:
-            if re.match(r".*store-locator/store-\d+$", url):
-                yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
+    sitemap_urls = ["https://www.lowesfoods.com/sitemap.xml"]
+    sitemap_rules = [(r".*store-locator/store-\d+$", "parse_store")]
 
     def parse_store(self, response):
         city_state_zip = (
@@ -53,15 +47,21 @@ class LowesFoodsSpider(scrapy.Spider):
             open_time = hours.split(" - ")[0].split(" ")[-1]
             close_time = hours.split(" - ")[1]
             # There is sometimes a space between the time and 'PM'
+            open_time = "".join(open_time.split(" "))
             close_time = "".join(close_time.split(" "))
 
-            for day in DAYS:
-                opening_hours.add_range(
-                    day=day,
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%I:%M%p",
-                )
+            try:
+                for day in DAYS:
+                    opening_hours.add_range(
+                        day=day,
+                        open_time=open_time,
+                        close_time=close_time,
+                        time_format="%I:%M%p",
+                    )
+            except:
+                # If times or dates are malformed, it might be due to a manual entry like
+                # 'Closing for hurricane debby'
+                return None
         else:
             return None
 

@@ -7,13 +7,14 @@ from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 AMENITIES_MAP = {"wifi": Extras.WIFI}
 
 
 class StarbucksZASpider(JSONBlobSpider):
     name = "starbucks_za"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES | {"extras": Categories.COFFEE_SHOP.value}
     locations_key = "stores"
 
     def start_requests(self):

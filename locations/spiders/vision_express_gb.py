@@ -14,6 +14,7 @@ class VisionExpressGBSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"/opticians/[-\w]+/[-\w]+$"), callback="parse_sd"),
     ]
     search_for_twitter = False
+    drop_attributes = {"email"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["street_address"] = item["street_address"].replace(" undefined", "")

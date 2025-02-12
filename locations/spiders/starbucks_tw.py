@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class StarbucksTWSpider(Spider):
     name = "starbucks_tw"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = {"brand": "星巴克", "brand_wikidata": "Q37158"}
     start_urls = ["https://www.starbucks.com.tw/stores/storesearch.jspx"]
     requires_proxy = True
 

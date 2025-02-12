@@ -8,10 +8,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 class LincolnshireCooperativeSpider(SitemapSpider):
     name = "lincolnshire_cooperative"
-    item_attributes = {
-        "brand": "Lincolnshire Co-operative",
-        "brand_wikidata": "Q5329759",
-    }
+    item_attributes = {"brand": "Lincolnshire Co-op", "brand_wikidata": "Q6551231", "nsi_id": "N/A"}
     sitemap_urls = ["https://www.lincolnshire.coop/sitemap.xml"]
     sitemap_rules = [
         (
@@ -38,7 +35,7 @@ class LincolnshireCooperativeSpider(SitemapSpider):
         item = LinkedDataParser.parse_ld(ld_item)
 
         if item.get("image"):
-            item["image"] = item["image"].replace("https://www.lincolnshire.coophttps://", "https://")
+            item["image"] = item["image"].replace("//www.lincolnshire.coophttps://", "https://")
 
         if item.get("phone"):
             item["phone"] = item["phone"].replace(" (24 hours)", "")

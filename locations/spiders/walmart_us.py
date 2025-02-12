@@ -70,7 +70,7 @@ class WalmartUSSpider(SitemapSpider):
             if service["name"] not in ["PHARMACY", "GAS_STATION"]:
                 self.crawler.stats.inc_value("atp/walmart/ignored/{}".format(service["name"]))
                 continue
-            poi = item.copy()
+            poi = item.deepcopy()
             poi["ref"] += service["name"]
             poi["name"] = service["displayName"]
             poi["phone"] = service["phone"]

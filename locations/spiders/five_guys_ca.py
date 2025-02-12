@@ -1,18 +1,9 @@
-from scrapy.spiders import SitemapSpider
+from locations.spiders.five_guys_us import FIVE_GUYS_SHARED_ATTRIBUTES, FiveGuysUSSpider
 
-from locations.structured_data_spider import StructuredDataSpider
-
-# Five Guys Microdata
+# Five Guys YextSearch
 
 
-class FiveGuysCASpider(SitemapSpider, StructuredDataSpider):
+class FiveGuysCASpider(FiveGuysUSSpider):
     name = "five_guys_ca"
-    item_attributes = {"brand": "Five Guys", "brand_wikidata": "Q1131810"}
-    sitemap_urls = ["https://restaurants.fiveguys.ca/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.ca\/[^/]+$", "parse_sd")]
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if "name" in item:
-            item["branch"] = item.pop("name").removeprefix("Five Guys ")
-
-        yield item
+    item_attributes = FIVE_GUYS_SHARED_ATTRIBUTES
+    host = "https://restaurants.fiveguys.ca"

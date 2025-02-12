@@ -15,6 +15,12 @@ def get_objects(phone, country):
     )
 
 
+def test_phoneword():
+    item, pipeline, spider = get_objects("1-800-Flowers", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+1 800-356-9377"
+
+
 def test_handle():
     # Switzerland
     item, pipeline, spider = get_objects("0442017500", "CH")
@@ -91,8 +97,28 @@ def test_drop_duplicate():
 def test_undefined():
     item, pipeline, spider = get_objects("undefined", "US")
     pipeline.process_item(item, spider)
-    assert item.get("phone") == ""
+    assert not item.get("phone")
 
     item, pipeline, spider = get_objects("+undefinedundefinedundefined", "US")
     pipeline.process_item(item, spider)
-    assert item.get("phone") == "+"
+    assert not item.get("phone")
+
+
+def test_no_number():
+    item, pipeline, spider = get_objects("None", "US")
+    pipeline.process_item(item, spider)
+    assert not item.get("phone")
+
+    item, pipeline, spider = get_objects("null", "US")
+    pipeline.process_item(item, spider)
+    assert not item.get("phone")
+
+
+def test_all_zeros():
+    item, pipeline, spider = get_objects("0000", "US")
+    pipeline.process_item(item, spider)
+    assert not item.get("phone")
+
+    item, pipeline, spider = get_objects("(000) 000-00-00", "US")
+    pipeline.process_item(item, spider)
+    assert not item.get("phone")

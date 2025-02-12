@@ -12,10 +12,10 @@ class BunningsSpider(Spider):
     start_urls = [
         "https://api.prod.bunnings.com.au/v1/stores?latitude=-23.12&longitude=132.13&currentPage=0&fields=FULL&pageSize=10000&radius=9000000",
     ]
-    item_attributes = {"brand": "Bunnings", "brand_wikidata": "Q4997829"}
+    item_attributes = {"brand": "Bunnings Warehouse", "brand_wikidata": "Q4997829"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     client_id = "mHPVWnzuBkrW7rmt56XGwKkb5Gp9BJMk"  # Fixed value of APIGEE_CLIENT_ID variable from store locator page.
-    requires_proxy = True  # Requires AU or NZ proxy, possibly residential IP addresses only.
+    requires_proxy = "AU"  # Requires AU or NZ proxy, possibly residential IP addresses only.
 
     def start_requests(self):
         yield Request(url="https://www.bunnings.com.au/", callback=self.parse_cookies)

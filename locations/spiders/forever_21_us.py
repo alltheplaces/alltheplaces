@@ -17,6 +17,7 @@ class Forever21USSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [
         (r"/stores/", "parse"),
     ]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         for city in response.css('[itemprop="address"] .Address-city'):

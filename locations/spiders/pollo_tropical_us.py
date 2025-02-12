@@ -1,21 +1,21 @@
-import chompjs
-import scrapy
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class PolloTropicalUSSpider(scrapy.Spider):
+class PolloTropicalUSSpider(SitemapSpider, StructuredDataSpider):
     name = "pollo_tropical_us"
-    allowed_domains = ["https://www.pollotropical.com/"]
     item_attributes = {"brand": "Pollo Tropical", "brand_wikidata": "Q3395356"}
-    start_urls = ["https://www.pollotropical.com/locations"]
+    sitemap_urls = ["https://locations.pollotropical.com/robots.txt"]
+    sitemap_rules = [(r"https://locations\.pollotropical\.com/\w\w/[^/]+/[^/]+$", "parse")]
 
-    def parse(self, response, **kwargs):
-        data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "locations")]').get())
-        for location in DictParser.get_nested_key(data, "list"):
-            location["state"] = location["cached_data"]["state"]
-            item = DictParser.parse(location)
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["lat"] = response.xpath('//meta[@itemprop="latitude"]/@content').get()
+        item["lon"] = response.xpath('//meta[@itemprop="longitude"]/@content').get()
+        item["extras"]["website:menu"] = response.xpath(
+            '//a[@class="Link Core-cta--online"][contains(@href, "https://order.pollotropical.com")]/@href'
+        ).get()
 
-            item["website"] = "https://olo.pollotropical.com/menu/{}?showInfoModal=true".format(location["slug"])
-
-            yield item
+        yield item

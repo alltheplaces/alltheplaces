@@ -85,7 +85,7 @@ class ChipotleSpider(scrapy.Spider):
     def parse_store(self, response):
         properties = {
             "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
-            "name": response.xpath('//*[@itemprop="name"]/text()').extract_first(),
+            "name": response.xpath('//*[@itemprop="name"]/text()').extract_first().strip(),
             "street_address": response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
             "city": response.xpath('//*[@class="c-address-city"]/text()').extract_first(),
             "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),

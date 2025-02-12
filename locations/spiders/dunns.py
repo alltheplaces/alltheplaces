@@ -8,4 +8,6 @@ class DunnsSpider(AmaiPromapSpider):
 
     def post_process_item(self, item, response, feature):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+        if item["postcode"] == "0000":
+            item.pop("postcode")
         yield item

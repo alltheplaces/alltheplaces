@@ -29,6 +29,7 @@ class ChicosSpider(CrawlSpider, StructuredDataSpider):
         ),
     ]
     time_format = "%H:%M:%S"
+    drop_attributes = {"email"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         brand = response.url.split(".")[1]

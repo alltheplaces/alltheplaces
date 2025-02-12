@@ -15,6 +15,7 @@ def slugify(s):
 class YardHouseSpider(Spider):
     name = "yard_house"
     item_attributes = {"brand": "Yard House", "brand_wikidata": "Q21189156"}
+    requires_proxy = True
 
     def start_requests(self):
         yield JsonRequest("https://www.yardhouse.com/api/restaurants", headers={"x-source-channel": "WEB"})
@@ -39,12 +40,13 @@ class YardHouseSpider(Spider):
                 or location["features"].get("onlineTogoEnabled")
                 or location["features"].get("curbSideTogoEnabled"),
             )
+            amenities = {amenity["title"] for amenity in location.get("amenities", [])}
             apply_yes_no(
                 Extras.OUTDOOR_SEATING,
                 item,
-                any(amenity["title"] == "Patio seating available" for amenity in location["amenities"]),
+                "Patio seating available" in amenities,
             )
-            apply_yes_no(Extras.WIFI, item, any(amenity["title"] == "Free WiFi" for amenity in location["amenities"]))
+            apply_yes_no(Extras.WIFI, item, "Free WiFi" in amenities)
 
             item["website"] = (
                 f"https://www.yardhouse.com/locations/{slugify(item['state'])}/{slugify(item['city'])}/{slugify(item['branch'])}/{item['ref']}"

@@ -13,6 +13,7 @@ class BobJaneTmartsAUSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"shop/.*$", "parse_sd"),
     ]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"], item["lon"] = self.parse_lat_lon(response)

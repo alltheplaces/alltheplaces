@@ -9,6 +9,7 @@ class CatoUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.catofashions.com/robots.txt"]
     sitemap_rules = [(r"com/\w\w/[^/]+/[^/]+$", "parse")]
     wanted_types = ["ClothingStore"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Cato Fashions ")

@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -9,11 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class GodivaChocolatierJPSpider(Spider):
     name = "godiva_chocolatier_jp"
-    item_attributes = {
-        "brand": "Godiva Chocolatier",
-        "brand_wikidata": "Q931084",
-        "extras": Categories.SHOP_CHOCOLATE.value,
-    }
+    item_attributes = {"brand_wikidata": "Q931084"}
     allowed_domains = ["shop.godiva.co.jp"]
     start_urls = ["https://shop.godiva.co.jp/api/delivery/stores/search/"]
 
@@ -50,5 +46,7 @@ class GodivaChocolatierJPSpider(Spider):
                         hours_string, day_hours["data"]["name_en"], time_period["start"], time_period["end"]
                     )
             item["opening_hours"].add_ranges_from_string(hours_string)
+
+            apply_category(Categories.SHOP_CHOCOLATE, item)
 
             yield item

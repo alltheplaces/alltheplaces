@@ -1,47 +1,32 @@
-import scrapy
+import html
+import re
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ZumiezSpider(scrapy.Spider):
-    download_delay = 0.1
+class ZumiezSpider(JSONBlobSpider):
     name = "zumiez"
     item_attributes = {"brand": "Zumiez", "brand_wikidata": "Q8075252"}
-    allowed_domains = [
-        "www.zumiez.com",
-    ]
-    start_urls = ("https://www.zumiez.com/storelocator/list/",)
+    start_urls = ["https://www.zumiez.com/graphql?hash=505530338"]
 
-    def parse(self, response):
-        urls = response.xpath('//div[@id="store-list-all"]/ul/li/ul/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
+    def extract_json(self, response: Response) -> dict | list[dict]:
+        return response.json()["data"]["getStores"]
 
-    def parse_store(self, response):
-        oh = OpeningHours()
-
-        days = response.xpath('//div[contains(@class, "storePage-hours")]/time/@datetime').extract()
-        for day in days:
-            day = day.replace("\xa0", " ")
-            day = day.replace("-", " ")
-            try:
-                (d, ot, ct) = day.split()
-            # Some stores may not operate on a specific day
-            except ValueError:
-                continue
-            oh.add_range(d[:2], ot, ct, time_format="%I:%M%p")
-
-        properties = {
-            "addr_full": response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
-            "phone": response.xpath('//div[@itemprop="telephone"]/a/text()').extract_first(),
-            "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first().replace(",", ""),
-            "state": response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
-            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            "ref": response.xpath('//h3[@class="uppercase"]/text()').extract_first(),
-            "website": response.url,
-            "lat": response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
-            "lon": response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
-            "opening_hours": oh.as_opening_hours(),
-        }
-        yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature.get("has_store_page"):
+            item["website"] = f"https://www.zumiez.com/stores/{feature.get('identifier')}"
+        try:
+            s = html.unescape(feature.get("store_hours"))
+            oh = OpeningHours()
+            for day in re.findall(r'content="([\w\s:-]+)"', s):
+                splits = day.replace("-", " ").split(" ")
+                oh.add_range(splits[0], splits[1], splits[2])
+            item["opening_hours"] = oh
+        except Exception as e:
+            self.logger.warning(f"Failed to parse opening hours: {e}")
+        yield item

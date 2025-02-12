@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class ReeceSpider(SitemapSpider, StructuredDataSpider):
     name = "reece"
-    item_attributes = {"brand": "Reece", "brand_wikidata": "Q29025524"}
+    item_attributes = {"brand_wikidata": "Q29025524"}
     allowed_domains = [
         "www.reece.com.au",
         "www.reece.co.nz",

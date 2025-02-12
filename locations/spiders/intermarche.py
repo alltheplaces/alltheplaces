@@ -1,9 +1,13 @@
+from typing import Any
+
 import scrapy
-from scrapy.http import JsonRequest
+from scrapy import FormRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class IntermarcheSpider(scrapy.Spider):
@@ -30,14 +34,36 @@ class IntermarcheSpider(scrapy.Spider):
         "brand_wikidata": "Q98278022",
     }
     item_attributes = {"country": "FR"}
-    requires_proxy = True
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DOWNLOAD_TIMEOUT": 180,
+    }
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
-        yield JsonRequest(
-            url="https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?min=20000",
+        # Fetch cookies to get rid of DataDome captcha blockage
+        yield FormRequest(
+            url="https://dt.intermarche.com/js/",
+            headers={
+                "referer": "https://www.intermarche.com/",
+            },
+            formdata={"ddk": "0571CF21385A163DDC74F0BEFBBAA0"},
         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield JsonRequest(
+            url="https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?min=20000",
+            headers={
+                "referer": "https://www.intermarche.com/",
+                "x-red-device": "red_fo_desktop",
+                "x-red-version": "3",
+                "x-service-name": "pdvs",
+            },
+            cookies={"cookie": response.json()["cookie"]},
+            callback=self.parse_locations,
+        )
+
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for place in response.json()["resultats"]:
             place["ref"] = place["entityCode"]
 
@@ -84,7 +110,7 @@ class IntermarcheSpider(scrapy.Spider):
                 continue  # Something to do with post offices
 
             if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
-                fuel = item.copy()
+                fuel = item.deepcopy()
                 fuel["ref"] += "_fuel"
                 fuel.update(self.INTERMARCHE)
 
@@ -93,7 +119,7 @@ class IntermarcheSpider(scrapy.Spider):
                 yield fuel
 
             if any(s["code"] == "lav" for s in place["ecommerce"]["services"]):
-                car_wash = item.copy()
+                car_wash = item.deepcopy()
                 car_wash["ref"] += "_carwash"
                 car_wash.update(self.INTERMARCHE)
 

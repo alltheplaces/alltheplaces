@@ -15,6 +15,7 @@ class UbreakifixSpider(SitemapSpider, StructuredDataSpider):
         "https://www.ubreakifix.com/ca/ca-locations-sitemap.xml",
     ]
     sitemap_rules = [("/locations/", "parse_sd")]
+    drop_attributes = {"image"}
 
     def pre_process_data(self, ld_data, **kwargs):
         if isinstance(ld_data["openingHours"], str):

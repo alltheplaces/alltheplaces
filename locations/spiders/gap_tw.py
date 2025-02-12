@@ -23,5 +23,4 @@ class GapTWSpider(scrapy.Spider):
             for store in city["storeLocations"]:
                 item = DictParser.parse(store)
                 item["country"] = "TW"
-                item["website"] = "https://www.gap.tw/"
                 yield item

@@ -8,6 +8,7 @@ class MattressFirmUSSpider(Where2GetItSpider):
     name = "mattress_firm_us"
     api_endpoint = "https://api.slippymap.com/mattressfirmsites/rest/getlist"
     api_key = "88FD3C6E-2B22-11EE-86CD-EF1E9DC6E625"
+    drop_attributes = {"email"}
 
     def parse_item(self, item, location, **kwargs):
         # Apply basic information common to each brand

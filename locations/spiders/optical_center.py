@@ -1,25 +1,20 @@
 import html
 import json
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class OpticalCenterSpider(CrawlSpider, StructuredDataSpider):
+class OpticalCenterSpider(SitemapSpider, StructuredDataSpider):
     name = "optical_center"
     item_attributes = {"brand": "Optical Center", "brand_wikidata": "Q3354448"}
-    start_urls = ["https://optician.optical-center.co.uk/site-map"]
-    rules = [
-        Rule(
-            LinkExtractor(
-                restrict_xpaths='//a[@class="lf-sitemap-hierarchy__location__link__item lf-site-map__main__content__location__link__item"]'
-            ),
-            callback="parse_sd",
-        )
-    ]
+    sitemap_urls = ["https://optician.optical-center.co.uk/sitemap.xml"]
+    sitemap_rules = [("https://optician.optical-center.co.uk/", "parse_sd")]
+    sitemap_follow = ["locationsitemap"]
+    download_delay = 1
     requires_proxy = True
+    drop_attributes = {"image"}
 
     def iter_linked_data(self, response):
         yield json.loads(response.xpath("//script[@data-lf-location-json]/text()").get())

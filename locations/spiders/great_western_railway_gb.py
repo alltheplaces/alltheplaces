@@ -13,6 +13,7 @@ class GreatWesternRailwayGBSpider(StructuredDataSpider):
     search_for_twitter = False
     search_for_facebook = False
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json():

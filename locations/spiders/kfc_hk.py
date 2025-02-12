@@ -44,7 +44,6 @@ class KfcHKSpider(scrapy.Spider):
             item["addr_full"] = store["storeAddress"]
             item["lon"], item["lat"] = store["coordinate"]
             item["ref"] = store["storeId"]
-            item["website"] = "https://www.kfchk.com/"
 
             item["opening_hours"] = OpeningHours()
             for rule in store["businessTimePros"]:

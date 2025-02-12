@@ -1,4 +1,5 @@
 import json
+import re
 
 from scrapy.spiders import SitemapSpider
 
@@ -35,13 +36,17 @@ class MigrosCHSpider(SitemapSpider):
     sitemap_rules = [(r"https://filialen\.migros\.ch/de/", "parse")]
 
     def parse(self, response):
-        data_js = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        data = json.loads(data_js)
-        page_props = data["props"]["pageProps"]
-        store = page_props["initialActiveStore"]
+
+        data = json.loads(
+            re.search(
+                r"({.*})\]n",
+                response.xpath('//*[contains(text(),"initialActiveStore")]/text()').get().replace("\\", ""),
+            ).group(1)
+        )
+        store = data["initialActiveStore"]
         loc = store["location"]
         for market in store["markets"]:
-            if market["slug"] != page_props["initialSlug"]:
+            if market["slug"] != data["initialSlug"]:
                 continue
             brand_key = market["type"].split("_")[0]
             if brand_key not in self.brands:
