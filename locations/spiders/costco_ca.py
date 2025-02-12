@@ -10,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class CostcoCASpider(Spider):
     name = "costco_ca"
-    item_attributes = {"name": "Costco", "brand": "Costco", "brand_wikidata": "Q715583"}
+    item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
     start_urls = ["https://www.costco.ca/AjaxWarehouseBrowseLookupView?countryCode=CA"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
@@ -18,8 +18,7 @@ class CostcoCASpider(Spider):
         for store in response.json():
             if isinstance(store, dict):
                 item = DictParser.parse(store)
-                item.pop("name")
-                item["ref"] = store["stlocID"]
+                item["ref"] = item.pop("name")
                 item["branch"] = store["locationName"]
                 item["website"] = (
                     "https://www.costco.ca/warehouse-locations/"
@@ -27,4 +26,10 @@ class CostcoCASpider(Spider):
                     + ".html"
                 )
                 apply_category(Categories.SHOP_WHOLESALE, item)
+
+                if store["hasBusinessDepartment"] is True:
+                    item["name"] = "Costco Business Center"
+                else:
+                    item["name"] = "Costco"
+
                 yield item
