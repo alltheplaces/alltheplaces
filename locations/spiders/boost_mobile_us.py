@@ -21,6 +21,9 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
         "ROBOTSTXT_OBEY": False,
     }
 
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data["openingHours"] = ld_data.pop("openingHoursSpecification", [])
+
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["addr_full"] = item.pop("street_address")
         item["street_address"] = item.pop("name").removeprefix("Boost ")
