@@ -8,11 +8,12 @@ from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksARCLSpider(Spider):
     name = "starbucks_ar_cl"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
 
     def start_requests(self):
         for country, base_url, min_population in [

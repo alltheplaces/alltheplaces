@@ -1,6 +1,10 @@
-import scrapy
+from typing import Any
 
-from locations.items import Feature
+import scrapy
+from requests_cache import Response
+
+from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MonclerSpider(scrapy.Spider):
@@ -9,20 +13,11 @@ class MonclerSpider(scrapy.Spider):
     allowed_domains = ["moncler.com"]
     start_urls = ["https://www.moncler.com/on/demandware.store/Sites-MonclerEU-Site/it_IT/StoresApi-FindAll"]
     requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    user_agent = BROWSER_DEFAULT
 
-    def parse(self, response):
-        data = response.json()
-        for i in data["stores"]:
-            properties = {
-                "ref": i["ID"],
-                "name": i["name"],
-                "street_address": i["address1"],
-                "city": i["city"],
-                "postcode": i.get("postalCode"),
-                "country": i["countryCode"]["value"],
-                "phone": i["phone"],
-                "lat": i["latitude"],
-                "lon": i["longitude"],
-            }
-
-            yield Feature(**properties)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["stores"]:
+            item = DictParser.parse(location)
+            item["state"] = location.get("stateCode")
+            yield item

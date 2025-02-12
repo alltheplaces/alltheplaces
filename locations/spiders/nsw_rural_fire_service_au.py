@@ -1,39 +1,28 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class NswRuralFireServiceAUSpider(Spider):
+class NswRuralFireServiceAUSpider(ArcGISFeatureServerSpider):
     name = "nsw_rural_fire_service_au"
-    item_attributes = {"brand": "New South Wales Rural Fire Service", "brand_wikidata": "Q7011777"}
-    allowed_domains = ["portal.spatial.nsw.gov.au"]
-    start_urls = [
-        "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/2/query?f=geojson"
-    ]
-    no_refs = True
+    item_attributes = {"operator": "NSW Rural Fire Service", "operator_wikidata": "Q7011777"}
+    host = "portal.spatial.nsw.gov.au"
+    context_path = "server"
+    service_id = "NSW_FOI_Emergency_Service_Facilities"
+    layer_id = "2"
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json()["features"]:
-            properties = {
-                "name": location["properties"]["generalname"],
-                "state": "NSW",
-                "geometry": location["geometry"],
-            }
-            if "ACT RFS " in properties["name"]:
-                properties["state"] = "ACT"
-            if (
-                " RFB" in properties["name"]
-                or " FIRE CONTROL CENTRE" in properties["name"]
-                or "ACT RFS " in properties["name"]
-            ):
-                apply_category(Categories.FIRE_STATION, properties)
-            else:
-                apply_category({"office": "government"}, properties)
-                apply_category({"government": "fire_service"}, properties)
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(feature["objectid"])
+        item["name"] = feature["generalname"]
+        item["state"] = "NSW"
+        if "ACT RFS " in item["name"]:
+            item["state"] = "ACT"
+        if " RFB" in item["name"] or " FIRE CONTROL CENTRE" in item["name"] or "ACT RFS " in item["name"]:
+            apply_category(Categories.FIRE_STATION, item)
+        else:
+            apply_category({"office": "government", "government": "fire_service"}, item)
+        yield item

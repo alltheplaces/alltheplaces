@@ -1,45 +1,46 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Request
 
-from locations.categories import Categories
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.json_blob_spider import JSONBlobSpider
 
-BRAND_WIKIDATA = {
-    "Bel Air": "Q112922067",
-    "Nob Hill Foods": "Q121816894",
-    "Raley's": "Q7286970",
-    "Raley's ONE Market": "Q7286970",
+BRAND_MAP = {
+    "Bel Air": {"brand": "Bel Air", "brand_wikidata": "Q112922067"},
+    "Nob Hill Foods": {"name": "Nob Hill Foods", "brand": "Nob Hill Foods"},
+    "Raley's": {"brand": "Raley's", "brand_wikidata": "Q7286970"},
+    "Raley's ONE Market": {"name": "Raley's O-N-E Market", "brand": "Raley's", "brand_wikidata": "Q7286970"},
+    "Food City": {"brand": "Food City", "brand_wikidata": "Q130253202"},
 }
 
+# FoodCityArizonaUSSpider inherits this spider
 
-class RaleysUSSpider(Spider):
+
+class RaleysUSSpider(JSONBlobSpider):
     name = "raleys_us"
-    item_attributes = {"extras": Categories.SHOP_SUPERMARKET.value}
-    custom_settings = {"DOWNLOAD_TIMEOUT": 55}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 55, "ROBOTSTXT_OBEY": False}
+    locations_key = ["data"]
+    allowed_domains = ["www.raleys.com"]
 
     def start_requests(self):
+        for domain in self.allowed_domains:
+            yield Request(f"https://{domain}/stores", callback=self.start_api_request)
+
+    def start_api_request(self, response):
         yield JsonRequest(
-            "https://www.raleys.com/api/store", data={"rows": 250, "searchParameter": {"shippingMethod": "pickup"}}
+            response.urljoin("/api/store"), data={"rows": 1000, "searchParameter": {"shippingMethod": "pickup"}}
         )
 
-    def parse(self, response):
-        result = response.json()
+    def post_process_item(self, item, response, location):
+        item["street_address"] = item.pop("street")
+        item["ref"] = location["number"]
 
-        if result["limit"] < result["total"]:
-            raise RuntimeError(f"Got {result['total']} results, need to increase limit")
+        item["website"] = response.urljoin(f"/store/{location['number']}")
 
-        for location in response.json()["data"]:
-            item = DictParser.parse(location)
-            item["ref"] = location["number"]
-            item["website"] = f"https://www.raleys.com/store/{location['number']}"
-            item["brand"] = item["name"] = location["brand"]["name"]
-            item["brand_wikidata"] = BRAND_WIKIDATA[location["brand"]["name"]]
-            item["street_address"] = item.pop("street")
+        if brand := BRAND_MAP.get(location["brand"]["name"]):
+            del item["name"]
+            item.update(brand)
+        else:
+            self.logger.error("Unexpected brand: {}".format(location["brand"]["name"]))
 
-            oh = OpeningHours()
-            # TODO: Is it safe to assume that all stores are open 7 days?
-            oh.add_ranges_from_string(f"Mo-Su {location['storeHours'].removeprefix('Between ')}")
-            item["opening_hours"] = oh
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
-            yield item
+        yield item

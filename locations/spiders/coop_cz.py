@@ -38,8 +38,6 @@ class CoopCZSpider(Spider):
         contacts = response.xpath("//*[contains(@class, 'kontakt')]")
         if phone := contacts.xpath("//*[contains(@class, 'telefon')]//text()").get():
             store["phone"] = phone
-        if email := contacts.xpath("//*[contains(@class, 'mail')]//text()").get():
-            store["email"] = email
         # override website if location explicitly provides its own
         if website := contacts.xpath("//*[contains(@class, 'link')]//a/@href").get():
             store["website"] = website

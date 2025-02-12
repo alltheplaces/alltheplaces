@@ -20,7 +20,6 @@ class PizzaHutCLSpider(scrapy.Spider):
         for store in response.json():
             item = DictParser.parse(store)
             item["street_address"] = store.get("text_address")
-            item["website"] = "https://pizzahut.cl/tiendas/"
             oh = OpeningHours()
             for hours in store.get("business_hours"):
                 day = hours["day"].capitalize()

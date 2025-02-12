@@ -9,6 +9,9 @@ from locations.items import Feature
 
 
 class ChargeUpSpider(scrapy.Spider):
+    start_urls = [
+        "https://app.chargeup.cz/chargingPlace/listNearest?criteria.powerFrom=0&criteria.dataSources%5B0%5D=chargeup&criteria.onlyAvailable=false&midpoint.lat=0&midpoint.lng=0&fastCountTotal=true&pageInfo.pageIndex=0&pageInfo.pageSize=10000"
+    ]
     name = "charge_up"
     item_attributes = {"brand": "ChargeUp", "brand_wikidata": "Q109066768"}
     providers = {
@@ -29,20 +32,10 @@ class ChargeUpSpider(scrapy.Spider):
         "CCS2": "type2_combo",
     }
 
-    def start_requests(self):
-        yield JsonRequest(
-            url="https://app.chargeup.cz/chargingPlace/listWithinPolygon",
-            data={
-                "criteria": {"connectors": [], "onlyAvailable": False, "dataSources": ["chargeup"], "powerFrom": 0},
-                "northEast": {"lat": 90, "lng": 180},
-                "southWest": {"lat": -90, "lng": -180},
-            },
-        )
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         result = response.json()
 
-        for stations in result["chargingPlaces"]["itemList"]:
+        for stations in result["chargingPlaces"]:
             for station in stations["chargingStations"]:
                 if station["state"] != "VALID":
                     continue
@@ -103,7 +96,8 @@ class ChargeUpSpider(scrapy.Spider):
         elif address["descriptiveNumber"]:
             item["housenumber"] = address["descriptiveNumber"].strip()
         item["city"] = address["city"].strip()
-        item["postcode"] = address["postalCode"].strip()
+        if address["postalCode"]:
+            item["postcode"] = address["postalCode"].strip()
         item["country"] = address["country"].strip()
         item["addr_full"] = station["derivedAddress"].strip()
 

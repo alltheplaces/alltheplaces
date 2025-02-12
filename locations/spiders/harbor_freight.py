@@ -16,3 +16,4 @@ class HarborFreightSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
+    drop_attributes = {"email"}

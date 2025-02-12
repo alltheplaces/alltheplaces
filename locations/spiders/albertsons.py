@@ -84,6 +84,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["GroceryStore", "GasStation", "Pharmacy"]
+    drop_attributes = {"facebook", "image", "twitter"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if ld_data["@type"] == "GroceryStore":
@@ -94,9 +95,5 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.PHARMACY, item)
 
         item.update(self.brands[response.url.split("/")[2].split(".")[-2]])
-
-        # Remove fields that are not specific to individual stores.
-        item.pop("facebook", None)
-        item.pop("twitter", None)
 
         yield item

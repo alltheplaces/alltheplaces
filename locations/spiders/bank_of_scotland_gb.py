@@ -18,3 +18,4 @@ class BankOfScotlandGBSpider(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
+    drop_attributes = {"image"}

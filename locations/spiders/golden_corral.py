@@ -11,6 +11,7 @@ class GoldenCorralSpider(CrawlSpider):
     download_delay = 0.5
     start_urls = ["https://www.goldencorral.com/locations/all-locations"]
     rules = [Rule(LinkExtractor(allow="/location-detail/"), callback="parse", follow=False)]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         if item := LinkedDataParser.parse(response, "Restaurant"):

@@ -1,4 +1,3 @@
-from html import unescape
 from typing import Iterable
 from urllib.parse import urljoin
 
@@ -21,6 +20,6 @@ class LaserawayUSSpider(WPStoreLocatorSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("addr_full", None)
-        item["branch"] = unescape(item.pop("name").removeprefix("LaserAway ")).removeprefix("– ")
+        item["branch"] = item.pop("name").removeprefix("LaserAway ").removeprefix("– ")
         item["website"] = urljoin("https://www.laseraway.com", feature["url"])
         yield item

@@ -1,5 +1,8 @@
+from typing import Any, Iterable
+
 import scrapy
-from scrapy.http import FormRequest
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import (
     Access,
@@ -12,7 +15,6 @@ from locations.categories import (
     apply_yes_no,
 )
 from locations.dict_parser import DictParser
-from locations.geo import country_coordinates
 from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
 
 COUNTRIES = {
@@ -38,31 +40,48 @@ BRANDS_MAPPING = {
     "INA": ("INA", "Q1662137"),
     "MOL": ("MOL", "Q549181"),
     "MOL (AGIP)": ("MOL", "Q549181"),
-    "MOL Ceska Republika": ("MOL", "Q549181"),
+    "MOL CESKA REPUBLIKA": ("MOL", "Q549181"),
     "MOLPLUGEE": ("MOL", "Q549181"),
-    "PapOil": ("PapOil", None),
-    "Slovnaft": ("Slovnaft", "Q1587563"),
-    "TOTAL": ("Total", "Q154037"),
+    "PAPOIL": ("PapOil", None),
+    "SLOVNAFT": ("Slovnaft", "Q1587563"),
+    "TOTAL": ("TotalEnergies", "Q154037"),
     "LOTOS": ("Lotos", "Q1256909"),
-    "TOTAL ACCESS": ("Total Access", "Q154037"),
-    "ex-OMV": ("MOL", "Q549181"),
+    "TOTAL ACCESS": ("TotalEnergies", "Q154037"),
+    "EX-OMV": ("MOL", "Q549181"),
+    "TIFON": ("Tifon", None),
+    "ENERGOPETROL": ("Energopetrol", "Q120433"),
 }
 
 FUEL_MAPPING = {
-    "AdBlue": Fuel.ADBLUE,
-    "CNG (Comprimed natural gas, in tank)": None,
-    "EVO 100 Plus (GASOLINE PREMIUM)": Fuel.OCTANE_100,
+    "ADBLUE": Fuel.ADBLUE,
+    "BLUE DIESEL": Fuel.DIESEL,
+    "CNG": Fuel.CNG,
+    "DIESEL": Fuel.DIESEL,
+    "DYNAMIC DIESEL": Fuel.DIESEL,
+    "EVO 100 PLUS (GASOLINE PREMIUM)": Fuel.OCTANE_100,
+    "EVO 100 PLUS": Fuel.OCTANE_100,
+    "EVO 100": Fuel.OCTANE_100,
     "EVO 95": Fuel.OCTANE_95,
-    "EVO Diesel": Fuel.DIESEL,
-    "EVO Diesel Plus (DIESEL PREMIUM)": Fuel.DIESEL,
-    "LPG ": Fuel.LPG,
-    "MOL Racing Fuel": "fuel:octane_102",
-    "Maingrade 95": Fuel.OCTANE_95,
-    "Premium Gasoline": Fuel.OCTANE_95,
-    "Premium Diesel": Fuel.DIESEL,
-    "Maingrade Diesel": Fuel.DIESEL,
+    "EVO 95 PLUS": Fuel.OCTANE_95,
+    "EVO 98 PLUS": Fuel.OCTANE_98,
+    "EUROSUPER 100 CLASS PLUS": Fuel.OCTANE_100,
+    "EUROSUPER 95": Fuel.OCTANE_95,
+    "EUROSUPER 95 CLASS PLUS": Fuel.OCTANE_95,
+    "EVO DIESEL": Fuel.DIESEL,
+    "EURODIESEL": Fuel.DIESEL,
+    "EURODIESEL CLASS PLUS": Fuel.DIESEL,
+    "EVO DIESEL PLUS WINTER DIESEL": Fuel.COLD_WEATHER_DIESEL,
+    "EVO DIESEL PLUS (DIESEL PREMIUM)": Fuel.DIESEL,
+    "EVO DIESEL PLUS": Fuel.DIESEL,
+    "LPG": Fuel.LPG,
+    "MOL RACING FUEL": "fuel:octane_102",
+    "MAINGRADE 95": Fuel.OCTANE_95,
+    "PREMIUM GASOLINE": Fuel.OCTANE_95,
+    "PREMIUM DIESEL": Fuel.DIESEL,
+    "MAINGRADE DIESEL": Fuel.DIESEL,
+    "MAINGRADE 95 PLUS": Fuel.OCTANE_95,
     "RACING 102": "fuel:octane_102",
-    "XXL Diesel": Fuel.DIESEL,
+    "XXL DIESEL": Fuel.DIESEL,
 }
 
 SERVICES_MAPPING = {
@@ -80,8 +99,7 @@ SERVICES_MAPPING = {
     "Truck friendly": Access.HGV,
     "Truck park": Access.HGV,
     "Jet wash": Extras.CAR_WASH,
-    # TODO: map high flow pump, this seems an important attribute for petrol stations!
-    "High speed pump": None,
+    "High speed pump": Fuel.HGV_DIESEL,
     # TODO: map below services if possible
     "Cylinder PB Gas": None,
     "Defibrillator - AED": None,
@@ -139,39 +157,33 @@ CARDS_MAPPING = {
 # along with other brands, but not all POIs on this page have fuel types and services.
 class MolSpider(scrapy.Spider):
     name = "mol"
-    allowed_domains = ["toltoallomaskereso.mol.hu"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    download_timeout = 90
 
-    def start_requests(self):
-        country_coords = country_coordinates(return_lookup=True)
+    def start_requests(self) -> Iterable[Request]:
         for country in COUNTRIES.values():
-            if coords := country_coords.get(country):
-                yield FormRequest(
-                    url="https://toltoallomaskereso.mol.hu/en/portlet/routing/along_latlng.json",
-                    formdata={
-                        "country": country,
-                        "lat": coords[0],
-                        "lng": coords[1],
-                    },
-                    meta={"country": country},
-                )
-
-    def parse(self, response):
-        for poi in response.json():
-            yield FormRequest(
-                url="https://toltoallomaskereso.mol.hu/en/portlet/routing/station_info.json",
-                formdata={"id": poi["id"]},
-                callback=self.parse_poi,
-                meta=response.meta,
+            yield JsonRequest(
+                url="https://tankstellenfinder.molaustria.at/api.php",
+                data={
+                    "api": "stations",
+                    "mode": "country",
+                    "input": country,
+                },
+                meta={"country": country},
             )
 
-    def parse_poi(self, response):
-        if poi := response.json():
-            fs = poi.get("fs")
-            item = DictParser.parse(fs)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for poi in response.json():
+            poi.update(poi.pop("gpsPosition"))
+            if not poi.get("latitude") and not poi.get("address"):  # not enough location data
+                continue
+            poi.pop("county", None)  # sometimes contains country info
+            item = DictParser.parse(poi)
+            item["ref"] = poi.get("code")
             item["street_address"] = item.pop("addr_full", None)
             item["country"] = response.meta.get("country")
-            item["phone"] = "; ".join(filter(None, [fs.get("fs_phone_num"), fs.get("fs_mobile_num")]))
-            self.parse_attribute(item, poi, "products", FUEL_MAPPING)
+            item["phone"] = "; ".join(filter(None, [poi.get("phoneNum"), poi.get("mobileNum")]))
+            self.parse_attribute(item, poi, "fuelsAndAdditives", FUEL_MAPPING)
             self.parse_attribute(item, poi, "cards", CARDS_MAPPING)
             self.parse_attribute(item, poi, "services", SERVICES_MAPPING)
             self.parse_brand(item, poi)
@@ -179,38 +191,39 @@ class MolSpider(scrapy.Spider):
             apply_category(Categories.FUEL_STATION, item)
             yield item
 
-    def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict):
-        for attribute in data.get(attribute_name, []):
+    def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict) -> Any:
+        for attribute in data.get(attribute_name, {}).get("values", []):
             name = attribute.get("name")
+            if attribute_name == "fuelsAndAdditives":
+                name = name.upper() if name else ""
             if tag := mapping.get(name):
                 apply_yes_no(tag, item, True)
             else:
                 self.crawler.stats.inc_value(f"atp/mol/{attribute_name}/failed/{name}")
 
-    def parse_brand(self, item, poi):
-        if brand_details := BRANDS_MAPPING.get(poi.get("brand", {}).get("name")):
+    def parse_brand(self, item, poi) -> Any:
+        brand_key = poi["brand"].upper() if poi.get("brand") else ""
+        if brand_details := BRANDS_MAPPING.get(brand_key):
             brand, brand_wikidata = brand_details
             item["brand"] = brand
             item["brand_wikidata"] = brand_wikidata
         else:
-            self.crawler.stats.inc_value(f"atp/mol/unknown_brands/{poi.get('brand', {}).get('name')}")
+            self.crawler.stats.inc_value(f"atp/mol/unknown_brands/{poi.get('brand')}")
 
-    def parse_hours(self, item, poi):
-        fs = poi.get("fs", {})
+    def parse_hours(self, item, poi) -> Any:
+        hours = poi.get("openedHours", {})
         oh = OpeningHours()
         try:
-            for k, v in fs.items():
+            for k, v in hours.items():
                 # There are winter and summer hours available.
                 # to keep it simple parse only winter hours.
-                if k.startswith("opn_hrs_wtr_"):
-                    days = k.split("_")[-1]
+                if k.startswith("openedWinter"):
+                    day = k.split("openedWinter")[-1]
                     time_open, time_close = v.split("-")
-                    if days == "wd":
+                    if day == "WeekDay":
                         oh.add_days_range(NAMED_DAY_RANGES_EN.get("Weekdays"), time_open, time_close)
-                    elif days == "sat":
-                        oh.add_range("Sa", time_open, time_close)
-                    elif days == "sun":
-                        oh.add_range("Sa", time_open, time_close)
-            item["opening_hours"] = oh.as_opening_hours()
+                    else:
+                        oh.add_range(day, time_open, time_close)
+            item["opening_hours"] = oh
         except Exception as e:
-            self.logger.warning(f"Failed to parse hours: {fs}, {e}")
+            self.logger.warning(f"Failed to parse hours: {hours}, {e}")

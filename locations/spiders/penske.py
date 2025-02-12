@@ -13,10 +13,9 @@ class PenskeSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.pensketruckrental.com/sitemap.xml"]
     sitemap_rules = [(r"/locations/us/[-\w]+/[-\w]+/[0-9]+/$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
+    drop_attributes = {"email", "image"}
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = re.findall("[0-9]+", response.url)[0]
-        item.pop("email", None)
         item["branch"] = html.unescape(item.pop("name"))
-
         yield item

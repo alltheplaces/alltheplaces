@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class YoursclothingGBSpider(CrawlSpider, StructuredDataSpider):
     name = "yoursclothing_gb"
-    item_attributes = {"brand": "YoursClothing", "brand_wikidata": "Q84163322"}
+    item_attributes = {"brand": "Yours Clothing", "brand_wikidata": "Q84163322"}
     allowed_domains = ["yoursclothing.co.uk"]
     start_urls = ["https://www.yoursclothing.co.uk/store-finder"]
     rules = [Rule(LinkExtractor(allow="/store-finder/"), callback="parse_sd")]

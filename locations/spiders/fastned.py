@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 class FastnedSpider(Spider):
     name = "fastned"
-    item_attributes = {"brand": "Fastned", "brand_wikidata": "Q19935749"}
+    item_attributes = {"operator": "Fastned", "operator_wikidata": "Q19935749"}
     start_urls = ["https://route.fastned.nl/_api/locations"]
 
     def parse(self, response, **kwargs):
@@ -18,4 +18,5 @@ class FastnedSpider(Spider):
             item["operator_wikidata"] = self.item_attributes["brand_wikidata"]
 
             # TODO: connector data available in location["connectors"]
+            item["street_address"] = item.pop("addr_full", None)
             yield item

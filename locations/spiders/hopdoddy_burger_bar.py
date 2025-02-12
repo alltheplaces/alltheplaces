@@ -7,7 +7,7 @@ from locations.searchable_points import open_searchable_points
 class HopdoddyBurgerBarSpider(scrapy.Spider):
     name = "hopdoddy_burger_bar"
     allowed_domains = ["amazonaws.com"]
-    item_attributes = {"brand": "HopDoddy Burger Bar", "brand_wikidata": "Q123689179"}
+    item_attributes = {"brand": "Hopdoddy Burger Bar", "brand_wikidata": "Q123689179"}
 
     def start_requests(self):
         base_url = "https://na6c0i4fb0.execute-api.us-west-2.amazonaws.com/restaurants/near?lat={lat}3&long={lon}"

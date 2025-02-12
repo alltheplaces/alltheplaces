@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
+from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -13,7 +14,6 @@ class BestBuySpider(SitemapSpider, StructuredDataSpider):
     search_for_image = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = response.xpath('//span[@class="LocationName-geo"]/text()').get()
-        item["brand"] = item["name"] = response.xpath('//span[@class="LocationName-brand"]/text()').get()
-        item["ref"] = response.xpath('//input[@name="extStoreId"]/@value').get()
+        if response.css(".closed-banner-header-shop-online"):
+            set_closed(item)
         yield item

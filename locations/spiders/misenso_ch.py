@@ -1,45 +1,36 @@
-import scrapy
+import json
+from typing import Any
+
+from scrapy.http import Response
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class MisensoCHSpider(scrapy.Spider):
+class MisensoCHSpider(Spider):
     name = "misenso_ch"
-    allowed_domains = ["misenso.ch"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    item_attributes = {"name": "Misenso", "brand": "Misenso", "brand_wikidata": "Q116151325"}
+    start_urls = ["https://www.misenso.ch/de/filialen/"]
 
-    def start_requests(self):
-        url = "https://www.misenso.ch/store/locator/vals"
-        query = {"jsonrpc": "2.0", "method": "call", "params": {}, "id": 123}
-        return [scrapy.http.JsonRequest(url, data=query)]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in json.loads(response.xpath("//@data-stores").get()):
+            data = json.loads(location["google_place_data"])
+            item = Feature()
+            item["ref"] = str(location["id"])
+            item["lat"] = data["location"]["lat"]
+            item["lon"] = data["location"]["lng"]
+            item["branch"] = location["title"].removeprefix("Misenso ")
 
-    def parse(self, response):
-        for store in response.json()["result"]["map_stores_data"].values():
-            address = store["store_address"]
-            feature = Feature(
-                brand="Misenso",
-                brand_wikidata="Q116151325",
-                city=address[1],
-                country="CH",
-                email=address[9],
-                branch=store["store_name"],
-                extras={"healthcare": "audiologist;optometrist"},
-                lat=float(store["store_lat"]),
-                lon=float(store["store_lng"]),
-                name="Misenso",
-                image=self.parse_image(response, store),
-                phone=address[6],
-                postcode=address[4],
-                ref=str(store["store_id"]),
-                street_address=address[0],
-            )
-            apply_category(Categories.SHOP_OPTICIAN, feature)
-            yield feature
+            item["website"] = item["extras"]["website:de"] = location["page_link_de"]
+            item["extras"]["website:fr"] = location["page_link_fr"]
+            item["extras"]["ref:google"] = location["place_id"]
 
-    @staticmethod
-    def parse_image(response, store):
-        if image := store["store_image"]:
-            return response.urljoin(image).split("?")[0]  # strip off tracking id
-        else:
-            return None
+            item["opening_hours"] = OpeningHours()
+            for day, times in location["amparex"]["opening_hours"].items():
+                item["opening_hours"].add_range(day, times["from"], times["to"])
+
+            apply_category(Categories.SHOP_OPTICIAN, item)
+
+            yield item

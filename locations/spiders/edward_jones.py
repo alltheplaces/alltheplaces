@@ -1,7 +1,6 @@
 import scrapy
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -10,12 +9,9 @@ class EdwardJonesSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Edward Jones", "brand_wikidata": "Q5343830"}
     allowed_domains = ["www.edwardjones.com"]
     sitemap_urls = ["https://www.edwardjones.com/us-en/sitemap/financial-advisor/sitemap.xml"]
+    time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        oh = OpeningHours()
-        oh.from_linked_data(ld_data, time_format="%H:%M:%S")
-        item["opening_hours"] = oh.as_opening_hours()
-
         yield from self.get_location(item, 1)
 
     def get_location(self, item, page):
@@ -34,7 +30,7 @@ class EdwardJonesSpider(SitemapSpider, StructuredDataSpider):
                 item["lon"] = x["lon"]
                 break
 
-        if ("lat" in item and "lon" in item) or json["resultCount" == 0] or len(results) < json["itemsPerPage"]:
+        if ("lat" in item and "lon" in item) or json["resultCount"] == 0 or len(results) < json["itemsPerPage"]:
             yield item
         else:
             yield from self.get_location(item, page + 1)

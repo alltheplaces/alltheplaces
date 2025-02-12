@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 
 
 class FineWineGoodSpiritsSpider(scrapy.Spider):
@@ -44,8 +44,7 @@ class FineWineGoodSpiritsSpider(scrapy.Spider):
                 for i in range(0, len(hours_txt) // 2, 2)
                 if hours_txt[i + 1] != "Closed"
             ]
-            oh = OpeningHours()
-            oh.from_linked_data({"openingHours": opening_hours}, "%I:%M %p")
+            oh = LinkedDataParser.parse_opening_hours({"openingHours": opening_hours}, "%I:%M %p")
 
             [lat, lon] = row.xpath("*/form/input").re('name=".*itude" value="(.*)"')
             if float(lat) == 0 and float(lon) == 0:

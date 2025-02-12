@@ -6,7 +6,7 @@ from locations.hours import DAYS_EN, OpeningHours
 
 class NewYorkPublicLibraryUSSpider(scrapy.Spider):
     name = "new_york_public_library_us"
-    item_attributes = {"brand": "The New York Public Library", "brand_wikidata": "Q219555"}
+    item_attributes = {"operator": "New York Public Library", "operator_wikidata": "Q219555"}
 
     start_urls = [
         "https://refinery.nypl.org/api/nypl/locations/v1.0/locations",

@@ -1,13 +1,18 @@
+import json
+
 from scrapy import Request
 from scrapy.spiders import SitemapSpider
 from scrapy.utils.sitemap import sitemap_urls_from_robots
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider, extract_email, extract_phone
 
 CATEGORY_MAP = {
     "Behavioral Health Facility": Categories.PSYCHOTHERAPIST,
     "Dental Services": Categories.DENTIST,
+    "Dental Office": Categories.DENTIST,
     "Dialysis Center": Categories.DIALYSIS,
     "Durable Medical Equipment Supplier": Categories.SHOP_MEDICAL_SUPPLY,
     "Emergency Care Center": Categories.EMERGENCY_WARD,
@@ -106,6 +111,12 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://healthy.kaiserpermanente.org/robots.txt"]
     sitemap_follow = ["/facilities/"]
     wanted_types = ["MedicalBusiness"]
+    custom_settings = {
+        # The KP website likes to set cookies and then redirect to the same page, which Scrapy counts as a duplicate request.
+        "DUPEFILTER_CLASS": "scrapy.dupefilters.BaseDupeFilter",
+    }
+    search_for_facebook = False
+    search_for_twitter = False
 
     def _parse_sitemap(self, response):
         # SitemapSpider doesn't honour sitemap_follow while parsing robots.txt
@@ -116,14 +127,39 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
         else:
             yield from super()._parse_sitemap(response)
 
+    def parse(self, response):
+        # First try structured data
+        sd_results = list(self.parse_sd(response))
+        if len(sd_results) > 0:
+            yield from sd_results
+            return
+
+        # Next, try this JSON
+        facility_directions = response.xpath("//script[@class='js-facility-directions']/text()").get()
+        if len(facility_directions.strip()) > 0:
+            item = DictParser.parse(json.loads(facility_directions))
+            item["street_address"] = item.pop("street", None)
+            item["website"] = response.url
+
+        # Finally, HTML
+        else:
+            item = Feature(name=response.xpath("//@data-name"))
+
+        extract_email(item, response)
+        extract_phone(item, response)
+        yield from self.post_process_item(item, response, {})
+
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
+        item["ref"] = response.xpath("//@data-id").get()
         item["image"] = ld_data.get("photo")
+        if item["phone"] == "+1-866-454-8855":
+            del item["phone"]
 
         # "Affiliated" locations are not KP-branded
         if response.xpath("//@data-affiliated").get() != "true":
-            apply_category({"brand": "Kaiser Permanente", "brand_wikidata": "Q1721601"}, item)
+            apply_category({"brand": "Kaiser Permanente", "brand:wikidata": "Q1721601"}, item)
 
         cat = response.xpath("//@data-type").get()
         if cat in CATEGORY_MAP:

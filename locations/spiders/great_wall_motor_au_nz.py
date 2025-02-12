@@ -6,10 +6,12 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
+GREAT_WALL_MOTOR_SHARED_ATTRIBBUTES = {"brand": "GWM", "brand_wikidata": "Q1117001"}
+
 
 class GreatWallMotorAUNZSpider(Spider):
     name = "great_wall_motor_au_nz"
-    item_attributes = {"brand": "Great Wall Motor", "brand_wikidata": "Q1117001", "extras": Categories.SHOP_CAR.value}
+    item_attributes = GREAT_WALL_MOTOR_SHARED_ATTRIBBUTES | {"extras": Categories.SHOP_CAR.value}
     allowed_domains = ["api.storyblok.com", "a.storyblok.com"]
     start_urls = [
         "https://api.storyblok.com/v2/cdn/stories/dealer-locator?cv=1715928712&language=au&resolve_relations=SelectModelLine.options%2CSelectEnquiryType.options&token=grBrbRuRX6NJLbQcyDGpcgtt&version=published"

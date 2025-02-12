@@ -44,9 +44,18 @@ class SasolZASpider(Spider):
                 item["postcode"] = item["addr_full"].split(", ")[-1]
             except ValueError:
                 pass
-            if item["addr_full"].split(", ")[-2] in ZA_PROVINCES:
-                item["state"] = item["addr_full"].split(", ")[-2]
-                item["city"] = item["addr_full"].split(", ")[-3]
+            try:
+                int(item["addr_full"].split(" ")[0])
+                item["housenumber"] = item["addr_full"].split(" ")[0]
+                item["street"] = item["addr_full"].split(",")[0].replace(item["housenumber"], "").strip()
+            except ValueError:
+                pass
+            try:
+                if item["addr_full"].split(", ")[-2] in ZA_PROVINCES:
+                    item["state"] = item["addr_full"].split(", ")[-2]
+                    item["city"] = item["addr_full"].split(", ")[-3]
+            except IndexError:
+                pass
             yield JsonRequest(
                 url=f"https://locator.sasol.com/api/station/{item['ref']}.json",
                 meta={"item": item},

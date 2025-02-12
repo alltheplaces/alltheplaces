@@ -1,19 +1,28 @@
-from locations.categories import Categories
-from locations.hours import DAYS_PL
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
+
+from locations.items import Feature
 
 
-class NaszSklepPLSpider(WPStoreLocatorSpider):
+class NaszSklepPLSpider(Spider):
     name = "nasz_sklep_pl"
-    item_attributes = {
-        "brand_wikidata": "Q62070369",
-        "brand": "Nasz Sklep",
-        "extras": Categories.SHOP_CONVENIENCE.value,
+    brands = {
+        "Delikatesy Premium": {"brand": "Delikatesy Premium", "brand_wikidata": "Q120147483"},
+        "Delikatesy Sezam": {"brand": "Delikatesy Sezam", "brand_wikidata": "Q120173828"},
+        "Livio": {"brand": "Livio", "brand_wikidata": "Q108599511"},
+        "Nasz Sklep": {"brand": "Nasz Sklep", "brand_wikidata": "Q62070369"},
     }
-    allowed_domains = [
-        "nasz-sklep.pl",
-    ]
-    iseadgg_countries_list = ["PL"]
-    search_radius = 24
-    max_results = 100
-    days = DAYS_PL
+    start_urls = ["https://nasz-sklep.pl/sklepy-wlasne/"]
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath("//table//tr[position()>1]"):
+            item = Feature()
+            brand, item["street_address"], oh, item["phone"], item["email"] = location.xpath("td/text()").getall()
+            item["ref"] = item["email"].split("@", 1)[0]
+            if b := self.brands.get(brand):
+                item.update(b)
+            else:
+                self.crawler.stats.inc_value("{}/unmapped_brand/{}".format(self.name, brand))
+            yield item

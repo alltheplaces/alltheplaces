@@ -9,3 +9,4 @@ class Pizzeria105PLSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Pizzeria 105", "brand_wikidata": "Q123090276"}
     sitemap_urls = ["https://105.pl/sitemap.xml"]
     sitemap_rules = [(r"https://105.pl/pizzeria-.*", "parse_sd")]
+    wanted_types = ["Place"]

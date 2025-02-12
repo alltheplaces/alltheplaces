@@ -10,7 +10,16 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.sixt.co.uk/xml-sitemaps/branch.xml"]
     sitemap_rules = [(r"\/car-hire\/[-\w]+\/[-\w]+\/[-\w]+\/$", "parse_sd")]
     user_agent = BROWSER_DEFAULT
+    drop_attributes = {"image"}
+    search_for_twitter = False
 
     def pre_process_data(self, ld_data, **kwargs):
         if not ld_data["address"].get("addressCountry"):
             ld_data["address"]["addressCountry"] = ld_data["address"].pop("addressRegion")
+
+    def post_process_item(self, item, response, ld_data):
+        if "|" in item["name"]:
+            item["branch"] = item.pop("name").split("|")[0].replace("Car Hire", "").strip()
+        else:
+            item["branch"] = item.pop("name")
+        yield item

@@ -22,11 +22,7 @@ class EuromasterFRSpider(scrapy.Spider):
             yield scrapy.Request(url="https://www.euromaster.fr" + city, callback=self.parse_city)
 
     def parse_city(self, response):
-        shops = set(
-            response.xpath(
-                "//*[@onclick=\"euromaster_eshop.gtm.pushActionOnDealerCart(this, 'viewDealerDetail', true);\"]/@href"
-            ).getall()
-        )
+        shops = set(response.xpath("//a[text()='Voir la fiche centre']/@href").getall())
         for shop in shops:
             yield scrapy.Request(url="https://www.euromaster.fr" + shop, callback=self.parse_shop)
 

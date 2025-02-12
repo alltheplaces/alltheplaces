@@ -11,6 +11,7 @@ class BestBuyCASpider(StructuredDataSpider):
     bb_url = "https://stores.bestbuy.ca/en-ca/index.html"
     wanted_types = ["ElectronicsStore"]
     start_urls = (bb_url,)
+    drop_attributes = {"image"}
 
     def parse(self, response):
         locations = response.xpath('//a[@class="Directory-listLink"]/@href').extract()

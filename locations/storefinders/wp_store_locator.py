@@ -1,3 +1,4 @@
+import html
 from typing import Iterable
 
 from scrapy import Selector, Spider
@@ -181,7 +182,7 @@ class WPStoreLocatorSpider(Spider):
             item = DictParser.parse(feature)
             item.pop("addr_full", None)
             item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address2")])
-            item["name"] = feature["store"]
+            item["name"] = html.unescape(feature["store"])
 
             if self.days is not None:
                 # If we have preconfigured the exact days to use, start there

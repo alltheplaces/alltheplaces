@@ -1,34 +1,25 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Iterable
 
-from locations.categories import Categories
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class CountryFireAuthorityAUSpider(Spider):
+class CountryFireAuthorityAUSpider(ArcGISFeatureServerSpider):
     name = "country_fire_authority_au"
-    item_attributes = {
-        "operator": "Country Fire Authority",
-        "operator_wikidata": "Q13632973",
-        "extras": Categories.FIRE_STATION.value,
-    }
-    allowed_domains = ["services-ap1.arcgis.com"]
-    start_urls = [
-        "https://services-ap1.arcgis.com/vh59f3ZyAEAhnejO/arcgis/rest/services/Fire_Stations/FeatureServer/0/query?where=1%3D1&outFields=site_id%2Cfs_name%2Clabel%2Cstreet%2Csuburb%2Cpcode%2Cadd_src%2Cfs_type%2Cpersonnel%2Cfs_st_date%2Cimage&returnGeometry=true&f=pgeojson"
-    ]
+    item_attributes = {"operator": "Country Fire Authority", "operator_wikidata": "Q13632973"}
+    host = "services-ap1.arcgis.com"
+    context_path = "vh59f3ZyAEAhnejO/arcgis"
+    service_id = "CFA_Fire_Stations"
+    layer_id = "0"
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json()["features"]:
-            properties = {
-                "ref": location["properties"]["site_id"],
-                "name": location["properties"]["fs_name"],
-                "street_address": location["properties"]["street"],
-                "city": location["properties"]["suburb"],
-                "postcode": location["properties"]["pcode"],
-                "geometry": location["geometry"],
-            }
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(feature["site_id"])
+        item["name"] = feature["fs_name"]
+        item["street_address"] = feature["street"]
+        item.pop("street", None)
+        item["postcode"] = feature["pcode"]
+        apply_category(Categories.FIRE_STATION, item)
+        yield item

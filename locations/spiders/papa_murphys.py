@@ -15,6 +15,7 @@ class PapaMurphysSpider(SitemapSpider):
             "parse_store",
         ),
     ]
+    drop_attributes = {"image"}
 
     def parse_store(self, response):
         MicrodataParser.convert_to_json_ld(response)

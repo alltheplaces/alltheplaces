@@ -3,11 +3,12 @@ from scrapy.spiders import Spider
 
 from locations.google_url import url_to_coords
 from locations.items import Feature
+from locations.spiders.debonairs_pizza_za import DEBONAIRS_SHARED_ATTRIBUTES
 
 
 class DebonairsPizzaNASpider(Spider):
     name = "debonairs_pizza_na"
-    item_attributes = {"brand": "Debonairs Pizza", "brand_wikidata": "Q65079407"}
+    item_attributes = DEBONAIRS_SHARED_ATTRIBUTES
     start_urls = ["https://namibia.debonairspizza.africa/contact/locate-us"]
     no_refs = True
 

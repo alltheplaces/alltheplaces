@@ -20,4 +20,5 @@ class QuiktripUSSpider(SitemapSpider, StructuredDataSpider):
 
         apply_yes_no(Extras.ATM, item, "ATM" in services)
 
+        item["image"] = None
         yield item

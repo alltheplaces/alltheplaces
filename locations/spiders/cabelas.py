@@ -13,3 +13,4 @@ class CabelasSpider(SitemapSpider, StructuredDataSpider):
         ("/find-a-store/", "parse_sd"),
     ]
     wanted_types = ["SportingGoodsStore", "Store"]
+    drop_attributes = {"image"}

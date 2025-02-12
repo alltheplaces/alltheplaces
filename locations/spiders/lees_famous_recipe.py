@@ -11,8 +11,8 @@ from locations.items import Feature
 class LeesFamousRecipeSpider(SitemapSpider):
     name = "lees_famous_recipe"
     item_attributes = {"brand": "Lee's Famous Recipe Chicken", "brand_wikidata": "Q6512810"}
-    allowed_domains = ["www.leesfamousrecipe.com"]
-    sitemap_urls = ["https://www.leesfamousrecipe.com/sitemap.xml"]
+    allowed_domains = ["leesfamousrecipe.com"]
+    sitemap_urls = ["https://leesfamousrecipe.com/sitemap.xml"]
     sitemap_rules = [(r"/locations/.+/.+$", "parse")]
 
     def parse(self, response, **kwargs):

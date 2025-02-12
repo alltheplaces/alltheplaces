@@ -9,3 +9,4 @@ class FoodLionUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.foodlion.com/sitemap.xml"]
     sitemap_rules = [(r"https://stores.foodlion.com/\w{2}/[-\w]+/[-\w]+", "parse_sd")]
     requires_proxy = True
+    drop_attributes = {"image"}

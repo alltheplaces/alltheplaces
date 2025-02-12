@@ -21,4 +21,9 @@ class RainbowShopsSpider(SitemapSpider, StructuredDataSpider):
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
 
+        if item.get("image") and "wkvygexq0az9oz125oof.jpg" in item["image"]:
+            # Ignore logo placeholder images where a specific image of a store
+            # does not exist.
+            item.pop("image")
+
         yield item

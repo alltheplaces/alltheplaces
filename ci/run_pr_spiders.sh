@@ -64,6 +64,7 @@ do
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
     PARQUETFILE="${SPIDER_RUN_DIR}/output.parquet"
+    STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
     timeout -k 5s 90s \
@@ -74,7 +75,7 @@ do
         --logfile="${LOGFILE}" \
         -s CLOSESPIDER_TIMEOUT=60 \
         -s CLOSESPIDER_ERRORCOUNT=1 \
-        -s LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats.json \
+        -s LOGSTATS_FILE="${STATSFILE}" \
         $spider
 
     if [ ! $? -eq 0 ]; then
@@ -132,7 +133,95 @@ do
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "parquet copy to s3 failed with exit code ${retval}")
-            exit 1
+        fi
+
+        aws s3 cp --only-show-errors ${STATSFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            (>&2 echo "stats copy to s3 failed with exit code ${retval}")
+        fi
+
+        # Check the stats JSON to look for things that we consider warnings or errors
+        if [ ! -f "${STATSFILE}" ]; then
+            (>&2 echo "stats file not found")
+        else
+            STATS_WARNINGS=""
+            STATS_ERRORS=""
+
+            # We expect items to have a category
+            missing_category=$(jq '."atp/category/missing" // 0' "${STATSFILE}")
+            if [ $missing_category -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
+            fi
+
+            # Warn if items are missing a lat/lon
+            missing_lat=$(jq '."atp/field/lat/missing" // 0' "${STATSFILE}")
+            missing_lon=$(jq '."atp/field/lon/missing" // 0' "${STATSFILE}")
+            if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
+            fi
+
+            # Error if items have invalid lat/lon
+            invalid_lat=$(jq '."atp/field/lat/invalid" // 0' "${STATSFILE}")
+            invalid_lon=$(jq '."atp/field/lon/invalid" // 0' "${STATSFILE}")
+            if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
+            fi
+
+            # Error if items have invalid website
+            invalid_website=$(jq '."atp/field/website/invalid" // 0' "${STATSFILE}")
+            if [ $invalid_website -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Website is invalid on ${invalid_website} items</li>"
+            fi
+
+            # Warn if items were fetched using Zyte
+            zyte_fetched=$(jq '."scrapy-zyte-api/success" // 0' "${STATSFILE}")
+            if [ $zyte_fetched -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${zyte_fetched} requests were made using Zyte</li>"
+            fi
+
+            # Warn if more than 30% of the items scraped were dropped by the dupe filter
+            dupe_dropped=$(jq '."dupefilter/filtered" // 0' "${STATSFILE}")
+            dupe_percent=$(awk -v dd="${dupe_dropped}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (dd / fc) * 100 }')
+            if awk -v dp="${dupe_percent}" 'BEGIN { exit !(dp > 30) }'; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
+            fi
+
+            # Warn if the image URL is not very unique across all the outputs
+            unique_image_urls=$(jq '.features | map(.properties.image) | map(select(. != null)) | unique | length' ${OUTFILE})
+            unique_image_url_rate=$(awk -v uiu="${unique_image_urls}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && uiu > 0) { printf "%.2f", (uiu / fc) * 100 } else { printf "0.00" } }')
+            if awk -v uiu="${unique_image_urls}" -v uir="${unique_image_url_rate}" 'BEGIN { exit !(uir < 50 && uiu > 0) }'; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
+            fi
+
+            # Warn if the phone number is not very unique across all the outputs
+            unique_phones=$(jq '.features | map(.properties.phone) | map(select(. != null)) | unique | length' ${OUTFILE})
+            unique_phone_rate=$(awk -v up="${unique_phones}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && up > 0) { printf "%.2f", (up / fc) * 100 } else { printf "0.00" } }')
+            if awk -v up="${unique_phones}" -v upr="${unique_phone_rate}" 'BEGIN { exit !(upr < 90 && up > 0) }'; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
+            fi
+
+            # Warn if the email is not very unique across all the outputs
+            unique_emails=$(jq '.features | map(.properties.email) | map(select(. != null)) | unique | length' ${OUTFILE})
+            unique_email_rate=$(awk -v ue="${unique_emails}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && ue > 0) { printf "%.2f", (ue / fc) * 100 } else { printf "0.00" } }')
+            if awk -v ue="${unique_emails}" -v uer="${unique_email_rate}" 'BEGIN { exit !(uer < 90 && ue > 0) }'; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
+            fi
+
+            num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
+            num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
+            if [ $num_errors -gt 0 ]; then
+                FAILURE_REASON="stats"
+                EXIT_CODE=1
+            fi
+
+            if [ $num_errors -gt 0 ] || [ $num_warnings -gt 0 ]; then
+                # Include details in an expandable section if there are warnings or errors
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+            else
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
+            fi
+            continue
         fi
 
         PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"

@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class SteakNShakeSpider(scrapy.Spider):
     name = "steak_n_shake"
-    item_attributes = {"brand": "Steak N Shake", "brand_wikidata": "Q7605233"}
+    item_attributes = {"brand": "Steak 'n Shake", "brand_wikidata": "Q7605233"}
     allowed_domains = ["www.steaknshake.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

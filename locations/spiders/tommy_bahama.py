@@ -1,4 +1,5 @@
 import json
+import urllib
 
 from scrapy import Request
 
@@ -19,6 +20,7 @@ class TommyBahamaSpider(StructuredDataSpider):
     search_for_facebook = False
     search_for_image = False
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response):
         script = response.xpath("//div[@tbr-all-stores]/following-sibling::script/text()").get()
@@ -50,6 +52,8 @@ class TommyBahamaSpider(StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item["ref"] = item.pop("name")
+
+        item["website"] = urllib.parse.quote(item["website"], safe=":/?=&")
 
         oh = OpeningHours()
         for day, times in zip(

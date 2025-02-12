@@ -8,6 +8,7 @@ from locations.spiders.crocs_eu import CrocsEUSpider
 class CrocsESSpider(scrapy.Spider):
     name = "crocs_es"
     item_attributes = CrocsEUSpider.item_attributes
+    drop_attributes = {"email"}
 
     def start_requests(self):
         yield scrapy.Request(

@@ -9,3 +9,4 @@ class WelcomeGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.welcome-stores.co.uk/sitemap.xml"]
     sitemap_rules = [(r"/.+/.+/.+\.html$", "parse_sd")]
     wanted_types = ["GroceryStore"]
+    drop_attributes = {"image"}

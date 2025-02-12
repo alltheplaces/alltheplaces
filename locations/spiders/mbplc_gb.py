@@ -50,6 +50,16 @@ class MbplcGBSpider(WoosmapSpider):
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },
+        "EGO Mediterranean": {
+            "brand": "EGO Mediterranean",
+            "brand_wikidata": "",
+            "extras": Categories.PUB.value,
+        },
+        "Orleans Smokehouse": {
+            "brand": "Orleans Smokehouse",
+            "brand_wikidata": "",
+            "extras": Categories.PUB.value,
+        },
     }
 
     def parse_item(self, item, feature, **kwargs):

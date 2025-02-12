@@ -4,7 +4,7 @@ from locations.storefinders.sweetiq import SweetIQSpider
 
 class FirstHawaiianBankSpider(SweetIQSpider):
     name = "first_hawaiian_bank"
-    item_attributes = {"brand": "First Hawaiian Bank", "brand_wikidata": "Q3072937"}
+    item_attributes = {"brand": "Hawaiian First Bank", "brand_wikidata": "Q3072937"}
     start_urls = ["https://locations.fhb.com/"]
 
     def parse_item(self, item, location):

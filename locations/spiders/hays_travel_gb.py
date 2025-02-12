@@ -10,4 +10,6 @@ class HaysTravelGBSpider(Spider):
 
     def parse(self, response):
         for store in response.json()["data"]:
-            yield DictParser.parse(store)
+            item = DictParser.parse(store)
+            item.pop("name", None)
+            yield item

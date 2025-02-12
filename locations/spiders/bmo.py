@@ -9,7 +9,7 @@ from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
-from locations.spiders.food_city_us import FoodCityUSSpider
+from locations.spiders.food_city_southeast_us import FoodCitySoutheastUSSpider
 from locations.spiders.giant_food import GiantFoodSpider
 from locations.spiders.giant_food_stores import GiantFoodStoresSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
@@ -29,7 +29,7 @@ from locations.spiders.safeway import SafewaySpider
 from locations.spiders.schnucks_us import SchnucksUSSpider
 from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
 from locations.spiders.shell import ShellSpider
-from locations.spiders.shoprite import ShopriteSpider
+from locations.spiders.shoprite_us import ShopriteUSSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
 from locations.spiders.thrifty_foods_ca import ThriftyFoodsCASpider
@@ -113,8 +113,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = KROGER_BRANDS["https://www.food4less.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.food4less.com/"]["brand_wikidata"]
             elif item["name"] == "Food City":
-                item["located_in"] = FoodCityUSSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = FoodCityUSSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = FoodCitySoutheastUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = FoodCitySoutheastUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Fred Meyer":
                 item["located_in"] = KROGER_BRANDS["https://www.fredmeyer.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.fredmeyer.com/"]["brand_wikidata"]
@@ -189,8 +189,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = ShellSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = ShellSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Shoprite" or item["name"] == "Shop Rite":
-                item["located_in"] = ShopriteSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = ShopriteSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = ShopriteUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = ShopriteUSSpider.item_attributes["brand_wikidata"]
             elif (
                 item["name"] == "Smiths Food and Drugs"
                 or item["name"] == "Smiths"

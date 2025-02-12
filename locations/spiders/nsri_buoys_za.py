@@ -1,5 +1,6 @@
 from typing import Any
 
+from chompjs import parse_js_object
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
@@ -17,11 +18,11 @@ class NsriBuoysZASpider(Spider):
     start_urls = ["https://www.nsri.org.za/water-safety/pink-rescue-buoys"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        script = [s for s in response.xpath("//script") if "window._gmData.infoWindows['buoy-finder']" in s.get()][0]
-        locations = script.re(r".*\'[0-9]+-buoyLocation\':\s\{\"content\":\"(.+)\"\},")
+        data_raw = response.xpath('.//script[contains(text(), "window._gmData.infoWindows")]/text()').get()
+        locations = parse_js_object(data_raw.split("['buoy-finder']")[1])
 
-        for location in locations:
-            selector = Selector(text=location.replace("\\/", "/"))
+        for location in locations.values():
+            selector = Selector(text=location["content"])
             item = Feature()
             item["ref"] = selector.xpath("//h3/text()").get().removeprefix("-").strip()
 

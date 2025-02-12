@@ -1,4 +1,3 @@
-from html import unescape
 from typing import Iterable
 
 from scrapy.http import Response
@@ -24,7 +23,6 @@ class BashasUSSpider(WPStoreLocatorSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if branch_name := item.pop("name", None):
-            branch_name = unescape(branch_name)
             if branch_name.startswith("Bashas’ Diné Market"):
                 item["brand"] = "Bashas’ Diné Market"
                 item["branch"] = branch_name.removeprefix("Bashas’ Diné Market").removeprefix(": ")

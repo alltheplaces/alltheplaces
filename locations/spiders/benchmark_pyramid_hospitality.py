@@ -28,8 +28,8 @@ class BenchmarkPyramidHospitalitySpider(scrapy.Spider):
             item["name"] = location.get("pointName")
             if address := location_html.xpath('//*[@class="propInfo"]//text()').getall():
                 item["street_address"] = address[-1]
-            website = location_html.xpath('//a[@id="exploreLink"]/@href').get()
-            item["website"] = website if website else "https://www.pyramidglobal.com/portfolio"
+            if website := location_html.xpath('//a[@id="exploreLink"]/@href').get():
+                item["website"] = "https://" + website.rstrip()
             if "Resort" in item["name"]:
                 apply_category(Categories.LEISURE_RESORT, item)
             elif "Center" in item["name"]:

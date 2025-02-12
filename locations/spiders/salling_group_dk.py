@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
+from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class SallingGroupDKSpider(scrapy.Spider):
@@ -36,7 +37,7 @@ class SallingGroupDKSpider(scrapy.Spider):
             "extras": Categories.SHOP_DEPARTMENT_STORE.value,
             "website": "https://salling.dk/kundeservice/abningstider/",
         },
-        "starbucks": {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value},
+        "starbucks": STARBUCKS_SHARED_ATTRIBUTES | {"extras": Categories.COFFEE_SHOP.value},
         "carlsjr": {"brand": "Carl's Jr", "brand_wikidata": "Q1043486", "website": "https://carlsjr.dk/find-os/"},
     }
     custom_settings = {

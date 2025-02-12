@@ -27,7 +27,7 @@ class LandiCHSpider(SitemapSpider):
         "garage": Categories.SHOP_CAR_REPAIR,
         "laden": Categories.SHOP_SUPERMARKET,
         "landgarage": Categories.SHOP_CAR_REPAIR,
-        "landi": Categories.SHOP_SUPERMARKET,
+        "landi": Categories.SHOP_COUNTRY_STORE,
         "mofag": Categories.SHOP_MOTORCYCLE,
         "moto": Categories.SHOP_MOTORCYCLE,
         "motobene": Categories.SHOP_MOTORCYCLE_REPAIR,
@@ -48,7 +48,7 @@ class LandiCHSpider(SitemapSpider):
         "zweiradtechnik": Categories.SHOP_MOTORCYCLE_REPAIR,
         "zweiradwerkstatt": Categories.SHOP_MOTORCYCLE_REPAIR,
     }
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60}
 
     def parse(self, response):
         lat, lon = self.parse_lat_lon(response)
@@ -61,12 +61,12 @@ class LandiCHSpider(SitemapSpider):
             "opening_hours": self.parse_opening_hours(response),
             "phone": self.parse_phone(response),
             "ref": response.url.split("/")[-1],
+            "website": response.url,
         }
         props.update(self.parse_name_brand(response))
         props.update(self.parse_address(response))
-        props.update(self.parse_website(response))
         extras = props["extras"] = self.parse_service(response)
-        for key in ["fax", "source:website"]:
+        for key in ["fax"]:
             extras[key] = props.pop(key, "")
         extras = {k: v for (k, v) in extras.items() if v}
         item = Feature(**props)
@@ -153,13 +153,6 @@ class LandiCHSpider(SitemapSpider):
         if 'alt="icon-Velo- und E-Bike-Service"' in text:
             s["service:bicycle:repair"] = "yes"
         return s
-
-    @staticmethod
-    def parse_website(response):
-        if url := response.css("span.custom-icon-world").xpath("../@href").get():
-            return {"website": url, "source:website": response.url}
-        else:
-            return {"website": response.url}
 
     def set_category(self, item):
         for word in item["ref"].lower().split("-"):

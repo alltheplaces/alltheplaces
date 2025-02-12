@@ -1,3 +1,5 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -12,6 +14,7 @@ class SupaQuickSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.supaquick.com/robots.txt"]
     sitemap_rules = [("/tyre-fitment-centres/", "parse_sd")]
     wanted_types = ["TireShop"]
+    download_timeout = 30  # The default timeout led to a a lot of requests timing out
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["facebook"] == "https://www.facebook.com/supaquick":
@@ -22,5 +25,6 @@ class SupaQuickSpider(SitemapSpider, StructuredDataSpider):
                 item["branch"] = item.pop("name").replace(brand, "").strip()
         item["opening_hours"] = OpeningHours()
         for row in response.xpath('.//div[contains(text(), "REGULAR HOURS")]/.././/table/tr'):
-            item["opening_hours"].add_ranges_from_string(row.xpath("string(.)").get())
+            hours_string = re.sub(r"(?<=\d)h(?=\d)", ":", row.xpath("string(.)").get())
+            item["opening_hours"].add_ranges_from_string(hours_string)
         yield item

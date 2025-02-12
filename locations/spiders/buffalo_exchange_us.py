@@ -1,4 +1,3 @@
-from html import unescape
 from typing import Iterable
 from urllib.parse import urljoin
 
@@ -29,8 +28,6 @@ class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
         if "PERMANENTLY CLOSED" in item["name"]:
             return
         if branch_name := item.pop("name", None):
-            item["branch"] = (
-                unescape(branch_name).removeprefix("Buffalo Outlet – ").removeprefix("Buffalo Trading Post – ")
-            )
+            item["branch"] = branch_name.removeprefix("Buffalo Outlet – ").removeprefix("Buffalo Trading Post – ")
         item["website"] = urljoin("https://buffaloexchange.com", item["website"])
         yield item

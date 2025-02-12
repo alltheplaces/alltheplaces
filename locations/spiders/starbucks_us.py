@@ -4,7 +4,7 @@ from math import sqrt
 
 from scrapy import Request, Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -12,11 +12,12 @@ from locations.searchable_points import open_searchable_points
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
+STARBUCKS_SHARED_ATTRIBUTES = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
 
 
 class StarbucksUSSpider(Spider):
     name = "starbucks_us"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     allowed_domains = ["www.starbucks.com"]
     searchable_point_files = ["us_centroids_50mile_radius.csv"]
     country_filter = ["US"]
@@ -51,7 +52,6 @@ class StarbucksUSSpider(Spider):
             store_lon = store.get("coordinates", {}).get("longitude")
 
             properties = {
-                "name": store["name"],
                 "branch": store["name"],
                 "street_address": clean_address(
                     [
@@ -72,6 +72,7 @@ class StarbucksUSSpider(Spider):
                 "extras": {"number": store["storeNumber"], "ownership_type": store["ownershipTypeCode"]},
             }
             item = Feature(**properties)
+            apply_category(Categories.COFFEE_SHOP, item)
             self.parse_hours(item, store)
             yield item
 

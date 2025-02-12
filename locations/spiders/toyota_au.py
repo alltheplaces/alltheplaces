@@ -3,10 +3,12 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
+TOYOTA_SHARED_ATTRIBUTES = {"brand": "Toyota", "brand_wikidata": "Q53268"}
+
 
 class ToyotaAUSpider(Spider):
     name = "toyota_au"
-    item_attributes = {"brand": "Toyota", "brand_wikidata": "Q53268"}
+    item_attributes = TOYOTA_SHARED_ATTRIBUTES
     allowed_domains = ["www.toyota.com.au"]
     start_urls = [
         "https://www.toyota.com.au/main/api/v1/toyotaforms/info/dealersbystate/ACT?dealerOptIn=false",
@@ -25,16 +27,19 @@ class ToyotaAUSpider(Spider):
             for location_type in ["sales", "service", "parts"]:
                 if not location[location_type]:
                     continue
+
                 item = DictParser.parse(location)
                 item["ref"] = location["branchCode"] + "_" + location_type
                 item["lat"] = location["refY"]
                 item["lon"] = location["refX"]
                 item["state"] = location["state"]
-                item["street_address"] = location.pop("addr_full", None)
+                item["street_address"] = item.pop("addr_full", None)
+
                 if location_type == "sales":
                     apply_category(Categories.SHOP_CAR, item)
                 elif location_type == "service":
                     apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif location_type == "parts":
                     apply_category(Categories.SHOP_CAR_PARTS, item)
+
                 yield item

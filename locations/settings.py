@@ -109,12 +109,14 @@ ITEM_PIPELINES = {
     "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
     "locations.pipelines.email_clean_up.EmailCleanUpPipeline": 370,
+    "locations.pipelines.geojson_geometry_reprojection.GeoJSONGeometryReprojectionPipeline": 380,
     "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
     "locations.pipelines.drop_logo.DropLogoPipeline": 550,
     "locations.pipelines.closed.ClosePipeline": 650,
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
     "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 750,
+    "locations.pipelines.geojson_multipoint_simplification.GeoJSONMultiPointSimplificationPipeline": 760,
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
     "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
@@ -142,8 +144,6 @@ LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-
-REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 
 DEFAULT_PLAYWRIGHT_SETTINGS = {
     "PLAYWRIGHT_BROWSER_TYPE": "firefox",

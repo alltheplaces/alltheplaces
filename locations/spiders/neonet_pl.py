@@ -4,7 +4,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 
 
 class NeonetPLSpider(SitemapSpider):
@@ -19,6 +19,5 @@ class NeonetPLSpider(SitemapSpider):
         )[1]
         item = DictParser.parse(data)
         item["ref"] = data.get("@id")
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].from_linked_data(data)
+        item["opening_hours"] = LinkedDataParser.parse_opening_hours(data)
         yield item

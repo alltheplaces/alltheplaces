@@ -30,7 +30,6 @@ class PizzaHutKRSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["ref"] = store.get("storeCd")
             item["city"] = store.get("sido")
-            item["website"] = "https://www.pizzahut.co.kr/"
             item["opening_hours"] = OpeningHours()
             for days, start_time, end_time in [
                 (DAYS_WEEKDAY, store.get("weekdayStartTime"), store.get("weekdayEndTime")),

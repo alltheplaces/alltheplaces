@@ -7,5 +7,5 @@ class LidlFRSpider(LidlBESpider):
 
     dataset_id = "717c7792c09a4aa4a53bb789c6bb94ee"
     dataset_name = "Filialdaten-FR/Filialdaten-FR"
-    key = "AgC167Ojch2BCIEvqkvyrhl-yLiZLv6nCK_p0K1wyilYx4lcOnTjm6ud60JnqQAa"
+    api_key = "AgC167Ojch2BCIEvqkvyrhl-yLiZLv6nCK_p0K1wyilYx4lcOnTjm6ud60JnqQAa"
     days = DAYS_FR

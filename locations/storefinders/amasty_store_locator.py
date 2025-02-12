@@ -1,3 +1,5 @@
+import json
+import re
 from typing import Iterable
 
 from scrapy import Request, Selector, Spider
@@ -37,13 +39,14 @@ class AmastyStoreLocatorSpider(Spider):
                 yield Request(url=url)
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        yield from self.parse_features(response.json()["items"])
+        raw_data = json.loads(re.search(r"items\":(\[.*\]),\"", response.text).group(1))
+        yield from self.parse_features(raw_data)
 
     def parse_features(self, features: dict) -> Iterable[Feature]:
         for feature in features:
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
-            if "popup_html" in feature:
+            if "popup_html" in feature and feature["popup_html"] is not None:
                 popup_html = Selector(text=feature["popup_html"])
                 if not item["name"]:
                     item["name"] = " ".join(

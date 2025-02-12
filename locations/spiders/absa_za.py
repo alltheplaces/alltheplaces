@@ -1,6 +1,7 @@
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AbsaZASpider(JSONBlobSpider):
@@ -17,6 +18,15 @@ class AbsaZASpider(JSONBlobSpider):
         else:
             # there are a number of "dealer" types, ignore
             return
+
+        item["addr_full"] = clean_address(item["addr_full"])
+        try:
+            int(item["addr_full"].split(" ")[0])
+            item["housenumber"] = item["addr_full"].split(" ")[0]
+            item["street"] = item["addr_full"].split(",")[0].replace(item["housenumber"], "").strip()
+        except ValueError:
+            pass
+
         item["branch"] = item.pop("name")
         if "weekdayHours" in location and "weekendHours" in location:
             oh = OpeningHours()

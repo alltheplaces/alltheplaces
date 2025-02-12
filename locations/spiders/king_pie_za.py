@@ -12,6 +12,9 @@ class KingPieZASpider(JSONBlobSpider):
     locations_key = "item"
 
     def post_process_item(self, item, response, location):
+        if item["website"] == "https://www.kingpie.co.za/":
+            item.pop("website")
+
         item["opening_hours"] = oh = OpeningHours()
         oh.add_ranges_from_string(
             re.sub(r"<[^>]*>|&nbsp;", " ", location["operatingHours"]).replace("24hrs", "00:00 - 23:59")

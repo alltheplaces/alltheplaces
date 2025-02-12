@@ -9,3 +9,4 @@ class HomebaseGBIESpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://store.homebase.co.uk/robots.txt"]
     sitemap_rules = [(r"https:\/\/store\.homebase\.co\.uk\/[-.\w]+\/[-.\w]+$", "parse_sd")]
     skip_auto_cc_domain = True
+    drop_attributes = {"image"}

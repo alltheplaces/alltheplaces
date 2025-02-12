@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class JetDESpider(scrapy.Spider):
     name = "jet_de"
-    item_attributes = {"brand": "Jet", "brand_wikidata": "Q568940"}
+    item_attributes = {"brand": "JET", "brand_wikidata": "Q568940"}
     start_urls = ["https://www.jet.de/tankstellen-suche"]
 
     def parse(self, response, **kwargs):

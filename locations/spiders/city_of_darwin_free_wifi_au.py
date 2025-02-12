@@ -1,42 +1,31 @@
 from json import loads
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 from shapely import to_geojson
 from shapely.geometry import Polygon, shape
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class CityOfDarwinFreeWifiAUSpider(Spider):
+class CityOfDarwinFreeWifiAUSpider(ArcGISFeatureServerSpider):
     name = "city_of_darwin_free_wifi_au"
     item_attributes = {"operator": "City of Darwin", "operator_wikidata": "Q125673118"}
-    allowed_domains = ["services6.arcgis.com"]
-    start_urls = [
-        "https://services6.arcgis.com/tVfesLETUHNU9Vna/ArcGIS/rest/services/Public_Wifi_APs_and_Coverage/FeatureServer/5/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&relationParam=&returnGeodetic=false&outFields=Hotspot_Name%2CPrecinct%2CShape__Length&returnGeometry=true&returnCentroid=false&returnEnvelope=false&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&defaultSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pgeojson&token="
-    ]
-    no_refs = True
+    host = "services6.arcgis.com"
+    context_path = "tVfesLETUHNU9Vna/ArcGIS"
+    service_id = "Public_Wifi_APs_and_Coverage"
+    layer_id = "5"
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json()["features"]:
-            if not location.get("geometry"):
-                continue
-            properties = {
-                "geometry": loads(to_geojson(Polygon(shape(location["geometry"])).centroid)),
-                "state": "Northern Territory",
-                "extras": {
-                    "internet_access": "wlan",
-                    "internet_access:fee": "no",
-                    "internet_access:operator": "Telstra",
-                    "internet_access:operator:wikidata": "Q721162",
-                    "internet_access:ssid": "City of Darwin Free Wi-Fi",
-                },
-            }
-            apply_category(Categories.ANTENNA, properties)
-
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(feature["OBJECTID"])
+        item["geometry"] = loads(to_geojson(Polygon(shape(feature["geometry"])).centroid))
+        item["state"] = "NT"
+        apply_category(Categories.ANTENNA, item)
+        item["extras"]["internet_access"] = "wlan"
+        item["extras"]["internet_access:fee"] = "no"
+        item["extras"]["internet_access:operator"] = "Telstra"
+        item["extras"]["internet_access:operator:wikidata"] = "Q721162"
+        item["extras"]["internet_access:ssid"] = "City of Darwin Free Wi-Fi"
+        yield item
