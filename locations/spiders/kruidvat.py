@@ -28,7 +28,7 @@ class KruidvatSpider(scrapy.Spider):
 
             item["state"] = store.xpath(".//province/text()").get()
             item["postcode"] = store.xpath(".//postalCode/text()").get()
-            item["street"] = store.xpath(".//line1/text()").get()
+            item["street_address"] = store.xpath(".//line1/text()").get()
             item["lat"] = store.xpath(".//latitude/text()").get()
             item["lon"] = store.xpath(".//longitude/text()").get()
             item["addr_full"] = store.xpath(".//formattedAddress/text()").get()
