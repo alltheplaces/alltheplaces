@@ -1,4 +1,4 @@
-from typing import Any, AsyncGenerator, Iterable, Iterator, override
+from typing import Any, AsyncGenerator, Iterable, Iterator
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from scrapy import Request
@@ -513,7 +513,6 @@ class GbfsSpider(CSVFeedSpider):
         parsed._replace(query=qs)
         return urlunparse(parsed)
 
-    @override
     def parse_row(self, response: Response, row: dict[str, str]) -> Iterator[Request]:
         """Queues downloads for every GBFS system manifest"""
         if url := self.get_authorized_url(row["Auto-Discovery URL"], row["Authentication Info"]):
