@@ -20,15 +20,15 @@ class CostcoCASpider(scrapy.Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in list(response.json()):
-            if type(store) != bool :
+        for store in response.json():
+            if isinstance(store, dict):
                 item = DictParser.parse(store)
                 item.pop("name")
                 item["ref"] = store["stlocID"]
                 item["branch"] = store["locationName"]
                 item["website"] = (
                     "https://www.costco.ca/warehouse-locations/"
-                    + "-".join([item["branch"].replace(" ","-"),item["state"],str(item["ref"])])
+                    + "-".join([item["branch"].replace(" ", "-"), item["state"], str(item["ref"])])
                     + ".html"
                 )
                 apply_category(Categories.SHOP_WHOLESALE, item)
