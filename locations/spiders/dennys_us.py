@@ -1,3 +1,5 @@
+import html
+
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -13,7 +15,7 @@ class DennysUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://locations.dennys.com/[^/]+/[^/]+/\d+$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["name"] = item["name"].replace("&#x27;", "'")
+        item["branch"] = html.unescape(item.pop("name")).removeprefix("DENNY'S - ")
         item["opening_hours"] = OpeningHours()
         for day_time in ld_data["openingHoursSpecification"]:
             day = day_time["dayOfWeek"].split("/")[-1]
