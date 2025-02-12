@@ -27,4 +27,5 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["addr_full"] = item.pop("street_address")
         item["street_address"] = item.pop("name").removeprefix("Boost ")
+        item["image"] = None
         yield item
