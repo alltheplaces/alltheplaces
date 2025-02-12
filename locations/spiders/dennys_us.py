@@ -26,4 +26,7 @@ class DennysUSSpider(SitemapSpider, StructuredDataSpider):
                 open_time, close_time = time.split("  to  ")
                 item["opening_hours"].add_range(day, open_time.strip(), close_time.strip(), "%I:%M %p")
 
+        item["extras"]["website:menu"] = response.xpath('//a[@data-event-name="loc_view_menu"]/@href').get()
+        item["extras"]["website:orders"] = response.xpath('//a[@data-event-name="loc_order_online"]/@href').get()
+
         yield item
