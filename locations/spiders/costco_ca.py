@@ -16,20 +16,21 @@ class CostcoCASpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
-            if isinstance(store, dict):
-                item = DictParser.parse(store)
-                item["ref"] = item.pop("name")
-                item["branch"] = store["locationName"]
-                item["website"] = (
-                    "https://www.costco.ca/warehouse-locations/"
-                    + "-".join([item["branch"].replace(" ", "-"), item["state"], str(item["ref"])])
-                    + ".html"
-                )
-                apply_category(Categories.SHOP_WHOLESALE, item)
+            if not isinstance(store, dict):
+                continue
+            item = DictParser.parse(store)
+            item["ref"] = item.pop("name")
+            item["branch"] = store["locationName"]
+            item["website"] = (
+                "https://www.costco.ca/warehouse-locations/"
+                + "-".join([item["branch"].replace(" ", "-"), item["state"], str(item["ref"])])
+                + ".html"
+            )
+            apply_category(Categories.SHOP_WHOLESALE, item)
 
-                if store["hasBusinessDepartment"] is True:
-                    item["name"] = "Costco Business Center"
-                else:
-                    item["name"] = "Costco"
+            if store["hasBusinessDepartment"] is True:
+                item["name"] = "Costco Business Center"
+            else:
+                item["name"] = "Costco"
 
-                yield item
+            yield item
