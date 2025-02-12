@@ -15,18 +15,21 @@ class CostcoCASpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self) -> Iterable[Request]:
-        yield scrapy.Request(url="https://www.costco.ca/AjaxWarehouseBrowseLookupView?countryCode=CA",
-                             callback=self.parse)
+        yield scrapy.Request(
+            url="https://www.costco.ca/AjaxWarehouseBrowseLookupView?countryCode=CA", callback=self.parse
+        )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json():
-            if store == False:
-                continue
-            item = DictParser.parse(store)
-            item.pop("name")
-            item["ref"] = store["stlocID"]
-            item["branch"] = store["locationName"]
-            item["website"] = "https://www.costco.ca/warehouse-locations/" + "-".join(
-                [item["branch"], item["state"], str(item["ref"])]) + ".html"
-            apply_category(Categories.SHOP_WHOLESALE, item)
-            yield item
+        for store in list(response.json()):
+            if type(store) != bool :
+                item = DictParser.parse(store)
+                item.pop("name")
+                item["ref"] = store["stlocID"]
+                item["branch"] = store["locationName"]
+                item["website"] = (
+                    "https://www.costco.ca/warehouse-locations/"
+                    + "-".join([item["branch"].replace(" ","-"),item["state"],str(item["ref"])])
+                    + ".html"
+                )
+                apply_category(Categories.SHOP_WHOLESALE, item)
+                yield item
