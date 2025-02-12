@@ -28,4 +28,6 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
         item["addr_full"] = item.pop("street_address")
         item["street_address"] = item.pop("name").removeprefix("Boost ")
         item["image"] = None
+        if "Temporarily Closed" in response.xpath('//*[contains(@class, "location-details")]').get(""):
+            item["opening_hours"] = "off"
         yield item
