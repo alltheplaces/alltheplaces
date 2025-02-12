@@ -1,18 +1,32 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any, Iterable
+
+import scrapy
+from scrapy import Request
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class CostcoCASpider(SitemapSpider, StructuredDataSpider):
+class CostcoCASpider(scrapy.Spider):
     name = "costco_ca"
     item_attributes = {"name": "Costco", "brand": "Costco", "brand_wikidata": "Q715583"}
-    sitemap_urls = ["https://www.costco.ca/robots.txt"]
-    sitemap_rules = [("/warehouse-locations/", "parse")]
-    wanted_types = ["Store"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.SHOP_WHOLESALE, item)
-        yield item
+    def start_requests(self) -> Iterable[Request]:
+        yield scrapy.Request(url="https://www.costco.ca/AjaxWarehouseBrowseLookupView?countryCode=CA",
+                             callback=self.parse)
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json():
+            if store == False:
+                continue
+            item = DictParser.parse(store)
+            item.pop("name")
+            item["ref"] = store["stlocID"]
+            item["branch"] = store["locationName"]
+            item["website"] = "https://www.costco.ca/warehouse-locations/" + "-".join(
+                [item["branch"], item["state"], str(item["ref"])]) + ".html"
+            apply_category(Categories.SHOP_WHOLESALE, item)
+            yield item
