@@ -1,5 +1,7 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -18,3 +20,7 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
         "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
     }
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["addr_full"] = item.pop("street_address")
+        yield item
