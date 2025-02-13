@@ -1,4 +1,7 @@
+from typing import Any
+
 from chompjs import parse_js_object
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
@@ -6,23 +9,27 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
-class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
-    name = "carpet_one_floor_and_home_us"
+class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
+    name = "carpet_one_floor_and_home_us_ca"
     item_attributes = {
         "brand": "Carpet One Floor & Home",
         "brand_wikidata": "Q121335910",
         "extras": Categories.SHOP_FLOORING.value,
     }
-    allowed_domains = ["www.carpetone.com"]
-    sitemap_urls = ["https://www.carpetone.com/locations-sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/www\.carpetone\.com\/locations\/[^/]+/[^/]+$", "parse")]
+    sitemap_urls = [
+        "https://www.carpetone.com/locations-sitemap.xml",
+        "https://www.carpetone.ca/locations-sitemap.xml",
+    ]
+    sitemap_rules = [
+        (r"^https:\/\/www\.carpetone\.com\/locations\/[^/]+/[^/]+$", "parse"),
+        (r"^https:\/\/www\.carpetone\.ca\/locations\/[^/]+/[^/]+$", "parse"),
+    ]
     # Attempt crawling with a high delay to try and avoid receiving
     # truncated binary responses (non-HTTP). Possible rate limiting
     # mechanism to frustrate bots?
     download_delay = 10
 
-    @staticmethod
-    def parse_store(response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in parse_js_object(response.xpath('//script[contains(text(), "var locationlist")]/text()').get()):
             item = DictParser.parse(location)
             item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
@@ -38,6 +45,3 @@ class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
                     item["extras"]["contact:instagram"] = social_media_account["value"]
 
             yield item
-
-    def parse(self, response):
-        yield from self.parse_store(response)
