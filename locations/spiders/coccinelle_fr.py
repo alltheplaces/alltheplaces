@@ -4,12 +4,14 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 BRANDS = {
     "coccimarket": {"brand": "CocciMarket", "brand_wikidata": "Q90020480"},
     "coccimarket city": {"brand": "CocciMarket City", "brand_wikidata": "Q90020481"},
+    "coccimarket easy": {"brand": "CocciMarket Easy", "brand_wikidata": ""},
     "coccinelle express": {"brand": "Coccinelle Express", "brand_wikidata": "Q90020479"},
     "coccinelle supermarche": {"brand": "Coccinelle Supermarché", "brand_wikidata": "Q90020459"},
 }
@@ -51,4 +53,6 @@ class CoccinelleFRSpider(SitemapSpider):
             item.update(brand_info)
         else:
             self.logger.error("Unexpected type: {}".format(brand_key))
+        if brand_key == "coccimarket easy":
+            apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
