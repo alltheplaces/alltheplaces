@@ -2,7 +2,7 @@ from typing import Any, AsyncGenerator, Iterable, Iterator
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from scrapy import Request
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, Response, TextResponse
 from scrapy.spiders import CSVFeedSpider
 from scrapy.utils.defer import maybe_deferred_to_future
 from twisted.internet.defer import Deferred, DeferredList
@@ -911,7 +911,7 @@ class GbfsSpider(CSVFeedSpider):
         feed or in the case of an error."""
         if has_feed:
             success, response = responses.pop(0)
-            if success:
+            if success and isinstance(response, TextResponse):
                 try:
                     return response.json()
                 except ValueError as e:
@@ -953,7 +953,7 @@ class GbfsSpider(CSVFeedSpider):
         system's "vehicle_types" feed."""
         vehicle_types_categories = {}
         for vehicle_type in DictParser.get_nested_key(vehicle_types, "vehicle_types") or []:
-            cat = dict(FORM_FACTOR_MAP.get(vehicle_type["form_factor"], {}))
+            cat = FORM_FACTOR_MAP.get(vehicle_type.get("form_factor", ""), {})
             if vehicle_type.get("propulsion_type") == "electric_assist":
                 if "rental" in cat:
                     cat["rental"] += ";ebike"
@@ -977,6 +977,9 @@ class GbfsSpider(CSVFeedSpider):
 
     async def parse_gbfs(self, response: Response, **kwargs) -> AsyncGenerator[Feature, None]:
         """Process one GBFS system."""
+        if not isinstance(response, TextResponse):
+            self.logger.error(f"Unexpected response type {type(response)}")
+            return
         try:
             data = response.json()
         except ValueError as e:
