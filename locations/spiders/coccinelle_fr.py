@@ -33,6 +33,7 @@ class CoccinelleFRSpider(SitemapSpider):
         item["lat"] = location.get("lat")
         item["lon"] = location.get("lng")
         item["ref"] = response.xpath("//@data-shop").get()
+        item["branch"] = response.xpath('//meta[@property="og:title"]/@content').get("").split("|")[0].strip().title()
         item["website"] = response.url
         item["street_address"] = merge_address_lines(
             [
@@ -40,7 +41,7 @@ class CoccinelleFRSpider(SitemapSpider):
                 response.xpath('//*[contains(@class,"addr-2")]/text()').get(""),
             ]
         )
-        item["city"] = response.xpath('//*[contains(@class,"city")]/text()').get()
+        item["city"] = response.xpath('//*[contains(@class,"city")]/text()').get("").title()
         item["postcode"] = response.xpath('//*[contains(@class,"zipcode")]/text()').get()
         item["phone"] = response.xpath('//a[contains(@href,"tel:")]/@href').get()
         brand_key = (
