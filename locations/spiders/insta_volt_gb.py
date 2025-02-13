@@ -26,7 +26,7 @@ class InstaVoltGBSpider(Spider):
             item["branch"] = (
                 item.pop("name").removeprefix(f'{location["location_id"]} &#8211; ').replace("&#8211;", ",")
             )
-            item["name"] = self.item_attributes["brand"]
+            item["operator"] = self.item_attributes["operator"]
             item["addr_full"] = clean_address(location["address_lines"])
             item["ref"] = location["location_id"]
             item["website"] = location["permalink"]
