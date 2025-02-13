@@ -8,12 +8,11 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class ChurchsChickenUSSpider(SitemapSpider, StructuredDataSpider):
     name = "churchs_chicken_us"
-    item_attributes = {"brand": "Church's Chicken", "brand_wikidata": "Q1089932"}
-    sitemap_urls = [
-        "https://locations.churchs.com/sitemap1.xml",
-    ]
+    item_attributes = {"name": "Church's Chicken", "brand": "Church's Chicken", "brand_wikidata": "Q1089932"}
+    sitemap_urls = ["https://locations.churchs.com/robots.txt"]
     sitemap_rules = [(r"https://locations.churchs.com/[^/]+/[^/]+/[a-z0-9\.A-Z-]+$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["name"] = None
         apply_category(Categories.FAST_FOOD, item)
         yield item
