@@ -6,15 +6,13 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.items import SocialMedia, set_social_media
 from locations.pipelines.address_clean_up import clean_address
 
 
 class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
     name = "carpet_one_floor_and_home_us_ca"
-    item_attributes = {
-        "brand": "Carpet One Floor & Home",
-        "brand_wikidata": "Q121335910",
-    }
+    item_attributes = {"brand": "Carpet One Floor & Home", "brand_wikidata": "Q121335910"}
     sitemap_urls = [
         "https://www.carpetone.com/locations-sitemap.xml",
         "https://www.carpetone.ca/locations-sitemap.xml",
@@ -34,11 +32,9 @@ class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
 
             for social_media_account in location.get("socialMedia", []):
                 if social_media_account.get("key") == "FacebookURL":
-                    item["facebook"] = social_media_account["value"]
+                    set_social_media(item, SocialMedia.FACEBOOK, social_media_account["value"])
                 elif social_media_account.get("key") == "InstagramURL":
-                    if not isinstance(item.get("extras"), dict):
-                        item["extras"] = {}
-                    item["extras"]["contact:instagram"] = social_media_account["value"]
+                    set_social_media(item, SocialMedia.INSTAGRAM, social_media_account["value"])
 
             apply_category(Categories.SHOP_FLOORING, item)
 
