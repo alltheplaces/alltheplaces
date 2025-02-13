@@ -24,10 +24,6 @@ class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
         (r"^https:\/\/www\.carpetone\.com\/locations\/[^/]+$", "parse"),
         (r"^https:\/\/www\.carpetone\.ca\/locations\/[^/]+$", "parse"),
     ]
-    # Attempt crawling with a high delay to try and avoid receiving
-    # truncated binary responses (non-HTTP). Possible rate limiting
-    # mechanism to frustrate bots?
-    download_delay = 10
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in parse_js_object(response.xpath('//script[contains(text(), "var locationlist")]/text()').get()):
