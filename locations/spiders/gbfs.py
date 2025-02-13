@@ -796,7 +796,6 @@ class GbfsSpider(CSVFeedSpider):
         # "network" is a better place than "brand" for the "system name," since a brand can have many non-interoperable networks
         shared_attributes: dict[str, Any] = {"country": kwargs["Country Code"], "extras": {"network": kwargs["Name"]}}
 
-        # TODO: Map all brands/names
         if kwargs["System ID"] in BRAND_MAPPING:
             shared_attributes.update(BRAND_MAPPING[kwargs["System ID"]])
         else:
