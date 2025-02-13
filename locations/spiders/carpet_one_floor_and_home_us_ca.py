@@ -4,7 +4,7 @@ from chompjs import parse_js_object
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
@@ -14,7 +14,6 @@ class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
     item_attributes = {
         "brand": "Carpet One Floor & Home",
         "brand_wikidata": "Q121335910",
-        "extras": Categories.SHOP_FLOORING.value,
     }
     sitemap_urls = [
         "https://www.carpetone.com/locations-sitemap.xml",
@@ -44,5 +43,7 @@ class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
                     if not isinstance(item.get("extras"), dict):
                         item["extras"] = {}
                     item["extras"]["contact:instagram"] = social_media_account["value"]
+
+            apply_category(Categories.SHOP_FLOORING, item)
 
             yield item
