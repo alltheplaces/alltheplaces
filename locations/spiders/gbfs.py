@@ -857,14 +857,18 @@ class GbfsSpider(CSVFeedSpider):
         return urlunparse(parsed)
 
     def parse_row(self, response: Response, row: dict[str, str]) -> Iterator[Request]:
-        """Queues downloads for every GBFS system manifest"""
+        """Entry point. For every row in the MobilityData spreadsheet, queue a
+        download for the system manifest."""
         if url := self.get_authorized_url(row["Auto-Discovery URL"], row["Authentication Info"]):
             yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
 
     def set_localized_name(
         self, item: Feature | dict[str, Any], itemkey: str, station: dict[str, Any], stationkey: str
     ):
-        """Utility function to set localized tags"""
+        """GBFS allows some values to be localized. This function checks if the
+        value under station[stationkey] is translated, and if so, adds it to
+        item[itemkey:language] for each language. If not, it adds it to
+        item[itemkey]."""
         if stationkey not in station:
             return
         value = station[stationkey]
@@ -886,8 +890,10 @@ class GbfsSpider(CSVFeedSpider):
         deferreds: list[Deferred[Response]],
         authentication_info: str,
     ) -> bool:
-        """Given the name of a GBFS feed, look for it in the feeds list, and
-        queue an asynchronous download"""
+        """Look for a GBFS feed by the given name (e.g. "system_information",
+        "station_information") in the system's list of feeds. If it exists,
+        generate an asynchronous download reqeust, and add it to the "deferreds"
+        list, and return True. If the feed doesn't exist, return False."""
         # List feeds by name.
         feeds = [feed for feed in all_feeds if feed["name"] == feed_name]
 
@@ -900,7 +906,9 @@ class GbfsSpider(CSVFeedSpider):
             return False
 
     def get_next_json(self, has_feed: bool, responses: list[tuple[bool, Response]]) -> Any | None:
-        """Get a feed from the list of responses, if we requested that feed"""
+        """After requesting a feed using defer_request_feed, get the response
+        from a list of results. Return the JSON data, or None if there was no
+        feed or in the case of an error."""
         if has_feed:
             success, response = responses.pop(0)
             if success:
@@ -911,7 +919,8 @@ class GbfsSpider(CSVFeedSpider):
         return None
 
     def get_shared_attributes_from_row(self, **kwargs) -> dict[str, Any]:
-        """Shared attributes for every item in a system, given the system's row in the CSV"""
+        """Generate attributes shared by every station in a system, given the
+        system's row in the CSV."""
         # "network" is a better place than "brand" for the "system name," since a brand can have many non-interoperable networks
         shared_attributes: dict[str, Any] = {"country": kwargs["Country Code"], "extras": {"network": kwargs["Name"]}}
 
@@ -927,7 +936,8 @@ class GbfsSpider(CSVFeedSpider):
     def update_attributes_from_system_information(
         self, system_information: dict[str, Any], shared_attributes: dict[str, Any]
     ):
-        """Shared attributes for every item in a system, given the system's "system_information" feed"""
+        """Generates attributes shared by every item in a system, given the
+        system's "system_information" feed."""
         system_information = system_information.get("data", system_information)
 
         self.set_localized_name(shared_attributes, "network", system_information, "name")
@@ -939,7 +949,8 @@ class GbfsSpider(CSVFeedSpider):
         self.set_localized_name(shared_attributes, "operator", system_information, "operator")
 
     def get_vehicle_types_categories(self, vehicle_types: Any) -> dict[Any, dict[str, str]]:
-        """Create a map from vehicle_type ID to OSM category using the system's "vehicle_types" feed"""
+        """Create a map from GBFS vehicle_type ID to OSM category using the
+        system's "vehicle_types" feed."""
         vehicle_types_categories = {}
         for vehicle_type in DictParser.get_nested_key(vehicle_types, "vehicle_types") or []:
             cat = dict(FORM_FACTOR_MAP.get(vehicle_type["form_factor"], {}))
@@ -954,7 +965,8 @@ class GbfsSpider(CSVFeedSpider):
     def get_station_status_categories(
         self, station_status: Any, vehicle_types_categories: dict[Any, dict[str, str]]
     ) -> dict[Any, list[dict[str, str]]]:
-        """If a station in station_information doesn't have vechicle_type tags, get it from the "station_status" feed."""
+        """If a station in station_information doesn't have vechicle_type tags,
+        get the category from the "station_status" feed instead."""
         station_status_categories = {}
         for station in DictParser.get_nested_key(station_status, "stations") or []:
             station_status_categories[station["station_id"]] = [
@@ -1065,7 +1077,7 @@ class GbfsSpider(CSVFeedSpider):
         apply_yes_no(PaymentMethods.APPLE_PAY, item, "applepay" in rental_methods)
         apply_yes_no(PaymentMethods.GOOGLE_PAY, item, "androidpay" in rental_methods)
 
-        # Try to determine the feature type based on its capacity of vehicle types
+        # Try to determine the feature category based on its capacity of vehicle types
         vehicle_types_capacity = station.get("vehicle_types_capacity", [])
         vehicle_docks_capacity = station.get("vehicle_docks_capacity", [])
         total_vehicle_capacity = vehicle_types_capacity + vehicle_docks_capacity
