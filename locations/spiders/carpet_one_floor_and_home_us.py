@@ -23,9 +23,7 @@ class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
 
     @staticmethod
     def parse_store(response):
-        js_blob = response.xpath('//script[contains(text(), "var locationlist = [{")]/text()').get()
-        js_blob = "[{" + js_blob.split("var locationlist = [{", 1)[1].split("}];", 1)[0] + "}]"
-        for location in parse_js_object(js_blob):
+        for location in parse_js_object(response.xpath('//script[contains(text(), "var locationlist")]/text()').get()):
             item = DictParser.parse(location)
             item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
             item["phone"] = location["address"].get("phone")
