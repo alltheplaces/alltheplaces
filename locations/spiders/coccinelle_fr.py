@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 BRANDS = {
     "coccimarket": {"brand": "CocciMarket", "brand_wikidata": "Q90020480"},
     "coccimarket city": {"brand": "CocciMarket City", "brand_wikidata": "Q90020481"},
-    "coccimarket easy": {"brand": "CocciMarket Easy", "brand_wikidata": ""},
+    "coccimarket easy": {"brand": "CocciMarket Easy", "name": "CocciMarket Easy"},
     "coccinelle express": {"brand": "Coccinelle Express", "brand_wikidata": "Q90020479"},
     "coccinelle supermarche": {"brand": "Coccinelle Supermarché", "brand_wikidata": "Q90020459"},
 }
