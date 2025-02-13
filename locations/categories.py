@@ -372,16 +372,14 @@ def apply_category(category, item: Feature):
     if not item.get("extras"):
         item["extras"] = {}
 
-    for key, value in tags.items():
+    for key, values_str in tags.items():
+        values = set(values_str.split(";"))
         if key in item["extras"].keys():
-            existing_values = item["extras"][key].split(";")
-            if value in existing_values:
-                continue
-            existing_values.append(value)
-            existing_values.sort()
-            item["extras"][key] = ";".join(existing_values)
+            existing_values = set(item["extras"][key].split(";"))
+            existing_values.update(values)
+            item["extras"][key] = ";".join(sorted(existing_values))
         else:
-            item["extras"][key] = value
+            item["extras"][key] = values_str
 
 
 top_level_tags = [
