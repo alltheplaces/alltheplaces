@@ -14,7 +14,7 @@ class DennerCHSpider(StructuredDataSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json().values():
-            yield scrapy.Request(url="https://www.denner.ch/"+store["uri"],callback=self.parse_sd)
+            yield scrapy.Request(url="https://www.denner.ch/" + store["uri"], callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["lat"] = response.xpath('//*[@id="storeLatitude"]/@value').get()
