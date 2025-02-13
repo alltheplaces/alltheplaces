@@ -20,9 +20,10 @@ class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
         "https://www.carpetone.com/locations-sitemap.xml",
         "https://www.carpetone.ca/locations-sitemap.xml",
     ]
+    # Scrape locations from state pages, reducing the number of requests
     sitemap_rules = [
-        (r"^https:\/\/www\.carpetone\.com\/locations\/[^/]+/[^/]+$", "parse"),
-        (r"^https:\/\/www\.carpetone\.ca\/locations\/[^/]+/[^/]+$", "parse"),
+        (r"^https:\/\/www\.carpetone\.com\/locations\/[^/]+$", "parse"),
+        (r"^https:\/\/www\.carpetone\.ca\/locations\/[^/]+$", "parse"),
     ]
     # Attempt crawling with a high delay to try and avoid receiving
     # truncated binary responses (non-HTTP). Possible rate limiting
