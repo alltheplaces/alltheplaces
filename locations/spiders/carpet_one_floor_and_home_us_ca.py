@@ -4,7 +4,6 @@ from chompjs import parse_js_object
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import SocialMedia, set_social_media
 from locations.pipelines.address_clean_up import clean_address
@@ -35,7 +34,5 @@ class CarpetOneFloorAndHomeUSCASpider(SitemapSpider):
                     set_social_media(item, SocialMedia.FACEBOOK, social_media_account["value"])
                 elif social_media_account.get("key") == "InstagramURL":
                     set_social_media(item, SocialMedia.INSTAGRAM, social_media_account["value"])
-
-            apply_category(Categories.SHOP_FLOORING, item)
 
             yield item
