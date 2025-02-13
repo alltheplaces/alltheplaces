@@ -16,7 +16,7 @@ class BurgerUrgeAUSpider(SitemapSpider):
         if order := response.xpath('//div[contains(@class, "button-pickup")]/a/@href'):
             properties = {
                 "ref": order.get().split("location=", 1)[1].split("&", 1)[0],
-                "name": response.xpath('//a[contains(@class, "storename")]/text()').get(),
+                "branch": response.xpath('//a[contains(@class, "storename")]/text()').get(),
                 "addr_full": " ".join(
                     filter(
                         None, map(str.strip, response.xpath('//div[contains(@class, "address-loc")]//text()').getall())
