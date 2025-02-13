@@ -953,9 +953,10 @@ class GbfsSpider(CSVFeedSpider):
         system's "vehicle_types" feed."""
         vehicle_types_categories = {}
         for vehicle_type in DictParser.get_nested_key(vehicle_types, "vehicle_types") or []:
-            cat = FORM_FACTOR_MAP.get(vehicle_type.get("form_factor", ""), {})
+            # Call dict() to make a copy
+            cat = dict(FORM_FACTOR_MAP.get(vehicle_type.get("form_factor", ""), {}))
             if vehicle_type.get("propulsion_type") == "electric_assist":
-                if "rental" in cat:
+                if "rental" in cat and "ebike" not in cat["rental"]:
                     cat["rental"] += ";ebike"
                 else:
                     cat["rental"] = "ebike"
