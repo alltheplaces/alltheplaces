@@ -56,12 +56,12 @@ class GiantFoodSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         for hour in hours:
             if "All Day" in hour:
-                day = hour.split(" ")[0]
-                open_time = "12:00"
-                close_time = "23:59"
+                opening_hours.add_range(day=hour.split(" ")[0], open_time="12:00", close_time="23:59")
+            elif "Closed" in hour:
+                opening_hours.set_closed(hour.split(" ")[0])
             else:
                 day, open_time, close_time = re.search(
                     r"([a-z]{2})\s([0-9:]+)-([0-9:]+)", hour, flags=re.IGNORECASE
                 ).groups()
-            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time)
+                opening_hours.add_range(day=day, open_time=open_time, close_time=close_time)
         return opening_hours.as_opening_hours()
