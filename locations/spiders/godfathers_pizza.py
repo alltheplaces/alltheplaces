@@ -2,7 +2,7 @@ import re
 from typing import Any
 
 import scrapy
-from scrapy.http import Response, JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 
