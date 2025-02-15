@@ -15,7 +15,7 @@ class MindGBSpider(JSONBlobSpider):
         match = re.search(r"const locations = ([^\n]+)", response.text)
         data = match.group(1)[:-1]
         data = data[:-1]
-        #print(data)
+        # print(data)
         json_data = json.loads(data)
         for location in json_data:
             item = Feature()
