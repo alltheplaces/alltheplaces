@@ -1,7 +1,7 @@
 import json
 import re
 
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -28,8 +28,8 @@ class MindGBSpider(JSONBlobSpider):
                 item["opening_hours"] = OpeningHours()
                 result = re.search(r"Opening hours(.*),,(.*?)(?:(Phone|Email))", temp)
                 hours = result.group(1)
-                #Example ,Monday to Saturday 9:00am - 4:00pm,Sunday 10:00am - 4:00pm
-                hours_split=hours.replace("&nbsp;","").split(",")
+                # Example ,Monday to Saturday 9:00am - 4:00pm,Sunday 10:00am - 4:00pm
+                hours_split = hours.replace("&nbsp;", "").split(",")
                 for hours_range in hours_split:
                     item["opening_hours"].add_ranges_from_string(hours_range)
                 address = result.group(2).replace("<br />", "")
