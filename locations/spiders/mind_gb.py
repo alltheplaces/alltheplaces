@@ -1,6 +1,7 @@
 import json
 import re
 
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -13,9 +14,7 @@ class MindGBSpider(JSONBlobSpider):
 
     def parse(self, response):
         match = re.search(r"const locations = ([^\n]+)", response.text)
-        data = match.group(1)[:-1]
-        data = data[:-1]
-        # print(data)
+        data = match.group(1)[:-2]
         json_data = json.loads(data)
         for location in json_data:
             item = Feature()
@@ -25,21 +24,21 @@ class MindGBSpider(JSONBlobSpider):
             item["lat"], item["lon"] = location["position"]["lat"], location["position"]["lng"]
             temp = location["content"].replace("\n", "")
             temp = re.sub(r"</?(?:(p|ul|li|span|div))[^>]*>", ",", temp).replace(",,", ",")
-            # print(temp)
             if "Opening hours" in temp:
+                item["opening_hours"] = OpeningHours()
                 result = re.search(r"Opening hours(.*),,(.*?)(?:(Phone|Email))", temp)
                 hours = result.group(1)
+                #Example ,Monday to Saturday 9:00am - 4:00pm,Sunday 10:00am - 4:00pm
+                hours_split=hours.replace("&nbsp;","").split(",")
+                for hours_range in hours_split:
+                    item["opening_hours"].add_ranges_from_string(hours_range)
                 address = result.group(2).replace("<br />", "")
-                # print("hours" + hours)
                 item["opening_hours"] = hours
-                # print("address" + address)
                 item["addr_full"] = address
             if "Phone:" in temp:
                 phone = re.search(r"Phone: <a href=\"tel:([^\"]*)\"", temp).group(1)
-                # print("phone" + phone)
                 item["phone"] = phone
             if "Email:" in temp:
                 email = re.search(r"Email: <a href=\"mailto:(.*)\"", temp).group(1)
-                # print("email" + email)
                 item["email"] = email
             yield item
