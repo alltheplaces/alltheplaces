@@ -33,7 +33,6 @@ class MindGBSpider(JSONBlobSpider):
                 for hours_range in hours_split:
                     item["opening_hours"].add_ranges_from_string(hours_range)
                 address = result.group(2).replace("<br />", "")
-                item["opening_hours"] = hours
                 item["addr_full"] = address
             if "Phone:" in temp:
                 phone = re.search(r"Phone: <a href=\"tel:([^\"]*)\"", temp).group(1)
