@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class WesternPowerStreetLampsAUSpider(ArcGISFeatureServerSpider):
-    name = "western_power_street_lamps_au"
+class WesternPowerOwnedStreetLampsAUSpider(ArcGISFeatureServerSpider):
+    name = "western_power_owned_street_lamps_au"
     item_attributes = {"operator": "Western Power", "operator_wikidata": "Q7988180"}
     host = "services2.arcgis.com"
     context_path = "tBLxde4cxSlNUxsM/ArcGIS"
@@ -21,4 +21,6 @@ class WesternPowerStreetLampsAUSpider(ArcGISFeatureServerSpider):
         item["state"] = "WA"
         apply_category(Categories.STREET_LAMP, item)
         item["extras"]["alt_ref"] = feature["POLE_PID"]
+        item["extras"]["owner"] = self.item_attributes["operator"]
+        item["extras"]["owner:wikidata"] = self.item_attributes["operator_wikidata"]
         yield item
