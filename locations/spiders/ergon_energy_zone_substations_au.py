@@ -21,7 +21,12 @@ class ErgonEnergyZoneSubstationsAUSpider(ArcGISFeatureServerSpider):
         item["name"] = feature.get("OP_DESC", feature.get("OP_NAME"))
         voltages_from_name = set()
         if item["name"]:
-            voltages_from_name = set(map(lambda x: int(float(x) * 1000), re.findall(r"(\d+(?:\.\d+)?)(?=(?:\/|KV))", item["name"], flags=re.IGNORECASE)))
+            voltages_from_name = set(
+                map(
+                    lambda x: int(float(x) * 1000),
+                    re.findall(r"(\d+(?:\.\d+)?)(?=(?:\/|KV))", item["name"], flags=re.IGNORECASE),
+                )
+            )
         if voltage_rating_str := feature.get("OP_VOLT"):
             voltage_rating_int = None
             if voltage_rating_str.endswith(" kV"):
@@ -29,7 +34,9 @@ class ErgonEnergyZoneSubstationsAUSpider(ArcGISFeatureServerSpider):
             elif voltage_rating_str.endswith(" V"):
                 voltage_rating_int = int(float(voltage_rating_str.removesuffix("V").strip()))
             elif voltage_rating_str:
-                self.logger.warning("Cannot parse substation maximum voltage rating from: {}".format(voltage_rating_str))
+                self.logger.warning(
+                    "Cannot parse substation maximum voltage rating from: {}".format(voltage_rating_str)
+                )
             if voltage_rating_int:
                 voltages_from_name.add(voltage_rating_int)
         voltages = list(map(lambda x: str(x), sorted(list(voltages_from_name), reverse=True)))
