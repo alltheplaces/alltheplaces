@@ -34,6 +34,11 @@ class MindGBSpider(JSONBlobSpider):
                     item["opening_hours"].add_ranges_from_string(hours_range)
                 address = result.group(2).replace("<br />", "")
                 item["addr_full"] = address
+            else:
+                result = re.search(r",,(.*?)(?:(Phone|Email))", temp)
+                if result:
+                    address = result.group(1).replace("<br />", "")
+                    item["addr_full"] = address
             if "Phone:" in temp:
                 phone = re.search(r"Phone: <a href=\"tel:([^\"]*)\"", temp).group(1)
                 item["phone"] = phone
