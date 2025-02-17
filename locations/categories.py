@@ -355,6 +355,7 @@ class Categories(Enum):
         "substance": "water",
     }
     STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
+    STREET_LAMP = {"highway": "street_lamp", "support": "pole"}
     SUBSTATION = {"power": "substation"}
     SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
     SUBSTATION_MINOR_DISTRIBUTION = {"power": "substation", "substation": "minor_distribution"}
