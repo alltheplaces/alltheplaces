@@ -30,6 +30,7 @@ class Categories(Enum):
     GYM = {"leisure": "fitness_centre"}
     SAUNA = {"leisure": "sauna"}
 
+    FOOTWAY_CROSSING = {"highway": "footway", "footway": "crossing"}
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
     HIGHWAY_TRAFFIC_SIGNALS = {"highway": "traffic_signals"}
 
