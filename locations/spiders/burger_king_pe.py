@@ -20,9 +20,9 @@ class BurgerKingPESpider(Spider):
 
     def start_requests(self):
         yield Request(
-            url="https://www.burgerking.pe/promociones/ver-todo",
+            url="https://www.burgerking.pe/",
             body='["accessToken"]',
-            headers={"next-action": "0bb66827efc453697cde0f01fed3bf7eb3d12673"},
+            headers={"next-action": "946e2ad932606b1dca3d9e1ba67a60713e79a6e6"},
             method="POST",
         )
 
