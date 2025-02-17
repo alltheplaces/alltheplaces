@@ -332,6 +332,7 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
     ANTENNA = {"man_made": "antenna"}
+    FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
     POWER_POLE = {"power": "pole"}
     STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
