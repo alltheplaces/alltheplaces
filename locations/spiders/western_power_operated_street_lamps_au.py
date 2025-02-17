@@ -21,6 +21,7 @@ class WesternPowerOperatedStreetLampsAUSpider(ArcGISFeatureServerSpider):
     make over 2000 requests for just 8000 non-duplicated features to be
     returned.
     """
+
     name = "western_power_operated_street_lamps_au"
     item_attributes = {"operator": "Western Power", "operator_wikidata": "Q7988180"}
     host = "services2.arcgis.com"
@@ -99,7 +100,7 @@ class WesternPowerOperatedStreetLampsAUSpider(ArcGISFeatureServerSpider):
         apply_category(Categories.STREET_LAMP, item)
         if owner_name := feature.get("OWNER"):
             owner_name = re.sub(r"\s+", " ", owner_name).strip()
-            if owner_name in self.councils_map.keys(): 
+            if owner_name in self.councils_map.keys():
                 item["extras"]["owner"] = self.councils_map[owner_name][0]
                 item["extras"]["owner:wikidata"] = self.councils_map[owner_name][1]
             else:
