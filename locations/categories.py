@@ -334,9 +334,24 @@ class Categories(Enum):
     ANTENNA = {"man_made": "antenna"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
     POWER_POLE = {"power": "pole"}
-    PUMPING_STATION_SEWAGE = {"man_made": "pumping_station", "pumping_station": "sewage", "utility": "sewerage", "substance": "sewage"}
-    PUMPING_STATION_WASTEWATER = {"man_made": "pumping_station", "pumping_station": "wastewater", "utility": "sewerage", "substance": "wastewater"}
-    PUMPING_STATION_WATER = {"man_made": "pumping_station", "pumping_station": "water", "utility": "water", "substance": "water"}
+    PUMPING_STATION_SEWAGE = {
+        "man_made": "pumping_station",
+        "pumping_station": "sewage",
+        "utility": "sewerage",
+        "substance": "sewage",
+    }
+    PUMPING_STATION_WASTEWATER = {
+        "man_made": "pumping_station",
+        "pumping_station": "wastewater",
+        "utility": "sewerage",
+        "substance": "wastewater",
+    }
+    PUMPING_STATION_WATER = {
+        "man_made": "pumping_station",
+        "pumping_station": "water",
+        "utility": "water",
+        "substance": "water",
+    }
     STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
     SUBSTATION = {"power": "substation"}
     SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
