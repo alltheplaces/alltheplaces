@@ -50,7 +50,7 @@ class SutterHealthUSSpider(YextAnswersSpider):
                 f"https://www.sutterhealth.org/find-location/facility/{location['slug']}-{location['uid']}"
             )
 
-        for location_type in location["c_locationType"]:
+        for location_type in location.get("c_locationType", []):
             if location_type in CATEGORY_MAP:
                 apply_category(CATEGORY_MAP[location_type], item)
                 if location_type in CATEGORY_SPECIALTY_MAP:
