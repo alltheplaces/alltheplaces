@@ -1,4 +1,3 @@
-
 from scrapy.spiders import Spider
 
 from locations.google_url import extract_google_position
