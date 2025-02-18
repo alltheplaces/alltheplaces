@@ -5,8 +5,8 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SallyBeautySpider(SitemapSpider, StructuredDataSpider):
-    name = "sally_beauty"
+class SallyBeautyUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "sally_beauty_us"
     item_attributes = {
         "brand": "Sally Beauty",
         "brand_wikidata": "Q7405065",
