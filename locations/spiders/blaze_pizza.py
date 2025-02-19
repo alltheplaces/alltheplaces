@@ -1,21 +1,16 @@
-import scrapy
-
-from locations.dict_parser import DictParser
+from locations.storefinders.nomnom import NomNomSpider, slugify
 
 
-class BlazePizzaSpider(scrapy.Spider):
+class BlazePizzaSpider(NomNomSpider):
     name = "blaze_pizza"
     item_attributes = {"brand": "Blaze Pizza", "brand_wikidata": "Q23016666"}
-    allowed_domains = ["nomnom-prod-api.blazepizza.com"]
     start_urls = ["https://nomnom-prod-api.blazepizza.com/extras/restaurant/summary/state"]
 
-    def parse(self, response):
-        url = "https://nomnom-prod-api.blazepizza.com"
-        for data in response.json().get("data"):
-            for row in data.get("cities"):
-                yield scrapy.Request(url=f'{url}{row.get("datauri")}', callback=self.parse_store)
-
-    def parse_store(self, response):
-        item = DictParser.parse(response.json().get("data")[0].get("restaurants")[0])
-
+    def post_process_item(self, item, response, feature):
+        item["extras"]["website:menu"] = feature["url"]
+        street_address = feature["streetaddress"]
+        street_address_no_unit = street_address[: street_address.find(",")] if "," in street_address else street_address
+        item["website"] = (
+            f"https://locations.blazepizza.com/{slugify(feature['state'])}/{slugify(feature['city'])}/{slugify(street_address_no_unit)}"
+        )
         yield item
