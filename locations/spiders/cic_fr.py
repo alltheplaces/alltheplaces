@@ -8,9 +8,9 @@ from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class CicSpider(CrawlSpider):
-    name = "cic"
-    item_attributes = {"brand_wikidata": "Q746525"}
+class CicFRSpider(CrawlSpider):
+    name = "cic_fr"
+    item_attributes = {"brand": "CIC", "brand_wikidata": "Q746525"}
     start_urls = ["https://www.cic.fr/fr/agences-et-distributeurs/Regions.aspx"]
     allowed_domains = ["cic.fr"]
     rules = [
@@ -53,4 +53,3 @@ class CicSpider(CrawlSpider):
                     item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
         apply_category(Categories.BANK, item)
         yield item
-
