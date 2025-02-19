@@ -13,7 +13,7 @@ class TexasRoadhouseSpider(SitemapSpider):
     }
 
     sitemap_urls = ["https://www.texasroadhouse.com/sitemap.xml"]
-    sitemap_rules = [(r"/locations/.*", "parse_store")]
+    sitemap_rules = [("/locations/.*", "parse_store")]
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
