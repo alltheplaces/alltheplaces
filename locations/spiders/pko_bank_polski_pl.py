@@ -1,12 +1,8 @@
-import logging
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
-from locations.hours import DAYS_PL, DELIMITERS_PL, OpeningHours
 
 
 class PkoBankPolskiPLSpider(Spider):
