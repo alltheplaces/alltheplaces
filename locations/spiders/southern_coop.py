@@ -19,4 +19,9 @@ class SouthernCoopSpider(UberallSpider):
         item.update(COOP_FOOD)
         apply_category(Categories.SHOP_CONVENIENCE, item)
 
+        item[
+            "website"
+        ] = f'https://southern.coop/store-locator/l/-/{location["city"]}/{location["streetAndNumber"]}/{location["id"]}'.lower().replace(
+            " ", "-"
+        )
         yield item
