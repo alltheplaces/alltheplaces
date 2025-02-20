@@ -4,10 +4,27 @@ import scrapy
 from scrapy import Request, Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
+from locations.categories import Access, Categories, Extras, Fuel, FuelCards, apply_category, apply_yes_no
 
+
+FUELS_AND_SERVICES_MAPPING = {
+    # Fuels
+    "adblue": Fuel.ADBLUE,
+    "diesel": Fuel.DIESEL,
+    "diesel_gold": Fuel.DIESEL,
+    "gas_98": Fuel.OCTANE_98,
+    "gas_95": Fuel.OCTANE_95,
+    "lpg": Fuel.LPG,
+    "hvo" : Fuel.BIODIESEL,
+    # Fuel cards
+    "eurowag": FuelCards.EUROWAG,
+    "dkv": FuelCards.DKV,
+    "uta": FuelCards.UTA,
+    "avia": FuelCards.AVIA,
+    "e100": FuelCards.E100,
+}
 
 class AviaPLSpider(Spider):
     name = "avia_pl"
@@ -31,5 +48,9 @@ class AviaPLSpider(Spider):
             if item["lon"][-2] == ".":
                 item["lon"] = ".".join([item["lon"][0:2], item["lon"][2:].replace(".", "")])
             apply_category(Categories.FUEL_STATION, item)
-
+            for key in ["cards", "fuels"]:
+                for tag,value in station["features"][key].items():
+                    if not isinstance(value,bool):
+                        continue
+                    apply_yes_no(FUELS_AND_SERVICES_MAPPING[tag],item,True if value == True else False)
             yield item
