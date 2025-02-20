@@ -12,5 +12,7 @@ class BurgerfiUSSpider(JSONBlobSpider):
     start_urls = ["https://www.burgerfi.com/wp-json/burgerfi-locations/v1/locations"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if "opening soon" in item["name"].lower():
+            return
         item["ref"] = item["website"]
         yield item
