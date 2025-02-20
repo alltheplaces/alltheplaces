@@ -8,6 +8,7 @@ from locations.spiders.central_england_cooperative import COOP_FOOD, set_operato
 from locations.storefinders.uberall import UberallSpider
 
 SOUTHERN_COOP = {"brand": "The Southern Co-operative", "brand_wikidata": "Q7569773"}
+WELCOME = {"brand": "Welcome", "brand_wikidata": "Q123004215"}
 
 
 class SouthernCoopSpider(UberallSpider):
@@ -16,7 +17,10 @@ class SouthernCoopSpider(UberallSpider):
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         set_operator(SOUTHERN_COOP, item)
-        item.update(COOP_FOOD)
+        if "Welcome" in item["name"]:
+            item.update(WELCOME)
+        else:
+            item.update(COOP_FOOD)
         apply_category(Categories.SHOP_CONVENIENCE, item)
 
         item[
