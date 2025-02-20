@@ -14,5 +14,5 @@ class BurgerfiUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if "opening soon" in item["name"].lower():
             return
-        item["ref"] = item["website"]
+        item["ref"] = item["website"].replace(" ", "-")
         yield item
