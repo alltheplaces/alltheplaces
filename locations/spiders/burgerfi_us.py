@@ -15,5 +15,5 @@ class BurgerfiUSSpider(JSONBlobSpider):
         if "opening soon" in item["name"].lower():
             return
         item["ref"] = item["website"].replace(" ", "-")
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").replace(" - NOW OPEN", "")
         yield item
