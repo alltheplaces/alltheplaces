@@ -22,7 +22,8 @@ class SouthernCoopSpider(UberallSpider):
         else:
             item.update(COOP_FOOD)
         apply_category(Categories.SHOP_CONVENIENCE, item)
-
+        item["branch"] = item.pop("name").removeprefix("Co-op Food").removeprefix(f'{item["brand"]}').strip()
+        item["name"] = item["brand"]
         item[
             "website"
         ] = f'https://southern.coop/store-locator/l/-/{location["city"]}/{location["streetAndNumber"]}/{location["id"]}'.lower().replace(
