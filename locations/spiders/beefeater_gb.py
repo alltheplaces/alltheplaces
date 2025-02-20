@@ -6,12 +6,14 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 from locations.items import set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class BeefeaterGBSpider(Spider):
     name = "beefeater_gb"
     item_attributes = {"brand": "Beefeater", "brand_wikidata": "Q4879766"}
     start_urls = ["https://www.beefeater.co.uk/en-gb/locations.search.json"]
+    user_agent  = BROWSER_DEFAULT
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
