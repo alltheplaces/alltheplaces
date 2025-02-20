@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.spiders.central_england_cooperative import COOP_FOOD, set_operator
 from locations.storefinders.uberall import UberallSpider
 
@@ -16,6 +16,8 @@ class SouthernCoopSpider(UberallSpider):
     key = "uvMckoaRcAUKR0LkkH03SVNyf7A4Lk"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        if "closed" in item["name"].lower():
+            set_closed(item)
         set_operator(SOUTHERN_COOP, item)
         if "Welcome" in item["name"]:
             item.update(WELCOME)
