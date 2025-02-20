@@ -5,7 +5,7 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class XLBYGSESpider(scrapy.Spider):
+class XlBygSESpider(scrapy.Spider):
     name = "xl_byg_se"
     item_attributes = {"brand": "XL-Bygg", "brand_wikidata": "Q10720798"}
     start_urls = ["https://www.xlbygg.se/butiker/"]
