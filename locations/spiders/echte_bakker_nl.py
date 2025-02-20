@@ -12,7 +12,7 @@ class EchteBakkerNLSpider(Spider):
     item_attributes = {"brand": "De Echte Bakker", "brand_wikidata": "Q16920716"}
 
     def make_request(self, page: int) -> JsonRequest:
-        return JsonRequest(url="https://echtebakker.nl/api/fetchDealers?page={}".format(page), meta={"page": page})
+        return JsonRequest(url="https://echtebakker.nl/api/fetch-dealers?page={}".format(page), meta={"page": page})
 
     def start_requests(self) -> Iterable[Request]:
         yield self.make_request(1)
