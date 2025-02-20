@@ -13,7 +13,7 @@ class BeefeaterGBSpider(Spider):
     name = "beefeater_gb"
     item_attributes = {"brand": "Beefeater", "brand_wikidata": "Q4879766"}
     start_urls = ["https://www.beefeater.co.uk/en-gb/locations.search.json"]
-    user_agent  = BROWSER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
