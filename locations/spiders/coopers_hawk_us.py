@@ -6,8 +6,8 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
 from locations.pipelines.address_clean_up import clean_address
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class CoopersHawkUSSpider(SitemapSpider, StructuredDataSpider):
@@ -31,7 +31,9 @@ class CoopersHawkUSSpider(SitemapSpider, StructuredDataSpider):
         item.pop("twitter", None)
 
         item["opening_hours"] = OpeningHours()
-        hours_text = " ".join(response.xpath('(//table[@class="hours-table"])[1]//tr[@class="hours-table__row"]//text()').getall())
+        hours_text = " ".join(
+            response.xpath('(//table[@class="hours-table"])[1]//tr[@class="hours-table__row"]//text()').getall()
+        )
         item["opening_hours"].add_ranges_from_string(hours_text)
 
         apply_category(Categories.RESTAURANT, item)
