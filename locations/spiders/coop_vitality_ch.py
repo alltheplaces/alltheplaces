@@ -12,7 +12,9 @@ class CoopVitalityCHSpider(JSONBlobSpider):
     name = "coop_vitality_ch"
     item_attributes = {"brand": "Coop Vitality", "brand_wikidata": "Q111725297"}
     allowed_domains = ["www.coopvitality.ch"]
-    start_urls = ["https://www.coopvitality.ch/jsapi/v2/stores?currentPage=0&lang=de&latitude=46.800663464&longitude=8.222665776&pageSize=1000&pharmacySearchType=&radius=2000000"]
+    start_urls = [
+        "https://www.coopvitality.ch/jsapi/v2/stores?currentPage=0&lang=de&latitude=46.800663464&longitude=8.222665776&pageSize=1000&pharmacySearchType=&radius=2000000"
+    ]
     locations_key = ["stores"]
 
     def start_requests(self) -> Iterable[JsonRequest]:
