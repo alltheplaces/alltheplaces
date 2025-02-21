@@ -27,7 +27,12 @@ class CitiwoodZASpider(Spider):
                 "branch": location["pin_item_title"].removeprefix("Citiwood "),
                 "lat": location["pin_latitude"],
                 "lon": location["pin_longitude"],
-                "addr_full": merge_address_lines(filter(lambda x: x not in ["Get Directions", "Address"], Selector(text=location["pin_item_description"]).xpath('//text()').getall())).strip(" :"),
+                "addr_full": merge_address_lines(
+                    filter(
+                        lambda x: x not in ["Get Directions", "Address"],
+                        Selector(text=location["pin_item_description"]).xpath("//text()").getall(),
+                    )
+                ).strip(" :"),
             }
             apply_category(Categories.SHOP_TRADE, properties)
             yield Feature(**properties)
