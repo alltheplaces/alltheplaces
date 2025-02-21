@@ -8,7 +8,8 @@ from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
 class TacoBellNLSpider(Spider):
     name = "taco_bell_nl"
     item_attributes = TACO_BELL_SHARED_ATTRIBUTES
-    start_urls = ["https://tacobell.nl/en/locations/"]
+    start_urls = ["https://tacobell.nl/____proof-of-work/validate/6798/aHR0cHM6Ly90YWNvYmVsbC5ubC9kZS1sb2NhdGlvbnMv"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
 
     def parse(self, response, **kwargs):
