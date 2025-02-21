@@ -1,30 +1,33 @@
-from scrapy import Request
-from scrapy.linkextractors import LinkExtractor
+from html import unescape
+from json import loads
+from typing import Iterable
 
-from locations.categories import Categories
-from locations.storefinders.go_review import GoReviewSpider
+from scrapy import Selector, Spider
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class CitiwoodZASpider(GoReviewSpider):
+class CitiwoodZASpider(Spider):
     name = "citiwood_za"
     item_attributes = {
         "brand": "Citiwood",
         "brand_wikidata": "Q130407139",
-        "extras": Categories.SHOP_TRADE.value,
     }
-    start_urls = ["https://citiwood.goreview.co.za/store-locator"]
+    allowed_domains = ["citiwood.co.za"]
+    start_urls = ["https://citiwood.co.za/contacts/"]
+    no_refs = True
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield Request(url=url, callback=self.fetch_store)
-
-    def fetch_store(self, response):
-        links = LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/goreview\/default$").extract_links(response)
-        for link in links:
-            store_page_url = link.url.replace("goreview.co.za/goreview/default", "goreview.co.za/store-information")
-            yield Request(url=store_page_url, callback=self.parse)
-
-    def post_process_item(self, item, response):
-        item["branch"] = item["branch"]
-        item["name"] = self.item_attributes["brand"]
-        yield item
+    def parse(self, response: Response) -> Iterable[Feature]:
+        locations = loads(unescape(response.xpath('//div[@class="mdp-gmaper-elementor-box"]/@data-markers').get()))
+        for location in locations:
+            properties = {
+                "branch": location["pin_item_title"].removeprefix("Citiwood "),
+                "lat": location["pin_latitude"],
+                "lon": location["pin_longitude"],
+                "addr_full": merge_address_lines(filter(lambda x: x not in ["Get Directions", "Address"], Selector(text=location["pin_item_description"]).xpath('//text()').getall())).strip(" :"),
+            }
+            apply_category(Categories.SHOP_TRADE, properties)
+            yield Feature(**properties)
