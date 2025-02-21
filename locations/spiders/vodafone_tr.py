@@ -50,7 +50,7 @@ class VodafoneTRSpider(scrapy.Spider):
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath(r'//*[contains(@class,"dd-time my-1")]'):
             day = sanitise_day(day_time.xpath("./b/text()").get(), DAYS_TR)
-            if not day is None:
+            if day is not None:
                 open_time, close_time = day_time.xpath("./text()").get().split("-")
                 item["opening_hours"].add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
         yield item
