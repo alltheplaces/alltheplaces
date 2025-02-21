@@ -32,6 +32,7 @@ class CharlesClinkardGBSpider(scrapy.Spider):
 
         properties = {
             "branch": response.xpath("//h1/text()").extract_first(),
+            "name": "Charles Clinkard",
             "addr_full": ", ".join(
                 response.xpath('//div[@class="col l-col-16 store-locator__store__col"]/div/p/span/text()').extract()
             ),
