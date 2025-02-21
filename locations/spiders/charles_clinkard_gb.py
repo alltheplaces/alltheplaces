@@ -27,7 +27,9 @@ class CharlesClinkardGBSpider(scrapy.Spider):
             "addr_full": ", ".join(
                 response.xpath('//div[@class="col l-col-16 store-locator__store__col"]/div/p/span/text()').extract()
             ),
-            "phone": response.xpath('//div[@class="col l-col-16 store-locator__store__col"]/div/span/a[contains(@href, "tel:")]/text()').extract_first(),
+            "phone": response.xpath(
+                '//div[@class="col l-col-16 store-locator__store__col"]/div/span/a[contains(@href, "tel:")]/text()'
+            ).extract_first(),
             "ref": response.url.replace("https://www.charlesclinkard.co.uk/map/", ""),
             "website": response.url,
             # "lat": response.xpath('//script[contains("var myLatlng")]').extract_first(),
