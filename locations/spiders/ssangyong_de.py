@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class SSangyongDESpider(scrapy.Spider):
+class SsangyongDESpider(scrapy.Spider):
     name = "ssangyong_de"
     item_attributes = {"brand": "SsangYong", "brand_wikidata": "Q221869"}
     start_urls = [
