@@ -27,7 +27,7 @@ class DuluthTradingCompanyUSSpider(JSONBlobSpider):
         if feature.get("storeStatus") != "open":
             # Store that is coming soon (not yet open).
             return
-        item["branch"]  = item.pop("name", None)
+        item["branch"] = item.pop("name", None)
         item["street_address"] = merge_address_lines([feature.get("address1"), feature.get("address2")])
         item["website"] = "https://www.duluthtrading.com/locations/?StoreID=" + item["ref"]
 
