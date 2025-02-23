@@ -21,6 +21,7 @@ class DouglasDESpider(JSONBlobSpider):
     needs_json_request = True
     days = DAYS_DE
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True  # Data centre IP addresses appear to be blocked.
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
