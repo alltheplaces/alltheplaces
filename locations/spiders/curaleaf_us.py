@@ -28,7 +28,9 @@ class CuraleafUSSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         for day_name, day_hours in feature["openTimes"].items():
             for hours_range in day_hours:
-                item["opening_hours"].add_range(day_name.title(), hours_range["startTime"], hours_range["endTime"], "%I:%M %p")
+                item["opening_hours"].add_range(
+                    day_name.title(), hours_range["startTime"], hours_range["endTime"], "%I:%M %p"
+                )
 
         apply_category(Categories.SHOP_CANNABIS, item)
         yield item
