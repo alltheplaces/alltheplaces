@@ -12,10 +12,16 @@ import os
 import scrapy
 
 import locations
+from locations.extensions.add_lineage import AddLineageExtension
+from locations.extensions.log_stats import LogStatsExtension
 
 BOT_NAME = "locations"
 
-SPIDER_MODULES = ["locations.spiders"]
+SPIDER_MODULES = [
+    "locations.spiders",
+    "locations.aggregator_spiders",
+    "locations.government_spiders",
+]
 NEWSPIDER_MODULE = "locations.spiders"
 COMMANDS_MODULE = "locations.commands"
 
@@ -94,7 +100,8 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 # }
 
 EXTENSIONS = {
-    "locations.extensions.LogStatsExtension": 101,
+    AddLineageExtension: 100,
+    LogStatsExtension: 1000,
 }
 
 # Configure item pipelines
