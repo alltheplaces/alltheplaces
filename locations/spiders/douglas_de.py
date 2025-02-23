@@ -3,13 +3,14 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_DE
+from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 DOUGLAS_SHARED_ATTRIBUTES = {"brand": "Douglas", "brand_wikidata": "Q2052213"}
+
 
 class DouglasDESpider(JSONBlobSpider):
     name = "douglas_de"
@@ -38,6 +39,8 @@ class DouglasDESpider(JSONBlobSpider):
             if day_hours["closed"]:
                 item["opening_hours"].set_closed(day_abbrev)
             else:
-                item["opening_hours"].add_range(day_abbrev, day_hours["openingTime"]["formattedHour"], day_hours["closingTime"]["formattedHour"])
+                item["opening_hours"].add_range(
+                    day_abbrev, day_hours["openingTime"]["formattedHour"], day_hours["closingTime"]["formattedHour"]
+                )
         apply_category(Categories.SHOP_PERFUMERY, item)
         yield item
