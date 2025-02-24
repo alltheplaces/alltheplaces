@@ -5,7 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 
 
 class IkeaSpider(scrapy.Spider):
@@ -93,5 +93,5 @@ class IkeaSpider(scrapy.Spider):
     def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
         oh = OpeningHours()
         for rule in rules:
-            oh.add_range(sanitise_day(rule.get("day")), rule["open"], rule["close"])
+            oh.add_range(rule["day"], rule["open"], rule["close"])
         return oh
