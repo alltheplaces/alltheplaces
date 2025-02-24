@@ -74,13 +74,12 @@ class IkeaSpider(scrapy.Spider):
                             rule["open"],
                             rule["close"],
                         )
-            split_url = response.url.split("/")
-            country_path = f"{split_url[3]}/{split_url[4]}"
 
-            item["branch"] = store["displayName"]
-            item["country"] = split_url[3].upper()
+            item["country"] = response.url.split("/")[3].upper()
             item["website"] = (
-                store["storePageUrl"] if "storePageUrl" in store else f"https://www.ikea.com/{country_path}/stores/"
+                store["storePageUrl"]
+                if "storePageUrl" in store
+                else response.url.replace("/meta-data/informera/stores-detailed.json", "/stores/")
             )
             item["extras"]["store_type"] = store["buClassification"]["code"]
 
