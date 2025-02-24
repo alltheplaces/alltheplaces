@@ -1,7 +1,10 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
@@ -59,17 +62,17 @@ class IkeaSpider(scrapy.Spider):
         "https://www.ikea.com/cn/zh/meta-data/informera/stores-detailed.json",
     ]
 
-    def parse(self, response):
-        data = response.json()
-        for store in data:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json():
             opening_hours = OpeningHours()
-            for day in store.get("hours", {}).get("normal", {}):
-                if day["open"] != "":
-                    opening_hours.add_range(
-                        day["day"].title()[:2],
-                        day["open"],
-                        day["close"],
-                    )
+            if hours := store.get("hours", {}).get("normal"):
+                for rule in hours:
+                    if day := sanitise_day(rule.get("day")):
+                        opening_hours.add_range(
+                            day,
+                            rule["open"],
+                            rule["close"],
+                        )
             split_url = response.url.split("/")
             country_path = f"{split_url[3]}/{split_url[4]}"
             properties = {
