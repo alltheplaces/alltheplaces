@@ -58,7 +58,7 @@ class IkeaSpider(scrapy.Spider):
         "https://www.ikea.com/se/sv/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/th/th/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/ua/uk/meta-data/informera/stores-detailed.json",
-        "https://www.ikea.com/cn/zh/meta-data/informera/stores-detailed.json",
+        "https://www.ikea.cn/cn/zh/meta-data/informera/stores-detailed.json",
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -79,7 +79,7 @@ class IkeaSpider(scrapy.Spider):
 
             properties = {
                 "name": store["displayName"],
-                "country": response.request.url[21:23].upper(),
+                "country": split_url[3].upper(),
                 "website": (
                     store["storePageUrl"] if "storePageUrl" in store else f"https://www.ikea.com/{country_path}/stores/"
                 ),
