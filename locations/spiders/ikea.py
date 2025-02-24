@@ -77,6 +77,7 @@ class IkeaSpider(scrapy.Spider):
                 else response.url.replace("/meta-data/informera/stores-detailed.json", "/stores/")
             )
             item["extras"]["store_type"] = store["buClassification"]["code"]
+            item["extras"]["start_date"] = store["openCloseDates"]["openingDate"]
 
             if item["country"] == "US":
                 item["state"] = store["address"].get("stateProvinceCode")[2:]
