@@ -52,7 +52,6 @@ class IkeaSpider(scrapy.Spider):
         "https://www.ikea.com/pl/pl/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/pt/pt/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/ro/ro/meta-data/informera/stores-detailed.json",
-        "https://www.ikea.com/ru/ru/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/sk/sk/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/si/sl/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/rs/sr/meta-data/informera/stores-detailed.json",
