@@ -77,20 +77,15 @@ class IkeaSpider(scrapy.Spider):
             split_url = response.url.split("/")
             country_path = f"{split_url[3]}/{split_url[4]}"
 
-            properties = {
-                "name": store["displayName"],
-                "country": split_url[3].upper(),
-                "website": (
-                    store["storePageUrl"] if "storePageUrl" in store else f"https://www.ikea.com/{country_path}/stores/"
-                ),
-                "extras": {
-                    "store_type": store["buClassification"]["code"],
-                },
-            }
+            item["branch"] = store["displayName"]
+            item["country"] = split_url[3].upper()
+            item["website"] = (
+                store["storePageUrl"] if "storePageUrl" in store else f"https://www.ikea.com/{country_path}/stores/"
+            )
+            item["extras"]["store_type"] = store["buClassification"]["code"]
 
-            if properties["country"] == "US":
-                properties["state"] = store["address"].get("stateProvinceCode")[2:]
+            if item["country"] == "US":
+                item["state"] = store["address"].get("stateProvinceCode")[2:]
 
-            item.update(properties)
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item
