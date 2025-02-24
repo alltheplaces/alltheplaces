@@ -4,8 +4,8 @@ import scrapy
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
-from locations.items import Feature
 
 
 class IkeaSpider(scrapy.Spider):
@@ -63,30 +63,26 @@ class IkeaSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
-            opening_hours = OpeningHours()
+            item = DictParser.parse(store)
+            item["street_address"] = item.pop("street")
+            item["opening_hours"] = OpeningHours()
             if hours := store.get("hours", {}).get("normal"):
                 for rule in hours:
                     if day := sanitise_day(rule.get("day")):
-                        opening_hours.add_range(
+                        item["opening_hours"].add_range(
                             day,
                             rule["open"],
                             rule["close"],
                         )
             split_url = response.url.split("/")
             country_path = f"{split_url[3]}/{split_url[4]}"
+
             properties = {
-                "lat": store["lat"],
-                "lon": store["lng"],
                 "name": store["displayName"],
-                "street_address": store["address"].get("street"),
-                "city": store["address"].get("city"),
-                "postcode": store["address"].get("zipCode"),
                 "country": response.request.url[21:23].upper(),
                 "website": (
                     store["storePageUrl"] if "storePageUrl" in store else f"https://www.ikea.com/{country_path}/stores/"
                 ),
-                "ref": store["id"],
-                "opening_hours": opening_hours.as_opening_hours(),
                 "extras": {
                     "store_type": store["buClassification"]["code"],
                 },
@@ -95,6 +91,6 @@ class IkeaSpider(scrapy.Spider):
             if properties["country"] == "US":
                 properties["state"] = store["address"].get("stateProvinceCode")[2:]
 
-            item = Feature(**properties)
+            item.update(properties)
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item
