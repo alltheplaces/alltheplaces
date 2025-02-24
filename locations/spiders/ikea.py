@@ -11,7 +11,7 @@ from locations.hours import OpeningHours, sanitise_day
 class IkeaSpider(scrapy.Spider):
     name = "ikea"
     item_attributes = {"brand": "IKEA", "brand_wikidata": "Q54078"}
-    allowed_domains = ["ikea.com"]
+    allowed_domains = ["ikea.com", "ikea.cn"]
     start_urls = [
         "https://www.ikea.com/ae/ar/meta-data/informera/stores-detailed.json",
         "https://www.ikea.com/bh/ar/meta-data/informera/stores-detailed.json",
@@ -77,7 +77,8 @@ class IkeaSpider(scrapy.Spider):
                 else response.url.replace("/meta-data/informera/stores-detailed.json", "/stores/")
             )
             item["extras"]["store_type"] = store["buClassification"]["code"]
-            item["extras"]["start_date"] = store["openCloseDates"]["openingDate"]
+            item["extras"]["start_date"] = store["openCloseDates"]["openingDate"].replace("T00:00:00Z", "")
+            item["extras"]["ref:google"] = store.get("placeId")
 
             if item["country"] == "US":
                 item["state"] = store["address"].get("stateProvinceCode")[2:]
