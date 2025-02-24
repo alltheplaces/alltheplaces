@@ -71,6 +71,10 @@ class IkeaSpider(scrapy.Spider):
                 self.logger.error("Error parsing opening hours")
 
             item["country"] = response.url.split("/")[3].upper()
+
+            if item["country"] in ("DE", "PT"):
+                item["nsi_id"] = "N/A"
+
             item["website"] = (
                 store["storePageUrl"]
                 if "storePageUrl" in store
