@@ -29,6 +29,7 @@ class NettoDESpider(SitemapSpider, StructuredDataSpider):
     }
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["website"] = response.url
         item["brand"] = item["name"] = ld_data["name"].split(" - ", 1)[0]
         if cat := self.categories.get(item["brand"]):
             apply_category(cat, item)
