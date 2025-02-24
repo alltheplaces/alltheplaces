@@ -1,4 +1,6 @@
+from h2.exceptions import ProtocolError
 from scrapy.http import Response
+from scrapy.settings.default_settings import RETRY_EXCEPTIONS
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -14,7 +16,10 @@ class NettoDESpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/filialen/[^/]+/[^/]+/(\d+)$", "parse")]
     wanted_types = ["GroceryStore"]
     user_agent = FIREFOX_LATEST
-    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
+    custom_settings = {
+        "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
+        "RETRY_EXCEPTIONS": RETRY_EXCEPTIONS + [ProtocolError],
+    }
 
     categories = {
         "Netto City": Categories.SHOP_SUPERMARKET,
