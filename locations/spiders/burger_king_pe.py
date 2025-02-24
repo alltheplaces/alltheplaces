@@ -17,16 +17,19 @@ class BurgerKingPESpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
     api_token = ""
+    start_urls = ["https://www.burgerking.pe/_next/static/chunks/3410-ec2cc34087f14b20.js"]
 
-    def start_requests(self):
+    def parse(self, response, **kwargs):
+        action_token = re.search(r"a=\(0,n\.\$\)\(\"(\w+)\"\)", response.text).group(1)
         yield Request(
             url="https://www.burgerking.pe/",
             body='["accessToken"]',
-            headers={"next-action": "946e2ad932606b1dca3d9e1ba67a60713e79a6e6"},
+            headers={"next-action": action_token},
             method="POST",
+            callback=self.parse_request,
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse_request(self, response: Response, **kwargs: Any) -> Any:
         self.api_token = re.search(r"1:\s*\"(.+)\"", response.text).group(1)
         yield JsonRequest(
             url="https://apiprod.pidelo.digital/api.stores/v1/stores/get-district?brandId=41",
