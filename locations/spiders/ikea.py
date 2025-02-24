@@ -65,15 +65,10 @@ class IkeaSpider(scrapy.Spider):
         for store in response.json():
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street")
-            item["opening_hours"] = OpeningHours()
-            if hours := store.get("hours", {}).get("normal"):
-                for rule in hours:
-                    if day := sanitise_day(rule.get("day")):
-                        item["opening_hours"].add_range(
-                            day,
-                            rule["open"],
-                            rule["close"],
-                        )
+            try:
+                item["opening_hours"] = self.parse_opening_hours(store.get("hours", {}).get("normal") or [])
+            except:
+                self.logger.error("Error parsing opening hours")
 
             item["country"] = response.url.split("/")[3].upper()
             item["website"] = (
@@ -88,3 +83,9 @@ class IkeaSpider(scrapy.Spider):
 
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            oh.add_range(sanitise_day(rule.get("day")), rule["open"], rule["close"])
+        return oh
