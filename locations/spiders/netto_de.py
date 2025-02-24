@@ -12,6 +12,7 @@ from locations.user_agents import FIREFOX_LATEST
 class NettoDESpider(SitemapSpider, StructuredDataSpider):
     name = "netto_de"
     allowed_domains = ["netto-online.de"]
+    item_attributes = {"brand_wikidata": "Q879858"}
     sitemap_urls = ["https://www.netto-online.de/ueber-netto/sitemap/index"]
     sitemap_rules = [(r"/filialen/[^/]+/[^/]+/(\d+)$", "parse")]
     wanted_types = ["GroceryStore"]
