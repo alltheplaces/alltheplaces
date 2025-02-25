@@ -1,12 +1,16 @@
-from scrapy import Selector
+from typing import Iterable
+
+from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class ReeceSpider(SitemapSpider, StructuredDataSpider):
+class ReeceSpider(SitemapSpider):
     name = "reece"
     item_attributes = {"brand_wikidata": "Q29025524"}
     allowed_domains = [
@@ -17,41 +21,56 @@ class ReeceSpider(SitemapSpider, StructuredDataSpider):
         "https://www.reece.com.au/sitemaps/store_sitemap.xml",
         "https://www.reece.co.nz/sitemaps/store_sitemap.xml",
     ]
-    wanted_types = ["Organization"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def post_process_item(self, item, response, ld_data):
-        item["ref"] = response.xpath("//input/@data-brcode").get()
-        item["name"] = response.xpath("//input/@data-bname").get()
-        item["brand"] = Selector(text=response.xpath("//input/@data-cname").get()).xpath("//text()").get()
-        item["lat"] = response.xpath("//input/@data-lat").get()
-        item["lon"] = response.xpath("//input/@data-lon").get()
-        if "www.reece.co.nz" in response.url:
-            item.pop("state")
-        if response.xpath("//input/@data-phone"):
-            item["phone"] = response.xpath("//input/@data-phone").get()
+    def start_requests(self) -> Iterable[Request]:
+        for url in self.sitemap_urls:
+            yield Request(url=url, callback=self.parse_sitemap)
+
+    def parse_sitemap(self, response: Response) -> Iterable[Request]:
+        for request in super()._parse_sitemap(response):
+            request.meta["playwright"] = True
+            request.meta["playwright_include_page"] = True
+            yield request
+
+    async def parse(self, response: Response) -> Iterable[Feature]:
+        page = response.meta["playwright_page"]
+        store_details = await page.main_frame.evaluate("() => window.__NUXT__.data[Object.getOwnPropertyNames(window.__NUXT__.data)[0]]")
+        await page.close()
+        item = DictParser.parse(store_details)
+        item["branch"] = item.pop("name", None)
+        item["street_address"] = store_details["address"]["address"]
         item["website"] = response.url
-        item.pop("image")
+
+        if hours := store_details.get("tradingHours"):
+            item["opening_hours"] = OpeningHours()
+            for day_name in DAYS_FULL:
+                open_time = hours.get(day_name.lower() + "OpenTime")
+                close_time = hours.get(day_name.lower() + "CloseTime")
+                if open_time and close_time:
+                    item["opening_hours"].add_range(day_name, open_time, close_time, "%H:%M:%S")
+                else:
+                    item["opening_hours"].set_closed(day_name)
 
         apply_category(Categories.SHOP_TRADE, item)
-        match item["brand"]:
-            case "Reece Actrol" | "Reece HVAC-R":
-                apply_category(Categories.TRADE_HVAC, item)
-            case "Reece Bathroom Life" | "Reece NZ Bathroom Life":
-                apply_category(Categories.TRADE_BATHROOM, item)
-            case "Reece Civil" | "Reece Onsite" | "Reece Plumbing Centre" | "Reece Viadux":
-                apply_category(Categories.TRADE_PLUMBING, item)
-            case "Reece Fire":
-                apply_category(Categories.TRADE_FIRE_PROTECTION, item)
-            case "Reece Irrigation & Pools":
-                apply_category(Categories.TRADE_IRRIGATION, item)
-                apply_category(Categories.TRADE_SWIMMING_POOL_SUPPLIES, item)
-            case "Reece Pipeline Supplies Aust":
-                apply_category(Categories.TRADE_FIRE_PROTECTION, item)
-                apply_category(Categories.TRADE_HVAC, item)
-                apply_category(Categories.TRADE_PLUMBING, item)
-
-        item["opening_hours"] = OpeningHours()
-        hours_string = " ".join(response.xpath('//tr[contains(@class, "branch-hours")]/td/text()').getall())
-        item["opening_hours"].add_ranges_from_string(hours_string)
+        for business_unit in store_details["businessUnits"]:
+            match business_unit["businessUnitTypeLongDescription"]:
+                case "Actrol" | "HVAC-R":
+                    apply_category(Categories.TRADE_HVAC, item)
+                case "Bathroom Life" | "NZ Bathroom Life":
+                    apply_category(Categories.TRADE_BATHROOM, item)
+                case "Civil" | "Onsite" | "Plumbing Centre" | "Viadux":
+                    apply_category(Categories.TRADE_PLUMBING, item)
+                case "Fire":
+                    apply_category(Categories.TRADE_FIRE_PROTECTION, item)
+                case "Intl Quadratics" | "Irrigation & Pools":
+                    apply_category(Categories.TRADE_IRRIGATION, item)
+                    apply_category(Categories.TRADE_SWIMMING_POOL_SUPPLIES, item)
+                case "Pipeline Supplies Aust":
+                    apply_category(Categories.TRADE_FIRE_PROTECTION, item)
+                    apply_category(Categories.TRADE_HVAC, item)
+                    apply_category(Categories.TRADE_PLUMBING, item)
+                case _:
+                    self.logger.warning("Unknown business unit type: {}".format(business_unit["businessUnitTypeLongDescription"]))
 
         yield item
