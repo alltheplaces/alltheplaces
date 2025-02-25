@@ -13,7 +13,7 @@ matcher = re.compile(
     r"\},\s*"
     r"map:\s*bbdMap,\s*"
     r"icon:\s*image,\s*"
-    r"title:\s*'Black Bear Diner'\s*"
+    r"title:\s*'Black Bear Diner\s*(?P<branch>[^']*)'\s*"
     r"\}\s*"
     r"\);\s*"
     r"google\.maps\.event\.addListener\("
@@ -40,7 +40,7 @@ class BlackBearDinerUSSpider(Spider):
             yield Feature(
                 lat=match.group("lat"),
                 lon=match.group("lng"),
-                branch=content.xpath("//strong/text()").get().removesuffix(" Black Bear Diner"),
+                branch=match.group("branch"),
                 street_address=address[0],
                 city=city,
                 state=state,
