@@ -36,4 +36,5 @@ class PandaExpressSpider(Spider):
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["restaurants"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             yield item
