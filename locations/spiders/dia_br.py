@@ -1,15 +1,19 @@
-import scrapy
+from typing import Any
 
+from scrapy import Spider
+from scrapy.http import Response
+
+from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class DiaBRSpider(scrapy.Spider):
+class DiaBRSpider(Spider):
     name = "dia_br"
     item_attributes = {"brand": "Dia", "brand_wikidata": "Q925132"}
     start_urls = ["https://www.dia.com.br/page-data/lojas/page-data.json"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["result"]["data"]["lojas"]["nodes"]:
             store["street_address"] = store.pop("address")
             store["postcode"] = store.pop("cep")
@@ -27,9 +31,9 @@ class DiaBRSpider(scrapy.Spider):
                 if start_time != "00:00:00":
                     oh.add_range(day, start_time, close_time, time_format="%H:%M:%S")
             item["opening_hours"] = oh
-            item["extras"] = {}
-            if any(f["name"] == "Estacionamento" for f in store["services"]):
-                item["extras"]["has_parking"] = "yes"
-            if any(f["name"] == "Padaria" for f in store["services"]):
-                item["extras"]["Refreshments"] = "yes"
+
+            services = [s["name"] for s in store["services"]]
+            apply_yes_no("parking_facility", item, "Estacionamento" in services)
+            apply_yes_no("food", item, "Padaria" in services)
+
             yield item
