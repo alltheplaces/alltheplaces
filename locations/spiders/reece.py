@@ -35,7 +35,9 @@ class ReeceSpider(SitemapSpider):
 
     async def parse(self, response: Response) -> Iterable[Feature]:
         page = response.meta["playwright_page"]
-        store_details = await page.main_frame.evaluate("() => window.__NUXT__.data[Object.getOwnPropertyNames(window.__NUXT__.data)[0]]")
+        store_details = await page.main_frame.evaluate(
+            "() => window.__NUXT__.data[Object.getOwnPropertyNames(window.__NUXT__.data)[0]]"
+        )
         await page.close()
         item = DictParser.parse(store_details)
         item["branch"] = item.pop("name", None)
@@ -71,6 +73,8 @@ class ReeceSpider(SitemapSpider):
                     apply_category(Categories.TRADE_HVAC, item)
                     apply_category(Categories.TRADE_PLUMBING, item)
                 case _:
-                    self.logger.warning("Unknown business unit type: {}".format(business_unit["businessUnitTypeLongDescription"]))
+                    self.logger.warning(
+                        "Unknown business unit type: {}".format(business_unit["businessUnitTypeLongDescription"])
+                    )
 
         yield item
