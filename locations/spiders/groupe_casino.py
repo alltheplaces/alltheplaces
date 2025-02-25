@@ -37,6 +37,9 @@ class GroupeCasinoSpider(Spider):
         for location in response.json().get("businesses", []):
             item = DictParser.parse(location)
             item["street_address"] = merge_address_lines([item.pop("addr_full", ""), location.get("address2")])
+            if contacts := location.get("contacts"):
+                item["phone"] = "; ".join(contacts[0].get("phone_numbers"))
+                item["email"] = contacts[0].get("email")
 
             if location.get("groups"):
                 item["brand"], item["brand_wikidata"], category = self.brands.get(
