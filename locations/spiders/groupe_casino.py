@@ -41,6 +41,14 @@ class GroupeCasinoSpider(Spider):
                 item["phone"] = "; ".join(contacts[0].get("phone_numbers"))
                 item["email"] = contacts[0].get("email")
 
+            location_name = location["name"].lower()
+            if "casino" in location_name:
+                item["website"] = f'https://petitcasino.casino.fr/fr/stores/{location["code"]}'
+            elif "spar" in location_name:
+                item["website"] = f'https://spar.casino.fr/fr/stores/{location["code"]}'
+            elif "vival" in location_name:
+                item["website"] = f'https://vival.casino.fr/fr/stores/{location["code"]}'
+
             if location.get("groups"):
                 item["brand"], item["brand_wikidata"], category = self.brands.get(
                     str(location["groups"][0]), ("", "", None)
