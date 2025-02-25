@@ -41,4 +41,10 @@ class PandaExpressSpider(Spider):
             item["street_address"] = merge_address_lines(
                 [location.get("streetaddress"), location.get("streetaddress2")]
             )
+            item["ref"] = location.get("extref")
+            item["website"] = (
+                "https://www.pandaexpress.com/locations/{}/{}/{}".format(item["state"], item["city"], item["ref"])
+                .lower()
+                .replace(" ", "-")
+            )
             yield item
