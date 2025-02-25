@@ -12,7 +12,10 @@ BRANDS = {
     "Pam": ({"name": "Pam", "brand": "Pam", "brand_wikidata": "Q105615038"}, Categories.SHOP_SUPERMARKET),
     "Pam City": ({"name": "Pam City", "brand": "Pam", "brand_wikidata": "Q105615038"}, Categories.SHOP_SUPERMARKET),
     "Pam Local": ({"brand": "Pam Local", "brand_wikidata": "Q105614389"}, Categories.SHOP_CONVENIENCE),
-    "Pam Superstore": ({"name": "Pam Superstore", "brand": "Pam", "brand_wikidata": "Q105615038"},),
+    "Pam Superstore": (
+        {"name": "Pam Superstore", "brand": "Pam", "brand_wikidata": "Q105615038"},
+        Categories.SHOP_SUPERMARKET,
+    ),
     "Pam local": ({"brand": "Pam Local", "brand_wikidata": "Q105614389"}, Categories.SHOP_CONVENIENCE),
     "Panorama": ({"name": "Panorama", "brand": "Pam", "brand_wikidata": "Q105615038"}, Categories.SHOP_SUPERMARKET),
     "RETAIL": ({"name": "Pam", "brand": "Pam", "brand_wikidata": "Q105615038"}, Categories.SHOP_SUPERMARKET),
