@@ -15,5 +15,4 @@ class CinnabonSASpider(Spider):
         for shop in response.json():
             item = DictParser.parse(shop)
             item["street_address"] = item.pop("street")
-            item["website"] = "https://cinnabon-ksa.com/"
             yield item
