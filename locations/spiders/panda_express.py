@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -37,4 +38,7 @@ class PandaExpressSpider(Spider):
         for location in response.json()["restaurants"]:
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines(
+                [location.get("streetaddress"), location.get("streetaddress2")]
+            )
             yield item
