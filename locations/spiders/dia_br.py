@@ -18,8 +18,11 @@ class DiaBRSpider(Spider):
             store["street_address"] = store.pop("address")
             store["postcode"] = store.pop("cep")
             store["state"] = store.pop("district")
+
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
             item["website"] = f'https://www.dia.com.br/lojas/{store["slug"]}/'
+
             oh = OpeningHours()
             for day in DAYS:
                 if day == "Su":
