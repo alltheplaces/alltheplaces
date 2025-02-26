@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 class VakifbankTRSpider(scrapy.Spider):
     name = "vakifbank_tr"
     item_attributes = {"brand": "Vakıfbank", "brand_wikidata": "Q1148521"}
-    requires_proxy = "TR"
+    requires_proxy = True
 
     def start_requests(self):
         yield scrapy.FormRequest(
@@ -26,10 +26,10 @@ class VakifbankTRSpider(scrapy.Spider):
         token = response.json()["access_token"]
         for branch_type in ["Branch", "ATM"]:
             yield JsonRequest(
-                url=f"https://apigw.vakifbank.com.tr:8443/vakifbank{branch_type}List",
+                url="https://apigw.vakifbank.com.tr:8443/vakifbank{}List".format(branch_type),
                 data={"Status": 1} if branch_type == "Branch" else {"CurrencyCode": "1"},
                 headers={
-                    "Authorization": f"Bearer {token}",
+                    "Authorization": "Bearer {}".format(token),
                 },
                 cb_kwargs={"branch_type": branch_type},
                 callback=self.parse_details,
@@ -39,7 +39,7 @@ class VakifbankTRSpider(scrapy.Spider):
         data_key = "Branch" if kwargs["branch_type"] == "Branch" else "ATM"
         for item_data in response.json().get("Data").get(data_key):
             item = DictParser.parse(item_data)
-            item["addr_full"] = item_data[f"{data_key}Address"]
+            item["addr_full"] = item_data["{}Address".format(data_key)]
             item["branch"] = item.pop("name")
             item["name"] = self.item_attributes["brand"]
             if kwargs["branch_type"] == "ATM":
