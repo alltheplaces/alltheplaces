@@ -37,6 +37,8 @@ class GroupeCasinoSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json().get("businesses", []):
+            if "Test" in location["name"].title():  # Dummy location data
+                continue
             item = DictParser.parse(location)
             item["street_address"] = merge_address_lines([item.pop("addr_full", ""), location.get("address2")])
             if contacts := location.get("contacts"):
