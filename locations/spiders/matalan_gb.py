@@ -1,35 +1,47 @@
 import json
+from typing import Any
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import scrapy
+from requests import Response
 
-from locations.items import set_closed
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class MatalanGBSpider(CrawlSpider, StructuredDataSpider):
+class MatalanGBSpider(scrapy.Spider):
     name = "matalan_gb"
     item_attributes = {"brand": "Matalan", "brand_wikidata": "Q12061509"}
-    allowed_domains = ["www.matalan.co.uk"]
     start_urls = ["https://www.matalan.co.uk/stores/uk"]
-    rules = [
-        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/stores/uk/[^/]+$")),
-        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/stores/uk/[^/]+/[^/]+$"), "parse_sd", follow=True),
-        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/store/[^/]+/[^/]+$"), "parse_sd"),
-    ]
-    time_format = "%H:%M:%S"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["phone"] = None
-        item["website"] = response.url
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        raw_data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+        stores_data = json.loads(raw_data)["props"]["pageProps"]["storesData"]
 
-        if item["name"].startswith("CLOSED "):
-            set_closed(item)
+        for store_data in stores_data.values():
+            for store in store_data.values():
+                for store_details in store:
+                    item = DictParser.parse(store_details)
+                    item["city"] = store_details["address"]["addressLine4"]
+                    item["state"] = store_details["address"]["addressLine5"]
+                    item["website"] = "/".join(
+                        [
+                            "https://www.matalan.co.uk/stores/uk",
+                            item["state"].replace(" ", "-").lower(),
+                            item["city"].replace(" ", "-").lower(),
+                        ]
+                    )
+                    item["opening_hours"] = self.parse_opening_hours(store_details["openingTimes"])
+                    yield item
 
-        item["branch"] = item.pop("name").split(" - ", 1)[1]
+    def parse_opening_hours(self, opening_times):
+        opening_hours = OpeningHours()
+        for day_time in opening_times:
+            day = day_time["day"]
+            open_time = self.format_time(day_time["openingTime"])
+            close_time = self.format_time(day_time["closingTime"])
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
+        return opening_hours
 
-        storedata = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        store = json.loads(storedata)["props"]["pageProps"]["store"]
-        item["lat"] = store["latitude"]
-        item["lon"] = store["longitude"]
-        yield item
+    @staticmethod
+    def format_time(time_str):
+        return time_str if len(time_str) == 8 else time_str + ":00"
