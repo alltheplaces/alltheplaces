@@ -11,26 +11,25 @@ class VakifbankTRSpider(scrapy.Spider):
     requires_proxy = "TR"
 
     def start_requests(self):
-        yield scrapy.Request(
+        yield scrapy.FormRequest(
             url="https://apigw.vakifbank.com.tr:8443/auth/oauth/v2/token",
-            body="client_id=l7xx672ef83670e842b0bb2f13a539ddbfb5&client_secret=282ce53197da4c0cb8f7bd658a14a6c3&grant_type=client_credentials&scope=public",
-            headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
-            method="POST",
+            formdata={
+                "client_id": "l7xx672ef83670e842b0bb2f13a539ddbfb5",
+                "client_secret": "282ce53197da4c0cb8f7bd658a14a6c3",
+                "grant_type": "client_credentials",
+                "scope": "public",
+            },
             callback=self.parse_token,
         )
 
     def parse_token(self, response):
         token = response.json()["access_token"]
         for branch_type in ["Branch", "ATM"]:
-            url = f"https://apigw.vakifbank.com.tr:8443/vakifbank{branch_type}List"
-            payload = {"Status": 1} if branch_type == "Branch" else {"CurrencyCode": "1"}
             yield JsonRequest(
-                url=url,
-                data=payload,
-                method="POST",
+                url=f"https://apigw.vakifbank.com.tr:8443/vakifbank{branch_type}List",
+                data={"Status": 1} if branch_type == "Branch" else {"CurrencyCode": "1"},
                 headers={
                     "Authorization": f"Bearer {token}",
-                    "Content-Type": "application/json",
                 },
                 cb_kwargs={"branch_type": branch_type},
                 callback=self.parse_details,
