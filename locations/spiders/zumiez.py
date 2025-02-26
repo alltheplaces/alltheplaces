@@ -13,6 +13,7 @@ class ZumiezSpider(JSONBlobSpider):
     name = "zumiez"
     item_attributes = {"brand": "Zumiez", "brand_wikidata": "Q8075252"}
     start_urls = ["https://www.zumiez.com/graphql?hash=505530338"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def extract_json(self, response: Response) -> dict | list[dict]:
         return response.json()["data"]["getStores"]
