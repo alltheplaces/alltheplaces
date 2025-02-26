@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -42,7 +43,10 @@ class GroupeCasinoSpider(Spider):
                 item["phone"] = "; ".join(contacts[0].get("phone_numbers"))
                 item["email"] = contacts[0].get("email")
 
-            if open_hours := location.get("open_hours"):
+            if location.get("status") == "closed":
+                set_closed(item)
+
+            elif open_hours := location.get("open_hours"):
                 item["opening_hours"] = OpeningHours()
                 for day in open_hours:
                     for shift in open_hours[day]:
