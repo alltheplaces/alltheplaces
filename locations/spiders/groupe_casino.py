@@ -56,12 +56,13 @@ class GroupeCasinoSpider(Spider):
                         item["opening_hours"].add_range(day, open_time, close_time)
 
             location_name = location["name"].lower()
+            slug = location["code"].strip().replace(" ", "%20")
             if "casino" in location_name:
-                item["website"] = f'https://petitcasino.casino.fr/fr/stores/{location["code"]}'
+                item["website"] = f"https://petitcasino.casino.fr/fr/stores/{slug}"
             elif "spar" in location_name:
-                item["website"] = f'https://spar.casino.fr/fr/stores/{location["code"]}'
+                item["website"] = f"https://spar.casino.fr/fr/stores/{slug}"
             elif "vival" in location_name:
-                item["website"] = f'https://vival.casino.fr/fr/stores/{location["code"]}'
+                item["website"] = f"https://vival.casino.fr/fr/stores/{slug}"
 
             if location.get("groups"):
                 item["brand"], item["brand_wikidata"], category = self.brands.get(
