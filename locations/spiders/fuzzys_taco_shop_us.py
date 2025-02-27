@@ -5,6 +5,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -27,3 +28,7 @@ class FuzzysTacoShopUSSpider(CrawlSpider, StructuredDataSpider):
                 yield response.follow(link, callback=self.parse)
             else:  # POI page
                 yield response.follow(link, callback=self.parse_sd)
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Fuzzy's Taco Shop ").split(",")[0]
+        yield item
