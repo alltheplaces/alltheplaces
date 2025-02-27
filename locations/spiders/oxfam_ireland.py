@@ -10,10 +10,14 @@ class OxfamIrelandSpider(SitemapSpider):
     sitemap_urls = ["https://www.oxfamireland.org/sitemap.xml"]
     sitemap_rules = [("/shops/", "parse")]
     recycle_types = {
+        "accessories": None,
         "books": "recycling:books",
         "clothing": "recycling:clothes",
         "electricals": "recycling:electrical_appliances",
         "furniture": "recycling:furniture",
+        "homewares": None,
+        "music": None,
+        "vintage": None,
     }
 
     def sitemap_filter(self, entries):
