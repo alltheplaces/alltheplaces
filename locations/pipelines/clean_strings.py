@@ -16,6 +16,6 @@ class CleanStringsPipeline:
             if isinstance(value, str):
                 cleaned_value = clean_string(value)
                 if cleaned_value != value:
-                    item[key] = clean_string(value)
+                    item[key] = cleaned_value
                     spider.crawler.stats.inc_value("atp/clean_strings/{}".format(key))
         return item
