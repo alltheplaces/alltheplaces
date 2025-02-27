@@ -16,7 +16,7 @@ BRANDS_AND_COUNTRIES = {
         "brand_wikidata": "Q168238",
     },
     "PETROM": {"countries": ["ROU", "MDA"], "brand": "Petrom", "brand_wikidata": "Q1755034"},
-    "AVANTI": {"countries": ["AUT"], "brand": "Avanti", "brand_wikidata": "Q168238"},
+    "AVANTI": {"countries": ["AUT"], "brand": "Avanti", "brand_wikidata": "Q124350461"},
     "HOFER": {"countries": ["AUT"], "brand": "Hofer Diskont", "brand_wikidata": "Q107803455"},
 }
 
