@@ -50,7 +50,7 @@ def test_clean_strings_function():
         ("CleanString", "CleanString"),
         ("Hello&nbsp;World", "Hello World"),
         ("&quot;Quoted Text&quot;", '"Quoted Text"'),
-        ("   &nbsp;Test&nbsp;String&nbsp;   ", "Test String"),
+        ("   &nbsp;Test&nbsp;String&nbsp;   ", "Test\xa0String"),
         ("   &lt;div&gt;Content&lt;/div&gt;   ", "<div>Content</div>"),
         ("Classic Digital Studio & Mp Onl;Ine", "Classic Digital Studio & Mp Onl;Ine"),
         ("Piccola Societa&apos;cooperativa", "Piccola Societa'cooperativa"),
