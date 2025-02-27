@@ -10,9 +10,12 @@ def clean_string(val: str) -> str:
 
 
 class CleanStringsPipeline:
+    skipped_keys = {"ref", "website"}
 
     def process_item(self, item: Feature, spider: Spider):
         for key, value in item.items():
+            if key in self.skipped_keys:
+                continue
             if not isinstance(value, str):
                 continue
 
