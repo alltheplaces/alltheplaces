@@ -13,9 +13,12 @@ class CleanStringsPipeline:
 
     def process_item(self, item: Feature, spider: Spider):
         for key, value in item.items():
-            if isinstance(value, str):
-                cleaned_value = clean_string(value)
-                if cleaned_value != value:
-                    item[key] = cleaned_value
-                    spider.crawler.stats.inc_value("atp/clean_strings/{}".format(key))
+            if not isinstance(value, str):
+                continue
+
+            cleaned_value = clean_string(value)
+            if cleaned_value != value:
+                item[key] = cleaned_value
+                spider.crawler.stats.inc_value("atp/clean_strings/{}".format(key))
+
         return item
