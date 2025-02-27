@@ -17,6 +17,8 @@ class KahveDunyasiSpider(JSONBlobSpider):
         if not feature.get("latitute") and not feature.get("address"):
             return
         item["street_address"] = item.pop("addr_full", "")
+        item["branch"] = item.pop("name")
+
         apply_yes_no(Extras.WIFI, item, feature["hasWifi"])
         apply_yes_no(Extras.TAKEAWAY, item, feature["isAvailableForTakeAway"])
         apply_yes_no(Extras.SMOKING_AREA, item, feature["hasSmokingArea"])
