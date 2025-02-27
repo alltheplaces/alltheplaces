@@ -39,9 +39,13 @@ class OxfamIrelandSpider(Spider):
         item = Feature(lat=response.meta["lat"], lon=response.meta["lon"])
         item["ref"] = item["website"] = response.url
         item["addr_full"] = response.xpath('//*[contains(@class, "address")]/text()').get()
-        item["name"] = response.xpath('//meta[@property="og:title"]/@content').get()
+        name = response.xpath('//meta[@property="og:title"]/@content').get()
         item["email"] = response.xpath('//a[contains(@href, "mailto")]/text()').get()
         item["phone"] = response.xpath('//a[contains(@href, "tel")]/text()').get()
+
+        if name.startswith("Oxfam Books "):
+            item["name"] = "Oxfam Books"
+        item["branch"] = name.removeprefix("Oxfam Books ")
 
         apply_category(Categories.SHOP_CHARITY, item)
 
