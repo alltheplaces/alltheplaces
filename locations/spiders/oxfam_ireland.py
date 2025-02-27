@@ -1,14 +1,18 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any
+
+from scrapy import Request
+from scrapy.http import Response
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 
 
-class OxfamIrelandSpider(SitemapSpider):
+class OxfamIrelandSpider(Spider):
     name = "oxfam_ireland"
     item_attributes = {"brand": "Oxfam", "brand_wikidata": "Q267941"}
-    sitemap_urls = ["https://www.oxfamireland.org/sitemap.xml"]
-    sitemap_rules = [("/shops/", "parse")]
+    start_urls = ["https://www.oxfamireland.org/shops"]
+
     recycle_types = {
         "accessories": None,
         "books": "recycling:books",
@@ -20,13 +24,19 @@ class OxfamIrelandSpider(SitemapSpider):
         "vintage": None,
     }
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            entry["loc"] = entry["loc"].replace("http://default", "https://www.oxfamireland.org")
-            yield entry
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath('//article[contains(@class, "location-card")]'):
+            yield Request(
+                response.urljoin(location.xpath(".//a/@href").get()),
+                callback=self.parse_page,
+                meta={
+                    "lat": location.xpath('.//p[@class="latitude"]/text()').get(),
+                    "lon": location.xpath('.//p[@class="longitude"]/text()').get(),
+                },
+            )
 
-    def parse(self, response, **kwargs):
-        item = Feature()
+    def parse_page(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature(lat=response.meta["lat"], lon=response.meta["lon"])
         item["ref"] = item["website"] = response.url
         item["addr_full"] = response.xpath('//*[contains(@class, "address")]/text()').get()
         item["name"] = response.xpath('//meta[@property="og:title"]/@content').get()
