@@ -10,7 +10,7 @@ def clean_string(val: str) -> str:
 
 
 class CleanStringsPipeline:
-    skipped_keys = {"ref", "website"}
+    skipped_keys = {"ref", "nsi_id", "website", "twitter", "facebook", "image"}
 
     def process_item(self, item: Feature, spider: Spider):
         for key, value in item.items():

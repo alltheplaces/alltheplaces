@@ -14,28 +14,43 @@ def get_spider() -> Spider:
 def test_clean_strings_pipeline():
     pipeline = CleanStringsPipeline()
 
-    item = Feature(name="test", addr_full="test str 123", phone="1234567890", website="https://example.com")
+    item = Feature(
+        name="test",
+        addr_full="test str 123",
+        phone="1234567890",
+        website="https://example.com",
+        brand="McDonald's",
+        brand_wikidata="Q38076",
+    )
     spider = get_spider()
     pipeline.process_item(item, spider)
     assert item["name"] == "test"
     assert item["addr_full"] == "test str 123"
     assert item["phone"] == "1234567890"
+    assert item["website"] == "https://example.com"
+    assert item["brand"] == "McDonald's"
+    assert item["brand_wikidata"] == "Q38076"
     assert not spider.crawler.stats.get_value("atp/clean_strings/name")
     assert not spider.crawler.stats.get_value("atp/clean_strings/addr_full")
     assert not spider.crawler.stats.get_value("atp/clean_strings/phone")
+    assert not spider.crawler.stats.get_value("atp/clean_strings/website")
+    assert not spider.crawler.stats.get_value("atp/clean_strings/brand")
+    assert not spider.crawler.stats.get_value("atp/clean_strings/brand_wikidata")
 
     item = Feature(
         name="&nbsp;test &amp; test  ",
         addr_full="  &nbsp;test str 123&nbsp;  ",
         phone="  &nbsp;1234567890&nbsp;  ",
-        website="https://example.com?query=title%20EQ%20'%3CMytitle%3E'",
+        website="https://example.com?query=title%20EQ%20'%3CMytitle%3E&amp;test'",
     )
     spider = get_spider()
     pipeline.process_item(item, spider)
     assert item["name"] == "test & test"
     assert item["addr_full"] == "test str 123"
     assert item["phone"] == "1234567890"
-    assert item["website"] == "https://example.com?query=title%20EQ%20'%3CMytitle%3E'"  # URL should not be unescaped
+    assert (
+        item["website"] == "https://example.com?query=title%20EQ%20'%3CMytitle%3E&amp;test'"
+    )  # URL should not be unescaped
     assert spider.crawler.stats.get_value("atp/clean_strings/name")
     assert spider.crawler.stats.get_value("atp/clean_strings/addr_full")
     assert spider.crawler.stats.get_value("atp/clean_strings/phone")
