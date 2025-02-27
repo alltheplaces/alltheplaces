@@ -1,8 +1,8 @@
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class SmoothieKingKRUSSpider(Where2GetItSpider):
-    name = "smoothie_king_kr_us"
+class SmoothieKingKYUSTTSpider(Where2GetItSpider):
+    name = "smoothie_king_ky_us_tt"
     item_attributes = {
         "brand_wikidata": "Q5491421",
         "brand": "Smoothie King",
