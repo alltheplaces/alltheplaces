@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.yext import YextSpider
@@ -12,6 +14,7 @@ class AmericanEagleOutfittersSpider(YextSpider):
     drop_attributes = {"image", "twitter"}
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
+        item["website"] = urljoin("https://storelocations.ae.com/", location.get("slug", ""))
         if item["name"].title().startswith("Aerie"):
             item.update(self.AERIE)
         elif item["name"].title().startswith("Offline"):
