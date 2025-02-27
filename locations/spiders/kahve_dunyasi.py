@@ -14,7 +14,9 @@ class KahveDunyasiSpider(JSONBlobSpider):
     locations_key = "payload"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["street_address"] = item.pop("addr_full")
+        if not feature.get("latitute") and not feature.get("address"):
+            return
+        item["street_address"] = item.pop("addr_full", "")
         apply_yes_no(Extras.WIFI, item, feature["hasWifi"])
         apply_yes_no(Extras.TAKEAWAY, item, feature["isAvailableForTakeAway"])
         apply_yes_no(Extras.SMOKING_AREA, item, feature["hasSmokingArea"])
