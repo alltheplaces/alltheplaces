@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -19,4 +20,5 @@ class AmericanEagleOutfittersSpider(SitemapSpider, StructuredDataSpider):
             item.update(self.AERIE)
         elif brand.startswith("Offline"):
             item.update(self.OFFLINE)
+            apply_category(Categories.SHOP_CLOTHES, item)
         yield item
