@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class EuroMobilDESpider(scrapy.Spider):
+class EuromobilDESpider(scrapy.Spider):
     name = "euromobil_de"
     item_attributes = {
         "brand": "Euromobil",
