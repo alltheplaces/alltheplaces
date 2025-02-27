@@ -15,7 +15,7 @@ class FuzzysTacoShopUSSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://fuzzystacoshop.com/locations/list/"]
     rules = [
         Rule(
-            LinkExtractor(allow=r"/list/[a-z]{2}/$"),
+            LinkExtractor(allow=r"/list/[a-z]{2}/?$"),
             callback="parse",
         ),
     ]
