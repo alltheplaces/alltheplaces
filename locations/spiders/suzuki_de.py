@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
 
-class SuzukiDeSpider(scrapy.Spider):
+class SuzukiDESpider(scrapy.Spider):
     name = "suzuki_de"
     item_attributes = {"brand": "Suzuki", "brand_wikidata": "Q181642"}
 
