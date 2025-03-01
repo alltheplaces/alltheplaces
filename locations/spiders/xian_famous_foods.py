@@ -1,11 +1,12 @@
 import re
-from typing import Any, Iterable, Optional, Tuple
+from typing import Any, Iterable, List, Optional, Tuple
 
 import scrapy
 from scrapy.http import Response
 from scrapy.selector import Selector
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -99,8 +100,17 @@ class XianFamousFoodsSpider(scrapy.Spider):
         if not address:
             return None
 
-        # Some addresses have newlines, so we need to handle that
-        address = address.replace("\n", " ").strip()
+        # Clean up the address by replacing multiple whitespaces and newlines with a single space
+        address = re.sub(r"\s+", " ", address.replace("\n", " ")).strip()
+
+        # Check for the specific Amsterdam Ave. case
+        amsterdam_match = re.search(r"((\d+)\s+Amsterdam Ave\.)\s+(New York),\s+([A-Z]{2})\s+(\d{5})", address)
+        if amsterdam_match:
+            street_address = amsterdam_match.group(1).strip()
+            city = amsterdam_match.group(3).strip()
+            state = amsterdam_match.group(4)
+            postcode = amsterdam_match.group(5)
+            return street_address, city, state, postcode
 
         # Extract street address, city, state, and postcode
         # First try the standard format
@@ -109,6 +119,12 @@ class XianFamousFoodsSpider(scrapy.Spider):
         # If that fails, try an alternative format (for addresses like "309 Amsterdam Ave. New York, NY 10023")
         if not address_match:
             address_match = re.search(r"(.*?)\s+([^,]+),\s+([A-Z]{2})\s+(\d{5})", address)
+
+        # If that still fails, try a more flexible format to handle addresses with or without periods
+        if not address_match:
+            address_match = re.search(
+                r"(.*?(?:Ave|St|Pl|Rd|Blvd|Dr|Ln|Ct|Way)\.?)\s+([^,]+),\s+([A-Z]{2})\s+(\d{5})", address, re.IGNORECASE
+            )
 
         if not address_match:
             self.logger.warning(f"Could not parse address: {address}")
@@ -130,38 +146,112 @@ class XianFamousFoodsSpider(scrapy.Spider):
             lon = location_data.attrib.get("data-lng")
         return lat, lon
 
+    def _normalize_time(self, time_str: str) -> str:
+        """Normalize time string to HH:MM format."""
+        time_str = time_str.strip()
+
+        # Add colon if missing
+        if ":" not in time_str:
+            time_str = f"{time_str}:00"
+
+        return time_str
+
+    def _convert_to_24h_format(self, open_time: str, close_time: str) -> Tuple[str, str]:
+        """Convert times to 24-hour format if needed."""
+        # If close time is less than open time or single digit, assume it's PM
+        if len(close_time.split(":")[0]) == 1 or int(close_time.split(":")[0]) < int(open_time.split(":")[0]):
+            close_hour = int(close_time.split(":")[0])
+            close_minute = close_time.split(":")[1]
+            close_time = f"{close_hour + 12}:{close_minute}"
+
+        return open_time, close_time
+
+    def _add_time_range(self, opening_hours: OpeningHours, days: List[str], open_time: str, close_time: str) -> None:
+        """Add a time range for the specified days."""
+        open_time = self._normalize_time(open_time)
+        close_time = self._normalize_time(close_time)
+
+        open_time, close_time = self._convert_to_24h_format(open_time, close_time)
+
+        for day in days:
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
+
+    def _handle_everyday_hours(self, opening_hours: OpeningHours, hours: str) -> bool:
+        """Handle 'Every day' format hours."""
+        if "Every day" not in hours:
+            return False
+
+        time_range = hours.replace("Every day:", "").replace("Every day", "").strip()
+        if "-" not in time_range:
+            return False
+
+        open_time, close_time = time_range.split("-")
+        self._add_time_range(opening_hours, ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], open_time, close_time)
+        return True
+
+    def _handle_weekday_weekend_hours(self, opening_hours: OpeningHours, hours: str) -> bool:
+        """Handle hours with different weekday and weekend schedules."""
+        if "Mon-Fri" not in hours:
+            return False
+
+        hours_parts = hours.split(";")
+
+        for part in hours_parts:
+            part = part.strip()
+            if "Mon-Fri" in part:
+                weekday_match = re.search(r"Mon-Fri:\s*([\d:]+)-([\d:]+)", part)
+                if weekday_match:
+                    open_time = weekday_match.group(1)
+                    close_time = weekday_match.group(2)
+                    self._add_time_range(opening_hours, ["Mo", "Tu", "We", "Th", "Fr"], open_time, close_time)
+            elif "Sat&Sun" in part or "Sat & Sun" in part:
+                weekend_match = re.search(r"Sat\s*&\s*Sun\s*:?\s*([\d:]+)-([\d:]+)", part)
+                if weekend_match:
+                    open_time = weekend_match.group(1)
+                    close_time = weekend_match.group(2)
+                    self._add_time_range(opening_hours, ["Sa", "Su"], open_time, close_time)
+
+        return True
+
+    def _handle_closed_weekends(self, opening_hours: OpeningHours, hours: str) -> bool:
+        """Handle locations closed on weekends."""
+        if "Closed" not in hours:
+            return False
+
+        closed_match = re.search(r"Mon-Fri:\s*([\d:]+)-([\d:]+),\s*Sat\s*&\s*Sun:\s*Closed", hours)
+        if not closed_match:
+            return False
+
+        open_time = closed_match.group(1)
+        close_time = closed_match.group(2)
+
+        self._add_time_range(opening_hours, ["Mo", "Tu", "We", "Th", "Fr"], open_time, close_time)
+
+        # Mark weekends as closed
+        opening_hours.set_closed(["Sa", "Su"])
+        return True
+
     def _parse_hours(self, hours: Optional[str]) -> Optional[str]:
         """Parse hours string into standardized opening hours format."""
         if not hours:
             return None
 
+        # Create an OpeningHours object
+        opening_hours = OpeningHours()
+
         # Normalize hours format
         hours = hours.strip()
-        if "Every day" in hours:
-            time_range = hours.replace("Every day:", "").replace("Every day", "").strip()
-            return f"Mo-Su {time_range}"
-        elif "Mon-Fri" in hours:
-            # Handle more complex hours formats
-            hours_parts = hours.split(";")
-            weekday_hours = ""
-            weekend_hours = ""
 
-            for part in hours_parts:
-                part = part.strip()
-                if "Mon-Fri" in part:
-                    weekday_match = re.search(r"Mon-Fri:\s*([\d:]+)-([\d:]+)", part)
-                    if weekday_match:
-                        weekday_hours = f"Mo-Fr {weekday_match.group(1)}-{weekday_match.group(2)}"
-                elif "Sat&Sun" in part or "Sat & Sun" in part:
-                    weekend_match = re.search(r"Sat\s*&\s*Sun\s*:?\s*([\d:]+)-([\d:]+)", part)
-                    if weekend_match:
-                        weekend_hours = f"Sa-Su {weekend_match.group(1)}-{weekend_match.group(2)}"
+        # Try each hours format handler
+        if self._handle_everyday_hours(opening_hours, hours):
+            pass
+        elif self._handle_weekday_weekend_hours(opening_hours, hours):
+            pass
+        elif self._handle_closed_weekends(opening_hours, hours):
+            pass
+        else:
+            self.logger.warning(f"Could not parse hours: {hours}")
+            return None
 
-            if weekday_hours and weekend_hours:
-                return f"{weekday_hours}; {weekend_hours}"
-            elif weekday_hours:
-                return weekday_hours
-            elif weekend_hours:
-                return weekend_hours
-
-        return None
+        # Return the formatted opening hours string
+        return opening_hours.as_opening_hours() if opening_hours else None
