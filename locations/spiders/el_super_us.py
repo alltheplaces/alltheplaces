@@ -77,24 +77,29 @@ class ElSuperUSSpider(SitemapSpider):
     def _parse_address_components(self, address_text: str, item: Feature) -> None:
         address_parts = address_text.split(",")
         if len(address_parts) >= 3:
-            item["street"] = address_parts[0].strip()
+            # Store street address in the correct field
+            item["street_address"] = address_parts[0].strip()
 
             city_part = address_parts[1].strip()
             item["city"] = city_part
 
-            state_zip_part = address_parts[2].strip()
-            state_zip_match = re.search(r"([A-Z]{2})[,\s]+(\d{5})", state_zip_part)
-            if state_zip_match:
-                item["state"] = state_zip_match.group(1)
-                item["postcode"] = state_zip_match.group(2)
-            else:
-                # Try to extract state and zip separately
-                state_match = re.search(r"([A-Z]{2})", state_zip_part)
-                zip_match = re.search(r"(\d{5})", state_zip_part)
-                if state_match:
-                    item["state"] = state_match.group(1)
-                if zip_match:
-                    item["postcode"] = zip_match.group(1)
+            # Handle the remaining parts which may contain state and zip
+            # The pattern is typically: City, State, Zipcode
+            # But sometimes it can be: City, State, State, Zipcode
+
+            # Extract state from the last parts
+            state_match = None
+            for part in address_parts[2:]:
+                part = part.strip()
+                if re.match(r"^[A-Z]{2}$", part):
+                    state_match = part
+                    item["state"] = state_match
+                    break
+
+            # Extract postcode from the last part
+            postcode_match = re.search(r"(\d{5}(?:-\d{4})?)", address_parts[-1])
+            if postcode_match:
+                item["postcode"] = postcode_match.group(1)
 
         item["country"] = "US"
 
