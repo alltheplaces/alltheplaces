@@ -3,14 +3,12 @@ import logging
 import os
 import re
 import sys
-from typing import Any, Generator, Type
 
 from scrapy import Spider
 from scrapy.commands import ScrapyCommand
-from scrapy.utils.misc import walk_modules
-from scrapy.utils.spider import iter_spider_classes
 
 from locations.settings import SPIDER_MODULES
+from locations.spider_utils import find_spider_class_from_name
 
 logger = logging.getLogger(__name__)
 
@@ -46,26 +44,10 @@ class DuplicateWikidataCommand(ScrapyCommand):
         )
 
     @staticmethod
-    def find_spider_class(spider_name: str):
-        if not spider_name:
-            return None
-        for spider_class in DuplicateWikidataCommand.iter_spider_classes_in_all_modules():
-            if spider_name == spider_class.name:
-                return spider_class
-        return None
-
-    @staticmethod
-    def iter_spider_classes_in_all_modules() -> Generator[Type[Spider], Any, None]:
-        for mod in SPIDER_MODULES:
-            for module in walk_modules(mod):
-                for spider_class in iter_spider_classes(module):
-                    yield spider_class
-
-    @staticmethod
     def wikidata_spiders(crawler_process):
         codes = {}
         for spider_name in crawler_process.spider_loader.list():
-            spider = DuplicateWikidataCommand.find_spider_class(spider_name)
+            spider = find_spider_class_from_name(spider_name)
             file_name = sys.modules[spider.__module__].__file__
             simple_name = file_name.split("/locations/")[-1]
             with open(file_name) as f:

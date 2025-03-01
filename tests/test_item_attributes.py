@@ -1,4 +1,4 @@
-from locations.exporters.geojson import iter_spider_classes_in_all_modules
+from locations.spider_utils import iter_spider_classes_in_all_modules
 
 
 def test_item_attributes_type():
