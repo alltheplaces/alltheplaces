@@ -9,10 +9,7 @@ from locations.hours import OpeningHours
 
 class ErnstingsFamilySpider(Spider):
     name = "ernstings_family"
-    item_attributes = {
-        "brand": "Ernsting’s family",
-        "brand_wikidata": "Q1361016",
-    }
+    item_attributes = {"brand": "Ernsting's family", "brand_wikidata": "Q1361016"}
 
     def start_requests(self) -> Iterable[Request]:
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", ["DE", "AT"]):

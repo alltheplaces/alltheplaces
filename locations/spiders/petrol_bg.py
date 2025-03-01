@@ -10,7 +10,7 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 class PetrolBGSpider(AgileStoreLocatorSpider):
     name = "petrol_bg"
-    item_attributes = {"brand": "Petrol", "brand_wikidata": "Q24315"}
+    item_attributes = {"brand_wikidata": "Q24315"}
     allowed_domains = ["www.petrol.bg"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

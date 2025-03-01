@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 COUNTRYCODE_COMPONENTS = {
+    "AD",
     "AE",
     "AL",
     "AO",
@@ -128,6 +129,7 @@ COUNTRYCODE_COMPONENTS = {
     "UZ",
     "VE",
     "VN",
+    "XK",
     "ZA",
     "ZM",
     "ZW",

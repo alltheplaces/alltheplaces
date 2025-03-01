@@ -1,21 +1,28 @@
 import csv
 import datetime
 import io
+import re
+import urllib
 import zipfile
 from collections import namedtuple
 
 import scrapy
 
 from locations.items import Feature
+from locations.user_agents import ALLTHEPLACES_BOT
 
 # To emit proper OpenStreetMap tags for platforms, we need to keep some
 # per-station properties in memory.
-Station = namedtuple("Station", "name operator city country means")
+Station = namedtuple("Station", "name operator operator_wikidata city country means")
 
 
 class OpentransportdataSwissSpider(scrapy.Spider):
     name = "opentransportdata_swiss"
-    allowed_domains = ["opentransportdata.swiss"]
+    allowed_domains = [
+        "opentransportdata.swiss",
+        "query.wikidata.org",
+        "r2.cloudflarestorage.com",
+    ]
     dataset_attributes = {
         # https://opentransportdata.swiss/en/authorised-databases/
         # https://opentransportdata.swiss/en/terms-of-use/#511_Exemption_for_databases
@@ -27,17 +34,36 @@ class OpentransportdataSwissSpider(scrapy.Spider):
         "use:openstreetmap": "yes",
         "website": "https://opentransportdata.swiss/",
     }
-
-    dataset_pattern = "https://opentransportdata.swiss/en/dataset/%s/permalink"
+    dataset_pattern = "https://data.opentransportdata.swiss/en/dataset/%s/permalink"
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DEFAULT_REQUEST_HEADERS": {
+            "User-Agent": ALLTHEPLACES_BOT,
+        },
+    }
 
     def start_requests(self):
-        url = "https://opentransportdata.swiss/de/dataset/bfr-rollstuhl"
+        query = "SELECT ?item ?sboid WHERE {?item p:P13221 ?s. ?s ps:P13221 ?sboid.}"
+        params = urllib.parse.urlencode({"query": query})
+        url = "https://query.wikidata.org/sparql?" + params
+        headers = {
+            "Accept": "text/csv",
+            "User-Agent": ALLTHEPLACES_BOT,
+        }
+        yield scrapy.Request(url, headers=headers, callback=self.handle_wikidata_operators)
+
+    def handle_wikidata_operators(self, response):
+        self.operators = {}
+        for row in csv.DictReader(io.StringIO(response.text), delimiter=","):
+            if m := re.search(r"(Q\d+)", row["item"]):
+                self.operators[row["sboid"].lower().strip()] = m.group(1)
+        url = "https://data.opentransportdata.swiss/de/dataset/bfr-rollstuhl"
         yield scrapy.Request(url, callback=self.handle_wheelchair_overview)
 
     def handle_wheelchair_overview(self, response):
         # The download URL changes daily with every database dump.
-        h = response.xpath("//a[@download='BfR_Haltestellendaten.csv']/@href")
-        yield scrapy.Request(h.get(), callback=self.handle_wheelchair_data)
+        link = next(href for href in response.xpath("//a/@href").getall() if href.endswith("bfr_haltestellendaten.csv"))
+        yield scrapy.Request(link, callback=self.handle_wheelchair_data)
 
     def handle_wheelchair_data(self, response):
         # The data feed supplies seperate properties for railbound
@@ -112,6 +138,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
             operator = row["businessOrganisationDescriptionEn"]
             if any(operator.startswith(p) for p in ("Dummy_", "Fiktive ")):
                 operator = ""
+            operator_wikidata = self.operators.get(row["businessOrganisation"])
             city = row["localityName"] or row["municipalityName"]
             if not city and "," in name:
                 city = name.split(",", 1)[0]
@@ -122,6 +149,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
                 "public_transport": "stop_area",
                 "name": name,
                 "operator": operator,
+                "operator:wikidata": operator_wikidata,
                 "ref:IFOPT": sloid,
                 "uic_ref": self.parse_uic_ref(row),
                 "wheelchair": wheelchair,
@@ -148,6 +176,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
             self.stations[sloid] = Station(
                 name=name,
                 operator=operator,
+                operator_wikidata=operator_wikidata,
                 city=city,
                 country=country,
                 means=means,
@@ -182,6 +211,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
                 "public_transport": "platform",
                 "name": station.name,
                 "operator": station.operator,
+                "operator:wikidata": station.operator_wikidata,
                 "ref:IFOPT": sloid,
                 "wheelchair": wheelchair,
                 "wheelchair:conditional": wheelchair_cond,

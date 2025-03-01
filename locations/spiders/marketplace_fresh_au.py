@@ -15,6 +15,8 @@ class MarketplaceFreshAUSpider(Spider):
     def parse(self, response):
         for location in json.loads(html.unescape(re.search(r"stores=\".*(\[.*\])\"", response.text).group(1))):
             item = DictParser.parse(location["map_marker"])
+            if postcode := item.get("postcode"):
+                item["postcode"] = str(postcode)
             item["street_address"] = item.pop("addr_full")
             item["addr_full"] = location["address"]
             yield item

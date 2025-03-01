@@ -2,14 +2,14 @@ import json
 
 from scrapy import Selector, Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
 class PostalannexUSSpider(Spider):
     name = "postalannex_us"
-    item_attributes = {"brand": "PostalAnnex", "brand_wikidata": "Q61960357", "extras": Categories.POST_OFFICE.value}
+    item_attributes = {"operator": "PostalAnnex", "operator_wikidata": "Q61960357"}
     start_urls = ["https://www.postalannex.com/location-results"]
 
     def parse(self, response):
@@ -31,4 +31,7 @@ class PostalannexUSSpider(Spider):
             )
             item["branch"] = selector.css(".views-field-field-store-name a::text").get()
             item["ref"] = item["website"].split("/")[-1]
+
+            apply_category(Categories.POST_OFFICE, item)
+
             yield item

@@ -9,11 +9,9 @@ from locations.items import Feature
 
 class SystemeUSpider(SitemapSpider):
     name = "systeme_u"
-    item_attributes = {"brand": "Systeme U", "brand_wikidata": "Q2529029"}
+    item_attributes = {"brand": "Système U", "brand_wikidata": "Q2529029"}
     allowed_domains = ["magasins-u.com"]
-    sitemap_urls = [
-        "https://www.magasins-u.com/sitemap.xml",
-    ]
+    sitemap_urls = ["https://www.magasins-u.com/sitemap.xml"]
     sitemap_rules = [(r"com\/(magasin|station)\/", "parse_stores")]
     requires_proxy = "FR"  # Proxy or other captcha drama?
     brands = {
