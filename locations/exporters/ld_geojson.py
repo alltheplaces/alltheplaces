@@ -12,7 +12,11 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
     def export_item(self, item):
         if self.first_item:
             self.first_item = False
-            self.dataset_attributes = get_dataset_attributes(item["extras"].get("@spider"))
+            spider_classes = item.get("extras", {}).get("@spider_classes", [])
+            dataset_attributes = get_dataset_attributes(spider_classes)
+            if "@spider_classes" in dataset_attributes.keys():
+                del dataset_attributes["@spider_classes"]
+            self.dataset_attributes = dataset_attributes
         super().export_item(item)
 
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
