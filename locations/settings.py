@@ -11,7 +11,11 @@ from os import environ
 
 from scrapy import __version__ as scrapy_version
 from scrapy_playwright.handler import ScrapyPlaywrightDownloadHandler
-from scrapy_zyte_api import ScrapyZyteAPIDownloadHandler, ScrapyZyteAPIDownloaderMiddleware, ScrapyZyteAPIRequestFingerprinter
+from scrapy_zyte_api import (
+    ScrapyZyteAPIDownloaderMiddleware,
+    ScrapyZyteAPIDownloadHandler,
+    ScrapyZyteAPIRequestFingerprinter,
+)
 
 from locations import __version__ as atp_bot_version
 from locations.exporters.geojson import GeoJsonExporter
