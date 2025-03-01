@@ -14,9 +14,9 @@ def find_spider_class_from_name(spider_name: str) -> type | None:
             return spider_class
     return None
 
+
 def iter_spider_classes_in_all_modules() -> Generator[Type[Spider], Any, None]:
     for mod in SPIDER_MODULES:
         for module in walk_modules(mod):
             for spider_class in iter_spider_classes(module):
                 yield spider_class
-
