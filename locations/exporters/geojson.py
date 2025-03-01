@@ -116,7 +116,7 @@ def compute_hash(item: Feature) -> str:
     # If a spider has no_refs = True, generate a GeoJSON feature identifier
     # as a random UUID that will change each time a crawl and export is
     # completed.
-    return uuid1().encode("utf8")
+    return str(uuid1()).encode("utf8")
 
 
 def get_dataset_attributes(spider_classes: list[type]) -> dict:
