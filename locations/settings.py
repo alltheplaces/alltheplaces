@@ -10,7 +10,6 @@
 from os import environ
 
 from scrapy import __version__ as scrapy_version
-
 from scrapy_playwright.handler import ScrapyPlaywrightDownloadHandler
 from scrapy_zyte_api import ScrapyZyteAPIDownloadHandler, ScrapyZyteAPIRequestFingerprinter
 
@@ -34,8 +33,8 @@ from locations.pipelines.check_item_properties import CheckItemPropertiesPipelin
 from locations.pipelines.clean_strings import CleanStringsPipeline
 from locations.pipelines.closed import ClosePipeline
 from locations.pipelines.count_brands import CountBrandsPipeline
-from locations.pipelines.count_operators import CountOperatorsPipeline
 from locations.pipelines.count_categories import CountCategoriesPipeline
+from locations.pipelines.count_operators import CountOperatorsPipeline
 from locations.pipelines.country_code_clean_up import CountryCodeCleanUpPipeline
 from locations.pipelines.drop_attributes import DropAttributesPipeline
 from locations.pipelines.drop_logo import DropLogoPipeline
@@ -46,7 +45,6 @@ from locations.pipelines.geojson_geometry_reprojection import GeoJSONGeometryRep
 from locations.pipelines.geojson_multipoint_simplification import GeoJSONMultiPointSimplificationPipeline
 from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
 from locations.pipelines.state_clean_up import StateCodeCleanUpPipeline
-
 
 BOT_NAME = "locations"
 BOT_VERSION = atp_bot_version

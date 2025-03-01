@@ -1,6 +1,7 @@
+from inspect import getmro
+
 from scrapy.utils.trackref import object_ref
 
-from inspect import getmro
 
 class ApplySourceSpiderAttributesPipeline:
     def process_item(self, item, spider):

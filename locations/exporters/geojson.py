@@ -4,14 +4,12 @@ from hashlib import sha1
 from io import StringIO
 from json import dump
 from logging import warning
-from uuid import uuid1
 from typing import Any
+from uuid import uuid1
 
-from scrapy import Item, Spider
+from scrapy import Item
 from scrapy.exporters import JsonItemExporter
-from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
-from scrapy.utils.spider import iter_spider_classes
 
 from locations.items import Feature
 
@@ -157,6 +155,7 @@ def get_dataset_attributes(spider_classes: list[type]) -> dict:
     combined_dataset_attributes["spider:collection_time"] = datetime.now().isoformat()
     return combined_dataset_attributes
 
+
 class GeoJsonExporter(JsonItemExporter):
     def __init__(self, file, **kwargs):
         super().__init__(file, **kwargs)
@@ -201,9 +200,7 @@ class GeoJsonExporter(JsonItemExporter):
     def write_geojson_header(self, spider_classes: list[type]) -> None:
         header = StringIO()
         header.write('{"type":"FeatureCollection","dataset_attributes":')
-        dump(
-            get_dataset_attributes(spider_classes), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True
-        )
+        dump(get_dataset_attributes(spider_classes), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
         header.write(',"features":[\n')
         self.file.write(to_bytes(header.getvalue(), self.encoding))
 
