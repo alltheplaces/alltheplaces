@@ -1,5 +1,6 @@
 from typing import Any, Generator, Type
 
+from scrapy import Spider
 from scrapy.utils.misc import walk_modules
 from scrapy.utils.spider import iter_spider_classes
 
