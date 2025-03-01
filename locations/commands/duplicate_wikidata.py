@@ -4,10 +4,8 @@ import os
 import re
 import sys
 
-from scrapy import Spider
 from scrapy.commands import ScrapyCommand
 
-from locations.settings import SPIDER_MODULES
 from locations.spider_utils import find_spider_class_from_name
 
 logger = logging.getLogger(__name__)
