@@ -68,11 +68,18 @@ class SocrataSpider(Spider):
     custom_settings = {"DOWNLOAD_TIMEOUT": 120, "DOWNLOAD_WARNSIZE": 268435456}
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(url=f"https://{self.host}/resource/{self.resource_id}.json?$query=SELECT count(*) AS total_records", callback=self.parse_record_count)
+        yield JsonRequest(
+            url=f"https://{self.host}/resource/{self.resource_id}.json?$query=SELECT count(*) AS total_records",
+            callback=self.parse_record_count,
+        )
 
     def parse_record_count(self, response: Response) -> Iterable[JsonRequest]:
         total_records = int(response.json()[0]["total_records"])
-        yield JsonRequest(url=f"https://{self.host}/api/views/{self.resource_id}.json", meta={"total_records": total_records}, callback=self.parse_schema)
+        yield JsonRequest(
+            url=f"https://{self.host}/api/views/{self.resource_id}.json",
+            meta={"total_records": total_records},
+            callback=self.parse_schema,
+        )
 
     def parse_schema(self, response: Response) -> Iterable[JsonRequest]:
         table_attributes = response.json()
@@ -81,7 +88,11 @@ class SocrataSpider(Spider):
         self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
         current_timestamp = datetime.now(UTC)
         if current_timestamp - timestamp_of_last_edit > timedelta(days=365):
-            self.logger.warning("The requested dataset is possibly outdated as the dataset was last edited over 365 days ago on {}.".format(timestamp_of_last_edit.isoformat()))
+            self.logger.warning(
+                "The requested dataset is possibly outdated as the dataset was last edited over 365 days ago on {}.".format(
+                    timestamp_of_last_edit.isoformat()
+                )
+            )
 
         select_clause = "&$select=*"
         if len(self.field_names) > 1:
@@ -89,13 +100,20 @@ class SocrataSpider(Spider):
             output_field_names = []
             for field_name in self.field_names:
                 if field_name not in available_field_names:
-                    self.logger.warning("Spider requested that field `{}` be extracted for each feature in the dataset but the dataset doesn't have a field named `{}`. Field ignored.".format(field_name, field_name))
+                    self.logger.warning(
+                        "Spider requested that field `{}` be extracted for each feature in the dataset but the dataset doesn't have a field named `{}`. Field ignored.".format(
+                            field_name, field_name
+                        )
+                    )
                     continue
                 output_field_names.append(field_name)
             select_clause = "&$select=" + ",".join(output_field_name)
 
         for offset in range(0, response.meta["total_records"], self.page_size):
-            yield JsonRequest(url=f"https://{self.host}/resource/{self.resource_id}.geojson?$limit={self.page_size}&$offset={offset}{select_clause}", callback=self.parse_features)
+            yield JsonRequest(
+                url=f"https://{self.host}/resource/{self.resource_id}.geojson?$limit={self.page_size}&$offset={offset}{select_clause}",
+                callback=self.parse_features,
+            )
 
     def parse_features(self, response: Response) -> Iterable[Feature]:
         features = response.json()["features"]
