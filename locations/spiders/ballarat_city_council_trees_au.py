@@ -10,7 +10,12 @@ from locations.storefinders.opendatasoft_explore import OpendatasoftExploreSpide
 
 class BallaratCityCouncilTreesAUSpider(OpendatasoftExploreSpider):
     name = "ballarat_city_council_trees_au"
-    item_attributes = {"operator": "Ballarat City Council", "operator_wikidata": "Q132478165", "state": "VIC", "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "Ballarat City Council",
+        "operator_wikidata": "Q132478165",
+        "state": "VIC",
+        "nsi_id": "N/A",
+    }
     api_endpoint = "https://data.ballarat.vic.gov.au/api/explore/v2.1/"
     dataset_id = "trees"
 
@@ -23,7 +28,9 @@ class BallaratCityCouncilTreesAUSpider(OpendatasoftExploreSpider):
         item["extras"]["protected"] = "yes"
         if dbh_range_cm := feature.get("dbh"):
             if dbh_range_cm != "Not Assessed" and dbh_range_cm != "Not Recorded":
-                dbh_range_cm = dbh_range_cm.replace("<", "0-").replace(" cm - ", "-").replace("cm - ", "-").replace("cm", " cm")
+                dbh_range_cm = (
+                    dbh_range_cm.replace("<", "0-").replace(" cm - ", "-").replace("cm - ", "-").replace("cm", " cm")
+                )
                 item["extras"]["diameter:range"] = f"{dbh_range_cm}"
         if diameter_crown_range_m := feature.get("crown"):
             if diameter_crown_range_m != "Not Assessed" and diameter_crown_range_m != "Not Recorded":
