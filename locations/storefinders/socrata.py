@@ -1,16 +1,3 @@
-# Documentation: https://dev.socrata.com/
-
-# Get columns (schema) from https://data.cityofnewyork.us/api/views/hn5i-inap.json?read_from_nbe=true&version=2.1
-
-# Check last modification date is within last year or so (see ArcGISSpider for example)
-
-# Get feature count from https://data.cityofnewyork.us/resource/hn5i-inap.json?$query=SELECT%20count(%27*%27)%20as%20__count_alias__
-
-# Request pages of results using https://data.cityofnewyork.us/resource/hn5i-inap.geojson?$limit=50000&$offset=200000 (or whatever offsets calculated from total feature count)
-
-# Examples: NYC Parks, ACT Government (ACT road safety cameras spider needs converting), etc.
-# Search for "Content built off this asset will live here." on Google to find more.
-
 from datetime import UTC, datetime, timedelta
 from typing import Iterable
 
