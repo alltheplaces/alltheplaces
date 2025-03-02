@@ -16,13 +16,16 @@ class MitchamCityCouncilTreesAUSpider(JSONBlobSpider):
     species = {}
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(url="https://dev.forestree.studio/storage/data/mitcham/mitcham_all_species.geojson", callback=self.parse_species_list)
+        yield JsonRequest(
+            url="https://dev.forestree.studio/storage/data/mitcham/mitcham_all_species.geojson",
+            callback=self.parse_species_list,
+        )
 
     def parse_species_list(self, response: Response) -> Iterable[JsonRequest]:
         for species in response.json()["features"]:
             species_attribs = {
                 "taxon_en": species["properties"].get("common_name"),
-                "species": species["properties"].get("genus")
+                "species": species["properties"].get("genus"),
             }
             species_id = str(species["id"])
             self.species[species_id] = species_attribs
