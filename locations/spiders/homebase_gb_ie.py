@@ -1,6 +1,5 @@
-
-
 from locations.storefinders.uberall import UberallSpider
+
 
 class HomebaseGBIESpider(UberallSpider):
     name = "homebase_gb_ie"
