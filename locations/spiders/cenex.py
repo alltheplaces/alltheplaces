@@ -2,7 +2,6 @@ import scrapy
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CenexSpider(scrapy.Spider):
