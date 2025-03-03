@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.hours import OpeningHours
 
 
-class FootLockerAESASpider(Spider):
+class FootlockerAESASpider(Spider):
     name = "footlocker_ae_sa"
     item_attributes = {
         "brand": "Foot Locker",
