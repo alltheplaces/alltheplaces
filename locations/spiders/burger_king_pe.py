@@ -27,7 +27,8 @@ class BurgerKingPESpider(Spider):
         )
 
     def parse_action_token(self, response: Response, **kwargs: Any) -> Any:
-        action_token = re.search(r"a=\(0,n\.\$\)\(\"(\w+)\"\)", response.text).group(1)
+        matches = re.findall(r"[a-z][\s=]+\(0,\s*o.\$\)\(\"([a-f0-9]{40})\"\)", response.text)
+        action_token = matches[1] if len(matches) > 1 else matches[0]
         yield Request(
             url="https://www.burgerking.pe/",
             body='["accessToken"]',
