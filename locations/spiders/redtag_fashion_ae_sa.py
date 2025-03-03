@@ -7,7 +7,7 @@ from scrapy.http import Request, Response
 from locations.items import Feature
 
 
-class RedTagFashionAESASpider(Spider):
+class RedtagFashionAESASpider(Spider):
     name = "redtag_fashion_ae_sa"
     item_attributes = {
         "brand": "Red Tag",
