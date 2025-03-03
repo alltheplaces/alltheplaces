@@ -17,9 +17,16 @@ class BurgerKingPESpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
     api_token = ""
-    start_urls = ["https://www.burgerking.pe/_next/static/chunks/3410-ec2cc34087f14b20.js"]
+    start_urls = ["https://www.burgerking.pe/"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Search for the desired JavaScript file
+        yield response.follow(
+            url=response.xpath("//script/@src").re(r"_next/static/chunks/\d{4}-\w+\.js")[-1],
+            callback=self.parse_action_token,
+        )
+
+    def parse_action_token(self, response: Response, **kwargs: Any) -> Any:
         action_token = re.search(r"a=\(0,n\.\$\)\(\"(\w+)\"\)", response.text).group(1)
         yield Request(
             url="https://www.burgerking.pe/",
