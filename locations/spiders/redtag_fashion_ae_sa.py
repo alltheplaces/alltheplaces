@@ -56,7 +56,9 @@ class RedtagFashionAESASpider(Spider):
                 item["opening_hours"] = self.parse_hours(hours)
 
             # Additional properties
-            item["extras"] = {}
+            item["extras"] = {
+                "shop": "clothes",
+            }
             if store.get("homeware") == "1":
                 item["extras"]["homeware"] = True
             if store.get("cosmetics") == "1":
@@ -73,7 +75,7 @@ class RedtagFashionAESASpider(Spider):
             formatted_hours = []
 
             # Split different day ranges
-            for section in hours_str.split("|"):
+            for section in hours_str.split("*"):  # Changed from | to * based on actual data
                 section = section.strip()
                 if not section:
                     continue
