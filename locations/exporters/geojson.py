@@ -4,8 +4,8 @@ from hashlib import sha1
 from io import StringIO
 from json import dump
 from logging import warning
+from random import randbytes
 from typing import Any
-from uuid import uuid1
 
 from scrapy import Item
 from scrapy.exporters import JsonItemExporter
@@ -102,21 +102,21 @@ def item_to_geojson_feature(item: Feature) -> dict:
 
 
 def compute_hash(item: Feature) -> str:
-    item_ref = str(item.get("ref"))
+    item_ref = item.get("ref")
     item_spider_class = item.get("extras", {}).get("@spider_classes", [None])[0]
     item_spider_name = None
     if item_spider_class:
         item_spider_name = getattr(item_spider_class, "name", None)
 
     if item_ref and item_spider_name:
-        sha1_hash = sha1(item_ref.encode("utf8"))
+        sha1_hash = sha1(str(item_ref).encode("utf8"))
         sha1_hash.update(item_spider_name.encode("utf8"))
         return urlsafe_b64encode(sha1_hash.digest()).decode("utf8")
 
     # If a spider has no_refs = True, generate a GeoJSON feature identifier
-    # as a random UUID that will change each time a crawl and export is
+    # as a random ID that will change each time a crawl and export is
     # completed.
-    return str(uuid1()).encode("utf8")
+    return urlsafe_b64encode(randbytes(20)).decode("utf8")
 
 
 def get_dataset_attributes(spider_classes: list[type]) -> dict:
