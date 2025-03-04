@@ -1,4 +1,7 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any
+
+from scrapy.http import Response
+from scrapy.spiders import Spider
 
 from locations.categories import (
     Categories,
@@ -7,7 +10,7 @@ from locations.categories import (
     apply_healthcare_specialities,
     apply_yes_no,
 )
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
 
 HEALTHCARE_CATEGORIES = {
     "/anticoagulation-clinics/": [Categories.CLINIC],
@@ -62,34 +65,25 @@ HEALTHCARE_CATEGORIES = {
 }
 
 
-class MercyHealthUSSpider(SitemapSpider, StructuredDataSpider):
+class MercyHealthUSSpider(Spider):
     name = "mercy_health_us"
     item_attributes = {"operator": "Mercy Health", "operator_wikidata": "Q5053169"}
-    allowed_domains = ["www.mercy.com"]
-    sitemap_urls = ["https://www.mercy.com/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"^https:\/\/www\.mercy\.com\/locations\/(?:emergency-room|fitness-healthplex|hospitals|medical-centers-clinics|primary-care-family-medicine|senior-living|specialty-locations|urgent-care)\/[\w\-]+\/[\w\-]+$",
-            "parse",
-        )
-    ]
-    wanted_types = ["EmergencyService", "ExerciseGym", "Hospital", "MedicalClinic", "Residence"]
-    drop_attributes = {"facebook", "twitter"}
+    start_urls = ["https://www.mercy.com/api/v2/locations"]
 
-    def post_process_item(self, item, response, ld_data):
-        for url_slug in HEALTHCARE_CATEGORIES.keys():
-            if url_slug in response.url:
-                for tags in HEALTHCARE_CATEGORIES[url_slug]:
-                    if isinstance(tags, Categories):
-                        apply_category(tags, item)
-                    elif isinstance(tags, HealthcareSpecialities):
-                        apply_healthcare_specialities([tags], item)
-                if "/.home-health-care/" in response.url:
-                    apply_yes_no("home_visit", item, True)
-                break
-
-        if item.get("image") and item["image"] == "https://www.mercy.com/":
-            # Ignore invalid image field values.
-            item.pop("image")
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location_info in response.json()["Results"]:
+            location = location_info["Location"]
+            item = DictParser.parse(location)
+            item["street_address"] = location["Address"]["StreetDisplay"]
+            item["website"] = response.urljoin(location["Link"])
+            for url_slug in HEALTHCARE_CATEGORIES.keys():
+                if url_slug in item["website"]:
+                    for tags in HEALTHCARE_CATEGORIES[url_slug]:
+                        if isinstance(tags, Categories):
+                            apply_category(tags, item)
+                        elif isinstance(tags, HealthcareSpecialities):
+                            apply_healthcare_specialities([tags], item)
+                    if "/.home-health-care/" in item["website"]:
+                        apply_yes_no("home_visit", item, True)
+                    break
+            yield item
