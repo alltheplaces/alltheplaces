@@ -68,8 +68,7 @@ class TravelMidwestUSSpider(JSONBlobSpider):
 
         item["ref"] = feature["properties"]["id"]
         item["name"] = feature["properties"]["locDesc"]
-        item["lat"] = feature["geometry"]["coordinates"][1]
-        item["lon"] = feature["geometry"]["coordinates"][0]
+        item["geometry"] = feature["geometry"]
         if len(feature["properties"]["remUrls"]) > 1:
             item["extras"]["camera:type"] = "dome"
         else:
