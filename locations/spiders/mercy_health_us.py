@@ -57,6 +57,7 @@ HEALTHCARE_CATEGORIES = {
     "/school-based-health-clinics/": [Categories.CLINIC],
     "/senior-living/": [Categories.NURSING_HOME],
     "/sleep-medicine-sleep-centers/": [Categories.CLINIC, HealthcareSpecialities.SLEEP_MEDICINE],
+    "/surgery-center/": [Categories.CLINIC, HealthcareSpecialities.SURGERY],
     "/urgent-care/": [Categories.CLINIC_URGENT],
     "/urology-pelvic-floor/": [Categories.CLINIC, HealthcareSpecialities.UROLOGY],
     "/vein-therapy/": [Categories.CLINIC, HealthcareSpecialities.VASCULAR_SURGERY],
