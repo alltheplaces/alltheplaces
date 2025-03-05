@@ -3,9 +3,10 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.categories import Categories, apply_category, apply_yes_no
+
 
 class RedtagFashionAESASpider(Spider):
     name = "redtag_fashion_ae_sa"
@@ -34,7 +35,7 @@ class RedtagFashionAESASpider(Spider):
                 item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_CLOTHES, item)
-            
+
             apply_yes_no("homeware", item, store.get("homeware") == "1")
             apply_yes_no("cosmetics", item, store.get("cosmetics") == "1")
 
