@@ -16,7 +16,6 @@ class UnderArmourAESASpider(Spider):
     }
     allowed_domains = ["underarmour.ae", "underarmour.sa"]
 
-
     def start_requests(self):
         urls = [
             # UAE stores
@@ -24,7 +23,6 @@ class UnderArmourAESASpider(Spider):
             # Saudi Arabia stores
             "https://www.underarmour.sa/on/demandware.store/Sites-UnderArmour_SA-Site/en_SA/Stores-FindStores?showMap=true&selectedCountry=SA&city=all",
         ]
-
 
         for url in urls:
             country_code = "SA" if "underarmour.sa" in url else "AE"
