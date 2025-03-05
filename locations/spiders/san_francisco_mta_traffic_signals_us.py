@@ -16,6 +16,6 @@ class SanFranciscoMtaTrafficSignalsUSSpider(ArcGISFeatureServerSpider):
     layer_id = "1"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["CNN"]
+        item["ref"] = str(feature["CNN"])
         apply_category(Categories.HIGHWAY_TRAFFIC_SIGNALS, item)
         yield item
