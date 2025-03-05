@@ -16,6 +16,6 @@ class SanFranciscoMtaParkingMetersUSSpider(ArcGISFeatureServerSpider):
     layer_id = "19"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["POST_ID"]
+        item["ref"] = str(feature["POST_ID"])
         apply_category(Categories.VENDING_MACHINE_PARKING_TICKETS, item)
         yield item
