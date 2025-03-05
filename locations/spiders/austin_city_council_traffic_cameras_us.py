@@ -9,7 +9,7 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class AustinCityCouncilTrafficCamerasUSSpider(ArcGISFeatureServerSpider):
     name = "austin_city_council_traffic_cameras_us"
-    item_attributes = {"operator": "Austin City Council", "operator_wikidata": "Q85744182"}
+    item_attributes = {"operator": "Austin City Council", "operator_wikidata": "Q85744182", "state": "TX"}
     host = "services.arcgis.com"
     context_path = "0L95CJ0VTaxqcmED/ArcGIS"
     service_id = "TRANSPORTATION_traffic_cameras"
