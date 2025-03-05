@@ -1,13 +1,13 @@
 from typing import Any
-import scrapy
 
+import scrapy
+import xmltodict
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
-import xmltodict
 
 
 class SaversGBSpider(scrapy.Spider):
