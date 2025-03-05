@@ -1,40 +1,33 @@
 from typing import Any
+import scrapy
 
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
+import xmltodict
 
 
-class SaversGBSpider(SitemapSpider):
+class SaversGBSpider(scrapy.Spider):
     name = "savers_gb"
     item_attributes = {"brand": "Savers", "brand_wikidata": "Q7428189"}
-    sitemap_urls = ["https://www.savers.co.uk/sitemap.xml"]
+    start_urls = ["https://api.savers.co.uk/api/v2/sv/stores?country=GB&currentPage=0&pageSize=1000"]
     requires_proxy = True
-
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if not entry["loc"].startswith("https://www.savers.co.uk/store/"):
-                continue
-            entry["loc"] = "https://www.savers.co.uk/store/page/{}".format(entry["loc"].split("/")[-1])
-            yield entry
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        location = response.json()
-        item = DictParser.parse(location)
-        item["website"] = None
-        item["street_address"] = merge_address_lines([item.pop("housenumber", None), item.pop("street", None)])
-        item["branch"] = item.pop("name")
-        item["ref"] = location["code"]
-        item["addr_full"] = location["address"]["formattedAddress"]
-        item["phone"] = location["address"]["phone"]
-
-        item["opening_hours"] = OpeningHours()
-        for rule in location["openingHours"]["weekDayOpeningList"]:
-            item["opening_hours"].add_range(
-                rule["weekDay"], rule["openingTime"]["formattedHour"], rule["closingTime"]["formattedHour"], "%I:%M %p"
-            )
-
-        yield item
+        for location in xmltodict.parse(response.text)["StoreFinderSearchPageWsDTO"]["stores"]["stores"]:
+            location.update(location.pop("address"))
+            location.update(location.pop("geoPoint"))
+            item = DictParser.parse(location)
+            item["street_address"] = merge_address_lines([location["line2"], location["line1"]])
+            item["website"] = "https://www.savers.co.uk/" + location["url"]
+            item["opening_hours"] = OpeningHours()
+            for day_time in location["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
+                day = day_time["weekDay"]
+                open_time = day_time["openingTime"]["formattedHour"]
+                close_time = day_time["closingTime"]["formattedHour"]
+                item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+            yield item
