@@ -18,7 +18,7 @@ class AustinCityCouncilTrafficCamerasUSSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature.get("CAMERA_STATUS") != "TURNED_ON":
             return
-        item["ref"] = feature["CAMERA_ID"]
+        item["ref"] = str(feature["CAMERA_ID"])
         item["addr_full"] = feature["location"]
         apply_category(Categories.SURVEILLANCE_CAMERA, item)
         item["extras"]["contact:webcam"] = feature["SCREENSHOT_ADDRESS"]
