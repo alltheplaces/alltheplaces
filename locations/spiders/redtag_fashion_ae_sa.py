@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from scrapy import Spider
@@ -69,8 +68,20 @@ class RedtagFashionAESASpider(Spider):
 
         def format_days(day_str: str) -> str:
             day_map = {
-                "SUN": "Su", "MON": "Mo", "TUE": "Tu", "WED": "We", "THU": "Th", "FRI": "Fr", "SAT": "Sa",
-                "Sun": "Su", "Mon": "Mo", "Tue": "Tu", "Wed": "We", "Thu": "Th", "Fri": "Fr", "Sat": "Sa"
+                "SUN": "Su",
+                "MON": "Mo",
+                "TUE": "Tu",
+                "WED": "We",
+                "THU": "Th",
+                "FRI": "Fr",
+                "SAT": "Sa",
+                "Sun": "Su",
+                "Mon": "Mo",
+                "Tue": "Tu",
+                "Wed": "We",
+                "Thu": "Th",
+                "Fri": "Fr",
+                "Sat": "Sa",
             }
             day_str = day_str.strip()
             if " to " in day_str:
@@ -104,7 +115,22 @@ class RedtagFashionAESASpider(Spider):
                         day_part, time_part = part[:space_pos].strip(), part[space_pos:].strip()
 
             if not (day_part and time_part):
-                for day in ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]:
+                for day in [
+                    "SUN",
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "Sun",
+                    "Mon",
+                    "Tue",
+                    "Wed",
+                    "Thu",
+                    "Fri",
+                    "Sat",
+                ]:
                     if day in part:
                         pos = part.find(day) + len(day)
                         if pos < len(part) and part[pos] == " ":
