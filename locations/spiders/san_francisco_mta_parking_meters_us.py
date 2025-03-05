@@ -9,7 +9,11 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class SanFranciscoMtaParkingMetersUSSpider(ArcGISFeatureServerSpider):
     name = "san_francisco_mta_parking_meters_us"
-    item_attributes = {"operator": "San Francisco Municipal Transportation Agency", "operator_wikidata": "Q7414072", "state": "CA"}
+    item_attributes = {
+        "operator": "San Francisco Municipal Transportation Agency",
+        "operator_wikidata": "Q7414072",
+        "state": "CA",
+    }
     host = "services.sfmta.com"
     context_path = "arcgis"
     service_id = "DataSF/master"
