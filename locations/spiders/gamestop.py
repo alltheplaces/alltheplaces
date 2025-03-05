@@ -12,6 +12,7 @@ class GamestopSpider(Spider):
     name = "gamestop"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def start_requests(self) -> Iterable[Request]:
         for country in ["ca", "it"]:
