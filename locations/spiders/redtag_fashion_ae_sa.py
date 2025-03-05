@@ -4,8 +4,9 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.items import Feature
-
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category, apply_yes_no
 
 class RedtagFashionAESASpider(Spider):
     name = "redtag_fashion_ae_sa"
@@ -24,41 +25,19 @@ class RedtagFashionAESASpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
-            item = Feature()
-
-            # Basic store info
+            item = DictParser.parse(store)
             item["ref"] = f"{response.meta['country']}_{store['storecode']}"
-            item["name"] = store["locname"]
+            item["street_address"] = item.pop("addr_full")
 
-            # Location
-            item["lat"] = store.get("lat")
-            item["lon"] = store.get("lng")
+            if hours := store.get("timming"):  # Note the misspelling in the API
+                oh = OpeningHours()
+                oh.add_ranges_from_string(hours)
+                item["opening_hours"] = oh
 
-            # Contact
-            item["phone"] = store.get("phone", "").strip() or None
-            item["email"] = store.get("email")
-
-            # Address
-            item["street_address"] = store.get("address")
-            item["city"] = store.get("city")
-            item["country"] = store.get("country")
-
-            # Hours
-            hours = store.get("timming")  # Note the misspelling in the API
-            if hours:
-                try:
-                    item["opening_hours"] = self.parse_hours(hours)
-                except Exception:
-                    item["opening_hours"] = None
-
-            # Additional properties
-            item["extras"] = {
-                "shop": "clothes",
-            }
-            if store.get("homeware") == "1":
-                item["extras"]["homeware"] = True
-            if store.get("cosmetics") == "1":
-                item["extras"]["cosmetics"] = True
+            apply_category(Categories.SHOP_CLOTHES, item)
+            
+            apply_yes_no("homeware", item, store.get("homeware") == "1")
+            apply_yes_no("cosmetics", item, store.get("cosmetics") == "1")
 
             yield item
 
