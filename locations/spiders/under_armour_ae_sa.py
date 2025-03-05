@@ -16,13 +16,15 @@ class UnderArmourAESASpider(Spider):
     }
     allowed_domains = ["underarmour.ae", "underarmour.sa"]
 
+
     def start_requests(self):
         urls = [
             # UAE stores
             "https://www.underarmour.ae/on/demandware.store/Sites-UnderArmour_AE-Site/en_AE/Stores-FindStores?showMap=true&selectedCountry=AE&city=all",
             # Saudi Arabia stores
-            "https://www.underarmour.sa/on/demandware.store/Sites-UnderArmour_SA-Site/en_SA/Stores-FindStores?showMap=true&selectedCountry=SA&city=all"
+            "https://www.underarmour.sa/on/demandware.store/Sites-UnderArmour_SA-Site/en_SA/Stores-FindStores?showMap=true&selectedCountry=SA&city=all",
         ]
+
 
         for url in urls:
             country_code = "SA" if "underarmour.sa" in url else "AE"
