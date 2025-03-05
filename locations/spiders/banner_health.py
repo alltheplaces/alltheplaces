@@ -15,7 +15,7 @@ class BannerHealthSpider(StructuredDataSpider):
     allowed_domains = ["bannerhealth.com"]
     start_urls = ["https://www.bannerhealth.com/api/sitecore/location/LocationSearch"]
     wanted_types = ["Hospital"]
-    custom_settings = {"ROBOTSTXT_OBEY":False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in (json.loads(response.json()))["LocationModelList"]:
