@@ -319,6 +319,7 @@ class Categories(Enum):
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
     VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
     VENDING_MACHINE_KEYS = {"amenity": "vending_machine", "vending": "key"}
+    VENDING_MACHINE_PARKING_TICKETS = {"amenity": "vending_machine", "vending": "parking_tickets"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
