@@ -26,7 +26,7 @@ class SanFranciscoMtaBicycleParkingUSSpider(ArcGISFeatureServerSpider):
         apply_category(Categories.BICYCLE_PARKING, item)
         if capacity := feature.get("SPACES"):
             item["extras"]["capacity"] = capacity
-        if rack_count := feature.get("RACKS"):
+        if feature.get("RACKS"):
             item["extras"]["bicycle_parking"] = "rack"
         if installation_year := feature.get("INSTALL_YR"):
             if installation_month := feature.get("INSTALL_MO"):
