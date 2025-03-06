@@ -1,40 +1,30 @@
-from scrapy import Spider
+from typing import Iterable
 
-from locations.google_url import url_to_coords
-from locations.hours import OpeningHours
+import chompjs
+from scrapy.http import Response
+
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class SupaRoofZASpider(Spider):
+class SupaRoofZASpider(JSONBlobSpider):
     name = "supa_roof_za"
-    start_urls = ["https://suparoof.co.za/store-locator/"]
+    start_urls = ["https://shop.suparoof.co.za/storefinder"]
     item_attributes = {
         "brand": "Supa-Roof",
         "brand_wikidata": "Q116474839",
     }
 
-    def parse(self, response):
-        for location in response.xpath('.//div[contains(@id, "suparoof-")]'):
-            item = Feature()
-            item["ref"] = location.xpath("./@id").get()
-            item["branch"] = location.xpath(".//h3/strong/text()").get().replace("Supa-Roof", "").strip()
-            item["addr_full"] = (
-                location.xpath('string(.//i[contains(@class, "fa-address-card")]/../../..)').get().strip()
-            )
-            item["state"] = (
-                location.xpath('../../../div[@class="panel-heading"]/.//div[@class="fusion-toggle-heading"]/text()')
-                .get()
-                .strip()
-            )
-            item["image"] = location.xpath('.//img[contains(@class, "img-responsive")]/@data-src').get()
-            if maps_url := location.xpath('.//a[contains(@href, "google.com/maps")]/@href').get():
-                item["lat"], item["lon"] = url_to_coords(maps_url)
-            item["email"] = location.xpath('.//a[contains(@href, "mailto:")]/@href').get()
-            item["phone"] = location.xpath('.//a[contains(@href, "tel:")]/@href').get()
+    def extract_json(self, response: Response) -> dict | list[dict]:
+        return [
+            chompjs.parse_js_object(region)
+            for region in response.xpath('//script[contains(text(), "let region")]/text()').getall()
+        ]
 
-            item["opening_hours"] = OpeningHours()
-            hours_string = location.xpath('string(.//h3/strong[contains(text(), "Operating Hours")]/../../p)').get()
-            hours_string = hours_string.replace("AM", "").replace("PM", "")
-            item["opening_hours"].add_ranges_from_string(hours_string)
+    def pre_process_data(self, feature: dict) -> None:
+        feature["address"] = merge_address_lines([feature.pop("address_line1", ""), feature.pop("address_line2", "")])
 
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["website"] = f'https://shop.suparoof.co.za/storefinder/store/index/id/{item["ref"]}/'
+        yield item
