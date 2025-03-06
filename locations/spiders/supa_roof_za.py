@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import chompjs
 from scrapy.http import Response
 
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -30,4 +31,12 @@ class SupaRoofZASpider(JSONBlobSpider):
         item["branch"] = item.pop("name").removeprefix("Supa-Roof ")
         item["website"] = f'https://shop.suparoof.co.za/storefinder/store/index/id/{item["ref"]}'
         item["image"] = urljoin("https://shop.suparoof.co.za/media/", feature["primary_image"])
+        item["opening_hours"] = OpeningHours()
+        for day in DAYS_3_LETTERS:
+            day_hours = feature.get(f"hours_{day.lower()}") or ""
+            if day_hours.lower() == "closed":
+                item["opening_hours"].set_closed(day)
+            else:
+                open_time, close_time = day_hours.replace("AM", "").replace("PM", "").split("-")
+                item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
         yield item
