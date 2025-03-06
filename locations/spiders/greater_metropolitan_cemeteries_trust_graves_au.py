@@ -9,7 +9,11 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class GreaterMetropolitanCemeteriesTrustGravesAUSpider(ArcGISFeatureServerSpider):
     name = "greater_metropolitan_cemeteries_trust_graves_au"
-    item_attributes = {"operator": "The Greater Metropolitan Cemeteries Trust", "operator_wikidata": "Q133070428", "state": "VIC"}
+    item_attributes = {
+        "operator": "The Greater Metropolitan Cemeteries Trust",
+        "operator_wikidata": "Q133070428",
+        "state": "VIC",
+    }
     host = "maps.gmct.com.au"
     context_path = "server"
     service_id = "Public_Map250924_MIL1"
@@ -37,7 +41,6 @@ class GreaterMetropolitanCemeteriesTrustGravesAUSpider(ArcGISFeatureServerSpider
         "YGC": ("Yarra Glen Cemetery", "Q133074518"),
     }
 
-
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["GISLocation"]
         item["name"] = feature["names"]
@@ -46,7 +49,11 @@ class GreaterMetropolitanCemeteriesTrustGravesAUSpider(ArcGISFeatureServerSpider
             item["located_in"] = self.cemeteries[cemetery_code][0]
             item["located_in_wikidata"] = self.cemeteries[cemetery_code][1]
         else:
-            self.logger.warning("Unknown cemetery code `{}`. Perhaps a new cemetery is now operated by this operator?".format(cemetery_code))
+            self.logger.warning(
+                "Unknown cemetery code `{}`. Perhaps a new cemetery is now operated by this operator?".format(
+                    cemetery_code
+                )
+            )
         apply_category(Categories.GRAVE, item)
         if plot_number := feature.get("PlotNumber"):
             item["extras"]["alt_ref"] = str(plot_number)
