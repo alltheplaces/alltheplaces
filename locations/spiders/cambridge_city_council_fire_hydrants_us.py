@@ -17,7 +17,7 @@ class CambridgeCityCouncilFireHydrantsUSSpider(ArcGISFeatureServerSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if hydrant_id := feature.get("HYDRANT_ID"):
-            item["ref"] = str(feature["HYDRANT_ID"])
+            item["ref"] = str(hydrant_id)
         else:
             item["ref"] = feature["GlobalID"]
         apply_category(Categories.FIRE_HYDRANT, item)
