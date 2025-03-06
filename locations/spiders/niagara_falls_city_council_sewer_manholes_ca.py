@@ -18,7 +18,6 @@ class NiagaraFallsCityCouncilSewerManholesCASpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature.get("Status") != "ACTIVE":
             return
-        apply_category(Categories.MANHOLE, item)
         if ref := feature.get("ID"):
             item["ref"] = ref
         else:
