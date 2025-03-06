@@ -7,6 +7,15 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
+ALT_TYPES = {
+    "bistro": ({"name": "IKEA Bistro"}, Categories.FAST_FOOD),
+    "cafe": ({}, Categories.CAFE),
+    "clickncollect": None,
+    "restaurant": ({"name": "IKEA Restaurant"}, Categories.FAST_FOOD),
+    "smaland": ({}, Categories.LEISURE_INDOOR_PLAY),
+    "swedishFoodMarket": ({}, Categories.SHOP_CONVENIENCE),
+}
+
 
 class IkeaSpider(scrapy.Spider):
     name = "ikea"
@@ -63,29 +72,46 @@ class IkeaSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
+            if store["buClassification"]["code"] == "FFP":  # FULFILMENT POINT
+                continue
+
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street")
-            try:
-                item["opening_hours"] = self.parse_opening_hours(store.get("hours", {}).get("normal") or [])
-            except:
-                self.logger.error("Error parsing opening hours")
-
+            item["name"] = None
+            item["branch"] = store["displayName"].replace("IKEA", "").strip()
             item["country"] = response.url.split("/")[3].upper()
-
-            if item["country"] in ("DE", "PT"):
-                item["nsi_id"] = "N/A"
+            if item["country"] == "US":
+                item["state"] = store["address"].get("stateProvinceCode")[2:]
 
             item["website"] = (
                 store["storePageUrl"]
                 if "storePageUrl" in store
                 else response.url.replace("/meta-data/informera/stores-detailed.json", "/stores/")
             )
+
+            for alt, hours in store.get("hours", {}).items():
+                if not hours:
+                    continue
+                if cat := ALT_TYPES.get(alt):
+                    alt_item = item.deepcopy()
+                    alt_item.update(cat[0])
+                    alt_item["ref"] = "{}-{}".format(item["ref"], alt)
+                    alt_item["opening_hours"] = self.parse_opening_hours(hours)
+
+                    apply_category(cat[1], alt_item)
+                    yield alt_item
+
+            try:
+                item["opening_hours"] = self.parse_opening_hours(store.get("hours", {}).get("normal") or [])
+            except:
+                self.logger.error("Error parsing opening hours")
+
+            if item["country"] in ("DE", "PT"):
+                item["name"] = "IKEA"
+
             item["extras"]["store_type"] = store["buClassification"]["code"]
             item["extras"]["start_date"] = store["openCloseDates"]["openingDate"].replace("T00:00:00Z", "")
             item["extras"]["ref:google"] = store.get("placeId")
-
-            if item["country"] == "US":
-                item["state"] = store["address"].get("stateProvinceCode")[2:]
 
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item
