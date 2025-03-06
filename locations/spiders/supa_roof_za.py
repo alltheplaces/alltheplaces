@@ -27,6 +27,7 @@ class SupaRoofZASpider(JSONBlobSpider):
         feature["address"] = merge_address_lines([feature.pop("address_line1", ""), feature.pop("address_line2", "")])
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["website"] = f'https://shop.suparoof.co.za/storefinder/store/index/id/{item["ref"]}/'
+        item["branch"] = item.pop("name").removeprefix("Supa-Roof ")
+        item["website"] = f'https://shop.suparoof.co.za/storefinder/store/index/id/{item["ref"]}'
         item["image"] = urljoin("https://shop.suparoof.co.za/media/", feature["primary_image"])
         yield item
