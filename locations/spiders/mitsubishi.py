@@ -31,33 +31,34 @@ class MitsubishiSpider(scrapy.Spider):
             yield JsonRequest(
                 url="https://www-graphql.prod.mipulse.co/prod/graphql",
                 data={
-                    "query": """query {{
-                    searchDealer(criteria: {{ market: "{country}", language: "{language}" }}) {{
-                    id
-                    dealershipMarketId
-                    name
-                    url
-                    email
-                    dealerFilterTags
-                    phone {{
-                        phoneNumber
-                    }}
-                    address {{
-                        country
-                        city
-                        district
-                        municipality
-                        postcode: postalArea
-                        longitude
-                        latitude
-                        addressLine1
-                        addressLine2
-                        addressLine3
-                    }}
-                    }}
-                }}""".format(
-                        country=country.lower(), language=language
-                    ),
+                    "query": """
+                    query SearchDealer($market: String!, $language: String!) {
+                        searchDealer(criteria: { market: $market, language: $language }) {
+                            id
+                            dealershipMarketId
+                            name
+                            isActive
+                            url
+                            email
+                            dealerFilterTags
+                            phone {
+                                phoneNumber
+                            }
+                            address {
+                                country
+                                city
+                                district
+                                municipality
+                                postcode: postalArea
+                                longitude
+                                latitude
+                                addressLine1
+                                addressLine2
+                                addressLine3
+                            }
+                        }
+                    }""",
+                    "variables": {"market": country.lower(), "language": language},
                 },
                 meta={"country": country, "language": language},
             )
@@ -122,6 +123,8 @@ class MitsubishiSpider(scrapy.Spider):
             self.logger.info(f"Found {len(pois)} dealers for {country}/{language}")
 
             for poi in pois:
+                if poi.get("isActive"):
+                    continue
                 poi.update(poi.pop("address"))
                 item = DictParser.parse(poi)
                 item.pop("street_address", None)
