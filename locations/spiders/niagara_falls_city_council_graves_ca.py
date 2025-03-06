@@ -17,7 +17,18 @@ class NiagaraFallsCityCouncilGravesCASpider(ArcGISFeatureServerSpider):
     layer_id = "0"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = "_".join(filter(None, [feature.get("Cemetery"), feature.get("CemSection"), feature.get("CemRow"), feature.get("CemLot"), feature.get("CemSubLot")]))
+        item["ref"] = "_".join(
+            filter(
+                None,
+                [
+                    feature.get("Cemetery"),
+                    feature.get("CemSection"),
+                    feature.get("CemRow"),
+                    feature.get("CemLot"),
+                    feature.get("CemSubLot"),
+                ],
+            )
+        )
         name = ""
         if feature.get("FirstNames") and feature.get("FirstNames") != "UNKNOWN":
             name = feature["FirstNames"]
