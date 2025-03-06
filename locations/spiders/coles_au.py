@@ -1,19 +1,19 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
+from locations.hours import OpeningHours, day_range
 
 
 class ColesAUSpider(scrapy.Spider):
     name = "coles_au"
 
     BRANDS = {
-        1: {"brand": "Coles Express", "brand_wikidata": "Q5144653", "extras": Categories.SHOP_CONVENIENCE.value},
-        2: {"brand": "Coles Supermarkets", "brand_wikidata": "Q1108172"},
+        1: {"brand": "Reddy Express", "brand_wikidata": "Q5144653"},
+        2: {"brand": "Coles", "brand_wikidata": "Q1108172"},
         3: {"brand": "Liquorland", "brand_wikidata": "Q2283837"},
-        4: {"brand": "1st Choice", "brand_wikidata": "Q4596269"},  # AKA First Choice Liquor
+        4: {"brand": "First Choice Liquor", "brand_wikidata": "Q4596269"},
         5: {"brand": "Vintage Cellars", "brand_wikidata": "Q7932815"},
     }
 
@@ -27,12 +27,38 @@ class ColesAUSpider(scrapy.Spider):
         for location in response.json()["stores"]:
             location["street_address"] = location.pop("address")
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
 
             if brand := self.BRANDS.get(location["brandId"]):
                 item.update(brand)
             else:
-                item["brand"] = location["brandName"]
+                self.logger.error("Unknown brand: {}".format(location["brandName"]))
 
-            # TODO: tradingHours
+            try:
+                item["opening_hours"] = self.parse_opening_hours(location["tradingHours"])
+            except:
+                self.logger.error("Unable to parse opening hours: {}".format(location["tradingHours"]))
 
             yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            if "-" in rule["daysOfWeek"]:
+                days = day_range(*rule["daysOfWeek"].split("-"))
+            else:
+                days = [rule["daysOfWeek"]]
+
+            if rule["storeTime"] == "24 hours":
+                oh.add_days_range(days, "00:00", "24:00")
+            elif rule["storeTime"] == "Closed":
+                oh.set_closed(days)
+            else:
+                start_time, end_time = rule["storeTime"].split("-")
+                if ":" not in start_time:
+                    start_time = start_time.replace("am", ":00am").replace("pm", ":00pm")
+                if ":" not in end_time:
+                    end_time = end_time.replace("am", ":00am").replace("pm", ":00pm")
+                oh.add_days_range(days, start_time, end_time, "%I:%M%p")
+
+        return oh
