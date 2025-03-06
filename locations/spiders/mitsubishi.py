@@ -123,7 +123,7 @@ class MitsubishiSpider(scrapy.Spider):
             self.logger.info(f"Found {len(pois)} dealers for {country}/{language}")
 
             for poi in pois:
-                if poi.get("isActive"):
+                if poi.get("isActive", True) is not True:
                     continue
                 poi.update(poi.pop("address"))
                 item = DictParser.parse(poi)
