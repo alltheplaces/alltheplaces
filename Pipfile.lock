@@ -1533,12 +1533,10 @@
         },
         "pygeohash": {
             "hashes": [
-                "sha256:3edb3a0c9df95435fd9b2ba9a7ef3ce42febcedb8f71b50899df3246fc32e8bc",
-                "sha256:b4080c7157197a3e988c6230abaf36d2643837f6db127c832d9497c219d1584f"
+                "sha256:750e51643e743eabd065a84fc8c1912c5843b648143137919e4a9776366d921e"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.8'",
-            "version": "==2.1.0"
+            "version": "==1.2.0"
         },
         "pygithub": {
             "hashes": [
