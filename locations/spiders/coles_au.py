@@ -1,6 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours, day_range
@@ -33,6 +34,9 @@ class ColesAUSpider(scrapy.Spider):
                 item.update(brand)
             else:
                 self.logger.error("Unknown brand: {}".format(location["brandName"]))
+
+            if location["brandId"] == 1:
+                apply_category(Categories.SHOP_CONVENIENCE, item)
 
             try:
                 item["opening_hours"] = self.parse_opening_hours(location["tradingHours"])
