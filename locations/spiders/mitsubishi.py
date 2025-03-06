@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.country_utils import get_locale
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class MitsubishiSpider(scrapy.Spider):
@@ -49,7 +50,9 @@ class MitsubishiSpider(scrapy.Spider):
                         postcode: postalArea
                         longitude
                         latitude
-                        address: addressLine1
+                        addressLine1
+                        addressLine2
+                        addressLine3
                     }}
                     }}
                 }}""".format(
@@ -121,6 +124,17 @@ class MitsubishiSpider(scrapy.Spider):
             for poi in pois:
                 poi.update(poi.pop("address"))
                 item = DictParser.parse(poi)
+                item.pop("street_address", None)
+                # Addresses are inconsistent across countries, so we do addr_full
+                item["addr_full"] = clean_address(
+                    [
+                        poi.get("addressLine1", ""),
+                        poi.get("addressLine2", ""),
+                        poi.get("addressLine3", ""),
+                        poi.get("city", ""),
+                        poi.get("postcode", ""),
+                    ]
+                )
                 item["phone"] = poi.get("phone").get("phoneNumber")
                 item["website"] = poi.get("url")
                 yield from self.get_details(country, language, poi.get("id"), item)
