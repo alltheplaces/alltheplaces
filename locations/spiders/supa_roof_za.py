@@ -1,4 +1,5 @@
 from typing import Iterable
+from urllib.parse import urljoin
 
 import chompjs
 from scrapy.http import Response
@@ -27,4 +28,5 @@ class SupaRoofZASpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["website"] = f'https://shop.suparoof.co.za/storefinder/store/index/id/{item["ref"]}/'
+        item["image"] = urljoin("https://shop.suparoof.co.za/media/", feature["primary_image"])
         yield item
