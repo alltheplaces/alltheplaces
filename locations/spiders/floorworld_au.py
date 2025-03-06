@@ -15,7 +15,6 @@ class FloorworldAUSpider(Spider):
             response.xpath('(//div[contains(@class, "goto-next")]/following::script)/text()').get()
         )
         for location in locations:
-            print(location)
             item = DictParser.parse(location)
             item["ref"] = location["hs_path"]
             if item.get("addr_full"):
