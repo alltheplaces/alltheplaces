@@ -10,7 +10,9 @@ class TdBankSpider(JSONBlobSpider):
         "brand": "TD Bank",
         "brand_wikidata": "Q7669891",
     }
-    start_urls = ["https://www.tdbank.com/net/get12.ashx?longitude=-94&latitude=48&json=y&searchradius=25000&searchunit=mi&numresults=10000"]
+    start_urls = [
+        "https://www.tdbank.com/net/get12.ashx?longitude=-94&latitude=48&json=y&searchradius=25000&searchunit=mi&numresults=10000"
+    ]
     locations_key = ["markers", "marker"]
 
     def post_process_item(self, item, response, location):
