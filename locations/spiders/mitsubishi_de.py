@@ -41,10 +41,10 @@ class MitsubishiDESpider(JSONBlobSpider):
             item["city"] = poi.get("city")
             item["phone"] = poi.get("phone")
             item["email"] = poi.get("mail")
-            
+
             item["website"] = poi.get("baseUrl") or poi.get("parentBaseUrl")
-            if item.get('website') and not item['website'].startswith('http'):
-                item['website'] = 'https://' + item['website']
+            if item.get("website") and not item["website"].startswith("http"):
+                item["website"] = "https://" + item["website"]
 
             type_id = poi.get("partnerTypID")
             if type_id in ["1", "2", "5", "6"]:
