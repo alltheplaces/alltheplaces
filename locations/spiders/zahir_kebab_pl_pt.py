@@ -36,7 +36,9 @@ class ZahirKebabPLPTSpider(Spider):
     def parse_feature(self, response: Response) -> Iterable[Feature]:
         properties = response.meta["properties"]
         properties["branch"] = response.xpath('//div[@class="entry-content"]/div[1]/div[1]/h3/strong/text()').get()
-        properties["addr_full"] = merge_address_lines(response.xpath('//div[@class="entry-content"]/div[1]/div[1]/h4/text()').getall())
+        properties["addr_full"] = merge_address_lines(
+            response.xpath('//div[@class="entry-content"]/div[1]/div[1]/h4/text()').getall()
+        )
         days = DAYS_PL
         if "/en/" in response.url:
             # All store pages redirected to their English langauge page are
@@ -48,11 +50,20 @@ class ZahirKebabPLPTSpider(Spider):
         elif "/pt/" in response.url:
             properties["country"] = "PT"
             days = DAYS_PT
-        properties["phone"] = response.xpath('//div[@class="entry-content"]/div[1]/div[1]/h4/span[contains(text(), "tel:")]/text()').get("").replace("tel:", "").strip()
+        properties["phone"] = (
+            response.xpath('//div[@class="entry-content"]/div[1]/div[1]/h4/span[contains(text(), "tel:")]/text()')
+            .get("")
+            .replace("tel:", "")
+            .strip()
+        )
         properties["website"] = response.url
         if not properties["phone"]:
             properties["phone"] = None
-        hours_text = " ".join(response.xpath('//div[@class="entry-content"]/div[1]/div[1]/div/table/tbody/tr/td[position() <= 3]/text()').getall())
+        hours_text = " ".join(
+            response.xpath(
+                '//div[@class="entry-content"]/div[1]/div[1]/div/table/tbody/tr/td[position() <= 3]/text()'
+            ).getall()
+        )
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_text, days=days, delimiters=[" "])
         apply_category(Categories.FAST_FOOD, properties)
