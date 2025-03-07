@@ -34,7 +34,7 @@ class RadissonHotelsSpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
-            url="https://www.radissonhotels.com/zimba-api/hotels?limit=1000", headers={"accept-language": "en-us"}
+            url="https://www.radissonhotels.com/zimba-api/hotels?limit=2000", headers={"accept-language": "en-us"}
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -47,6 +47,7 @@ class RadissonHotelsSpider(scrapy.Spider):
                 if page.get("code") == "overview":
                     item["website"] = response.urljoin(page["url"])
                     break
+            item["image"] = hotel.get("image", {}).get("url")
 
             if brand_info := self.brand_mapping.get(hotel.get("brand")):
                 item["brand"], item["brand_wikidata"] = brand_info
