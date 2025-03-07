@@ -25,6 +25,7 @@ FEATURES_MAPPING = {
 class StarbucksEUSpider(scrapy.Spider):
     name = "starbucks_eu"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         base_url = "https://www.starbucks.co.uk/api/v2/stores/?filter[coordinates][latitude]={}&filter[coordinates][longitude]={}&filter[radius]=250"

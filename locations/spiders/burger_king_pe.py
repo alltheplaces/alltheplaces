@@ -17,16 +17,27 @@ class BurgerKingPESpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
     api_token = ""
-
-    def start_requests(self):
-        yield Request(
-            url="https://www.burgerking.pe/carta/ver-todo",
-            body='["accessToken"]',
-            headers={"next-action": "2686d5940e3bce57deceb15dc1c5eb63d9a86f4c"},
-            method="POST",
-        )
+    start_urls = ["https://www.burgerking.pe/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Search for the desired JavaScript file
+        yield response.follow(
+            url=response.xpath("//script/@src").re(r"_next/static/chunks/\d{4}-\w+\.js")[-1],
+            callback=self.parse_action_token,
+        )
+
+    def parse_action_token(self, response: Response, **kwargs: Any) -> Any:
+        matches = re.findall(r"[a-z][\s=]+\(0,\s*o.\$\)\(\"([a-f0-9]{40})\"\)", response.text)
+        action_token = matches[1] if len(matches) > 1 else matches[0]
+        yield Request(
+            url="https://www.burgerking.pe/",
+            body='["accessToken"]',
+            headers={"next-action": action_token},
+            method="POST",
+            callback=self.parse_request,
+        )
+
+    def parse_request(self, response: Response, **kwargs: Any) -> Any:
         self.api_token = re.search(r"1:\s*\"(.+)\"", response.text).group(1)
         yield JsonRequest(
             url="https://apiprod.pidelo.digital/api.stores/v1/stores/get-district?brandId=41",
@@ -47,6 +58,7 @@ class BurgerKingPESpider(Spider):
         for location in response.json().get("data", []):
             location.update(location.pop("addressInformation"))
             item = DictParser.parse(location)
+            item["name"] = None
             item["housenumber"] = location.get("exteriorNumber")
             item["street"] = item.pop("addr_full").replace("S/N", "")
             item["addr_full"] = merge_address_lines([item["housenumber"], item["street"], district])

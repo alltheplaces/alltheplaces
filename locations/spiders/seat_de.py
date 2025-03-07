@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -20,5 +21,5 @@ class SeatDESpider(scrapy.Spider):
             item["postcode"] = data.get("PLZ")
             item["lat"] = data.get("XPOS")
             item["lon"] = data.get("YPOS")
-
+            apply_category(Categories.SHOP_CAR, item)
             yield item

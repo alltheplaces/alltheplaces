@@ -44,7 +44,7 @@ BRANDS_MAPPING = {
     "MOLPLUGEE": ("MOL", "Q549181"),
     "PAPOIL": ("PapOil", None),
     "SLOVNAFT": ("Slovnaft", "Q1587563"),
-    "TOTAL": ("Total", "Q154037"),
+    "TOTAL": ("TotalEnergies", "Q154037"),
     "LOTOS": ("Lotos", "Q1256909"),
     "TOTAL ACCESS": ("TotalEnergies", "Q154037"),
     "EX-OMV": ("MOL", "Q549181"),

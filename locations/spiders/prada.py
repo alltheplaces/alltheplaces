@@ -1,31 +1,18 @@
 from typing import Iterable
 
-import scrapy
-from scrapy import Request
-
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class PradaSpider(scrapy.Spider):
+class PradaSpider(YextAnswersSpider):
     name = "prada"
     item_attributes = {"brand": "Prada", "brand_wikidata": "Q193136"}
+    endpoint = "https://cdn.yextapis.com/v2/accounts/me/search/vertical/query"
+    api_key = "61119b3d853ae12bf41e7bd9501a718b"
+    experience_key = "prada-experience"
+    feature_type = "prada-locations"
 
-    def make_request(self, offset: int):
-        return scrapy.Request(
-            url="https://cdn.yextapis.com/v2/accounts/me/search/vertical/query?api_key=61119b3d853ae12bf41e7bd9501a718b&v=20220511&limit=50&experienceKey=prada-experience&verticalKey=prada-locations&retrieveFacets=true&offset={}".format(
-                offset
-            ),
-            cb_kwargs={"offset": offset},
-        )
-
-    def start_requests(self) -> Iterable[Request]:
-        yield self.make_request(0)
-
-    def parse(self, response, **kwargs):
-        if raw_data := response.json()["response"]["results"]:
-            for store in raw_data:
-                item = DictParser.parse(store["data"])
-                item["website"] = "https://www.prada.com/us/en/store-locator/" + store["data"]["slug"]
-                yield item
-            current_offeset = kwargs["offset"] + 50
-            yield self.make_request(current_offeset)
+    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        item["website"] = "https://www.prada.com/us/en/store-locator/" + location["slug"]
+        item["branch"] = item.pop("name").removeprefix("Prada ")
+        yield item

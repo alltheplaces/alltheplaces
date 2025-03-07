@@ -1,43 +1,21 @@
-import logging
-
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
-from locations.hours import DAYS_PL, DELIMITERS_PL, OpeningHours
 
 
 class PkoBankPolskiPLSpider(Spider):
     name = "pko_bank_polski_pl"
     item_attributes = {"brand": "PKO BP", "brand_wikidata": "Q578832"}
-
-    def start_requests(self):
-        for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "PL"):
-            start_lat = int(float(lat) * 10 - 0.5)
-            start_lon = int(float(lon) * 10 - 0.5)
-            bounds = ",".join([str(c) for c in [start_lat, start_lon, start_lat + 1, start_lon + 1]])
-            yield JsonRequest(
-                url=f"https://www.pkobp.pl/poi/?type=facility,atm&search=&bounds={bounds}",
-            )
+    start_urls = ["https://www.pkobp.pl/api/modules/poi-map?top-left=54.776,14.064&bottom-right=48.934,24.932"]
 
     def parse(self, response):
-        for location in response.json()["result"]:
+        for location in response.json():
             item = DictParser.parse(location)
-            if location["type"] == "atm":
+            item["ref"] = location["unique_id"]
+            if location["label"] == "atm_pko":
                 apply_category(Categories.ATM, item)
-            elif location["type"] == "facility":
+                yield item
+            elif location["label"] == "facility":
                 apply_category(Categories.BANK, item)
-            else:
-                logging.error(f"Unexpected type: {location['type']}")
-            if "opening_hours" in location:
-                if location["opening_hours"] == "Codziennie przez całą dobę":
-                    item["opening_hours"] = "24/7"
-                else:
-                    item["opening_hours"] = OpeningHours()
-                    for line in location["opening_hours"].split("<br />"):
-                        item["opening_hours"].add_ranges_from_string(
-                            ranges_string=line, days=DAYS_PL, delimiters=DELIMITERS_PL
-                        )
-            yield item
+                yield item
