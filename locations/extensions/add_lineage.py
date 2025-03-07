@@ -6,6 +6,8 @@ from scrapy.signals import spider_opened
 S_ATP_AGG = "S_ATP_AGGREGATORS"
 S_ATP_BRANDS = "S_ATP_BRANDS"
 S_ATP_GOV = "S_ATP_GOVERNMENTS"
+S_ATP_INFRA = "S_ATP_INFRASTRUCTURE"
+S_ATP_ADDRESSES = "S_ATP_ADDRESSES"
 UNKNOWN_LINEAGE = "S_?"
 
 
@@ -28,6 +30,10 @@ def spider_path_to_lineage(file_path: str) -> str:
         return S_ATP_GOV
     elif "locations/aggregator_spiders/" in file_path:
         return S_ATP_AGG
+    elif "locations/infrastructure_spiders/" in file_path:
+        return S_ATP_INFRA
+    elif "locations/address_spiders/" in file_path:
+        return S_ATP_ADDRESSES
     elif "locations/spiders/" in file_path:
         return S_ATP_BRANDS
     else:
