@@ -6,12 +6,12 @@ from scrapy.signals import spider_opened
 
 
 class Lineage(Enum):
-    S_ATP_AGG = "S_ATP_AGGREGATOR"
-    S_ATP_BRANDS = "S_ATP_BRANDS"
-    S_ATP_GOV = "S_ATP_GOVERNMENT"
-    S_ATP_INFRA = "S_ATP_INFRASTRUCTURE"
-    S_ATP_ADDRESSES = "S_ATP_ADDRESSES"
-    UNKNOWN_LINEAGE = "S_?"
+    Aggregators = "S_ATP_AGGREGATORS"
+    Brands = "S_ATP_BRANDS"
+    Governments = "S_ATP_GOVERNMENTS"
+    Infrastructure = "S_ATP_INFRASTRUCTURE"
+    Addresses = "S_ATP_ADDRESSES"
+    Unknown = "S_?"
 
 
 def spider_class_to_lineage(spider: Spider) -> Lineage:
@@ -30,17 +30,17 @@ def spider_path_to_lineage(file_path: str) -> Lineage:
     :return: an indication of the origin the spider
     """
     if "locations/spiders/government/" in file_path:
-        return Lineage.S_ATP_GOV
-    elif "locations/spiders/aggregator/" in file_path:
-        return Lineage.S_ATP_AGG
-    elif "locations/spiders/infrastructure" in file_path:
-        return Lineage.S_ATP_INFRA
-    elif "locations/spiders/addresses" in file_path:
-        return Lineage.S_ATP_ADDRESSES
+        return Lineage.Governments
+    elif "locations/spiders/aggregators/" in file_path:
+        return Lineage.Aggregators
+    elif "locations/spiders/infrastructure/" in file_path:
+        return Lineage.Infrastructure
+    elif "locations/spiders/addresses/" in file_path:
+        return Lineage.Addresses
     elif "locations/spiders/" in file_path:
-        return Lineage.S_ATP_BRANDS
+        return Lineage.Brands
     else:
-        return Lineage.UNKNOWN_LINEAGE
+        return Lineage.Unknown
 
 
 class AddLineageExtension:
