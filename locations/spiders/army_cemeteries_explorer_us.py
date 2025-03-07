@@ -24,7 +24,13 @@ class ArymCemeteriesExplorerUSSpider(ArcGISFeatureServerSpider):
         6: ("Carlisle Barracks Main Post Cemetery", "Q117516970", "PA", "Office of Army Cemeteries", "Q114305338"),
         9: ("Fort Drum Prisoner Of War Cemetery", "Q133148748", "NY", "Office of Army Cemeteries", "Q114305338"),
         10: ("Edgewood Arsenal Post Cemetery", "Q133149492", "MD", "Office of Army Cemeteries", "Q114305338"),
-        11: ("Fort Eisenhower German and Italian Prisoner of War Cemetery", "Q133149865", "GA", "Office of Army Cemeteries", "Q114305338"),
+        11: (
+            "Fort Eisenhower German and Italian Prisoner of War Cemetery",
+            "Q133149865",
+            "GA",
+            "Office of Army Cemeteries",
+            "Q114305338",
+        ),
         12: ("Fort Huachuca Post Cemetery", "Q115871322", "AZ", "Office of Army Cemeteries", "Q114305338"),
         13: ("Fort Knox Post Cemetery", "Q117601183", "KY", "Office of Army Cemeteries", "Q114305338"),
         15: ("U.S. Disciplinary Barracks Cemetery", "Q5471497", "KS", "Office of Army Cemeteries", "Q114305338"),
@@ -36,15 +42,38 @@ class ArymCemeteriesExplorerUSSpider(ArcGISFeatureServerSpider):
         23: ("Schofield Barracks Main Post Cemetery", "Q117682792", "HI", "Office of Army Cemeteries", "Q114305338"),
         25: ("Fort Sill Post Cemetery", "Q117538802", "OK", "Office of Army Cemeteries", "Q114305338"),
         28: ("West Point Cemetery", "Q2687434", "NY", "United States Military Academy", "Q9219"),
-        30: ("Fort Campbell Prisoner of War Post Cemetery", "Q133151740", "KY", "Office of Army Cemeteries", "Q114305338"),
+        30: (
+            "Fort Campbell Prisoner of War Post Cemetery",
+            "Q133151740",
+            "KY",
+            "Office of Army Cemeteries",
+            "Q114305338",
+        ),
         31: ("Watervliet Arsenal Post Cemetery", "Q117642154", "NY", "Office of Army Cemeteries", "Q114305338"),
-        32: ("Soldiers' and Airmen's Home National Cemetery", "Q7892208", "DC", "United States Department of the Army", "Q1328562"),
-        41: ("United States Naval Academy Cemetery", "Q7890788", "MD", "United States Department of the Navy", "Q742787"),
+        32: (
+            "Soldiers' and Airmen's Home National Cemetery",
+            "Q7892208",
+            "DC",
+            "United States Department of the Army",
+            "Q1328562",
+        ),
+        41: (
+            "United States Naval Academy Cemetery",
+            "Q7890788",
+            "MD",
+            "United States Department of the Navy",
+            "Q742787",
+        ),
     }
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["cemeteryidpk"]
-        item["name"] = " ".join(filter(lambda x: x.upper() != "UNKNOWN", filter(None, [feature["firstname"], feature["middlename"], feature["surname"]])))
+        item["name"] = " ".join(
+            filter(
+                lambda x: x.upper() != "UNKNOWN",
+                filter(None, [feature["firstname"], feature["middlename"], feature["surname"]]),
+            )
+        )
         if not item["name"]:
             item["name"] = None
         cemetery_id = feature["cemetery_id"]
@@ -55,7 +84,11 @@ class ArymCemeteriesExplorerUSSpider(ArcGISFeatureServerSpider):
             item["operator"] = self.cemeteries[cemetery_id][3]
             item["operator_wikidata"] = self.cemeteries[cemetery_id][4]
         else:
-            self.logger.warning("Unknown cemetery code `{}` with name `{}`. Perhaps a new cemetery is now included in the dataset?".format(cemetery_id, feature["cemeteryname"]))
+            self.logger.warning(
+                "Unknown cemetery code `{}` with name `{}`. Perhaps a new cemetery is now included in the dataset?".format(
+                    cemetery_id, feature["cemeteryname"]
+                )
+            )
         apply_category(Categories.GRAVE, item)
         item["extras"]["alt_ref"] = feature["gravenumber"]
         yield item
