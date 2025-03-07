@@ -1,4 +1,3 @@
-import base64
 
 from chompjs import chompjs
 from scrapy import FormRequest, Spider
