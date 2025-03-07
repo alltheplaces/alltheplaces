@@ -1,5 +1,6 @@
 import sys
 from enum import Enum
+from typing import Type
 
 from scrapy import Spider
 from scrapy.signals import spider_opened
@@ -14,21 +15,18 @@ class Lineage(Enum):
     Unknown = "S_?"
 
 
-def spider_class_to_lineage(spider: Spider) -> Lineage:
+def spider_class_to_lineage(spider: Type) -> Lineage:
     """
     Provide an indication of the origin of the spider.
     :param spider: the spider
     :return: an indication of the origin the spider
     """
-    return spider_path_to_lineage(sys.modules[spider.__module__].__file__)
 
+    if hasattr(spider, "lineage"):
+        return getattr(spider, "lineage")
 
-def spider_path_to_lineage(file_path: str) -> Lineage:
-    """
-    Provide an indication of the origin of the spider.
-    :param file_path: the location of the spider on the file system
-    :return: an indication of the origin the spider
-    """
+    file_path = sys.modules[spider.__module__].__file__
+
     if "locations/spiders/government/" in file_path:
         return Lineage.Governments
     elif "locations/spiders/aggregators/" in file_path:
