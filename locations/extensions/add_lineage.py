@@ -7,11 +7,11 @@ from scrapy.signals import spider_opened
 
 
 class Lineage(Enum):
+    Addresses = "S_ATP_ADDRESSES"
     Aggregators = "S_ATP_AGGREGATORS"
     Brands = "S_ATP_BRANDS"
     Governments = "S_ATP_GOVERNMENTS"
     Infrastructure = "S_ATP_INFRASTRUCTURE"
-    Addresses = "S_ATP_ADDRESSES"
     Unknown = "S_?"
 
 
