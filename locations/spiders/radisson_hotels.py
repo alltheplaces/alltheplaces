@@ -46,6 +46,7 @@ class RadissonHotelsSpider(scrapy.Spider):
             for page in hotel.get("pages", []):
                 if page.get("code") == "overview":
                     item["website"] = response.urljoin(page["url"])
+                    break
 
             if brand_info := self.brand_mapping.get(hotel.get("brand")):
                 item["brand"], item["brand_wikidata"] = brand_info
