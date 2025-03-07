@@ -12,6 +12,7 @@ class QldtrafficAUSpider(JSONBlobSpider):
     item_attributes = {
         "operator": "Department of Transport and Main Roads",
         "operator_wikidata": "Q1191482",
+        "nsi_id": "N/A",
     }
     allowed_domains = ["data.qldtraffic.qld.gov.au"]
     start_urls = [
@@ -25,8 +26,12 @@ class QldtrafficAUSpider(JSONBlobSpider):
         feature["name"] = feature.pop("description", None)
         feature["city"] = feature.pop("locality", None)
         feature["state"] = "QLD"
+        # Geometry is supplied with projection of EPSG:4326 not EPSG:7844 as
+        # the source data incorrectly states.
+        feature["geometry"]["crs"]["properties"]["name"] = "EPSG:4326"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(item["ref"])
         item.pop("website", None)
         apply_category(Categories.SURVEILLANCE_CAMERA, item)
         match str(feature["image_sourced_from"]).strip().upper():
