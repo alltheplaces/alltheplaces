@@ -43,6 +43,10 @@ class RadissonHotelsSpider(scrapy.Spider):
             item = DictParser.parse(hotel)
             item["ref"] = hotel.get("code")
             item["street_address"] = item.pop("addr_full")
+            for page in hotel.get("pages", []):
+                if page.get("code") == "overview":
+                    item["website"] = response.urljoin(page["url"])
+
             if brand_info := self.brand_mapping.get(hotel.get("brand")):
                 item["brand"], item["brand_wikidata"] = brand_info
             else:
