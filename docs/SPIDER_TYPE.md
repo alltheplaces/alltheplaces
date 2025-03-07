@@ -21,4 +21,3 @@ We store them in [locations/infrastructure_spiders](../locations/infrastructure_
 We also collect data from aggregators, this is likely third party data and as such may contain issues not present in
 brand spiders.
 We store them in [locations/aggregator_spiders](../locations/aggregator_spiders), there lineage is `S_ATP_AGGREGATORS`.
-
