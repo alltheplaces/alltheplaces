@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class ArymCemeteriesExplorerUSSpider(ArcGISFeatureServerSpider):
+class ArmyCemeteriesExplorerUSSpider(ArcGISFeatureServerSpider):
     name = "army_cemeteries_explorer_us"
     host = "ancexplorer.army.mil"
     context_path = "arcgis"
