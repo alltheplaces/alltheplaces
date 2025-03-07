@@ -1,4 +1,4 @@
-## Types of spiders
+## Spider Lineage
 
 The vast majority of spiders are collecting first party data about a specific brand/chain.
 We sometimes call these "brand spiders", these should be well categorised and branded by us, and have original data from
