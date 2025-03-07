@@ -44,5 +44,5 @@ class MitsubishiIDSpider(JSONBlobSpider):
                 apply_category(Categories.SHOP_CAR_PARTS, item)
             else:
                 self.logger.error(f"No type present for: {item['ref']}, {item['name']}")
-
+            # TODO: hours
             yield item
