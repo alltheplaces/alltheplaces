@@ -23,8 +23,8 @@ class RadissonHotelsSpider(scrapy.Spider):
         "rad": ["Radisson", "Q1751979"],
         # I did not find the sub-brand wikidata so I put None.
         "prz": ["Prizeotel", None],
-        "rdi": ["Radisson Individuals", None],
         "ri": ["Radisson Individuals", None],
+        "pis": ["Park Inn & Suites by Radisson", None],
     }
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
