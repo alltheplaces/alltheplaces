@@ -12,8 +12,6 @@ import os
 import scrapy
 
 import locations
-from locations.extensions.add_lineage import AddLineageExtension
-from locations.extensions.log_stats import LogStatsExtension
 
 BOT_NAME = "locations"
 
@@ -101,8 +99,8 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 # }
 
 EXTENSIONS = {
-    AddLineageExtension: 100,
-    LogStatsExtension: 1000,
+    "locations.extensions.add_lineage.AddLineageExtension": 100,
+    "locations.extensions.log_stats.LogStatsExtension": 1000,
 }
 
 # Configure item pipelines
