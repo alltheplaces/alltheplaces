@@ -6,9 +6,9 @@ from scrapy.signals import spider_opened
 
 
 class Lineage(Enum):
-    S_ATP_AGG = "S_ATP_AGGREGATORS"
+    S_ATP_AGG = "S_ATP_AGGREGATOR"
     S_ATP_BRANDS = "S_ATP_BRANDS"
-    S_ATP_GOV = "S_ATP_GOVERNMENTS"
+    S_ATP_GOV = "S_ATP_GOVERNMENT"
     S_ATP_INFRA = "S_ATP_INFRASTRUCTURE"
     S_ATP_ADDRESSES = "S_ATP_ADDRESSES"
     UNKNOWN_LINEAGE = "S_?"
@@ -29,13 +29,13 @@ def spider_path_to_lineage(file_path: str) -> Lineage:
     :param file_path: the location of the spider on the file system
     :return: an indication of the origin the spider
     """
-    if "locations/government_spiders/" in file_path:
+    if "locations/spiders/government/" in file_path:
         return Lineage.S_ATP_GOV
-    elif "locations/aggregator_spiders/" in file_path:
+    elif "locations/spiders/aggregator/" in file_path:
         return Lineage.S_ATP_AGG
-    elif "locations/infrastructure_spiders/" in file_path:
+    elif "locations/spiders/infrastructure" in file_path:
         return Lineage.S_ATP_INFRA
-    elif "locations/address_spiders/" in file_path:
+    elif "locations/spiders/addresses" in file_path:
         return Lineage.S_ATP_ADDRESSES
     elif "locations/spiders/" in file_path:
         return Lineage.S_ATP_BRANDS
