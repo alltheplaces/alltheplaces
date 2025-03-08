@@ -58,6 +58,7 @@ class YextAnswersSpider(Spider):
     locale: str = "en"
     environment: str = "PRODUCTION"  # "STAGING" also used
     feature_type: str = "locations"  # "restaurants" also used
+    facet_filters: dict = {}
 
     def make_request(self, offset: int) -> JsonRequest:
         return JsonRequest(
@@ -77,6 +78,7 @@ class YextAnswersSpider(Spider):
                         "limit": str(self.page_limit),
                         "offset": str(offset),
                         "source": "STANDARD",
+                        "facetFilters": json.dumps(self.facet_filters),
                     }
                 ),
             ),
@@ -129,6 +131,7 @@ class YextAnswersSpider(Spider):
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
             item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(location.get("deliveryHours"))
             item["extras"]["happy_hours"] = self.parse_opening_hours(location.get("happyHours"))
+            item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(location.get("driveThroughHours"))
 
             self.parse_payment_methods(location, item)
             self.parse_google_attributes(location, item)
