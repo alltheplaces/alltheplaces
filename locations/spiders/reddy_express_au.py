@@ -39,14 +39,34 @@ class ReddyExpressAUSpider(MapDataServicesSpider):
         if feature.get("restaurant") == "1":
             apply_category(Categories.RESTAURANT, item)
         apply_yes_no(Fuel.E10, item, feature.get("unleaded_e10") == "1", False)
-        apply_yes_no(Fuel.OCTANE_91, item, feature.get("unleaded_91") == "1" or feature.get("unleaded_91_la") == "1", False)
+        apply_yes_no(
+            Fuel.OCTANE_91, item, feature.get("unleaded_91") == "1" or feature.get("unleaded_91_la") == "1", False
+        )
         apply_yes_no(Fuel.OCTANE_95, item, feature.get("unleaded_95") == "1", False)
-        apply_yes_no(Fuel.OCTANE_98, item, feature.get("unleaded_98") == "1" or feature.get("shell_v_power") == "1", False)
-        apply_yes_no(Fuel.DIESEL, item, feature.get("diesel") == "1" or feature.get("premium_diesel") == "1" or feature.get("shell_v_power_diesel") == "1", False)
-        apply_yes_no(Fuel.HGV_DIESEL, item, feature.get("high_flow_diesel") == "1" or "ultra_high_flow_diesel" == "1", False)
+        apply_yes_no(
+            Fuel.OCTANE_98, item, feature.get("unleaded_98") == "1" or feature.get("shell_v_power") == "1", False
+        )
+        apply_yes_no(
+            Fuel.DIESEL,
+            item,
+            feature.get("diesel") == "1"
+            or feature.get("premium_diesel") == "1"
+            or feature.get("shell_v_power_diesel") == "1",
+            False,
+        )
+        apply_yes_no(
+            Fuel.HGV_DIESEL, item, feature.get("high_flow_diesel") == "1" or "ultra_high_flow_diesel" == "1", False
+        )
         apply_yes_no(Fuel.LPG, item, feature.get("autogas") == "1", False)
-        apply_yes_no(Fuel.ADBLUE, item, feature.get("adblue_at_pump") == "1" or feature.get("adblue_by_pack") == "1", False)
-        apply_yes_no(FuelCards.SHELL, item, feature.get("shell_card_accepted") == "1" or feature.get("shell_card_mobile_app_accepted") == "1", False)
+        apply_yes_no(
+            Fuel.ADBLUE, item, feature.get("adblue_at_pump") == "1" or feature.get("adblue_by_pack") == "1", False
+        )
+        apply_yes_no(
+            FuelCards.SHELL,
+            item,
+            feature.get("shell_card_accepted") == "1" or feature.get("shell_card_mobile_app_accepted") == "1",
+            False,
+        )
         apply_yes_no(Extras.CAR_WASH, item, feature.get("carwash") == "1", False)
         apply_yes_no(Extras.TOILETS, item, feature.get("toilets") == "1", False)
         apply_yes_no(Extras.SHOWERS, item, feature.get("showers") == "1", False)

@@ -19,6 +19,7 @@ class MapDataServicesSpider(Spider):
     source data and to extract additional attributes with `DictParser` does
     not automatically extract.
     """
+
     dataset_attributes = {"source": "api", "api": "nowwhere.com.au"}
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt causes parsing errors
 
