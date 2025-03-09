@@ -10,14 +10,14 @@ We also collect government Open Data.
 These should also contain license details in `dataset_attributes`.
 These spiders are typically bigger than brand spiders, often collecting all of a specific category for a country,
 the age of the dataset, or records in the dataset, may be uncomfortably old.
-We store them in [locations/government_spiders](../locations/government_spiders), there lineage is `S_ATP_GOVERNMENTS`.
+We store them in [locations/spiders/government](../locations/spiders/government), there lineage is `S_ATP_GOVERNMENTS`.
 
 We also collect infrastructure data, these wouldn't typically be called Points of Interest.
 These may be anything from trees to electrical sub stations.
 These may come from a government, or a company.
-We store them in [locations/infrastructure_spiders](../locations/infrastructure_spiders), there lineage is
+We store them in [locations/spiders/infrastructure](../locations/spiders/infrastructure), there lineage is
 `S_ATP_INFRASTRUCTURE`.
 
 We also collect data from aggregators, this is likely third party data and as such may contain issues not present in
 brand spiders.
-We store them in [locations/aggregator_spiders](../locations/aggregator_spiders), there lineage is `S_ATP_AGGREGATORS`.
+We store them in [locations/spiders/aggregators](../locations/spiders/aggregators), there lineage is `S_ATP_AGGREGATORS`.
