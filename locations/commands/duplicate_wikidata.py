@@ -6,7 +6,7 @@ import sys
 
 from scrapy.commands import ScrapyCommand
 
-from locations.exporters.geojson import find_spider_class
+from locations.spider_utils import find_spider_class_from_name
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class DuplicateWikidataCommand(ScrapyCommand):
     def wikidata_spiders(crawler_process):
         codes = {}
         for spider_name in crawler_process.spider_loader.list():
-            spider = find_spider_class(spider_name)
+            spider = find_spider_class_from_name(spider_name)
             file_name = sys.modules[spider.__module__].__file__
             simple_name = file_name.split("/locations/")[-1]
             with open(file_name) as f:
