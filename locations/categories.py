@@ -266,6 +266,7 @@ class Categories(Enum):
     FAST_FOOD = {"amenity": "fast_food"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
+    GRAVE = {"cemetery": "grave"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOSPICE = {"healthcare": "hospice"}
     HOTEL = {"tourism": "hotel"}
@@ -409,6 +410,7 @@ def apply_category(category, item: Feature):
 top_level_tags = [
     "aeroway",
     "amenity",
+    "cemetery",
     "club",
     "craft",
     "dark_store",
