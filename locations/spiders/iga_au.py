@@ -80,7 +80,10 @@ class IgaAUSpider(CrawlSpider):
                 "Google Maps rate limiting encountered when following redirect to obtain feature coordinates. Coordinates could not be extracted for feature."
             )
         if self.follow_google_maps_urls and "https://www.google.com/maps/preview/place/" in response.text:
-            properties["lat"], properties["lon"] = url_to_coords("https://www.google.com/maps/preview/place/" + response.text.split(r"\"https://www.google.com/maps/preview/place/", 1)[1].split(r"\"", 1)[0])
+            properties["lat"], properties["lon"] = url_to_coords(
+                "https://www.google.com/maps/preview/place/"
+                + response.text.split(r"\"https://www.google.com/maps/preview/place/", 1)[1].split(r"\"", 1)[0]
+            )
         yield Feature(**properties)
 
     def parse_coordinates_short(self, response: Response) -> Iterable[Feature]:
