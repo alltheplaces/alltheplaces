@@ -34,7 +34,7 @@ class RadissonHotelsSpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
-            url="https://www.radissonhotels.com/zimba-api/hotels?limit=2000", headers={"accept-language": "en-us"}
+            url="https://www.radissonhotels.com/zimba-api/hotels?limit=1000", headers={"accept-language": "en-us"}
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
