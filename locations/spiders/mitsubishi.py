@@ -13,7 +13,7 @@ class MitsubishiSpider(scrapy.Spider):
     API for the spider is found on https://www.mitsubishi-motors.co.th/en/dealer-locator.
     At the time of writing it covers dealers for below countries:
     AT, BH, CA, EG, ES, FI, GR, IT, KW, MX,
-    NL, NO, OM, PR, PT, QA, RO, TH, US
+    NL, NO, OM, PR, PH, PT, QA, RO, TH, US
     """
 
     name = "mitsubishi"
@@ -28,40 +28,45 @@ class MitsubishiSpider(scrapy.Spider):
         for country in countries:
             locale = get_locale(country)
             language = locale.split("-")[0] if locale else "en"
-            yield JsonRequest(
-                url="https://www-graphql.prod.mipulse.co/prod/graphql",
-                data={
-                    "query": """
-                    query SearchDealer($market: String!, $language: String!) {
-                        searchDealer(criteria: { market: $market, language: $language }) {
-                            id
-                            dealershipMarketId
-                            name
-                            isActive
-                            url
-                            email
-                            dealerFilterTags
-                            phone {
-                                phoneNumber
-                            }
-                            address {
-                                country
-                                city
-                                district
-                                municipality
-                                postcode: postalArea
-                                longitude
-                                latitude
-                                addressLine1
-                                addressLine2
-                                addressLine3
-                            }
+            country = country.lower()
+            yield self.get_locations(country, language)
+
+    def get_locations(self, country, language):
+        return JsonRequest(
+            url="https://www-graphql.prod.mipulse.co/prod/graphql",
+            data={
+                "query": """
+                query SearchDealer($market: String!, $language: String!) {
+                    searchDealer(criteria: { market: $market, language: $language }) {
+                        id
+                        dealershipMarketId
+                        name
+                        isActive
+                        url
+                        email
+                        dealerFilterTags
+                        phone {
+                            phoneNumber
                         }
-                    }""",
-                    "variables": {"market": country.lower(), "language": language},
-                },
-                meta={"country": country, "language": language},
-            )
+                        address {
+                            country
+                            city
+                            district
+                            municipality
+                            postcode: postalArea
+                            longitude
+                            latitude
+                            addressLine1
+                            addressLine2
+                            addressLine3
+                        }
+                    }
+                }""",
+                "variables": {"market": country, "language": language},
+            },
+            meta={"country": country, "language": language},
+            callback=self.parse,
+        )
 
     def get_details(self, country, language, dealer_id, item):
         yield JsonRequest(
@@ -118,6 +123,11 @@ class MitsubishiSpider(scrapy.Spider):
         elif "errors" in response.json():
             self.logger.info(f"No dealers found for {country}/{language}")
             self.crawler.stats.inc_value(f"atp/{self.name}/dealers/not_found/{country}/{language}")
+
+            # Fallback to English if no dealers found for country/language combination
+            if language != "en":
+                yield self.get_locations(country, "en")
+
         else:
             pois = response.json()["data"].get("searchDealer", [])
             self.logger.info(f"Found {len(pois)} dealers for {country}/{language}")
