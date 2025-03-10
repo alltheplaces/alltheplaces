@@ -44,7 +44,7 @@ class MitsubishiAUSpider(scrapy.Spider):
                                 phone
                                 postcode
                                 region
-                                street 
+                                street
                             }
                             services
                             identifier
