@@ -94,7 +94,7 @@ class DogHausUSSpider(Where2GetItSpider):
         item["extras"]["website:orders"] = attributes.get("url_order_ahead")
         item["extras"]["website:booking"] = attributes.get("url_reservations")
 
-        if attributes["has_catering"] == "yes":
+        if attributes.get("has_catering") == "yes":
             apply_category(Categories.CRAFT_CATERER, item)
 
         yield item
