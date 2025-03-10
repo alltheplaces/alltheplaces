@@ -19,7 +19,9 @@ class FoodworksAUSpider(Spider):
     allowed_domains = ["myfoodworks.com.au", "www.google.com"]
     follow_google_maps_urls = True
     download_delay = 2  # Crawl slower as chooser.myfoodworks.com.au can return HTTP 429
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # Disable robots.txt as it adds many unwanted requests for each feature's subdomain
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False
+    }  # Disable robots.txt as it adds many unwanted requests for each feature's subdomain
 
     def start_requests(self) -> Iterable[Request]:
         url_template = "https://chooser.myfoodworks.com.au/shops/all?latitude={}&longitude={}"
@@ -36,8 +38,12 @@ class FoodworksAUSpider(Spider):
                 properties["phone"] = phone.removeprefix("tel:")
             apply_category(Categories.SHOP_SUPERMARKET, properties)
 
-            website_redirect_path = store.xpath('.//a[contains(@class, "StoreLink__CallToAction__Button--Primary")]/@href').get()
-            yield response.follow(website_redirect_path, meta={"properties": properties}, callback=self.parse_store, dont_filter=True)
+            website_redirect_path = store.xpath(
+                './/a[contains(@class, "StoreLink__CallToAction__Button--Primary")]/@href'
+            ).get()
+            yield response.follow(
+                website_redirect_path, meta={"properties": properties}, callback=self.parse_store, dont_filter=True
+            )
 
     def parse_store(self, response: Response) -> Iterable[Feature | Request]:
         if urlparse(response.url).path.strip("/"):
@@ -45,13 +51,19 @@ class FoodworksAUSpider(Spider):
             # official website but rather a sub-path which is a manager/store
             # employee portal. Re-do the request for the official website in
             # such instances.
-            yield Request(url="https:{}".format(urlparse(response.url).hostname), meta={"properties": response.meta["properties"]}, callback=self.parse_store)
+            yield Request(
+                url="https:{}".format(urlparse(response.url).hostname),
+                meta={"properties": response.meta["properties"]},
+                callback=self.parse_store,
+            )
             return
 
         properties = response.meta["properties"]
         properties["ref"] = response.url
         properties["website"] = response.url
-        if email := response.xpath('//div[@class="Microsite-Component__Content"]/p/a[contains(@href, "mailto:")]/@href').get():
+        if email := response.xpath(
+            '//div[@class="Microsite-Component__Content"]/p/a[contains(@href, "mailto:")]/@href'
+        ).get():
             properties["email"] = email.removeprefix("mailto:")
         hours_text = " ".join(response.xpath('//div[contains(@class, "TradingHours__Day")]//text()').getall())
         properties["opening_hours"] = OpeningHours()
@@ -60,7 +72,11 @@ class FoodworksAUSpider(Spider):
         if self.follow_google_maps_urls:
             if google_maps_url := response.xpath('//div[@class="Microsite__GoogleMap"]/iframe/@src').get():
                 google_maps_places_id = unquote(unescape(google_maps_url)).split("place_id:", 1)[1].split("&", 1)[0]
-                yield Request(url=f"https://www.google.com/maps/place/?q=place_id:{google_maps_places_id}", meta={"properties": properties, "handle_httpstatus_list": [429]}, callback=self.parse_coordinates)
+                yield Request(
+                    url=f"https://www.google.com/maps/place/?q=place_id:{google_maps_places_id}",
+                    meta={"properties": properties, "handle_httpstatus_list": [429]},
+                    callback=self.parse_coordinates,
+                )
                 return
 
         yield Feature(**properties)
@@ -73,5 +89,8 @@ class FoodworksAUSpider(Spider):
                 "Google Maps rate limiting encountered when following redirect to obtain feature coordinates. Coordinates could not be extracted for feature."
             )
         if self.follow_google_maps_urls and "https://www.google.com/maps/preview/place/" in response.text:
-            properties["lat"], properties["lon"] = url_to_coords("https://www.google.com/maps/preview/place/" + response.text.split(r"\"https://www.google.com/maps/preview/place/", 1)[1].split(r"\"", 1)[0])
+            properties["lat"], properties["lon"] = url_to_coords(
+                "https://www.google.com/maps/preview/place/"
+                + response.text.split(r"\"https://www.google.com/maps/preview/place/", 1)[1].split(r"\"", 1)[0]
+            )
         yield Feature(**properties)
