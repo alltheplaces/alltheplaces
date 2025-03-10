@@ -22,10 +22,16 @@ class KekeSpider(Spider):
             "appId": "8c1ec64c-b621-4d3a-9cad-af08be8eba54",
         }
         encoded_query = base64.b64encode(json.dumps(query).encode()).decode()
-        sv_session = response.json()["svSession"]
+        access_tokens = response.json()
+        authorization = [
+            app["instance"] for app in access_tokens["apps"].values() if app["instance"].startswith("wixcode-pub.")
+        ][0]
         yield Request(
             f"https://www.kekes.com/_api/cloud-data/v2/items/query?.r={encoded_query}",
-            headers={"Cookie": f"svSession={sv_session}"},
+            headers={
+                "Cookie": f"svSession={access_tokens['svSession']}; hs={access_tokens['hs']}",
+                "authorization": authorization,
+            },
             callback=self.parse_query_response,
         )
 
