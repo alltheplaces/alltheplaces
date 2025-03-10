@@ -1,0 +1,26 @@
+from urllib.parse import urlparse
+
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
+
+
+class MichaelKorsSpider(SitemapSpider, StructuredDataSpider):
+    name = "michael_kors"
+    item_attributes = {"brand": "Michael Kors", "brand_wikidata": "Q19572998"}
+    sitemap_urls = ["https://locations.michaelkors.com/sitemap.xml"]
+    sitemap_rules = [(r"^https://locations.michaelkors.com/[\w-]+(?:/[\w-]+)?/[\w-]+/[\w-]+$", "parse_sd")]
+    search_for_twitter = False
+    search_for_fimage = False
+    drop_attributes = {"facebook"}
+
+    def sitemap_filter(self, entries):
+        # Skip alternate-language versions of each page
+        for entry in entries:
+            url = urlparse(entry["loc"])
+            if not url.path.startswith("/es/") and not url.path.startswith("/fr/"):
+                yield entry
+
+    def post_process_item(self, item, response, ld_data):
+        item["branch"] = item.pop("name").removeprefix("Michael Kors ")
+        yield item
