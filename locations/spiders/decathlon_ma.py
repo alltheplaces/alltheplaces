@@ -2,7 +2,7 @@ from chompjs import parse_js_object
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours, DAYS_FR
+from locations.hours import DAYS, DAYS_FR, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.decathlon_fr import DecathlonFRSpider
 
@@ -37,10 +37,7 @@ class DecathlonMASpider(Spider):
                 for time_range in day_hours:
                     hours_string = time_range.replace("H", ":")
                     item["opening_hours"].add_ranges_from_string(
-                        f"{DAYS[day_number]} {hours_string}",
-                        days=DAYS_FR,
-                        delimiters=["-", "à", "a", ","]
+                        f"{DAYS[day_number]} {hours_string}", days=DAYS_FR, delimiters=["-", "à", "a", ","]
                     )
-
 
             yield item
