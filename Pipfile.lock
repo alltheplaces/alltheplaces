@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6e0b0453e7205bcc856fce4ab6ce0e4978b7f30e4951381e9f84448daa3d3f34"
+            "sha256": "ed9d07219b277bea5d896e4b5621e8da2590261f2477468b0af2ec8d7928df5e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1582,10 +1582,11 @@
         },
         "pygeohash": {
             "hashes": [
-                "sha256:750e51643e743eabd065a84fc8c1912c5843b648143137919e4a9776366d921e"
+                "sha256:37c9de345257044ea48ff04044c29f55411f9b2a7d9df2d45c81c493061cf1d0"
             ],
             "index": "pypi",
-            "version": "==1.2.0"
+            "markers": "python_version >= '3.8'",
+            "version": "==3.0.0"
         },
         "pygithub": {
             "hashes": [
