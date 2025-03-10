@@ -13,6 +13,7 @@ from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
+from locations.extensions.add_lineage import spider_class_to_lineage
 from locations.settings import SPIDER_MODULES
 
 mapping = (
@@ -114,14 +115,14 @@ def compute_hash(item: Item) -> str:
 def find_spider_class(spider_name: str):
     if not spider_name:
         return None
-    for spider_class in iter_spider_classes_in_all_modules():
+    for spider_class in iter_spider_classes_in_modules():
         if spider_name == spider_class.name:
             return spider_class
     return None
 
 
-def iter_spider_classes_in_all_modules() -> Generator[Type[Spider], Any, None]:
-    for mod in SPIDER_MODULES:
+def iter_spider_classes_in_modules(modules=SPIDER_MODULES) -> Generator[Type[Spider], Any, None]:
+    for mod in modules:
         for module in walk_modules(mod):
             for spider_class in iter_spider_classes(module):
                 yield spider_class
@@ -134,6 +135,8 @@ def get_dataset_attributes(spider_name) -> {}:
     if not settings.get("ROBOTSTXT_OBEY", True):
         # See https://github.com/alltheplaces/alltheplaces/issues/4537
         dataset_attributes["spider:robots_txt"] = "ignored"
+    if not dataset_attributes.get("lineage"):
+        dataset_attributes["spider:lineage"] = spider_class_to_lineage(spider_class).value
     dataset_attributes["@spider"] = spider_name
     dataset_attributes["spider:collection_time"] = datetime.datetime.now().isoformat()
 
