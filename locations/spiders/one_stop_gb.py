@@ -1,5 +1,4 @@
-import base64
-
+from chompjs import chompjs
 from scrapy import FormRequest, Spider
 
 from locations.categories import Extras, apply_yes_no
@@ -21,25 +20,21 @@ class OneStopGBSpider(Spider):
         for city in city_locations("GB", 10000):
             yield FormRequest(
                 url="https://www.onestop.co.uk/wp-admin/admin-ajax.php",
-                formdata={
-                    "action": "findstockists",
-                    "searchfor": base64.b64encode(city["name"].encode("utf-8")),
-                },
+                formdata={"action": "storefinder_ajax", "search": city["name"], "security": "f4350888a1"},
             )
 
     def parse(self, response, **kwargs):
-        if not response.json():
+        data = chompjs.parse_js_object(response.text)
+        if not data:
             return
-        for location in response.json()["message"]["locations"]:
-            location["location"]["address"] = location["location"]["address"].pop("details")
-            location["location"]["address"]["street_address"] = merge_address_lines(
-                location["location"]["address"]["lines"]
-            )
+        for location in data["message"]["locations"]:
+            if location.get("location").get("address").get("details"):
+                location["location"]["address"] = location.get("location").get("address").pop("details")
+                location["location"]["address"]["street_address"] = merge_address_lines(
+                    location["location"]["address"]["lines"]
+                )
             location["location"]["contact"]["phone"] = location["location"]["contact"]["phoneNumbers"]["main"]
-
             item = DictParser.parse(location["location"])
-            item["website"] = f'https://www.onestop.co.uk/store/?store={item["ref"]}'
-
             if isinstance(location["location"]["openingHours"], dict):
                 item["opening_hours"] = OpeningHours()
                 for day, intervals in location["location"]["openingHours"]["standard"].items():
