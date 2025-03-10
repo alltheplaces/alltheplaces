@@ -80,20 +80,21 @@ class DogHausUSSpider(Where2GetItSpider):
         ):
             apply_yes_no(Extras.WHEELCHAIR_LIMITED, item, True)
 
-        cards = set(attributes["pay_credit_card_types_accepted"])
+        cards = set(attributes.get("pay_credit_card_types_accepted", []))
         apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "american_express" in cards)
         apply_yes_no(PaymentMethods.DINERS_CLUB, item, "diners_club" in cards)
         apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "discover" in cards)
         apply_yes_no(PaymentMethods.VISA, item, "visa" in cards)
         apply_yes_no(PaymentMethods.MASTER_CARD, item, "mastercard" in cards)
         cards.difference_update({"american_express", "discover", "visa", "mastercard", "diners_club"})
-        assert cards == set(), cards
+        for unknown_card in cards:
+            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_card/{unknown_card}")
 
-        item["extras"]["website:menu"] = attributes["url_menu"]
-        item["extras"]["website:orders"] = attributes["url_order_ahead"]
+        item["extras"]["website:menu"] = attributes.get("url_menu")
+        item["extras"]["website:orders"] = attributes.get("url_order_ahead")
         item["extras"]["website:booking"] = attributes.get("url_reservations")
 
-        if attributes["has_catering"] == "yes":
+        if attributes.get("has_catering") == "yes":
             apply_category(Categories.CRAFT_CATERER, item)
 
         yield item
