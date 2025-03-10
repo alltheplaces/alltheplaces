@@ -23,7 +23,8 @@ class LesSchwabUSSpider(SitemapSpider):
     def parse(self, response):
         for location in json.loads(response.xpath("//@data-locations").get()):
             item = DictParser.parse(location)
-            item["name"], item["branch"] = item["name"].split(" - ")
+            if " - " in item["name"]:
+                item["name"], _, item["branch"] = item["name"].partition(" - ")
             el = response.xpath(f"//div[@data-store-map-id={location['id']}]")
             item["website"] = response.urljoin(el.css(".js-store-detail-url::attr(href)").get())
             _, _, item["street_address"] = el.css(".storeDetails__streetName::text").get().partition(".")
