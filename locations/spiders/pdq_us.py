@@ -1,7 +1,6 @@
 import chompjs
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.items import Feature
 
 
