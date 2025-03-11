@@ -29,15 +29,20 @@ class MitsubishiVNSpider(JSONBlobSpider):
         item["phone"] = "; ".join(filter(None, [phone] + phone_sales + phone_services))
 
         services = [s["id"] for s in location.get("dealer_service", [])]
-        if 219 or 364 in services:
+
+        SALES = 219
+        SERVICE_AND_PARTS = 220
+        USED_CAR_SALES = 364
+
+        if SALES or USED_CAR_SALES in services:
             apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, 220 in services)
-            apply_yes_no(Extras.CAR_PARTS, item, 220 in services)
-            apply_yes_no(Extras.USED_CAR_SALES, item, 364 in services)
-        elif 220 in services:
+            apply_yes_no(Extras.CAR_REPAIR, item, SERVICE_AND_PARTS in services)
+            apply_yes_no(Extras.CAR_PARTS, item, SERVICE_AND_PARTS in services)
+        elif SERVICE_AND_PARTS in services:
             apply_category(Categories.SHOP_CAR_REPAIR, item)
-            apply_yes_no(Extras.CAR_PARTS, item, 220 in services)
-            apply_yes_no(Extras.USED_CAR_SALES, item, 364 in services)
+            apply_yes_no(Extras.CAR_PARTS, item, SERVICE_AND_PARTS in services)
+
+        apply_yes_no(Extras.USED_CAR_SALES, item, USED_CAR_SALES in services)
 
         # TODO: hours
         yield item
