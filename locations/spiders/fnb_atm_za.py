@@ -1,7 +1,10 @@
+from typing import Any, Iterable
+
 from scrapy import Request, Selector, Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
@@ -21,7 +24,7 @@ ZA_PROVINCES = [
 
 class FnbAtmZASpider(Spider):
     name = "fnb_atm_za"
-    item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956", "extras": Categories.ATM.value}
+    item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956"}
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
@@ -29,7 +32,7 @@ class FnbAtmZASpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         for province in ZA_PROVINCES:
             yield Request(
                 url="https://www.fnb.co.za/Controller?nav=locators.ATMLocatorSearch",
@@ -38,7 +41,7 @@ class FnbAtmZASpider(Spider):
                 method="POST",
             )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         onclicks = response.xpath('.//a[@class="link fontTurq searchResult       "]/@onclick').getall()
         links = [onclick.split("(event,'")[1].split("');")[0] for onclick in onclicks]
 
@@ -63,7 +66,7 @@ class FnbAtmZASpider(Spider):
                     "https://www.fnb.co.za/Controller?nav=locators.ATMLocatorSearch&atmid=", ""
                 ).replace("&details=true", ""),
             }
-
+            apply_category(Categories.ATM, properties)
             apply_yes_no(Extras.CASH_IN, properties, deposits == "Yes", False)
 
             yield Feature(**properties)
