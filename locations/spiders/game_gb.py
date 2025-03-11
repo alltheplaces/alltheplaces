@@ -36,7 +36,8 @@ class GameGBSpider(CrawlSpider, StructuredDataSpider):
         item["branch"] = item.pop("name").removeprefix("Game ")
 
         item["located_in"] = response.xpath('//div[@class="WithinMainStore"]/div/img/@alt').get()
-        item["located_in_wikidata"] = self.located_in_brands.get(item["located_in"])
+        if located_in := self.located_in_brands.get(item["located_in"]):
+            item["located_in_wikidata"] = located_in
         item["lat"] = response.xpath("//@data-latitude").get()
         item["lon"] = response.xpath("//@data-longitude").get()
         item["addr_full"] = clean_address(
