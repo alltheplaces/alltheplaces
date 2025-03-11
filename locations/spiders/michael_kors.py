@@ -1,7 +1,9 @@
 from urllib.parse import urlparse
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -21,6 +23,11 @@ class MichaelKorsSpider(SitemapSpider, StructuredDataSpider):
             if not url.path.startswith("/es/") and not url.path.startswith("/fr/"):
                 yield entry
 
-    def post_process_item(self, item, response, ld_data):
-        item["branch"] = item.pop("name").removeprefix("Michael Kors ")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        if item["name"].startswith("Michael Kors Outlet "):
+            item["branch"] = item.pop("name").removeprefix("Michael Kors Outlet ")
+            item["name"] = "Michael Kors Outlet"
+        else:
+            item["branch"] = item.pop("name").removeprefix("Michael Kors ")
+
         yield item
