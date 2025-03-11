@@ -3,6 +3,7 @@ from scrapy import Request, Selector, Spider
 from locations.categories import Categories, Extras, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 ZA_PROVINCES = [
     "Eastern Cape",
@@ -18,9 +19,14 @@ ZA_PROVINCES = [
 
 
 class FnbAtmZASpider(Spider):
-    # download_delay = 0.2
     name = "fnb_atm_za"
     item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956", "extras": Categories.ATM.value}
+    custom_settings = {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 5,
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def start_requests(self):
         for province in ZA_PROVINCES:
