@@ -41,16 +41,6 @@ class PdqUSSpider(SitemapSpider):
                 item["phone"] = store_contact[2]
                 item["email"] = store_contact[1]
 
-    def parse_hours(self, item, styled_box):
-        store_hours = self.current_or_next_sibling_matching("Hours of Operation", styled_box)
-
-        if store_hours is not None and len(store_hours) > 0:
-            if store_hours[1].strip() == "7 Days a Week":
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_ranges_from_string("Mo-Su " + store_hours[0])
-            else:
-                self.logger.warn("Unparsed store hours: " + "\n".join(store_hours))
-
     def parse_store(self, response):
         if response.url == "https://www.eatpdq.com/locations/find-a-location":
             return
@@ -64,7 +54,6 @@ class PdqUSSpider(SitemapSpider):
 
             self.parse_address(item, styled_box)
             self.parse_contact(item, styled_box)
-            self.parse_hours(item, styled_box)
 
             if location_map := response.xpath('//div[contains(@data-block-json, "markerLat")]').get():
                 json_data = chompjs.parse_js_object(location_map)["location"]
