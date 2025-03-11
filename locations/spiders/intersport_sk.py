@@ -4,6 +4,7 @@ import scrapy
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from urllib.parse import urljoin
 
 
 class IntersportSKSpider(scrapy.Spider):
