@@ -47,7 +47,7 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         html_decode_dict(ld_data)
-        ld_data["openingHours"] = ld_data["openingHours"][0].replace("\r\n","").split(",")
+        ld_data["openingHours"] = ld_data["openingHours"][0].replace("\r\n", "").split(",")
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(self.STONEGATE, item)
@@ -60,7 +60,5 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
             apply_category(cat, item)
         else:
             apply_category(Categories.PUB, item)
-
-
 
         yield item
