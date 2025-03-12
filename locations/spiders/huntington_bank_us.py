@@ -16,7 +16,7 @@ class HuntingtonBankUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         hours = OpeningHours()
-        opening_hours = ld_data.get("openingHoursSpecification") or []:
+        opening_hours = ld_data.get("openingHoursSpecification") or []
         for row in opening_hours:
             day = row["dayOfWeek"].split("/")[-1][:2]
             hours.add_range(day, row["opens"], row["closes"], "%H:%M:%S")
