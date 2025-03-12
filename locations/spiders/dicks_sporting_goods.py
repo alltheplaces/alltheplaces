@@ -6,16 +6,6 @@ import scrapy
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
-
 
 class DicksSportingGoodsSpider(scrapy.Spider):
     name = "dicks_sporting_goods"
@@ -29,10 +19,8 @@ class DicksSportingGoodsSpider(scrapy.Spider):
         end_times = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
         opening_hours = OpeningHours()
         for day, open_time, close_time in zip(days, start_times, end_times):
-            open_time = self.fix_hours(open_time)
-            close_time = self.fix_hours(close_time)
-            opening_hours.add_range(day=DAY_MAPPING[day], open_time=open_time, close_time=close_time)
-        return opening_hours.as_opening_hours()
+            opening_hours.add_range(day, self.fix_hours(open_time), self.fix_hours(close_time))
+        return opening_hours
 
     def fix_hours(self, hours_str):
         if ":" not in hours_str:
