@@ -11,7 +11,6 @@ class ColesAUSpider(scrapy.Spider):
     name = "coles_au"
 
     BRANDS = {
-        1: {"brand": "Reddy Express", "brand_wikidata": "Q5144653"},
         2: {"brand": "Coles", "brand_wikidata": "Q1108172"},
         3: {"brand": "Liquorland", "brand_wikidata": "Q2283837"},
         4: {"brand": "First Choice Liquor", "brand_wikidata": "Q4596269"},
@@ -32,6 +31,8 @@ class ColesAUSpider(scrapy.Spider):
 
             if brand := self.BRANDS.get(location["brandId"]):
                 item.update(brand)
+            elif location["brandId"] == 1:
+                continue
             else:
                 self.logger.error("Unknown brand: {}".format(location["brandName"]))
 
