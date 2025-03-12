@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -45,6 +45,14 @@ class WestpacSpider(Spider):
                         apply_category(Categories.ATM, item)
                     elif location_type.upper() == "BRANCH":
                         apply_category(Categories.BANK, item)
+                    elif location_type.upper() == "CDM":  # Cash Deposit Machine
+                        apply_category(Categories.ATM, item)
+                        apply_yes_no(Extras.CASH_IN, item, True)
+                        apply_yes_no(Extras.CASH_OUT, item, False)
+                    elif location_type.upper() == "CEM":  # Cash Exchange Machine
+                        apply_category(Categories.ATM, item)
+                        apply_yes_no(Extras.CASH_IN, item, True)
+                        apply_yes_no(Extras.CASH_OUT, item, True)
                     else:
                         self.crawler.stats.inc_value(f"atp/unmapped_category/{location_type}")
                 yield item
