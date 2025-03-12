@@ -27,11 +27,17 @@ class DicksSportingGoodsSpider(scrapy.Spider):
         days = response.xpath('//meta[@property="business:hours:day"]/@content').extract()
         start_times = response.xpath('//meta[@property="business:hours:start"]/@content').extract()
         end_times = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
-
         opening_hours = OpeningHours()
         for day, open_time, close_time in zip(days, start_times, end_times):
+            open_time = self.fix_hours(open_time)
+            close_time = self.fix_hours(close_time)
             opening_hours.add_range(day=DAY_MAPPING[day], open_time=open_time, close_time=close_time)
         return opening_hours.as_opening_hours()
+
+    def fix_hours(self, hours_str):
+        if ":" not in hours_str:
+            hours_str = hours_str + ":00"
+        return hours_str
 
     def parse_store(self, response):
         ref = re.search(r"/(\d+)/$", response.url).group(1)
