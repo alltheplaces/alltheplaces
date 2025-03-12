@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -83,4 +84,14 @@ class WestpacSpider(Spider):
                         item["website"] = (
                             f'https://www.westpac.com.au/locateus/{location_type.upper()}/{location["brandCode"]}/{location["locationId"]}'
                         )
+
+                if services := location.get("services"):
+                    item["opening_hours"] = OpeningHours()
+                    for day in DAYS_FULL:
+                        open_time, close_time = services[0].get(f"{day.lower()}OpenTime"), services[0].get(
+                            f"{day.lower()}CloseTime"
+                        )
+                        if open_time and close_time:
+                            item["opening_hours"].add_range(day, open_time, close_time, time_format="%I:%M%p")
+
                 yield item
