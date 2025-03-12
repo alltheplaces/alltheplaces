@@ -13,7 +13,6 @@ from locations.user_agents import BROWSER_DEFAULT
 class AllpointSpider(Spider):
     name = "allpoint"
     item_attributes = {"brand": "Allpoint", "brand_wikidata": "Q4733264"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     download_timeout = 50
 
     def make_request(self, page: int) -> Request:
