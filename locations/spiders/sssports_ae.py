@@ -12,9 +12,10 @@ class SssportsAESpider(Spider):
     name = "sssports_ae"
     item_attributes = {"brand": "SS Sports", "brand_wikidata": "Q133263395"}
 
-    start_urls = ["https://en-ae.sssports.com/on/demandware.store/Sites-UAE-Site/en_AE/Stores-FindStores?showMap=true&city=all&all"]
+    start_urls = [
+        "https://en-ae.sssports.com/on/demandware.store/Sites-UAE-Site/en_AE/Stores-FindStores?showMap=true&city=all&all"
+    ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
