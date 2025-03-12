@@ -1,17 +1,17 @@
 import re
-import string
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class DicksSportingGoodsSpider(scrapy.Spider):
+class DicksSportingGoodsSpider(SitemapSpider):
     name = "dicks_sporting_goods"
     item_attributes = {"brand": "Dick's Sporting Goods", "brand_wikidata": "Q5272601"}
     allowed_domains = ["dickssportinggoods.com"]
-    start_urls = ("https://stores.dickssportinggoods.com/",)
+    sitemap_urls = ["https://stores.dickssportinggoods.com/robots.txt"]
+    sitemap_rules = [(r"com/\w\w/[^/]+/(\d+)/", "parse_store")]
 
     def parse_hours(self, response):
         days = response.xpath('//meta[@property="business:hours:day"]/@content').extract()
@@ -52,23 +52,3 @@ class DicksSportingGoodsSpider(scrapy.Spider):
             name=name,
             opening_hours=self.parse_hours(response),
         )
-
-    def parse_city(self, response):
-        store_urls = response.xpath(
-            '//ul[@class="city_contentlist"]/li//a[contains(text(), "Store Hours & Details")]/@href'
-        ).extract()
-        for url in store_urls:
-            yield scrapy.Request(url=url, callback=self.parse_store)
-
-    def parse_state(self, response):
-        city_urls = response.xpath('//ul[@class="contentlist"]/li/a/@href').extract()
-        for url in city_urls:
-            yield scrapy.Request(
-                url=url,
-                callback=self.parse_city,
-            )
-
-    def parse(self, response):
-        state_urls = response.xpath('//ul[@class="contentlist"]/li/a/@href').extract()
-        for url in state_urls:
-            yield scrapy.Request(url=url, callback=self.parse_state)
