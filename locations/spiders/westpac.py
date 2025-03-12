@@ -68,4 +68,19 @@ class WestpacSpider(Spider):
                         apply_yes_no(Extras.CASH_OUT, item, True)
                     else:
                         self.crawler.stats.inc_value(f"atp/unmapped_category/{location_type}")
+
+                    if location_type.upper() == "BRANCH":
+                        item["website"] = (
+                            f'https://www.westpac.com.au/locateus/branch/{item["state"]}/{item["city"]}/{item["name"]}'.replace(
+                                " ", ""
+                            )
+                        )
+                    elif location["brandCode"] == "wbc":
+                        item["website"] = (
+                            f'https://www.westpac.com.au/locateus/{location_type.upper()}/{location["locationId"]}'
+                        )
+                    else:
+                        item["website"] = (
+                            f'https://www.westpac.com.au/locateus/{location_type.upper()}/{location["brandCode"]}/{location["locationId"]}'
+                        )
                 yield item
