@@ -26,6 +26,7 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"/page/\d+/$")),
         Rule(LinkExtractor(restrict_xpaths='//a[contains(., "View Site")]'), callback="parse_sd"),
     ]
+    time_format = "%I:%M %p"
 
     brands = {
         "www.feverbars.co.uk": {"brand": "Fever", "cat": Categories.NIGHTCLUB},
@@ -41,7 +42,6 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         "www.greatukpubs.co.uk": {"brand": "Great UK Pubs"},
         "www.craftunionpubs.com": {"brand": "Craft Union", "brand_wikidata": "Q124956771"},
         "www.rosiesclubs.co.uk": {"brand": "Rosies Clubs"},
-        "www.craftunionpubs.com": {"brand": "Craft Union"},
         "www.heritagepubs.co.uk": {"brand": "Heritage Pubs"},
     }
 
