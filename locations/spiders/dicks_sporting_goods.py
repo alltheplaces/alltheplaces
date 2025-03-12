@@ -29,12 +29,13 @@ class DicksSportingGoodsSpider(SitemapSpider):
 
     def parse_store(self, response):
         ref = re.search(r"/(\d+)/$", response.url).group(1)
-        name = response.xpath('//meta[@property="og:title"]/@content').extract_first()
-        shopping_center = string.capwords(
-            "".join(response.xpath('//div[contains(@class, "shopping_center")]/text()').extract()).strip()
-        )
-        if shopping_center:
-            name = ", ".join([name, shopping_center])
+        name = response.xpath('//meta[@property="og:title"]/@content').get()
+        if "GOING, GOING, GONE!" in name:
+            name = "Going, Going, Gone!"
+            branch = response.xpath('//div[@class="addressBlock"]//h1/text()[2]').get()
+        else:
+            name = "Dick's Sporting Goods"
+            branch = response.xpath('//div[@class="addressBlock"]//h1/text()').get()
 
         yield Feature(
             lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
@@ -50,5 +51,6 @@ class DicksSportingGoodsSpider(SitemapSpider):
             website=response.xpath('//meta[@property="business:contact_data:website"]/@content').extract_first(),
             ref=ref,
             name=name,
+            branch=branch,
             opening_hours=self.parse_hours(response),
         )
