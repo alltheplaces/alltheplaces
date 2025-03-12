@@ -34,8 +34,10 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         "www.popworldparty.co.uk": {"brand": "Popworld", "cat": Categories.NIGHTCLUB},
         "www.slugandlettuce.co.uk": {"brand": "Slug & Lettuce", "brand_wikidata": "Q7542224"},
         "www.crafted-social.co.uk": {"brand": "Crafted Social"},
+        "www.socialpubandkitchen.co.uk": {"brand": "Social Pub & Kitchen"},
+        "www.pubsmiths.co.uk": {"brand": "Pubsmiths"},
         "www.greatukpubs.co.uk": {"brand": "Great UK Pubs"},
-        "www.craftunionpubs.com": {"brand": "Craft Union"},
+        "www.craftunionpubs.com": {"brand": "Craft Union", "brand_wikidata": "Q124956771"},
     }
 
     def pre_process_data(self, ld_data, **kwargs):
