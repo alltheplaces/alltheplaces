@@ -4,6 +4,7 @@ from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -39,4 +40,11 @@ class WestpacSpider(Spider):
             for location in response.json()["map"][-1][-1]:
                 item = DictParser.parse(location)
                 item["ref"] = location["markerPointId"]
+                if location_type := location.get("serviceProviderTypeName"):
+                    if location_type.upper() == "ATM":
+                        apply_category(Categories.ATM, item)
+                    elif location_type.upper() == "BRANCH":
+                        apply_category(Categories.BANK, item)
+                    else:
+                        self.crawler.stats.inc_value(f"atp/unmapped_category/{location_type}")
                 yield item
