@@ -38,7 +38,7 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         "www.pubsmiths.co.uk": {"brand": "Pubsmiths"},
         "www.greatukpubs.co.uk": {"brand": "Great UK Pubs"},
         "www.craftunionpubs.com": {"brand": "Craft Union", "brand_wikidata": "Q124956771"},
-        "www.rosiesclubs.co.uk" : {"brand": "Rosies Clubs"},
+        "www.rosiesclubs.co.uk": {"brand": "Rosies Clubs"},
         "www.craftunionpubs.com": {"brand": "Craft Union"},
         "www.heritagepubs.co.uk": {"brand": "Heritage Pubs"},
     }
