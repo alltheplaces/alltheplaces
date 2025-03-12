@@ -29,6 +29,7 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
 
     brands = {
         "www.feverbars.co.uk": {"brand": "Fever", "cat": Categories.NIGHTCLUB},
+        "www.zincclubs.co.uk": {"brand": "Zinc Clubs", "cat": Categories.NIGHTCLUB},
         "www.walkaboutbars.co.uk": {"brand": "Walkabout", "brand_wikidata": "Q7962149", "cat": Categories.PUB},
         "www.beatone.co.uk": {"brand": "Be At One", "brand_wikidata": "Q110016786", "cat": Categories.BAR},
         "www.popworldparty.co.uk": {"brand": "Popworld", "cat": Categories.NIGHTCLUB},
@@ -36,6 +37,7 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         "www.crafted-social.co.uk": {"brand": "Crafted Social"},
         "www.socialpubandkitchen.co.uk": {"brand": "Social Pub & Kitchen"},
         "www.pubsmiths.co.uk": {"brand": "Pubsmiths"},
+        "www.thechaptercollection.co.uk": {"brand", "The Chapter Collection"},
         "www.greatukpubs.co.uk": {"brand": "Great UK Pubs"},
         "www.craftunionpubs.com": {"brand": "Craft Union", "brand_wikidata": "Q124956771"},
         "www.rosiesclubs.co.uk": {"brand": "Rosies Clubs"},
