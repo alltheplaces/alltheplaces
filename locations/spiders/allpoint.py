@@ -1,13 +1,10 @@
-import json
 from typing import Any, Iterable
 
-import scrapy
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class AllpointSpider(Spider):
