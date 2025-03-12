@@ -11,7 +11,13 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class WestpacSpider(Spider):
     name = "westpac"
-    item_attributes = {"brand": "Westpac", "brand_wikidata": "Q2031726"}
+    BRAND_MAPPING = {
+        "bom": ("BOM", "Q4856151"),
+        "bsa": ("BankSA", "Q4856181"),
+        "fid": ("Precinct", ""),
+        "stg": ("St.George", "Q1606050"),
+        "wbc": ("Westpac", "Q2031726"),
+    }
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
@@ -40,6 +46,13 @@ class WestpacSpider(Spider):
             for location in response.json()["map"][-1][-1]:
                 item = DictParser.parse(location)
                 item["ref"] = location["markerPointId"]
+                if location["brandCode"] == "ats":  # ATMX locations covered by Armaguard AU Spider
+                    continue
+                if brand_details := self.BRAND_MAPPING.get(location["brandCode"]):
+                    item["brand"], item["brand_wikidata"] = brand_details
+                else:
+                    self.crawler.stats.inc_value(f'atp/unknown_brand/{location["brandName"]}')
+
                 if location_type := location.get("serviceProviderTypeName"):
                     if location_type.upper() == "ATM":
                         apply_category(Categories.ATM, item)
