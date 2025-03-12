@@ -8,5 +8,6 @@ class IntersportNLSpider(StockistSpider):
     key = "u25150"
 
     def parse_item(self, item: Feature, location: dict):
+        item["branch"] = item.pop("name").removeprefix("Intersport ")
         item["website"] = location["custom_fields"][0]["value"]
         yield item

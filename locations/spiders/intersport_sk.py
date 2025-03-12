@@ -15,5 +15,7 @@ class IntersportSKSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]["stores"]:
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name").removeprefix("INTERSPORT ")
             item["website"] = urljoin("https://www.intersport.sk/shop/", item["website"])
+
             yield item
