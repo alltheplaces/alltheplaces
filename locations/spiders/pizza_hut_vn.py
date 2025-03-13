@@ -13,6 +13,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PizzaHutVNSpider(scrapy.Spider):
@@ -20,6 +21,7 @@ class PizzaHutVNSpider(scrapy.Spider):
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     start_urls = ["https://pizzahut.vn/_next/static/chunks/3070-0d2156c9136abbb1.js"]
     api_url = "https://rwapi.pizzahut.vn/api/store/GetAllStoreList"
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         timestamp = int(time.time() * 1000)
