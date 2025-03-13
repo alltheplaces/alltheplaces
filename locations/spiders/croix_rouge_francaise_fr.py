@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, DAYS_FR, OpeningHours, sanitise_day
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 
 
 class CroixRougeFrancaiseFRSpider(Spider):
