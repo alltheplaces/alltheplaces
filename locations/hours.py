@@ -942,9 +942,9 @@ class OpeningHours:
         if isinstance(close_time, str):
             if close_time.lower() in closed:
                 return
-            if close_time == "24:00" or close_time == "00:00":
+            if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
-            if close_time == "24:00:00" or close_time == "00:00:00":
+            if close_time in ("24:00:00", "00:00:00"):
                 close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
