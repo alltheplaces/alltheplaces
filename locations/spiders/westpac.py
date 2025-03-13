@@ -15,7 +15,7 @@ class WestpacSpider(Spider):
     BRAND_MAPPING = {
         "bom": ("BOM", "Q4856151"),
         "bsa": ("BankSA", "Q4856181"),
-        "fid": ("Precinct", ""),
+        "fid": ("Precinct", "Q126895608"),
         "stg": ("St.George", "Q1606050"),
         "wbc": ("Westpac", "Q2031726"),
     }
