@@ -1,6 +1,9 @@
+import re
+
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
@@ -30,6 +33,16 @@ class MitsubishiBESpider(JSONBlobSpider):
                 location.get("PostCode", ""),
             ]
         )
+        item["website"] = location.get("WebSite")
+        item["email"] = location.get("PrincipalEmail")
+
+        item["opening_hours"] = OpeningHours()
+        for day in DAYS_FULL:
+            self.crawler.stats.inc_value("x/{}".format(location.get("Service{}Open".format(day))))
+            for start_time, end_time in re.findall(
+                r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", location.get("Service{}Open".format(day)) or ""
+            ):
+                item["opening_hours"].add_range(day, start_time, end_time)
 
         if location.get("Status", "").lower() == "service only":
             apply_category(Categories.SHOP_CAR_REPAIR, item)
