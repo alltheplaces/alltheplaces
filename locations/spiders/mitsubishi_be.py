@@ -38,7 +38,6 @@ class MitsubishiBESpider(JSONBlobSpider):
 
         item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
-            self.crawler.stats.inc_value("x/{}".format(location.get("Service{}Open".format(day))))
             for start_time, end_time in re.findall(
                 r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", location.get("Service{}Open".format(day)) or ""
             ):
