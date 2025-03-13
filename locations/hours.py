@@ -950,6 +950,11 @@ class OpeningHours:
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
+            if close_time.tm_hour == 0 and close_time.tm_min == 0:
+                # weird format not caught by checks above
+                # may be 0:00 or even more divergent if time_format
+                # parameter was used with some exotic value
+                close_time = time.strptime("23:59", "%H:%M")
 
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
