@@ -48,5 +48,4 @@ class MitsubishiBESpider(JSONBlobSpider):
         else:
             self.logger.error(f'Unknown type: {location.get("Status")}, {item["name"]}, {item["ref"]}')
 
-        # TODO: hours
         yield item
