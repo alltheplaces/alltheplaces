@@ -71,19 +71,19 @@ class WestpacSpider(Spider):
                         self.crawler.stats.inc_value(f"atp/unmapped_category/{location_type}")
 
                     if location_type.upper() == "BRANCH":
-                        item[
-                            "website"
-                        ] = f'https://www.westpac.com.au/locateus/branch/{item["state"]}/{item["city"]}/{item["name"]}'.replace(
-                            " ", ""
+                        item["website"] = (
+                            f'https://www.westpac.com.au/locateus/branch/{item["state"]}/{item["city"]}/{item["name"]}'.replace(
+                                " ", ""
+                            )
                         )
                     elif location["brandCode"] == "wbc":
-                        item[
-                            "website"
-                        ] = f'https://www.westpac.com.au/locateus/{location_type.upper()}/{location["locationId"]}'
+                        item["website"] = (
+                            f'https://www.westpac.com.au/locateus/{location_type.upper()}/{location["locationId"]}'
+                        )
                     else:
-                        item[
-                            "website"
-                        ] = f'https://www.westpac.com.au/locateus/{location_type.upper()}/{location["brandCode"]}/{location["locationId"]}'
+                        item["website"] = (
+                            f'https://www.westpac.com.au/locateus/{location_type.upper()}/{location["brandCode"]}/{location["locationId"]}'
+                        )
 
                 if services := location.get("services"):
                     item["opening_hours"] = OpeningHours()
