@@ -162,6 +162,19 @@ def test_over_midnight():
         o.as_opening_hours() == "Mo 00:00-03:00,07:00-24:00; Tu-Sa 00:00-02:00,07:00-24:00; Su 00:00-02:00,05:00-24:00"
     )
 
+def test_till_midnight():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "23:00")
+    o.add_range("Tu", "11:00", "23:00")
+    o.add_range("We", "11:00", "23:00")
+    o.add_range("Th", "11:00", "23:00")
+    o.add_range("Fr", "11:00", "24:00")
+    o.add_range("Sa", "11:00", "24:00")
+    o.add_range("Su", "11:00", "23:00")
+
+    assert (
+        o.as_opening_hours() == "Mo-Th 11:00-23:00; Fr-Sa 11:00-24:00; Su 11:00-23:00"
+    )
 
 def test_sanitise_days():
     assert sanitise_day("Mo") == "Mo"
