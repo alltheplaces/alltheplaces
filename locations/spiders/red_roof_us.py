@@ -55,7 +55,7 @@ class RedRoofUSSpider(SitemapSpider):
         item["website"] = response.url
         if not item["ref"]:
             for rule in self.sitemap_rules:
-                if match := re.search(rule[0], url):
+                if match := re.search(rule[0], response.url):
                     if len(match.groups()) > 0:
                         item["ref"] = match.group(1).upper()
 
