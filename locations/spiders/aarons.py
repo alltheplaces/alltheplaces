@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -36,7 +37,17 @@ class AaronsSpider(Spider):
                     [location.get("mainPhone", {}).get("number"), location.get("alternatePhone", {}).get("number")],
                 )
             )
+            item["opening_hours"] = OpeningHours()
+            for rule in location.get("hours", {}).get("normalHours", []):
+                if rule.get("isClosed"):
+                    item["opening_hours"].set_closed(rule["day"])
+                else:
+                    for shift in rule["intervals"]:
+                        item["opening_hours"].add_range(
+                            rule["day"], str(shift["start"]).zfill(4), str(shift["end"]).zfill(4), "%H%M"
+                        )
             yield item
+
         new_offset = kwargs["offset"] + kwargs["limit"]
         if new_offset < response.json()["response"]["count"]:
             yield self.make_request(new_offset)
