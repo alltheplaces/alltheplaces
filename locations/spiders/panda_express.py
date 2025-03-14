@@ -9,7 +9,6 @@ class PandaExpressSpider(NomNomSpider):
     user_agent = BROWSER_DEFAULT
 
     def post_process_item(self, item, response, feature):
-        item["extras"]["website:menu"] = feature["url"]
         item["website"] = (
             f"https://www.pandaexpress.com/locations/{slugify(feature['state'])}/{slugify(feature['city'])}/{feature['extref']}"
         )
