@@ -14,6 +14,17 @@ def slugify(s: str) -> str:
 
 
 class NomNomSpider(Spider):
+    """NomNom is an "accelerator technology" by Bounteous for restaurants and
+    retailers:
+    https://www.bounteous.com/industries/restaurant-convenience/nomnom/
+    To use, specify "domain" as the base domain of the website.
+
+    NOTE: Consider using SitemapSpider+StructuredDataSpider instead, since the
+    NomNom API does not include opening hours, and the structured data usually
+    does."""
+
+    domain: str
+
     def start_requests(self) -> Iterable[Request]:
         yield Request(f"https://nomnom-prod-api.{self.domain}/restaurants/")
 
