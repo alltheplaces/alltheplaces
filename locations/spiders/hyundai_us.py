@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
@@ -31,10 +32,17 @@ class HyundaiUSSpider(JSONBlobSpider):
         item["name"] = feature.get("dealerNm")
         item["street_address"] = clean_address([feature.get("address1"), feature.get("address2")])
         item["postcode"] = feature.get("zipCd")
-        item["email"] = feature.get("dealerEmail")
-        item["website"] = feature.get("dealerUrl")
-        if item["website"] and item["website"].startswith("www."):
-            item["website"] = "https://" + item["website"]
+
+        if email := feature.get("dealerEmail"):
+            email = re.sub(r"[;,].*", "", email)
+            if "@" in email and "." in email:
+                item["email"] = email
+
+        if website := feature.get("dealerUrl"):
+            if website.upper().startswith("WWW."):
+                item["website"] = "https://" + website
+            elif "Inc" not in website and "None" not in website:
+                item["website"] = "https://" + website
 
         if "showroom" in feature.keys():
             sales = item.deepcopy()

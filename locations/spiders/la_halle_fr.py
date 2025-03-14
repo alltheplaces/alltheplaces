@@ -16,6 +16,7 @@ class LaHalleFRSpider(Spider):
     name = "la_halle_fr"
     item_attributes = {"brand": "La Halle", "brand_wikidata": "Q100728296"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
+    requires_proxy = True
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(

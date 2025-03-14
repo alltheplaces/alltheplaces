@@ -10,10 +10,10 @@ If sitemap data is present then USE IT. Writing code to query a store locator we
 
 The sitemap is such an important concept that the [scrapy framework](https://scrapy.org/) we use has [baked in support](https://docs.scrapy.org/en/latest/topics/spiders.html?highlight=sitemapspider#sitemapspider) for sitemap spider operations, providing a [few examples](https://docs.scrapy.org/en/latest/topics/spiders.html?highlight=sitemapspider#sitemapspider-examples).
 
-Within our project there are a severeal examples showing slightly different use of `SitemapSpider` support:
+Within our project there are a several examples showing slightly different use of `SitemapSpider` support:
 
-* [`jackinthebox.py`](../locations/spiders/jack_in_the_box.py)
-* [`moeys.py`](../locations/spiders/moes_southwest_grill.py)
+* [`jack_in_the_box.py`](../locations/spiders/jack_in_the_box.py)
+* [`moes_southwest_grill.py`](../locations/spiders/moes_southwest_grill.py)
 * [`shopko.py`](../locations/spiders/shopko.py)
 
 Note that spiders with have good sitemap links nearly always have good machine-readable [structured data](./STRUCTURED_DATA.md) for their POI details. In these cases you will see frequent use of our [`StructuredDataSpider`](../locations/structured_data_spider.py) assistant class.

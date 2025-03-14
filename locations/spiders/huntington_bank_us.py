@@ -16,12 +16,15 @@ class HuntingtonBankUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         hours = OpeningHours()
-        if ld_data["openingHoursSpecification"] is not None:
-            for row in ld_data["openingHoursSpecification"]:
-                day = row["dayOfWeek"].split("/")[-1][:2]
-                hours.add_range(day, row["opens"], row["closes"], "%H:%M:%S")
+        opening_hours = ld_data.get("openingHoursSpecification") or []
+        for row in opening_hours:
+            day = row["dayOfWeek"].split("/")[-1][:2]
+            hours.add_range(day, row["opens"], row["closes"], "%H:%M:%S")
 
         item["ref"] = response.xpath("//@data-branch-id").get()
         item["opening_hours"] = hours.as_opening_hours()
-        item["extras"]["fax"] = ld_data["faxNumber"]
+
+        if fax_number := ld_data.get("faxNumber"):
+            item["extras"]["fax"] = fax_number
+
         yield item

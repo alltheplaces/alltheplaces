@@ -82,7 +82,7 @@ class TasmaniaParksAndWildlifeServiceAUSpider(Spider):
                 False,
             )
             apply_yes_no(
-                Extras.BARBEQUES, properties, response.xpath('//img[contains(@data-src, "/icons/BBQ.png")]'), False
+                Extras.BARBECUES, properties, response.xpath('//img[contains(@data-src, "/icons/BBQ.png")]'), False
             )
             apply_yes_no(
                 Extras.PICNIC_TABLES,

@@ -50,10 +50,15 @@ class MbplcGBSpider(WoosmapSpider):
             "brand_wikidata": "Q133280052",
             "extras": Categories.PUB.value,
         },
-        "Ego": {
-            "brand": "Ego",
+        "EGO Mediterranean": {
+            "brand": "EGO Mediterranean",
             "brand_wikidata": "Q133279746",
             "extras": Categories.RESTAURANT.value,
+        },
+        "Orleans Smokehouse": {
+            "brand": "Orleans Smokehouse",
+            "brand_wikidata": "",
+            "extras": Categories.PUB.value,
         },
     }
 

@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class CoopSESpider(scrapy.Spider):
     name = "coop_se"
-    item_attributes = {"brand": "Coop", "brand_wikidata": "Q15229319"}
+    item_attributes = {"brand": "Coop", "brand_wikidata": "Q106684510"}
     start_urls = ["https://proxy.api.coop.se/external/store/stores?api-version=v2"]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"ocp-apim-subscription-key": "990520e65cc44eef89e9e9045b57f4e9"}}
 
@@ -56,12 +56,9 @@ class CoopSESpider(scrapy.Spider):
                 "extras": {"store_type": store_type},
             }
         )
-
-        if store_type == "Coop" or store_type == "Stora Coop":
-            apply_category(Categories.SHOP_SUPERMARKET, item)
-        elif store_type == "Coop kök cafe":
+        if store_type == "Coop kök cafe":
             apply_category(Categories.CAFE, item)
         else:
-            self.logger.warn("Unknown store type, will default to supermarket: " + store_type)
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item

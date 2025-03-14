@@ -25,13 +25,13 @@ class GovCmaFuelGBSpider(Spider):
     user_agent = BROWSER_DEFAULT  # TESCO!
 
     brand_map = {
-        "asda": {"brand": "Asda", "brand_wikidata": "Q297410"},
         "applegreen": {"brand": "Applegreen", "brand_wikidata": "Q7178908"},
+        "asda": {"brand": "Asda", "brand_wikidata": "Q297410"},
+        "asda express": {"brand": "Asda Express", "brand_wikidata": "Q114826023"},
         "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
         "coop": None,
         "essar": {"brand": "Essar", "brand_wikidata": "Q5399372"},
         "esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "jet ": {"brand": "JET", "brand_wikidata": "Q568940"},
         "jet": {"brand": "JET", "brand_wikidata": "Q568940"},
         "morrisons": {"brand": "Morrisons", "brand_wikidata": "Q922344"},
         "murco": {"brand": "Murco", "brand_wikidata": "Q16998281"},
@@ -61,7 +61,7 @@ class GovCmaFuelGBSpider(Spider):
             item["lat"] = location["location"]["latitude"]
             item["lon"] = location["location"]["longitude"]
 
-            if brand := self.brand_map.get(location["brand"].lower()):
+            if brand := self.brand_map.get((location.get("brand") or "").lower().strip()):
                 item.update(brand)
                 item["name"] = item.get("brand")
             else:

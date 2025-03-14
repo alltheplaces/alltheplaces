@@ -24,7 +24,11 @@ class ToyotaBRSpider(JSONBlobSpider):
 
     def pre_process_data(self, location):
         location["address"]["house_number"] = location["address"].pop("number", None)
-        location["website"] = location.pop("site")
+
+        if website := location.pop("site"):
+            if not website.startswith("https://"):
+                website = "https://" + website
+            location["website"] = website
 
     def post_process_item(self, item, response, location):
         services = [service["title"] for service in location["services"]]

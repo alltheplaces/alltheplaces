@@ -8,7 +8,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class WilcoFarmSpider(JSONBlobSpider):
     name = "wilco_farm"
-    item_attributes = {"brand": "Wilco Farm", "brand_wikidata": "Q8000290"}
+    item_attributes = {"brand": "Wilco", "brand_wikidata": "Q8000290"}
     allowed_domains = ["www.farmstore.com"]
     start_urls = ["https://www.farmstore.com/locations/"]
     requires_proxy = True

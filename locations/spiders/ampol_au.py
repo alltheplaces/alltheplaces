@@ -4,6 +4,9 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.central_england_cooperative import set_operator
+
+EG = {"brand": "EG Australia", "brand_wikidata": "Q5023980"}
 
 
 class AmpolAUSpider(Spider):
@@ -32,13 +35,17 @@ class AmpolAUSpider(Spider):
             item["geometry"] = location["Location"]
             item["street_address"] = address
 
-            apply_category(Categories.FUEL_STATION, item)
-            if location["Brand"] == "Eg Ampol":
-                item["brand"] = "EG Ampol"
-                apply_category(Categories.SHOP_CONVENIENCE, item)
-            elif location["Brand"] == "The Foodary":
-                item["brand"] = "Ampol Foodary"
-                apply_category(Categories.SHOP_CONVENIENCE, item)
+            if location["Brand"] == "Independent":
+                continue
+            elif location["Brand"] == "Ampcharge":
+                apply_category(Categories.CHARGING_STATION, item)
+            elif location["Brand"] == "EG Ampol":
+                set_operator(EG, item)
+                apply_category(Categories.FUEL_STATION, item)
+            elif location["Brand"] in ["The Foodary", "Ampol"]:
+                apply_category(Categories.FUEL_STATION, item)
+            else:
+                self.logger.error("Unexpected brand: {}".format(location["Brand"]))
 
             item["opening_hours"] = OpeningHours()
             for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
