@@ -23,7 +23,7 @@ def get_time_from_iso(s):
         return None
 
 
-class RedRoofSitemapUsSpider(SitemapSpider):
+class RedRoofUSSpider(SitemapSpider):
     name = "red_roof_us"
     item_attributes = {
         "brand_wikidata": "Q7304949",
