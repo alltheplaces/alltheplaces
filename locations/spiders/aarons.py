@@ -1,25 +1,36 @@
-from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from typing import Any, Iterable
 
-from locations.categories import Categories
-from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
+
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AaronsSpider(CrawlSpider, StructuredDataSpider):
+class AaronsSpider(Spider):
     name = "aarons"
-    item_attributes = {"brand": "Aaron's", "brand_wikidata": "Q10397787", "extras": Categories.SHOP_FURNITURE.value}
-    start_urls = ["https://www.aarons.com/locations/us", "https://www.aarons.com/locations/ca"]
-    rules = [
-        Rule(LinkExtractor(allow=r"/[a-z]{2}/[a-z]{2}/?$")),
-        Rule(LinkExtractor(allow=r"/[a-z]{2}/[a-z]{2}/[-\w]+/[-\w]+"), callback="parse_sd"),
-    ]
-    drop_attributes = {"name", "image"}
-    wanted_types = ["Store"]
-    search_for_twitter = False
+    item_attributes = {"brand": "Aaron's", "brand_wikidata": "Q10397787"}
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        if not item.get("street_address"):
-            return
-        yield item
+    def make_request(self, offset: int, limit: int = 10) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://www.aarons.com/locations/search?limit={limit}&offset={offset}",
+            cb_kwargs=dict(offset=offset, limit=limit),
+        )
+
+    def start_requests(self) -> Iterable[JsonRequest]:
+        yield self.make_request(0)
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["response"]["entities"]:
+            location.update(location.pop("profile"))
+            item = DictParser.parse(location)
+            item["ref"] = location.get("c_storeCode")
+            address = location["address"]
+            item["street_address"] = merge_address_lines(
+                [address.get("line1"), address.get("line2"), address.get("line3")]
+            )
+            item["website"] = response.urljoin(location.get("url"))
+            yield item
+        new_offset = kwargs["offset"] + kwargs["limit"]
+        if new_offset < response.json()["response"]["count"]:
+            yield self.make_request(new_offset)
