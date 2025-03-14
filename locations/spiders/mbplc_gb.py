@@ -30,8 +30,8 @@ class MbplcGBSpider(WoosmapSpider):
         },
         "Inn Keepers Collection": {
             "brand": "Inn Keepers Collection",
-            "brand_wikidata": "",
-            "extras": Categories.PUB.value,
+            "brand_wikidata": "Q6035891",
+            "extras": Categories.HOTEL.value,
         },
         "Vintage Inns": {"brand": "Vintage Inns", "brand_wikidata": "Q87067899"},
         "Browns": {"brand": "Browns", "brand_wikidata": "Q4976672"},
@@ -45,10 +45,15 @@ class MbplcGBSpider(WoosmapSpider):
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },
-        "Castle": {
-            "brand": "Castle",
-            "brand_wikidata": "",
+        "Castle Pubs": {
+            "brand": "Castle Pubs",
+            "brand_wikidata": "Q133280052",
             "extras": Categories.PUB.value,
+        },
+        "Ego": {
+            "brand": "Ego",
+            "brand_wikidata": "Q133279746",
+            "extras": Categories.RESTAURANT.value,
         },
     }
 
