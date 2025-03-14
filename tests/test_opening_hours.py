@@ -183,6 +183,13 @@ def test_till_midnight_formatted_as_zero_hour():
     assert o.as_opening_hours() == "Mo 11:00-24:00"
 
 
+def test_till_midnight_formatted_as_twenty_four_hour():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "24:00")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+
 def test_till_midnight_formatted_in_other_unusual_formats():
     o = OpeningHours()
     o.add_range("Mo", "11:00:00", "00:00:00", time_format="%H:%M:%S")
@@ -191,6 +198,11 @@ def test_till_midnight_formatted_in_other_unusual_formats():
 
     o = OpeningHours()
     o.add_range("Mo", "11:00:00", "0:00:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+    o = OpeningHours()
+    o.add_range("Mo", "11:00:00", "24:00:00", time_format="%H:%M:%S")
 
     assert o.as_opening_hours() == "Mo 11:00-24:00"
 
