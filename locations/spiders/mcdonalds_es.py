@@ -18,7 +18,7 @@ class McdonaldsESSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         name_re = re.compile(r"mc ?donald['´'`]?s", re.IGNORECASE)
-        for location in response.json()["restaurants"]:
+        for location in response.json()["results"]:
             if location["open"] is True:
                 # some locations are not open yet
                 item = DictParser.parse(location)
@@ -27,8 +27,7 @@ class McdonaldsESSpider(scrapy.Spider):
                 item["ref"] = location["site"]
                 item["postcode"] = location["cp"]
 
-                services = [i["id"] for i in location["services"]]
-                if "mccafe" in services:
+                if "mccafe" in location["services"]:
                     mccafe = item.deepcopy()
                     mccafe["ref"] = "{}-mccafe".format(item["ref"])
                     mccafe["brand"] = "McCafé"
@@ -38,10 +37,10 @@ class McdonaldsESSpider(scrapy.Spider):
 
                 self.parse_opening_hours(item, location["schedules"].get("restaurant"))
 
-                apply_yes_no(Extras.DELIVERY, item, "delivery" in services)
-                apply_yes_no(Extras.TAKEAWAY, item, "takeaway" in services)
-                apply_yes_no(Extras.OUTDOOR_SEATING, item, "terrace" in services)
-                apply_yes_no(Extras.DRIVE_THROUGH, item, "mcauto" in services)
+                apply_yes_no(Extras.DELIVERY, item, "delivery" in location["services"])
+                apply_yes_no(Extras.TAKEAWAY, item, "takeaway" in location["services"])
+                apply_yes_no(Extras.OUTDOOR_SEATING, item, "terrace" in location["services"])
+                apply_yes_no(Extras.DRIVE_THROUGH, item, "mcauto" in location["services"])
 
                 apply_category(Categories.FAST_FOOD, item)
 
