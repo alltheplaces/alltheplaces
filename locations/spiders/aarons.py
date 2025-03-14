@@ -30,6 +30,12 @@ class AaronsSpider(Spider):
                 [address.get("line1"), address.get("line2"), address.get("line3")]
             )
             item["website"] = response.urljoin(location.get("url"))
+            item["phone"] = "; ".join(
+                filter(
+                    None,
+                    [location.get("mainPhone", {}).get("number"), location.get("alternatePhone", {}).get("number")],
+                )
+            )
             yield item
         new_offset = kwargs["offset"] + kwargs["limit"]
         if new_offset < response.json()["response"]["count"]:
