@@ -4,7 +4,7 @@ from locations.storefinders.nomnom import NomNomSpider, slugify
 class BlazePizzaSpider(NomNomSpider):
     name = "blaze_pizza"
     item_attributes = {"brand": "Blaze Pizza", "brand_wikidata": "Q23016666"}
-    start_urls = ["https://nomnom-prod-api.blazepizza.com/extras/restaurant/summary/state"]
+    domain = "blazepizza.com"
 
     def post_process_item(self, item, response, feature):
         item["extras"]["website:menu"] = feature["url"]

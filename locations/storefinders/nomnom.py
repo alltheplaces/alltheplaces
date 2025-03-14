@@ -14,13 +14,11 @@ def slugify(s: str) -> str:
 
 
 class NomNomSpider(Spider):
-    def parse(self, response: TextResponse) -> Iterable[Request]:
-        for state in response.json()["data"]:
-            for city in state["cities"]:
-                yield response.follow(city["datauri"], callback=self.parse_locations)
+    def start_requests(self) -> Iterable[Request]:
+        yield Request(f"https://nomnom-prod-api.{self.domain}/restaurants/")
 
-    def parse_locations(self, response: TextResponse) -> Iterable[Feature]:
-        for location in response.json()["data"][0]["restaurants"]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
+        for location in response.json()["restaurants"]:
             item = DictParser.parse(location)
             item["ref"] = location["extref"]
             item["branch"] = location["name"].removeprefix(location["storename"]).strip()
