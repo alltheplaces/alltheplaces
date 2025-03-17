@@ -15,9 +15,14 @@ def test_item_attributes_type():
 
 
 def test_item_attributes_brand_match():
-    ignored_cases = []
+    ignored_spiders = [
+        "sparkasse_de",  # Overcomplicated in NSI
+    ]
+
     fails = []
     for spider_class in iter_spider_classes_in_all_modules():
+        if spider_class.name in ignored_spiders:
+            continue
         for tree in ["brand", "operator"]:
             item_attributes = getattr(spider_class, "item_attributes", {})
             if not isinstance(item_attributes, dict):
@@ -53,5 +58,6 @@ def test_item_attributes_brand_match():
                     )
                 )
                 continue
-    pprint.pp(fails)
-    assert False
+    if fails:
+        pprint.pp(fails)
+        assert False
