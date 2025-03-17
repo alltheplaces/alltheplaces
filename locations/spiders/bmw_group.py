@@ -203,10 +203,10 @@ class BmwGroupSpider(scrapy.Spider):
                 yield item
 
     def map_category(self, item: Feature, poi: dict):
-        distribution_branches = poi.get("distributionBranches", [])
+        distribution_branches = poi.get("attributes", {}).get("distributionBranches", [])
 
         if poi.get("category") == self.BMW_MOTORBIKE:
-            if "F" or "G" in distribution_branches:
+            if "F" in distribution_branches or "G" in distribution_branches:
                 apply_category(Categories.SHOP_MOTORCYCLE, item)
                 apply_yes_no(Extras.USED_MOTORCYCLE_SALES, item, "G" in distribution_branches)
                 apply_yes_no(Extras.MOTORCYCLE_REPAIR, item, "T" in distribution_branches)
@@ -218,7 +218,7 @@ class BmwGroupSpider(scrapy.Spider):
                     self.logger.error(f"Unknown distribution branch: {branch}, {item['ref']}")
             return
 
-        if "F" or "G" in distribution_branches:
+        if "F" in distribution_branches or "G" in distribution_branches:
             apply_category(Categories.SHOP_CAR, item)
             apply_yes_no(Extras.USED_CAR_SALES, item, "G" in distribution_branches)
             apply_yes_no(Extras.CAR_REPAIR, item, "T" in distribution_branches)
