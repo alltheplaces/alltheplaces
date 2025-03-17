@@ -187,7 +187,7 @@ class BmwGroupSpider(scrapy.Spider):
                 data["street_address"] = data.pop("street")
 
                 item = DictParser.parse(data)
-                item["ref"] = f"{data.get('key', '')}-{data.get('category','')}"
+                item["ref"] = f"{data.get('key', '')}-{data.get('category', '')}"
                 item["phone"] = data.get("attributes", {}).get("phone")
                 item["email"] = data.get("attributes", {}).get("mail")
                 item["website"] = data.get("attributes", {}).get("homepage")
