@@ -14,7 +14,12 @@ def test_item_attributes_type():
             assert isinstance(extras, dict)
 
 
-def test_item_attributes_brand_match():
+def test_item_attributes_brand_strings_match_nsi():
+    """
+    Check if the brand/operator string from the spider matches the brand/operator in NSI.
+    Some edge/complex cases might occur that are not possible to solve right away.
+    If you face such a case, please add the spider to the ignored_spiders list.
+    """
     ignored_spiders = [
         "czech_post_cz",  # Brand name in NSI is a question
         "sparkasse_de",  # Overcomplicated in NSI
