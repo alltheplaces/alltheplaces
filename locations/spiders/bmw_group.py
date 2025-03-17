@@ -210,7 +210,8 @@ class BmwGroupSpider(scrapy.Spider):
                 apply_category(Categories.SHOP_MOTORCYCLE, item)
                 apply_yes_no(Extras.USED_MOTORCYCLE_SALES, item, "G" in distribution_branches)
                 apply_yes_no(Extras.MOTORCYCLE_REPAIR, item, "T" in distribution_branches)
-            elif "T" in distribution_branches:
+                apply_yes_no(Extras.MOTORCYCLE_REPAIR, item, "CCRC" in distribution_branches)
+            elif "T" in distribution_branches or "CCRC" in distribution_branches:
                 apply_category(Categories.SHOP_MOTORCYCLE_REPAIR, item)
             else:
                 for branch in distribution_branches:
@@ -222,7 +223,8 @@ class BmwGroupSpider(scrapy.Spider):
             apply_category(Categories.SHOP_CAR, item)
             apply_yes_no(Extras.USED_CAR_SALES, item, "G" in distribution_branches)
             apply_yes_no(Extras.CAR_REPAIR, item, "T" in distribution_branches)
-        elif "T" in distribution_branches:
+            apply_yes_no(Extras.CAR_REPAIR, item, "CCRC" in distribution_branches)
+        elif "T" in distribution_branches or "CCRC" in distribution_branches:
             apply_category(Categories.SHOP_CAR_REPAIR, item)
         else:
             for branch in distribution_branches:
