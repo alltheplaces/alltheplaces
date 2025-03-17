@@ -10,7 +10,7 @@ from locations.storefinders.mapdata_services import MapDataServicesSpider
 
 class ReddyExpressAUSpider(MapDataServicesSpider):
     name = "reddy_express_au"
-    item_attributes = {"operator": "Reddy Express", "operator_wikidata": "Q5144653"}
+    item_attributes = {"brand": "Reddy Express", "brand_wikidata": "Q5144653"}
     api_brand_name = "SHE_FuelLocations"
     api_key = "KYAmqfaKFEsYWtweMcoqStasRlCoipBukIAt3gSb"
     api_filter = '(shell_card_accepted = 1) AND (Status = "Temp Closure" OR Status = "Open")'
