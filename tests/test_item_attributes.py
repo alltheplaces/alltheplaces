@@ -16,11 +16,15 @@ def test_item_attributes_type():
 
 def test_item_attributes_brand_match():
     ignored_spiders = [
+        "czech_post_cz",  # Brand name in NSI is a question
         "sparkasse_de",  # Overcomplicated in NSI
     ]
 
     fails = []
+    spider_names = set()
     for spider_class in iter_spider_classes_in_all_modules():
+        spider_names.add(spider_class.name)
+
         if spider_class.name in ignored_spiders:
             continue
         for tree in ["brand", "operator"]:
@@ -60,4 +64,10 @@ def test_item_attributes_brand_match():
                 continue
     if fails:
         pprint.pp(fails)
+        assert False
+
+    ignored_spiders_list_problems = set(ignored_spiders).difference(spider_names)
+    if len(ignored_spiders_list_problems):
+        print("ignored_spiders bad references:")
+        pprint.pp(ignored_spiders_list_problems)
         assert False
