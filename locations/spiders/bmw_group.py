@@ -1,62 +1,26 @@
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # POI Types mapping found in https://dlo.api.bmw/main.js
 """
-newCars: [{
-        type: "distributionBranches",
-        key: "F"
-    }],
-    usedCars: [{
-        type: "distributionBranches",
-        key: "G"
-    }],
-    repairServices: [{
-        type: "distributionBranches",
-        key: "T"
-    }],
-    mCertified: [{
-        type: "businessTypes",
-        key: "MC"
-    }],
-    classicCertified: [{
-        type: "businessTypes",
-        key: "CC"
-    }],
-    eRetail: [{
-        type: "requestServices",
-        key: "SON"
-    }],
-    highVoltageServices: [{
-        type: "services",
-        key: "HV"
-    }],
-    carbonServices: [{
-        type: "services",
-        key: "CR"
-    }],
-    bodyShop: [{
-        type: "requestServices",
-        key: "CBS"
-    }],
-    paintShop: [{
-        type: "requestServices",
-        key: "CPS"
-    }],
-    onlineBooking: [{
-        type: "testDriveBooking",
-        key: "TDB_OB"
-    }],
-    sendRequest: [{
-        type: "testDriveBooking",
-        key: "TDB_SR"
-    }],
-    bmwEmployeeDelivery: [{
-        type: "businessTypes",
-        key: "GE"
-    }]
+{
+  "newCars": [{ "type": "distributionBranches", "key": "F" }],
+  "usedCars": [{ "type": "distributionBranches", "key": "G" }],
+  "repairServices": [{ "type": "distributionBranches", "key": "T" }],
+  "mCertified": [{ "type": "businessTypes", "key": "MC" }],
+  "classicCertified": [{ "type": "businessTypes", "key": "CC" }],
+  "eRetail": [{ "type": "requestServices", "key": "SON" }],
+  "highVoltageServices": [{ "type": "services", "key": "HV" }],
+  "carbonServices": [{ "type": "services", "key": "CR" }],
+  "bodyShop": [{ "type": "requestServices", "key": "CBS" }],
+  "paintShop": [{ "type": "requestServices", "key": "CPS" }],
+  "onlineBooking": [{ "type": "testDriveBooking", "key": "TDB_OB" }],
+  "sendRequest": [{ "type": "testDriveBooking", "key": "TDB_SR" }],
+  "bmwEmployeeDelivery": [{ "type": "businessTypes", "key": "GE" }]
+}
 """
 
 
@@ -196,13 +160,15 @@ class BmwGroupSpider(scrapy.Spider):
         "BY",
         "LV",
     ]
+
+    BMW_MOTORBIKE = "BMW_MOTORBIKE"
     BRAND_MAPPING = {
         "BMW": {"brand": "BMW", "brand_wikidata": "Q26678"},
         "BMW_I": {"brand": "BMW i", "brand_wikidata": "Q796784"},
         "ROLLS_ROYCE": {"brand": "Rolls-Royce", "brand_wikidata": "Q243278"},
         "BMW_M": {"brand": "BMW M", "brand_wikidata": "Q173339"},
         "MINI": {"brand": "Mini", "brand_wikidata": "Q116232"},
-        "BMW_MOTORBIKE": {"brand": "BMW Motorrad", "brand_wikidata": "Q249173"},
+        BMW_MOTORBIKE: {"brand": "BMW Motorrad", "brand_wikidata": "Q249173"},
     }
 
     def start_requests(self):
@@ -213,24 +179,52 @@ class BmwGroupSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        response = response.json().get("data").get("pois")
-        for data in response:
-            data["street_address"] = data.pop("street")
+        if response.status == 204:
+            self.logger.info(f"No content found in {response.url}")
+        else:
+            response = response.json().get("data").get("pois")
+            for data in response:
+                data["street_address"] = data.pop("street")
 
-            item = DictParser.parse(data)
-            item["ref"] = f"{data.get('key', '')}-{data.get('category','')}"
-            item["phone"] = data.get("attributes", {}).get("phone")
-            item["email"] = data.get("attributes", {}).get("mail")
-            item["website"] = data.get("attributes", {}).get("homepage")
+                item = DictParser.parse(data)
+                item["ref"] = f"{data.get('key', '')}-{data.get('category','')}"
+                item["phone"] = data.get("attributes", {}).get("phone")
+                item["email"] = data.get("attributes", {}).get("mail")
+                item["website"] = data.get("attributes", {}).get("homepage")
 
-            if match := self.BRAND_MAPPING.get(data.get("category")):
-                item.update(match)
-            else:
-                self.crawler.stats.inc_value(f"atp/brand/fail/{data.get('category')}")
+                if match := self.BRAND_MAPPING.get(data.get("category")):
+                    item.update(match)
+                else:
+                    self.crawler.stats.inc_value(f"atp/{self.name}/brand/fail/{data.get('category')}")
+                    self.logger.error(f"Unknown brand: {data.get('category')}, {item['ref']}")
 
-            if item["brand"] == "BMW Motorrad":
+                self.map_category(item, data)
+
+                yield item
+
+    def map_category(self, item: Feature, poi: dict):
+        distribution_branches = poi.get("distributionBranches", [])
+
+        if poi.get("category") == self.BMW_MOTORBIKE:
+            if "F" or "G" in distribution_branches:
                 apply_category(Categories.SHOP_MOTORCYCLE, item)
+                apply_yes_no(Extras.USED_MOTORCYCLE_SALES, item, "G" in distribution_branches)
+                apply_yes_no(Extras.MOTORCYCLE_REPAIR, item, "T" in distribution_branches)
+            elif "T" in distribution_branches:
+                apply_category(Categories.SHOP_MOTORCYCLE_REPAIR, item)
             else:
-                apply_category(Categories.SHOP_CAR, item)
+                for branch in distribution_branches:
+                    self.crawler.stats.inc_value(f"atp/{self.name}/distribution_branch/fail/{branch}")
+                    self.logger.error(f"Unknown distribution branch: {branch}, {item['ref']}")
+            return
 
-            yield item
+        if "F" or "G" in distribution_branches:
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.USED_CAR_SALES, item, "G" in distribution_branches)
+            apply_yes_no(Extras.CAR_REPAIR, item, "T" in distribution_branches)
+        elif "T" in distribution_branches:
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
+        else:
+            for branch in distribution_branches:
+                self.crawler.stats.inc_value(f"atp/{self.name}/distribution_branch/fail/{branch}")
+                self.logger.error(f"Unknown distribution branch: {branch}, {item['ref']}")
