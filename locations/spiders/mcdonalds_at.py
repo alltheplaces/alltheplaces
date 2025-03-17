@@ -23,12 +23,12 @@ class McdonaldsATSpider(scrapy.spiders.SitemapSpider):
 
         selector = scrapy.Selector(text=response.xpath('//div[@id="restaurants"]').get())
 
-        for p in selector.xpath('.//p[string-length(text()) > 0]'):
-            if day := p.xpath('./span/text()').get():
+        for p in selector.xpath(".//p[string-length(text()) > 0]"):
+            if day := p.xpath("./span/text()").get():
                 day = day.title()
                 if day := DAYS_DE.get(day):
-                    open, close = (p.xpath('text()[1]').get()).split(' - ')
-                    oh.add_range(day, open, close, closed=CLOSED_DE) 
+                    open, close = (p.xpath("text()[1]").get()).split(" - ")
+                    oh.add_range(day, open, close, closed=CLOSED_DE)
         item["opening_hours"] = oh
 
         services = response.xpath('//*[@class="wso-tax-img"]/img/@alt').getall()
@@ -44,5 +44,5 @@ class McdonaldsATSpider(scrapy.spiders.SitemapSpider):
             mccafe["brand_wikidata"] = "Q3114287"
             apply_category(Categories.CAFE, mccafe)
             yield mccafe
- 
+
         yield item
