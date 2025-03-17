@@ -96,7 +96,7 @@ class UbbBGSpider(Spider):
             if location["data"]["features"] == []:
                 yield item
                 continue
-            
+
             for _, feature in location["data"]["features"].items():
                 if feature["slug"] == "atm-money-deposit":
                     has_cash_in = True
