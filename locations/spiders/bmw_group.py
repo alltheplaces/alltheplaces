@@ -204,29 +204,36 @@ class BmwGroupSpider(scrapy.Spider):
 
     def map_category(self, item: Feature, poi: dict):
         distribution_branches = poi.get("attributes", {}).get("distributionBranches", [])
+        category = poi.get("category")
 
-        if poi.get("category") == self.BMW_MOTORBIKE:
-            if "F" in distribution_branches or "G" in distribution_branches:
-                apply_category(Categories.SHOP_MOTORCYCLE, item)
-                apply_yes_no(Extras.USED_MOTORCYCLE_SALES, item, "G" in distribution_branches)
-                apply_yes_no(Extras.MOTORCYCLE_REPAIR, item, "T" in distribution_branches)
-                apply_yes_no(Extras.MOTORCYCLE_REPAIR, item, "CCRC" in distribution_branches)
-            elif "T" in distribution_branches or "CCRC" in distribution_branches:
-                apply_category(Categories.SHOP_MOTORCYCLE_REPAIR, item)
-            else:
-                for branch in distribution_branches:
-                    self.crawler.stats.inc_value(f"atp/{self.name}/distribution_branch/fail/{branch}")
-                    self.logger.error(f"Unknown distribution branch: {branch}, {item['ref']}")
-            return
+        if category == self.BMW_MOTORBIKE:
+            self.apply_motorbike_category(item, distribution_branches)
+        else:
+            self.apply_car_category(item, distribution_branches)
 
+    def apply_motorbike_category(self, item: Feature, distribution_branches: list):
+        if "F" in distribution_branches or "G" in distribution_branches:
+            apply_category(Categories.SHOP_MOTORCYCLE, item)
+            apply_yes_no(Extras.USED_MOTORCYCLE_SALES, item, "G" in distribution_branches)
+            apply_yes_no(
+                Extras.MOTORCYCLE_REPAIR, item, "T" in distribution_branches or "CCRC" in distribution_branches
+            )
+        elif "T" in distribution_branches or "CCRC" in distribution_branches:
+            apply_category(Categories.SHOP_MOTORCYCLE_REPAIR, item)
+        else:
+            self.log_unknown_branches(distribution_branches, item)
+
+    def apply_car_category(self, item: Feature, distribution_branches: list):
         if "F" in distribution_branches or "G" in distribution_branches:
             apply_category(Categories.SHOP_CAR, item)
             apply_yes_no(Extras.USED_CAR_SALES, item, "G" in distribution_branches)
-            apply_yes_no(Extras.CAR_REPAIR, item, "T" in distribution_branches)
-            apply_yes_no(Extras.CAR_REPAIR, item, "CCRC" in distribution_branches)
+            apply_yes_no(Extras.CAR_REPAIR, item, "T" in distribution_branches or "CCRC" in distribution_branches)
         elif "T" in distribution_branches or "CCRC" in distribution_branches:
             apply_category(Categories.SHOP_CAR_REPAIR, item)
         else:
-            for branch in distribution_branches:
-                self.crawler.stats.inc_value(f"atp/{self.name}/distribution_branch/fail/{branch}")
-                self.logger.error(f"Unknown distribution branch: {branch}, {item['ref']}")
+            self.log_unknown_branches(distribution_branches, item)
+
+    def log_unknown_branches(self, distribution_branches: list, item: Feature):
+        for branch in distribution_branches:
+            self.crawler.stats.inc_value(f"atp/{self.name}/distribution_branch/fail/{branch}")
+            self.logger.error(f"Unknown distribution branch: {branch}, {item['ref']}")
