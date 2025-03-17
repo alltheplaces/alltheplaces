@@ -245,7 +245,7 @@ if [ -z "${GITHUB_TOKEN}" ]; then
 else
     if [ "${pull_request_number}" != "false" ]; then
         curl \
-            -s \
+            -v \
             -XPOST \
             -H "Authorization: token ${GITHUB_TOKEN}" \
             -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
