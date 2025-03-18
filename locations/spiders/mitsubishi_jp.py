@@ -32,4 +32,6 @@ class MitsubishiJPSpider(CrawlSpider):
         item["addr_full"] = clean_address(
             response.xpath('//*[contains(text(),"住所")]/following-sibling::td/span/text()').getall()
         )
+        item["phone"] = response.xpath('//*[contains(@class, "mod-link-tel")]//a/@href').get()
+        item["extras"]["fax"] = response.xpath('//*[contains(@class, "mod-link-fax")]/text()').get()
         yield item
