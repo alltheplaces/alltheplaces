@@ -3,7 +3,7 @@ from typing import Any
 import scrapy
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category, apply_yes_no, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
