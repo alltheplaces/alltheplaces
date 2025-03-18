@@ -1,24 +1,66 @@
 #!/bin/bash
+
+generate_jwt() {
+    # Generate a JWT for GitHub App authentication
+    app_id="$1"
+    private_key="$2"
+
+    now=$(date +%s)
+    iat=$now
+    exp=$((now + 600)) # 10 minutes expiration
+
+    header=$(echo -n '{"alg":"RS256","typ":"JWT"}' | base64 | tr -d '=' | tr '/+' '_-')
+    payload=$(echo -n "{\"iat\":${iat},\"exp\":${exp},\"iss\":${app_id}}" | base64 | tr -d '=' | tr '/+' '_-')
+
+    signature=$(echo -n "${header}.${payload}" | openssl dgst -sha256 -sign <(echo -n "${private_key}") -binary | base64 | tr -d '=' | tr '/+' '_-')
+
+    echo "${header}.${payload}.${signature}"
+}
+
+get_installation_token() {
+    # Get an installation token using the JWT
+    app_id="$1"
+    private_key="$2"
+    installation_id="$3"
+
+    jwt=$(generate_jwt "$app_id" "$private_key")
+
+    curl -s -X POST \
+         -H "Authorization: Bearer ${jwt}" \
+         -H "Accept: application/vnd.github.v3+json" \
+         "https://api.github.com/app/installations/${installation_id}/access_tokens" \
+         | jq -r '.token'
+}
+
 PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
+
+if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
+    echo "GitHub App credentials not set"
+    exit 1
+fi
+
+# Get an access token for the installation
+access_token=$(get_installation_token "${GITHUB_APP_ID}" "${GITHUB_APP_PRIVATE_KEY}" "${GITHUB_APP_INSTALLATION_ID}")
 
 # Check if the build is triggered by a pull request
 if [ "${CODEBUILD_WEBHOOK_EVENT}" = "PULL_REQUEST_CREATED" ] || [ "${CODEBUILD_WEBHOOK_EVENT}" = "PULL_REQUEST_UPDATED" ]; then          # Extract the pull request number from the CODEBUILD_SOURCE_VERSION variable
-  # CODEBUILD_SOURCE_VERSION format: "pr/pull-request-number"
-  pull_request_number=$(echo "${CODEBUILD_SOURCE_VERSION}" | cut -d '/' -f 2)
+    # CODEBUILD_SOURCE_VERSION format: "pr/pull-request-number"
+    pull_request_number=$(echo "${CODEBUILD_SOURCE_VERSION}" | cut -d '/' -f 2)
 
-  echo "Pull request number: ${pull_request_number}"
+    echo "Pull request number: ${pull_request_number}"
 else
-  echo "This build is not triggered by a pull request. It was ${CODEBUILD_WEBHOOK_EVENT}"
-  exit 1
+    echo "This build is not triggered by a pull request. It was ${CODEBUILD_WEBHOOK_EVENT}"
+    exit 1
 fi
 
 # If the most recent commit on the PR is from the pre-commit bot, skip running the spiders
 if git log -1 --pretty=format:%an | grep -q "pre-commit"; then
-  echo "Skipping spider run for pre-commit changes."
-  exit 0
+    echo "Skipping spider run for pre-commit changes."
+    exit 0
 fi
 
-pr_file_changes=$(curl -sL --header "authorization: Bearer ${GITHUB_TOKEN}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
+
+pr_file_changes=$(curl -sL --header "authorization: token ${access_token}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
 (>&2 echo "PR response: ${pr_file_changes}")
 
 SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
@@ -240,20 +282,17 @@ if [[ ! "$(ls ${RUN_DIR})" ]]; then
     echo $EXIT_CODE
 fi
 
-if [ -z "${GITHUB_TOKEN}" ]; then
-    echo "No GITHUB_TOKEN set"
+if [ "${pull_request_number}" != "false" ]; then
+    curl \
+        -v \
+        -XPOST \
+        -H "Authorization: token ${access_token}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
+        "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
+    echo "Added a comment to pull https://github.com/alltheplaces/alltheplaces/pull/${pull_request_number}"
 else
-    if [ "${pull_request_number}" != "false" ]; then
-        curl \
-            -v \
-            -XPOST \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
-            "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
-        echo "Added a comment to pull https://github.com/alltheplaces/alltheplaces/pull/${pull_request_number}"
-    else
-        echo "Not posting to GitHub because no pull event number set"
-    fi
+    echo "Not posting to GitHub because no pull event number set"
 fi
 
 exit $EXIT_CODE
