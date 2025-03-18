@@ -5,14 +5,20 @@ generate_jwt() {
     app_id="$1"
     private_key="$2"
 
+    key_file=$(mktemp)
+    echo "$private_key" > "$key_file"
+    chmod 600 "$key_file"
+
     now=$(date +%s)
     iat=$now
-    exp=$((now + 600)) # 10 minutes expiration
+    exp=$((now + 600))
 
     header=$(echo -n '{"alg":"RS256","typ":"JWT"}' | base64 | tr -d '=' | tr '/+' '_-')
     payload=$(echo -n "{\"iat\":${iat},\"exp\":${exp},\"iss\":${app_id}}" | base64 | tr -d '=' | tr '/+' '_-')
 
-    signature=$(echo -n "${header}.${payload}" | openssl dgst -sha256 -sign <(echo -n "${private_key}") -binary | base64 | tr -d '=' | tr '/+' '_-')
+    signature=$(echo -n "${header}.${payload}" | openssl dgst -sha256 -sign "$key_file" -binary | base64 | tr -d '=' | tr '/+' '_-')
+
+    rm "$key_file"
 
     echo "${header}.${payload}.${signature}"
 }
