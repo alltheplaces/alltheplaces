@@ -7,14 +7,51 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-import os
+from os import environ
 
-import scrapy
+from scrapy import __version__ as scrapy_version
+from scrapy_playwright.handler import ScrapyPlaywrightDownloadHandler
+from scrapy_zyte_api import (
+    ScrapyZyteAPIDownloaderMiddleware,
+    ScrapyZyteAPIDownloadHandler,
+    ScrapyZyteAPIRequestFingerprinter,
+)
 
-import locations
+from locations import __version__ as atp_bot_version
+from locations.exporters.geojson import GeoJsonExporter
+from locations.exporters.geoparquet import GeoparquetExporter
+from locations.exporters.ld_geojson import LineDelimitedGeoJsonExporter
+from locations.exporters.osm import OSMExporter
+from locations.extensions import LogStatsExtension
+from locations.logformatter import DebugDuplicateLogFormatter
+from locations.middlewares.cdnstats import CDNStatsMiddleware
+from locations.middlewares.playwright_middleware import PlaywrightMiddleware
+from locations.middlewares.track_sources import TrackSourcesMiddleware
+from locations.middlewares.zyte_api_by_country import ZyteApiByCountryMiddleware
+from locations.pipelines.address_clean_up import AddressCleanUpPipeline
+from locations.pipelines.apply_nsi_categories import ApplyNSICategoriesPipeline
+from locations.pipelines.apply_source_spider_attributes import ApplySourceSpiderAttributesPipeline
+from locations.pipelines.apply_spider_level_attributes import ApplySpiderLevelAttributesPipeline
+from locations.pipelines.assert_url_scheme import AssertURLSchemePipeline
+from locations.pipelines.check_item_properties import CheckItemPropertiesPipeline
 from locations.pipelines.clean_strings import CleanStringsPipeline
+from locations.pipelines.closed import ClosePipeline
+from locations.pipelines.count_brands import CountBrandsPipeline
+from locations.pipelines.count_categories import CountCategoriesPipeline
+from locations.pipelines.count_operators import CountOperatorsPipeline
+from locations.pipelines.country_code_clean_up import CountryCodeCleanUpPipeline
+from locations.pipelines.drop_attributes import DropAttributesPipeline
+from locations.pipelines.drop_logo import DropLogoPipeline
+from locations.pipelines.duplicates import DuplicatesPipeline
+from locations.pipelines.email_clean_up import EmailCleanUpPipeline
+from locations.pipelines.extract_gb_postcode import ExtractGBPostcodePipeline
+from locations.pipelines.geojson_geometry_reprojection import GeoJSONGeometryReprojectionPipeline
+from locations.pipelines.geojson_multipoint_simplification import GeoJSONMultiPointSimplificationPipeline
+from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
+from locations.pipelines.state_clean_up import StateCodeCleanUpPipeline
 
 BOT_NAME = "locations"
+BOT_VERSION = atp_bot_version
 
 SPIDER_MODULES = ["locations.spiders"]
 NEWSPIDER_MODULE = "locations.spiders"
@@ -22,20 +59,20 @@ COMMANDS_MODULE = "locations.commands"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = f"Mozilla/5.0 (X11; Linux x86_64) {BOT_NAME}/{locations.__version__} (+https://github.com/alltheplaces/alltheplaces; framework {scrapy.__version__})"
+USER_AGENT = f"Mozilla/5.0 (X11; Linux x86_64) {BOT_NAME}/{BOT_VERSION} (+https://github.com/alltheplaces/alltheplaces; framework {scrapy_version})"
 
 ROBOTSTXT_USER_AGENT = BOT_NAME
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
-FEED_URI = os.environ.get("FEED_URI")
-FEED_FORMAT = os.environ.get("FEED_FORMAT")
+FEED_URI = environ.get("FEED_URI")
+FEED_FORMAT = environ.get("FEED_FORMAT")
 FEED_EXPORTERS = {
-    "geojson": "locations.exporters.geojson.GeoJsonExporter",
-    "parquet": "locations.exporters.geoparquet.GeoparquetExporter",
-    "ndgeojson": "locations.exporters.ld_geojson.LineDelimitedGeoJsonExporter",
-    "osm": "locations.exporters.osm.OSMExporter",
+    "geojson": GeoJsonExporter,
+    "parquet": GeoparquetExporter,
+    "ndgeojson": LineDelimitedGeoJsonExporter,
+    "osm": OSMExporter,
 }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -67,26 +104,26 @@ TELNETCONSOLE_ENABLED = False
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-    "locations.middlewares.track_sources.TrackSourcesMiddleware": 500,
+    TrackSourcesMiddleware: 500,
 }
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {}
 
-if os.environ.get("ZYTE_API_KEY"):
+if environ.get("ZYTE_API_KEY"):
     DOWNLOAD_HANDLERS = {
-        "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
-        "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+        "http": ScrapyZyteAPIDownloadHandler,
+        "https": ScrapyZyteAPIDownloadHandler,
     }
     DOWNLOADER_MIDDLEWARES = {
-        "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
-        "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
+        ZyteApiByCountryMiddleware: 500,
+        ScrapyZyteAPIDownloaderMiddleware: 1000,
     }
-    REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
+    REQUEST_FINGERPRINTER_CLASS = ScrapyZyteAPIRequestFingerprinter
     TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
-DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
+DOWNLOADER_MIDDLEWARES[CDNStatsMiddleware] = 500
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -95,36 +132,36 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 # }
 
 EXTENSIONS = {
-    "locations.extensions.LogStatsExtension": 101,
+    LogStatsExtension: 101,
 }
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "locations.pipelines.duplicates.DuplicatesPipeline": 200,
-    "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
-    "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
-    "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
+    DuplicatesPipeline: 200,
+    DropAttributesPipeline: 250,
+    ApplySpiderLevelAttributesPipeline: 300,
+    ApplySourceSpiderAttributesPipeline: 350,
     CleanStringsPipeline: 354,
-    "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
-    "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
-    "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
-    "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
-    "locations.pipelines.email_clean_up.EmailCleanUpPipeline": 370,
-    "locations.pipelines.geojson_geometry_reprojection.GeoJSONGeometryReprojectionPipeline": 380,
-    "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
-    "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
-    "locations.pipelines.drop_logo.DropLogoPipeline": 550,
-    "locations.pipelines.closed.ClosePipeline": 650,
-    "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
-    "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 750,
-    "locations.pipelines.geojson_multipoint_simplification.GeoJSONMultiPointSimplificationPipeline": 760,
-    "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
-    "locations.pipelines.count_brands.CountBrandsPipeline": 810,
-    "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
+    CountryCodeCleanUpPipeline: 355,
+    StateCodeCleanUpPipeline: 356,
+    AddressCleanUpPipeline: 357,
+    PhoneCleanUpPipeline: 360,
+    EmailCleanUpPipeline: 370,
+    GeoJSONGeometryReprojectionPipeline: 380,
+    ExtractGBPostcodePipeline: 400,
+    AssertURLSchemePipeline: 500,
+    DropLogoPipeline: 550,
+    ClosePipeline: 650,
+    ApplyNSICategoriesPipeline: 700,
+    CheckItemPropertiesPipeline: 750,
+    GeoJSONMultiPointSimplificationPipeline: 760,
+    CountCategoriesPipeline: 800,
+    CountBrandsPipeline: 810,
+    CountOperatorsPipeline: 820,
 }
 
-LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
+LOG_FORMATTER = DebugDuplicateLogFormatter
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -153,10 +190,10 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
     "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
     "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
     "DOWNLOAD_HANDLERS": {
-        "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-        "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+        "http": ScrapyPlaywrightDownloadHandler,
+        "https": ScrapyPlaywrightDownloadHandler,
     },
-    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+    "DOWNLOADER_MIDDLEWARES": {PlaywrightMiddleware: 543},
 }
 
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {

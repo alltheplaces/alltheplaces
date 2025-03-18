@@ -1,19 +1,17 @@
-import base64
-import datetime
-import hashlib
-import io
-import json
-import logging
-import uuid
-from typing import Any, Generator, Type
+from base64 import urlsafe_b64encode
+from datetime import datetime
+from hashlib import sha1
+from io import StringIO
+from json import dump
+from logging import warning
+from random import randbytes
+from typing import Any
 
-from scrapy import Item, Spider
+from scrapy import Item
 from scrapy.exporters import JsonItemExporter
-from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
-from scrapy.utils.spider import iter_spider_classes
 
-from locations.settings import SPIDER_MODULES
+from locations.items import Feature
 
 mapping = (
     ("addr_full", "addr:full"),
@@ -53,8 +51,10 @@ def item_to_properties(item: Item) -> dict[str, Any]:
     # Add in the extra bits
     if extras := item.get("extras"):
         for key, value in extras.items():
-            if value is not None and value != "":
-                # Only export populated values
+            if value is not None and value != "" and key != "@spider" and key != "@spider_classes":
+                # Only export populated values and ignore certain attributes
+                # which are output in the GeoJSON header as
+                # non-feature-specific attributes.
                 props[key] = value
 
     # Bring in the optional stuff
@@ -86,11 +86,11 @@ def item_to_geometry(item: Item) -> dict:
                 "coordinates": [float(item["lon"]), float(item["lat"])],
             }
         except ValueError:
-            logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
+            warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
     return geometry
 
 
-def item_to_geojson_feature(item: Item) -> dict:
+def item_to_geojson_feature(item: Feature) -> dict:
     feature = {
         "id": compute_hash(item),
         "type": "Feature",
@@ -101,72 +101,93 @@ def item_to_geojson_feature(item: Item) -> dict:
     return feature
 
 
-def compute_hash(item: Item) -> str:
-    ref = str(item.get("ref") or uuid.uuid1()).encode("utf8")
-    sha1 = hashlib.sha1(ref)
+def compute_hash(item: Feature) -> str:
+    item_ref = item.get("ref")
+    item_spider_class = item.get("extras", {}).get("@spider_classes", [None])[0]
+    item_spider_name = None
+    if item_spider_class:
+        item_spider_name = getattr(item_spider_class, "name", None)
 
-    if spider_name := item.get("extras", {}).get("@spider"):
-        sha1.update(spider_name.encode("utf8"))
+    if item_ref and item_spider_name:
+        sha1_hash = sha1(str(item_ref).encode("utf8"))
+        sha1_hash.update(item_spider_name.encode("utf8"))
+        return urlsafe_b64encode(sha1_hash.digest()).decode("utf8")
 
-    return base64.urlsafe_b64encode(sha1.digest()).decode("utf8")
-
-
-def find_spider_class(spider_name: str):
-    if not spider_name:
-        return None
-    for spider_class in iter_spider_classes_in_all_modules():
-        if spider_name == spider_class.name:
-            return spider_class
-    return None
-
-
-def iter_spider_classes_in_all_modules() -> Generator[Type[Spider], Any, None]:
-    for mod in SPIDER_MODULES:
-        for module in walk_modules(mod):
-            for spider_class in iter_spider_classes(module):
-                yield spider_class
+    # If a spider has no_refs = True, generate a GeoJSON feature identifier
+    # as a random ID that will change each time a crawl and export is
+    # completed.
+    return urlsafe_b64encode(randbytes(20)).decode("utf8")
 
 
-def get_dataset_attributes(spider_name) -> {}:
-    spider_class = find_spider_class(spider_name)
-    dataset_attributes = getattr(spider_class, "dataset_attributes", {})
-    settings = getattr(spider_class, "custom_settings", {}) or {}
-    if not settings.get("ROBOTSTXT_OBEY", True):
-        # See https://github.com/alltheplaces/alltheplaces/issues/4537
-        dataset_attributes["spider:robots_txt"] = "ignored"
-    dataset_attributes["@spider"] = spider_name
-    dataset_attributes["spider:collection_time"] = datetime.datetime.now().isoformat()
+def get_dataset_attributes(spider_classes: list[type]) -> dict:
+    """
+    Apply dataset attributes from base classes and the class of the spider in
+    reverse method resolution order, overwriting any previous value. This is
+    best illustrated by an example:
 
-    return dataset_attributes
+    class ExampleSpider(ParentSpiderClassA, ParentSpiderClassB):
+        dataset_attributes = {"attribute_a": "E", "attribute_b": "X"}
+
+    class ParentSpiderClassA():
+        dataset_attributes = {"attribute_a": "A", "attribute_c": "Y"}
+
+    class ParentSpiderClassB():
+        dataset_attributes = {"attribute_a": "B", "attribute_c": "Z"}
+
+    For this example, this function will return the following dictionary:
+        dataset_attributes = {
+            "attribute_a": "E",
+            "attribute_b": "X",
+            "attribute_c": "Y",
+        }
+    """
+    combined_dataset_attributes = {}
+    for spider_class in reversed(spider_classes):
+        dataset_attributes = getattr(spider_class, "dataset_attributes", {}) or {}
+        settings = getattr(spider_class, "custom_settings", {}) or {}
+        if not settings.get("ROBOTSTXT_OBEY", True):
+            # See https://github.com/alltheplaces/alltheplaces/issues/4537
+            dataset_attributes["spider:robots_txt"] = "ignored"
+        combined_dataset_attributes.update(dataset_attributes)
+    if len(spider_classes) > 0:
+        if spider_name := getattr(spider_classes[0], "name", None):
+            combined_dataset_attributes["@spider"] = spider_name
+    combined_dataset_attributes["spider:collection_time"] = datetime.now().isoformat()
+    return combined_dataset_attributes
 
 
 class GeoJsonExporter(JsonItemExporter):
     def __init__(self, file, **kwargs):
         super().__init__(file, **kwargs)
-        self.spider_name = None
+        self.exporter_spider_class: type = None
 
     def start_exporting(self):
         pass
 
-    def export_item(self, item):
-        spider_name = item.get("extras", {}).get("@spider")
+    def export_item(self, item: Feature):
+        item_spider_classes = item.get("extras", {}).get("@spider_classes", [])
+        item_spider_class = None
+        if len(item_spider_classes) > 0:
+            item_spider_class = item_spider_classes[0]
 
         if self.first_item:
-            self.spider_name = spider_name
-            self.write_geojson_header()
+            # Remember the spider class which generated the first item this
+            # exporter first encounters. If this exporter then encounters an
+            # item generated by a different spider class, stop exporting and
+            # generate a fatal exception. It is preferred to cancel the export
+            # than to omit a GeoJSON file with the wrong headers confused
+            # between two or more spiders.
+            self.exporter_spider_class = item_spider_class
+            self.write_geojson_header(item_spider_classes)
 
-        if spider_name != self.spider_name:
-            # It really should not happen that a single exporter instance
-            # handles output from different spiders. If it does happen,
-            # we rather crash than emit GeoJSON with the wrong dataset
-            # properties, which may include legally relevant license tags.
+        if item_spider_class != self.exporter_spider_class:
             raise ValueError(
-                f"harvest from multiple spiders ({spider_name, self.spider_name}) cannot be written to same GeoJSON file"
+                f"Items generated from multiple spiders ({item_spider_class, self.exporter_spider_class}) cannot be written to same GeoJSON file."
             )
 
         super().export_item(item)
 
-    def _get_serialized_fields(self, item, default_value=None, include_empty=None):
+    def _get_serialized_fields(self, item: Feature, default_value=None, include_empty=None):
         feature = [
             ("type", "Feature"),
             ("id", compute_hash(item)),
@@ -176,12 +197,10 @@ class GeoJsonExporter(JsonItemExporter):
 
         return feature
 
-    def write_geojson_header(self):
-        header = io.StringIO()
+    def write_geojson_header(self, spider_classes: list[type]) -> None:
+        header = StringIO()
         header.write('{"type":"FeatureCollection","dataset_attributes":')
-        json.dump(
-            get_dataset_attributes(self.spider_name), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True
-        )
+        dump(get_dataset_attributes(spider_classes), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
         header.write(',"features":[\n')
         self.file.write(to_bytes(header.getvalue(), self.encoding))
 
