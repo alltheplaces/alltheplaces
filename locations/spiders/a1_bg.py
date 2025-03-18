@@ -15,7 +15,7 @@ class A1BGSpider(scrapy.Spider):
             item = Feature()
             item["ref"] = store["id"]
             item["name"] = store["name"]
-            item["addr_full"] = store["address"].strip()
+            item["street_address"] = store["address"].strip()
             item["lat"] = store["latitude"]
             item["lon"] = store["longitude"]
             item["phone"] = store["phone"]

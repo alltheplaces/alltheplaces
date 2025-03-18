@@ -38,13 +38,18 @@ class PrimarkSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
+        item["website"] = response.url
         for k in item.fields.keys():
-            if item.get(k) == "{{placeholder}}}":
+            if item.get(k) == "{{placeholder}}":
                 item[k] = None
 
         item["branch"] = item.pop("name").removeprefix("Primark ").removeprefix("Penneys ")
 
-        if m := re.search(r'"latitude":(-?\d+\.\d+),"longitude":(-?\d+\.\d+)', response.text):
+        item["state"] = None
+        item["country"] = response.url.split("/")[3].split("-")[1]
+        if m := re.search(
+            r'\\"displayCoordinate\\":{\\"latitude\\":(-?\d+\.\d+),\\"longitude\\":(-?\d+\.\d+)', response.text
+        ):
             item["lat"], item["lon"] = m.groups()
 
         apply_category(Categories.SHOP_CLOTHES, item)

@@ -13,7 +13,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class ChangeGroupSpider(Spider):
     name = "change_group"
     item_attributes = {"brand": "Change Group", "brand_wikidata": "Q5071758"}
-    start_urls = ["https://uk.changegroup.com/slatwall/?slatAction=changeGroup:main.globalBranchData"]
+    """
+        The following Javascript file has the actual API details, being used.
+        https://uk.changegroup.com/.resources/ProsegurWebCorpModule/resources/changegroup/branch-locator/main.js
+    """
+    start_urls = ["https://uksw.changegroup.com/slatwall/?slatAction=changeGroup:main.globalBranchData"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.text.encode("utf-8")

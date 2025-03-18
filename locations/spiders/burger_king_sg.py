@@ -26,7 +26,6 @@ class BurgerKingSGSpider(Spider):
             item["ref"] = location.xpath("@data-restaurant-id").get()
             item["lat"], item["lon"] = url_to_coords(location.xpath('.//a[@class="markerArea"]/@href').get())
             item["branch"] = location.xpath('.//dt[@class="mainAddress"]/text()').get().removeprefix("BK ")
-            item["phone"] = location.xpath('.//span[@class="phone"]/text()').get().replace("Phone:", "")
             item["website"] = f"{self.website_root}/Locator/Details/" + item["ref"]
             yield Request(url=item["website"], callback=self.parse_location, meta={"item": item})
         if response.xpath('//a[contains(@class, "bk-btn-next")]').get() is not None:

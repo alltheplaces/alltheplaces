@@ -1,44 +1,36 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import apply_category
 from locations.items import Feature
+from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class NswStateEmergencyServiceAUSpider(Spider):
+class NswStateEmergencyServiceAUSpider(ArcGISFeatureServerSpider):
     name = "nsw_state_emergency_service_au"
-    item_attributes = {"operator": "New South Wales State Emergency Service", "operator_wikidata": "Q7011790"}
-    allowed_domains = ["portal.spatial.nsw.gov.au"]
-    start_urls = [
-        "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/3/query?f=geojson"
-    ]
-    no_refs = True
+    item_attributes = {"operator": "NSW State Emergency Service", "operator_wikidata": "Q7011790", "nsi_id": "N/A"}
+    host = "portal.spatial.nsw.gov.au"
+    context_path = "server"
+    service_id = "NSW_FOI_Emergency_Service_Facilities"
+    layer_id = "3"
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json()["features"]:
-            properties = {
-                "name": location["properties"]["generalname"],
-                "state": "NSW",
-                "geometry": location["geometry"],
-            }
-            if properties["name"][:4] == "ACT ":
-                properties["state"] = "ACT"
-            if " HEADQUARTERS" in properties["name"]:
-                apply_category({"office": "government"}, properties)
-                apply_category({"government": "emergency"}, properties)
-            elif "MARINE RESCUE " in properties["name"]:
-                apply_category({"emergency": "water_rescue"}, properties)
-            elif (
-                " SES" in properties["name"]
-                or " MINES RESCUE STATION" in properties["name"]
-                or ("ACT ESA " in properties["name"] and " UNIT" in properties["name"])
-            ):
-                apply_category({"amenity": "rescue_station"}, properties)
-            else:
-                apply_category({"office": "government"}, properties)
-                apply_category({"government": "emergency"}, properties)
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(feature["objectid"])
+        item["name"] = feature["generalname"]
+        item["state"] = "NSW"
+        if item["name"][:4] == "ACT ":
+            item["state"] = "ACT"
+        if " HEADQUARTERS" in item["name"]:
+            apply_category({"office": "government", "government": "emergency"}, item)
+        elif "MARINE RESCUE " in item["name"]:
+            apply_category({"emergency": "water_rescue"}, item)
+        elif (
+            " SES" in item["name"]
+            or " MINES RESCUE STATION" in item["name"]
+            or ("ACT ESA " in item["name"] and " UNIT" in item["name"])
+        ):
+            apply_category({"amenity": "rescue_station"}, item)
+        else:
+            apply_category({"office": "government", "government": "emergency"}, item)
+        yield item

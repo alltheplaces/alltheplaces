@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class DaveAndBustersSpider(Spider):
     name = "dave_and_busters"
-    item_attributes = {"brand": "Dave and Busters", "brand_wikidata": "Q5228205"}
+    item_attributes = {"brand_wikidata": "Q5228205"}
     allowed_domains = ["www.daveandbusters.com"]
     start_urls = ["https://www.daveandbusters.com/content/dnb-request/datadetails.json?mode=location"]
 

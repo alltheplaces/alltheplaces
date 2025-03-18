@@ -11,7 +11,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MichiganDotUSSpider(JSONBlobSpider):
     name = "michigan_dot_us"
-    item_attributes = {"operator": "Michigan DOT", "operator_wikidata": "Q2350930"}
+    item_attributes = {"operator": "Michigan Department of Transportation", "operator_wikidata": "Q2350930"}
     start_urls = ["https://mdotjboss.state.mi.us/MiDrive/camera/AllForMap/"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

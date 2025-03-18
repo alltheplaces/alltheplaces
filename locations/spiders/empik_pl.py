@@ -48,4 +48,6 @@ class EmpikPLSpider(Spider):
                 start, end = hours.split("-")
                 properties["opening_hours"].add_range(weekday, start, end)
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            item["street_address"] = item.pop("addr_full", None)
+            yield item

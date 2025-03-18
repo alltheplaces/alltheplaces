@@ -345,7 +345,8 @@ class StructuredDataSpider(Spider):
         if isinstance(ld_item["paymentAccepted"], str):
             ld_item["paymentAccepted"] = [ld_item["paymentAccepted"]]
         for payment in ld_item["paymentAccepted"]:
-            payment = payment.strip()
+            if payment:
+                payment = payment.strip()
             if not payment:
                 continue
             if not map_payment(item, payment, PaymentMethods):

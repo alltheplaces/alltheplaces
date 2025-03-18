@@ -1,3 +1,5 @@
+import re
+
 from locations.categories import Categories, Extras, apply_yes_no
 from locations.storefinders.yext_answers import YextAnswersSpider
 
@@ -15,7 +17,8 @@ class TropicalSmoothieCafeUSSpider(YextAnswersSpider):
     feature_type = "restaurants"
 
     def parse_item(self, location, item):
-        item["email"] = location.get("c_franchiseeEmail")
+        if email := location.get("c_franchiseeEmail"):
+            item["email"] = re.sub(r"[;,].*", "", email)
         if amenities := location.get("c_locationPageServices"):
             apply_yes_no(Extras.WIFI, item, "Wifi" in amenities, False)
         yield item

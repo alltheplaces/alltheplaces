@@ -30,7 +30,7 @@ state = {
 
 class GenesisRehabUSSpider(scrapy.Spider):
     name = "genesis_rehab_us"
-    item_attributes = {"brand": "Genesis Rehab Services", "brand_wikidata": "Q5532813"}
+    item_attributes = {"operator": "Genesis HealthCare", "operator_wikidata": "Q5532813"}
     allowed_domains = ["genesishcc.com"]
     start_urls = [
         "https://www.genesishcc.com/page-data/findlocations/page-data.json",

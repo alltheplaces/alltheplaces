@@ -128,7 +128,7 @@ class RetailApparelGroupSpider(Spider):
                     item["brand"] = brand["brand"]
                     item["brand_wikidata"] = brand["brand_wikidata"]
                     break
-            item["addr_full"] = location["address"]["addr_full"]
+            item["street_address"] = location["address"]["addr_full"]
             item["phone"] = location["address"]["phone"]
             item["website"] = response.json()["data"]["stockists"]["canonical_url"].replace(
                 "/stores", "/store/" + location["url_key"].lower().replace(" ", "-")

@@ -9,7 +9,7 @@ from locations.hours import DAYS_DK, NAMED_DAY_RANGES_DK, OpeningHours
 
 class TelenorDKSpider(Spider):
     name = "telenor_dk"
-    item_attributes = {"brand": "Telenor", "brand_wikidata": "Q845632"}
+    item_attributes = {"brand": "Telenorbutikken", "brand_wikidata": "Q845632"}
     start_urls = [
         "https://www.telenor.dk/da/sharedblock/2ed9d2b7-45d2-4f7d-9406-a933d6883cdc/FindNearestShopBlock/GetShops/2bd5f376-3f79-475b-aa1e-b45174b9a2f3/"
     ]

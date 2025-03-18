@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class NapaSpider(scrapy.Spider):
     name = "napa"
-    item_attributes = {"brand": "Napa Auto Parts", "brand_wikidata": "Q6970842"}
+    item_attributes = {"brand": "NAPA Auto Parts", "brand_wikidata": "Q6970842"}
     allowed_domains = ["napaonline.com"]
     start_urls = [
         "https://www.napaonline.com/en/auto-parts-stores-near-me",
