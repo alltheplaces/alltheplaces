@@ -31,7 +31,7 @@ get_installation_token() {
 
     jwt=$(generate_jwt "$app_id" "$private_key")
 
-    curl -s -X POST \
+    curl -v -X POST \
          -H "Authorization: Bearer ${jwt}" \
          -H "Accept: application/vnd.github.v3+json" \
          "https://api.github.com/app/installations/${installation_id}/access_tokens" \
@@ -65,7 +65,6 @@ if git log -1 --pretty=format:%an | grep -q "pre-commit"; then
     echo "Skipping spider run for pre-commit changes."
     exit 0
 fi
-
 
 pr_file_changes=$(curl -sL --header "authorization: token ${access_token}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
 (>&2 echo "PR response: ${pr_file_changes}")
