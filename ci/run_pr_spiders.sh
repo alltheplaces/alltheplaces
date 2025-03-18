@@ -41,7 +41,7 @@ get_installation_token() {
 
     jwt=$(generate_jwt "$app_id" "$private_key")
 
-    curl -v -X POST \
+    curl -s -X POST \
          -H "Authorization: Bearer ${jwt}" \
          -H "Accept: application/vnd.github.v3+json" \
          "https://api.github.com/app/installations/${installation_id}/access_tokens" \
@@ -300,12 +300,18 @@ fi
 
 if [ "${pull_request_number}" != "false" ]; then
     curl \
-        -v \
+        -s \
         -XPOST \
         -H "Authorization: token ${github_access_token}" \
         -H "Accept: application/vnd.github.v3+json" \
         -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
         "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
+
+    if [ ! $? -eq 0 ]; then
+        (>&2 echo "comment post failed")
+        exit 1
+    fi
+
     echo "Added a comment to pull https://github.com/alltheplaces/alltheplaces/pull/${pull_request_number}"
 else
     echo "Not posting to GitHub because no pull event number set"
