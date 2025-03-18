@@ -556,6 +556,8 @@ class Extras(Enum):
     MALE = "male"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
+    USED_MOTORCYCLE_SALES = "motorcycle:sales=used"
+    MOTORCYCLE_REPAIR = "motorcycle:repair"
     NEW_CAR_SALES = "service:vehicle:new_car_sales"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
