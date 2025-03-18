@@ -12,6 +12,8 @@ from locations.items import Feature
 # of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
+    GENERIC_POI = {"amenity": "yes"}
+
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
     CAR_RENTAL = {"amenity": "car_rental"}
