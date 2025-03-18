@@ -40,7 +40,8 @@ if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY}" ] || [ -z "${GI
 fi
 
 # Get an access token for the installation
-access_token=$(get_installation_token "${GITHUB_APP_ID}" "${GITHUB_APP_PRIVATE_KEY}" "${GITHUB_APP_INSTALLATION_ID}")
+private_key=$(echo "$GITHUB_APP_PRIVATE_KEY_BASE64" | base64 -d)
+access_token=$(get_installation_token "${GITHUB_APP_ID}" "${private_key}" "${GITHUB_APP_INSTALLATION_ID}")
 
 # Check if the build is triggered by a pull request
 if [ "${CODEBUILD_WEBHOOK_EVENT}" = "PULL_REQUEST_CREATED" ] || [ "${CODEBUILD_WEBHOOK_EVENT}" = "PULL_REQUEST_UPDATED" ]; then          # Extract the pull request number from the CODEBUILD_SOURCE_VERSION variable
