@@ -6,7 +6,9 @@ env:
     CODEBUILD_CACHE_BUCKET: codebuild-cache.openaddresses.io
   secrets-manager:
     ZYTE_API_KEY: "alltheplaces:ZYTE_API_KEY"
-    GITHUB_TOKEN: "alltheplaces:GITHUB_TOKEN"
+    GITHUB_APP_ID: "alltheplaces:GITHUB_APP_ID"
+    GITHUB_APP_PRIVATE_KEY: "alltheplaces:GITHUB_APP_PRIVATE_KEY"
+    GITHUB_APP_INSTALLATION_ID: "alltheplaces:GITHUB_APP_INSTALLATION_ID"
 
 phases:
   install:
