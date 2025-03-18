@@ -73,6 +73,6 @@ def test_item_attributes_brand_strings_match_nsi():
 
     ignored_spiders_list_problems = set(ignored_spiders).difference(spider_names)
     if len(ignored_spiders_list_problems):
-        print("ignored_spiders bad references:")
+        pprint.pp("ignored_spiders bad references:")
         pprint.pp(ignored_spiders_list_problems)
         assert False
