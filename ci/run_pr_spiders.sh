@@ -34,7 +34,7 @@ get_installation_token() {
 
 PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
-if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
+if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY_BASE64}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
     echo "GitHub App credentials not set"
     exit 1
 fi
