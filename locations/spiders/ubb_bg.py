@@ -32,11 +32,6 @@ class UbbBGSpider(Spider):
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.WHEELCHAIR, item, location["data"]["has_accessibility"])
 
-            for feature in location["data"]["features"]:
-                if feature["slug"] == "branch-of-former-kbc-bank":
-                    item["brand"] = "ОББ*"
-                    item["brand_wikidata"] = "Q7283808"
-
             item["opening_hours"] = OpeningHours()
             worktimes = (
                 location["data"]["worktime"]
@@ -98,10 +93,11 @@ class UbbBGSpider(Spider):
             apply_yes_no(Extras.WHEELCHAIR, item, location["data"]["has_accessibility"])
 
             has_cash_in = False
-            for feature in location["data"]["features"]:
-                if feature["slug"] == "kbc-bank-atm":
-                    item["brand"] = "ОББ*"
-                    item["brand_wikidata"] = "Q7283808"
+            if location["data"]["features"] == []:
+                yield item
+                continue
+
+            for _, feature in location["data"]["features"].items():
                 if feature["slug"] == "atm-money-deposit":
                     has_cash_in = True
                 if feature["slug"] == "day-and-night-access":
