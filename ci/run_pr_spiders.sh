@@ -1,5 +1,63 @@
 #!/bin/bash
+
+generate_jwt() {
+    # Generate a JWT for GitHub App authentication
+    app_id="$1"
+    private_key="$2"
+
+    now=$(date +%s)
+    iat=$((${now} - 60)) # Issues 60 seconds in the past
+    exp=$((${now} + 600)) # Expires 10 minutes in the future
+
+    b64enc() { openssl base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n'; }
+
+    header_json='{
+        "typ":"JWT",
+        "alg":"RS256"
+    }'
+    header=$( echo -n "${header_json}" | b64enc )
+
+    payload_json="{
+        \"iat\":${iat},
+        \"exp\":${exp},
+        \"iss\":\"${app_id}\"
+    }"
+    payload=$( echo -n "${payload_json}" | b64enc )
+
+    header_payload="${header}"."${payload}"
+    signature=$(
+        openssl dgst -sha256 -sign <(echo -n "${private_key}") \
+        <(echo -n "${header_payload}") | b64enc
+    )
+
+    echo "${header_payload}"."${signature}"
+}
+
+get_installation_token() {
+    # Get an installation token using the JWT
+    app_id="$1"
+    private_key="$2"
+    installation_id="$3"
+
+    jwt=$(generate_jwt "$app_id" "$private_key")
+
+    curl -v -X POST \
+         -H "Authorization: Bearer ${jwt}" \
+         -H "Accept: application/vnd.github.v3+json" \
+         "https://api.github.com/app/installations/${installation_id}/access_tokens" \
+         | jq -r '.token'
+}
+
 PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
+
+if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY_BASE64}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
+    echo "GitHub App credentials not set"
+    exit 1
+fi
+
+# Get an access token for github interactions
+private_key=$(echo "$GITHUB_APP_PRIVATE_KEY_BASE64" | base64 -d)
+github_access_token=$(get_installation_token "${GITHUB_APP_ID}" "${private_key}" "${GITHUB_APP_INSTALLATION_ID}")
 
 # Check if the build is triggered by a pull request
 if [ "${CODEBUILD_WEBHOOK_EVENT}" = "PULL_REQUEST_CREATED" ] || [ "${CODEBUILD_WEBHOOK_EVENT}" = "PULL_REQUEST_UPDATED" ]; then          # Extract the pull request number from the CODEBUILD_SOURCE_VERSION variable
@@ -18,7 +76,7 @@ if git log -1 --pretty=format:%an | grep -q "pre-commit"; then
   exit 0
 fi
 
-pr_file_changes=$(curl -sL --header "authorization: Bearer ${GITHUB_TOKEN}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
+pr_file_changes=$(curl -sL --header "authorization: token ${github_access_token}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
 (>&2 echo "PR response: ${pr_file_changes}")
 
 SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
@@ -240,20 +298,17 @@ if [[ ! "$(ls ${RUN_DIR})" ]]; then
     echo $EXIT_CODE
 fi
 
-if [ -z "${GITHUB_TOKEN}" ]; then
-    echo "No GITHUB_TOKEN set"
+if [ "${pull_request_number}" != "false" ]; then
+    curl \
+        -v \
+        -XPOST \
+        -H "Authorization: token ${github_access_token}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
+        "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
+    echo "Added a comment to pull https://github.com/alltheplaces/alltheplaces/pull/${pull_request_number}"
 else
-    if [ "${pull_request_number}" != "false" ]; then
-        curl \
-            -s \
-            -XPOST \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
-            "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
-        echo "Added a comment to pull https://github.com/alltheplaces/alltheplaces/pull/${pull_request_number}"
-    else
-        echo "Not posting to GitHub because no pull event number set"
-    fi
+    echo "Not posting to GitHub because no pull event number set"
 fi
 
 exit $EXIT_CODE
