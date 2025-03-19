@@ -5,6 +5,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class BinnysUSSpider(SitemapSpider):
@@ -21,4 +22,16 @@ class BinnysUSSpider(SitemapSpider):
         item = DictParser.parse(data)
         item["branch"] = item.pop("name")
         item["website"] = response.url
+
+        try:
+            item["opening_hours"] = self.parse_opening_hours(data["storeSchedule"])
+        except:
+            pass
+
         yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            oh.add_range(rule["dayOfTheWeek"], rule["openingHours"], rule["closingHours"], "%I:%M %p")
+        return oh
