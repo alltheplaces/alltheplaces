@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -20,4 +21,13 @@ class MitsubishiMYSpider(JSONBlobSpider):
         item["email"] = feature.get("centre_email")
         item["extras"]["fax"] = feature.get("fax_number")
         item["image"] = feature.get("featured_img_url")
+
+        services = feature.get("centre_type")
+        if "showroom" in services:
+            apply_category(Categories.SHOP_CAR, item)
+        elif "service" in services:
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
+        apply_yes_no(Extras.CAR_PARTS, item, "parts-stockist" in services)
+        apply_yes_no("service:vehicle:glass", item, "windscreen-replacement" in services)
+        apply_yes_no("service:vehicle:painting", item, "body-paint" in services)
         yield item
