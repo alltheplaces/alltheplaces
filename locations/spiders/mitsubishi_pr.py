@@ -1,5 +1,3 @@
-import json
-import re
 from typing import Any
 
 import chompjs
@@ -8,7 +6,6 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
