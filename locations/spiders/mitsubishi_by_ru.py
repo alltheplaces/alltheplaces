@@ -1,8 +1,11 @@
+from typing import Iterable
+
 import chompjs
 from scrapy import Selector
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.structured_data_spider import extract_phone
 
@@ -18,7 +21,7 @@ class MitsubishiBYRUSpider(JSONBlobSpider):
             -1
         ]
 
-    def post_process_item(self, item, response, feature):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         extract_phone(item, Selector(text=feature["phone"]))
         item["website"] = (
             "https://www." + feature["www"].replace("www.", "")
