@@ -20,4 +20,5 @@ class BinnysUSSpider(SitemapSpider):
         data = chompjs.parse_js_object(script)
         item = DictParser.parse(data)
         item["branch"] = item.pop("name")
+        item["website"] = response.url
         yield item
