@@ -2,6 +2,7 @@ import chompjs
 from scrapy import Selector
 from scrapy.http import Response
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.json_blob_spider import JSONBlobSpider
 from locations.structured_data_spider import extract_phone
 
@@ -26,4 +27,7 @@ class MitsubishiBYRUSpider(JSONBlobSpider):
         )
         if "mitsubishi" not in item["website"]:  # Not a branded location
             return
+
+        apply_category(Categories.SHOP_CAR, item)
+        apply_yes_no(Extras.CAR_REPAIR, item, feature.get("service_partner") == "1")
         yield item
