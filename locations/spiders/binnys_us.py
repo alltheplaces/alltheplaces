@@ -7,8 +7,8 @@ from scrapy.spiders import SitemapSpider
 from locations.dict_parser import DictParser
 
 
-class BinnysSpider(SitemapSpider):
-    name = "binnys"
+class BinnysUSSpider(SitemapSpider):
+    name = "binnys_us"
     item_attributes = {"brand": "Binny's Beverage Depot", "brand_wikidata": "Q30687714"}
     allowed_domains = ["binnys.com"]
     sitemap_urls = ["https://www.binnys.com/robots.txt"]
