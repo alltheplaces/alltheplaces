@@ -1,5 +1,6 @@
 from locations.json_blob_spider import JSONBlobSpider
 
+
 class HiddenHearingGBSpider(JSONBlobSpider):
     name = "hidden_hearing_gb"
     item_attributes = {"brand": "Hidden Hearing", "brand_wikidata": ""}
