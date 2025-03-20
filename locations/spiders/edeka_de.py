@@ -66,13 +66,16 @@ class EdekaDESpider(scrapy.Spider):
                 if m := re.match(r"^Marktkauf(?:center)? (.+)$", item.pop("name"), flags=re.IGNORECASE):
                     item["branch"] = m.group(1)
                 item.update(self.MARKTKAUF)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "capmarkt" in name:
                 if m := re.match(r"^CAP[ \-]Markt (.+)$", item.pop("name"), flags=re.IGNORECASE):
                     item["branch"] = m.group(1)
                 item.update(self.CAPMARKT)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "npmarkt" in name:
                 item["branch"] = item.pop("name").removeprefix("NP-Markt ")
                 item.update(self.NPMARKT)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "marktbäckerei" in name:
                 item["branch"] = item.pop("name").removeprefix("Markt-Bäckerei ")
                 item.update(self.MARKT_BACKEREI)
@@ -82,6 +85,8 @@ class EdekaDESpider(scrapy.Spider):
                     item["branch"] = m.group(1)
                 item.update(self.ELLI)
                 apply_category(Categories.SHOP_SUPERMARKET, item)
+            else:
+                self.logger.info(f"Unknown store: {item['name']}")
 
             yield item
 
