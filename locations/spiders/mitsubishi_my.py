@@ -23,6 +23,8 @@ class MitsubishiMYSpider(JSONBlobSpider):
         item["image"] = feature.get("featured_img_url")
 
         services = feature.get("centre_type")
+        if not services:  # Doesn't look a branded location
+            return
         if "showroom" in services:
             apply_category(Categories.SHOP_CAR, item)
         elif "service" in services:
