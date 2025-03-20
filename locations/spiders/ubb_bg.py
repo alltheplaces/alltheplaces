@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class UbbBGSpider(Spider):
     name = "ubb_bg"
-    item_attributes = {"brand": "Обединена Българска Банка", "brand_wikidata": "Q7887555"}
+    item_attributes = {"brand": "Обединена българска банка", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
     requires_proxy = True
 
