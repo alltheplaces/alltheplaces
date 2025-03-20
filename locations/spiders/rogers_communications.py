@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class RogersCommunicationsSpider(scrapy.Spider):
     name = "rogers_communications"
-    item_attributes = {"brand": "Rogers Communications", "brand_wikidata": "Q165684"}
+    item_attributes = {"brand": "Rogers", "brand_wikidata": "Q3439663"}
     allowed_domains = ["1-dot-rogers-store-finder.appspot.com", "rogers.com"]
 
     def start_requests(self):
