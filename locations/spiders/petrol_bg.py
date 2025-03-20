@@ -14,9 +14,9 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
     allowed_domains = ["www.petrol.bg"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if m := re.match(r"^(\d+) (.+)$", item["name"]):
+        if m := re.match(r"^(\d+) (.+)$", item.pop("name")):
             item["ref"] = m.group(1)
-            item["name"] = m.group(2)
+            item["branch"] = m.group(2)
 
         categories = (feature["categories"] or "").split(",")
 
