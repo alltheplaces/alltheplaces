@@ -1,6 +1,8 @@
 import datetime
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -61,24 +63,13 @@ class RogersCommunicationsSpider(scrapy.Spider):
                     time_format="%H:%M",
                 )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
-    def parse(self, response):
-        stores = response.json()
-
-        for store in stores["features"]:
-            name = store["properties"]["Address2"]
-            if name == "":
-                name = store["properties"]["LocationName"]
-
-            addr = store["properties"]["AddressOrIntersection"]
-            if addr[-1] == ",":
-                addr = addr[:-1]
-
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["features"]:
             properties = {
                 "ref": store["properties"]["Record_ID"],
-                "name": name,
-                "street_address": addr,
+                "street_address": store["properties"]["AddressOrIntersection"],
                 "city": store["properties"]["City"],
                 "state": store["properties"]["StateOrProvince"],
                 "postcode": store["properties"]["ZIPOrPostalCode"],
@@ -106,5 +97,5 @@ class RogersCommunicationsSpider(scrapy.Spider):
             except:
                 pass
 
-            apply_category(Categories.SHOP_TELECOMMUNICATION, properties)
+            apply_category(Categories.SHOP_MOBILE_PHONE, properties)
             yield Feature(**properties)
