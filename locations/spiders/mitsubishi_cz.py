@@ -30,7 +30,6 @@ class MitsubishiCZSpider(Spider):
             yield response.follow(url=location["url"], callback=self.parse_location_details, cb_kwargs=dict(item=item))
 
     def parse_location_details(self, response: Response, item: Feature) -> Any:
-        item["website"] = response.url
         location = response.xpath(f'//*[@class="dealer-info dealer_info_{item["ref"]}"]//*[@class="dealer-detail"]')
         address = location.xpath(".//p[1]/text()").getall()
         # clean address
@@ -51,5 +50,6 @@ class MitsubishiCZSpider(Spider):
             './/*[contains(text(), "Servisní místo:")]/following-sibling::p//a[contains(@href,"mailto:")]/@href'
         ).get()
         item["email"] = sales_email or service_email
-        item["extras"]["website_2"] = location.xpath('.//a[contains(text(), "webová stránka")]/@href').get()
+        item["website"] = location.xpath('.//a[contains(text(), "webová stránka")]/@href').get()
+        item["extras"]["brand:website"] = response.url
         yield item
