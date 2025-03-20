@@ -23,11 +23,7 @@ class MitsubishiBYRUSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         extract_phone(item, Selector(text=feature["phone"]))
-        item["website"] = (
-            "https://www." + feature["www"].replace("www.", "")
-            if not feature["www"].startswith("http")
-            else feature["www"]
-        )
+        item["website"] = "https://" + feature["www"] if not feature["www"].startswith("http") else feature["www"]
         if "mitsubishi" not in item["website"]:  # Not a branded location
             return
 
