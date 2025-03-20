@@ -56,6 +56,11 @@ def test_item_attributes_brand_strings_match_nsi():
             if entry:
                 # Brand is found in NSI, but the brand name does not match.
                 if not matching_entry:
+                    pprint.pp(
+                        '{}: "{}" tag "{}" does not match expected {}'.format(
+                            spider_class.name, tree, item_attributes.get(tree), set(entry_details)
+                        )
+                    )
                     fails.append((item_attributes, spider_class.name, entry_details))
             else:
                 # Brand is not found in NSI.
@@ -67,7 +72,6 @@ def test_item_attributes_brand_strings_match_nsi():
                 )
                 continue
     if fails:
-        pprint.pp(fails)
         assert False
 
     ignored_spiders_list_problems = set(ignored_spiders).difference(spider_names)
