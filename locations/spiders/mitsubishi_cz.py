@@ -51,4 +51,5 @@ class MitsubishiCZSpider(Spider):
             './/*[contains(text(), "Servisní místo:")]/following-sibling::p//a[contains(@href,"mailto:")]/@href'
         ).get()
         item["email"] = sales_email or service_email
+        item["extras"]["website_2"] = location.xpath('.//a[contains(text(), "webová stránka")]/@href').get()
         yield item
