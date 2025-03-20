@@ -8,6 +8,7 @@ on:
     - 'locations/middlewares/*.py'
     - 'locations/pipelines/*.py'
     - 'locations/storefinders/*.py'
+    - 'locations/spiders/*.py'
     - 'locations/*.py'
     - 'tests/*.py'
     - 'Pipfile'
