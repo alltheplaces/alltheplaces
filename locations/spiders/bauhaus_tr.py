@@ -10,6 +10,7 @@ class BauhausTRSpider(scrapy.Spider):
     name = "bauhaus_tr"
     item_attributes = BauhausNordicsSpider.item_attributes
     start_urls = ["https://www.bauhaus.com.tr/bauhaus-magazalari"]
+    requires_proxy = True
 
     def parse(self, response):
         stores_city_list = chompjs.parse_js_object(
