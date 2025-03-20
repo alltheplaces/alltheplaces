@@ -10,11 +10,12 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.mitsubishi import MitsubishiSpider
 
 
-class MitsubishiBESpider(JSONBlobSpider):
-    name = "mitsubishi_be"
+class MitsubishiBELUSpider(JSONBlobSpider):
+    name = "mitsubishi_be_lu"
     item_attributes = MitsubishiSpider.item_attributes
     start_urls = ["https://mitsubishi-motors.be/dealers.json"]
     locations_key = "dealers"
+    skip_auto_cc_spider_name = True
 
     def pre_process_data(self, feature: dict):
         for key in list(feature.keys()):
