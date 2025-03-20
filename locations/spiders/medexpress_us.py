@@ -7,7 +7,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MedexpressUSSpider(JSONBlobSpider):
     name = "medexpress_us"
-    item_attributes = {"brand": "MedExpress", "brand_wikidata": "Q102183820"}
+    item_attributes = {"operator": "MedExpress", "operator_wikidata": "Q102183820"}
     start_urls = ["https://www.medexpress.com/bin/optum3/medexserviceCallToYEXT2"]
     locations_key = "locations"
 

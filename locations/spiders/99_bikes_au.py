@@ -32,8 +32,8 @@ class NinetynineBikesAUSpider(Spider):
             store["opening_hours"] = OpeningHours()
             for opening_time in item.xpath("extension_attributes/opening_time/item"):
                 day = opening_time.xpath("day/text()").get()
-                open_time = opening_time.xpath("open_time/text()").get()
-                close_time = opening_time.xpath("close_time/text()").get()
-
+                open_time = opening_time.xpath("open_time/text()").get().strip()
+                if close_time := opening_time.xpath("close_time/text()").get():
+                    close_time = close_time.strip()
                 store["opening_hours"].add_range(DAYS_EN[day], open_time, close_time, "%H:%M%p")
             yield Feature(**store)

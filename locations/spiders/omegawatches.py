@@ -7,10 +7,7 @@ from locations.dict_parser import DictParser
 
 class OmegawatchesSpider(scrapy.Spider):
     name = "omegawatches"
-    item_attributes = {
-        "brand": "OMEGA",
-        "brand_wikidata": "Q659224",
-    }
+    item_attributes = {"brand": "Omega", "brand_wikidata": "Q659224"}
     allowed_domains = ["omegawatches.com"]
     start_urls = ["https://www.omegawatches.com/store"]
 

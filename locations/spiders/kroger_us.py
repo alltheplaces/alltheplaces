@@ -81,6 +81,8 @@ class KrogerUSSpider(SitemapSpider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]["stores"]:
+            if phone_number := location.get("phoneNumber"):
+                phone_number = phone_number.get("raw")
             properties = {
                 "ref": location["locationId"],
                 "name": location["facilityName"],
@@ -91,7 +93,7 @@ class KrogerUSSpider(SitemapSpider):
                 "postcode": location["locale"]["address"]["postalCode"],
                 "state": location["locale"]["address"]["stateProvince"],
                 "country": location["locale"]["address"]["countryCode"],
-                "phone": location["phoneNumber"].get("raw"),
+                "phone": phone_number,
                 "website": response.meta["url_map"][location["locationId"]],
                 "branch": location["vanityName"],
                 "operator": location["legalName"],

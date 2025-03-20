@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class HarrisFarmMarketsAUSpider(CrawlSpider):
     name = "harris_farm_markets_au"
-    item_attributes = {"brand": "Harris Farm Markets", "brand_wikidata": "Q5664888"}
+    item_attributes = {"brand": "Harris Market Farms", "brand_wikidata": "Q5664888"}
     allowed_domains = ["www.harrisfarm.com.au"]
     start_urls = ["https://www.harrisfarm.com.au/pages/our-stores"]
     rules = [

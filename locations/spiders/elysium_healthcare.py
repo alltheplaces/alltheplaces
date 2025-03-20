@@ -22,6 +22,7 @@ class ElysiumHealthcareSpider(scrapy.Spider):
         "https://www.elysiumhealthcare.co.uk/locations/",
     ]
     download_delay = 0.3
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         urls = response.xpath('//li[@class="elementor-icon-list-item"]/a/@href').extract()

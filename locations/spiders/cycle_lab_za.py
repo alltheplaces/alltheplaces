@@ -23,11 +23,11 @@ class CycleLabZASpider(Spider):
         for location in locations:
             item = Feature()
 
-            item["branch"] = location[0].replace(self.item_attributes["brand"], "").strip()
-            item["lat"] = location[1]
-            item["lon"] = location[2]
+            item["branch"] = location["name"].replace(self.item_attributes["brand"], "").strip()
+            item["lat"] = location["lat"]
+            item["lon"] = location["lng"]
 
-            info = response.xpath('//div[@class="Store-Location"][.//h3[text()="' + location[0] + '"]]')
+            info = response.xpath('//div[@class="Store-Location"][.//h3[text()="' + location["name"] + '"]]')
 
             item["addr_full"] = clean_address(
                 info.xpath('.//div[@class="Store-Location-Address"]/div/div/p/text()').getall()
