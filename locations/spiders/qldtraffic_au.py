@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -10,9 +10,9 @@ from locations.json_blob_spider import JSONBlobSpider
 class QldtrafficAUSpider(JSONBlobSpider):
     name = "qldtraffic_au"
     item_attributes = {
-        "operator": "Queensland Government",
-        "operator_wikidata": "Q3112627",
-        "extras": Categories.SURVEILLANCE_CAMERA.value,
+        "operator": "Department of Transport and Main Roads",
+        "operator_wikidata": "Q1191482",
+        "nsi_id": "N/A",
     }
     allowed_domains = ["data.qldtraffic.qld.gov.au"]
     start_urls = [
@@ -26,8 +26,27 @@ class QldtrafficAUSpider(JSONBlobSpider):
         feature["name"] = feature.pop("description", None)
         feature["city"] = feature.pop("locality", None)
         feature["state"] = "QLD"
+        # Geometry is supplied with projection of EPSG:4326 not EPSG:7844 as
+        # the source data incorrectly states.
+        feature["geometry"]["crs"]["properties"]["name"] = "EPSG:4326"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(item["ref"])
+        item.pop("website", None)
+        apply_category(Categories.SURVEILLANCE_CAMERA, item)
+        match str(feature["image_sourced_from"]).strip().upper():
+            case "DOUGLAS SHIRE COUNCIL":
+                item["operator"] = "Douglas Shire Council"
+                item["operator_wikidata"] = "Q85372027"
+            case "DEPARTMENT OF TRANSPORT & MAIN ROADS" | "DEPARTMENT OF TRANSPORT AND MAIN ROADS" | "NONE":
+                # If not specified, it's likely the camera is operated by the
+                # default operator "Department of Transport and Main Roads".
+                pass
+            case _:
+                # If there is unknown operator specified then raise it as a
+                # warning so this spider can be updated to include the
+                # alternative operator.
+                self.logger.warning("Unknown camera operator: {}".format(feature["image_sourced_from"]))
         item["extras"]["contact:webcam"] = feature["image_url"]
         item["extras"]["camera:type"] = "fixed"
         item["extras"]["camera:direction"] = (

@@ -15,10 +15,12 @@ class PrixQualityITSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for record in response.json():
             store = record["acf"]
+            if not store.get("lat"):
+                continue
             item = DictParser.parse(store)
             item["ref"] = store["shop_code"]
             item["branch"] = store["shop_name"]
-            item["street_address"] = item.pop("addr_full")
+            item["street_address"] = item.pop("addr_full", "")
             item["opening_hours"] = OpeningHours()
 
             for day in DAYS_IT:
