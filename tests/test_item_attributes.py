@@ -56,7 +56,7 @@ def test_item_attributes_brand_strings_match_nsi():
             if entry:
                 # Brand is found in NSI, but the brand name does not match.
                 if not matching_entry:
-                    pprint.pp(
+                    logging.error(
                         '{}: "{}" tag "{}" does not match expected {}'.format(
                             spider_class.name, tree, item_attributes.get(tree), set(entry_details)
                         )
@@ -65,11 +65,11 @@ def test_item_attributes_brand_strings_match_nsi():
             else:
                 # Brand is not found in NSI.
                 # It doesn't contribute to the fails list, as it's currently out of focus
-                logging.warning(
-                    "Missing {} in NSI: {} {}".format(
-                        tree, item_attributes.get(tree), item_attributes.get("{}_wikidata".format(tree))
-                    )
-                )
+                # logging.warning(
+                #     "Missing {} in NSI: {} {}".format(
+                #         tree, item_attributes.get(tree), item_attributes.get("{}_wikidata".format(tree))
+                #     )
+                # )
                 continue
     if fails:
         assert False
