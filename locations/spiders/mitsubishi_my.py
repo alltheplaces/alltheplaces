@@ -27,6 +27,10 @@ class MitsubishiMYSpider(JSONBlobSpider):
             apply_category(Categories.SHOP_CAR, item)
         elif "service" in services:
             apply_category(Categories.SHOP_CAR_REPAIR, item)
+        elif services == ["parts-stockist"]:
+            apply_category(Categories.SHOP_CAR_PARTS, item)
+        elif services == ["body-paint"]:
+            apply_category({"shop": "car_painting"}, item)
         apply_yes_no(Extras.CAR_PARTS, item, "parts-stockist" in services)
         apply_yes_no("service:vehicle:glass", item, "windscreen-replacement" in services)
         apply_yes_no("service:vehicle:painting", item, "body-paint" in services)
