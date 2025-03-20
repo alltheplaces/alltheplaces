@@ -3,8 +3,7 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category, apply_yes_no, Extras
-
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
