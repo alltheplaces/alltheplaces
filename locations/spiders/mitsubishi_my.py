@@ -10,7 +10,7 @@ from locations.json_blob_spider import JSONBlobSpider
 class MitsubishiMYSpider(JSONBlobSpider):
     name = "mitsubishi_my"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
-    start_urls = ["https://www.mitsubishi-motors.com.my/wp-admin/admin-ajax.php?action=get_dealer_markers"]
+    start_urls = ["https://www.mitsubishi-motors.com.my/wp-admin/admin-ajax.php?action=update_dealer_markers"]
 
     def pre_process_data(self, feature: dict) -> None:
         if isinstance(feature.get("state"), list):
