@@ -1,7 +1,9 @@
+import re
+
 import scrapy
 from scrapy import Request
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -10,26 +12,18 @@ class EdekaDESpider(scrapy.Spider):
     name = "edeka_de"
     start_urls = ["https://www.edeka.de/api/marketsearch/markets?size=100"]
 
-    NAH_UND_GUT = {"brand": "nah und gut", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
-    AKTIV_MARKT = {
-        "brand": "EDEKA aktiv markt",
-        "brand_wikidata": "Q701755",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    }
-    XPRESS = {"brand": "EDEKA xpress", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
-    DISKA = {"brand": "diska", "brand_wikidata": "Q62390177", "extras": Categories.SHOP_SUPERMARKET.value}
-    EDEKA = {"brand": "EDEKA", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
-    ECENTER = {"brand": "E-Center", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
-    ECENTER_HERKULES = {
-        "brand": "HERKULES Ecenter",
-        "brand_wikidata": "Q701755",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    }
+    NAH_UND_GUT = {"name": "nah und gut", "brand": "Edeka", "brand_wikidata": "Q701755"}
+    AKTIV_MARKT = {"name": "Edeka aktiv markt", "brand": "Edeka", "brand_wikidata": "Q701755"}
+    XPRESS = {"name": "Edeka xpress", "brand": "Edeka", "brand_wikidata": "Q701755"}
+    DISKA = {"brand": "diska", "brand_wikidata": "Q62390177"}
+    EDEKA = {"name": "Edeka", "brand": "Edeka", "brand_wikidata": "Q701755"}
+    ECENTER = {"name": "E-Center", "brand": "Edeka", "brand_wikidata": "Q701755"}
+    ECENTER_HERKULES = {"name": "HERKULES Ecenter", "brand": "HERKULES Ecenter", "brand_wikidata": "Q701755"}
     MARKTKAUF = {"brand": "MARKTKAUF", "brand_wikidata": "Q1533254"}
     CAPMARKT = {"brand": "CAP", "brand_wikidata": "Q1022827"}
     NPMARKT = {"brand": "NP", "brand_wikidata": "Q15836148"}
-    MARKT_BACKEREI = {"brand": "Markt-Bäckerei", "brand_wikidata": "Q1719433"}
-    ELLI = {"brand": "Elli", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
+    MARKT_BACKEREI = {"brand": "K&U Bäckerei", "brand_wikidata": "Q1719433"}
+    ELLI = {"name": "Elli", "brand": "Elli", "brand_wikidata": "Q701755"}
 
     def parse(self, response):
         for store in response.json()["markets"]:
@@ -45,33 +39,50 @@ class EdekaDESpider(scrapy.Spider):
 
             name = item["name"].lower().replace(" ", "").replace("und", "&").replace("-", "")
             if "nah&gut" in name:
+                if m := re.match(r"^nah(?: und |&| & )gut (.+)$", item.pop("name"), flags=re.IGNORECASE):
+                    item["branch"] = m.group(1)
                 item.update(self.NAH_UND_GUT)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "aktivmarkt" in name:
                 item.update(self.AKTIV_MARKT)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "xpress" in name:
                 item.update(self.XPRESS)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "diska" in name:
+                item["branch"] = item.pop("name").removeprefix("diska ")
                 item.update(self.DISKA)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "edeka" in name:
                 item.update(self.EDEKA)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "ecenterherkules" in name:
                 item.update(self.ECENTER_HERKULES)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "ecenter" in name:
                 item.update(self.ECENTER)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif "marktkauf" in name:
+                if m := re.match(r"^Marktkauf(?:center)? (.+)$", item.pop("name"), flags=re.IGNORECASE):
+                    item["branch"] = m.group(1)
                 item.update(self.MARKTKAUF)
             elif "capmarkt" in name:
+                if m := re.match(r"^CAP[ \-]Markt (.+)$", item.pop("name"), flags=re.IGNORECASE):
+                    item["branch"] = m.group(1)
                 item.update(self.CAPMARKT)
             elif "npmarkt" in name:
+                item["branch"] = item.pop("name").removeprefix("NP-Markt ")
                 item.update(self.NPMARKT)
             elif "marktbäckerei" in name:
+                item["branch"] = item.pop("name").removeprefix("Markt-Bäckerei ")
                 item.update(self.MARKT_BACKEREI)
+                apply_category(Categories.SHOP_BAKERY, item)
             elif "ellimarkt" in name:
+                if m := re.match(r"^Elli[ |-]Markt (.+)$", item.pop("name"), flags=re.IGNORECASE):
+                    item["branch"] = m.group(1)
                 item.update(self.ELLI)
-            else:
-                item.update(self.EDEKA)
-            if item["website"] == "https://www.edeka.de/eh/minden-hannover/edeka-junghans-poppauer-str.-2/index.jspp":
-                item["website"] = "https://www.edeka.de/eh/minden-hannover/edeka-junghans-poppauer-str.-2/index.jsp"
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+
             yield item
 
         if next := response.json()["_links"].get("next"):
