@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 import chompjs
@@ -39,4 +40,15 @@ class MitsubishiCZSpider(Spider):
                 address_end_index = index
                 break
         item["addr_full"] = clean_address(address[:address_end_index])
+
+        if phone := re.search(r"Telefon:(.+?)<", location.get("")):
+            item["phone"] = phone.group(1).replace(",", ";")
+
+        sales_email = location.xpath(
+            './/*[contains(text(), "Prodejní místo")]/following-sibling::p//a[contains(@href,"mailto:")]/@href'
+        ).get()
+        service_email = location.xpath(
+            './/*[contains(text(), "Servisní místo:")]/following-sibling::p//a[contains(@href,"mailto:")]/@href'
+        ).get()
+        item["email"] = sales_email or service_email
         yield item
