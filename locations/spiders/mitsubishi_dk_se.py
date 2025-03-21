@@ -17,6 +17,8 @@ class MitsubishiDKSESpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("street", None)
+        if website := feature.get("website"):
+            item["website"] = "https://" + website if website.startswith("www.") else website
 
         categories = (feature.get("categories") or "").split(",")
         if "1" in categories or "19" in categories:
