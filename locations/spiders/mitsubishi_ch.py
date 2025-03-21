@@ -4,6 +4,7 @@ from typing import Iterable
 import chompjs
 from scrapy.http import Response
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -31,4 +32,10 @@ class MitsubishiCHSpider(JSONBlobSpider):
         item["street_address"] = item.pop("addr_full", None)
         item["name"] = feature.get("organisation")
         item["website"] = response.urljoin(feature.get("www"))
+
+        if feature.get("hasSales"):
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.CAR_REPAIR, item, feature.get("hasService"))
+        elif feature.get("hasService"):
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
         yield item
