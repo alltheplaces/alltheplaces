@@ -10,6 +10,6 @@ class HiddenHearingGBSpider(JSONBlobSpider):
         item["website"] = "https://www.hiddenhearing.co.uk" + item["website"]
         if item["phone"] == "0800 740 8706":
             item.pop("phone")
-        if item["email"] == "info@hiddenhearing.co.uk ":
+        if "info@hiddenhearing.co.uk" in item["email"]:
             item.pop("email")
         yield item
