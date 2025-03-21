@@ -38,7 +38,8 @@ class MitsubishiPLSpider(Spider):
             item["lon"] = location.get("marker_lng")
             item["housenumber"] = location.get("address_number")
             item["postcode"] = location.get("address_postal")
-            item["phone"] = location.get("address_phone") or location.get("service_phone")
+            if phone := location.get("address_phone") or location.get("service_phone"):
+                item["phone"] = phone.strip().removeprefix("0")
             if "serwis" in location["email"].lower() or "Serwis" in location["name"].title():
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             else:
