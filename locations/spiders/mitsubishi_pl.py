@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -38,4 +39,9 @@ class MitsubishiPLSpider(Spider):
             item["housenumber"] = location.get("address_number")
             item["postcode"] = location.get("address_postal")
             item["phone"] = location.get("address_phone") or location.get("service_phone")
+            if "serwis" in location["email"].lower() or "Serwis" in location["name"].title():
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            else:
+                apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.CAR_REPAIR, item, location.get("service_phone"))
             yield item
