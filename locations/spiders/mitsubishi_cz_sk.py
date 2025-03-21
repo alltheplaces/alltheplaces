@@ -40,7 +40,7 @@ class MitsubishiCZSKSpider(Spider):
                 break
         item["addr_full"] = clean_address(address[:address_end_index])
 
-        if phone := re.search(r"Telefon:(.+?)<", location.get("")):
+        if phone := re.search(r"Telef[o,ó]n:(.+?)<", location.get("")):
             item["phone"] = phone.group(1).replace(",", ";")
 
         sales_email = location.xpath(
