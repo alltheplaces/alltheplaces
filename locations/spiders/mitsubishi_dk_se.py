@@ -18,10 +18,10 @@ class MitsubishiDKSESpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("street", None)
 
-        categories = feature.get("categories") or ""
-        if "1" in categories:
+        categories = (feature.get("categories") or "").split(",")
+        if "1" in categories or "19" in categories:
             apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, "2" in categories)
-        elif "2" in categories:
+            apply_yes_no(Extras.CAR_REPAIR, item, "2" in categories or "18" in categories)
+        elif "2" in categories or "18" in categories:
             apply_category(Categories.SHOP_CAR_REPAIR, item)
         yield item
