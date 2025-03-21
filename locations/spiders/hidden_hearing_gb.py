@@ -1,4 +1,6 @@
 from locations.json_blob_spider import JSONBlobSpider
+from locations.hours import DAYS_EN, OpeningHours
+
 
 
 class HiddenHearingGBSpider(JSONBlobSpider):
@@ -10,6 +12,9 @@ class HiddenHearingGBSpider(JSONBlobSpider):
         item["website"] = "https://www.hiddenhearing.co.uk" + item["website"]
         if item["phone"] == "0800 740 8706":
             item.pop("phone")
-        if "info@hiddenhearing.co.uk" in item["email"]:
-            item.pop("email")
+        if item["email"]:
+            if "info@hiddenhearing.co.uk" in item["email"]:
+                item.pop("email")
+        #Most of the opening hours just say contact us - so decided not to add.
+
         yield item
