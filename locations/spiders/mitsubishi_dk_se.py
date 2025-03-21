@@ -7,10 +7,13 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class MitsubishiDKSpider(JSONBlobSpider):
-    name = "mitsubishi_dk"
+class MitsubishiDKSESpider(JSONBlobSpider):
+    name = "mitsubishi_dk_se"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
-    start_urls = ["https://mitsubishi-motors.dk/wp-admin/admin-ajax.php?action=asl_load_stores"]
+    start_urls = [
+        f"https://mitsubishi-motors.{country_code}/wp-admin/admin-ajax.php?action=asl_load_stores"
+        for country_code in ["dk", "se"]
+    ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("street", None)
