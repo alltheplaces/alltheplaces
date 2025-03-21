@@ -25,7 +25,6 @@ class MitsubishiCLSpider(scrapy.Spider):
             item["city"] = location.xpath(".//tr[6]/td/text()").get()
             item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/text()').get()
             extract_google_position(item, location)
-            print(location.xpath(".//@data-servicios").get())
             location_type = location.xpath(".//@data-servicios").get()
             if "ventas" not in location_type:
                 if "repuestos" in location_type:
