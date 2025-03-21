@@ -11,10 +11,10 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MitsubishiCZSpider(Spider):
-    name = "mitsubishi_cz"
+class MitsubishiCZSKSpider(Spider):
+    name = "mitsubishi_cz_sk"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
-    start_urls = ["https://www.mitsubishi-motors.cz/prodejci/"]
+    start_urls = ["https://www.mitsubishi-motors.cz/prodejci/", "https://www.mitsubishi-motors.sk/predajcovia/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in chompjs.parse_js_object(
