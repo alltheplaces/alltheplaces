@@ -8,8 +8,8 @@ class HiddenHearingGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["website"] = "https://www.hiddenhearing.co.uk" + item["website"]
-        if item["phone"] == "+44 800 740 8706":
+        if item["phone"] == "0800 740 8706":
             item.pop("phone")
-        if item["email"] == "info@hiddenhearing.co.uk":
+        if item["email"] == "info@hiddenhearing.co.uk ":
             item.pop("email")
         yield item
