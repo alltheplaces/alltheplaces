@@ -14,11 +14,16 @@ class MazdaUSSpider(scrapy.Spider):
         if dealers := response.json()["body"]["results"]:
             for dealer in dealers:
                 item = DictParser.parse(dealer)
-                item["extras"] = {"website_2": dealer.get("webUrl")}
+
+                item["website"] = dealer.get("webUrl")
+
                 if dealer.get("serviceUrl"):
                     apply_category({"shop": "car", "service": "dealer;repair"}, item)
                 else:
                     apply_category(Categories.SHOP_CAR, item)
+
                 yield item
+
             current_page = kwargs.get("page", 1)
+
             yield JsonRequest(url=f"{self.start_urls[0]}?p={current_page + 1}", cb_kwargs=dict(page=current_page + 1))
