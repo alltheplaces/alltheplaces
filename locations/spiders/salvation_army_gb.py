@@ -14,7 +14,6 @@ class SalvationArmyGBSpider(SitemapSpider):
     sitemap_rules = [(r"^https:\/\/www\.salvationarmy\.org\.uk\/[^/]+-charity-shop(?:-\d+)?$", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = item["website"] = response.url
