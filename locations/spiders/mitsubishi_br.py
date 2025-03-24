@@ -15,10 +15,10 @@ class MitsubishiBRSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json().get("results", []):
             item = DictParser.parse(dealer)
-            item["branch"] = item.pop("name", None)
+            item["branch"] = item.pop("name")
             website = dealer.get("website")
             if website and not website.startswith("https"):
-                item["website"] = "https://" + website
+                item["website"] = "https://" + website.strip()
             if dealer.get("newCars"):
                 apply_category(Categories.SHOP_CAR, item)
             elif not dealer.get("newCars") and dealer.get("kitCarParts"):
