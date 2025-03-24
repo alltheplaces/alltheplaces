@@ -21,6 +21,6 @@ class SallyBeautyUSSpider(SitemapSpider, StructuredDataSpider):
     def parse(self, response, **kwargs):
         # Try to correct syntax errors
         for el in response.xpath('//script[@type="application/ld+json"]'):
-            match = re.search(r',\s*"mainEntityOfPage"', el.root.text)
-            el.root.text = el.root.text[: match.start()] + "}]"
+            if match := re.search(r',\s*"mainEntityOfPage"', el.root.text):
+                el.root.text = el.root.text[: match.start()] + "}]"
         yield from self.parse_sd(response)
