@@ -11,10 +11,10 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MitsubishiCZSpider(Spider):
-    name = "mitsubishi_cz"
+class MitsubishiCZSKSpider(Spider):
+    name = "mitsubishi_cz_sk"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
-    start_urls = ["https://www.mitsubishi-motors.cz/prodejci/"]
+    start_urls = ["https://www.mitsubishi-motors.cz/prodejci/", "https://www.mitsubishi-motors.sk/predajcovia/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in chompjs.parse_js_object(
@@ -40,16 +40,10 @@ class MitsubishiCZSpider(Spider):
                 break
         item["addr_full"] = clean_address(address[:address_end_index])
 
-        if phone := re.search(r"Telefon:(.+?)<", location.get("")):
+        if phone := re.search(r"Telef[oó]n:(.+?)<", location.get("")):
             item["phone"] = phone.group(1).replace(",", ";")
 
-        sales_email = location.xpath(
-            './/*[contains(text(), "Prodejní místo")]/following-sibling::p//a[contains(@href,"mailto:")]/@href'
-        ).get()
-        service_email = location.xpath(
-            './/*[contains(text(), "Servisní místo:")]/following-sibling::p//a[contains(@href,"mailto:")]/@href'
-        ).get()
-        item["email"] = sales_email or service_email
+        item["email"] = location.xpath('.//a[contains(@href,"mailto:")]/@href').get()
         item["website"] = location.xpath('.//a[contains(text(), "webová stránka")]/@href').get()
         item["extras"]["brand:website"] = response.url
         yield item
