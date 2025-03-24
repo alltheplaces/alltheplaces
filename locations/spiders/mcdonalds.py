@@ -113,7 +113,6 @@ class McdonaldsSpider(scrapy.Spider):
             if hours := self.store_hours(properties.get("restauranthours")):
                 item["opening_hours"] = hours
 
-
             if "MCCAFE" in filter_type:
                 mccafe = item.deepcopy()
                 mccafe["ref"] = "{}-mccafe".format(item["ref"])
