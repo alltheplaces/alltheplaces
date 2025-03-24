@@ -25,7 +25,6 @@ class McdonaldsFRSpider(WoosmapSpider):
         apply_yes_no(Extras.OUTDOOR_SEATING, item, "terrace" in feature["properties"]["tags"])
         apply_yes_no(Extras.WIFI, item, "wireless" in feature["properties"]["tags"])
 
-
         if "mccafe" in feature["properties"]["tags"]:
             print(feature["properties"]["tags"])
             mccafe = item.deepcopy()
