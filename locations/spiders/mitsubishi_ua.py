@@ -3,6 +3,7 @@ from typing import Iterable
 import chompjs
 from scrapy.http import Response
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -26,4 +27,21 @@ class MitsubishiUASpider(JSONBlobSpider):
         item["street_address"] = item.pop("addr_full", None)
         item["website"] = feature.get("website_link")
         item["extras"]["brand:website"] = response.urljoin(f'?dealer={item["ref"]}')
+
+        departments = {
+            department["title"]: {"phones": department["phones"], "schedule": department["schedule"]}
+            for department in feature["departments"]
+        }
+        SALES = "Відділ продажу"
+        SERVICE = "Відділ сервісу"
+        category = ""
+
+        if SALES in departments:
+            category = SALES
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.CAR_REPAIR, item, SERVICE in departments)
+        elif SERVICE in departments:
+            category = SERVICE
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
+
         yield item
