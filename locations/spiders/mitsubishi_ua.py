@@ -8,6 +8,7 @@ class MitsubishiUASpider(JSONBlobSpider):
     name = "mitsubishi_ua"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
     start_urls = ["https://mitsubishi-motors.com.ua/find-a-dealer"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def extract_json(self, response: Response) -> list[dict]:
         return chompjs.parse_js_object(
