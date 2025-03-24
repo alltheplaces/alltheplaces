@@ -1,6 +1,9 @@
+from typing import Iterable
+
 import chompjs
 from scrapy.http import Response
 
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -17,3 +20,10 @@ class MitsubishiUASpider(JSONBlobSpider):
             ),
             unicode_escape=True,
         )
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["lat"], item["lon"] = feature["latlng"].split(",")
+        item["street_address"] = item.pop("addr_full", None)
+        item["website"] = feature.get("website_link")
+        item["extras"]["brand:website"] = response.urljoin(f'?dealer={item["ref"]}')
+        yield item
