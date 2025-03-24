@@ -30,7 +30,11 @@ class MitsubishiUASpider(JSONBlobSpider):
         item["extras"]["brand:website"] = response.urljoin(f'?dealer={item["ref"]}')
 
         departments = {
-            department["title"]: {"phones": department["phones"], "schedule": department["schedule"]}
+            department["title"]: {
+                "phones": department["phones"],
+                "email": department["email"],
+                "schedule": department["schedule"],
+            }
             for department in feature["departments"]
         }
         SALES = "Відділ продажу"
@@ -47,6 +51,7 @@ class MitsubishiUASpider(JSONBlobSpider):
 
         phones = departments[category].get("phones") or ""
         item["phone"] = phones.replace(",", "; ")
+        item["email"] = departments[category].get("email")
 
         item["opening_hours"] = OpeningHours()
         for rule in departments[category].get("schedule", []):
