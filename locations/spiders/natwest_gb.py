@@ -43,7 +43,6 @@ class NatwestGBSpider(Spider):
                 location["location"] = coordinates
             item = DictParser.parse(location)
             item["ref"] = dist["id"]
-            item["branch"] = location["geomodifier"]
             item["website"] = location["c_listing_URL"].replace("/personal", "")
             item["facebook"] = "https://www.facebook.com/{}".format(location["facebookVanityUrl"])
             item["extras"]["ref:facebook"] = location.get("" "facebookPageUrl", "").split("/")[-1]
