@@ -4,6 +4,7 @@ import chompjs
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -46,5 +47,9 @@ class MitsubishiUASpider(JSONBlobSpider):
 
         phones = departments[category].get("phones") or ""
         item["phone"] = phones.replace(",", "; ")
+
+        item["opening_hours"] = OpeningHours()
+        for rule in departments[category].get("schedule", []):
+            item["opening_hours"].add_ranges_from_string(f'{rule["day"]} {rule["workhours"]}', days=DAYS_RU)
 
         yield item
