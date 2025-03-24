@@ -5,6 +5,7 @@ import scrapy
 from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MazdaCASpider(scrapy.Spider):
@@ -16,10 +17,9 @@ class MazdaCASpider(scrapy.Spider):
         for dealer in response.json()["data"]:
             item = DictParser.parse(dealer)
             item["ref"] = dealer["dealer_code"]
-            item["street_address"] = ", ".join(filter(None, [dealer["address_line_1"], dealer["address_line_2"]]))
+            item["street_address"] = merge_address_lines([dealer["address_line_1"], dealer["address_line_2"]])
             item["email"] = dealer["oca_email"]
             item["state"] = dealer["province"]["province_code"]
-            item["extras"] = {"website_2": dealer.pop("website")}
             item["opening_hours"] = OpeningHours()
             for rule in dealer["hours"]["sales"]:
                 if rule["open"] == 0:  # closed
