@@ -44,6 +44,7 @@ class MitsubishiUASpider(JSONBlobSpider):
             category = SERVICE
             apply_category(Categories.SHOP_CAR_REPAIR, item)
 
-        item["phone"] = departments[category].get("phones")
+        phones = departments[category].get("phones") or ""
+        item["phone"] = phones.replace(",", "; ")
 
         yield item
