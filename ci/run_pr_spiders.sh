@@ -311,7 +311,7 @@ if [ "${pull_request_number}" != "false" ]; then
         -H "Authorization: token ${github_access_token}" \
         -H "Accept: application/vnd.github.v3+json" \
         -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
-        "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
+        "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments" > /dev/null
 
     if [ ! $? -eq 0 ]; then
         (>&2 echo "comment post failed")
