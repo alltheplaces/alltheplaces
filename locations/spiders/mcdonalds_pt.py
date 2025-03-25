@@ -3,7 +3,7 @@ import html
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_PT, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.mcdonalds import McdonaldsSpider
@@ -26,6 +26,14 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider):
         apply_yes_no(Extras.WIFI, item, "Wi-Fi" in services)
         apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "Fraldário" in services)
         apply_yes_no(Extras.TAKEAWAY, item, "Takeaway" in services)
+
+        if "McCafé" in services:
+            mccafe = item.deepcopy()
+            mccafe["ref"] = "{}-mccafe".format(item["ref"])
+            mccafe["brand"] = "McCafé"
+            mccafe["brand_wikidata"] = "Q3114287"
+            apply_category(Categories.CAFE, mccafe)
+            yield mccafe
 
         item["opening_hours"] = self.parse_opening_hours(
             response.xpath(

@@ -538,6 +538,6 @@ class GbfsSpider(CSVFeedSpider):
 
         # If neither the vehicle type nor a brand preset were available, set a fallback category.
         if "amenity" not in item["extras"] and not item.get("brand_wikidata"):
-            apply_category({"public_transport": "platform"}, item)
+            apply_category(Categories.BICYCLE_RENTAL, item)
 
         return item
