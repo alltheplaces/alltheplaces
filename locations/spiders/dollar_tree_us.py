@@ -5,12 +5,12 @@ from locations.items import Feature
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class FamilyDollarUSSpider(YextAnswersSpider):
-    name = "family_dollar_us"
-    item_attributes = {"brand": "Family Dollar", "brand_wikidata": "Q5433101"}
+class DollarTreeUSSpider(YextAnswersSpider):
+    name = "dollar_tree_us"
+    item_attributes = {"brand": "Dollar Tree", "brand_wikidata": "Q5289230"}
     api_key = "7a860787290ef5396ebe3ffe229d96c3"
     experience_key = "pages-locator-usa-only"
-    feature_type = "family-dollar"
+    feature_type = "dollar-tree-usa"
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         item.pop("facebook", None)
