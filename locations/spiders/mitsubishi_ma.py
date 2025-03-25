@@ -1,15 +1,11 @@
 from typing import Any
 
-import chompjs
 import scrapy
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MitsubishiMASpider(scrapy.Spider):
