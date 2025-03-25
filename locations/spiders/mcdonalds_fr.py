@@ -26,7 +26,6 @@ class McdonaldsFRSpider(WoosmapSpider):
         apply_yes_no(Extras.WIFI, item, "wireless" in feature["properties"]["tags"])
 
         if "mccafe" in feature["properties"]["tags"]:
-            print(feature["properties"]["tags"])
             mccafe = item.deepcopy()
             mccafe["ref"] = "{}-mccafe".format(item["ref"])
             mccafe["brand"] = "McCafé"
