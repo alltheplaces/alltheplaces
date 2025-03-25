@@ -77,27 +77,33 @@ if git log -1 --pretty=format:%an | grep -q "pre-commit"; then
 fi
 
 pr_file_changes=$(curl -sL --header "authorization: token ${github_access_token}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
-(>&2 echo "PR response: ${pr_file_changes}")
 
-SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
+changed_filenames=$(echo -n "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | .filename')
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "checking file changes failed. response was ${pr_file_changes}")
     exit 1
 fi
+(>&2 echo "Changed files: ${changed_filenames}")
 
-spider_count=$(echo -n "${pr_file_changes}" | jq -r '[.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/"))] | length')
+spiders=$(echo "${changed_filenames}" | grep "^locations/spiders/")
+
+spider_count=$(echo "${spiders}" | wc -l)
 if [ $spider_count -gt 15 ]; then
     (>&2 echo "refusing to run on more than 15 spiders")
     exit 1
 fi
 
-if [ $spider_count -eq 0 ]; then
+# Manually run a couple spiders when Pipfile/Pipfile.lock changes
+if echo "${changed_filenames}" | grep -q "Pipfile" || echo "${changed_filenames}" | grep -q "Pipfile.lock"; then
+    echo "Pipfile or Pipfile.lock changed. Running a couple spiders."
+    spiders=("locations/spiders/the_works.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
+elif [ "$spider_count" -eq 0 ]; then
     (>&2 echo "no spiders modified (only deleted?)")
     exit 0
 fi
 
-if grep PLAYWRIGHT -q -m 1 $SPIDERS; then
+if grep PLAYWRIGHT -q -m 1 $spiders; then
     echo "Playwright detected. Installing requirements."
     playwright install-deps
     playwright install firefox
@@ -105,7 +111,7 @@ fi
 
 RUN_DIR="/tmp/output"
 EXIT_CODE=0
-for file_changed in $SPIDERS
+for file_changed in $spiders
 do
     if [[ $file_changed != locations/spiders/* ]]; then
         echo "${file_changed} is not a spider. Skipping."
@@ -305,7 +311,7 @@ if [ "${pull_request_number}" != "false" ]; then
         -H "Authorization: token ${github_access_token}" \
         -H "Accept: application/vnd.github.v3+json" \
         -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
-        "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
+        "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments" > /dev/null
 
     if [ ! $? -eq 0 ]; then
         (>&2 echo "comment post failed")
