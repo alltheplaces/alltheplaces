@@ -272,6 +272,18 @@ class DictParser:
         "orari",
     ]
 
+    twitter_keys = [
+        "twitter",
+        "twitter-link",
+        "twitter-url",
+    ]
+
+    facebook_keys = [
+        "facebook",
+        "facebook-link",
+        "facebook-url",
+    ]
+
     @staticmethod
     def parse(obj: dict) -> Feature:
         item = Feature()
@@ -341,6 +353,8 @@ class DictParser:
         item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
         item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
         item["website"] = DictParser.get_first_key(contact, DictParser.website_keys)
+        item["twitter"] = DictParser.get_first_key(contact, DictParser.twitter_keys)
+        item["facebook"] = DictParser.get_first_key(contact, DictParser.facebook_keys)
 
         return item
 

@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class FarmboyCASpider(SitemapSpider):
     name = "farmboy_ca"
-    item_attributes = {"brand": "Farmboy", "brand_wikidata": "Q5435469"}
+    item_attributes = {"brand": "Farm Boy", "brand_wikidata": "Q5435469"}
     allowed_domains = ["www.farmboy.ca"]
     sitemap_urls = ["https://www.farmboy.ca/stores-sitemap.xml"]
     sitemap_rules = [(r"/stores/[-\w]+", "parse")]

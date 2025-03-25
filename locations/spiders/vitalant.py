@@ -1,44 +1,27 @@
-import itertools
-import re
+from scrapy.spiders import SitemapSpider
 
-import scrapy
-
+from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
-class VitalantSpider(scrapy.Spider):
+class VitalantSpider(SitemapSpider):
     name = "vitalant"
     item_attributes = {"brand": "Vitalant", "brand_wikidata": "Q7887528"}
-    allowed_domains = ["vitalant.org"]
-    start_urls = ("https://vitalant.org/Donate/Locations",)
+    sitemap_urls = ["https://www.vitalant.org/sitemap.xml"]
+    sitemap_rules = [("/locations/", "parse")]
 
     def parse(self, response):
-        [script] = response.xpath('//script/text()[contains(., "BasicGoogleMaps = ")]').extract()
-        marker_lines = []
-        location_lines = []
-        for line in script.splitlines():
-            match = re.search(r"<div.*/div>", line)
-            if match is not None:
-                marker_lines.append(match[0])
-            elif "addGoogleMarker" in line:
-                location_lines.append(line)
-
-        for marker, location in itertools.zip_longest(marker_lines, location_lines):
-            selector = scrapy.Selector(text=marker)
-            name, *addrs, addr2 = (s.strip() for s in selector.xpath("//b/text()[normalize-space()]").extract())
-            city, state, postcode = re.search("(.*), (.*) (.*)", addr2).groups()
-            website = selector.xpath("//@href").extract_first().strip(r"\"")
-            lat, lon = location.split(", ")[1:3]
-            ref = re.search(r"BasicGoogleMaps\[(\d+)\]", location)[1]
-            properties = {
-                "ref": ref,
-                "lat": lat,
-                "lon": lon,
-                "website": response.urljoin(website),
-                "name": name,
-                "addr_full": ", ".join(addrs),
-                "city": city,
-                "state": state,
-                "postcode": postcode,
-            }
-            yield Feature(**properties)
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["name"] = response.xpath('//h1[@class="content__title"]/text()').get()
+        address_data = response.xpath('//*[@class="location__address"]/p/text()').getall()
+        address = address_data[0]
+        line_2 = address_data[1]
+        if line_2 is not None:
+            if "877" not in line_2:
+                address = address + line_2
+        item["addr_full"] = clean_address(address)
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
+        extract_google_position(item, response)
+        yield item

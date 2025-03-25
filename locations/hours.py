@@ -4,6 +4,7 @@ import time
 from collections import defaultdict
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
 DAYS_3_LETTERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 DAYS_3_LETTERS_FROM_SUNDAY = DAYS_3_LETTERS[-1:] + DAYS_3_LETTERS[:-1]
 DAYS_FULL = [
@@ -18,10 +19,25 @@ DAYS_FULL = [
 DAYS_WEEKDAY = ["Mo", "Tu", "We", "Th", "Fr"]
 DAYS_WEEKEND = ["Sa", "Su"]
 
-# The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
+# The below DAYS dicts are provided to be used with sanitise_day in order for us to do best attempts at matching the
 # given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
 
-DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa", "So": "Su"}
+DAYS_AT = {
+    "Mo": "Mo",
+    "Montag": "Mo",
+    "Di": "Tu",
+    "Dienstag": "Tu",
+    "Mi": "We",
+    "Mittwoch": "We",
+    "Do": "Th",
+    "Donnerstag": "Th",
+    "Fr": "Fr",
+    "Freitag": "Fr",
+    "Sa": "Sa",
+    "Samstag": "Sa",
+    "So": "Su",
+    "Sonntag": "Su",
+}
 
 DAYS_EN = {
     "Monday": "Mo",
@@ -90,6 +106,7 @@ DAYS_BG = {
     "Четвъртък": "Th",
     "Че": "Th",
     "Чт": "Th",
+    "Четв": "Th",
     "Петък": "Fr",
     "Пет": "Fr",
     "Пе": "Fr",
@@ -101,7 +118,6 @@ DAYS_BG = {
     "Неделя": "Su",
     "Нед": "Su",
     "нед": "Su",
-    "Нед": "Su",
     "Не": "Su",
     "Нд": "Su",
 }
@@ -342,30 +358,44 @@ DAYS_IT = {
     "Lunedì": "Mo",
     "Lunedi": "Mo",
     "Lun": "Mo",
+    "Lun.": "Mo",
     "Lu": "Mo",
+    "Lu.": "Mo",
     "Martedì": "Tu",
     "Martedi": "Tu",
     "Mar": "Tu",
+    "Mar.": "Tu",
     "Ma": "Tu",
+    "Ma.": "Tu",
     "Mercoledì": "We",
     "Mercoledi": "We",
     "Mer": "We",
+    "Mer.": "We",
     "Me": "We",
+    "Me.": "We",
     "Giovedì": "Th",
     "Giovedi": "Th",
     "Gio": "Th",
+    "Gio.": "Th",
     "Gi": "Th",
+    "Gi.": "Th",
     "Venerdì": "Fr",
     "Venerdi": "Fr",
     "Ven": "Fr",
+    "Ven.": "Fr",
     "Ve": "Fr",
+    "Ve.": "Fr",
     "Sabato": "Sa",
     "Sab": "Sa",
+    "Sab.": "Sa",
     "Sa": "Sa",
+    "Sa.": "Sa",
     "Domenica": "Su",
     "Domenicale": "Su",
     "Dom": "Su",
+    "Dom.": "Su",
     "Do": "Su",
+    "Do.": "Su",
 }
 DAYS_FR = {
     "Lu": "Mo",
@@ -642,8 +672,19 @@ DAYS_TR = {
     "Pazar": "Su",
 }
 
+DAYS_ID = {
+    "Senin": "Mo",
+    "Selasa": "Tu",
+    "Rabu": "We",
+    "Kamis": "Th",
+    "Jumat": "Fr",
+    "Sabtu": "Sa",
+    "Minggu": "Su",
+    "Ahad": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
-# A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
+# A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
 DAYS_BY_FREQUENCY = [
     DAYS_EN,
@@ -752,13 +793,16 @@ DELIMITERS_IT = [
     "―",
     "‒",
     "/",
+    "e",
     "dal",
     "al",
     "il",
     "fino al",
     "alle",
+    "alla",
     "fino alle",
     "dalle",
+    "dalle ore",
     "da",
     "a",
     "dall'",
@@ -806,9 +850,17 @@ DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
 DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
+CLOSED_AT = ["geschlossen"]
+
 CLOSED_EN = ["closed", "off"]
 
+CLOSED_DE = ["geschlossen"]
+
 CLOSED_IT = ["chiuso", "chiusi", "siamo chiusi"]
+
+CLOSED_NL = ["gesloten"]
+
+CLOSED_TH = ["ปิดทำการ"]
 
 logger = logging.getLogger(__name__)
 
@@ -852,8 +904,9 @@ class OpeningHours:
         """
         Mark days where the location has stated they are closed; as opposed to simply not provided or known from survey hours.
 
-        This differs slightly to https://wiki.openstreetmap.org/wiki/Key:opening_hours; in that 'off' or 'closed'
-        are more frequently output.
+        This matches the syntax of https://wiki.openstreetmap.org/wiki/Key:opening_hours.
+        Use of this in All the Places is more common than in OpenStreetMap where use of 'off' or 'closed'
+        is quite uncommon.
 
         Recommended to use with an appropriate helper to pass a specific string or list, ie:
         `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
@@ -889,14 +942,19 @@ class OpeningHours:
         if isinstance(close_time, str):
             if close_time.lower() in closed:
                 return
-            if close_time == "24:00" or close_time == "00:00":
+            if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
-            if close_time == "24:00:00" or close_time == "00:00:00":
+            if close_time in ("24:00:00", "00:00:00"):
                 close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
+            if close_time.tm_hour == 0 and close_time.tm_min == 0:
+                # weird format not caught by checks above
+                # may be 0:00 or even more divergent if time_format
+                # parameter was used with some exotic value
+                close_time = time.strptime("23:59", "%H:%M")
 
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
@@ -905,6 +963,34 @@ class OpeningHours:
         day_groups = []
         this_day_group = None
 
+        # usually ; works fine as a separator between different days
+        # but it has an annoying quirk, in OpenStreetMap opening_hours syntax
+        # it overrides previous definitions
+        # so for example
+        # Mo-Sa 10:00-02:00; Su 09:00-02:00
+        # means that object is closed on midnight between Saturday and Sunday
+        # Mo-Sa 10:00-02:00; Su 00:00-02:00,09:00-02:00
+        # in turn means that object is open also during early Sunday hours
+        #
+        # All the Places is using a small section of entire opening_hours syntax
+        # so we need only check whether time goes over midnight and split it
+        # in two regular ranges
+        day_hours_midnight_split = defaultdict(set)
+        time_format = "%H:%M"
+        midnight_end = time.strptime("23:59", time_format)
+        midnight_start = time.strptime("00:00", time_format)
+        for index, day in enumerate(DAYS):
+            for h in self.day_hours[day]:
+                if h[0].tm_hour * 60 + h[0].tm_min > h[1].tm_hour * 60 + h[1].tm_min:
+                    # start hour is greater than end hour, indicating that it is
+                    # an over-midnight range
+                    day_hours_midnight_split[day].add((h[0], midnight_end))
+                    next_day = DAYS[(index + 1) % len(DAYS)]
+                    day_hours_midnight_split[next_day].add((midnight_start, h[1]))
+                    if next_day in self.days_closed:
+                        self.days_closed.remove(next_day)
+                else:
+                    day_hours_midnight_split[day].add(h)
         for day in DAYS:
             if day in self.days_closed:
                 hours = "closed"
@@ -915,7 +1001,7 @@ class OpeningHours:
                         time.strftime("%H:%M", h[0]),
                         time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
                     )
-                    for h in sorted(self.day_hours[day])
+                    for h in sorted(day_hours_midnight_split[day])
                 )
 
             if not this_day_group:
@@ -1159,7 +1245,7 @@ class OpeningHours:
             days_regex
             + r"(?:\W+|"
             + OpeningHours.delimiters_regex(delimiters)
-            + r")((?:(?:\s*(?:,|/)?\s*)?"
+            + r")((?:(?:\s*(?:,|/|-)?\s*)?"
             + OpeningHours.time_of_day_regex(time_24h=time_24h)
             + OpeningHours.delimiters_regex(delimiters)
             + OpeningHours.time_of_day_regex(time_24h=time_24h)

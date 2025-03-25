@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 class GridserveGBSpider(Spider):
     name = "gridserve_gb"
-    item_attributes = {"brand": "Gridserve", "brand_wikidata": "Q89575318"}
+    item_attributes = {"operator": "Gridserve", "operator_wikidata": "Q89575318"}
     start_urls = ["https://gfxpushnode.gridserve.com/api/v1/charging-station-by-locations"]
 
     def parse(self, response, **kwargs):

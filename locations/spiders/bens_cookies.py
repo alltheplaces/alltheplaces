@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -19,6 +20,7 @@ class BensCookiesSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
+        apply_category(Categories.SHOP_CONFECTIONERY, item)
 
         try:
             item["opening_hours"] = self.parse_opening_hours(response)

@@ -11,9 +11,11 @@ from locations.spiders.gamestop_us import GAMESTOP_SHARED_ATTRIBUTES
 class GamestopSpider(Spider):
     name = "gamestop"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def start_requests(self) -> Iterable[Request]:
-        for country in ["ca", "de", "it"]:
+        for country in ["ca", "it"]:
             yield JsonRequest(
                 url="https://www.gamestop.{}/api/store/GetNearestStoresByLocation?latitude=0&longitude=0&limit=1000".format(
                     country
@@ -40,4 +42,5 @@ class GamestopSpider(Spider):
                     close_time=close_time.strip(),
                     time_format="%I:%M %p" if ".ca" in response.url else "%H:%M",
                 )
+            item["street_address"] = item.pop("addr_full", None)
             yield item

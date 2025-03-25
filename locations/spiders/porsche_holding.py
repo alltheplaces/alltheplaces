@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 import pycountry
@@ -31,9 +32,7 @@ class PorscheHoldingSpider(JSONBlobSpider):
     }
     locations_key = "data"
     start_urls = [
-        "https://www.porsche-holding.com/en/company/locations",
-        "https://www.porsche-holding.com/en/company/locations/asia",
-        "https://www.porsche-holding.com/en/company/locations/south-america",
+        "https://www.porsche-holding.com/en/Company/locations",
     ]
 
     base_url = "https://hs.porsche-holding.com/api/v2/dealers"
@@ -41,7 +40,8 @@ class PorscheHoldingSpider(JSONBlobSpider):
     custom_settings = {
         "CONCURRENT_REQUESTS": 1,
         "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
-        "DOWNLOAD_DELAY": 10,  # API throws 429 very quickly
+        "DOWNLOAD_DELAY": 10,  # API throws 429 very quickly,
+        "RETRY_TIMES": 5,
     }
 
     def start_requests(self) -> Iterable[Request]:
@@ -49,7 +49,9 @@ class PorscheHoldingSpider(JSONBlobSpider):
             yield Request(url=url, callback=self.get_countries)
 
     def get_countries(self, response: Response):
-        country_names = response.xpath('//div[@class="porscheholding-countriesViewDropdown__item"]/a/text()').getall()
+        country_names = re.findall(
+            r"globe\.countryOption\.\w+\":\[\{\"type\":\d,\"value\":\"(.+?)\"}]", response.text.replace('\\"', '"')
+        )
         self.logger.info(f"Found country names: {country_names}")
         for country_name in country_names:
             matches = pycountry.countries.search_fuzzy(country_name)

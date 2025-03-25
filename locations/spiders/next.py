@@ -15,7 +15,7 @@ class NextSpider(Spider):
     VICTORIAS_SECRET = {"brand": "Victoria's Secret", "brand_wikidata": "Q332477"}
     PINK = {"brand": "Pink", "brand_wikidata": "Q20716793"}
     item_attributes = NEXT
-    start_urls = ["http://stores.next.co.uk/"]
+    start_urls = ["https://www.next.co.uk/countryselect"]
 
     @staticmethod
     def get_time(time: str) -> str:
@@ -41,10 +41,10 @@ class NextSpider(Spider):
         return o
 
     def parse(self, response, **kwargs):
-        for country in response.xpath('//select[@id="country-store"]/option/@value').getall():
+        for country in response.xpath('//*[contains(@class, "country-name")]/text()').getall():
             yield FormRequest(
                 url="https://stores.next.co.uk/index/stores",
-                formdata={"country": country},
+                formdata={"country": country.strip()},
                 callback=self.parse_country,
             )
 
@@ -74,7 +74,7 @@ class NextSpider(Spider):
             item = DictParser.parse(location)
 
             item["ref"] = location["location_id"]
-            item["name"] = location["branch_name"]
+            item["branch"] = item.pop("name")
             item["website"] = response.url
 
             item["opening_hours"] = self.store_hours(location)

@@ -27,7 +27,8 @@ class AccessStorageCASpider(Spider):
             item["lon"] = location["latlng"]["lng"]
             item["city"] = location.get("city")
             item["website"] = item["extras"]["website:en"] = location["url"]
-            item["image"] = location["gallery_images"][0]["image"]
+            if len(location.get("gallery_images")) > 0:
+                item["image"] = location["gallery_images"][0]["image"]
 
             item["opening_hours"] = OpeningHours()
             for day, time in location["hour"].items():

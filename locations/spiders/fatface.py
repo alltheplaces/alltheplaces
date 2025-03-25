@@ -12,7 +12,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class FatfaceSpider(CrawlSpider):
     name = "fatface"
-    item_attributes = {"brand": "FATFACE", "brand_wikidata": "Q5437186"}
+    item_attributes = {"brand": "Fat Face", "brand_wikidata": "Q5437186"}
     start_urls = ["https://www.fatface.com/countryselect"]
     rules = [
         Rule(LinkExtractor(allow=r"https://www.fatface.com/[a-z]{2}/en"), callback="parse"),
