@@ -1,7 +1,7 @@
 import re
 from typing import Iterable
 
-from scrapy.http import Request, Response
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -55,8 +55,10 @@ class IgaAUSpider(CrawlSpider):
         # The source data only provides URLs to Google Maps via CID or via
         # URL redirect service goo.gl which will be shutdown in the 2nd half
         # of 2025.
-        if google_maps_url_cid := response.xpath('//a[contains(@href, "https://maps.google.com/maps?cid=")]/@href').get():
-            if m := re.search(r'\Wcid=(\d+)\b', google_maps_url_cid):
+        if google_maps_url_cid := response.xpath(
+            '//a[contains(@href, "https://maps.google.com/maps?cid=")]/@href'
+        ).get():
+            if m := re.search(r"\Wcid=(\d+)\b", google_maps_url_cid):
                 properties["extras"]["ref:google:cid"] = m.group(1)
 
         yield Feature(**properties)
