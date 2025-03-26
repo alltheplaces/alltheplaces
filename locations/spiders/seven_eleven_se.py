@@ -13,8 +13,7 @@ from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 class SevenElevenSESpider(JSONBlobSpider):
     name = "seven_eleven_se"
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
-    allowed_domains = ["public-store-data-prod.storage.googleapis.com"]
-    start_urls = ["https://public-store-data-prod.storage.googleapis.com/stores-seven_eleven.json"]
+    start_urls = ["https://storage.googleapis.com/public-store-data-prod/stores-seven_eleven.json"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("addr_full", None)
