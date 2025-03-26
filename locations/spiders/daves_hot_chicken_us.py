@@ -1,4 +1,5 @@
 from typing import Iterable
+from urllib.parse import urljoin
 
 from scrapy.http import Response
 
@@ -18,6 +19,7 @@ class DavesHotChickenUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if not feature["available"]:
             return
+        item["branch"] = item.pop("name")
         item["street_address"] = item.pop("addr_full", None)
         item["opening_hours"] = OpeningHours()
         for day_hours in feature["hours"]:
@@ -39,5 +41,7 @@ class DavesHotChickenUSSpider(JSONBlobSpider):
         apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in card_types)
         apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in card_types)
         apply_yes_no(PaymentMethods.VISA, item, "Visa" in card_types)
+
+        item["extras"]["website:menu"] = urljoin("https://daveshotchicken.com/menu/", feature["menu_id"])
 
         yield item
