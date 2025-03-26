@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.categories import apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -30,7 +30,8 @@ class MazdaCASpider(scrapy.Spider):
                     ]
                     item["opening_hours"].add_range(day, open_time, close_time)
 
-            apply_category({"shop": "car", "service": "dealer;repair;parts"}, item)
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.CAR_REPAIR, item, True)
             if item["website"].startswith("www."):
                 item["website"] = item["website"].replace("www.", "https://")
             item["website"] = item["website"].replace("http://", "https://")
