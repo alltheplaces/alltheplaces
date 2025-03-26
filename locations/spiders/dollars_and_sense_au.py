@@ -19,8 +19,10 @@ class DollarsAndSenseAUSpider(Spider):
         # a general search/query term similar to searching Google Maps for a
         # feature such as "Dollars and Sense BranchName".
         for store in response.xpath('//div[@class="ecom-sections"]/section[position() > 1]'):
-            location_details = re.sub(r'\s*:\s*', ": ", " ".join(store.xpath('.//text()').getall())).strip().removesuffix("Phone")
-            location_parts = re.split(r'(?:Located in:|Address:|Phone:)', location_details)
+            location_details = (
+                re.sub(r"\s*:\s*", ": ", " ".join(store.xpath(".//text()").getall())).strip().removesuffix("Phone")
+            )
+            location_parts = re.split(r"(?:Located in:|Address:|Phone:)", location_details)
             properties = {
                 "ref": location_parts[0].removeprefix("Dollars and Sense ").strip(),
                 "branch": location_parts[0].removeprefix("Dollars and Sense ").strip(),
