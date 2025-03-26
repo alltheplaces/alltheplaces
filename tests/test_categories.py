@@ -53,6 +53,11 @@ def test_cuisine_multiple():
     apply_category({"cuisine": "pizza"}, item)
     assert item["extras"]["cuisine"] == "coffee_shop;pizza"
 
+    item = Feature()
+    apply_category({"cuisine": "coffee_shop"}, item)
+    apply_category({"cuisine": "pizza;coffee_shop"}, item)
+    assert item["extras"]["cuisine"] == "coffee_shop;pizza"
+
 
 def test_shop_yes_category():
     item = Feature()
