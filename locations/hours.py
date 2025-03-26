@@ -910,6 +910,18 @@ class OpeningHours:
 
         Recommended to use with an appropriate helper to pass a specific string or list, ie:
         `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
+
+        In the situation where source data does not explicitly state a feature
+        is closed on a specific day of a week, do not make an assumption of
+        closure status in the absence of other data. For example, source data
+        may be `{"open_days": ["monday", "wednesday"]}` for one feature, and
+        `{"open_days": ["monday", "tuesday", "wednesday"]}` for a different
+        feature. Do not assume that the first feature is closed on Tuesdays
+        unless there is other data explicitly stating this is the case. If the
+        front end website displaying this data treats the absence of `"Tuesday"`
+        in the `"open_days"` array as closure and visually states "Tuesdays:
+        closed" on the website, this function can then be used to set Tuesdays
+        to be closed.
         """
         for day in [days] if isinstance(days, str) else days:
             day = sanitise_day(day)
