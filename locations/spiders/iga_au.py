@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Request, Response
@@ -5,7 +6,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -14,7 +14,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class IgaAUSpider(CrawlSpider):
     name = "iga_au"
     item_attributes = {"brand": "IGA", "brand_wikidata": "Q5970945"}
-    allowed_domains = ["www.iga.com.au", "www.google.com", "goo.gl"]
+    allowed_domains = ["www.iga.com.au"]
     start_urls = [
         "https://www.iga.com.au/stores/act/",
         "https://www.iga.com.au/stores/nsw/",
@@ -31,10 +31,8 @@ class IgaAUSpider(CrawlSpider):
             callback="parse_store",
         )
     ]
-    follow_google_maps_urls = True
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # Required for maps.google.com
 
-    def parse_store(self, response: Response) -> Iterable[Feature | Request]:
+    def parse_store(self, response: Response) -> Iterable[Feature]:
         properties = {
             "ref": response.url,
             "name": response.xpath('//h1[@id="store-name"]/text()').get(),
@@ -54,45 +52,11 @@ class IgaAUSpider(CrawlSpider):
         hours_string = " ".join(response.xpath('//table[@id="store-hours-table"]//text()').getall())
         properties["opening_hours"].add_ranges_from_string(hours_string)
 
-        google_maps_url_cid = response.xpath('//a[contains(@href, "https://maps.google.com/maps?cid=")]/@href').get()
-        google_maps_url_short = response.xpath('//a[contains(@href, "https://goo.gl/maps/")]/@href').get()
-        if self.follow_google_maps_urls and google_maps_url_cid:
-            google_maps_url_cid = google_maps_url_cid.replace("maps.google.com", "www.google.com")
-            yield Request(
-                url=google_maps_url_cid,
-                callback=self.parse_coordinates_cid,
-                meta={"properties": properties, "handle_httpstatus_list": [429]},
-            )
-        elif self.follow_google_maps_urls and google_maps_url_short:
-            yield Request(
-                url=google_maps_url_short,
-                callback=self.parse_coordinates_short,
-                meta={"properties": properties, "handle_httpstatus_list": [429]},
-            )
-        else:
-            yield Feature(**properties)
+        # The source data only provides URLs to Google Maps via CID or via
+        # URL redirect service goo.gl which will be shutdown in the 2nd half
+        # of 2025.
+        if google_maps_url_cid := response.xpath('//a[contains(@href, "https://maps.google.com/maps?cid=")]/@href').get():
+            if m := re.search(r'\Wcid=(\d+)\b', google_maps_url_cid):
+                properties["extras"]["ref:google:cid"] = m.group(1)
 
-    def parse_coordinates_cid(self, response: Response) -> Iterable[Feature]:
-        properties = response.meta["properties"]
-        if response.status == 429:
-            self.follow_google_maps_urls = False
-            self.logger.error(
-                "Google Maps rate limiting encountered when following redirect to obtain feature coordinates. Coordinates could not be extracted for feature."
-            )
-        if self.follow_google_maps_urls and "https://www.google.com/maps/preview/place/" in response.text:
-            properties["lat"], properties["lon"] = url_to_coords(
-                "https://www.google.com/maps/preview/place/"
-                + response.text.split(r"\"https://www.google.com/maps/preview/place/", 1)[1].split(r"\"", 1)[0]
-            )
-        yield Feature(**properties)
-
-    def parse_coordinates_short(self, response: Response) -> Iterable[Feature]:
-        properties = response.meta["properties"]
-        if response.status == 429:
-            self.follow_google_maps_urls = False
-            self.logger.error(
-                "Google Maps rate limiting encountered when following redirect to obtain feature coordinates. Coordinates could not be extracted for feature."
-            )
-        if self.follow_google_maps_urls:
-            properties["lat"], properties["lon"] = url_to_coords(response.url)
         yield Feature(**properties)
