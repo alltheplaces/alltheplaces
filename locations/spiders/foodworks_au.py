@@ -7,7 +7,6 @@ from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
-from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -16,8 +15,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class FoodworksAUSpider(Spider):
     name = "foodworks_au"
     item_attributes = {"brand": "Foodworks", "brand_wikidata": "Q5465579"}
-    allowed_domains = ["myfoodworks.com.au", "www.google.com"]
-    follow_google_maps_urls = True
+    allowed_domains = ["myfoodworks.com.au"]
     download_delay = 2  # Crawl slower as chooser.myfoodworks.com.au can return HTTP 429
     custom_settings = {
         "ROBOTSTXT_OBEY": False
@@ -45,7 +43,7 @@ class FoodworksAUSpider(Spider):
                 website_redirect_path, meta={"properties": properties}, callback=self.parse_store, dont_filter=True
             )
 
-    def parse_store(self, response: Response) -> Iterable[Feature | Request]:
+    def parse_store(self, response: Response) -> Iterable[Feature]:
         if urlparse(response.url).path.strip("/"):
             # Sometimes the store list redirector points not to the store
             # official website but rather a sub-path which is a manager/store
@@ -69,28 +67,9 @@ class FoodworksAUSpider(Spider):
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_text)
 
-        if self.follow_google_maps_urls:
-            if google_maps_url := response.xpath('//div[@class="Microsite__GoogleMap"]/iframe/@src').get():
-                google_maps_places_id = unquote(unescape(google_maps_url)).split("place_id:", 1)[1].split("&", 1)[0]
-                yield Request(
-                    url=f"https://www.google.com/maps/place/?q=place_id:{google_maps_places_id}",
-                    meta={"properties": properties, "handle_httpstatus_list": [429]},
-                    callback=self.parse_coordinates,
-                )
-                return
+        # The source data only provides URLs to Google Maps via Place IDs.
+        if google_maps_url := response.xpath('//div[@class="Microsite__GoogleMap"]/iframe/@src').get():
+            google_maps_places_id = unquote(unescape(google_maps_url)).split("place_id:", 1)[1].split("&", 1)[0]
+            properties["extras"]["ref:google:place_id"] = google_maps_places_id
 
-        yield Feature(**properties)
-
-    def parse_coordinates(self, response: Response) -> Iterable[Feature]:
-        properties = response.meta["properties"]
-        if response.status == 429:
-            self.follow_google_maps_urls = False
-            self.logger.error(
-                "Google Maps rate limiting encountered when following redirect to obtain feature coordinates. Coordinates could not be extracted for feature."
-            )
-        if self.follow_google_maps_urls and "https://www.google.com/maps/preview/place/" in response.text:
-            properties["lat"], properties["lon"] = url_to_coords(
-                "https://www.google.com/maps/preview/place/"
-                + response.text.split(r"\"https://www.google.com/maps/preview/place/", 1)[1].split(r"\"", 1)[0]
-            )
         yield Feature(**properties)
