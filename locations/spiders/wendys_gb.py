@@ -1,8 +1,7 @@
-import json
-
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
+from locations.categories import Extras, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,35 +13,13 @@ class WendysGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://uklocations.wendys.com/.+/.+", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = item["image"] = None
         item["website"] = ld_data.get("url")
-
-        # Opening hours for the drive-through seem to get included with regular hours, so clean that up
-        opening_hours_divs = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')
-        item["opening_hours"] = self.clean_hours(opening_hours_divs[0])
-
-        if len(opening_hours_divs) > 1:
-            item["extras"]["opening_hours:drive_through"] = self.clean_hours(opening_hours_divs[1])
-
-        if breakfast_hours_divs := response.xpath(
-            '//div[@class="LocationInfo-breakfastInfo js-breakfastInfo"]/span[@class="c-location-hours-today js-location-hours"]'
-        ):
-            item["extras"]["breakfast"] = self.clean_hours(breakfast_hours_divs[0])
 
         yield item
 
-    @staticmethod
-    def clean_hours(hours_div):
-        days = hours_div.xpath(".//@data-days").extract_first()
-        days = json.loads(days)
+    def extract_amenity_features(self, item, response: Response, ld_item):
+        if isinstance(ld_item.get("amenityFeature"), str):
+            ld_item["amenityFeature"] = [ld_item["amenityFeature"]]
 
-        oh = OpeningHours()
-
-        for day in days:
-            for interval in day["intervals"]:
-                # These interval ranges are 24 hour times represented as integers, so they need to be converted to strings
-                open_time = str(interval["start"]).zfill(4)
-                close_time = str(interval["end"]).zfill(4)
-
-                oh.add_range(day=day["day"].title()[:2], open_time=open_time, close_time=close_time, time_format="%H%M")
-
-        return oh.as_opening_hours()
+        apply_yes_no(Extras.WIFI, item, "Wi-Fi" in ld_item.get("amenityFeature", []))

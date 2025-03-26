@@ -152,6 +152,7 @@ class BurgerKingSpider(scrapy.Spider):
         sa_endpoint = "https://www.burgerking.com.sa/api/whitelabel"
         us_endpoint = "https://use1-prod-bk.rbictg.com/graphql"
         za_endpoint = "https://www.burgerking.co.za/api/whitelabel"
+        ie_endpoint = "https://burgerking.ie/api/whitelabel"
 
         # UAE
         for country_code, city_name in [("AE", "Dubai")]:
@@ -183,6 +184,10 @@ class BurgerKingSpider(scrapy.Spider):
         for country_code, city_name in [("GB", "London")]:
             yield self.make_city_request(city_name, country_code, 1000000, 20000, gb_endpoint)
 
+        # Ireland
+        for country_code, city_name in [("IE", "Dublin")]:
+            yield self.make_city_request(city_name, country_code, 1000000, 20000, ie_endpoint)
+
         # USA
         # So many stores in the US that we need to be kind to the BK back end.
         for lat, lon in country_iseadgg_centroids(["US"], 158):
@@ -203,6 +208,7 @@ class BurgerKingSpider(scrapy.Spider):
         "SA": "https://www.burgerking.com.sa/ar/store-locator/store/{}",
         "US": "https://www.bk.com/store-locator/store/{}",
         "ZA": "https://www.burgerking.co.za/store-locator/store/{}",
+        "IE": "https://burgerking.ie/store-locator/store/{}",
     }
 
     def parse(self, response, country_code):
