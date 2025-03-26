@@ -29,4 +29,5 @@ class StarbucksZASpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
+        item["website"] = "/".join(["https://www.starbucks.co.za/store-locator",location["storeNumber"],item["branch"].replace(" ","-")])
         yield item
