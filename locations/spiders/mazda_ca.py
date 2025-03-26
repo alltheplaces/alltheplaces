@@ -31,4 +31,7 @@ class MazdaCASpider(scrapy.Spider):
                     item["opening_hours"].add_range(day, open_time, close_time)
 
             apply_category({"shop": "car", "service": "dealer;repair;parts"}, item)
+            if item["website"].startswith("www."):
+                item["website"] = item["website"].replace("www.", "https://")
+            item["website"] = item["website"].replace("http://", "https://")
             yield item
