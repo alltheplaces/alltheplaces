@@ -1,41 +1,27 @@
-import scrapy
+from typing import Iterable
 
-from locations.categories import Categories
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
-class SevenElevenSESpider(scrapy.Spider):
+class SevenElevenSESpider(JSONBlobSpider):
     name = "seven_eleven_se"
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
-    start_urls = ["https://storage.googleapis.com/public-store-data-prod/stores-seven_eleven.json"]
+    allowed_domains = ["public-store-data-prod.storage.googleapis.com"]
+    start_urls = ["https://public-store-data-prod.storage.googleapis.com/stores-seven_eleven.json"]
 
-    def parse(self, response, **kwargs):
-        for store in response.json():
-            coordinates = store.get("location")
-            oh = OpeningHours()
-            for hours in store.get("openhours").get("standard"):
-                open, close = hours.get("hours")
-                oh.add_range(
-                    day=DAYS[hours.get("weekday")],
-                    open_time=open,
-                    close_time=close,
-                    time_format="%H:%M",
-                )
-            yield Feature(
-                {
-                    "ref": store.get("storeId"),
-                    "name": store.get("title"),
-                    "state": store.get("county"),
-                    "street_address": " ".join(store.get("address")),
-                    "phone": store.get("phone"),
-                    "postcode": store.get("postalCode"),
-                    "city": store.get("city"),
-                    "website": store.get("link"),
-                    "lat": coordinates.get("lat"),
-                    "lon": coordinates.get("lng"),
-                    "opening_hours": oh,
-                    "extras": Categories.SHOP_CONVENIENCE.value,
-                }
-            )
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item.pop("addr_full", None)
+        item["street_address"] = merge_address_lines(feature["address"])
+        item["branch"] = item.pop("name").removeprefix("7-Eleven ")
+        item["opening_hours"] = OpeningHours()
+        for day_hours in feature["openhours"]["standard"]:
+            item["opening_hours"].add_range(DAYS[day_hours["weekday"]], day_hours["hours"][0], day_hours["hours"][1])
+        apply_category(Categories.SHOP_CONVENIENCE, item)
+        yield item
