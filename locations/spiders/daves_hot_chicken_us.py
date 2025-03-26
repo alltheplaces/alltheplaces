@@ -27,9 +27,17 @@ class DavesHotChickenUSSpider(JSONBlobSpider):
         apply_yes_no(Extras.DELIVERY, item, feature["services"]["delivery"], False)
         apply_yes_no(Extras.TAKEAWAY, item, feature["services"]["pickup"], False)
         apply_yes_no(Extras.INDOOR_SEATING, item, feature["services"]["dinein"], False)
+
+        # Use a very cautious approach of not assuming the absence of a
+        # payment method in an array of payment method types means the
+        # store doesn't accept that payment method. Payment method
+        # information is not shown on the website for each location. All
+        # stores are observed to accept all four payment method types listed
+        # below so this cautious approach likely has no real world impact.
         card_types = feature["payments"]["cardtypes"]
-        apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in card_types, False)
-        apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in card_types, False)
-        apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in card_types, False)
-        apply_yes_no(PaymentMethods.VISA, item, "Visa" in card_types, False)
+        apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in card_types)
+        apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in card_types)
+        apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in card_types)
+        apply_yes_no(PaymentMethods.VISA, item, "Visa" in card_types)
+
         yield item
