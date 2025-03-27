@@ -7,9 +7,9 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class AustinParksAndRecreationTreesUSSpider(ArcGISFeatureServerSpider):
-    name = "austin_parks_and_recreation_trees_us"
-    item_attributes = {"operator": "Austin Parks and Recreation", "operator_wikidata": "Q115220147", "state": "TX"}
+class AustinParksAndRecreationDepartmentTreesUSSpider(ArcGISFeatureServerSpider):
+    name = "austin_parks_and_recreation_department_trees_us"
+    item_attributes = {"operator": "Austin Parks and Recreation Department", "operator_wikidata": "Q115220147", "state": "TX"}
     host = "services.arcgis.com"
     context_path = "0L95CJ0VTaxqcmED/ArcGIS"
     service_id = "Public_PARD_Tree_Inventory_View"
