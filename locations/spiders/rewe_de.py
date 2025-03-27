@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class ReweDESpider(SitemapSpider, StructuredDataSpider):
     name = "rewe_de"
-    item_attributes = {"name": "REWE", "brand": "REWE", "brand_wikidata": "Q16968817"}
+    item_attributes = {"name": "Rewe", "brand": "Rewe", "brand_wikidata": "Q16968817"}
     allowed_domains = ["www.rewe.de"]
     sitemap_urls = ["https://www.rewe.de/sitemaps/sitemap-maerkte.xml"]
     sitemap_rules = [(r"/marktseite/[^/]+/(\d+)/[^/]+/$", "parse_sd")]
