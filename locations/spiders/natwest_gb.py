@@ -43,11 +43,10 @@ class NatwestGBSpider(Spider):
                 location["location"] = coordinates
             item = DictParser.parse(location)
             item["ref"] = dist["id"]
-            item["branch"] = location["geomodifier"]
             item["website"] = location["c_listing_URL"].replace("/personal", "")
             item["facebook"] = "https://www.facebook.com/{}".format(location["facebookVanityUrl"])
             item["extras"]["ref:facebook"] = location.get("" "facebookPageUrl", "").split("/")[-1]
-            item["extras"]["ref:google"] = location["googlePlaceId"]
+            item["extras"]["ref:google:place_id"] = location["googlePlaceId"]
 
             if "phone" in item and item["phone"].replace(" ", "").startswith("+443"):
                 # not a phone number specific to given branch

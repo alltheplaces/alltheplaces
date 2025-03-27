@@ -26,20 +26,28 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"/page/\d+/$")),
         Rule(LinkExtractor(restrict_xpaths='//a[contains(., "View Site")]'), callback="parse_sd"),
     ]
+    time_format = "%I:%M %p"
 
     brands = {
         "www.feverbars.co.uk": {"brand": "Fever", "cat": Categories.NIGHTCLUB},
+        "www.zincclubs.co.uk": {"brand": "Zinc Clubs", "cat": Categories.NIGHTCLUB},
         "www.walkaboutbars.co.uk": {"brand": "Walkabout", "brand_wikidata": "Q7962149", "cat": Categories.PUB},
         "www.beatone.co.uk": {"brand": "Be At One", "brand_wikidata": "Q110016786", "cat": Categories.BAR},
         "www.popworldparty.co.uk": {"brand": "Popworld", "cat": Categories.NIGHTCLUB},
         "www.slugandlettuce.co.uk": {"brand": "Slug & Lettuce", "brand_wikidata": "Q7542224"},
         "www.crafted-social.co.uk": {"brand": "Crafted Social"},
+        "www.socialpubandkitchen.co.uk": {"brand": "Social Pub & Kitchen"},
+        # "www.pubsmiths.co.uk": {"brand": "Pubsmiths"},
+        # "www.thechaptercollection.co.uk": {"brand", "The Chapter Collection"},
         "www.greatukpubs.co.uk": {"brand": "Great UK Pubs"},
-        "www.craftunionpubs.com": {"brand": "Craft Union"},
+        "www.craftunionpubs.com": {"brand": "Craft Union", "brand_wikidata": "Q124956771"},
+        # "www.rosiesclubs.co.uk": {"brand": "Rosies Clubs"},
+        "www.heritagepubs.co.uk": {"brand": "Heritage Pubs"},
     }
 
     def pre_process_data(self, ld_data, **kwargs):
         html_decode_dict(ld_data)
+        ld_data["openingHours"] = ld_data["openingHours"][0].replace("\r\n", "").split(",")
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(self.STONEGATE, item)
