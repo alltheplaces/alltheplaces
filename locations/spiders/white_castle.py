@@ -50,6 +50,7 @@ class WhiteCastleSpider(scrapy.Spider):
             del store["address"]
 
             item = DictParser.parse(store)
+            item["name"] = None
             item["ref"] = store["storeNumber"]
             item["website"] = f'https://www.whitecastle.com/locations/{store.get("storeNumber")}'
             item["opening_hours"] = self.store_hours(store)
