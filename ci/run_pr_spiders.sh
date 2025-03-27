@@ -137,7 +137,7 @@ do
         -o "file://${PARQUETFILE}:parquet" \
         --loglevel=INFO \
         --logfile="${LOGFILE}" \
-        -s CLOSESPIDER_TIMEOUT=60 \
+        -s CLOSESPIDER_TIMEOUT=120 \
         -s CLOSESPIDER_ERRORCOUNT=1 \
         -s LOGSTATS_FILE="${STATSFILE}" \
         $spider
