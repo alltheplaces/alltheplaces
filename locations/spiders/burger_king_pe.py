@@ -22,7 +22,7 @@ class BurgerKingPESpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Search for the desired JavaScript file
         yield response.follow(
-            url=response.xpath("//script/@src").re(r"_next/static/chunks/\d{4}-\w+\.js")[-1],
+            url=response.xpath("//script/@src").re(r"/_next/static/chunks/app/global-error-\w+\.js")[-1],
             callback=self.parse_action_token,
         )
 
