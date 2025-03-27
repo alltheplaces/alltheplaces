@@ -9,7 +9,11 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class AustinParksAndRecreationDepartmentTreesUSSpider(ArcGISFeatureServerSpider):
     name = "austin_parks_and_recreation_department_trees_us"
-    item_attributes = {"operator": "Austin Parks and Recreation Department", "operator_wikidata": "Q115220147", "state": "TX"}
+    item_attributes = {
+        "operator": "Austin Parks and Recreation Department",
+        "operator_wikidata": "Q115220147",
+        "state": "TX",
+    }
     host = "services.arcgis.com"
     context_path = "0L95CJ0VTaxqcmED/ArcGIS"
     service_id = "Public_PARD_Tree_Inventory_View"
