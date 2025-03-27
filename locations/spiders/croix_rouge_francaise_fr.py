@@ -69,8 +69,10 @@ class CroixRougeFrancaiseFRSpider(Spider):
             if location.get("slug"):
                 item["website"] = "https://www.croix-rouge.fr/" + location["slug"]
             item["opening_hours"] = OpeningHours()
-            for day_hours in location["schedule"]:
-                item["opening_hours"].add_range(
-                    sanitise_day(day_hours["day"], DAYS_FR), day_hours["open"], day_hours["closed"]
-                )
+            if schedule := location["schedule"]:
+                if isinstance(schedule, list):
+                    for day_hours in schedule:
+                        item["opening_hours"].add_range(
+                            sanitise_day(day_hours["day"], DAYS_FR), day_hours["open"], day_hours["closed"]
+                        )
             yield item

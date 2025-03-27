@@ -134,8 +134,9 @@
                         value = `<a referrerpolicy="no-referrer" target="_blank" href="${value}">${value}</a>`;
                     }
 
-                    // If the key is "brand:wikidata", make it a link to Wikidata
-                    if (key === "brand:wikidata") {
+                    // If the key is "brand:wikidata", "network:wikidata", etc.
+                    // make it a link to Wikidata
+                    if (key.endsWith(":wikidata")) {
                         value = `<a referrerpolicy="no-referrer" target="_blank" href="https://www.wikidata.org/wiki/${value}">${value}</a>`;
                     }
 
