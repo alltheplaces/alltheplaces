@@ -30,12 +30,12 @@ class NewYorkCityDepartmentOfParksAndRecreationTreesUSSpider(SocrataSpider):
         apply_category(Categories.NATURAL_TREE, item)
 
         if species_label := feature["genusspecies"]:
-            if " - " in feature["genusspecies"]:
-                scientific_name, common_name = feature["genusspecies"].split(" - ", 1)
+            if " - " in species_label:
+                scientific_name, common_name = species_label.split(" - ", 1)
                 item["extras"]["species"] = scientific_name
                 item["extras"]["taxon:en"] = common_name
             else:
-                item["extras"]["taxon:en"] = feature["genusspecies"]
+                item["extras"]["taxon:en"] = species_label
 
         item["extras"]["protected"] = "yes"
         if dbh_in := feature.get("dbh"):

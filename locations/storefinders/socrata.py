@@ -94,7 +94,7 @@ class SocrataSpider(Spider):
                     )
                     continue
                 output_field_names.append(field_name)
-            select_clause = "&$select=" + ",".join(output_field_name)
+            select_clause = "&$select=" + ",".join(output_field_names)
 
         for offset in range(0, response.meta["total_records"], self.page_size):
             yield JsonRequest(
