@@ -1,11 +1,9 @@
-import re
 
 from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class RubyTuesdayUSSpider(Spider):
