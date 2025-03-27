@@ -20,5 +20,5 @@ class BettsAUSpider(Spider):
         for row in rows:
             item = DictParser.parse(row)
             item["branch"] = item.pop("name").removeprefix("Betts ")
-            item["extras"]["ref:google"] = row["place_id"]
+            item["extras"]["ref:google:place_id"] = row["place_id"]
             yield item
