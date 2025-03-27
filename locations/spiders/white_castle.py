@@ -25,6 +25,10 @@ class WhiteCastleSpider(scrapy.Spider):
                 o.add_range(day_name[:2], "00:00", "23:59")
                 continue
 
+            if store[key] == "CLOSED":
+                o.set_closed(day_name[:2])
+                continue
+
             open_time, close_time = store[key].split(" - ", 2)
 
             if close_time in ("12:00 AM", "12AM", "Midnight"):
