@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -6,6 +7,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import clean_facebook
 
 # Documentation for the Yext API is available at:
@@ -110,5 +112,5 @@ class YextSpider(Spider):
                 oh.add_range(day_name.title(), interval["start"], interval["end"])
         return oh
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Any:
         yield item

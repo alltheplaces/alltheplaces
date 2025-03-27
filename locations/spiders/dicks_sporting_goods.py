@@ -1,46 +1,42 @@
 import re
-import string
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
 
-
-class DicksSportingGoodsSpider(scrapy.Spider):
+class DicksSportingGoodsSpider(SitemapSpider):
     name = "dicks_sporting_goods"
     item_attributes = {"brand": "Dick's Sporting Goods", "brand_wikidata": "Q5272601"}
     allowed_domains = ["dickssportinggoods.com"]
-    start_urls = ("https://stores.dickssportinggoods.com/",)
+    sitemap_urls = ["https://stores.dickssportinggoods.com/robots.txt"]
+    sitemap_rules = [(r"com/\w\w/[^/]+/(\d+)/", "parse_store")]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_hours(self, response):
         days = response.xpath('//meta[@property="business:hours:day"]/@content').extract()
         start_times = response.xpath('//meta[@property="business:hours:start"]/@content').extract()
         end_times = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
-
         opening_hours = OpeningHours()
         for day, open_time, close_time in zip(days, start_times, end_times):
-            opening_hours.add_range(day=DAY_MAPPING[day], open_time=open_time, close_time=close_time)
-        return opening_hours.as_opening_hours()
+            opening_hours.add_range(day, self.fix_hours(open_time), self.fix_hours(close_time))
+        return opening_hours
+
+    def fix_hours(self, hours_str):
+        if ":" not in hours_str:
+            hours_str = hours_str + ":00"
+        return hours_str
 
     def parse_store(self, response):
         ref = re.search(r"/(\d+)/$", response.url).group(1)
-        name = response.xpath('//meta[@property="og:title"]/@content').extract_first()
-        shopping_center = string.capwords(
-            "".join(response.xpath('//div[contains(@class, "shopping_center")]/text()').extract()).strip()
-        )
-        if shopping_center:
-            name = ", ".join([name, shopping_center])
+        name = response.xpath('//meta[@property="og:title"]/@content').get()
+        if "GOING, GOING, GONE!" in name:
+            name = "Going, Going, Gone!"
+            branch = response.xpath('//div[@class="addressBlock"]//h1/text()[2]').get()
+        else:
+            name = "Dick's Sporting Goods"
+            branch = response.xpath('//div[@class="addressBlock"]//h1/text()').get()
 
         yield Feature(
             lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
@@ -56,25 +52,6 @@ class DicksSportingGoodsSpider(scrapy.Spider):
             website=response.xpath('//meta[@property="business:contact_data:website"]/@content').extract_first(),
             ref=ref,
             name=name,
+            branch=branch,
             opening_hours=self.parse_hours(response),
         )
-
-    def parse_city(self, response):
-        store_urls = response.xpath(
-            '//ul[@class="city_contentlist"]/li//a[contains(text(), "Store Hours & Details")]/@href'
-        ).extract()
-        for url in store_urls:
-            yield scrapy.Request(url=url, callback=self.parse_store)
-
-    def parse_state(self, response):
-        city_urls = response.xpath('//ul[@class="contentlist"]/li/a/@href').extract()
-        for url in city_urls:
-            yield scrapy.Request(
-                url=url,
-                callback=self.parse_city,
-            )
-
-    def parse(self, response):
-        state_urls = response.xpath('//ul[@class="contentlist"]/li/a/@href').extract()
-        for url in state_urls:
-            yield scrapy.Request(url=url, callback=self.parse_state)
