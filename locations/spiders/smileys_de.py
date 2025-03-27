@@ -17,8 +17,7 @@ class SmileysDESpider(Spider):
         for location in response.json()["data"]["stores"]:
             location.update(location.pop("address"))
             item = DictParser.parse(location)
-            item["branch"] = location["name"]
-            item["website"] = urljoin("https://www.smileys.de/bestellen/", location["url_name"])  # bad data
+            item["branch"] = item.pop("name")
             item["extras"]["fax"] = location.get("fax")
 
             apply_yes_no(Extras.TAKEAWAY, item, location["modes"]["pickup"])
