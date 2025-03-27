@@ -27,7 +27,7 @@ class MelbourneCityCouncilTreesAUSpider(JSONBlobSpider):
         if dbh := feature.get("diameter_breast_height"):
             item["extras"]["diameter"] = f"{dbh} cm"
         if date_planted := feature.get("date_planted"):
-            item["extras"]["start_time"] = date_planted
+            item["extras"]["start_date"] = date_planted
         elif year_planted := feature.get("year_planted"):
-            item["extras"]["start_time"] = year_planted
+            item["extras"]["start_date"] = year_planted
         yield item
