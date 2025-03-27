@@ -112,6 +112,8 @@ class JSONBlobSpider(Spider):
 
     def parse_feature_dict(self, response: Response, feature_dict: dict) -> Iterable[Feature]:
         for feature_id, feature in feature_dict.items():
+            if feature is None:
+                continue
             if not feature.get("id"):
                 feature["id"] = feature_id
             else:
