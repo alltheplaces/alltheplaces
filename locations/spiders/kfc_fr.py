@@ -20,7 +20,7 @@ class KfcFRSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").removeprefix("KFC ")
             item["website"] = "https://www.kfc.fr/nos-restaurants/{}".format(location["url"])
-            item["extras"]["ref:google"] = location["placeId"]
+            item["extras"]["ref:google:place_id"] = location["placeId"]
 
             apply_yes_no(Extras.DELIVERY, item, "delivery" in location["dispositions"])
             apply_yes_no(Extras.TAKEAWAY, item, "pickup" in location["dispositions"])

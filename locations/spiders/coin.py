@@ -6,13 +6,17 @@ class CoinSpider(JSONBlobSpider):
     name = "coin"
     STORE_TYPES = {
         "COIN": {"brand": "Coin", "brand_wikidata": "Q1107215"},
+        "COINOutlet": {"brand": "Coin", "brand_wikidata": "Q1107215"},
         "COINCASA": {"brand": "Coincasa", "brand_wikidata": "Q1107215"},
-        "EXCELSIOR": {"brand": "Coin Excelsior", "brand_wikidata": "Q1107215"},
+        "COINCASAOutlet": {"brand": "Coincasa", "brand_wikidata": "Q1107215"},
+        "COINEXCELSIOR": {"brand": "Coin Excelsior", "brand_wikidata": "Q1107215"},
     }
     STORE_CATS = {
         "COIN": Categories.SHOP_DEPARTMENT_STORE,
+        "COINOutlet": Categories.SHOP_DEPARTMENT_STORE,
         "COINCASA": Categories.SHOP_INTERIOR_DECORATION,
-        "EXCELSIOR": Categories.SHOP_DEPARTMENT_STORE,
+        "COINCASAOutlet": Categories.SHOP_INTERIOR_DECORATION,
+        "COINEXCELSIOR": Categories.SHOP_DEPARTMENT_STORE,
     }
     start_urls = [
         "https://www.coin.it/on/demandware.store/Sites-coin_eu-Site/it_IT/Stores-FindStores?latmin=-45&latmax=80&lngmin=-180&lngmax=180"

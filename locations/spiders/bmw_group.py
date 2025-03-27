@@ -1,7 +1,27 @@
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.items import Feature
+
+# POI Types mapping found in https://dlo.api.bmw/main.js
+"""
+{
+  "newCars": [{ "type": "distributionBranches", "key": "F" }],
+  "usedCars": [{ "type": "distributionBranches", "key": "G" }],
+  "repairServices": [{ "type": "distributionBranches", "key": "T" }],
+  "mCertified": [{ "type": "businessTypes", "key": "MC" }],
+  "classicCertified": [{ "type": "businessTypes", "key": "CC" }],
+  "eRetail": [{ "type": "requestServices", "key": "SON" }],
+  "highVoltageServices": [{ "type": "services", "key": "HV" }],
+  "carbonServices": [{ "type": "services", "key": "CR" }],
+  "bodyShop": [{ "type": "requestServices", "key": "CBS" }],
+  "paintShop": [{ "type": "requestServices", "key": "CPS" }],
+  "onlineBooking": [{ "type": "testDriveBooking", "key": "TDB_OB" }],
+  "sendRequest": [{ "type": "testDriveBooking", "key": "TDB_SR" }],
+  "bmwEmployeeDelivery": [{ "type": "businessTypes", "key": "GE" }]
+}
+"""
 
 
 class BmwGroupSpider(scrapy.Spider):
@@ -140,47 +160,80 @@ class BmwGroupSpider(scrapy.Spider):
         "BY",
         "LV",
     ]
-    brand_mapping = {
+
+    BMW_MOTORBIKE = "BMW_MOTORBIKE"
+    BRAND_MAPPING = {
         "BMW": {"brand": "BMW", "brand_wikidata": "Q26678"},
         "BMW_I": {"brand": "BMW i", "brand_wikidata": "Q796784"},
         "ROLLS_ROYCE": {"brand": "Rolls-Royce", "brand_wikidata": "Q243278"},
         "BMW_M": {"brand": "BMW M", "brand_wikidata": "Q173339"},
         "MINI": {"brand": "Mini", "brand_wikidata": "Q116232"},
-        "BMW_MOTORBIKE": {"brand": "BMW Motorrad", "brand_wikidata": "Q249173"},
+        BMW_MOTORBIKE: {"brand": "BMW Motorrad", "brand_wikidata": "Q249173"},
     }
 
     def start_requests(self):
         for country in self.available_countries:
-            url = f"https://www.bmw.com/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/DE/pois?brand=BMW_BMWI_BMWM&cached=off&language=en&lat=0&lng=0&maxResults=7000&showAll=true&unit=km&country={country}"
+            url = f"https://c2b-services.bmw.com/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/-/pois?cached=off&language=en&lat=0&lng=0&maxResults=10000&unit=km&showAll=true&country={country}"
             yield scrapy.Request(
                 url=url, callback=self.parse, headers={"Accept": "application/json", "Content-Type": "application/json"}
             )
 
     def parse(self, response):
-        response = response.json().get("data").get("pois")
-        for data in response:
-            data["street_address"] = data.pop("street")
-            occurrences = self.get_num_of_brands_per_location(response, data.get("key"))
-            item = DictParser.parse(data)
-            item["ref"] = data.get("key")
-            item["phone"] = data.get("attributes", {}).get("phone")
-            item["email"] = data.get("attributes", {}).get("mail")
-            item["website"] = data.get("attributes", {}).get("homepage")
-            if occurrences > 1:
-                # If there are more than one brand per location, we set it to the mother brand, BMW
-                item["brand"] = self.brand_mapping["BMW"]["brand"]
-                item["brand_wikidata"] = self.brand_mapping["BMW"]["brand_wikidata"]
-            else:
-                item["brand"] = self.brand_mapping[data.get("category")]["brand"]
-                item["brand_wikidata"] = self.brand_mapping[data.get("category")]["brand_wikidata"]
+        if response.status == 204:
+            self.logger.info(f"No content found in {response.url}")
+        else:
+            response = response.json().get("data").get("pois")
+            for data in response:
+                data["street_address"] = data.pop("street")
 
-            if item["brand"] == "BMW Motorrad":
-                apply_category(Categories.SHOP_MOTORCYCLE, item)
-            else:
-                apply_category(Categories.SHOP_CAR, item)
+                item = DictParser.parse(data)
+                item["ref"] = f"{data.get('key', '')}-{data.get('category', '')}"
+                item["phone"] = data.get("attributes", {}).get("phone")
+                item["email"] = data.get("attributes", {}).get("mail")
+                item["website"] = data.get("attributes", {}).get("homepage")
 
-            yield item
+                if match := self.BRAND_MAPPING.get(data.get("category")):
+                    item.update(match)
+                else:
+                    self.crawler.stats.inc_value(f"atp/{self.name}/brand/fail/{data.get('category')}")
+                    self.logger.error(f"Unknown brand: {data.get('category')}, {item['ref']}")
 
-    def get_num_of_brands_per_location(self, data, key):
-        # A dealer can have multiple brands, so we need to check if there are more than one brand per location
-        return sum(1 for pois in data if key == pois.get("key"))
+                self.map_category(item, data)
+
+                yield item
+
+    def map_category(self, item: Feature, poi: dict):
+        distribution_branches = poi.get("attributes", {}).get("distributionBranches", [])
+        category = poi.get("category")
+
+        if category == self.BMW_MOTORBIKE:
+            self.apply_motorbike_category(item, distribution_branches)
+        else:
+            self.apply_car_category(item, distribution_branches)
+
+    def apply_motorbike_category(self, item: Feature, distribution_branches: list):
+        if "F" in distribution_branches or "G" in distribution_branches:
+            apply_category(Categories.SHOP_MOTORCYCLE, item)
+            apply_yes_no(Extras.USED_MOTORCYCLE_SALES, item, "G" in distribution_branches)
+            apply_yes_no(
+                Extras.MOTORCYCLE_REPAIR, item, "T" in distribution_branches or "CCRC" in distribution_branches
+            )
+        elif "T" in distribution_branches or "CCRC" in distribution_branches:
+            apply_category(Categories.SHOP_MOTORCYCLE_REPAIR, item)
+        else:
+            self.log_unknown_branches(distribution_branches, item)
+
+    def apply_car_category(self, item: Feature, distribution_branches: list):
+        if "F" in distribution_branches or "G" in distribution_branches:
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.USED_CAR_SALES, item, "G" in distribution_branches)
+            apply_yes_no(Extras.CAR_REPAIR, item, "T" in distribution_branches or "CCRC" in distribution_branches)
+        elif "T" in distribution_branches or "CCRC" in distribution_branches:
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
+        else:
+            self.log_unknown_branches(distribution_branches, item)
+
+    def log_unknown_branches(self, distribution_branches: list, item: Feature):
+        for branch in distribution_branches:
+            self.crawler.stats.inc_value(f"atp/{self.name}/distribution_branch/fail/{branch}")
+            self.logger.error(f"Unknown distribution branch: {branch}, {item['ref']}")
