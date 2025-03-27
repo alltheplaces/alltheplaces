@@ -17,23 +17,23 @@ class WalmartUSSpider(SitemapSpider):
     requires_proxy = True
 
     CATEGORIES = {
-        "GAS_STATION": Categories.FUEL_STATION,
+        "GAS_STATION": None,  # It may be Walmart or Murphy
         "PHARMACY": Categories.PHARMACY,
-        "STORE": Categories.SHOP_SUPERMARKET,
+        "STORE": None,
     }
 
-    def store_hours(self, store):
+    def store_hours(self, store) -> OpeningHours | str:
         if store.get("open24Hours") is True:
             return "24/7"
         elif rules := store.get("operationalHours"):
             oh = OpeningHours()
             for rule in rules:
                 if rule.get("closed") is True:
-                    continue
+                    oh.set_closed(rule["day"])
+                else:
+                    oh.add_range(rule["day"], rule["start"], rule["end"])
 
-                oh.add_range(rule.get("day")[:2], rule.get("start"), rule.get("end"))
-
-            return oh.as_opening_hours()
+            return oh
 
     def parse_store(self, response):
         script = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
@@ -67,7 +67,7 @@ class WalmartUSSpider(SitemapSpider):
         item["website"] = response.url
 
         for service in store["services"]:
-            if service["name"] not in ["PHARMACY", "GAS_STATION"]:
+            if not self.CATEGORIES.get(service["name"]):
                 self.crawler.stats.inc_value("atp/walmart/ignored/{}".format(service["name"]))
                 continue
             poi = item.deepcopy()
@@ -78,13 +78,28 @@ class WalmartUSSpider(SitemapSpider):
 
             apply_category(self.CATEGORIES[service["name"]], poi)
 
-            if service["name"] == "GAS_STATION":
-                poi["brand_wikidata"] = "Q62606411"
-
             yield poi
 
-        item["extras"]["type"] = store.get("type")
-        self.crawler.stats.inc_value("atp/walmart/type/{}".format(store.get("type")))  # TODO revisit after weekly
-        apply_category(Categories.SHOP_SUPERMARKET, item)
+        if item["name"].endswith("Supercenter"):
+            item["name"] = "Walmart Supercenter"
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif item["name"].endswith("Neighborhood Market"):
+            item["name"] = "Walmart Neighborhood Market"
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif item["name"].endswith(" Walmart Pickup Store"):
+            item["name"] = "Walmart Pickup Store"
+            apply_category(Categories.SHOP_OUTPOST, item)
+        elif item["name"].endswith("Store"):
+            item["name"] = "Walmart"
+            apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+        elif item["name"].endswith("Pharmacy"):
+            item["name"] = "Walmart Pharmacy"
+            apply_category(Categories.PHARMACY, item)
+        elif item["name"].endswith("Gas Station"):
+            item["name"] = "Walmart"
+            item["brand_wikidata"] = "Q62606411"
+            apply_category(Categories.FUEL_STATION, item)
+        else:
+            self.logger.error("Unknown store format: {}".format(item["name"]))
 
         yield item
