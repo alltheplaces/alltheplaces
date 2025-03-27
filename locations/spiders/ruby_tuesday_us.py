@@ -22,10 +22,4 @@ class RubyTuesdayUSSpider(Spider):
             item["ref"] = location["branch_id"]
             item["branch"] = location["branch_name"]
             item["phone"] = location["store_phone_number"]
-            opening_hours = OpeningHours()
-            for day, hour_range in location["opening_hours"].items():
-                if "Closed" in hour_range:
-                    continue
-                opening_hours.add_range(day, *(re.split(r" - ?", hour_range)), "%I:%M %p")
-            item["opening_hours"] = opening_hours
             yield item
