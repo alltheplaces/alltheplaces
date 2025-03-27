@@ -7,5 +7,5 @@ class LindeDirectUSSpider(RioSeoSpider):
     end_point = "https://maps.stores.lindedirect.com"
 
     def post_process_feature(self, feature, location):
-        feature["extras"]["ref:google"] = location.get("google_place_id")
+        feature["extras"]["ref:google:place_id"] = location.get("google_place_id")
         yield feature

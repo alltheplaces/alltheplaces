@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_FULL, OpeningHours
@@ -112,6 +112,14 @@ class McdonaldsSpider(scrapy.Spider):
 
             if hours := self.store_hours(properties.get("restauranthours")):
                 item["opening_hours"] = hours
+
+            if "MCCAFE" in filter_type:
+                mccafe = item.deepcopy()
+                mccafe["ref"] = "{}-mccafe".format(item["ref"])
+                mccafe["brand"] = "McCafé"
+                mccafe["brand_wikidata"] = "Q3114287"
+                apply_category(Categories.CAFE, mccafe)
+                yield mccafe
 
             yield item
 
