@@ -18,7 +18,7 @@ class AlbanyCityCouncilTreesAUSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["tree_id"])
         apply_category(Categories.NATURAL_TREE, item)
-        item["extras"]["taxon:en"] = feature["common_nam"]
-        item["extras"]["species"] = feature["botan_nam"]
+        item["extras"]["taxon:en"] = feature["COMMON_NAME_"]
+        item["extras"]["species"] = feature["BOTANICAL_NAME"]
         item["extras"]["protected"] = "yes"
         yield item
