@@ -52,7 +52,7 @@ class JjillSpider(scrapy.Spider):
 
         for rule in store_hours:
             day = rule.xpath('.//*[@class="day"]/text()').get().strip(" :")
-            hours = rule.xpath('.//*[@class="hr"]/text()').get()
+            hours = rule.xpath('//*[contains(@class, "hr")]/text()').get()
             if "closed" in hours.lower():
                 continue
             start_time, end_time = hours.split("-")
