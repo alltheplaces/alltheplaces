@@ -1,3 +1,6 @@
+import re
+from urllib.parse import urljoin
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -8,16 +11,23 @@ from locations.geo import country_iseadgg_centroids
 class CoinstarSpider(Spider):
     name = "coinstar"
     item_attributes = {"brand": "Coinstar", "brand_wikidata": "Q5141641"}
+    start_urls = ["https://www.coinstar.com/findakiosk"]
     max_results = 1000
-
-    def start_requests(self):
-        for lat, lon in country_iseadgg_centroids(["ca", "de", "es", "fr", "gb", "ie", "it", "us"], 158):
-            yield JsonRequest(
-                "https://coinstar.com/api?type=kiosk_selector",
-                data={"radius": 100, "total_kiosks": self.max_results, "latitude": lat, "longitude": lon},
-            )
+    requires_proxy = True
 
     def parse(self, response):
+        s = response.xpath("//script[contains(text(), 'csApiToken')]/text()").get()
+        api_url = re.search(r"csApiUrl\s*=\s*'([^']*)';", s).group(1)
+        api_token = re.search(r"csApiToken\s*=\s*'([^']*)';", s).group(1)
+        for lat, lon in country_iseadgg_centroids(["ca", "de", "es", "fr", "gb", "ie", "it", "us"], 158):
+            yield JsonRequest(
+                urljoin(api_url, "kiosk_selector"),
+                data={"radius": 100, "total_kiosks": self.max_results, "latitude": lat, "longitude": lon},
+                callback=self.parse_kiosks,
+                headers={"X-AUTH-TOKEN": api_token, "Accept": "*/*"},
+            )
+
+    def parse_kiosks(self, response):
         j = response.json()
         if j["status"] != "000":
             self.logger.error(j.get("status_text"))
