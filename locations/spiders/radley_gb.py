@@ -10,7 +10,7 @@ from locations.items import Feature
 class RadleyGBSpider(CrawlSpider):
     name = "radley_gb"
     item_attributes = {
-        "brand": "Radley",
+        "brand": "Radley London",
         "brand_wikidata": "Q7281436",
         "country": "GB",
     }

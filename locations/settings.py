@@ -12,7 +12,6 @@ import os
 import scrapy
 
 import locations
-from locations.pipelines.clean_strings import CleanStringsPipeline
 
 BOT_NAME = "locations"
 
@@ -95,7 +94,8 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 # }
 
 EXTENSIONS = {
-    "locations.extensions.LogStatsExtension": 101,
+    "locations.extensions.add_lineage.AddLineageExtension": 100,
+    "locations.extensions.log_stats.LogStatsExtension": 1000,
 }
 
 # Configure item pipelines
@@ -105,7 +105,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
     "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
     "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
-    CleanStringsPipeline: 354,
+    "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
     "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
     "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
     "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,

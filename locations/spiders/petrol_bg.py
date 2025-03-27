@@ -14,20 +14,13 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
     allowed_domains = ["www.petrol.bg"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if m := re.match(r"^(\d+) (.+)$", item["name"]):
+        if m := re.match(r"^(\d+) (.+)$", item.pop("name")):
             item["ref"] = m.group(1)
-            item["name"] = m.group(2)
+            item["branch"] = m.group(2)
 
         categories = (feature["categories"] or "").split(",")
-        if "31" in categories:
-            charging_station_item = item.deepcopy()
-            charging_station_item["ref"] = item.get("ref") + "-charging-station"
-            charging_station_item["name"] = None
-            charging_station_item["phone"] = None
-            charging_station_item["opening_hours"] = None
-            apply_category(Categories.CHARGING_STATION, charging_station_item)
-            yield charging_station_item
 
+        apply_yes_no(Fuel.ELECTRIC, item, "31" in categories)
         apply_yes_no(Fuel.DIESEL, item, ("19" in categories or "20" in categories))
         apply_yes_no(Fuel.OCTANE_100, item, "21" in categories)
         apply_yes_no(Fuel.OCTANE_95, item, "22" in categories)
