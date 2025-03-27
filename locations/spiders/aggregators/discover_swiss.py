@@ -5,16 +5,17 @@ import scrapy
 from locations.categories import Categories, PaymentMethods, apply_category, map_payment
 from locations.items import Feature
 
-
 # Hotels (including hostels and serviced apartments) in Switzerland
+
+# This dataset includes some data from other sources, like hotel
+# chains. But a lot of their content is unique, such as small hotels
+# that aren't part of a chain.
+
+
 class DiscoverSwissSpider(scrapy.Spider):
     name = "discover_swiss"
     allowed_domains = ["api.discover.swiss"]
     dataset_attributes = {
-        # This dataset includes some data from other sources, like hotel
-        # chains. But a lot of their content is unique, such as small hotels
-        # that aren’t part of a chain.
-        "aggregate": "yes",
         # Mandatory attribution as per CC-BY 4.0, waived for OpenStreetMap
         # via standard template. Negotiations took place in January 2025
         # between Hotellerie Suisse (who runs the discover.swiss platform)

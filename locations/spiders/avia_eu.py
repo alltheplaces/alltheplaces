@@ -60,13 +60,14 @@ class AviaEUSpider(Spider):
             item["website"] = station.xpath("./@href").get()
             item["addr_full"] = clean_address(location.xpath('.//*[@class="st-address-text"]//text()').getall())
             extract_google_position(item, location)
-            station_title = item["name"].title()
-            if any(brand_key.title() in station_title for brand_key in self.IGNORED_BRANDS):
-                continue  # Ignore locations as duplicates data from other spiders
-            for brand in self.BRANDS_MAPPING:
-                if brand in station_title:
-                    item.update(self.BRANDS_MAPPING[brand])
-                    break
+            if item["name"] is not None:
+                station_title = item["name"].title()
+                if any(brand_key.title() in station_title for brand_key in self.IGNORED_BRANDS):
+                    continue  # Ignore locations as duplicates data from other spiders
+                for brand in self.BRANDS_MAPPING:
+                    if brand in station_title:
+                        item.update(self.BRANDS_MAPPING[brand])
+                        break
             apply_category(Categories.FUEL_STATION, item)
 
             # Avia fuels: https://avia.nl/avia-brandstoffen
