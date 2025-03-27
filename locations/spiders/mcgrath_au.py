@@ -25,14 +25,17 @@ class McgrathAUSpider(Spider):
             )
 
     def parse_office(self, response):
-        data = dict(parse_rsc(response.body))[2][0][3]
-        item = DictParser.parse(data["profile"])
+        data = DictParser.get_nested_key(dict(parse_rsc(response.body)), "profile")
+        if not data:
+            return
+
+        item = DictParser.parse(data)
 
         item["branch"] = item.pop("name")
         item["website"] = response.url
 
         oh = OpeningHours()
-        oh.add_ranges_from_string(data["profile"]["openingHours"])
-        item["opening_hours"] = oh.as_opening_hours()
+        oh.add_ranges_from_string(data["openingHours"])
+        item["opening_hours"] = oh
 
         yield item
