@@ -1,5 +1,4 @@
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy import Spider
 from scrapy.http import Response
