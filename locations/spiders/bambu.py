@@ -42,11 +42,16 @@ class BambuSpider(Spider):
             },
         }
         query = b64encode(compress(json.dumps(params, separators=(",", ":")).encode())).decode()
+        access_tokens = response.json()
+        authorization = [
+            app["instance"] for app in access_tokens["apps"].values() if app["instance"].startswith("wixcode-pub.")
+        ][0]
         req = Request(
             f"https://www.drinkbambu.com/_api/dynamic-pages-router/v1/pages?{query}",
+            headers={"authorization": authorization},
             callback=self.parse_pages,
         )
-        req.cookies["svSession"] = response.json()["svSession"]
+        req.cookies["svSession"] = access_tokens["svSession"]
         yield req
 
     def parse_pages(self, response):
