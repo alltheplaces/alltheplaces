@@ -60,7 +60,7 @@ class NomNomSpider(Spider):
         "dispatch": "delivery",
     }
 
-    def parse(self, response: TextResponse) -> Iterable[Feature]:
+    def parse_locations(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["restaurants"]:
             item = DictParser.parse(location)
             item["ref"] = location["extref"]
@@ -83,6 +83,9 @@ class NomNomSpider(Spider):
                     item["extras"][key] = self.parse_opening_hours(calendar).as_opening_hours()
 
             yield from self.post_process_item(item, response, location)
+
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
+        yield from self.parse_locations(response)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
