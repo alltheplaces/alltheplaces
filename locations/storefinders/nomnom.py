@@ -71,16 +71,17 @@ class NomNomSpider(Spider):
             apply_yes_no(Extras.TAKEAWAY, item, location["canpickup"] or location["supportscurbside"])
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["supportsdrivethru"])
 
-            calendars = location["calendars"]
-            if isinstance(calendars, dict):
-                calendars = calendars["calendar"]
-            if calendars is None:
-                calendars = []
-            for calendar in calendars:
-                if calendar["type"] == "business":
-                    item["opening_hours"] = self.parse_opening_hours(calendar)
-                elif key := self.CALENDAR_KEYS.get(calendar["type"]):
-                    item["extras"][key] = self.parse_opening_hours(calendar).as_opening_hours()
+            if self.use_calendar:
+                calendars = location["calendars"]
+                if isinstance(calendars, dict):
+                    calendars = calendars["calendar"]
+                if calendars is None:
+                    calendars = []
+                for calendar in calendars:
+                    if calendar["type"] == "business":
+                        item["opening_hours"] = self.parse_opening_hours(calendar)
+                    elif key := self.CALENDAR_KEYS.get(calendar["type"]):
+                        item["extras"][key] = self.parse_opening_hours(calendar).as_opening_hours()
 
             yield from self.post_process_item(item, response, location)
 
