@@ -7,6 +7,7 @@ class PandaExpressSpider(NomNomSpider):
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     domain = "pandaexpress.com"
     user_agent = BROWSER_DEFAULT
+    use_calendar = False
 
     def post_process_item(self, item, response, feature):
         item["website"] = (
