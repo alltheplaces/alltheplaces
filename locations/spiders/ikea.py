@@ -111,7 +111,7 @@ class IkeaSpider(scrapy.Spider):
 
             item["extras"]["store_type"] = store["buClassification"]["code"]
             item["extras"]["start_date"] = store["openCloseDates"]["openingDate"].replace("T00:00:00Z", "")
-            item["extras"]["ref:google"] = store.get("placeId")
+            item["extras"]["ref:google:place_id"] = store.get("placeId")
 
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item
