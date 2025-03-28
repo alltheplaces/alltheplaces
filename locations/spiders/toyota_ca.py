@@ -3,9 +3,8 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
