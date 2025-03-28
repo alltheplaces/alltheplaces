@@ -434,10 +434,7 @@ class GbfsSpider(CSVFeedSpider):
                     break
             else:
                 item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
-                if "bike" in kwargs["Name"].lower() or "cycle" in kwargs["Name"].lower():
-                    apply_category(Categories.BICYCLE_RENTAL, item)
-                else:
-                    apply_category({"public_transport": "stop_position"}, item)
+                apply_category(Categories.BICYCLE_RENTAL, item)
 
             if station.get("is_virtual_station"):
                 item["extras"]["physically_present"] = "no"

@@ -9,7 +9,7 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class ElectranetTransmissionSubstationsAUSpider(ArcGISFeatureServerSpider):
     name = "electranet_transmission_substations_au"
-    item_attributes = {"operator": "ElectraNet", "operator_wikidata": "Q5357218"}
+    item_attributes = {"operator": "Electranet", "operator_wikidata": "Q5357218"}
     host = "pirsa.geohub.sa.gov.au"
     context_path = "server"
     service_id = "AgInsight_Services/SIS_AgInsight_Electricity_P"

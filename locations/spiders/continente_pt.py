@@ -23,7 +23,8 @@ class ContinentePTSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]:
-                item["opening_hours"].add_range(DAYS[rule["dayOfWeek"] - 1], rule["from1"], rule["to1"])
+                to_time = rule["to1"].replace(":030", ":30").replace(":000", ":00")
+                item["opening_hours"].add_range(DAYS[rule["dayOfWeek"] - 1], rule["from1"], to_time)
 
             for photo in location["photos"]:
                 if photo["type"] == "MAIN":

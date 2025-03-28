@@ -13,6 +13,7 @@ class CoinstarSpider(Spider):
     item_attributes = {"brand": "Coinstar", "brand_wikidata": "Q5141641"}
     start_urls = ["https://www.coinstar.com/findakiosk"]
     max_results = 1000
+    requires_proxy = True
 
     def parse(self, response):
         s = response.xpath("//script[contains(text(), 'csApiToken')]/text()").get()
