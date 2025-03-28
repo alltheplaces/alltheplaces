@@ -1,5 +1,4 @@
 import json
-import re
 
 from scrapy import Request
 from scrapy.spiders import SitemapSpider
