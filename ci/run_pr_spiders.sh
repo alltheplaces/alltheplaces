@@ -131,13 +131,13 @@ do
     STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
-    timeout -k 5s 90s \
+    timeout -k 5s 150s \
     scrapy runspider \
         -o "file://${OUTFILE}:geojson" \
         -o "file://${PARQUETFILE}:parquet" \
         --loglevel=INFO \
         --logfile="${LOGFILE}" \
-        -s CLOSESPIDER_TIMEOUT=60 \
+        -s CLOSESPIDER_TIMEOUT=120 \
         -s CLOSESPIDER_ERRORCOUNT=1 \
         -s LOGSTATS_FILE="${STATSFILE}" \
         $spider
