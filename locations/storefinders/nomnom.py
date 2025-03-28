@@ -23,10 +23,14 @@ class NomNomSpider(Spider):
     NomNom API does not include opening hours, and the structured data usually
     does."""
 
-    domain: str
+    domain: str | None = None
 
     def start_requests(self) -> Iterable[Request]:
-        yield Request(f"https://nomnom-prod-api.{self.domain}/restaurants/")
+        if self.start_urls:
+            for url in self.start_urls:
+                yield Request(url, dont_filter=True)
+        elif self.domain:
+            yield Request(f"https://nomnom-prod-api.{self.domain}/restaurants/")
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["restaurants"]:
