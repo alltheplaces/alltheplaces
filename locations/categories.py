@@ -274,6 +274,7 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MANHOLE = {"man_made": "manhole"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"
     }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
