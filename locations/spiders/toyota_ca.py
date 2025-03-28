@@ -1,6 +1,7 @@
 import datetime
 from typing import Iterable
 
+import scrapy
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -12,7 +13,7 @@ from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 current_day = (datetime.datetime.now()).strftime("%A")
 
 
-class ToyotaCASpider(JSONBlobSpider):
+class ToyotaCASpider(scrapy.Spider):
     name = "toyota_ca"
     item_attributes = TOYOTA_SHARED_ATTRIBUTES
     start_urls = [
