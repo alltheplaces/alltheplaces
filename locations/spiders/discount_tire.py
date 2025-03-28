@@ -2,61 +2,37 @@ import json
 import re
 
 from scrapy import Request
+from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DiscountTireSpider(StructuredDataSpider):
+class DiscountTireSpider(SitemapSpider):
     name = "discount_tire"
     item_attributes = {"brand": "Discount Tire", "brand_wikidata": "Q5281735"}
-    allowed_domains = ["discounttire.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = BROWSER_DEFAULT
+    sitemap_urls = ["https://sitemaps.discounttire.com/store.xml"]
 
-    def start_requests(self):
-        headers = {"Referer": "https://www.discounttire.com/", "Operation": "CmsPage"}
-
+    def parse(self, response, **kwargs):
         yield Request(
-            url="https://data.discounttire.com/webapi/discounttire.graph",
+            url="https://www.discounttire.com/webapi/discounttire.graph",
             method="POST",
-            headers=headers,
             body=json.dumps(
                 {
-                    "operationName": "CmsPage",
-                    "variables": {"id": "/store"},
-                    "query": "query CmsPage($id: String!) {\n  cms {\n    page(id: $id) {\n      documentTitle\n      metaTags {\n        name\n        content\n        __typename\n      }\n      breadcrumbs {\n        name\n        url\n        __typename\n      }\n      htmlContent\n      source\n      __typename\n    }\n    __typename\n  }\n}\n",
+                    "operationName": "StoreByCode",
+                    "variables": {"storeCode": str(response.url.split("/")[-1])},
+                    "query": "query StoreByCode($storeCode: String!) {\n  store {\n    byCode(storeCode: $storeCode) {\n      ...myStoreFields\n    }\n  }\n}\n\nfragment myStoreFields on StoreData {\n  code\n  applicationType\n  address {\n    country {\n      isocode\n      name\n    }\n    email\n    line1\n    line2\n    phone\n    postalCode\n    region {\n      isocodeShort\n      name\n    }\n    town\n  }\n  additionalServices {\n    name\n    link\n    code\n  }\n  remainingWinterDays\n  winterStore\n  baseStore\n  pitPass\n  description\n  displayName\n  isBopisTurnedOff: bopisTurnedOff\n  distance\n  legacyStoreCode\n  geoPoint {\n    latitude\n    longitude\n  }\n  rating {\n    rating\n    numberOfReviews\n  }\n  weekDays {\n    closed\n    closingTime {\n      formattedHour\n      hour\n      minute\n    }\n    formattedDate\n    openingTime {\n      formattedHour\n      hour\n      minute\n    }\n    dayOfWeek\n  }\n  nearByStores {\n    code\n    distance\n    address {\n      line1\n    }\n    pitPass\n  }\n}\n",
                 }
             ),
-            callback=self.parse_sitemap,
+            callback=self.parse_store,
+            cb_kwargs={"url": response.url},
         )
 
-    def parse_sitemap(self, response):
-        data = json.loads(response.text)
-        html_content = data["data"]["cms"]["page"]["htmlContent"]
-        urls = re.findall(r"href=\"(\/store\/[a-z]{2}\/[\w-]+\/s\/\d+)\"", html_content)
-        for url in urls:
-            new_url = "https://www.discounttire.com" + url[6:]
-            headers = {"Referer": "https://www.discounttire.com/", "Operation": "CmsPage"}
-            yield Request(
-                url="https://data.discounttire.com/webapi/discounttire.graph",
-                method="POST",
-                headers=headers,
-                body=json.dumps(
-                    {
-                        "operationName": "StoreByCode",
-                        "variables": {"storeCode": url.split("/")[-1]},
-                        "query": "query StoreByCode($storeCode: String!) {  store {    byCode(storeCode: $storeCode) { ...myStoreFields __typename } __typename } } fragment myStoreFields on StoreData { code address { country { isocode name __typename } email line1 line2 phone postalCode region { isocodeShort name __typename } town __typename } baseStore displayName legacyStoreCode geoPoint { latitude longitude __typename } weekDays { closed dayOfWeek __typename closingTime {        formattedHour        hour        minute        __typename    }    openingTime {        formattedHour        hour        minute        __typename    } } __typename } ",
-                    }
-                ),
-                callback=self.parse_store,
-                cb_kwargs={"url": new_url},
-            )
-
     def parse_store(self, response, url):
-        poi = response.json().get("data", {}).get("store", {}).get("byCode", {})
+        poi = response.json()["data"]["store"]["byCode"]
         item = DictParser.parse(poi)
         item["website"] = url
         item["ref"] = poi.get("code")
