@@ -305,6 +305,7 @@ class Categories(Enum):
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SHARPS_WASTE_BASKET = {"amenity": "waste_basket", "waste": "sharps"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
+    TAXI = {"amenity": "taxi"}
     TELEPHONE = {"amenity": "telephone"}
     TOILETS = {"amenity": "toilets"}
     RESTAURANT = {"amenity": "restaurant"}
