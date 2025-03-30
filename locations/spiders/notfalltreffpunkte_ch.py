@@ -22,16 +22,16 @@ class NotfalltreffpunkteCHSpider(scrapy.Spider):
         "license:wikidata": "Q133462062",
     }
 
-    # Swiss LV95 (https://epsg.io/2056) -> lat/lon (https://epsg.io/4326)
-    coord_transformer = pyproj.Transformer.from_crs(2056, 4326)
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Swiss LV95 (https://epsg.io/2056) -> lat/lon (https://epsg.io/4326)
+        coord_transformer = pyproj.Transformer.from_crs(2056, 4326)
+
         for f in response.json()["features"]:
             props = f["properties"]
             coords = f["geometry"].get("coordinates", [])
             if len(coords) < 2:
                 continue
-            lat, lon = self.coord_transformer.transform(coords[0], coords[1])
+            lat, lon = coord_transformer.transform(coords[0], coords[1])
             item = {
                 "ref": props.get("ntp-id"),
                 "lat": lat,
