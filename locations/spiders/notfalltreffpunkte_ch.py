@@ -1,5 +1,8 @@
+from typing import Any
+
 import pyproj
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -8,6 +11,7 @@ from locations.items import Feature
 class NotfalltreffpunkteCHSpider(scrapy.Spider):
     name = "notfalltreffpunkte_ch"
     allowed_domains = ["data.geo.admin.ch"]
+    start_urls = ["https://data.geo.admin.ch/ch.babs.notfalltreffpunkte/notfalltreffpunkte/notfalltreffpunkte.geojson"]
     dataset_attributes = {
         "attribution": "optional",
         "attribution:name:de": "Schweizer Bundesamt für Bevölkerungsschutz",
@@ -21,12 +25,7 @@ class NotfalltreffpunkteCHSpider(scrapy.Spider):
     # Swiss LV95 (https://epsg.io/2056) -> lat/lon (https://epsg.io/4326)
     coord_transformer = pyproj.Transformer.from_crs(2056, 4326)
 
-    def start_requests(self):
-        yield scrapy.Request(
-            "https://data.geo.admin.ch/ch.babs.notfalltreffpunkte/notfalltreffpunkte/notfalltreffpunkte.geojson",
-        )
-
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for f in response.json()["features"]:
             props = f["properties"]
             coords = f["geometry"].get("coordinates", [])
