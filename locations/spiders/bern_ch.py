@@ -5,7 +5,7 @@ import zipfile
 
 import scrapy
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Vending, apply_category, apply_vending, apply_yes_no
 from locations.items import Feature
 
 
@@ -137,5 +137,6 @@ class BernCHSpider(scrapy.Spider):
                 "operator:website": props.get("url"),
             }
         )
-        apply_category(Categories.VENDING_MACHINE_BICYCLE_TUBE, item)
+        apply_category(Categories.VENDING_MACHINE, item)
+        apply_vending(Vending.BICYCLE_TUBE, item)
         return Feature(**item)

@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import scrapy
 from parsel import Selector
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 # “Ich tanke Strom“, charging stations for electric vehicles.
@@ -28,7 +29,6 @@ from locations.items import Feature
 class IchTankeStromSpider(scrapy.Spider):
     name = "ich_tanke_strom"
     allowed_domains = ["data.geo.admin.ch"]
-    item_attributes = {"extras": {"amenity": "charging_station"}}
     start_urls = (
         "https://data.geo.admin.ch/ch.bfe.ladestellen-elektromobilitaet/data/ch.bfe.ladestellen-elektromobilitaet_de.json",
     )
@@ -78,6 +78,7 @@ class IchTankeStromSpider(scrapy.Spider):
                 "ref": f["id"],
             }
             properties.update(self.parse_address(html))
+            apply_category(Categories.CHARGING_STATION, item)
             yield Feature(**properties)
 
     def parse_access(self, html):
