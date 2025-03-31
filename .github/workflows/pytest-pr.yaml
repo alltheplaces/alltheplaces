@@ -20,8 +20,8 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-        cache: 'pipenv'
-    - name: Install pipenv
+        cache: 'uv'
+    - name: Install uv
       run: |
         pip --quiet install pipenv
     - name: Install dependencies
@@ -29,4 +29,4 @@ jobs:
         pipenv --bare install --dev
     - name: Run pytest
       run: |
-        pipenv run pytest
+        uv run pytest

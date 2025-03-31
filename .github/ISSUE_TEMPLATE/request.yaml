@@ -63,8 +63,8 @@ body:
         - label: JSON API?
         - label: Embedded JSON?
         - label: HTML markup?
-        - label: Structured Data? (`pipenv run scrapy sd (specific page url)`) or [validator](https://validator.schema.org/) has content
+        - label: Structured Data? (`uv run scrapy sd (specific page url)`) or [validator](https://validator.schema.org/) has content
         - label: Open Graph Data? # Disabled until https://github.com/alltheplaces/alltheplaces/pull/9426 - (`pipenv run scrapy og (specific page url)`)
-        - label: Sitemap? (`pipenv run scrapy sitemap (url)`)
+        - label: Sitemap? (`uv run scrapy sitemap (url)`)
         - label: Requires proxy?
         - label: Has 'bot protection' (Cloudflare, etc)?

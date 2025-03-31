@@ -66,7 +66,7 @@ RUN curl https://pyenv.run | bash \
 
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
-RUN pipenv install --dev --deploy --system && pyenv rehash
+RUN uv install --dev --deploy --system && pyenv rehash
 
 RUN playwright install-deps
 RUN playwright install firefox
