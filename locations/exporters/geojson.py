@@ -67,7 +67,7 @@ def item_to_properties(item: Item) -> dict[str, Any]:
     return props
 
 
-def item_to_geometry(item: Item) -> dict:
+def item_to_geometry(item: Item) -> (dict|None):
     """
     Convert the item to a GeoJSON geometry object. If the item has lat and lon fields,
     but no geometry field, then a Point geometry will be created. Otherwise the
@@ -80,6 +80,7 @@ def item_to_geometry(item: Item) -> dict:
     lat = item.get("lat")
     lon = item.get("lon")
     geometry = item.get("geometry")
+
     if lat and lon and not geometry:
         try:
             geometry = {
@@ -88,6 +89,14 @@ def item_to_geometry(item: Item) -> dict:
             }
         except ValueError:
             logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
+
+    # Check for empty or missing coordinates list in geometry
+    if geometry and isinstance(geometry, dict):
+        coordinates = geometry.get("coordinates")
+        if not coordinates:
+            logging.warning("Invalid geometry coordinates: %s", geometry)
+            return None
+
     return geometry
 
 
