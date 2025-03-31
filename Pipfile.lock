@@ -1369,11 +1369,11 @@
         },
         "phonenumbers": {
             "hashes": [
-                "sha256:7507bd6228d3b5fc4a3661c28f08157ac12a3386aca50bc6d2e71d91a00ff2be",
-                "sha256:ea8ec8083d85e5dcba48a6ba633ee68481e60331200f99744ae24a08e5026b13"
+                "sha256:dbcec6bdfdf3973f60b81dc0fcac3f7b1638f877ac42da4d7b46724ed413e2b9",
+                "sha256:f590ee2b729bdd9873ca2d52989466add14c9953b48805c0aeb408348d4d6224"
             ],
             "index": "pypi",
-            "version": "==9.0.1"
+            "version": "==9.0.2"
         },
         "phpserialize": {
             "hashes": [
