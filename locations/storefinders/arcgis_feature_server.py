@@ -150,6 +150,12 @@ class ArcGISFeatureServerSpider(Spider):
             feature.update(properties)
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
+
+            # Esri's GeoJSON output is not always valid, so check for known problems
+            geom = item.get("geometry")
+            if geom and geom.get("coordinates") == []:
+                item["geometry"] = None
+
             yield from self.post_process_item(item, response, feature)
 
         if "&resultRecordCount=" in response.url:
