@@ -26,6 +26,6 @@ class SeattleParksAndRecreationTennisCourtsUSSpider(ArcGISFeatureServerSpider):
         if lit := feature.get("LIGHTS"):
             if lit == "Yes":
                 item["extras"]["lit"] = "yes"
-            elif lit == "no":
+            elif lit == "No":
                 item["extras"]["lit"] = "no"
         yield item
