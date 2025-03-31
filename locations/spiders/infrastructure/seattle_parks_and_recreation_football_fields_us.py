@@ -22,7 +22,7 @@ class SeattleParksAndRecreationFootballFieldsUSSpider(ArcGISFeatureServerSpider)
         if lit := feature.get("E_LIGHTS"):
             if lit == "Yes":
                 item["extras"]["lit"] = "yes"
-            elif lit == "no":
+            elif lit == "No":
                 item["extras"]["lit"] = "no"
         match feature.get("E_SURFACE"):
             case "Grass":
