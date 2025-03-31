@@ -21,13 +21,13 @@ class PandaExpressSpider(NomNomSpider):
                 "referer": "https://www.pandaexpress.com/",
             },
             formdata={"ddk": "988C29D6706800A8C3451C0AB0E93A"},
+            callback=self.parse_cookies,
         )
 
-    def parse(self, response):
+    def parse_cookies(self, response):
         yield JsonRequest(
             url="https://nomnom-prod-api.pandaexpress.com/restaurants",
             cookies={"cookie": response.json()["cookie"]},
-            callback=self.parse_locations,
         )
 
     def post_process_item(self, item, response, feature):
