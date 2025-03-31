@@ -23,12 +23,21 @@ class SanFranciscoMtaBicycleParkingUSSpider(ArcGISFeatureServerSpider):
         item["ref"] = str(feature["OBJECTID"])
         item.pop("street", None)
         item["street_address"] = item.pop("addr_full", None)
+
         apply_category(Categories.BICYCLE_PARKING, item)
+
         if capacity := feature.get("SPACES"):
             item["extras"]["capacity"] = capacity
+
         if feature.get("RACKS"):
             item["extras"]["bicycle_parking"] = "rack"
+
         if installation_year := feature.get("INSTALL_YR"):
             if installation_month := feature.get("INSTALL_MO"):
                 item["extras"]["start_date"] = "{}-{}".format(installation_year, str(installation_month).zfill(2))
+
+        # Clear out the occasional empty coordinates array in geometry
+        if item.geometry and item.geometry.get("coordinates") == []:
+            item.geometry = None
+
         yield item
