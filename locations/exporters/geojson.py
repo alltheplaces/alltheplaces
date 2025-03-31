@@ -67,7 +67,7 @@ def item_to_properties(item: Item) -> dict[str, Any]:
     return props
 
 
-def item_to_geometry(item: Item) -> (dict|None):
+def item_to_geometry(item: Item) -> dict | None:
     """
     Convert the item to a GeoJSON geometry object. If the item has lat and lon fields,
     but no geometry field, then a Point geometry will be created. Otherwise the
