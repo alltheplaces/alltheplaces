@@ -37,7 +37,8 @@ class SanFranciscoMtaBicycleParkingUSSpider(ArcGISFeatureServerSpider):
                 item["extras"]["start_date"] = "{}-{}".format(installation_year, str(installation_month).zfill(2))
 
         # Clear out the occasional empty coordinates array in geometry
-        if item.geometry and item.geometry.get("coordinates") == []:
-            item.geometry = None
+        geom = item.get("geometry")
+        if geom and geom.get("coordinates") == []:
+            item["geometry"] = None
 
         yield item
