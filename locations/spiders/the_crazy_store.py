@@ -1,9 +1,14 @@
+import json
+import re
 from urllib.parse import unquote
 
+import chompjs
 from scrapy import Spider
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TheCrazyStoreSpider(Spider):
@@ -13,34 +18,15 @@ class TheCrazyStoreSpider(Spider):
     skip_auto_cc_domain = True
 
     def parse(self, response):
-        for location in response.xpath('.//div[contains(@class,"geolocation-location")]'):
-            item = Feature()
-            item["ref"] = location.xpath("@id").get()
-            item["lat"] = location.xpath("@data-lat").get()
-            item["lon"] = location.xpath("@data-lng").get()
-            item["name"] = location.xpath('.//div[contains(@class,"field--name-name")]/text()').get()
-            item["phone"] = unquote(
-                location.xpath('.//div[contains(@class,"field field--name-field-phone")]/.//a/@href').get("")
-            )
-            item["website"] = (
-                "https://www.crazystore.co.za/store-locator/#" + location.xpath(".//article/@data-marker").get()
-            )
+        raw_data = chompjs.parse_js_object(
+            re.search(
+                r"features':\s*(\[.*\])", response.xpath('//*[contains(text(),"geojsonData")]/text()').get()
+            ).group(1)
+        )
+        for location in raw_data:
+            location.update(location.pop("properties"))
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines([location["address_1"], location["address_2"]])
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(
-                " ".join(
-                    location.xpath(
-                        './/div[contains(@class,"field--name-field-trading-hours-weekdays")]/div/text()'
-                    ).getall()
-                )
-                .replace(")", "")
-                .replace("Weekdays (", "")
-            )
-            for day in ["fridays", "weekend-sat", "weekend-sun"]:
-                item["opening_hours"].add_ranges_from_string(
-                    " ".join(
-                        location.xpath(
-                            f'.//div[contains(@class,"field--name-field-trading-hours-{day}")]/div/text()'
-                        ).getall()
-                    ),
-                )
             yield item
