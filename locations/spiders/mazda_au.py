@@ -3,11 +3,12 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 
 
 class MazdaAUSpider(Spider):
     name = "mazda_au"
-    item_attributes = {"brand": "Mazda", "brand_wikidata": "Q35996"}
+    item_attributes = MAZDA_SHARED_ATTRIBUTES
     allowed_domains = ["www.mazda.com.au"]
     start_urls = ["https://www.mazda.com.au/api/dealers"]
 

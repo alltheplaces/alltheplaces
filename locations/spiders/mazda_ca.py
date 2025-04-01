@@ -6,11 +6,12 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 
 
 class MazdaCASpider(scrapy.Spider):
     name = "mazda_ca"
-    item_attributes = {"brand": "Mazda", "brand_wikidata": "Q35996"}
+    item_attributes = MAZDA_SHARED_ATTRIBUTES
     start_urls = ["https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers"]
 
     def parse(self, response, **kwargs):
