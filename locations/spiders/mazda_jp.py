@@ -28,6 +28,8 @@ class MazdaJPSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["DealerId"]
         item["name"] = feature["DealerName"]
+        item["lat"] = feature["Address"]["Latitude"]
+        item["lon"] = feature["Address"]["Longitude"]
         item["street_address"] = merge_address_lines([feature["Address"]["Address1"], feature["Address"]["Address2"]])
         item["phone"] = feature["Contact"]["PhoneNumber"]
         item["extras"]["fax"] = feature["Contact"]["FaxNumber"]

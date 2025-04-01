@@ -22,6 +22,8 @@ class MazdaAUSpider(Spider):
                 item["email"] = department["email"]
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(" ".join(department["hours"]))
+                if website := item["website"]:
+                    item["website"] = website.replace(":// ", "://").strip()
                 if department["name"] == "Sales":
                     apply_category(Categories.SHOP_CAR, item)
                 elif department["name"] == "Parts":
