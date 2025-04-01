@@ -10,6 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 MAZDA_SHARED_ATTRIBUTES = {"operator": "Mazda", "operator_wikidata": "Q35996"}
 
+
 class MazdaJPSpider(JSONBlobSpider):
     name = "mazda_jp"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
@@ -18,7 +19,11 @@ class MazdaJPSpider(JSONBlobSpider):
 
     def start_requests(self) -> Iterable[JsonRequest]:
         for coordinates in country_iseadgg_centroids(["JP"], 79):
-            yield JsonRequest(url="https://ssl.mazda.co.jp/api/v1/shopslist/?latitude={}&longitude={}".format(coordinates[0], coordinates[1]))
+            yield JsonRequest(
+                url="https://ssl.mazda.co.jp/api/v1/shopslist/?latitude={}&longitude={}".format(
+                    coordinates[0], coordinates[1]
+                )
+            )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["DealerId"]
