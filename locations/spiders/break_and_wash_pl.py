@@ -4,7 +4,7 @@ from typing import Any
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, Vending, apply_category, apply_vending, add_vending
+from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
