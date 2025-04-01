@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import FormRequest, Response
 
-from locations.categories import Categories, Vending, apply_category, apply_vending
+from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -117,7 +117,7 @@ class TimpsonGroupSpider(JSONBlobSpider):
             elif feature["loc_type"] == "6":
                 # Self-service key cutting machine.
                 apply_category(Categories.VENDING_MACHINE, item)
-                apply_vending(Vending.KEYS, item)
+                add_vending(Vending.KEYS, item)
             elif feature["loc_type"] == "8":
                 # "Barbershop" branded hairdresser.
                 apply_category(self.brands["barbershop"]["category"], item)

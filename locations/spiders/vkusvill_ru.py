@@ -4,7 +4,7 @@ from chompjs import chompjs
 from scrapy.http import Request
 from scrapy.spiders import Spider
 
-from locations.categories import Categories, Vending, apply_category, apply_vending
+from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -61,7 +61,7 @@ class VkusvillRUSpider(Spider):
                 icon = shop_point.get("options", {}).get("iconImageHref", "")
                 if "vkusomat.svg" in icon:
                     apply_category(Categories.VENDING_MACHINE, item)
-                    apply_vending(Vending.FOOD, item)
+                    add_vending(Vending.FOOD, item)
                 elif "darkstore.svg" in icon:
                     apply_category(Categories.DARK_STORE_GROCERY, item)
                 else:

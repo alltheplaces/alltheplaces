@@ -5,10 +5,10 @@ from locations.categories import (
     HealthcareSpecialities,
     PaymentMethods,
     Vending,
+    add_vending,
     apply_category,
     apply_clothes,
     apply_healthcare_specialities,
-    apply_vending,
     apply_yes_no,
     get_category_tags,
     map_payment,
@@ -150,21 +150,21 @@ def test_map_payment():
 def test_vending():
     item = Feature()
 
-    apply_vending(Vending.FOOD, item)
+    add_vending(Vending.FOOD, item)
     assert item["extras"]["vending"] == "food"
 
-    apply_vending(Vending.FOOD, item)
-    apply_vending(Vending.FOOD, item)
+    add_vending(Vending.FOOD, item)
+    add_vending(Vending.FOOD, item)
     assert item["extras"]["vending"] == "food"
 
-    apply_vending(Vending.COFFEE, item)
+    add_vending(Vending.COFFEE, item)
     v = item["extras"]["vending"].split(";")
     assert "coffee" in v
     assert "food" in v
 
     item = Feature()
-    apply_vending(Vending.FOOD, item)
-    apply_vending(Vending.COFFEE, item)
+    add_vending(Vending.FOOD, item)
+    add_vending(Vending.COFFEE, item)
     v = item["extras"]["vending"].split(";")
     assert "coffee" in v
     assert "food" in v

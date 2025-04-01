@@ -818,7 +818,7 @@ class Vending(Enum):
     PARKING_TICKETS = "parking_tickets"
 
 
-def apply_vending(vending: Vending | list[Vending], item: Feature):
+def add_vending(vending: Vending | list[Vending], item: Feature):
     if item["extras"].get("vending"):
         current = item["extras"]["vending"].split(";")
     else:
@@ -829,6 +829,34 @@ def apply_vending(vending: Vending | list[Vending], item: Feature):
             current.append(v.value)
 
     item["extras"]["vending"] = ";".join(current)
+
+
+class Sport(Enum):
+    """
+    https://wiki.openstreetmap.org/wiki/Key:sport
+    """
+
+    SOCCER = "soccer"
+    TENNIS = "tennis"
+    BASKETBALL = "basketball"
+    BASEBALL = "baseball"
+    SWIMMING = "swimming"
+    EQUESTRIAN = "equestrian"
+    AMERICAN_FOOTBALL = "american_football"
+    CRICKET = "cricket"
+
+
+def add_sport(sport: Sport | list[Sport], item: Feature):
+    if item["extras"].get("sport"):
+        current = item["extras"]["sport"].split(";")
+    else:
+        current = []
+
+    for v in sport if isinstance(sport, list) else [sport]:
+        if v.value not in current:
+            current.append(v.value)
+
+    item["extras"]["sport"] = ";".join(current)
 
 
 class HealthcareSpecialities(Enum):
