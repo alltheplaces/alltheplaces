@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
-MAZDA_SHARED_ATTRIBUTES = {"operator": "Mazda", "operator_wikidata": "Q35996"}
+MAZDA_SHARED_ATTRIBUTES = {"brand": "Mazda", "brand_wikidata": "Q35996"}
 
 
 class MazdaJPSpider(JSONBlobSpider):
