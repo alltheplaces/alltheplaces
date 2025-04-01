@@ -1,7 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class AeonBigMYSpider(CrawlSpider):
     name = "aeon_big_my"
-    item_attributes = {"brand": "AEON BiG", "brand_wikidata": "Q8077280", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "AEON BiG", "brand_wikidata": "Q8077280"}
     allowed_domains = ["aeonbig.com.my"]
     start_urls = [
         "https://aeonbig.com.my/wp-content/themes/twentyseventeen/ajax/portfolio-ajax-load-more-store.php?limit=1000&id=&p=1"
@@ -32,4 +32,7 @@ class AeonBigMYSpider(CrawlSpider):
         hours_string = " ".join(filter(None, map(str.strip, response.xpath('//li[@class="bs_date"]//text()').getall())))
         hours_string = hours_string.replace("Daily", "Mo-Su").replace("Weekday", "Mo-Fr").replace("Weekend", "Sa-Su")
         properties["opening_hours"].add_ranges_from_string(hours_string)
+
+        apply_category(Categories.SHOP_SUPERMARKET, properties)
+
         yield Feature(**properties)
