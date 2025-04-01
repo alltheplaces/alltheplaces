@@ -38,5 +38,5 @@ class CameraHouseAUSpider(Spider):
                 hours_string = f"{hours_string} {day_name}: {start_time} - {end_time}"
             properties["opening_hours"].add_ranges_from_string(hours_string)
 
-            apply_category(Categories.SHOP_CAMERA, item)
+            apply_category(Categories.SHOP_CAMERA, properties)
             yield Feature(**properties)

@@ -78,7 +78,7 @@ class IchTankeStromSpider(scrapy.Spider):
                 "ref": f["id"],
             }
             properties.update(self.parse_address(html))
-            apply_category(Categories.CHARGING_STATION, item)
+            apply_category(Categories.CHARGING_STATION, properties)
             yield Feature(**properties)
 
     def parse_access(self, html):

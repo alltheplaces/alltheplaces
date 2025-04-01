@@ -5,7 +5,7 @@ from urllib.parse import parse_qs, urlsplit
 import chompjs
 import scrapy
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
@@ -58,5 +58,5 @@ class MightyFlameSpider(scrapy.Spider):
                 "postcode": postcode,
             }
             apply_category(Categories.SHOP_GAS, properties)
-            apply_yes_no(Fuel.LPG, item, True)
+            apply_yes_no(Fuel.LPG, properties, True)
             yield Feature(**properties)
