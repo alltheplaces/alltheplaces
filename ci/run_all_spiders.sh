@@ -20,9 +20,10 @@ GITHUB_AUTH="scraperbot:${GITHUB_TOKEN}"
 
 RUN_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 RUN_TIMESTAMP=$(date -u +%F-%H-%M-%S)
-RUN_S3_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
-RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
-RUN_URL_PREFIX="https://alltheplaces-data.openaddresses.io/${RUN_S3_KEY_PREFIX}"
+RUN_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
+RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_KEY_PREFIX}"
+RUN_R2_PREFIX="s3://${R2_BUCKET}/${RUN_KEY_PREFIX}"
+RUN_URL_PREFIX="https://alltheplaces-data.openaddresses.io/${RUN_KEY_PREFIX}"
 SPIDER_RUN_DIR="${GITHUB_WORKSPACE}/output"
 PARALLELISM=${PARALLELISM:-12}
 SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-28800} # default to 8 hours
@@ -185,6 +186,21 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
+(>&2 echo "Saving log and output files to ${RUN_R2_PREFIX}")
+AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+aws s3 sync \
+    --endpoint-url="${R2_ENDPOINT_URL}" \
+    --only-show-errors \
+    "${SPIDER_RUN_DIR}/" \
+    "${RUN_R2_PREFIX}/"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't sync to r2")
+    exit 1
+fi
+
 (>&2 echo "Saving embed to https://data.alltheplaces.xyz/runs/latest/info_embed.html")
 OUTPUT_FILESIZE=$(du -b "${SPIDER_RUN_DIR}/output.zip"  | awk '{ print $1 }')
 OUTPUT_FILESIZE_PRETTY=$(echo "$OUTPUT_FILESIZE" | numfmt --to=si --format=%0.1f)
@@ -323,7 +339,7 @@ touch "${SPIDER_RUN_DIR}/latest_placeholder.txt"
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.zip" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.zip" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.zip"
 
@@ -335,7 +351,7 @@ fi
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.pmtiles" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.pmtiles" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.pmtiles"
 
@@ -347,7 +363,7 @@ fi
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.parquet" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.parquet" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.parquet"
 
@@ -361,7 +377,7 @@ for spider in $(scrapy list)
 do
     aws s3 cp \
         --only-show-errors \
-        --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output/${spider}.geojson" \
+        --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output/${spider}.geojson" \
         "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
         "s3://${S3_BUCKET}/runs/latest/output/${spider}.geojson"
 
