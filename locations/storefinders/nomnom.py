@@ -57,7 +57,7 @@ class NomNomSpider(Spider):
 
     CALENDAR_KEYS = {
         "drivethru": "opening_hours:drive_through",
-        "dispatch": "delivery",
+        "dispatch": "opening_hours:delivery",
     }
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
