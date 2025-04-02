@@ -33,7 +33,7 @@ phases:
 
         # check if the cache exists on S3
         REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-uv-cache/${CACHE_FILE_NAME}"
-        if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
+        if uv run --with 'awscli' aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
           # if the cache exists, extract it to the install location
           echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
           mkdir -p ${PYTHON_INSTALL_LOCATION}
@@ -50,7 +50,7 @@ phases:
 
           echo "Caching uv environment to $REMOTE_CACHE_LOCATION"
           tar -czf "${CACHE_FILE_NAME}" "${PYTHON_INSTALL_LOCATION}"
-          aws s3 --only-show-errors cp "${CACHE_FILE_NAME}" "${REMOTE_CACHE_LOCATION}"
+          uv run aws s3 --only-show-errors cp "${CACHE_FILE_NAME}" "${REMOTE_CACHE_LOCATION}"
         fi
   build:
     commands:
