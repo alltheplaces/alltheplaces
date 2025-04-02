@@ -3,6 +3,14 @@ FROM python:3.11-bookworm
 # install uv to manage python
 COPY --from=ghcr.io/astral-sh/uv:0.6.11 /uv /uvx /bin/
 
+# install some dependencies that are useful for the build
+RUN apt-get update \
+ && apt-get install -qq -y \
+    jq \
+    git \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
+
 # install tippecanoe
 ARG TIPPECANOE_VERSION=2.29.0
 RUN curl -sL https://github.com/felt/tippecanoe/archive/refs/tags/${TIPPECANOE_VERSION}.tar.gz | tar -xz \

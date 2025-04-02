@@ -155,7 +155,7 @@ do
         FAILURE_REASON="timeout"
     fi
 
-    aws --only-show-errors s3 cp ${LOGFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt
+    uv run aws --only-show-errors s3 cp ${LOGFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt
     retval=$?
     if [ ! $retval -eq 0 ]; then
         (>&2 echo "log copy to s3 failed with exit code ${retval}")
@@ -180,7 +180,7 @@ do
             continue
         fi
 
-        aws s3 cp --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson
+        uv run aws s3 cp --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "output copy to s3 failed with exit code ${retval}")
@@ -193,13 +193,13 @@ do
             echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}"
         fi
 
-        aws s3 cp --only-show-errors ${PARQUETFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet
+        uv run aws s3 cp --only-show-errors ${PARQUETFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "parquet copy to s3 failed with exit code ${retval}")
         fi
 
-        aws s3 cp --only-show-errors ${STATSFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json
+        uv run aws s3 cp --only-show-errors ${STATSFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "stats copy to s3 failed with exit code ${retval}")
