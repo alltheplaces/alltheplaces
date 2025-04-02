@@ -32,9 +32,9 @@ mkdir -p "${SPIDER_RUN_DIR}"
 
 (>&2 echo "Writing to ${SPIDER_RUN_DIR}")
 (>&2 echo "Write out a file with scrapy commands to parallelize")
-for spider in $(scrapy list -s REQUESTS_CACHE_ENABLED=False)
+for spider in $(uv run scrapy list -s REQUESTS_CACHE_ENABLED=False)
 do
-    echo "timeout -k 15s 8h scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --output ${SPIDER_RUN_DIR}/output/${spider}.parquet:parquet --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "timeout -k 15s 8h uv run scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --output ${SPIDER_RUN_DIR}/output/${spider}.parquet:parquet --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p "${SPIDER_RUN_DIR}/logs"
@@ -84,7 +84,7 @@ fi
 OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
-scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
+uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
 (>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
 tippecanoe --cluster-distance=25 \
@@ -119,7 +119,7 @@ rm "${SPIDER_RUN_DIR}"/output/*.parquet
 
 (>&2 echo "Writing out summary JSON")
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"
-for spider in $(scrapy list)
+for spider in $(uv run scrapy list)
 do
     statistics_json="${SPIDER_RUN_DIR}/stats/${spider}.json"
 
@@ -141,7 +141,7 @@ do
         elapsed_time="0"
     fi
 
-    spider_filename=$(scrapy spider_filename "${spider}")
+    spider_filename=$(uv run scrapy spider_filename "${spider}")
 
     # use JQ to create an overall results JSON
     jq --compact-output \
@@ -373,7 +373,7 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
-for spider in $(scrapy list)
+for spider in $(uv run scrapy list)
 do
     aws s3 cp \
         --only-show-errors \

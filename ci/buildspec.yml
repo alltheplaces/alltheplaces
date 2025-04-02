@@ -17,19 +17,22 @@ phases:
   pre_build:
     commands:
       - |
-        # calculate a hash of the pipenv lockfile
-        # this is used to cache the pipenv environment
-        # if the lockfile changes, the cache will be invalidated
-        PIPENV_HASH=$(sha256sum Pipfile.lock | cut -d ' ' -f 1)
-        PLATFORM=$(uname -m)
-        CACHE_FILE_NAME="${PIPENV_HASH}-${PLATFORM}.tar.gz"
+        # uv will already be installed in the image,
+        # but we need to set up the cache
 
-        # output where pip is installing stuff to help with debugging
-        PYTHON_INSTALL_LOCATION="/tmp/opt/python/site-packages"
-        echo "Pip install location: ${PYTHON_INSTALL_LOCATION}"
+        # calculate a hash of the uv lockfile
+        # this is used to cache the python environment
+        # if the lockfile changes, the cache will be invalidated
+        UV_HASH=$(sha256sum uv.lock | cut -d ' ' -f 1)
+        PLATFORM=$(uname -m)
+        CACHE_FILE_NAME="${UV_HASH}-${PLATFORM}.tar.gz"
+
+        # store where uv is caching stuff
+        PYTHON_INSTALL_LOCATION=$(uv cache dir)
+        echo "uv cache location: ${PYTHON_INSTALL_LOCATION}"
 
         # check if the cache exists on S3
-        REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-pipenv-cache/${CACHE_FILE_NAME}"
+        REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-uv-cache/${CACHE_FILE_NAME}"
         if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
           # if the cache exists, extract it to the install location
           echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
@@ -38,20 +41,18 @@ phases:
         else
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
-          pip install -qq --upgrade pip pipenv
-
-          pipenv sync --system
+          uv sync --frozen
           retval=$?
           if [ ! $retval -eq 0 ]; then
-            (>&2 echo "pipenv sync failed. refusing to continue.")
+            (>&2 echo "uv sync failed. refusing to continue.")
             exit 1
           fi
 
-          echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
+          echo "Caching uv environment to $REMOTE_CACHE_LOCATION"
           tar -czf "${CACHE_FILE_NAME}" "${PYTHON_INSTALL_LOCATION}"
           aws s3 --only-show-errors cp "${CACHE_FILE_NAME}" "${REMOTE_CACHE_LOCATION}"
         fi
   build:
     commands:
-      - scrapy check
+      - uv scrapy check
       - /bin/bash ci/run_pr_spiders.sh
