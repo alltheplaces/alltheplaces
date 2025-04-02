@@ -54,5 +54,5 @@ phases:
         fi
   build:
     commands:
-      - uv scrapy check
+      - uv run scrapy check
       - /bin/bash ci/run_pr_spiders.sh
