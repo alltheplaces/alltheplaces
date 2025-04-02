@@ -17,9 +17,8 @@ phases:
   pre_build:
     commands:
       - |
-        # install uv
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        source $HOME/.local/bin/env
+        # uv will already be installed in the image,
+        # but we need to set up the cache
 
         # calculate a hash of the uv lockfile
         # this is used to cache the python environment
