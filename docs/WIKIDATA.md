@@ -19,7 +19,7 @@ class TravelodgeGBSpider(scrapy.Spider):
 Many of the companies that we write spiders for will be significant enough to have been added to the [Name Suggestion Index (NSI)](https://nsi.guide/?t=brands) project (see below). We provide a custom `scrapy nsi` command for doing name queries against the NSI dataset e.g.
 
 ```
-$ pipenv run scrapy nsi --name travelodge
+$ uv run scrapy nsi --name travelodge
 "Travelodge UK", "Q9361374"
        -> https://www.wikidata.org/wiki/Q9361374
        -> https://www.wikidata.org/wiki/Special:EntityData/Q9361374.json
@@ -45,7 +45,7 @@ The success of the NSI can be gauged from the rapid increase in the number of OS
 Running our custom `scrapy nsi` command, but this time with a direct QID parameter specified, yields the NSI tag suggestions for the QID. This is the bottom line of the output below:
 
 ```
-$ pipenv run scrapy nsi --code Q9361374
+$ uv run scrapy nsi --code Q9361374
 "Travelodge UK", "Q9361374"
        -> https://www.wikidata.org/wiki/Q9361374
        -> https://www.wikidata.org/wiki/Special:EntityData/Q9361374.json
@@ -65,7 +65,7 @@ To looking for missing or existing scrapers by a given category, review https://
 to the nsi --detect-missing command.
 
 ```
-$ pipenv run scrapy nsi --detect-missing brands/shop/supermarket
+$ uv run scrapy nsi --detect-missing brands/shop/supermarket
 Fetched 915 brands/shop/supermarket from NSI
 Missing by wikidata: 619
 "3hreeSixty", "Q7797310"
@@ -75,7 +75,7 @@ Missing by wikidata: 619
 
 You can also search by a location code such as "za" or "us-ct.geojson":
 ```
-$ pipenv run scrapy nsi --detect-missing za
+$ uv run scrapy nsi --detect-missing za
 Missing by wikidata: 66
 ...
 ```

@@ -6,8 +6,8 @@ on:
     - '.github/workflows/*.yaml'
     - 'locations/**/*.py'
     - 'tests/*.py'
-    - 'Pipfile'
-    - 'Pipfile.lock'
+    - 'pyproject.toml'
+    - 'uv.lock'
 
 
 jobs:
@@ -15,18 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pipenv'
-    - name: Install pipenv
-      run: |
-        pip --quiet install pipenv
-    - name: Install dependencies
-      run: |
-        pipenv --bare install --dev
+      uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
     - name: Run pytest
       run: |
-        pipenv run pytest
+        uv run pytest
