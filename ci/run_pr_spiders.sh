@@ -94,9 +94,9 @@ if [ $spider_count -gt 15 ]; then
     exit 1
 fi
 
-# Manually run a couple spiders when Pipfile/Pipfile.lock changes
-if echo "${changed_filenames}" | grep -q "Pipfile" || echo "${changed_filenames}" | grep -q "Pipfile.lock"; then
-    echo "Pipfile or Pipfile.lock changed. Running a couple spiders."
+# Manually run a couple spiders when uv.lock or pyproject.toml changes
+if echo "${changed_filenames}" | grep -q "pyproject.toml" || echo "${changed_filenames}" | grep -q "uv.lock"; then
+    echo "pyproject.toml or uv.lock changed. Running a couple spiders."
     spiders=("locations/spiders/the_works.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
 elif [ "$spider_count" -eq 0 ]; then
     (>&2 echo "no spiders modified (only deleted?)")
@@ -105,8 +105,8 @@ fi
 
 if grep PLAYWRIGHT -q -m 1 $spiders; then
     echo "Playwright detected. Installing requirements."
-    playwright install-deps
-    playwright install firefox
+    uv run playwright install-deps
+    uv run playwright install firefox
 fi
 
 RUN_DIR="/tmp/output"
@@ -132,7 +132,7 @@ do
     FAILURE_REASON="success"
 
     timeout -k 5s 150s \
-    scrapy runspider \
+    uv run scrapy runspider \
         -o "file://${OUTFILE}:geojson" \
         -o "file://${PARQUETFILE}:parquet" \
         --loglevel=INFO \
