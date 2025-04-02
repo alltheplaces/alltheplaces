@@ -1,4 +1,4 @@
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -23,7 +23,7 @@ class RunzaUSSpider(JSONBlobSpider):
         item["ref"] = location["uuid"][0]["value"]
         item.pop("name", None)
 
-        apply_category({"amenity": "fast_food", "cuisine": "chicken"}, item)
+        apply_category(Categories.FAST_FOOD, item)
 
         if location["field_hide_dining_room_hours"][0]["value"] is False:
             oh = OpeningHours()
