@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 
@@ -57,10 +58,10 @@ class FineWineGoodSpiritsSpider(scrapy.Spider):
                 "phone": phone,
                 "extras": {
                     "fax": fax,
-                    "shop": "alcohol",
                     "type_of_store": type_of_store,
                 },
                 "ref": ref,
-                "opening_hours": oh.as_opening_hours(),
+                "opening_hours": oh,
             }
+            apply_category(Categories.SHOP_ALCOHOL, properties)
             yield Feature(**properties)

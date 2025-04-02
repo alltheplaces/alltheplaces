@@ -5,6 +5,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -59,13 +60,13 @@ class VirginiaHealthInspectionBlueRidgeSpider(Spider):
 
             # categorize the inspection to OSM standards
             if inspection["inspectionType"] == "Fast Food":
-                item["extras"]["amenity"] = "fast_food"
+                apply_category(Categories.FAST_FOOD, item)
             elif inspection["inspectionType"] == "Full Service Restaurant":
-                item["extras"]["amenity"] = "restaurant"
+                apply_category(Categories.RESTAURANT, item)
             elif inspection["inspectionType"] == "Hospital Food Service":
-                item["extras"]["amenity"] = "hospital"
+                apply_category(Categories.HOSPITAL, item)
             elif inspection["inspectionType"] == "Educational Facility Food Service":
-                item["extras"]["amenity"] = "school"
+                apply_category(Categories.SCHOOL, item)
             else:
                 self.crawler.stats.inc_value("{}/unmapped_category/{}".format(self.name, inspection["inspectionType"]))
                 continue
