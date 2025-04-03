@@ -80,7 +80,7 @@ class IccuITSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location: dict):
         if "archivio" in item["name"].lower():
-            apply_category({"amenity": "archive"}, item)
+            apply_category(Categories.ARCHIVE, item)
         else:
             apply_category(Categories.LIBRARY, item)
 

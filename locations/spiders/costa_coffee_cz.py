@@ -8,10 +8,7 @@ class CostaCoffeeCZSpider(scrapy.Spider):
     name = "costa_coffee_cz"
     brands = {
         "costa": ({"brand": "Costa", "brand_wikidata": "Q608845"}, Categories.COFFEE_SHOP),
-        "express": (
-            {"brand": "Costa Express", "brand_wikidata": "Q113556385"},
-            Categories.VENDING_MACHINE_COFFEE,
-        ),
+        "express": ({"brand": "Costa Express", "brand_wikidata": "Q113556385"}, Categories.VENDING_MACHINE),
     }
     SHELL = {"brand": "Shell", "brand_wikidata": "Q154950"}
     start_urls = ["https://loc.costa-coffee.cz/locator/"]
