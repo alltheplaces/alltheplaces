@@ -1,13 +1,11 @@
 import scrapy
 
-from locations.hours import OpeningHours, DAYS_BG
+from locations.hours import DAYS_BG, OpeningHours
+
 
 class SopharnacyBGSpider(scrapy.Spider):
     name = "sopharmacy_bg"
-    item_attributes = {
-        "brand": "SOpharmacy",
-        "brand_wikidata": "Q108852081"
-    }
+    item_attributes = {"brand": "SOpharmacy", "brand_wikidata": "Q108852081"}
     allowed_domains = ["sopharmacy.bg"]
     start_urls = ["https://sopharmacy.bg/bg/mapbox/contactus.json"]
 
