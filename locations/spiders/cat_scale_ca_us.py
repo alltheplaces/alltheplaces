@@ -4,8 +4,8 @@ from locations.categories import apply_category
 from locations.dict_parser import DictParser
 
 
-class CatScaleCAMXUSSpider(CSVFeedSpider):
-    name = "cat_scale_ca_mx_us"
+class CatScaleCAUSSpider(CSVFeedSpider):
+    name = "cat_scale_ca_us"
     allowed_domains = ["catscale.com"]
     start_urls = ["https://catscale.com/exl.php"]
 
@@ -21,6 +21,7 @@ class CatScaleCAMXUSSpider(CSVFeedSpider):
         item["located_in"] = row["TruckstopName"]
         item["street_address"] = row["InterstateAddress"]
         item["postcode"] = row["InterstatePostalCode"]
+        item["country"] = "US" if row["InterstatePostalCode"].isdigit() else "CA"
         item.pop("website")
         item["extras"]["fax"] = row["FaxNumber"]
         item["extras"]["located_in:website"] = row["URL"]
