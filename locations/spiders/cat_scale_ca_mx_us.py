@@ -1,7 +1,7 @@
 from scrapy.spiders import CSVFeedSpider
 
 from locations.dict_parser import DictParser
-
+from locations.categories import apply_category
 
 class CatScaleCAMXUSSpider(CSVFeedSpider):
     name = "cat_scale_ca_mx_us"
@@ -23,4 +23,5 @@ class CatScaleCAMXUSSpider(CSVFeedSpider):
         item.pop("website")
         item["extras"]["fax"] = row["FaxNumber"]
         item["extras"]["located_in:website"] = row["URL"]
+        apply_category({"amenity": "weighbridge"}, item)
         return item
