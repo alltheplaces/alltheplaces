@@ -33,5 +33,6 @@ class AllpointSpider(Spider):
         if response.json()["data"]["ATMInfo"]:
             for atm in response.json()["data"]["ATMInfo"]:
                 item = DictParser.parse(atm)
+                item["street_address"] = item.pop("street", None)
                 yield item
             yield self.make_request(kwargs["current_page"] + 1)
