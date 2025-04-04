@@ -16,7 +16,6 @@ class EspressolabSpider(CrawlSpider):
     allowed_domains = ["espressolab.com"]
     start_urls = ["https://espressolab.com/subeler/"]
     rules = [Rule(LinkExtractor(allow=[r"/subeler/[\w-]+/"]), callback="parse_item")]
-    require_proxy = True
 
     def parse_item(self, response: http.HtmlResponse):
         item = Feature()
