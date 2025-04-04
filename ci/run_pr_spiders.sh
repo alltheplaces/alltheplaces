@@ -79,13 +79,10 @@ upload_to_r2() {
 upload_file() {
     # Upload a file to a specified location (S3 and R2)
     local file_path="$1"
-    local bucket="$2"
-    local path="$3"
+    local path="$2"
 
-    # For S3, the path should be in the format "bucket/path/to/file"
-    upload_to_s3 "${file_path}" "${bucket}/${path}"
-    # For R2, the path should be in the format "R2_BUCKET/bucket/path/to/file"
-    upload_to_r2 "${file_path}" "${R2_BUCKET}/${bucket}/${path}"
+    upload_to_s3 "${file_path}" "${S3_BUCKET}/${path}"
+    upload_to_r2 "${file_path}" "${R2_BUCKET}/${path}"
 }
 
 PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
@@ -195,7 +192,7 @@ do
         FAILURE_REASON="timeout"
     fi
 
-    upload_file "${LOGFILE}" "${BUCKET}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
+    upload_file "${LOGFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
 
     LOGFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
     echo "${spider} log: ${LOGFILE_URL}"
@@ -215,7 +212,7 @@ do
             continue
         fi
 
-        upload_file "${OUTFILE}" "${BUCKET}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
+        upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
@@ -223,8 +220,8 @@ do
             echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}"
         fi
 
-        upload_file "${PARQUETFILE}" "${BUCKET}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
-        upload_file "${STATSFILE}" "${BUCKET}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json"
+        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
+        upload_file "${STATSFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json"
 
         # Check the stats JSON to look for things that we consider warnings or errors
         if [ ! -f "${STATSFILE}" ]; then

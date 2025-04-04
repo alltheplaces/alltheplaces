@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    BUCKET: alltheplaces.openaddresses.io
+    S3_BUCKET: alltheplaces.openaddresses.io
     R2_BUCKET: alltheplaces-openaddresses-io
   secrets-manager:
     ZYTE_API_KEY: "alltheplaces:ZYTE_API_KEY"
