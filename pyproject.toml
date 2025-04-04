@@ -14,6 +14,7 @@ dependencies = [
     "ijson",
     "json5",
     "openpyxl",
+    "pdfplumber",
     "phonenumbers",
     "phpserialize",
     "pyarrow",
