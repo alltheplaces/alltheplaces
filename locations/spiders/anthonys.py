@@ -2,6 +2,7 @@ import scrapy
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.structured_data_spider import extract_phone
 
 
 class AnthonysSpider(scrapy.Spider):
@@ -18,4 +19,5 @@ class AnthonysSpider(scrapy.Spider):
             item["lat"] = store.xpath(".//@data-lat").get()
             item["lon"] = store.xpath(".//@data-lng").get()
             item["addr_full"] = merge_address_lines(store.xpath('.//*[@class="location-address"]/p/text()').getall())
+            extract_phone(item, store)
             yield item
