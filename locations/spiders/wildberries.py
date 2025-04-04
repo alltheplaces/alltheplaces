@@ -8,7 +8,7 @@ from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_T
 class WildberriesSpider(scrapy.Spider):
     name = "wildberries"
     allowed_domains = ["www.wildberries.ru"]
-    start_urls = ["https://static-basket-01.wbbasket.ru/vol0/data/all-poo-fr-v9.json"]
+    start_urls = ["https://static-basket-01.wbbasket.ru/vol0/data/all-poo-fr-v10.json"]
     item_attributes = {"brand": "Wildberries", "brand_wikidata": "Q24933714"}
 
     def parse(self, response):
@@ -18,8 +18,16 @@ class WildberriesSpider(scrapy.Spider):
                     # Parsel lockers for inhabitants of a specific building,
                     # not available for public.
                     continue
-                if poi.get("dtype") == 6:
-                    # Around 15 partner pickup points - we are not interested in them
+                if poi.get("isHkn"):
+                    # For household needs
+                    continue
+                if poi.get("emp"):
+                    # For employees
+                    continue
+                if poi.get("isSortCenter"):
+                    continue
+                if poi.get("typePoint") == 14:
+                    # Russian Post offices
                     continue
                 item = DictParser.parse(poi)
                 item["lat"] = poi["coordinates"][0]

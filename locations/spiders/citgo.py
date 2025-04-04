@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -58,7 +59,7 @@ class CitgoSpider(scrapy.Spider):
                         time_format="%H:%M",
                     )
 
-                yield Feature(
+                item = Feature(
                     ref=location["number"],
                     lon=location["longitude"],
                     lat=location["latitude"],
@@ -69,14 +70,14 @@ class CitgoSpider(scrapy.Spider):
                     postcode=location["zip"],
                     country=location["country"],
                     phone=location["phone"],
-                    opening_hours=opening_hours.as_opening_hours(),
+                    opening_hours=opening_hours,
                     extras={
-                        "amenity:fuel": True,
                         "atm": SERVICE_VALUES.get(services["atm"]),
                         "car_wash": SERVICE_VALUES.get(services["carwash"]),
                         "fuel:diesel": SERVICE_VALUES.get(services["diesel"]),
                         "hgv": SERVICE_VALUES.get(services["truckstop"]),
                         "wheelchair": SERVICE_VALUES.get(services["handicapaccess"]),
-                        "shop": "convenience" if SERVICE_VALUES.get(services["cstore"]) else None,
                     },
                 )
+                apply_category(Categories.FUEL_STATION, item)
+                yield item

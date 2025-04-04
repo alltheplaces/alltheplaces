@@ -2,13 +2,16 @@ version: 0.2
 
 env:
   variables:
-    BUCKET: alltheplaces.openaddresses.io
-    CODEBUILD_CACHE_BUCKET: codebuild-cache.openaddresses.io
+    S3_BUCKET: alltheplaces.openaddresses.io
+    R2_BUCKET: alltheplaces-openaddresses-io
   secrets-manager:
     ZYTE_API_KEY: "alltheplaces:ZYTE_API_KEY"
     GITHUB_APP_ID: "alltheplaces:GITHUB_APP_ID"
     GITHUB_APP_PRIVATE_KEY_BASE64: "alltheplaces:GITHUB_APP_PRIVATE_KEY_BASE64"
     GITHUB_APP_INSTALLATION_ID: "alltheplaces:GITHUB_APP_INSTALLATION_ID"
+    R2_ENDPOINT_URL: "alltheplaces:R2_ENDPOINT_URL"
+    R2_ACCESS_KEY_ID: "alltheplaces:R2_ACCESS_KEY_ID"
+    R2_SECRET_ACCESS_KEY: "alltheplaces:R2_SECRET_ACCESS_KEY"
 
 phases:
   install:
@@ -16,42 +19,16 @@ phases:
       python: 3.11
   pre_build:
     commands:
-      - |
-        # calculate a hash of the pipenv lockfile
-        # this is used to cache the pipenv environment
-        # if the lockfile changes, the cache will be invalidated
-        PIPENV_HASH=$(sha256sum Pipfile.lock | cut -d ' ' -f 1)
-        PLATFORM=$(uname -m)
-        CACHE_FILE_NAME="${PIPENV_HASH}-${PLATFORM}.tar.gz"
-
-        # output where pip is installing stuff to help with debugging
-        PYTHON_INSTALL_LOCATION="/tmp/opt/python/site-packages"
-        echo "Pip install location: ${PYTHON_INSTALL_LOCATION}"
-
-        # check if the cache exists on S3
-        REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-pipenv-cache/${CACHE_FILE_NAME}"
-        if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
-          # if the cache exists, extract it to the install location
-          echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
-          mkdir -p ${PYTHON_INSTALL_LOCATION}
-          tar -xzf "${CACHE_FILE_NAME}" -C /
-        else
-          # if the cache does not exist, install dependencies and save the cache to S3
-          echo "Cache not found. Installing dependencies."
-          pip install -qq --upgrade pip pipenv
-
-          pipenv sync --system
-          retval=$?
-          if [ ! $retval -eq 0 ]; then
-            (>&2 echo "pipenv sync failed. refusing to continue.")
-            exit 1
-          fi
-
-          echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
-          tar -czf "${CACHE_FILE_NAME}" "${PYTHON_INSTALL_LOCATION}"
-          aws s3 --only-show-errors cp "${CACHE_FILE_NAME}" "${REMOTE_CACHE_LOCATION}"
-        fi
+      - uv sync --cache-dir /root/.cache/uv
   build:
     commands:
-      - scrapy check
+      - uv run scrapy check
       - /bin/bash ci/run_pr_spiders.sh
+  post_build:
+    commands:
+      - uv cache prune --ci
+
+cache:
+  key: python-uv-$(codebuild-hash-files uv.lock)
+  paths:
+    - /root/.cache/uv/**/*
