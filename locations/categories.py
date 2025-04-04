@@ -280,6 +280,7 @@ class Categories(Enum):
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
     GRAVE = {"cemetery": "grave"}
+    GRIT_BIN = {"amenity": "grit_bin"}
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
