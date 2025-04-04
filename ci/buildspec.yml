@@ -29,5 +29,6 @@ phases:
       - uv cache prune --ci
 
 cache:
+  key: python-uv-$(codebuild-hash-files uv.lock)
   paths:
-    - /root/.cache/uv
+    - /root/.cache/uv/**/*
