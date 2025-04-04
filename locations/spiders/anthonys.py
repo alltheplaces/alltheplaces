@@ -14,9 +14,9 @@ class AnthonysSpider(scrapy.Spider):
     def parse(self, response):
         for store in response.xpath('//*[@class="location"]'):
             item = Feature()
-            item["ref"] = item["website"] = response.urljoin(
-                store.xpath('.//a[contains(@href,"locations")]/@href').get("")
-            )
+            branch = store.xpath('.//a[contains(@href,"locations")]')
+            item["ref"] = item["website"] = response.urljoin(branch.xpath("./@href").get(""))
+            item["branch"] = branch.xpath("./text()").get()
             item["lat"] = store.xpath(".//@data-lat").get()
             item["lon"] = store.xpath(".//@data-lng").get()
             item["addr_full"] = merge_address_lines(store.xpath('.//*[@class="location-address"]/p/text()').getall())
