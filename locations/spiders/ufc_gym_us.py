@@ -9,12 +9,7 @@ class UfcGymUSSpider(SitemapSpider):
     name = "ufc_gym_us"
     item_attributes = {"brand": "UFC GYM", "brand_wikidata": "Q122511683"}
     sitemap_urls = ["https://www.ufcgym.com/sitemap.xml"]
-    sitemap_rules = [(r"/locations/[-\w]+$", "parse")]
-
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if "list" not in entry["loc"]:
-                yield entry
+    sitemap_rules = [(r"/locations/(?!list)[-\w]+$", "parse")]
 
     def parse(self, response, **kwargs):
         if data := response.xpath('//script[@id="__NEXT_DATA__"]/text()').get():
