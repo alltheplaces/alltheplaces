@@ -20,9 +20,10 @@ GITHUB_AUTH="scraperbot:${GITHUB_TOKEN}"
 
 RUN_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 RUN_TIMESTAMP=$(date -u +%F-%H-%M-%S)
-RUN_S3_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
-RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
-RUN_URL_PREFIX="https://alltheplaces-data.openaddresses.io/${RUN_S3_KEY_PREFIX}"
+RUN_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
+RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_KEY_PREFIX}"
+RUN_R2_PREFIX="s3://${R2_BUCKET}/${RUN_KEY_PREFIX}"
+RUN_URL_PREFIX="https://alltheplaces-data.openaddresses.io/${RUN_KEY_PREFIX}"
 SPIDER_RUN_DIR="${GITHUB_WORKSPACE}/output"
 PARALLELISM=${PARALLELISM:-12}
 SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-28800} # default to 8 hours
@@ -31,9 +32,9 @@ mkdir -p "${SPIDER_RUN_DIR}"
 
 (>&2 echo "Writing to ${SPIDER_RUN_DIR}")
 (>&2 echo "Write out a file with scrapy commands to parallelize")
-for spider in $(scrapy list -s REQUESTS_CACHE_ENABLED=False)
+for spider in $(uv run scrapy list -s REQUESTS_CACHE_ENABLED=False)
 do
-    echo "timeout -k 15s 8h scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --output ${SPIDER_RUN_DIR}/output/${spider}.parquet:parquet --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "timeout -k 15s 8h uv run scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --output ${SPIDER_RUN_DIR}/output/${spider}.parquet:parquet --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p "${SPIDER_RUN_DIR}/logs"
@@ -83,7 +84,7 @@ fi
 OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
-scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
+uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
 (>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
 tippecanoe --cluster-distance=25 \
@@ -118,7 +119,7 @@ rm "${SPIDER_RUN_DIR}"/output/*.parquet
 
 (>&2 echo "Writing out summary JSON")
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"
-for spider in $(scrapy list)
+for spider in $(uv run scrapy list)
 do
     statistics_json="${SPIDER_RUN_DIR}/stats/${spider}.json"
 
@@ -140,7 +141,7 @@ do
         elapsed_time="0"
     fi
 
-    spider_filename=$(scrapy spider_filename "${spider}")
+    spider_filename=$(uv run scrapy spider_filename "${spider}")
 
     # use JQ to create an overall results JSON
     jq --compact-output \
@@ -182,6 +183,21 @@ aws s3 sync \
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't sync to s3")
+    exit 1
+fi
+
+(>&2 echo "Saving log and output files to ${RUN_R2_PREFIX}")
+AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+aws s3 sync \
+    --endpoint-url="${R2_ENDPOINT_URL}" \
+    --only-show-errors \
+    "${SPIDER_RUN_DIR}/" \
+    "${RUN_R2_PREFIX}/"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't sync to r2")
     exit 1
 fi
 
@@ -323,7 +339,7 @@ touch "${SPIDER_RUN_DIR}/latest_placeholder.txt"
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.zip" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.zip" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.zip"
 
@@ -335,7 +351,7 @@ fi
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.pmtiles" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.pmtiles" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.pmtiles"
 
@@ -347,7 +363,7 @@ fi
 
 aws s3 cp \
     --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output.parquet" \
+    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.parquet" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.parquet"
 
@@ -357,11 +373,11 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
-for spider in $(scrapy list)
+for spider in $(uv run scrapy list)
 do
     aws s3 cp \
         --only-show-errors \
-        --website-redirect="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}/output/${spider}.geojson" \
+        --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output/${spider}.geojson" \
         "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
         "s3://${S3_BUCKET}/runs/latest/output/${spider}.geojson"
 

@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 PILOT = {"brand": "Pilot", "brand_wikidata": "Q64128179"}
@@ -42,12 +43,12 @@ class PilotFlyingJSpider(scrapy.Spider):
             "phone": store.get("mainPhone", {}).get("number"),
             "extras": {
                 "fax": store.get("fax", {}).get("number"),
-                "amenity": "fuel",
                 "fuel:diesel": "yes",
                 "fuel:HGV_diesel": "yes",
                 "hgv": "yes",
             },
         }
+        apply_category(Categories.FUEL_STATION, item)
         properties.update(self.brand_info(store["name"]))
         yield Feature(**properties)
 

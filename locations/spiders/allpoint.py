@@ -17,9 +17,9 @@ class AllpointSpider(Spider):
             url="https://clsws.locatorsearch.net/Rest/LocatorSearchAPI.svc/GetLocations",
             data={
                 "NetworkId": 10029,
-                "Latitude": 0,
-                "Longitude": 0,
-                "Miles": 500000,
+                "Latitude": 33.15004936,
+                "Longitude": -96.83464,
+                "Miles": 50000,
                 "SearchByOptions": "ATMSF, ATMDP",
                 "PageIndex": page,
             },
@@ -33,5 +33,6 @@ class AllpointSpider(Spider):
         if response.json()["data"]["ATMInfo"]:
             for atm in response.json()["data"]["ATMInfo"]:
                 item = DictParser.parse(atm)
+                item["street_address"] = item.pop("street", None)
                 yield item
             yield self.make_request(kwargs["current_page"] + 1)

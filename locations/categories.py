@@ -13,13 +13,16 @@ from locations.items import Feature
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
     GENERIC_POI = {"amenity": "yes"}
+    GENERIC_SHOP = {"shop": "yes"}
 
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
+    KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
+
     SCHOOL = {"amenity": "school"}
     UNIVERSITY = {"amenity": "university"}
     COLLEGE = {"amenity": "college"}
@@ -49,19 +52,21 @@ class Categories(Enum):
     CRAFT_JEWELLER = {"craft": "jeweller"}
     CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
     CRAFT_LOCKSMITH = {"craft": "locksmith"}
-    CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
+    CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_WATCHMAKER = {"craft": "watchmaker"}
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
+    LEISURE_GARDEN = {"leisure": "garden"}
     LEISURE_DOG_PARK = {"leisure": "dog_park"}
     LEISURE_FITNESS_STATION = {"leisure": "fitness_station"}
     LEISURE_INDOOR_PLAY = {"leisure": "indoor_play"}
     LEISURE_NATURE_RESERVE = {"leisure": "nature_reserve"}
     LEISURE_PARK = {"leisure": "park"}
+    LEISURE_PICNIC_TABLE = {"leisure": "picnic_table"}
     LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
@@ -80,11 +85,11 @@ class Categories(Enum):
     SHOP_BED = {"shop": "bed"}
     SHOP_BEVERAGES = {"shop": "beverages"}
     SHOP_BICYCLE = {"shop": "bicycle"}
-    SHOP_BOOKMAKER = {"shop": "bookmaker"}
-    SHOP_BOOKS = {"shop": "books"}
     SHOP_BOAT = {"shop": "boat"}
     SHOP_BOAT_PARTS = {"shop": "boat_parts"}
     SHOP_BOAT_REPAIR = {"shop": "boat_repair"}
+    SHOP_BOOKMAKER = {"shop": "bookmaker"}
+    SHOP_BOOKS = {"shop": "books"}
     SHOP_BUTCHER = {"shop": "butcher"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
@@ -184,8 +189,8 @@ class Categories(Enum):
     SHOP_RENTAL = {"shop": "rental"}
     SHOP_SEAFOOD = {"shop": "seafood"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
-    SHOP_SHOES = {"shop": "shoes"}
     SHOP_SHOE_REPAIR = {"shop": "shoe_repair"}
+    SHOP_SHOES = {"shop": "shoes"}
     SHOP_SPICES = {"shop": "spices"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_STATIONERY = {"shop": "stationery"}
@@ -209,8 +214,8 @@ class Categories(Enum):
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VACUUM_CLEANER = {"shop": "vacuum_cleaner"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
-    SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_VIDEO = {"shop": "video"}
+    SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
@@ -234,6 +239,8 @@ class Categories(Enum):
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
+    ANIMAL_BOARDING = {"amenity": "animal_boarding"}
+    ARCHIVE = {"amenity": "archive"}
     ATM = {"amenity": "atm"}
     AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
@@ -251,6 +258,7 @@ class Categories(Enum):
     CAFE = {"amenity": "cafe"}
     CANTEEN = {"amenity": "canteen"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
+    CASINO = {"amenity": "casino"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
     CINEMA = {"amenity": "cinema"}
@@ -259,36 +267,46 @@ class Categories(Enum):
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
-    DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
+    CONFERENCE_CENTRE = {"amenity": "conference_centre"}
+    COURTHOUSE = {"amenity": "courthouse"}
     DEFIBRILLATOR = {"emergency": "defibrillator"}
+    DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
     DIALYSIS = {"healthcare": "dialysis"}
+    DISASTER_HELP_POINT = {"emergency": "disaster_help_point"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
     DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     FAST_FOOD = {"amenity": "fast_food"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
-    HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
+    GRAVE = {"cemetery": "grave"}
+    GRIT_BIN = {"amenity": "grit_bin"}
     HOSPICE = {"healthcare": "hospice"}
+    HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    ICE_CREAM = {"amenity": "ice_cream"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MANHOLE = {"man_made": "manhole"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"
     }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MORTUARY = {"amenity": "mortuary"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
+    MUSIC_VENUE = {"amenity": "music_venue"}
     NIGHTCLUB = {"amenity": "nightclub"}
     NURSE_CLINIC = {"healthcare": "nurse"}
     NURSING_HOME = {"amenity": "social_facility", "social_facility": "nursing_home", "social_facility:for": "senior"}
     NUTRITIONIST = {"healthcare": "nutrition_counselling"}
     OPTOMETRIST = {"healthcare": "optometrist"}
-    PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
+    PLACE_OF_WORSHIP = {"amenity": "place_of_worship"}
     PODIATRIST = {"healthcare": "podiatrist"}
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
@@ -299,29 +317,25 @@ class Categories(Enum):
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
     PUBLIC_BOOKCASE = {"amenity": "public_bookcase"}
+    RECYCLING = {"amenity": "recycling"}
     REHABILITATION = {"healthcare": "rehabilitation"}
     RESCUE_BUOY = {"emergency": "rescue_buoy"}
+    RESTAURANT = {"amenity": "restaurant"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SHARPS_WASTE_BASKET = {"amenity": "waste_basket", "waste": "sharps"}
+    SOCIAL_CENTRE = {"amenity": "social_centre"}
+    SOCIAL_FACILITY = {"amenity": "social_facility"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
+    TAXI = {"amenity": "taxi"}
     TELEPHONE = {"amenity": "telephone"}
     TOILETS = {"amenity": "toilets"}
-    RESTAURANT = {"amenity": "restaurant"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
+    VENDING_MACHINE = {"amenity": "vending_machine"}
     VETERINARY = {"amenity": "veterinary"}
     WASTE_BASKET = {"amenity": "waste_basket"}
     WATER_RESCUE = {"emergency": "water_rescue"}
-    ANIMAL_BOARDING = {"amenity": "animal_boarding"}
-    MORTUARY = {"amenity": "mortuary"}
 
     DATA_CENTRE = {"telecom": "data_center"}
-
-    VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
-    VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
-    VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
-    VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
-    VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
-    VENDING_MACHINE_KEYS = {"amenity": "vending_machine", "vending": "key"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
@@ -411,6 +425,7 @@ def apply_category(category, item: Feature):
 top_level_tags = [
     "aeroway",
     "amenity",
+    "cemetery",
     "club",
     "craft",
     "dark_store",
@@ -789,6 +804,62 @@ def apply_clothes(clothes: [Clothes], item: Feature):
     for c in clothes:
         apply_yes_no(f"clothes:{c.value}", item, True)
         apply_category({"clothes": c.value}, item)
+
+
+class Vending(Enum):
+    """
+    https://wiki.openstreetmap.org/wiki/Key:vending
+    """
+
+    BICYCLE_TUBE = "bicycle_tube"
+    BOTTLE_RETURN = "bottle_return"
+    COFFEE = "coffee"
+    DRINKS = "drinks"
+    FOOD = "food"
+    KEYS = "key"
+    LAUNDRY = "laundry"
+    PARKING_TICKETS = "parking_tickets"
+
+
+def add_vending(vending: Vending | list[Vending], item: Feature):
+    if item["extras"].get("vending"):
+        current = item["extras"]["vending"].split(";")
+    else:
+        current = []
+
+    for v in vending if isinstance(vending, list) else [vending]:
+        if v.value not in current:
+            current.append(v.value)
+
+    item["extras"]["vending"] = ";".join(current)
+
+
+class Sport(Enum):
+    """
+    https://wiki.openstreetmap.org/wiki/Key:sport
+    """
+
+    SOCCER = "soccer"
+    TENNIS = "tennis"
+    BASKETBALL = "basketball"
+    BASEBALL = "baseball"
+    SWIMMING = "swimming"
+    EQUESTRIAN = "equestrian"
+    AMERICAN_FOOTBALL = "american_football"
+    CRICKET = "cricket"
+
+
+def add_sport(sport: Sport | list[Sport], item: Feature):
+    if item["extras"].get("sport"):
+        current = item["extras"]["sport"].split(";")
+    else:
+        current = []
+
+    for v in sport if isinstance(sport, list) else [sport]:
+        if v.value not in current:
+            current.append(v.value)
+
+    item["extras"]["sport"] = ";".join(current)
 
 
 class HealthcareSpecialities(Enum):

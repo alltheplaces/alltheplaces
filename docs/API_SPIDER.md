@@ -24,8 +24,8 @@ There are a good number of sites that employ their own bespoke API (typically re
 
 You are encouraged to run the following checks as a first step:
 
-- `pipenv run scrapy sitemap http://example.com/` - determine if there are sitemaps and useful links - see [sitemap](./SITEMAP.md) for your next steps.
-- `pipenv run scrapy sd http://example.com/path/to/individual/store` or pasting the URL into https://validator.schema.org/ - see [structured data](./STRUCTURED_DATA.md)
+- `uv run scrapy sitemap http://example.com/` - determine if there are sitemaps and useful links - see [sitemap](./SITEMAP.md) for your next steps.
+- `uv run scrapy sd http://example.com/path/to/individual/store` or pasting the URL into https://validator.schema.org/ - see [structured data](./STRUCTURED_DATA.md)
 
 If these yield no results or you wish to explore more efficient ways to query; the next thing to do is to figure out that **there is an API** and **how it is driven**.
 
