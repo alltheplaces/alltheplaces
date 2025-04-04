@@ -3,7 +3,7 @@ import scrapy
 from locations.hours import DAYS_BG, OpeningHours
 
 
-class SopharnacyBGSpider(scrapy.Spider):
+class SopharmacyBGSpider(scrapy.Spider):
     name = "sopharmacy_bg"
     item_attributes = {"brand": "SOpharmacy", "brand_wikidata": "Q108852081"}
     allowed_domains = ["sopharmacy.bg"]
