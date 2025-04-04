@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class UFCGymUSSpider(SitemapSpider):
+class UfcGymUSSpider(SitemapSpider):
     name = "ufc_gym_us"
     item_attributes = {"brand": "UFC GYM", "brand_wikidata": "Q122511683"}
     sitemap_urls = ["https://www.ufcgym.com/sitemap.xml"]
