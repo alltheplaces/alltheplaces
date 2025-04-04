@@ -58,7 +58,7 @@ BASH_BRANDS = {
     "SNEAKER FACTORY": {"brand": "The Sneaker Factory", "brand_wikidata": "Q116290301"},
     "SODA BLOC": {"brand": "SODA Bloc", "brand_wikidata": "Q117406709", "extras": Categories.SHOP_CLOTHES.value},
     "SPORTSCENE": {"brand": "sportscene", "brand_wikidata": "Q116378841"},
-    "SS": {"brand": "Sportsportscenescene", "brand_wikidata": "Q116378841"},
+    "SS": {"brand": "sportscene", "brand_wikidata": "Q116378841"},
     "STERNS": {"brand": "Sterns", "brand_wikidata": "Q116430300"},
     "STN": {"brand": "Sterns", "brand_wikidata": "Q116430300"},
     "TOTALSPORTS": {"brand": "Totalsports", "brand_wikidata": "Q116379123"},
