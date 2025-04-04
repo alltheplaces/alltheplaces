@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.hours import DAYS_BG, OpeningHours
+from locations.items import Feature
 
 
 class SopharmacyBGSpider(scrapy.Spider):
@@ -13,7 +14,7 @@ class SopharmacyBGSpider(scrapy.Spider):
         for store in response.json()["contact-map"]["features"]:
             item = {
                 "ref": store["id"],
-                "name": store["properties"]["name"],
+                "branch": store["properties"]["name"],
                 "street_address": store["properties"]["address"].strip(),
                 "city": store["properties"]["city"],
                 "lat": store["geometry"]["coordinates"][1],
@@ -24,4 +25,4 @@ class SopharmacyBGSpider(scrapy.Spider):
             item["opening_hours"] = OpeningHours()
             for day in store["properties"]["worktime"]:
                 item["opening_hours"].add_ranges_from_string(day, DAYS_BG)
-            yield item
+            yield Feature(**item)
