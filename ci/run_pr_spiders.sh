@@ -131,13 +131,15 @@ if [ $spider_count -gt 15 ]; then
     exit 1
 fi
 
-# Manually run a couple spiders when uv.lock or pyproject.toml changes
-if echo "${changed_filenames}" | grep -q "pyproject.toml" || echo "${changed_filenames}" | grep -q "uv.lock"; then
-    echo "pyproject.toml or uv.lock changed. Running a couple spiders."
-    spiders=("locations/spiders/the_works.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
-elif [ "$spider_count" -eq 0 ]; then
-    (>&2 echo "no spiders modified (only deleted?)")
-    exit 0
+if [ "$spider_count" -eq 0 ]; then
+    # Manually run a couple spiders when uv.lock or pyproject.toml changes
+    if echo "${changed_filenames}" | grep -q "pyproject.toml" || echo "${changed_filenames}" | grep -q "uv.lock"; then
+        echo "pyproject.toml or uv.lock changed. Running a couple spiders."
+        spiders=("locations/spiders/the_works.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
+    else
+        (>&2 echo "no spiders modified (only deleted?)")
+        exit 0
+    fi
 fi
 
 if grep PLAYWRIGHT -q -m 1 $spiders; then
