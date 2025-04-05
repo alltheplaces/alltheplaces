@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class MarstonsPlcSpider(scrapy.Spider):
     name = "marstons_plc"
-    item_attributes = {"brand": "Marston's", "brand_wikidata": "Q6773982"}
+    MARSTONS = {"brand": "Marston's", "brand_wikidata": "Q6773982"}
     allowed_domains = ["marstonspubs.co.uk"]
     store_types = {}
 
@@ -87,6 +87,10 @@ class MarstonsPlcSpider(scrapy.Spider):
                 "email": place["email"],
                 "brand": place["pfLabel"],
             }
+
+            if properties["brand"] == "Marston's":
+                properties.update(self.MARSTONS)
+
             apply_category(Categories.PUB, properties)
             apply_yes_no("payment:marstons_privilege_card", properties, place["sv"], False)
 
