@@ -9,7 +9,11 @@ from locations.storefinders.socrata import SocrataSpider
 
 class NewYorkCityDepartmentOfSanitationWasteBasketsUSSpider(SocrataSpider):
     name = "new_york_city_department_of_sanitation_waste_baskets_us"
-    item_attributes = {"operator": "New York City Department of Sanitation", "operator_wikidata": "Q8354833", "state": "NY"}
+    item_attributes = {
+        "operator": "New York City Department of Sanitation",
+        "operator_wikidata": "Q8354833",
+        "state": "NY",
+    }
     host = "data.cityofnewyork.us"
     resource_id = "8znf-7b2c"
 
