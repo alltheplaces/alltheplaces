@@ -48,6 +48,43 @@ get_installation_token() {
          | jq -r '.token'
 }
 
+upload_to_s3() {
+    # Upload a file to S3
+    local file_path="$1"
+    local s3_path="$2"
+
+    uv run aws s3 cp --only-show-errors "${file_path}" "s3://${s3_path}"
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "uploading ${file_path} to s3 failed with exit code ${retval}")
+        exit 1
+    fi
+}
+
+upload_to_r2() {
+    # Upload a file to R2
+    local file_path="$1"
+    local r2_path="$2"
+
+    AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+    AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+    uv run aws s3 cp --endpoint-url="${R2_ENDPOINT_URL}" --only-show-errors "${file_path}" "s3://${r2_path}"
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "uploading ${file_path} to R2 failed with exit code ${retval}")
+        exit 1
+    fi
+}
+
+upload_file() {
+    # Upload a file to a specified location (S3 and R2)
+    local file_path="$1"
+    local path="$2"
+
+    upload_to_s3 "${file_path}" "${S3_BUCKET}/${path}"
+    upload_to_r2 "${file_path}" "${R2_BUCKET}/${path}"
+}
+
 PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
 if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY_BASE64}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
@@ -155,12 +192,7 @@ do
         FAILURE_REASON="timeout"
     fi
 
-    uv run aws --only-show-errors s3 cp ${LOGFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt
-    retval=$?
-    if [ ! $retval -eq 0 ]; then
-        (>&2 echo "log copy to s3 failed with exit code ${retval}")
-        exit 1
-    fi
+    upload_file "${LOGFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
 
     LOGFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
     echo "${spider} log: ${LOGFILE_URL}"
@@ -180,12 +212,7 @@ do
             continue
         fi
 
-        uv run aws s3 cp --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson
-        retval=$?
-        if [ ! $retval -eq 0 ]; then
-            (>&2 echo "output copy to s3 failed with exit code ${retval}")
-            exit 1
-        fi
+        upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
@@ -193,17 +220,8 @@ do
             echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}"
         fi
 
-        uv run aws s3 cp --only-show-errors ${PARQUETFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet
-        retval=$?
-        if [ ! $retval -eq 0 ]; then
-            (>&2 echo "parquet copy to s3 failed with exit code ${retval}")
-        fi
-
-        uv run aws s3 cp --only-show-errors ${STATSFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json
-        retval=$?
-        if [ ! $retval -eq 0 ]; then
-            (>&2 echo "stats copy to s3 failed with exit code ${retval}")
-        fi
+        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
+        upload_file "${STATSFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json"
 
         # Check the stats JSON to look for things that we consider warnings or errors
         if [ ! -f "${STATSFILE}" ]; then
