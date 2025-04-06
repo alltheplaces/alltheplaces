@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 
 class UfcGymUSSpider(SitemapSpider):
     name = "ufc_gym_us"
-    item_attributes = {"brand": "UFC GYM", "brand_wikidata": "Q122511683"}
+    item_attributes = {"brand": "UFC Gym", "brand_wikidata": "Q122511683"}
     sitemap_urls = ["https://www.ufcgym.com/sitemap.xml"]
     sitemap_rules = [(r"/locations/(?!list)[-\w]+$", "parse")]
 
