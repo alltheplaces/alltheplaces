@@ -16,7 +16,13 @@ class DenverParksAndRecreationTreesUSSpider(ArcGISFeatureServerSpider):
     layer_id = "241"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature.get("SPECIES_BOTANIC") in ("Vacant Site", "_Vacant", "_Vacant site-not plantable", "Stump", "_Stump"):
+        if feature.get("SPECIES_BOTANIC") in (
+            "Vacant Site",
+            "_Vacant",
+            "_Vacant site-not plantable",
+            "Stump",
+            "_Stump",
+        ):
             return
         item["ref"] = feature["GlobalID"]
         item.pop("name", None)
@@ -30,10 +36,10 @@ class DenverParksAndRecreationTreesUSSpider(ArcGISFeatureServerSpider):
         if dbh_range_in := feature.get("DIAMETER"):
             if " to " in dbh_range_in:
                 dbh_low_in, dbh_high_in = dbh_range_in.split(" to ", 1)
-                item["extras"]["diameter:range"] = f"{dbh_low_in} - {dbh_high_in}\""
+                item["extras"]["diameter:range"] = f'{dbh_low_in} - {dbh_high_in}"'
             elif dbh_range_in.endswith("+"):
                 dbh_min_in = dbh_range_in.removesuffix("+").strip()
-                item["extras"]["diameter"] = f"{dbh_min_in}\""
+                item["extras"]["diameter"] = f'{dbh_min_in}"'
             elif dbh_range_in.isnumeric():
-                item["extras"]["diameter"] = f"{dbh_range_in}\""
+                item["extras"]["diameter"] = f'{dbh_range_in}"'
         yield item
