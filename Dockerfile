@@ -33,4 +33,4 @@ COPY . .
 ARG GIT_COMMIT
 ENV GIT_COMMIT=$GIT_COMMIT
 
-CMD ["/home/ubuntu/ci/run_all_spiders.sh"]
+CMD ["./ci/run_all_spiders.sh"]
