@@ -1,15 +1,11 @@
-import re
 from typing import Any
 
 from requests import Response
+from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
-from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
-from locations.structured_data_spider import StructuredDataSpider
-from scrapy.linkextractors import LinkExtractor
 
 
 class SproutsFarmersMarketSpider(CrawlSpider):
