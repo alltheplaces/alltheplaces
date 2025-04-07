@@ -10,8 +10,10 @@ from locations.json_blob_spider import JSONBlobSpider
 class GreaterSheppartonCityCouncilTreesAUSpider(JSONBlobSpider):
     name = "greater_shepparton_city_council_trees_au"
     item_attributes = {"operator": "Greater Shepparton City Council", "operator_wikidata": "Q133830205", "state": "VIC"}
-    allowed_domains =  ["data.gov.au"]
-    start_urls = ["https://data.gov.au/data/dataset/e794491f-2eb7-4035-8b0c-f7248c28feda/resource/8f46fcc0-778c-44d3-bba6-38ac9120123e/download/greater_shepparton_city_council_street_and_park_trees.json"]
+    allowed_domains = ["data.gov.au"]
+    start_urls = [
+        "https://data.gov.au/data/dataset/e794491f-2eb7-4035-8b0c-f7248c28feda/resource/8f46fcc0-778c-44d3-bba6-38ac9120123e/download/greater_shepparton_city_council_street_and_park_trees.json"
+    ]
     locations_key = ["features"]
 
     def pre_process_data(self, feature: dict) -> None:
