@@ -34,7 +34,7 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         "www.walkaboutbars.co.uk": {"brand": "Walkabout", "brand_wikidata": "Q7962149", "cat": Categories.PUB},
         "www.beatone.co.uk": {"brand": "Be At One", "brand_wikidata": "Q110016786", "cat": Categories.BAR},
         "www.popworldparty.co.uk": {"brand": "Popworld", "cat": Categories.NIGHTCLUB},
-        "www.slugandlettuce.co.uk": {"brand": "Slug & Lettuce", "brand_wikidata": "Q7542224"},
+        "www.slugandlettuce.co.uk": {"brand": "Slug and Lettuce", "brand_wikidata": "Q7542224"},
         "www.crafted-social.co.uk": {"brand": "Crafted Social"},
         "www.socialpubandkitchen.co.uk": {"brand": "Social Pub & Kitchen"},
         # "www.pubsmiths.co.uk": {"brand": "Pubsmiths"},
