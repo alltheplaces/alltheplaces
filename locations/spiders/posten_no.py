@@ -37,7 +37,11 @@ class PostenNOSpider(Spider):
                 if rules["name"] != "openingHoursLabel":
                     continue
 
-                item["opening_hours"] = self.parse_opening_hours(rules)
+                try:
+                    item["opening_hours"] = self.parse_opening_hours(rules)
+                except:
+                    self.logger.error("Error parsing opening hours")
+
                 break
 
             if attributes["enhetstype"] in (1, 21):
@@ -55,6 +59,7 @@ class PostenNOSpider(Spider):
             elif attributes["enhetstype"] == 10:
                 apply_category(Categories.POST_BOX, item)
             else:
+                item["extras"]["enhetstype"] = str(attributes["enhetstype"])
                 self.logger.error("Unexpected type: {}".format(attributes["enhetstype"]))
 
             yield item
