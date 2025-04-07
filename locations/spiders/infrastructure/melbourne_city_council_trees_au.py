@@ -9,7 +9,12 @@ from locations.storefinders.opendatasoft_explore import OpendatasoftExploreSpide
 
 class MelbourneCityCouncilTreesAUSpider(OpendatasoftExploreSpider):
     name = "melbourne_city_council_trees_au"
-    item_attributes = {"operator": "Melbourne City Council", "operator_wikidata": "Q56477763", "state": "VIC", "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "Melbourne City Council",
+        "operator_wikidata": "Q56477763",
+        "state": "VIC",
+        "nsi_id": "N/A",
+    }
     api_endpoint = "https://data.melbourne.vic.gov.au/api/explore/v2.1/"
     dataset_id = "trees-with-species-and-dimensions-urban-forest"
 
