@@ -14,7 +14,7 @@ class MbplcGBSpider(WoosmapSpider):
         "Ember Inns": {"brand": "Ember Inns", "brand_wikidata": "Q116272278"},
         "Harvester": {"brand": "Harvester", "brand_wikidata": "Q5676915"},
         "Miller & Carter": {"brand": "Miller & Carter", "brand_wikidata": "Q87067401"},
-        "Nicholsons": {"brand": "Nicholsons", "brand_wikidata": "Q113130666"},
+        "Nicholsons": {"brand": "Nicholson's", "brand_wikidata": "Q113130666"},
         "O'Neill's": {"brand": "O'Neill's", "brand_wikidata": "Q7071905"},
         "Premium Country Pubs": {"brand": "Premium Country Pubs", "brand_wikidata": "Q118606900"},
         "Stonehouse": {"brand": "Stonehouse", "brand_wikidata": "Q78192049"},

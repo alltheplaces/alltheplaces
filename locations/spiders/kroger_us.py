@@ -28,7 +28,7 @@ BRANDS = {
     "https://www.kingsoopers.com/": {"brand": "King Soopers", "brand_wikidata": "Q6412065"},
     "https://www.kroger.com/": {"brand": "Kroger", "brand_wikidata": "Q153417"},
     "https://www.marianos.com/": {"brand": "Mariano's Fresh Market", "brand_wikidata": "Q55622168"},
-    "https://www.metromarket.net/": {"brand": "Metro Market", "brand_wikidata": "Q7371288"},
+    "https://www.metromarket.net/": {"brand": "Metro Market"},
     "https://www.pay-less.com/": {"brand": "Pay Less", "brand_wikidata": "Q7156587"},
     "https://www.picknsave.com/": {"brand": "Pick 'n Save", "brand_wikidata": "Q7371288"},
     "https://www.qfc.com/": {"brand": "QFC", "brand_wikidata": "Q7265425"},
