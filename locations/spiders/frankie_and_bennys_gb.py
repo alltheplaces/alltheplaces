@@ -1,7 +1,7 @@
 from typing import Any, Iterable
 from urllib.parse import urljoin
 
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.hours import DAYS_FULL, OpeningHours
@@ -12,8 +12,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class FrankieAndBennysGBSpider(Spider):
     name = "frankie_and_bennys_gb"
     item_attributes = {"brand": "Frankie & Benny's", "brand_wikidata": "Q5490892"}
-    start_urls = ["https://netapi.bigtablegroup.com/api/v1/content/search-restaurants/"]
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"brandkey": "frankies"}}
+    api = "https://netapi.bigtablegroup.com/api/v1/content/search-restaurants/"
+    brand_key = "frankies"
+
+    def start_requests(self) -> Iterable[JsonRequest]:
+        yield JsonRequest(url=self.api, headers={"brandkey": self.brand_key})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["restaurants"]:
