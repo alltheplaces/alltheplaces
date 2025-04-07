@@ -4,18 +4,14 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.storefinders.opendatasoft_explore import OpendatasoftExploreSpider
 
 
-class MelbourneCityCouncilTreesAUSpider(JSONBlobSpider):
+class MelbourneCityCouncilTreesAUSpider(OpendatasoftExploreSpider):
     name = "melbourne_city_council_trees_au"
-    item_attributes = {"operator": "Melbourne City Council", "operator_wikidata": "Q56477763", "nsi_id": "N/A"}
-    allowed_domains = ["data.melbourne.vic.gov.au"]
-    start_urls = [
-        "https://data.melbourne.vic.gov.au/api/explore/v2.1/catalog/datasets/trees-with-species-and-dimensions-urban-forest/exports/json?lang=en&timezone=Australia%2FSydney"
-    ]
-    # Source data is a large file >50MB
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60, "DOWNLOAD_WARNSIZE": 134217728}
+    item_attributes = {"operator": "Melbourne City Council", "operator_wikidata": "Q56477763", "state": "VIC", "nsi_id": "N/A"}
+    api_endpoint = "https://data.melbourne.vic.gov.au/api/explore/v2.1/"
+    dataset_id = "trees-with-species-and-dimensions-urban-forest"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["com_id"])
