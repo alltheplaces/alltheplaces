@@ -12,10 +12,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class FrankieAndBennysGBSpider(Spider):
     name = "frankie_and_bennys_gb"
     item_attributes = {"brand": "Frankie & Benny's", "brand_wikidata": "Q5490892"}
-    start_urls = ["https://api.bigtablegroup.com/cdg/allRestaurants/frankies"]
+    start_urls = ["https://netapi.bigtablegroup.com/api/v1/content/search-restaurants/"]
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"brandkey": "frankies"}}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
+        for location in response.json()["restaurants"]:
             item = Feature()
             item["ref"] = location["storeId"]
             item["lat"] = location["addressLocation"]["lat"]
