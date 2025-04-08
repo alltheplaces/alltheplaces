@@ -1,7 +1,10 @@
+from typing import Iterable
+
 import scrapy
 from requests_cache import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -9,7 +12,11 @@ class HsbcTWSpider(StructuredDataSpider):
     name = "hsbc_tw"
     item_attributes = {"brand": "HSBC", "brand_wikidata": "Q5635861"}
     start_urls = ["https://www.hsbc.com.tw/en-tw/ways-to-bank/branch/"]
-    wanted_types = ["Place"]
+
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
+            if ld_obj.get("address"):  # @type key is not present for the desired ld_data
+                yield ld_obj
 
     def parse(self, response: Response, **kwargs):
         for branch in response.xpath(r'//*[@class="desktop"]//td[2]').xpath("normalize-space()").getall():
