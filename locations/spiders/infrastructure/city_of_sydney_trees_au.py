@@ -18,6 +18,7 @@ class CityOfSydneyTreesAUSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["asset_id"]
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         item["extras"]["species"] = feature.get("SpeciesName")
         item["extras"]["taxon:en"] = feature.get("CommonName")
         if height_m := feature.get("TreeHeight"):

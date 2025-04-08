@@ -18,6 +18,7 @@ class AustralianCapitalTerritoryGovernmentTreesAUSpider(ArcGISFeatureServerSpide
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["ASSET_ID"]
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         if species := feature.get("BOTANICAL_NAME"):
             item["extras"]["species"] = species
         if genus := feature.get("GENUS"):
