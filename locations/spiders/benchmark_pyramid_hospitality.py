@@ -33,7 +33,7 @@ class BenchmarkPyramidHospitalitySpider(scrapy.Spider):
             if "Resort" in item["name"]:
                 apply_category(Categories.LEISURE_RESORT, item)
             elif "Center" in item["name"]:
-                apply_category({"amenity": "conference_centre"}, item)
+                apply_category(Categories.CONFERENCE_CENTRE, item)
             else:
                 apply_category(Categories.HOTEL, item)
 
