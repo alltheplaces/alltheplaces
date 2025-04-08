@@ -26,7 +26,7 @@ class BanxicoMXSpider(Spider):
         "40030": ("BanBajío", "Q5718183"),
         "40002": ("Banamex", "Q2646652"),
         "40072": ("Banorte", "Q806914"),
-        "40012": ("BBVA", "Q2876794"),
+        "40012": ("BBVA México", "Q2876794"),
         "40021": ("HSBC", "Q5635881"),
         "40130": ("Compartamos Banco ICR", "Q2990370"),
         "40036": ("ICR Inbursa", "Q731123"),

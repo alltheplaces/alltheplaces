@@ -30,7 +30,7 @@ class MarriottHotelsSpider(scrapy.Spider):
 
     # Continue policy of ignoring collection hotels for now.
     my_brands = {
-        "MC": ["Marriott Hotels & Resorts", "Q3918608"],
+        "MC": ["Marriott", "Q3918608"],
         "AR": ["AC Hotels", "Q5653536"],
         "AK": "ignore",  # Autograph Collection
         "AL": ["Aloft Hotels", "Q4734166"],
@@ -54,7 +54,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "PR": ["Protea Hotels", "Q17092570"],
         "RI": ["Residence Inn by Marriott", "Q7315394"],
         "RZ": ["Ritz-Carlton", "Q782200"],
-        "SI": ["Sheraton Hotels and Resorts", "Q634831"],
+        "SI": ["Sheraton", "Q634831"],
         "SH": ["SpringHill Suites", "Q7580351"],
         "TX": "ignore",  # Tribute Portfolio
         "XR": ["St. Regis Hotels & Resorts", "Q30715430"],
