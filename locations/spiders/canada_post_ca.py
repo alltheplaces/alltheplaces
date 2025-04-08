@@ -18,9 +18,6 @@ class CanadaPostCASpider(ArcGISFeatureServerSpider):
     layer_id = "0"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature["grouping"] not in ["Post Office", "Pick and Drop", "Parcel Pickup"]:
-            raise RuntimeError("Unknown feature type detected and ignored: {}".format(feature["grouping"]))
-
         item["ref"] = feature["site"]
         item.pop("name", None)
         item["name"] = feature["displaynameen"]
@@ -46,10 +43,17 @@ class CanadaPostCASpider(ArcGISFeatureServerSpider):
             item["extras"]["post_office:brand"] = CANADA_POST["brand"]
             item["extras"]["post_office:brand:wikidata"] = CANADA_POST["brand_wikidata"]
             item["extras"]["post_office:parcel_to"] = "Canada Post"
+        elif feature["grouping"] == "Post Point":
+            apply_category(Categories.POST_PARTNER, item)
+            item["operator"] = feature["sitebusinessname"]
+            item["extras"]["post_office:brand"] = CANADA_POST["brand"]
+            item["extras"]["post_office:brand:wikidata"] = CANADA_POST["brand_wikidata"]
+        else:
+            self.crawler.stats.inc_value(f'{self.name}/unknown_feature_type/{feature["grouping"]}')
 
         yield item
 
-    def parse_opening_hours(self, feature: dict) -> OpeningHours():
+    def parse_opening_hours(self, feature: dict) -> OpeningHours:
         hours_keys_list = [
             ("Mo", "openmonam", "closemonam", "openmonpm", "closemonpm"),
             ("Tu", "opentueam", "closetueam", "opentuepm", "closetuepm"),
