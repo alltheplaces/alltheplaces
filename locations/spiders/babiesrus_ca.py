@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BabiesrusCASpider(Spider):
-    name = "babiesrus_CA"
+    name = "babiesrus_ca"
     item_attributes = {"brand": "Babies R Us", "brand_wikidata": "Q17232036"}
     start_urls = ["https://www.babiesrus.ca/en/stores-findstores?batch=100&showMap=false&radius=25000"]
 
