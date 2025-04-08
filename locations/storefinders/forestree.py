@@ -37,6 +37,7 @@ class ForestreeSpider(Spider):
     def parse_species_list(self, response: Response) -> Iterable[JsonRequest]:
         for species in response.json()["features"]:
             self._species[species["id"]] = {
+                "protected": "yes",
                 "genus": species["properties"]["genus"],
                 "species": species["properties"]["species"],
                 "taxon:en": species["properties"]["common_name"],
