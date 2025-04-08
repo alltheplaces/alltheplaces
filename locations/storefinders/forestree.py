@@ -29,7 +29,10 @@ class ForestreeSpider(Spider):
     _species: dict = {}
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(url=f"https://{self.host}/storage/data/{self.customer_id}/{self.customer_id}_all_species.geojson", callback=self.parse_species_list)
+        yield JsonRequest(
+            url=f"https://{self.host}/storage/data/{self.customer_id}/{self.customer_id}_all_species.geojson",
+            callback=self.parse_species_list,
+        )
 
     def parse_species_list(self, response: Response) -> Iterable[JsonRequest]:
         for species in response.json()["features"]:
@@ -38,7 +41,10 @@ class ForestreeSpider(Spider):
                 "species": species["properties"]["species"],
                 "taxon:en": species["properties"]["common_name"],
             }
-        yield JsonRequest(url=f"https://{self.host}/storage/data/{self.customer_id}/{self.customer_id}_trees.geojson", callback=self.parse_trees_list)
+        yield JsonRequest(
+            url=f"https://{self.host}/storage/data/{self.customer_id}/{self.customer_id}_trees.geojson",
+            callback=self.parse_trees_list,
+        )
 
     def parse_trees_list(self, response: Response) -> Iterable[Feature]:
         for tree in response.json()["features"]:
