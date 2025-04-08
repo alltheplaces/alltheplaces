@@ -20,6 +20,7 @@ class CityOfPerthTreesAUSpider(ArcGISFeatureServerSpider):
         item["ref"] = str(feature["TREE_ID"])
         item["city"] = feature["SUBURB"]
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         item["extras"]["species"] = feature.get("BOTANICAL_NAME")
         item["extras"]["taxon:en"] = feature.get("COMMON_NAME")
         if height_m := feature.get("TREE_HEIGHT"):
