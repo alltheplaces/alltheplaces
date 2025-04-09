@@ -30,4 +30,5 @@ class MagasinVertFRSpider(JSONBlobSpider):
             item.update(brand_info)
             item["branch"] = item.pop("name").removeprefix(item["brand"]).strip()
             item["name"] = item["brand"]
+        item["website"] = feature.get("cms_page_url")
         yield item
