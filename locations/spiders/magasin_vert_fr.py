@@ -28,4 +28,6 @@ class MagasinVertFRSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if brand_info := self.BRANDS.get(feature.get("store_type")):
             item.update(brand_info)
+            item["branch"] = item.pop("name").removeprefix(item["brand"]).strip()
+            item["name"] = item["brand"]
         yield item
