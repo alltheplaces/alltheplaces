@@ -22,7 +22,12 @@ class PioneerCASpider(scrapy.Spider):
             item["city"] = location["siteCity"]
             item["state"] = location["siteStateProvince"]
             item["postcode"] = location["sitePostalCode"]
-            item["website"] = "https://journie.ca/pioneer/on-en/locations/" + location["siteNumber"]
+            item["website"] = item["extras"]["website:en"] = "https://journie.ca/pioneer/on-en/locations/{}".format(
+                location["siteNumber"]
+            )
+            item["extras"]["website:fr"] = "https://journie.ca/pioneer/on-fr/locations/{}".format(
+                location["siteNumber"]
+            )
             apply_category(Categories.FUEL_STATION, item)
             item["opening_hours"] = OpeningHours()
             for day_time in location["siteRegularHours"]:
