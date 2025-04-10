@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class SanFranciscoMtaParkingMetersUSSpider(ArcGISFeatureServerSpider):
-    name = "san_francisco_mta_parking_meters_us"
+class SanFranciscoMtaParkingSpacesUSSpider(ArcGISFeatureServerSpider):
+    name = "san_francisco_mta_parking_spaces_us"
     item_attributes = {
         "operator": "San Francisco Municipal Transportation Agency",
         "operator_wikidata": "Q7414072",
@@ -21,5 +21,6 @@ class SanFranciscoMtaParkingMetersUSSpider(ArcGISFeatureServerSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["POST_ID"])
-        apply_category(Categories.VENDING_MACHINE_PARKING_TICKETS, item)
+        item["housenumber"] = str(feature["STREET_NUM"])
+        apply_category(Categories.PARKING_SPACE, item)
         yield item
