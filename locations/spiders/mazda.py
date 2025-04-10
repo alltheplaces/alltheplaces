@@ -4,11 +4,12 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 
 
 class MazdaSpider(scrapy.Spider):
     name = "mazda"
-    item_attributes = {"brand": "Mazda", "brand_wikidata": "Q35996"}
+    item_attributes = MAZDA_SHARED_ATTRIBUTES
     countries = {
         "at": "https://www.mazda.at/formular/haendlersuche/",
         "be": "https://fr.mazda.be/formulaires/rechercher-un-concessionnaire/",

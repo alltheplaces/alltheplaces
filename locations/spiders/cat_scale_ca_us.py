@@ -1,6 +1,7 @@
 from scrapy.spiders import CSVFeedSpider
 
-from locations.items import Feature
+from locations.categories import apply_category
+from locations.dict_parser import DictParser
 
 
 class CatScaleCAUSSpider(CSVFeedSpider):
@@ -14,17 +15,15 @@ class CatScaleCAUSSpider(CSVFeedSpider):
     }
 
     def parse_row(self, response, row):
-        item = Feature()
+        item = DictParser.parse(row)
         item["ref"] = row["CATScaleNumber"]
-        item["state"] = row["State"]
         item["city"] = row["InterstateCity"]
         item["located_in"] = row["TruckstopName"]
         item["street_address"] = row["InterstateAddress"]
         item["postcode"] = row["InterstatePostalCode"]
         item["country"] = "US" if row["InterstatePostalCode"].isdigit() else "CA"
-        item["phone"] = row["PhoneNumber"]
+        item.pop("website")
         item["extras"]["fax"] = row["FaxNumber"]
-        item["lat"] = row["Latitude"]
-        item["lon"] = row["Longitude"]
         item["extras"]["located_in:website"] = row["URL"]
+        apply_category({"amenity": "weighbridge"}, item)
         return item

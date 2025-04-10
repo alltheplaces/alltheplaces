@@ -3,11 +3,12 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 
 
 class MazdaUSSpider(scrapy.Spider):
     name = "mazda_us"
-    item_attributes = {"brand": "Mazda", "brand_wikidata": "Q35996"}
+    item_attributes = MAZDA_SHARED_ATTRIBUTES
     start_urls = ["https://www.mazdausa.com/handlers/dealer.ajax"]
 
     def parse(self, response, **kwargs):

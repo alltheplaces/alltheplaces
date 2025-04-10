@@ -46,7 +46,7 @@ class MidcountiesCooperativeGBSpider(Spider):
                 item["brand_wikidata"] = "Q7726526"
                 apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
             elif store["tradingGroupId"] == 4:
-                apply_category({"amenity": "kindergarten"}, item)
+                apply_category(Categories.KINDERGARTEN, item)
             elif store["tradingGroupId"] == 6:
                 item["brand"] = "Post Office"
                 item["brand_wikidata"] = "Q1783168"

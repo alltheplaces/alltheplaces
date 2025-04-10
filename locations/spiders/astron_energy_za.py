@@ -1,6 +1,6 @@
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -40,11 +40,7 @@ ASTRON_PROPERTIES = {
 
 class AstronEnergyZASpider(JSONBlobSpider):
     name = "astron_energy_za"
-    item_attributes = {
-        "brand": "Astron Energy",
-        "brand_wikidata": "Q120752181",
-        "extras": Categories.FUEL_STATION.value,
-    }
+    item_attributes = {"brand": "Astron Energy", "brand_wikidata": "Q120752181"}
     start_urls = ["https://www.astronenergy.co.za/umbraco/api/station/Stations"]
     locations_key = "stations"
 
@@ -71,4 +67,7 @@ class AstronEnergyZASpider(JSONBlobSpider):
             item["opening_hours"].add_days_range(DAYS, "00:00", "24:00")
         else:
             item["opening_hours"].add_ranges_from_string("Mo-Su " + location["workingHours"])
+
+        apply_category(Categories.FUEL_STATION, item)
+
         yield item

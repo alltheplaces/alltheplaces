@@ -10,16 +10,10 @@ class StarbucksZASpider(JSONBlobSpider):
     name = "starbucks_za"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES | {"extras": Categories.COFFEE_SHOP.value}
     locations_key = "data"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for lat, lon in country_iseadgg_centroids("ZA", 158):
-            yield JsonRequest(
-                url=f"https://www.starbucks.co.za/api/v2/stores/?filter%5Bcoordinates%5D%5Blatitude%5D={lat}&filter%5Bcoordinates%5D%5Blongitude%5D={lon}&filter%5Bradius%5D=158"
-            )
-        extra_locations = [
-            (-34, 18.45),  # Cape Town
-        ]
-        for lat, lon in extra_locations:
             yield JsonRequest(
                 url=f"https://www.starbucks.co.za/api/v2/stores/?filter%5Bcoordinates%5D%5Blatitude%5D={lat}&filter%5Bcoordinates%5D%5Blongitude%5D={lon}&filter%5Bradius%5D=158"
             )
