@@ -30,5 +30,6 @@ class EpcorManholesCASpider(SocrataSpider):
         else:
             self.logger.warning("Unknown utility type: {}".format(feature["type"]))
         if construction_year := feature.get("year_const"):
-            item["extras"]["start_date"] = construction_year
+            if construction_year != "9999":
+                item["extras"]["start_date"] = construction_year
         yield item
