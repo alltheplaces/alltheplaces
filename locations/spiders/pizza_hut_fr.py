@@ -1,4 +1,4 @@
-from locations.spiders.pizza_hut_gb import PIZZA_HUT, PizzaHutGBSpider
+from locations.spiders.pizza_hut_gb import PizzaHutGBSpider
 
 
 class PizzaHutFRSpider(PizzaHutGBSpider):
