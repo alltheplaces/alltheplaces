@@ -29,5 +29,5 @@ class SanFranciscoDepartmentOfPublicWorksTreesUSSpider(SocrataSpider):
                 item["operator"] = "San Francisco Department of Public Works"
                 item["operator_wikidata"] = "Q7413995"
         if dbh_in := feature.get("dbh"):
-            item["extras"]["diameter"] = f"{dbh_in}\""
+            item["extras"]["diameter"] = f'{dbh_in}"'
         yield item
