@@ -21,6 +21,7 @@ class GreaterSheppartonCityCouncilTreesAUSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         item["extras"]["genus"] = feature["genus"]
         item["extras"]["species"] = feature["species"]
 

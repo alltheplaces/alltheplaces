@@ -31,6 +31,7 @@ class DenverParksAndRecreationTreesUSSpider(ArcGISFeatureServerSpider):
         item["housenumber"] = feature.get("ADDRESS")
         item["street_address"] = feature.get("STREET")
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         item["extras"]["species"] = feature.get("SPECIES_BOTANIC")
         item["extras"]["taxon:en"] = feature.get("SPECIES_COMMON")
         if dbh_range_in := feature.get("DIAMETER"):

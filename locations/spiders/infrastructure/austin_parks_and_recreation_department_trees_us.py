@@ -23,6 +23,7 @@ class AustinParksAndRecreationDepartmentTreesUSSpider(ArcGISFeatureServerSpider)
         item.pop("name", None)
         item["ref"] = str(feature["GlobalID"])
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         item["extras"]["species"] = feature["SCIENTIFIC_NAME"]
         item["extras"]["taxon:en"] = feature["SPECIES_NAME"]
         if dbh_in := feature.get("DBH"):
