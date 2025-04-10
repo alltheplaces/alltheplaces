@@ -1,4 +1,3 @@
-import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -65,5 +64,5 @@ class SeattleCityCouncilTreesUSSpider(ArcGISFeatureServerSpider):
         item["extras"]["species"] = feature.get("SCIENTIFIC_NAME")
         item["extras"]["taxon:en"] = feature.get("COMMON_NAME")
         if dbh_in := feature.get("dbh"):
-            item["extras"]["diameter"] = f"{dbh_in}\""
+            item["extras"]["diameter"] = f'{dbh_in}"'
         yield item
