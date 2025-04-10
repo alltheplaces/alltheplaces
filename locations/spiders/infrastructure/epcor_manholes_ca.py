@@ -18,13 +18,13 @@ class EpcorManholesCASpider(SocrataSpider):
         item["street_address"] = feature.get("road_name")
         item["city"] = feature.get("neighbourhood_name")
         apply_category(Categories.MANHOLE, item)
-        if feature.get("type") == "STORM":
+        if feature.get("type") == "STORM" or feature.get("type") == "COMBINED":
             item["extras"]["utility"] = "stormwater"
             item["extras"]["substance"] = "rainwater"
-        elif feature.get("type") == "SANITARY":
+        if feature.get("type") == "SANITARY" or feature.get("type") == "COMBINED":
             item["extras"]["utility"] = "sewerage"
             item["extras"]["substance"] = "sewage"
-        else:
+        if feature.get("type") not in ["STORM", "SANITARY", "COMBINED"]:
             self.logger.warning("Unknown utility type: {}".format(feature["type"]))
         if construction_year := feature.get("year_const"):
             item["extras"]["start_date"] = construction_year
