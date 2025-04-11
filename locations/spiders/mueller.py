@@ -1,73 +1,107 @@
-import urllib.parse
+from typing import Any, Iterable
 
+import chompjs
 import scrapy
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, OpeningHours
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
 class MuellerSpider(scrapy.Spider):
     name = "mueller"
+    item_attributes = {"brand": "Müller", "brand_wikidata": "Q1958759"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    storefinders = {
-        "www.mueller.at": "/meine-filiale",
-        "www.mueller.ch": "/meine-filiale",
-        "www.mueller.de": "/meine-filiale",
-        "www.mueller.es": "/mis-tiendas",
-        "www.mueller.hr": "/moja-poslovnica",
-        "www.mueller.co.hu": "/mueller-uezletek",
-        "www.mueller.si": "/poslovalnice",
-    }
-    allowed_domains = storefinders.keys()
-    start_urls = ["https://%s/api/ccstore/allPickupStores/" % d for d in storefinders]
-    download_delay = 0.2
+    api = "https://backend.prod.ecom.mueller.de/"
+    headers = {}
 
-    def parse(self, response):
-        store_numbers = [s["storeNumber"] for s in response.json()]
-        for n in store_numbers:
-            url = response.urljoin(f"/api/ccstore/byStoreNumber/{n}/")
-            yield scrapy.Request(url, callback=self.parse_stores)
+    def start_requests(self) -> Iterable[Request]:
+        for country, url in [
+            ("AT", "https://www.mueller.at/storefinder/"),
+            ("CH", "https://www.mueller.ch/storefinder/"),
+            ("DE", "https://www.mueller.de/storefinder/"),
+            ("ES", "https://www.mueller.es/mis-tiendas/"),
+            ("HR", "https://www.mueller.hr/moja-poslovnica/"),
+            ("HU", "https://www.mueller.co.hu/mueller-uezletek/"),
+            ("SI", "https://www.mueller.si/poslovalnice/"),
+        ]:
+            yield Request(url=url, cb_kwargs=dict(country=country))
 
-    def parse_stores(self, response):
-        store = response.json()
-        details = store.get("cCStoreDtoDetails", {})
-        properties = {
-            "brand": "Müller",
-            "brand_wikidata": "Q1958759",
-            "lat": store["latitude"],
-            "lon": store["longitude"],
-            "branch": store["storeName"],
-            "name": "Müller",
-            "street_address": store["street"],
-            "city": store["city"],
-            "postcode": store["zip"],
-            "country": store["country"],
-            "opening_hours": self.parse_opening_hours(store),
-            "phone": details.get("phone", "").replace("/", " "),
-            "website": self.parse_website(response, store),
-            "ref": store["storeNumber"],
-        }
-        feature = Feature(**properties)
-        apply_category(Categories.SHOP_CHEMIST, feature)
-        yield feature
+    def parse(self, response: Response, country: str) -> Any:
+        data = chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        auth_details = data["props"]["pageProps"]["graphqlSettings"]["publicHost"]["header"]
+        self.headers = {auth_details["key"]: auth_details["value"]}
+        yield JsonRequest(
+            url=self.api,
+            data={
+                "query": """
+                    query GetStores($country: String!) {
+                        getStores(country: $country) {
+                            code
+                            }
+                    }
+                """,
+                "operationName": "GetStores",
+                "variables": {
+                    "country": country,
+                },
+            },
+            headers=self.headers,
+            callback=self.parse_store_ids,
+            cb_kwargs=dict(country=country),
+        )
 
-    def parse_opening_hours(self, store):
-        store_hours = store.get("ccStoreDetails", {}).get("openingHourWeek")
-        if not store_hours:
-            return None
-        opening_hours = OpeningHours()
-        for record in store_hours:
-            if record["open"]:
-                opening_hours.add_range(
-                    day=DAYS_EN[record["dayOfWeek"].title()],
-                    open_time=record["fromTime"],
-                    close_time=record["toTime"],
-                    time_format="%H:%M",
-                )
-        return opening_hours.as_opening_hours()
+    def parse_store_ids(self, response: Response, country: str) -> Any:
+        stores = response.json()["data"]["getStores"]
+        # Don't pull the data for whole list of stores in one go, to avoid non-responsive behaviour of API.
+        batch_size = 25
+        for i in range(0, len(stores), batch_size):
+            yield JsonRequest(
+                url=self.api,
+                data={
+                    "query": """
+                            query GetStoresByIds($storeIds: [String!]!, $country: String!) {
+                                getStoresByIds(storeIds: $storeIds, country: $country) {
+                                    id: code
+                                    address {
+                                        street_address: street
+                                        zip
+                                        town
+                                    }
+                                    assortments
+                                    company{
+                                        name
+                                    }
+                                    email
+                                    geoLocation{
+                                        lat
+                                        lng
+                                    }
+                                    name
+                                    openingHours{
+                                        day
+                                        openingTime
+                                        closingTime
+                                        startPauseTime
+                                        endPauseTime
+                                    }
+                                    phone
+                                    pickupTime
+                                }
+                            }
+                            """,
+                    "operationName": "GetStoresByIds",
+                    "variables": {
+                        "storeIds": [store["code"] for store in stores[i : i + batch_size]],
+                        "country": country,
+                    },
+                },
+                headers=self.headers,
+                callback=self.parse_stores,
+            )
 
-    def parse_website(self, response, store):
-        domain = urllib.parse.urlsplit(response.url).netloc
-        finder = self.storefinders[domain]
-        return response.urljoin("%s/%s" % (finder, store["link"]))
+    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["data"]["getStoresByIds"]:
+            item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
+            yield item
