@@ -25,5 +25,6 @@ class NapaSpider(CrawlSpider, StructuredDataSpider):
     time_format = "%H:%M:%S"
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["image"] = None
         apply_category(Categories.SHOP_CAR_PARTS, item)
         yield item
