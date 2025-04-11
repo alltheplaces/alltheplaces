@@ -6,6 +6,7 @@ from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class MuellerSpider(scrapy.Spider):
@@ -106,4 +107,8 @@ class MuellerSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
             item["phone"] = store["phone"].replace("/", "") if store["phone"] else None
+            item["opening_hours"] = OpeningHours()
+            for rule in store["openingHours"]:
+                if rule["openingTime"] and rule["closingTime"]:
+                    item["opening_hours"].add_range(rule["day"], rule["openingTime"], rule["closingTime"])
             yield item
