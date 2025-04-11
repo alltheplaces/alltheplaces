@@ -105,4 +105,5 @@ class MuellerSpider(scrapy.Spider):
         for store in response.json()["data"]["getStoresByIds"]:
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
+            item["phone"] = store["phone"].replace("/", "") if store["phone"] else None
             yield item
