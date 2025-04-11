@@ -1,87 +1,29 @@
-# -*- coding: utf-8 -*-
-import json
+from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-import scrapy
-
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class NapaSpider(scrapy.Spider):
+class NapaSpider(CrawlSpider, StructuredDataSpider):
     name = "napa"
     item_attributes = {"brand": "NAPA Auto Parts", "brand_wikidata": "Q6970842"}
-    allowed_domains = ["napaonline.com"]
-    start_urls = [
-        "https://www.napaonline.com/en/auto-parts-stores-near-me",
+    download_delay = 2
+    user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 90 * 1000}
+    start_urls = ["https://www.napaonline.com/en/auto-parts-stores-near-me"]
+    rules = [
+        Rule(LinkExtractor(allow=r"/en/auto-parts-stores-near-me/[a-z]{2}$")),
+        Rule(LinkExtractor(allow=r"/en/auto-parts-stores-near-me/[a-z]{2}/[-\w]+$"), callback="parse_sd"),
+        Rule(LinkExtractor(allow=r"/en/[a-z]{2}/[-\w]+/store/\d+"), callback="parse_sd"),
     ]
+    time_format = "%H:%M:%S"
 
-    def parse(self, response):
-        urls = response.xpath('//div[@class="box box-xpad-both nol-content-outer"]//a/@href').extract()
-        for url in urls:
-            if url not in ("/en/"):
-                yield scrapy.Request(response.urljoin(url), callback=self.parse2ndlevel)
-
-    def parse2ndlevel(self, response):
-        urls = response.xpath('//div[@class="store-browse-content"]//a/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse3rdlevel)
-
-    def parse3rdlevel(self, response):
-        if response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-        ).extract_first():
-            data = json.loads(
-                response.xpath(
-                    '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-                ).extract_first()
-            )
-
-            try:
-                state = data["address"]["addressRegion"]
-            except:
-                state = ""
-
-            properties = {
-                "ref": data["url"],
-                "name": data["name"],
-                "street_address": data["address"]["streetAddress"],
-                "city": data["address"]["addressLocality"],
-                "state": state,
-                "postcode": data["address"]["postalCode"],
-                "country": data["address"]["addressCountry"],
-                "phone": data.get("telephone"),
-                "lat": data["geo"]["latitude"],
-                "lon": data["geo"]["longitude"],
-            }
-
-            yield Feature(**properties)
-        else:
-            urls = response.xpath('//div[@class="store-browse-content-listing"]//a/@href').extract()
-            for url in urls:
-                yield scrapy.Request(response.urljoin(url), callback=self.parse4thlevel)
-
-    def parse4thlevel(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-            ).extract_first()
-        )
-
-        try:
-            state = data["address"]["addressRegion"]
-        except:
-            state = ""
-
-        properties = {
-            "ref": data["url"],
-            "name": data["name"],
-            "street_address": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": state,
-            "postcode": data["address"]["postalCode"],
-            "country": data["address"]["addressCountry"],
-            "phone": data.get("telephone"),
-            "lat": data["geo"]["latitude"],
-            "lon": data["geo"]["longitude"],
-        }
-
-        yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        apply_category(Categories.SHOP_CAR_PARTS, item)
+        yield item
