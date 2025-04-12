@@ -15,7 +15,6 @@ class MuellerSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     api = "https://backend.prod.ecom.mueller.de/"
     headers = {}
-    download_delay = 0.5
 
     def start_requests(self) -> Iterable[Request]:
         for country, url in [
