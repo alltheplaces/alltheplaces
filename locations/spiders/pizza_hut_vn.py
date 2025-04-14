@@ -19,11 +19,18 @@ from locations.user_agents import BROWSER_DEFAULT
 class PizzaHutVNSpider(scrapy.Spider):
     name = "pizza_hut_vn"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    start_urls = ["https://pizzahut.vn/_next/static/chunks/3070-0d2156c9136abbb1.js"]
+    start_urls = ["https://pizzahut.vn/store-location?area=north"]
     api_url = "https://rwapi.pizzahut.vn/api/store/GetAllStoreList"
     user_agent = BROWSER_DEFAULT
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Search for the desired JavaScript file
+        yield response.follow(
+            url=response.xpath("//script/@src").re(r"/_next/static/chunks/3070-\w+\.js")[-1],
+            callback=self.parse_auth_token,
+        )
+
+    def parse_auth_token(self, response: Response, **kwargs: Any) -> Any:
         timestamp = int(time.time() * 1000)
         device_uid = uuid.uuid4()
 
