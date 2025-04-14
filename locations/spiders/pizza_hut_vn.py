@@ -34,13 +34,18 @@ class PizzaHutVNSpider(scrapy.Spider):
         timestamp = int(time.time() * 1000)
         device_uid = uuid.uuid4()
 
-        app_code, secret_key, access_key = re.findall(
-            r"[a-z][\s=]+\(0,[\n\s]*[a-z]\.[a-z]\)\(\"([a-z0-9]+)\"\)", response.text
-        )[:3]
+        auth_data = {}
+        for auth_param in ["app_code", "access_key", "secret_key"]:
+            if identifier := self.find_identifier(response, auth_param.title().replace("_", "")):
+                pattern = re.compile(rf"{identifier}[\s=]+\(0,[\n\s]*[a-z]\.[a-z]\)\(\"([a-z0-9]+)\"\)")
+            else:  # secret_key
+                pattern = re.compile(r"s[\s=]+\(0,[\n\s]*[a-z]\.[a-z]\)\(\"([a-z0-9]+)\"\)")
 
-        query_string = f"TimeStamp={timestamp}&DeviceUID={device_uid}&AppCode={app_code}&AccessKey={access_key}&Method=GET&url={self.api_url}&Body="
+            auth_data[auth_param] = re.search(pattern, response.text).group(1)
 
-        key = base64.b64decode(secret_key)
+        query_string = f"TimeStamp={timestamp}&DeviceUID={device_uid}&AppCode={auth_data['app_code']}&AccessKey={auth_data['access_key']}&Method=GET&url={self.api_url}&Body="
+
+        key = base64.b64decode(auth_data["secret_key"])
         message = query_string.encode("utf-8")
         signature = hmac.new(key, message, hashlib.sha512)
 
@@ -71,3 +76,10 @@ class PizzaHutVNSpider(scrapy.Spider):
                 item["opening_hours"].add_days_range(DAYS, store["Open_Time"], store["Close_Time"])
             apply_category(Categories.RESTAURANT, item)
             yield item
+
+    def find_identifier(self, response: Response, key: str) -> str | None:
+        pattern = re.compile(rf"\"&{key}=\"\)\.concat\(([a-z]),")
+        if match := re.search(pattern, response.text):
+            return match.group(1)
+        else:
+            return None
