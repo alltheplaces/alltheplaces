@@ -15,48 +15,31 @@ class SaveALotUSSpider(Spider):
 
     def start_requests(self):
         # API returns stores within 25 miles of a provided WGS84 coordinate.
-        for lat, lon in country_iseadgg_centroids(["US"], 79):
+        for lat, lon in country_iseadgg_centroids(["US"], 24):
             yield JsonRequest(url=f"https://savealot.com/?lat={lat}&lng={lon}&_data=root")
 
     def parse(self, response):
-        locations = response.json()["storeList"]["_embedded"]["matches"]
+        if stores := response.json()["storeList"]:
+            if locations := stores.get("stores"):
+                for location in locations:
+                    location.update(location.pop("location"))
+                    item = DictParser.parse(location)
+                    item["branch"] = item.pop("name", None)
+                    item["website"] = "https://savealot.com/stores/" + location["storeId"]
 
-        # A maximum of 50 locations are returned at once. The search radius is
-        # set to avoid receiving 50 locations in a single response. If 50
-        # locations were to be returned, it is a sign that some locations have
-        # most likely been truncated.
-        if len(locations) >= 50:
-            raise RuntimeError(
-                "Locations have probably been truncated due to 50 (or more) locations being returned by a single geographic radius search, and the API restricts responses to 50 results only. Use a smaller search radius."
-            )
+                    for phone_number in location["phoneNumbers"]:
+                        if phone_number["description"] == "Main":
+                            item["phone"] = phone_number["value"]
+                            break
 
-        if len(locations) > 0:
-            self.crawler.stats.inc_value("atp/geo_search/hits")
-        else:
-            self.crawler.stats.inc_value("atp/geo_search/misses")
-        self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+                    item["opening_hours"] = OpeningHours()
+                    for day_hours in location["hours"]["weekly"]:
+                        hours = day_hours["daily"]
+                        if "24_HOURS" in hours["type"]:
+                            item["opening_hours"].add_range(day_hours["day"], "00:00", "24:00", "%H:%M")
+                        else:
+                            item["opening_hours"].add_range(
+                                day_hours["day"], hours["open"]["open"], hours["open"]["close"], "%H:%M:%S"
+                            )
 
-        for location in locations:
-            location = location["details"]
-            item = DictParser.parse(location)
-            item["ref"] = location["number"]
-            item["branch"] = item.pop("name", None)
-            item["website"] = "https://savealot.com/stores/" + location["number"]
-            item["street_address"] = location["location"]["address1"]
-            item["city"] = location["location"]["city"]
-            item["state"] = location["location"]["state"]
-            item["postcode"] = location["location"]["postalCode"]
-            item["country"] = location["location"]["country"]
-
-            for phone_number in location["phoneNumbers"]:
-                if phone_number["description"] == "Main":
-                    item["phone"] = phone_number["value"]
-                    break
-
-            item["opening_hours"] = OpeningHours()
-            for day_hours in location["hours"]:
-                item["opening_hours"].add_range(
-                    DAYS[day_hours["day"]], day_hours["hours"]["open"], day_hours["hours"]["close"], "%H:%M:%S"
-                )
-
-            yield item
+                    yield item
