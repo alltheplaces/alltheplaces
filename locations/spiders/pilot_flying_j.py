@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
+from locations.categories import Access, Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 PILOT = {"brand": "Pilot", "brand_wikidata": "Q64128179"}
