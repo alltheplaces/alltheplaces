@@ -1,3 +1,5 @@
+import re
+
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
@@ -14,23 +16,22 @@ class AldiSudCNSpider(Spider):
     def parse(self, response, **kwargs):
         districts = response.json().values()
         for district in districts:
-            for id, store in district["stores"].items():
-                item = Feature()
-                item["ref"] = id
+            for store_data in district["district-data"].values():
+                for store in store_data["stores"].values():
+                    item = Feature()
+                    item["ref"] = store["mapLink"]
+                    item["branch"] = store["title-en"].removeprefix("ALDI ").removesuffix(" Store")
+                    item["addr_full"] = store["address-en"]
+                    oh = OpeningHours()
+                    for day in DAYS:
+                        start_time, end_time = re.search(r"(\d+:\d+)-(\d+:\d+)", store["hours"]).groups()
+                        oh.add_range(day, start_time, end_time)
+                    item["opening_hours"] = oh.as_opening_hours()
 
-                item["branch"] = store["title-en"].removeprefix("ALDI ").removesuffix(" Store")
-                item["addr_full"] = store["address-en"]
+                    # TODO: Transform store["locationX"] store["locationX"]
 
-                oh = OpeningHours()
-                for day in DAYS:
-                    start_time, end_time = store["hours"].split("-")
-                    oh.add_range(day, start_time, end_time)
-                item["opening_hours"] = oh.as_opening_hours()
+                    item["extras"] = {"map": store["mapLink"]}
 
-                # TODO: Transform store["locationX"] store["locationX"]
+                    apply_category(Categories.SHOP_SUPERMARKET, item)
 
-                item["extras"] = {"map": store["mapLink"]}
-
-                apply_category(Categories.SHOP_SUPERMARKET, item)
-
-                yield item
+                    yield item
