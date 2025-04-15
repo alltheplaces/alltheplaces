@@ -1,5 +1,3 @@
-import re
-
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
@@ -23,10 +21,13 @@ class AldiSudCNSpider(Spider):
                     item["branch"] = store["title-en"].removeprefix("ALDI ").removesuffix(" Store")
                     item["addr_full"] = store["address-en"]
 
-                    oh = OpeningHours()
-                    start_time, end_time = re.search(r"(\d+:\d+)-(\d+:\d+)", store["hours"]).groups()
-                    oh.add_days_range(DAYS, start_time, end_time)
-                    item["opening_hours"] = oh
+                    try:
+                        oh = OpeningHours()
+                        start_time, end_time = store["hours"].split("-")
+                        oh.add_days_range(DAYS, start_time, end_time)
+                        item["opening_hours"] = oh
+                    except:
+                        self.logger.error("Error parsing opening hours: {}".format(store["hours"]))
 
                     # TODO: Transform store["locationX"] store["locationX"]
 
