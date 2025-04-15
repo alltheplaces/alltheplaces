@@ -47,6 +47,7 @@ COUNTRYCODE_COMPONENTS = {
     "FR",
     "GA",
     "GB",
+    "GE",
     "GG",
     "GH",
     "GR",
