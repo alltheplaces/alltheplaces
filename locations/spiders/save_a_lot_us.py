@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
 
 
 class SaveALotUSSpider(Spider):
