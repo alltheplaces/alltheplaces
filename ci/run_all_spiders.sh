@@ -89,8 +89,8 @@ uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPI
 
 tippecanoe --cluster-distance=25 \
            --drop-rate=g \
-           --maximum-zoom=16 \
-           --maximum-tile-bytes=1000000 \
+           --maximum-zoom=15 \
+           --maximum-tile-bytes=5000000 \
            --cluster-maxzoom=g \
            --layer="alltheplaces" \
            --read-parallel \
