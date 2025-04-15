@@ -17,9 +17,9 @@ class AldiSudCNSpider(Spider):
         districts = response.json().values()
         for district in districts:
             for store_data in district["district-data"].values():
-                for store in store_data["stores"].values():
+                for ref, store in store_data["stores"].items():
                     item = Feature()
-                    item["ref"] = store["mapLink"]
+                    item["ref"] = ref
                     item["branch"] = store["title-en"].removeprefix("ALDI ").removesuffix(" Store")
                     item["addr_full"] = store["address-en"]
                     oh = OpeningHours()
