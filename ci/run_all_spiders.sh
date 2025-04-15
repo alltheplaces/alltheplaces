@@ -89,8 +89,8 @@ uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPI
 
 tippecanoe --cluster-distance=25 \
            --drop-rate=g \
-           --maximum-zoom=16 \
-           --maximum-tile-bytes=1000000 \
+           --maximum-zoom=15 \
+           --maximum-tile-bytes=5000000 \
            --cluster-maxzoom=g \
            --layer="alltheplaces" \
            --read-parallel \
@@ -99,17 +99,22 @@ tippecanoe --cluster-distance=25 \
            "${SPIDER_RUN_DIR}"/output/*.geojson
 retval=$?
 if [ ! $retval -eq 0 ]; then
-    (>&2 echo "Couldn't generate pmtiles")
-    exit 1
+    (>&2 echo "Couldn't generate pmtiles, won't include in output")
+    include_pmtiles=false
+else
+    (>&2 echo "Done generating pmtiles")
+    include_pmtiles=true
 fi
-(>&2 echo "Done generating pmtiles")
 
 python ci/concatenate_parquet.py \
     --output "${SPIDER_RUN_DIR}/output.parquet" \
     "${SPIDER_RUN_DIR}"/output/*.parquet
 retval=$?
 if [ ! $retval -eq 0 ]; then
-    (>&2 echo "Couldn't convert to parquet")
+    (>&2 echo "Couldn't concatenate parquet files, won't include in output")
+    include_parquet=false
+else
+    include_parquet=true
 fi
 
 # concatenate_parquet.py leaves behind the parquet files for each spider, and I don't
@@ -350,28 +355,36 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
-aws s3 cp \
-    --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.pmtiles" \
-    "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
-    "s3://${S3_BUCKET}/runs/latest/output.pmtiles"
+if [ "${include_pmtiles}" = true ]; then
+    aws s3 cp \
+        --only-show-errors \
+        --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.pmtiles" \
+        "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
+        "s3://${S3_BUCKET}/runs/latest/output.pmtiles"
 
-retval=$?
-if [ ! $retval -eq 0 ]; then
-    (>&2 echo "Couldn't update latest/output.pmtiles redirect")
-    exit 1
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "Couldn't update latest/output.pmtiles redirect")
+        exit 1
+    fi
+else
+    (>&2 echo "Skipping latest/output.pmtiles redirect because pmtiles generation failed")
 fi
 
-aws s3 cp \
-    --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.parquet" \
-    "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
-    "s3://${S3_BUCKET}/runs/latest/output.parquet"
+if [ "${include_parquet}" = true ]; then
+    aws s3 cp \
+        --only-show-errors \
+        --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.parquet" \
+        "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
+        "s3://${S3_BUCKET}/runs/latest/output.parquet"
 
-retval=$?
-if [ ! $retval -eq 0 ]; then
-    (>&2 echo "Couldn't update latest/output.parquet redirect")
-    exit 1
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "Couldn't update latest/output.parquet redirect")
+        exit 1
+    fi
+else
+    (>&2 echo "Skipping latest/output.parquet redirect because parquet generation failed")
 fi
 
 for spider in $(uv run scrapy list)
