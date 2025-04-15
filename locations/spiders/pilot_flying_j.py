@@ -2,8 +2,8 @@ import json
 
 import scrapy
 
-from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 
 PILOT = {"brand": "Pilot", "brand_wikidata": "Q64128179"}
 FLYING_J = {"brand": "Flying J", "brand_wikidata": "Q64130592"}
@@ -29,28 +29,17 @@ class PilotFlyingJSpider(scrapy.Spider):
         store = jsdata["entities"][0]["profile"]
         if "Dealer" in store["name"]:
             return
-        properties = {
-            "ref": store["meta"]["id"],
-            "lat": item.xpath('//*[@itemprop="latitude"]/@content').get(),
-            "lon": item.xpath('//*[@itemprop="longitude"]/@content').get(),
-            "name": store["name"],
-            "website": response.url,
-            "street_address": store["address"]["line1"],
-            "city": store["address"]["city"],
-            "state": store["address"]["region"],
-            "postcode": store["address"]["postalCode"],
-            "country": store["address"]["countryCode"],
-            "phone": store.get("mainPhone", {}).get("number"),
-            "extras": {
-                "fax": store.get("fax", {}).get("number"),
-                "fuel:diesel": "yes",
-                "fuel:HGV_diesel": "yes",
-                "hgv": "yes",
-            },
-        }
+        store.update(store.pop("meta"))
+        item = DictParser.parse(store)
+        if phone := item.get("phone"):
+            item["phone"] = phone.get("number")
+        item["extras"]["fax"] = store.get("fax", {}).get("number")
+        apply_yes_no(Fuel.DIESEL, item, True)
+        apply_yes_no(Fuel.HGV_DIESEL, item, True)
+        apply_yes_no(Access.HGV, item, True)
         apply_category(Categories.FUEL_STATION, item)
-        properties.update(self.brand_info(store["name"]))
-        yield Feature(**properties)
+        item.update(self.brand_info(store["name"]))
+        yield item
 
     def brand_info(self, name):
         if name in ["Pilot Licensed Location", "Pilot Travel Center"]:
