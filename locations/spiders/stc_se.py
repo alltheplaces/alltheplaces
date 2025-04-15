@@ -1,12 +1,12 @@
 import json
 import re
+from urllib.parse import urljoin
 
 import chompjs
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from urllib.parse import urljoin
 
 
 class StcSESpider(scrapy.Spider):
