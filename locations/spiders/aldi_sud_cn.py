@@ -22,11 +22,11 @@ class AldiSudCNSpider(Spider):
                     item["ref"] = ref
                     item["branch"] = store["title-en"].removeprefix("ALDI ").removesuffix(" Store")
                     item["addr_full"] = store["address-en"]
+
                     oh = OpeningHours()
-                    for day in DAYS:
-                        start_time, end_time = re.search(r"(\d+:\d+)-(\d+:\d+)", store["hours"]).groups()
-                        oh.add_range(day, start_time, end_time)
-                    item["opening_hours"] = oh.as_opening_hours()
+                    start_time, end_time = re.search(r"(\d+:\d+)-(\d+:\d+)", store["hours"]).groups()
+                    oh.add_days_range(DAYS, start_time, end_time)
+                    item["opening_hours"] = oh
 
                     # TODO: Transform store["locationX"] store["locationX"]
 
