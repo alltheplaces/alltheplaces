@@ -39,4 +39,4 @@ You can use the `output_url` field to download the GeoJSON output of the latest 
 
 ## Metadata for given spider run
 
-See `http://data.alltheplaces.xyz/runs/RUN_ID/stats/SPIDER_ID.json` for example `http://data.alltheplaces.xyz/runs/2025-03-22-13-32-09/stats/usps_collection_boxes.json`
+See `http://data.alltheplaces.xyz/runs/RUN_ID/stats/SPIDER_NAME.json` for example `http://data.alltheplaces.xyz/runs/2025-03-22-13-32-09/stats/usps_collection_boxes.json`
