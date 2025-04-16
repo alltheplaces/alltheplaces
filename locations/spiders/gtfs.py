@@ -73,9 +73,9 @@ BRAND_MAPPING = {
 }
 
 
-class GTFSSpider(CSVFeedSpider):
+class GtfsSpider(CSVFeedSpider):
     name = "gtfs"
-    start_urls = ["https://bit.ly/catalogs-csv"]
+    start_urls = ["https://files.mobilitydatabase.org/feeds_v2.csv"]
     no_refs = True
 
     def parse_row(self, response, row):
@@ -143,11 +143,12 @@ class GTFSSpider(CSVFeedSpider):
             routes = {route.get("route_id"): route for route in csviter(z.read("routes.txt"))}
             trips = {trip.get("trip_id"): trip for trip in csviter(z.read("trips.txt"))}
             for stop_time in csviter(z.read("stop_times.txt")):
-                trip = trips.get(stop_time.get("trip_id"))
-                if not trip:
+                if not (trip := trips.get(stop_time.get("trip_id"))):
                     continue
-                stop_id = stop_time.get("stop_id")
-                route = routes.get(trip.get("route_id"))
+                if not (stop_id := stop_time.get("stop_id")):
+                    continue
+                if not (route := routes.get(trip.get("route_id"))):
+                    continue
                 if stop_id in stop_routes:
                     stop_routes[stop_id].append(route)
                 else:
@@ -186,7 +187,7 @@ class GTFSSpider(CSVFeedSpider):
         for route in routes:
             agency = agencies.get(route.get("agency_id"), {})
             for k, v in agency.items():
-                item["extras"][k] = ";".join(filter(None, set((item["extras"].get(k, "").split(";")) + [v])))
+                item[k] = ";".join(filter(None, set((item.get(k, "").split(";")) + [v])))
 
         apply_yes_no(
             Extras.WHEELCHAIR, item, row.get("wheelchair_boarding") == "1", row.get("wheelchair_boarding") != "2"
