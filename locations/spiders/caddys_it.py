@@ -18,7 +18,7 @@ class CaddysITSpider(JSONBlobSpider):
     locations_key = "stores"
     # no url per-store is available from the API
     # but a sitemap would be available to get those URLs, from which we would need to scrape info from HTML
-    # pipenv run scrapy sitemap --pages https://www.caddys.it/sitemap-negozi.xml | awk '/negozi\/[^\/]+\/[^\/]+$/ { print $0 }'
+    # uv run scrapy sitemap --pages https://www.caddys.it/sitemap-negozi.xml | awk '/negozi\/[^\/]+\/[^\/]+$/ { print $0 }'
 
     def pre_process_data(self, location):
         # some stores are defined with wrong country code (DE/US), even if they're all in Italy

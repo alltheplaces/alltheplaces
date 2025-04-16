@@ -9,7 +9,7 @@ if [ -z "${EDITOR}" ]; then
 fi
 
 echo "Generate your new spider. Tip: Do this a new terminal"
-echo "git fetch upstream && git checkout upstream/master && git checkout -b $1 && pipenv run scrapy genspider $1 $3 -t $2 && git add locations/spiders/$1.py && $EDITOR locations/spiders/$1.py && pipenv run scrapy crawl $1"
+echo "git fetch upstream && git checkout upstream/master && git checkout -b $1 && uv run scrapy genspider $1 $3 -t $2 && git add locations/spiders/$1.py && $EDITOR locations/spiders/$1.py && uv run scrapy crawl $1"
 
 echo ""
 echo "Commit and push"

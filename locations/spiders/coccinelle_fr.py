@@ -1,38 +1,59 @@
+import json
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 BRANDS = {
-    "CocciMarket": {"brand": "CocciMarket", "brand_wikidata": "Q90020480"},
-    "CocciMarket City - Easy": {"brand": "CocciMarket City", "brand_wikidata": "Q90020481"},
-    "Coccinelle Express": {"brand": "Coccinelle Express", "brand_wikidata": "Q90020479"},
-    "Coccinelle Supermarché": {"brand": "Coccinelle Supermarché", "brand_wikidata": "Q90020459"},
+    "coccimarket": {"brand": "CocciMarket", "brand_wikidata": "Q90020480"},
+    "coccimarket city": {"brand": "CocciMarket City", "brand_wikidata": "Q90020481"},
+    "coccimarket easy": {"brand": "CocciMarket Easy", "name": "CocciMarket Easy"},
+    "coccinelle express": {"brand": "Coccinelle Express", "brand_wikidata": "Q90020479"},
+    "coccinelle supermarche": {"brand": "Coccinelle Supermarché", "brand_wikidata": "Q90020459"},
 }
 
 
-class CoccinelleFRSpider(Spider):
+class CoccinelleFRSpider(SitemapSpider):
     name = "coccinelle_fr"
-    start_urls = ["https://www.coccinelle.fr/data/locations.xml"]
+    sitemap_urls = ["https://www.coccinelle.fr/sitemap.xml"]
+    sitemap_rules = [("/magasin/", "parse")]
+
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            entry["loc"] = entry["loc"].replace("http://default/", "https://www.coccinelle.fr/")
+            yield entry
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("/markers/marker"):
-            item = Feature()
-            item["lat"] = location.xpath("@lat").get()
-            item["lon"] = location.xpath("@lng").get()
-            item["street_address"] = location.xpath("@address").get()
-            item["city"] = location.xpath("@city").get()
-            item["postcode"] = location.xpath("@postal").get()
-            item["country"] = location.xpath("@country").get()
-            item["phone"] = location.xpath("@phone").get()
-            item["email"] = location.xpath("@email").get()
-            item["ref"] = item["website"] = response.urljoin(location.xpath("@web").get())
-
-            if b := BRANDS.get(location.xpath("@category").get()):
-                item.update(b)
-            else:
-                self.logger.error("Unexpected type: {}".format(location.xpath("@category").get()))
-
-            yield item
+        location = json.loads(response.xpath('//script[contains(text(),"rndmaps")]/text()').get())["rndmaps"]
+        item = Feature()
+        item["lat"] = location.get("lat")
+        item["lon"] = location.get("lng")
+        item["ref"] = response.xpath("//@data-shop").get()
+        item["branch"] = response.xpath('//meta[@property="og:title"]/@content').get("").split("|")[0].strip().title()
+        item["website"] = response.url
+        item["street_address"] = merge_address_lines(
+            [
+                response.xpath('//*[contains(@class,"addr-1")]/text()').get(""),
+                response.xpath('//*[contains(@class,"addr-2")]/text()').get(""),
+            ]
+        )
+        item["city"] = response.xpath('//*[contains(@class,"city")]/text()').get("").title()
+        item["postcode"] = response.xpath('//*[contains(@class,"zipcode")]/text()').get()
+        item["phone"] = response.xpath('//a[contains(@href,"tel:")]/@href').get()
+        brand_key = (
+            response.xpath('//img[@alt="logo coccinelle"]/following-sibling::*[contains(@class,"poppins")]/text()')
+            .get("")
+            .strip()
+            .lower()
+        )
+        if brand_info := BRANDS.get(brand_key):
+            item.update(brand_info)
+        else:
+            self.logger.error("Unexpected type: {}".format(brand_key))
+        if brand_key == "coccimarket easy":
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        yield item

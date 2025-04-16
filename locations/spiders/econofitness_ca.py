@@ -10,6 +10,7 @@ class EconofitnessCASpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://econofitness.ca/en/results?searchmode=searchall&searchtext=&filters="]
     rules = [Rule(LinkExtractor(r"/en/gym/[-\w]+/\d+-"), callback="parse_sd")]
     wanted_types = ["ExerciseGym"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removesuffix(" 24/7")

@@ -54,9 +54,9 @@ rules = [Rule(LinkExtractor(r"/customer-services/stores/[-\w]+/$"), "parse_sd")]
 
 Digging around in HTML responses for data is fiddly.
 
-Instead of `pipenv run scrapy crawl` every time you want to try your spider, you can use the [`scrapy shell`](https://doc.scrapy.org/en/latest/topics/shell.html) to load a page and experiment with XPath queries. When you're happy with the query, you can use it in your code. This is a lot easier than running a `crawl` every time you make a change to your spider.
+Instead of `uv run scrapy crawl` every time you want to try your spider, you can use the [`scrapy shell`](https://doc.scrapy.org/en/latest/topics/shell.html) to load a page and experiment with XPath queries. When you're happy with the query, you can use it in your code. This is a lot easier than running a `crawl` every time you make a change to your spider.
 
-To enter the shell, use `pipenv run scrapy shell http://example.com` (where you replace the URL with your own). It will dump you into a Python shell after having requested the page and parsing it. Once in the shell, you can do things with the `response` object as if you were in your spider. The shell also offers a shortcut function called `fetch()` that lets you pull up a different page, once again setting the `response` object.
+To enter the shell, use `uv run scrapy shell http://example.com` (where you replace the URL with your own). It will dump you into a Python shell after having requested the page and parsing it. Once in the shell, you can do things with the `response` object as if you were in your spider. The shell also offers a shortcut function called `fetch()` that lets you pull up a different page, once again setting the `response` object.
 
 For example from within the `scrapy shell`:
 

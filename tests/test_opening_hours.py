@@ -128,6 +128,85 @@ def test_multiple_times():
     assert o3.as_opening_hours() == "Tu 09:00-12:00,15:00-17:00"
 
 
+def test_simple_over_midnight():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    assert o.as_opening_hours() == "Mo 07:00-24:00; Tu 00:00-02:00"
+
+
+def test_hours_over_midnight_overide_closed_days_on_next_day():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    o.set_closed("Tu")
+    assert o.as_opening_hours() == "Mo 07:00-24:00; Tu 00:00-02:00"
+
+
+def test_hours_over_midnight_removed_when_start_day_set_to_closed():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    o.set_closed("Mo")
+    assert o.as_opening_hours() == "Mo closed"
+
+
+def test_over_midnight():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    o.add_range("Tu", "07:00", "02:00")
+    o.add_range("We", "07:00", "02:00")
+    o.add_range("Th", "07:00", "02:00")
+    o.add_range("Fr", "07:00", "02:00")
+    o.add_range("Sa", "07:00", "02:00")
+    o.add_range("Su", "05:00", "03:00")
+
+    assert (
+        o.as_opening_hours() == "Mo 00:00-03:00,07:00-24:00; Tu-Sa 00:00-02:00,07:00-24:00; Su 00:00-02:00,05:00-24:00"
+    )
+
+
+def test_till_midnight():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "23:00")
+    o.add_range("Tu", "11:00", "23:00")
+    o.add_range("We", "11:00", "23:00")
+    o.add_range("Th", "11:00", "23:00")
+    o.add_range("Fr", "11:00", "24:00")
+    o.add_range("Sa", "11:00", "24:00")
+    o.add_range("Su", "11:00", "23:00")
+
+    assert o.as_opening_hours() == "Mo-Th 11:00-23:00; Fr-Sa 11:00-24:00; Su 11:00-23:00"
+
+
+def test_till_midnight_formatted_as_zero_hour():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "0:00")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+
+def test_till_midnight_formatted_as_twenty_four_hour():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "24:00")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+
+def test_till_midnight_formatted_in_other_unusual_formats():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00:00", "00:00:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+    o = OpeningHours()
+    o.add_range("Mo", "11:00:00", "0:00:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+    o = OpeningHours()
+    o.add_range("Mo", "11:00:00", "24:00:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+
 def test_sanitise_days():
     assert sanitise_day("Mo") == "Mo"
     assert sanitise_day("Mon") == "Mo"
