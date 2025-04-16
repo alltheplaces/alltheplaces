@@ -6,7 +6,7 @@ from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature, SocialMedia, set_social_media
+from locations.items import SocialMedia, set_social_media
 
 
 class BambuSpider(Spider):
