@@ -1,7 +1,6 @@
 from scrapy import Selector
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import DAYS, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -21,9 +20,4 @@ class BluepearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
         )
         item.pop("twitter")
         item.pop("facebook")
-        if "24/7" in ld_data["openingHours"]:
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
-        # else: not worth parsing because not even humans can interpret the
-        # unintelligible hours information (example: "Sun 7am-Thu 6 am")
         yield item
