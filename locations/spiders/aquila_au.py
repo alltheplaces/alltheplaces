@@ -1,4 +1,4 @@
-from locations.categories import Categories, apply_clothes
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.stockinstore import StockInStoreSpider
 
@@ -12,5 +12,5 @@ class AquilaAUSpider(StockInStoreSpider):
     api_origin = "https://www.aquila.com.au"
 
     def parse_item(self, item: Feature, location: dict):
-        apply_clothes(Categories.SHOP_SHOES, item)
+        apply_category(Categories.SHOP_SHOES, item)
         yield item
