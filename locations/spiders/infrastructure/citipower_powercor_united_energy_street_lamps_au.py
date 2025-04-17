@@ -23,7 +23,6 @@ class CitipowerPowercorUnitedEnergyStreetLampsAUSpider(Spider):
 
     @staticmethod
     def get_victoria_bboxes() -> list[tuple[tuple[float, float], tuple[float, float]]]:
-        bbox_list = []
         lat_n = -33.97  # Murray River SA/VIC border
         lon_e = 146.29  # Wangaratta (nothing East of this city)
         lat_s = -38.86  # Cape Otway (nothing South of this point)
