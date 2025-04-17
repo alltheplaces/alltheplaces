@@ -129,6 +129,11 @@ for spider in $(uv run scrapy list)
 do
     statistics_json="${SPIDER_RUN_DIR}/stats/${spider}.json"
 
+    if [ ! -f "${statistics_json}" ]; then
+        (>&2 echo "Couldn't find ${statistics_json}")
+        continue
+    fi
+
     feature_count=$(jq --raw-output '.item_scraped_count' "${statistics_json}")
     retval=$?
     if [ ! $retval -eq 0 ] || [ "${feature_count}" == "null" ]; then
