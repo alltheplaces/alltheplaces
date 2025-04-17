@@ -126,16 +126,16 @@ fi
 spiders=$(echo "${changed_filenames}" | grep "^locations/spiders/")
 
 spider_count=$(echo "${spiders}" | wc -l)
-if [ $spider_count -gt 15 ]; then
+if [ "${spider_count}" -gt 15 ]; then
     (>&2 echo "refusing to run on more than 15 spiders")
     exit 1
 fi
 
-if [ "$spider_count" -eq 0 ]; then
+if [ "${spider_count}" -eq 0 ]; then
     # Manually run a couple spiders when uv.lock or pyproject.toml changes
     if echo "${changed_filenames}" | grep -q "pyproject.toml" || echo "${changed_filenames}" | grep -q "uv.lock"; then
         echo "pyproject.toml or uv.lock changed. Running a couple spiders."
-        spiders=("locations/spiders/the_works.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
+        spiders=$'locations/spiders/the_works.py\nlocations/spiders/the_coffee_club_au.py\nlocations/spiders/woods_coffee_us.py'
     else
         (>&2 echo "no spiders modified (only deleted?)")
         exit 0
@@ -199,36 +199,28 @@ do
     LOGFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
     echo "${spider} log: ${LOGFILE_URL}"
 
-    if [ -f "$OUTFILE" ]; then
-        FEATURE_COUNT=$(jq --raw-output '.item_scraped_count' ${SPIDER_RUN_DIR}/stats.json)
-
-        if [ $FEATURE_COUNT == "null" ]; then
-            FEATURE_COUNT="0"
-        fi
-
-        if [ $FEATURE_COUNT == "0" ]; then
-            echo "${spider} has no output"
-            FAILURE_REASON="no output"
-            PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
-            EXIT_CODE=1
-            continue
-        fi
-
+    if [ -f "${OUTFILE}" ]; then
         upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
-
+        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
-        if grep -q 'Stored geojson feed' $LOGFILE; then
-            echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}"
-        fi
+        if [ -f "${STATSFILE}" ]; then
+            upload_file "${STATSFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json"
 
-        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
-        upload_file "${STATSFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json"
+            FEATURE_COUNT=$(jq --raw-output '.item_scraped_count' ${SPIDER_RUN_DIR}/stats.json)
 
-        # Check the stats JSON to look for things that we consider warnings or errors
-        if [ ! -f "${STATSFILE}" ]; then
-            (>&2 echo "stats file not found")
-        else
+            if [ "${FEATURE_COUNT}" == "null" ]; then
+                FEATURE_COUNT="0"
+            fi
+
+            if [ "${FEATURE_COUNT}" == "0" ]; then
+                echo "${spider} has no output"
+                FAILURE_REASON="no output"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                EXIT_CODE=1
+                continue
+            fi
+
             STATS_WARNINGS=""
             STATS_ERRORS=""
 
@@ -294,18 +286,22 @@ do
 
             num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
             num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
-            if [ $num_errors -gt 0 ]; then
+            if [ "${num_errors}" -gt 0 ]; then
                 FAILURE_REASON="stats"
                 EXIT_CODE=1
             fi
 
-            if [ $num_errors -gt 0 ] || [ $num_warnings -gt 0 ]; then
+            if [ "${num_errors}" -gt 0 ] || [ "${num_warnings}" -gt 0 ]; then
                 # Include details in an expandable section if there are warnings or errors
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
             else
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
             fi
             continue
+        else
+            (>&2 echo "${spider} has no stats file")
+            STATS_WARNINGS=""
+            STATS_ERRORS=""
         fi
 
         PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
