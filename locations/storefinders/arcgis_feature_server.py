@@ -83,7 +83,12 @@ class ArcGISFeatureServerSpider(Spider):
     def start_requests(self) -> Iterable[JsonRequest]:
         layer_details_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}?f=json"
         if len(self.additional_parameters.keys()) > 0:
-            additional_parameters_str = "".join([f"&{parameter_name}={parameter_value}" for parameter_name, parameter_value in self.additional_parameters.items()])
+            additional_parameters_str = "".join(
+                [
+                    f"&{parameter_name}={parameter_value}"
+                    for parameter_name, parameter_value in self.additional_parameters.items()
+                ]
+            )
             layer_details_url = layer_details_url + additional_parameters_str
         yield JsonRequest(url=layer_details_url, callback=self.parse_layer_details)
 
@@ -147,7 +152,12 @@ class ArcGISFeatureServerSpider(Spider):
 
         query_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}/query?where={where_query_urlencoded}&outFields={output_fields}&outSR=4326{max_record_count_fields}&f=geojson"
         if len(self.additional_parameters.keys()) > 0:
-            additional_parameters_str = "".join([f"&{parameter_name}={parameter_value}" for parameter_name, parameter_value in self.additional_parameters.items()])
+            additional_parameters_str = "".join(
+                [
+                    f"&{parameter_name}={parameter_value}"
+                    for parameter_name, parameter_value in self.additional_parameters.items()
+                ]
+            )
             query_url = query_url + additional_parameters_str
         yield JsonRequest(url=query_url, callback=self.parse_features)
 

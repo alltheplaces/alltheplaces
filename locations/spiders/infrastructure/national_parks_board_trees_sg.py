@@ -1,4 +1,3 @@
-import re
 from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
@@ -6,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
+
 
 class NationalParksBoardTreesSGSpider(ArcGISFeatureServerSpider):
     name = "national_parks_board_trees_sg"
