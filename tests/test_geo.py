@@ -1,5 +1,7 @@
 from locations.geo import (
+    antimeridian_safe_longitude_sum,
     bbox_contains,
+    bbox_split,
     bbox_to_geojson,
     city_locations,
     country_iseadgg_centroids,
@@ -128,3 +130,64 @@ def test_bbox_to_geojson():
         "coordinates": [[[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]]],
         "type": "Polygon",
     }
+
+def test_antimeridian_safe_longitude_sum():
+    assert antimeridian_safe_longitude_sum(179.9, 0.2) == -179.9
+    assert antimeridian_safe_longitude_sum(-179.9, -0.2) == 179.9
+    assert antimeridian_safe_longitude_sum(179.9, -0.2) == 179.7
+    assert antimeridian_safe_longitude_sum(-179.9, 0.2) == -179.7
+    assert antimeridian_safe_longitude_sum(180.0, 0) == 180.0
+    assert antimeridian_safe_longitude_sum(-180.0, 0) == 180.0
+    assert antimeridian_safe_longitude_sum(180.0, 0.01) == -179.99
+    assert antimeridian_safe_longitude_sum(-180.0, -0.01) == 179.99
+    assert antimeridian_safe_longitude_sum(0.0, 180.0) == 180.0
+    assert antimeridian_safe_longitude_sum(0.0, -180.0) == 180.0
+    assert antimeridian_safe_longitude_sum(45.0, 360) == 45.0
+    assert antimeridian_safe_longitude_sum(45, 360) == 45.0
+    assert antimeridian_safe_longitude_sum(45.0, -360) == 45.0
+    assert antimeridian_safe_longitude_sum(45, -360) == 45.0
+    assert antimeridian_safe_longitude_sum(45, 405) == 90.0
+    assert antimeridian_safe_longitude_sum(45, -405) == 0.0
+
+def test_bbox_split():
+    bbox1 = ((20, -20), (-20, 20))
+    assert bbox_split(bbox1, lat_parts=4, lon_parts=4) == [
+        ((20.1, -20.1), (9.9, -9.9)),
+        ((10.1, -20.1), (-0.1, -9.9)),
+        ((0.1, -20.1), (-10.1, -9.9)),
+        ((-9.9, -20.1), (-20.1, -9.9)),
+        ((20.1, -10.1), (9.9, 0.1)),
+        ((10.1, -10.1), (-0.1, 0.1)),
+        ((0.1, -10.1), (-10.1, 0.1)),
+        ((-9.9, -10.1), (-20.1, 0.1)),
+        ((20.1, -0.1), (9.9, 10.1)),
+        ((10.1, -0.1), (-0.1, 10.1)),
+        ((0.1, -0.1), (-10.1, 10.1)),
+        ((-9.9, -0.1), (-20.1, 10.1)),
+        ((20.1, 9.9), (9.9, 20.1)),
+        ((10.1, 9.9), (-0.1, 20.1)),
+        ((0.1, 9.9), (-10.1, 20.1)),
+        ((-9.9, 9.9), (-20.1, 20.1)),
+    ]
+    assert bbox_split(bbox1, lat_parts=2, lon_parts=2) == [
+        ((20.2, -20.2), (-0.2, 0.2)),
+        ((0.2, -20.2), (-20.2, 0.2)),
+        ((20.2, -0.2), (-0.2, 20.2)),
+        ((0.2, -0.2), (-20.2, 20.2)),
+    ]
+    assert bbox_split(bbox1, lat_parts=2, lon_parts=1) == [
+        ((20.2, -20.4), (-0.2, 20.4)),
+        ((0.2, -20.4), (-20.2, 20.4)),
+    ]
+    assert bbox_split(bbox1, lat_parts=1, lon_parts=2) == [
+        ((20.4, -20.2), (-20.4, 0.2)),
+        ((20.4, -0.2), (-20.4, 20.2)),
+    ]
+
+    bbox2 = ((80, 170), (70, -170))
+    assert bbox_split(bbox2, lat_parts=2, lon_parts=2) == [
+        ((80.05, 169.9), (74.95, -179.9)),
+        ((75.05, 169.9), (69.95, -179.9)),
+        ((80.05, 179.9), (74.95, -169.9)),
+        ((75.05, 179.9), (69.95, -169.9)),
+    ]
