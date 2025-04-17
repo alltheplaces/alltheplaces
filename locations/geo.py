@@ -370,8 +370,10 @@ def bbox_split(
         bbox_lon_nw = antimeridian_safe_longitude_sum(lon_nw, lon_gridref * lon_inc)
         for lat_gridref in range(0, lat_parts):
             bbox_lat_nw = lat_nw - lat_gridref * lat_inc
+
             def clamp(n: float, minimum: float, maximum: float) -> float:
                 return max(min(maximum, n), minimum)
+
             new_bbox_lat_nw = clamp(round(bbox_lat_nw + (lat_inc * buffer), precision), -90.0, 90.0)
             new_bbox_lon_nw = round(antimeridian_safe_longitude_sum(bbox_lon_nw, -lon_inc * buffer), precision)
             new_bbox_lat_se = clamp(round(bbox_lat_nw - (lat_inc + (lat_inc * buffer)), precision), -90.0, 90.0)
