@@ -38,6 +38,12 @@ class ArcGISFeatureServerSpider(Spider):
       * `where_query = "FEATURE_TYPE = 'PARK'"`
       * `where_query = "FEATURE_TYPE <> 'Unknown' AND OPEN_STATUS = 'OPEN'"`
 
+    In some rare cases, it may be necessary to add additional parameters to
+    each query of the ArcGIS server. An example is the parameter
+    "&token=12345". To specify such parameter(s), set a list of additional
+    parameters using the key/value dictionary attribute of this class,
+    `additional_parameters`.
+
     Each feature within the specified layer is run through `DictParser.parse`
     to try and automatically extract as much information as possible. Override
     the `pre_process_data` function to modify field values before
@@ -68,6 +74,7 @@ class ArcGISFeatureServerSpider(Spider):
     layer_id: str = ""
     field_names: list[str] = []
     where_query: str = "1=1"
+    additional_parameters: dict = {}
 
     # robots.txt does not exist and instead returns a HTTP 404 page which
     # triggers a number of Scrapy warning messages.
@@ -75,6 +82,9 @@ class ArcGISFeatureServerSpider(Spider):
 
     def start_requests(self) -> Iterable[JsonRequest]:
         layer_details_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}?f=json"
+        if len(self.additional_parameters.keys()) > 0:
+            additional_parameters_str = "".join([f"&{parameter_name}={parameter_value}" for parameter_name, parameter_value in self.additional_parameters.items()])
+            layer_details_url = layer_details_url + additional_parameters_str
         yield JsonRequest(url=layer_details_url, callback=self.parse_layer_details)
 
     def parse_layer_details(self, response: Response) -> Iterable[JsonRequest]:
@@ -136,6 +146,9 @@ class ArcGISFeatureServerSpider(Spider):
         where_query_urlencoded = quote_plus(self.where_query)
 
         query_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}/query?where={where_query_urlencoded}&outFields={output_fields}&outSR=4326{max_record_count_fields}&f=geojson"
+        if len(self.additional_parameters.keys()) > 0:
+            additional_parameters_str = "".join([f"&{parameter_name}={parameter_value}" for parameter_name, parameter_value in self.additional_parameters.items()])
+            query_url = query_url + additional_parameters_str
         yield JsonRequest(url=query_url, callback=self.parse_features)
 
     def parse_features(self, response: Response) -> Iterable[Feature]:
