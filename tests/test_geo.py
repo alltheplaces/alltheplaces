@@ -131,6 +131,7 @@ def test_bbox_to_geojson():
         "type": "Polygon",
     }
 
+
 def test_antimeridian_safe_longitude_sum():
     assert antimeridian_safe_longitude_sum(179.9, 0.2) == -179.9
     assert antimeridian_safe_longitude_sum(-179.9, -0.2) == 179.9
@@ -148,6 +149,7 @@ def test_antimeridian_safe_longitude_sum():
     assert antimeridian_safe_longitude_sum(45, -360) == 45.0
     assert antimeridian_safe_longitude_sum(45, 405) == 90.0
     assert antimeridian_safe_longitude_sum(45, -405) == 0.0
+
 
 def test_bbox_split():
     bbox1 = ((20, -20), (-20, 20))

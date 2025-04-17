@@ -278,6 +278,7 @@ def make_subdivisions(
 
     return tiles
 
+
 def antimeridian_safe_longitude_sum(longitude: float, summand: float, precision: int = 9) -> float:
     """
     Adds or subtracts a decimal degree value from a longitude, factoring in
@@ -308,7 +309,14 @@ def antimeridian_safe_longitude_sum(longitude: float, summand: float, precision:
         return 180.0
     return round(modulo_sum, precision)
 
-def bbox_split(bbox: tuple[tuple[float, float], tuple[float, float]], lat_parts: int = 2, lon_parts: int = 2, precision: int = 2, buffer: float = 0.01) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+
+def bbox_split(
+    bbox: tuple[tuple[float, float], tuple[float, float]],
+    lat_parts: int = 2,
+    lon_parts: int = 2,
+    precision: int = 2,
+    buffer: float = 0.01,
+) -> list[tuple[tuple[float, float], tuple[float, float]]]:
     """
     Splits a bounding box rectangle by a given number of latitude and
     longitude partitions. Split bounding boxes are by default slightly
@@ -366,9 +374,12 @@ def bbox_split(bbox: tuple[tuple[float, float], tuple[float, float]], lat_parts:
             new_bbox_lat_nw = clamp(round(bbox_lat_nw + (lat_inc * buffer), precision), -90.0, 90.0)
             new_bbox_lon_nw = round(antimeridian_safe_longitude_sum(bbox_lon_nw, -lon_inc * buffer), precision)
             new_bbox_lat_se = clamp(round(bbox_lat_nw - (lat_inc + (lat_inc * buffer)), precision), -90.0, 90.0)
-            new_bbox_lon_se = round(antimeridian_safe_longitude_sum(bbox_lon_nw, lon_inc + (lon_inc * buffer)), precision)
-            bbox_list.append(((new_bbox_lat_nw, new_bbox_lon_nw),(new_bbox_lat_se, new_bbox_lon_se)))
+            new_bbox_lon_se = round(
+                antimeridian_safe_longitude_sum(bbox_lon_nw, lon_inc + (lon_inc * buffer)), precision
+            )
+            bbox_list.append(((new_bbox_lat_nw, new_bbox_lon_nw), (new_bbox_lat_se, new_bbox_lon_se)))
     return bbox_list
+
 
 def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float, float]) -> bool:
     """

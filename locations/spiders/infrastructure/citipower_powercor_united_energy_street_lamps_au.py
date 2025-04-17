@@ -1,7 +1,6 @@
 from typing import Iterable
 
 from chompjs import parse_js_object
-
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -18,20 +17,22 @@ class CitipowerPowercorUnitedEnergyStreetLampsAUSpider(Spider):
     start_urls = ["https://publiclighting.portal.powercor.com.au/PublicLightFault"]
     user_agent = BROWSER_DEFAULT
     _request_attribs: dict = {}  # Authorization token and other attributes
-                                 # captured once and required to be sent with
-                                 # each API request.
+    # captured once and required to be sent with
+    # each API request.
     _tid_counter: int = 0  # Transaction ID counter the API uses.
 
     @staticmethod
     def get_victoria_bboxes() -> list[tuple[tuple[float, float], tuple[float, float]]]:
         bbox_list = []
-        lat_n = -33.97 # Murray River SA/VIC border
-        lon_e = 146.29 # Wangaratta (nothing East of this city)
-        lat_s = -38.86 # Cape Otway (nothing South of this point)
-        lon_w = 140.96 # Murray River SA/VIC border
+        lat_n = -33.97  # Murray River SA/VIC border
+        lon_e = 146.29  # Wangaratta (nothing East of this city)
+        lat_s = -38.86  # Cape Otway (nothing South of this point)
+        lon_w = 140.96  # Murray River SA/VIC border
         return bbox_split(((lat_n, lon_w), (lat_s, lon_e)), lat_parts=8, lon_parts=8, precision=4)
 
-    def make_bbox_search_request(self, bbox: tuple[tuple[float, float], tuple[float, float]], level: int = 1) -> JsonRequest:
+    def make_bbox_search_request(
+        self, bbox: tuple[tuple[float, float], tuple[float, float]], level: int = 1
+    ) -> JsonRequest:
         lon_se = bbox[1][1]
         lat_se = bbox[1][0]
         lon_nw = bbox[0][1]
@@ -58,7 +59,14 @@ class CitipowerPowercorUnitedEnergyStreetLampsAUSpider(Spider):
             "X-User-Agent": "Visualforce-Remoting",
         }
         self._tid_counter = self._tid_counter + 1
-        return JsonRequest(url="https://publiclighting.portal.powercor.com.au/apexremote", data=data, headers=headers, meta={"bbox": bbox, "level": level}, method="POST", callback=self.parse_street_lamps)
+        return JsonRequest(
+            url="https://publiclighting.portal.powercor.com.au/apexremote",
+            data=data,
+            headers=headers,
+            meta={"bbox": bbox, "level": level},
+            method="POST",
+            callback=self.parse_street_lamps,
+        )
 
     def parse(self, response: Response) -> Iterable[JsonRequest]:
         js_object = response.xpath('//script[contains(text(), "findLamps")]/text()').get()
@@ -69,16 +77,27 @@ class CitipowerPowercorUnitedEnergyStreetLampsAUSpider(Spider):
             yield self.make_bbox_search_request(bbox)
 
     def parse_street_lamps(self, response: Response) -> Iterable[Feature | JsonRequest]:
-        bbox_string = "NW:[{},{}] SE:[{},{}]".format(response.meta["bbox"][0][0], response.meta["bbox"][0][1], response.meta["bbox"][1][0], response.meta["bbox"][1][1])
+        bbox_string = "NW:[{},{}] SE:[{},{}]".format(
+            response.meta["bbox"][0][0],
+            response.meta["bbox"][0][1],
+            response.meta["bbox"][1][0],
+            response.meta["bbox"][1][1],
+        )
         if response.json()[0]["statusCode"] != 200:
-            raise RuntimeError("Server returned an error code to a request for street lamps in the bounding box of {}.".format(bbox_string))
+            raise RuntimeError(
+                "Server returned an error code to a request for street lamps in the bounding box of {}.".format(
+                    bbox_string
+                )
+            )
         if "result" not in response.json()[0].keys():
             # No street lamps exist in the requested bounding box.
             self.crawler.stats.inc_value("atp/geo_search/misses")
             return
         level = response.meta["level"]
         if level == 4:
-            self.crawler.stats.max_value("atp/geo_search/max_features_returned/level4", len(response.json()[0]["result"]["items"]))
+            self.crawler.stats.max_value(
+                "atp/geo_search/max_features_returned/level4", len(response.json()[0]["result"]["items"])
+            )
         if len(response.json()[0]["result"]["items"]) == 1000:
             self.crawler.stats.inc_value("atp/geo_search/misses")
             self.crawler.stats.inc_value(f"atp/geo_search/misses/level{level}")
@@ -89,9 +108,13 @@ class CitipowerPowercorUnitedEnergyStreetLampsAUSpider(Spider):
             elif level == 3:
                 lat_lon_parts = 4
             else:
-                raise RuntimeError("More than 4 levels of subdivision of bounding boxes were unexpectedly encountered. Crawling stopped to avoid an endless recursive loop.")
-            for bbox in bbox_split(response.meta["bbox"], lat_parts=lat_lon_parts, lon_parts=lat_lon_parts, precision=4):
-                yield self.make_bbox_search_request(bbox, level=level+1)
+                raise RuntimeError(
+                    "More than 4 levels of subdivision of bounding boxes were unexpectedly encountered. Crawling stopped to avoid an endless recursive loop."
+                )
+            for bbox in bbox_split(
+                response.meta["bbox"], lat_parts=lat_lon_parts, lon_parts=lat_lon_parts, precision=4
+            ):
+                yield self.make_bbox_search_request(bbox, level=level + 1)
             return
         self.crawler.stats.inc_value("atp/geo_search/hits")
         self.crawler.stats.inc_value(f"atp/geo_search/hits/level{level}")
