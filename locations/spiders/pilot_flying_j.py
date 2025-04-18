@@ -16,6 +16,7 @@ class PilotFlyingJSpider(scrapy.Spider):
     allowed_domains = ["pilotflyingj.com"]
 
     start_urls = ["https://locations.pilotflyingj.com/"]
+    no_refs = True
 
     def parse(self, response):
         for href in response.xpath('//a[@data-ya-track="todirectory" or @data-ya-track="visitpage"]/@href').extract():
@@ -31,6 +32,7 @@ class PilotFlyingJSpider(scrapy.Spider):
             return
         store.update(store.pop("meta"))
         item = DictParser.parse(store)
+        item["ref"] = None
         if phone := item.get("phone"):
             item["phone"] = phone.get("number")
         item["extras"]["fax"] = store.get("fax", {}).get("number")
