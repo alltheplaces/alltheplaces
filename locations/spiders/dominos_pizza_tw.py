@@ -10,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class DominosPizzaTWSpider(Spider):
     name = "dominos_pizza_tw"
-    item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
+    item_attributes = {"brand_wikidata": "Q839466"}
     start_urls = ["https://www.dominos.com.tw/Ajax/GetStoreMapMakers"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = BROWSER_DEFAULT
@@ -28,7 +28,7 @@ class DominosPizzaTWSpider(Spider):
         item["ref"] = id
         item["lat"] = lat
         item["lon"] = lng
-        item["name"] = response.xpath('//p[@class="stroe-name"]/text()').get()
+        item["branch"] = response.xpath('//p[@class="stroe-name"]/text()').get()
         item["addr_full"] = response.xpath('//div[@class="d-flex"]/div/span/text()').get()
         item["phone"] = response.xpath('//div[@class="d-flex"]/div/a/span/text()').get()
         self.parse_hours(item, response.xpath('//div[@class="collapse store-opening-time"]'))
