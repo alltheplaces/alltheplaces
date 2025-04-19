@@ -9,7 +9,12 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class BoiseCityDepartmentOfPublicWorksStreetLampsUSSpider(ArcGISFeatureServerSpider):
     name = "boise_city_department_of_public_works_street_lamps_us"
-    item_attributes = {"operator": "Boise City Department of Public Works", "operator_wikidata": "Q133930333", "state": "ID", "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "Boise City Department of Public Works",
+        "operator_wikidata": "Q133930333",
+        "state": "ID",
+        "nsi_id": "N/A",
+    }
     host = "services1.arcgis.com"
     context_path = "WHM6qC35aMtyAAlN/ArcGIS"
     service_id = "Boise_Streetlights_Open_Data"
