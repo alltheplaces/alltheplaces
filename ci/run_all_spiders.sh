@@ -88,10 +88,9 @@ uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPI
 (>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
 tippecanoe --cluster-distance=25 \
-           --drop-rate=g \
-           --maximum-zoom=15 \
+           --drop-rate=1 \
+           --maximum-zoom=14 \
            --maximum-tile-bytes=5000000 \
-           --cluster-maxzoom=g \
            --layer="alltheplaces" \
            --read-parallel \
            --attribution="<a href=\"https://www.alltheplaces.xyz/\">All The Places</a> ${RUN_TIMESTAMP}" \
@@ -168,7 +167,7 @@ done
 (>&2 echo "Wrote out summary JSON")
 
 (>&2 echo "Compressing output files")
-(cd "${SPIDER_RUN_DIR}" && zip -r output.zip output)
+(cd "${SPIDER_RUN_DIR}" && zip -qr output.zip output)
 
 retval=$?
 if [ ! $retval -eq 0 ]; then
@@ -177,7 +176,7 @@ if [ ! $retval -eq 0 ]; then
 fi
 
 (>&2 echo "Compressing log files")
-(cd "${SPIDER_RUN_DIR}" && zip -r logs.zip logs)
+(cd "${SPIDER_RUN_DIR}" && zip -qr logs.zip logs)
 
 retval=$?
 if [ ! $retval -eq 0 ]; then
