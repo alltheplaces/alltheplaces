@@ -9,7 +9,11 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class GovernmentOfTheDistrictOfColumbiaStreetLampsUSSpider(ArcGISFeatureServerSpider):
     name = "government_of_the_district_of_columbia_street_lamps_us"
-    item_attributes = {"operator": "Government of the District of Columbia", "operator_wikidata": "Q16152667", "state": "DC"}
+    item_attributes = {
+        "operator": "Government of the District of Columbia",
+        "operator_wikidata": "Q16152667",
+        "state": "DC",
+    }
     host = "maps2.dcgis.dc.gov"
     context_path = "dcgis"
     service_id = "DCGIS_DATA/Transportation_Signs_Signals_Lights_WebMercator"
@@ -48,4 +52,3 @@ class GovernmentOfTheDistrictOfColumbiaStreetLampsUSSpider(ArcGISFeatureServerSp
                 case _:
                     self.logger.warning("Unknown pole material: {}".format(feature["POLECOMPOSITION_DESC"]))
         yield item
-
