@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class CityOfOttawaStreetLampsUSSpider(ArcGISFeatureServerSpider):
-    name = "city_of_ottawa_street_lamps_us"
+class CityOfOttawaStreetLampsCASpider(ArcGISFeatureServerSpider):
+    name = "city_of_ottawa_street_lamps_ca"
     item_attributes = {"operator": "City of Ottawa", "operator_wikidata": "Q5123850", "state": "ON"}
     host = "maps.ottawa.ca"
     context_path = "arcgis"
