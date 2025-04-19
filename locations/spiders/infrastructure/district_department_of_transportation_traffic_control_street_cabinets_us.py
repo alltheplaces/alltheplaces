@@ -7,9 +7,9 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class GovernmentOfTheDistrictOfColumbiaTrafficStreetCabinetsUSSpider(ArcGISFeatureServerSpider):
-    name = "government_of_the_district_of_columbia_traffic_street_cabinets_us"
-    item_attributes = {"operator": "Government of the District of Columbia", "operator_wikidata": "Q16152667", "state": "DC"}
+class DistrictDepartmentOfTransportationTrafficControlStreetCabinetsUSSpider(ArcGISFeatureServerSpider):
+    name = "district_department_of_transportation_traffic_control_street_cabinets_us"
+    item_attributes = {"operator": "District Department of Transportation", "operator_wikidata": "Q4923837", "state": "DC"}
     host = "maps2.dcgis.dc.gov"
     context_path = "dcgis"
     service_id = "DCGIS_DATA/Transportation_Signs_Signals_Lights_WebMercator"
