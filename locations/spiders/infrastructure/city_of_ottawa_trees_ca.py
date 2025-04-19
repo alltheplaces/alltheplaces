@@ -23,6 +23,7 @@ class CityOfOttawaTreesCASpider(ArcGISFeatureServerSpider):
         if housenumber := feature.get("ADDNUM"):
             item["housenumber"] = housenumber
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         if common_name := feature.get("SPECIES"):
             item["extras"]["taxon:en"] = common_name
         if dbh_cm := feature.get("DBH"):
