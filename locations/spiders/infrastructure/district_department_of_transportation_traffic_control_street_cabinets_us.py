@@ -9,7 +9,11 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class DistrictDepartmentOfTransportationTrafficControlStreetCabinetsUSSpider(ArcGISFeatureServerSpider):
     name = "district_department_of_transportation_traffic_control_street_cabinets_us"
-    item_attributes = {"operator": "District Department of Transportation", "operator_wikidata": "Q4923837", "state": "DC"}
+    item_attributes = {
+        "operator": "District Department of Transportation",
+        "operator_wikidata": "Q4923837",
+        "state": "DC",
+    }
     host = "maps2.dcgis.dc.gov"
     context_path = "dcgis"
     service_id = "DCGIS_DATA/Transportation_Signs_Signals_Lights_WebMercator"
@@ -20,4 +24,3 @@ class DistrictDepartmentOfTransportationTrafficControlStreetCabinetsUSSpider(Arc
         item["ref"] = str(feature["CABINETID"])
         apply_category(Categories.STREET_CABINET_TRAFFIC_CONTROL, item)
         yield item
-
