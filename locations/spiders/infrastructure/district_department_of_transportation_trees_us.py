@@ -21,6 +21,7 @@ class DistrictDepartmentOfTransportationTreesUSSpider(ArcGISFeatureServerSpider)
         if street_address := feature.get("VICINITY"):
             item["street_address"] = street_address
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
         if species := feature.get("SCI_NM"):
             item["extras"]["species"] = species
         if genus := feature.get("GENUS_NAME"):
