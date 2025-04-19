@@ -9,7 +9,12 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class TransportCanberraAndCityServicesStreetLampsAUSpider(ArcGISFeatureServerSpider):
     name = "transport_canberra_and_city_services_street_lamps_au"
-    item_attributes = {"operator": "Transport Canberra & City Services", "operator_wikidata": "Q4650892", "state": "ACT", "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "Transport Canberra & City Services",
+        "operator_wikidata": "Q4650892",
+        "state": "ACT",
+        "nsi_id": "N/A",
+    }
     host = "services1.arcgis.com"
     context_path = "E5n4f1VY84i0xSjy/ArcGIS"
     service_id = "ACTGOV_Streetlight_Column_Assets"
