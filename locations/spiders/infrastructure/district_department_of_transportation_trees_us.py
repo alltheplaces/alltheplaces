@@ -9,7 +9,11 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class DistrictDepartmentOfTransportationTreesUSSpider(ArcGISFeatureServerSpider):
     name = "district_department_of_transportation_trees_us"
-    item_attributes = {"operator": "District Department of Transportation", "operator_wikidata": "Q4923837", "state": "DC"}
+    item_attributes = {
+        "operator": "District Department of Transportation",
+        "operator_wikidata": "Q4923837",
+        "state": "DC",
+    }
     host = "maps2.dcgis.dc.gov"
     context_path = "dcgis"
     service_id = "DDOT/UFATrees2"
@@ -29,6 +33,5 @@ class DistrictDepartmentOfTransportationTreesUSSpider(ArcGISFeatureServerSpider)
         if common_name := feature.get("CMMN_NM"):
             item["extras"]["taxon:en"] = common_name
         if dbh_in := feature.get("DBH"):
-            item["extras"]["diameter"] = f"{dbh_in}\""
+            item["extras"]["diameter"] = f'{dbh_in}"'
         yield item
-
