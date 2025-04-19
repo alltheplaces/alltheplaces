@@ -167,7 +167,7 @@ done
 (>&2 echo "Wrote out summary JSON")
 
 (>&2 echo "Compressing output files")
-(cd "${SPIDER_RUN_DIR}" && zip -r output.zip output)
+(cd "${SPIDER_RUN_DIR}" && zip -qr output.zip output)
 
 retval=$?
 if [ ! $retval -eq 0 ]; then
@@ -176,7 +176,7 @@ if [ ! $retval -eq 0 ]; then
 fi
 
 (>&2 echo "Compressing log files")
-(cd "${SPIDER_RUN_DIR}" && zip -r logs.zip logs)
+(cd "${SPIDER_RUN_DIR}" && zip -qr logs.zip logs)
 
 retval=$?
 if [ ! $retval -eq 0 ]; then
