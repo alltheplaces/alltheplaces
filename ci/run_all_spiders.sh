@@ -88,10 +88,9 @@ uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPI
 (>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
 tippecanoe --cluster-distance=25 \
-           --drop-rate=g \
-           --maximum-zoom=15 \
+           --drop-rate=1 \
+           --maximum-zoom=14 \
            --maximum-tile-bytes=5000000 \
-           --cluster-maxzoom=g \
            --layer="alltheplaces" \
            --read-parallel \
            --attribution="<a href=\"https://www.alltheplaces.xyz/\">All The Places</a> ${RUN_TIMESTAMP}" \
