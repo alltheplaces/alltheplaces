@@ -9,7 +9,7 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class TranspowerPolesNZSpider(ArcGISFeatureServerSpider):
     name = "transpower_poles_nz"
-    item_attributes = {"operator": "Transpower", "operator_wikidata": "Q7835339"}
+    item_attributes = {"operator": "Transpower New Zealand", "operator_wikidata": "Q7835339"}
     host = "services3.arcgis.com"
     context_path = "AkUq3zcWf7TVqyR9/ArcGIS"
     service_id = "Structures"
