@@ -353,6 +353,7 @@ class Categories(Enum):
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
     POWER_POLE = {"power": "pole"}
+    POWER_TOWER = {"power": "tower"}
     PUMPING_STATION_SEWAGE = {
         "man_made": "pumping_station",
         "pumping_station": "sewage",
