@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 class RobinsonsBreweryGBSpider(Spider):
     name = "robinsons_brewery_gb"
     item_attributes = {
-        "brand": "Robinsons Brewery",
+        "brand": "Robinsons",
         "brand_wikidata": "Q7353116",
     }
     start_urls = ["https://www.robinsonsbrewery.com/page-data/search-results/page-data.json"]
