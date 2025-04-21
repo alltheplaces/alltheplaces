@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class JohnstonesDecoratingCentreSpider(scrapy.Spider):
     name = "johnstones_decorating_centre"
-    item_attributes = {"brand": "Johnstone's Decorating Centre", "brand_wikidata": "Q121742106"}
+    item_attributes = {"brand": "Johnstone's", "brand_wikidata": "Q121742106"}
     start_urls = ["https://www.johnstonesdc.com/StoreLocator/AjaxStores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

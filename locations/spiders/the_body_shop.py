@@ -1,54 +1,32 @@
+from typing import Any, Iterable
+
 import scrapy
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 
 
-class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
+class TheBodyShopSpider(scrapy.Spider):
     name = "the_body_shop"
     item_attributes = {"brand": "The Body Shop", "brand_wikidata": "Q837851"}
-    allowed_domains = ["thebodyshop.com"]
-    sitemap_urls = ["https://www.thebodyshop.com/sitemap.xml"]
 
-    parse_pages = {
-        "/en-gb/": "uk",
-        "/es-es/": "es",
-        "/en-au/": "au",
-        "/en-ca/": "ca",
-        "/en-us/": "us",
-        "/de-de/": "de",
-        "/en-sg/": "sg",
-        "/da-dk/": "dk",
-        "/sv-se/": "se",
-        "/nl-nl/": "nl",
-        "/fr-fr/": "fr",
-        "/pt-pt/": "pt",
-        "/de-at/": "at",
-    }
+    def start_requests(self) -> Iterable[Request]:
+        for country in ["uk", "es", "au", "ca", "de", "sg", "dk", "se", "nl", "fr", "pt", "at"]:
+            yield JsonRequest(
+                url="https://api.thebodyshop.com/rest/v2/thebodyshop-{}/stores?fields=FULL&pageSize=1000".format(
+                    country
+                ),
+                callback=self.parse,
+            )
 
-    def _parse_sitemap(self, response):
-        for x in super()._parse_sitemap(response):
-            if ".xml" in x.url:
-                yield x
-            elif "/store-details" in x.url:
-                store_id = x.url.split("/")[-1]
-                for key in self.parse_pages:
-                    if key in x.url:
-                        yield scrapy.Request(
-                            "https://api.thebodyshop.com/rest/v2/thebodyshop-{}/stores/{}".format(
-                                self.parse_pages[key], store_id
-                            ),
-                            headers={"Accept": "application/json"},
-                            cb_kwargs=dict(html_url=x.url),
-                        )
-                        break
-
-    def parse(self, response, html_url):
-        store = response.json()
-        item = DictParser.parse(store)
-        item["ref"] = store["address"]["id"]
-        item["name"] = store["displayName"]
-        item["website"] = html_url
-        if isinstance(item["state"], dict):  # inconsistently string or dict
-            item["state"] = item["state"]["name"]
-        item["country"] = store["address"]["country"]["isocode"]
-        return item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["stores"]:
+            store.update(store.pop("address"))
+            item = DictParser.parse(store)
+            item.pop("name")
+            item.pop("website")
+            item["branch"] = store["displayName"]
+            if store.get("region"):
+                item["state"] = store["region"]["name"]
+            yield item

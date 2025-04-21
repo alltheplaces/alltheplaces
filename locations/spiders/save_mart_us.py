@@ -6,10 +6,16 @@ from locations.categories import PaymentMethods, apply_yes_no
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
-brands = {
+BRANDS = {
     "a3b11717-f4ca-4196-b670-e5142c205dee": {"brand": "Lucky", "brand_wikidata": "Q6698032"},
     "b0fbc8a0-c305-4adc-97c0-80d7548ea2f9": {"brand": "Save Mart", "brand_wikidata": "Q7428009"},
     "ed5181c4-4323-4bac-9e4a-e5ca92c3de68": {"brand": "FoodMaxx", "brand_wikidata": "Q61894844"},
+}
+
+WEBSITES = {
+    "a3b11717-f4ca-4196-b670-e5142c205dee": "luckysupermarkets.com",
+    "b0fbc8a0-c305-4adc-97c0-80d7548ea2f9": "savemart.com",
+    "ed5181c4-4323-4bac-9e4a-e5ca92c3de68": "foodmaxx.com",
 }
 
 
@@ -59,12 +65,12 @@ class SaveMartUSSpider(JSONBlobSpider):
             )
 
     def post_process_item(self, item, response, location):
-        item.update(brands[location["chainId"]])
+        item.update(BRANDS[location["chainId"]])
 
         item["ref"] = location["number"]
         item["branch"] = location["primaryDetails"]["name"]
         item["website"] = (
-            f"https://luckysupermarkets.com/stores/{location['storeId']}/{quote(location['primaryDetails']['name'])}/{location['number']}/{quote(location['city'])}"
+            f"https://{WEBSITES[location['chainId']]}/stores/{location['storeId']}/{quote(location['primaryDetails']['name'])}/{location['number']}/{quote(location['city'])}"
         )
 
         apply_yes_no(PaymentMethods.CASH, item, "CASH" in location["payments"])
@@ -83,5 +89,8 @@ class SaveMartUSSpider(JSONBlobSpider):
                 item["phone"] = contact_number["value"]
             elif contact_number["imageId"] == "fax_phone_icon":
                 item["extras"]["fax"] = contact_number["value"]
+
+        # The data seems to be consistently offset, at least compared to OSM
+        item["lon"] += 0.002
 
         yield item

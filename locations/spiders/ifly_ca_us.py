@@ -45,4 +45,5 @@ class IflyCAUSSpider(Spider):
                     item["opening_hours"].add_range(
                         day_abbrev.title(), hours_range["StartTime"], hours_range["EndTime"], "%I:%M%p"
                     )
+            item["street_address"] = item.pop("addr_full", None)
             yield item

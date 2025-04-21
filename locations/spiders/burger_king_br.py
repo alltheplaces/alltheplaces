@@ -1,9 +1,10 @@
 import scrapy
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 SERVICES_MAPPING = {
@@ -25,26 +26,24 @@ class BurgerKingBRSpider(scrapy.Spider):
             data={"localization": {}, "address": "Americana", "nonParticipatingStores": ""},
         )
 
-    def parse(self, response):
-        for key, poi in response.json()["entries"].items():
-            if key == "cacheForever":
-                continue
+    def parse(self, response: Response):
+        for poi in response.json()["entries"]:
             item = DictParser.parse(poi)
             item["state"] = poi["administrativeArea"]
             self.parse_hours(item, poi)
             self.parse_services(item, poi)
             yield item
 
-    def parse_hours(self, item, poi):
+    def parse_hours(self, item: Feature, poi: dict):
         try:
             oh = OpeningHours()
             missing_weekdays = self.parse_regular_hours(poi, oh)
             self.parse_special_hours(poi, oh, missing_weekdays)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         except Exception as e:
             self.logger.warning(f"Failed to parse hours: {e}, {poi}")
 
-    def parse_regular_hours(self, poi, oh: OpeningHours):
+    def parse_regular_hours(self, poi: dict, oh: OpeningHours):
         missing_weekdays = 0
         for key, value in poi.items():
             if key.endswith("Hours") and key != "specialHours":
@@ -58,7 +57,7 @@ class BurgerKingBRSpider(scrapy.Spider):
                     missing_weekdays += 1
         return missing_weekdays
 
-    def parse_special_hours(self, poi, oh: OpeningHours, missing_weekdays):
+    def parse_special_hours(self, poi: dict, oh: OpeningHours, missing_weekdays: int):
         if missing_weekdays > 7 and "specialHours" in poi:
             value = poi["specialHours"]
             if "24h" in value:
@@ -67,11 +66,11 @@ class BurgerKingBRSpider(scrapy.Spider):
                 open, close = self.split_hours(value)
                 oh.add_days_range(DAYS, open, close)
 
-    def split_hours(self, value):
+    def split_hours(self, value: str):
         open, close = value.split("-")
         return open.strip(), close.strip()
 
-    def parse_services(self, item, poi):
+    def parse_services(self, item: Feature, poi: dict):
         if services := poi.get("storeServices"):
             for service in services:
                 title = service.get("title")

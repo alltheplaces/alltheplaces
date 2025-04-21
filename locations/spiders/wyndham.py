@@ -7,7 +7,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 BRANDS = {
     "americinn": ["AmericInn", "Q4742493"],
-    "baymont": ["Baymont by Wyndham", "Q4874634"],
+    "baymont": ["Baymont", "Q4874634"],
     "caesars-rewards": ["Caesars Rewards", None],
     "days-inn": ["Days Inn", "Q1047239"],
     "dazzler": ["Dazzler", None],
@@ -21,7 +21,7 @@ BRANDS = {
     "ramada": ["Ramada", "Q1502859"],
     "registry-collection": ["Registry Collection", None],
     "super-8": ["Super 8", "Q5364003"],
-    "trademark": ["Trademark Collection by Wyndham", "Q112144846"],
+    "trademark": ["Trademark Collection", "Q112144846"],
     "travelodge": ["Travelodge", "Q7836087"],
     "tryp": ["TRYP", "Q6153452"],
     "vienna-house": ["Vienna House", "Q2523363"],

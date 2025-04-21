@@ -16,7 +16,6 @@ class MinimartBGSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
-            item["website"] = "https://mini-mart.bg/"
             item["opening_hours"] = OpeningHours()
             for key, value in json.loads(store["open_hours"]).items():
                 day = key

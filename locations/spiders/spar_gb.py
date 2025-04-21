@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class SparGBSpider(scrapy.Spider):
     name = "spar_gb"
-    item_attributes = {"brand": "SPAR", "brand_wikidata": "Q610492"}
+    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://www.spar.co.uk/umbraco/api/storelocationapi/stores?pageNumber=1"]
 

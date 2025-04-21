@@ -19,7 +19,7 @@ class A101TRSpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[scrapy.Request]:
         for city in city_locations("TR"):
-            data = {"geoHash": encode(city.get("latitude"), city.get("longitude"), precision=5)}
+            data = {"geoHash": encode(city.get("latitude"), city.get("longitude"), precision=9)}
             data = b64encode(json.dumps(data).encode("utf-8"))
             data = data.decode("utf-8")  # convert bytes back to string
             url_template = "https://api-bp.a101prod.retter.io/dbmk89vnr/CALL/StoreContentManager/nearestStores/default?__culture=tr-TR&__platform=web&data={}&__isbase64=true"

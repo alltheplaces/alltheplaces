@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class MccoysSpider(StructuredDataSpider):
     name = "mccoys"
-    item_attributes = {"brand": "McCoy's Building Supply", "brand_wikidata": "Q27877295"}
+    item_attributes = {"brand": "McCoy's", "brand_wikidata": "Q27877295"}
     start_urls = ["https://www.mccoys.com/stores"]
     time_format = "%I%p"
     drop_attributes = {"image"}
