@@ -10,7 +10,7 @@ class BatteriesPlusSpider(Where2GetItSpider):
     name = "batteries_plus"
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
     api_endpoint = "https://www.batteriesplus.com/store-locator/rest/getlist"
-    api_key = "9C5DD3EE-C1E6-11EE-903D-65C0A96E38C4"
+    api_key = "EC1E5D98-07CF-11EF-89F1-68CFC87EF9CB"
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")
@@ -25,7 +25,7 @@ class BatteriesPlusSpider(Where2GetItSpider):
         self.apply_attribute("recycling:batteries", item, attributes, "has_recycling_batteries")
 
         oh = OpeningHours()
-        for day, hours in zip(DAYS_FROM_SUNDAY, location["bho"]):
+        for day, hours in zip(DAYS_FROM_SUNDAY, json.loads(location["bho"])):
             opening, closing = hours[:2]
             if "9999" not in (opening, closing):
                 oh.add_range(day, opening, closing, time_format="%H%M")
