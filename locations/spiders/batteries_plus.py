@@ -6,11 +6,16 @@ from locations.items import SocialMedia, set_social_media
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
+def apply_attribute(attribute, item, attributes, key):
+    apply_yes_no(attribute, item, attributes.get(key) == "yes", attributes.get(key, "unsure") == "unsure")
+
+
 class BatteriesPlusSpider(Where2GetItSpider):
     name = "batteries_plus"
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
     api_endpoint = "https://www.batteriesplus.com/store-locator/rest/getlist"
     api_key = "EC1E5D98-07CF-11EF-89F1-68CFC87EF9CB"
+    api_filter = {"opening_status": {"ne": "permanently_closed"}}
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")
@@ -18,11 +23,11 @@ class BatteriesPlusSpider(Where2GetItSpider):
         set_social_media(item, SocialMedia.YELP, location["yelp_url"])
 
         attributes = {attribute["id"]: attribute["value"] for attribute in json.loads(location["attributes"])}
-        self.apply_attribute(PaymentMethods.DEBIT_CARDS, item, attributes, "pay_debit_card")
-        self.apply_attribute(PaymentMethods.CREDIT_CARDS, item, attributes, "pay_credit_card")
-        self.apply_attribute("recycling:electrical_appliances", item, attributes, "has_recycling_electronics")
-        self.apply_attribute(Extras.TAKEAWAY, item, attributes, "has_in_store_pickup")
-        self.apply_attribute("recycling:batteries", item, attributes, "has_recycling_batteries")
+        apply_attribute(PaymentMethods.DEBIT_CARDS, item, attributes, "pay_debit_card")
+        apply_attribute(PaymentMethods.CREDIT_CARDS, item, attributes, "pay_credit_card")
+        apply_attribute("recycling:electrical_appliances", item, attributes, "has_recycling_electronics")
+        apply_attribute(Extras.TAKEAWAY, item, attributes, "has_in_store_pickup")
+        apply_attribute("recycling:batteries", item, attributes, "has_recycling_batteries")
 
         oh = OpeningHours()
         for day, hours in zip(DAYS_FROM_SUNDAY, json.loads(location["bho"])):
@@ -42,5 +47,5 @@ class BatteriesPlusSpider(Where2GetItSpider):
 
         yield item
 
-    def apply_attribute(self, attribute, item, attributes, key):
-        apply_yes_no(attribute, item, attributes.get(key) == "yes", attributes.get(key, "unsure") == "unsure")
+    def pre_process_data(self, location):
+        location.pop("location", None)
