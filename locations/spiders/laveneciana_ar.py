@@ -1,5 +1,8 @@
 import chompjs
+from scrapy.http import Response
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -18,3 +21,7 @@ class LavenecianaARSpider(JSONBlobSpider):
     def pre_process_data(self, location):
         # {'id': '31', 'nombre': 'Lomitas Street', 'direccion': 'Italia 459 | Lomas de Zamora | Buenos Aires', 'latitud': '-34.76602000', 'longitud': '-58.40212900', 'telefono': '7529 - 8791', 'email': '-', 'facebook': None, 'google_map_single': None, 'imagen': '800', 'filtro': 'buenosaires', 'wifi': '1', 'estacionamiento': '1', 'activo': '1'}
         location["nombre"] = location["nombre"].replace(" | ", ", ")
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        apply_category(Categories.ICE_CREAM, item)
+        yield item
