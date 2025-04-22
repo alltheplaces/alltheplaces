@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -49,6 +50,8 @@ class GiantFoodSpider(scrapy.Spider):
         )
         if hours:
             properties["opening_hours"] = hours
+
+        apply_category(Categories.SHOP_SUPERMARKET, properties)
 
         yield Feature(**properties)
 
