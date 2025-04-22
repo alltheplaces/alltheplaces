@@ -5,8 +5,8 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
 from locations.dict_parser import DictParser
+from locations.items import Feature
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 from locations.user_agents import BROWSER_DEFAULT
 
