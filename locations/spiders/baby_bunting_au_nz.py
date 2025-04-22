@@ -25,7 +25,12 @@ class BabyBuntingAUNZSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if "CLOSED" in feature["title"] or "COMING SOON" in feature["title"] or len(list(filter(lambda h: ("CLOSED" in h.upper()), feature["opening_hours"].values()))) == len(feature["opening_hours"].values()):
+        if (
+            "CLOSED" in feature["title"]
+            or "COMING SOON" in feature["title"]
+            or len(list(filter(lambda h: ("CLOSED" in h.upper()), feature["opening_hours"].values())))
+            == len(feature["opening_hours"].values())
+        ):
             return
 
         item["ref"] = str(feature["supplychannel_id"])
