@@ -21,9 +21,16 @@ class DanMurphysAUSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
         item["street_address"] = merge_address_lines([feature.get("AddressLine1"), feature.get("AddressLine2")])
-        item["website"] = "https://www.danmurphys.com.au/stores/{}-{}-{}".format(feature["State"], feature["Name"].replace(" ", "-"), feature["Id"])
+        item["website"] = "https://www.danmurphys.com.au/stores/{}-{}-{}".format(
+            feature["State"], feature["Name"].replace(" ", "-"), feature["Id"]
+        )
         item["opening_hours"] = OpeningHours()
-        hours_string = " ".join(["{}: {}".format(day_hours["Day"], day_hours["Hours"]) for day_hours in feature.get("OpeningHours", [])[:-1]])
+        hours_string = " ".join(
+            [
+                "{}: {}".format(day_hours["Day"], day_hours["Hours"])
+                for day_hours in feature.get("OpeningHours", [])[:-1]
+            ]
+        )
         item["opening_hours"].add_ranges_from_string(hours_string)
         apply_category(Categories.SHOP_ALCOHOL, item)
         yield item
