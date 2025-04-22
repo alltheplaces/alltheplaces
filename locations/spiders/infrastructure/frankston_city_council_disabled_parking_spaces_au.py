@@ -20,5 +20,5 @@ class FrankstonCityCouncilDisabledParkingSpacesAUSpider(FlatGeobufSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.PARKING_SPACE, item)
-        apply_category({"parking_space": "disabled"}, item)
+        item["extras"]["parking_space"] = "disabled"
         yield item

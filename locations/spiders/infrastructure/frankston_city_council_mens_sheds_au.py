@@ -25,5 +25,5 @@ class FrankstonCityCouncilMensShedsAUSpider(FlatGeobufSpider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
         apply_category(Categories.COMMUNITY_CENTRE, item)
-        apply_category({"community_centre:for", "man"}, item)
+        item["extras"]["community_centre:for"] = "man"
         yield item

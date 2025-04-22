@@ -20,8 +20,8 @@ class FrankstonCityCouncilPublicWifiAUSpider(FlatGeobufSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.ANTENNA, item)
-        apply_category({"internet_access": "wlan"}, item)
-        apply_category({"internet_access:fee": "customers"}, item)
-        apply_cateogry({"internet_access:operator": self.item_attributes["operator"]}, item)
-        apply_category({"internet_access:operator:wikidata": self.item_attributes["operator_wikidata"]}, item)
+        item["extras"]["internet_access"] = "wlan"
+        item["extras"]["internet_access:fee"] = "customers"
+        item["extras"]["internet_access:operator"] = self.item_attributes["operator"]
+        item["extras"]["internet_access:operator:wikidata"] = self.item_attributes["operator_wikidata"]
         yield item

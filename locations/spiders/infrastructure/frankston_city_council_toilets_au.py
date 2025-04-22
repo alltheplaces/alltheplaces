@@ -21,9 +21,12 @@ class FrankstonCityCouncilToiletsAUSpider(FlatGeobufSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = feature["Facility_Name"]
         apply_category(Categories.TOILETS, item)
-        if feature.get("Facility_Occupier") in ["FCC", "Public"]:
-            apply_category({"access": "yes"}, item)
-        elif feature.get("Facility_Occupier") == "Club/Org":
-            apply_category({"access": "customers"}, item)
-        apply_category({"fee": "no"}, item)
+        match feature.get("Facility_Occupier"):
+            case "FCC" | "Public":
+                item["extras"]["access"] = "yes"
+            case "Club/Org":
+                item["extras"]["access"] = "customers"
+            case _:
+                self.logger.warning("Unknown public toilet access type: {}".format(feature.get("Facility_Occupier")))
+        item["extras"]["fee"] = "no"
         yield item

@@ -21,6 +21,6 @@ class FrankstonCityCouncilAquaticCentresAUSpider(FlatGeobufSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["website"] = feature.get("Click for More Information")
         apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
-        apply_category({"access": "yes"}, item)
-        apply_category({"sport": "swimming"}, item)
+        item["extras"]["sport"] = "swimming"
+        item["extras"]["access"] = "yes"
         yield item

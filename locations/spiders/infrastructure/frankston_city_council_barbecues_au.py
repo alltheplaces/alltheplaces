@@ -23,9 +23,9 @@ class FrankstonCityCouncilBarbecuesAUSpider(FlatGeobufSpider):
         apply_category(Categories.BARBECUE, item)
         match feature["Asset_SubType"]:
             case "Electric" | "Solar":
-                apply_category({"fuel": "electric"}, item)
+                item["extras"]["fuel"] = "electric"
             case "Gas":
-                apply_cateogry({"fuel": "gas"}, item)
+                item["extras"]["fuel"] = "gas"
             case _:
                 pass
         yield item
