@@ -10,8 +10,8 @@ from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
 from locations.spiders.food_city_southeast_us import FoodCitySoutheastUSSpider
-from locations.spiders.giant_food import GiantFoodUSSpider
 from locations.spiders.giant_food_stores import GiantFoodStoresSpider
+from locations.spiders.giant_food_us import GiantFoodUSSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
 from locations.spiders.h_e_b_us import HEBUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
