@@ -3,6 +3,7 @@ from typing import Any, Iterable
 from scrapy.http import JsonRequest, Request, Response
 from scrapy.spiders import Spider
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
@@ -25,4 +26,9 @@ class ZaxbysUSSpider(Spider):
             item["website"] = (
                 f'https://www.zaxbys.com/locations/{store["state"]}/{store["city"]}/{store["slug"]}'.lower()
             )
+            apply_yes_no(Extras.DELIVERY, item, store.get("supportsDelivery"))
+            apply_yes_no(Extras.TAKEAWAY, item, store.get("supportsPickup"))
+            apply_yes_no(Extras.INDOOR_SEATING, item, store.get("supportsDineIn"))
+            apply_yes_no(Extras.DRIVE_THROUGH, item, store.get("supportsDriveThru"))
+            apply_yes_no(Extras.WIFI, item, store.get("freeWifi"))
             yield item
