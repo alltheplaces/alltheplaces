@@ -12,6 +12,7 @@ class RoyalLepageSpider(scrapy.Spider):
     start_urls = [
         "https://www.royallepage.ca/en/search/offices/?lat=&lng=&address=&designations=&address_type=&city_name=&prov_code=&sortby=&transactionType=OFFICE&name=&location=&language=&specialization=All"
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_location(self, response):
         map_script = response.xpath('//script/text()[contains(., "staticMap")]').get()
