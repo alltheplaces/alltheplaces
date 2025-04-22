@@ -1,16 +1,15 @@
 import json
 
-from locations.categories import Extras, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import SocialMedia, set_social_media
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class BatteriesPlusSpider(Where2GetItSpider):
-    name = "batteries_plus"
+class BatteriesPlusBulbsPRUSSpider(Where2GetItSpider):
+    name = "batteries_plus_bulbs_pr_us"
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
-    api_endpoint = "https://www.batteriesplus.com/store-locator/rest/getlist"
-    api_key = "9C5DD3EE-C1E6-11EE-903D-65C0A96E38C4"
+    api_key = "EC1E5D98-07CF-11EF-89F1-68CFC87EF9CB"
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")
@@ -40,6 +39,7 @@ class BatteriesPlusSpider(Where2GetItSpider):
         apply_yes_no(PaymentMethods.MASTER_CARD, item, "Mastercard" in payment_forms)
         apply_yes_no(PaymentMethods.VISA, item, "Visa" in payment_forms)
 
+        apply_category(Categories.SHOP_ELECTRONICS, item)
         yield item
 
     def apply_attribute(self, attribute, item, attributes, key):
