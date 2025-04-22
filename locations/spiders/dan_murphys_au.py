@@ -15,8 +15,10 @@ class DanMurphysAUSpider(JSONBlobSpider):
     item_attributes = {"brand": "Dan Murphy's", "brand_wikidata": "Q5214075"}
     allowed_domains = ["api.danmurphys.com.au"]
     start_urls = ["https://api.danmurphys.com.au/apis/ui/StoreLocator/Stores/danmurphys"]
-    user_agent = BROWSER_DEFAULT
     locations_key = "Stores"
+    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt cannot be parsed
+    requires_proxy = "AU"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
