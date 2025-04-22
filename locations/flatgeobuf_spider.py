@@ -1,7 +1,6 @@
 from typing import Iterable
 
 from geopandas import read_file
-
 from scrapy import Spider
 from scrapy.http import Response
 
