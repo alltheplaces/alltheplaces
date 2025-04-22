@@ -11,7 +11,7 @@ class GiantFoodUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Giant", "brand_wikidata": "Q5558336"}
     allowed_domains = ["giantfood.com"]
     sitemap_urls = ["https://stores.giantfood.com/robots.txt"]
-    sitemap_rules = [(r"com/\w\w/[^/]+/(\d+)-[^/]+$", "parse")]
+    sitemap_rules = [(r"com/\w\w/[^/]+/\d+-[^/]+$", "parse")]
     wanted_types = ["GroceryStore"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
