@@ -1,32 +1,23 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any, Iterable
 
-from locations.items import set_closed
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.http import JsonRequest, Request, Response
+from scrapy.spiders import Spider
+
+from locations.dict_parser import DictParser
+from locations.geo import city_locations
 
 
-class ZaxbysUSSpider(SitemapSpider, StructuredDataSpider):
+class ZaxbysUSSpider(Spider):
     name = "zaxbys_us"
     item_attributes = {"brand": "Zaxby's", "brand_wikidata": "Q8067525"}
-    allowed_domains = ["www.zaxbys.com"]
-    sitemap_urls = ["https://www.zaxbys.com/server-sitemap.xml"]
-    sitemap_rules = [(r"\/locations\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/?$", "parse_sd")]
-    wanted_types = ["Restaurant"]
-    custom_settings = {"REDIRECT_ENABLED": False}
-    search_for_facebook = False
-    search_for_twitter = False
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            entry["loc"] = entry["loc"].rstrip("/")
-            yield entry
+    def start_requests(self) -> Iterable[Request]:
+        for city in city_locations("US", 15000):
+            yield JsonRequest(
+                url=f'https://zapi.zaxbys.com/v1/stores/near?latitude={city["latitude"]}&longitude={city["longitude"]}&radius=300',
+            )
 
-    def post_process_item(self, item, response, ld_data):
-        if "undefined" in item["website"]:
-            return
-        if "Closed" in item["name"]:
-            set_closed(item)
-        item["branch"] = item.pop("name")
-        item.pop("image")
-        item.pop("opening_hours")
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json():
+            item = DictParser.parse(store)
+            yield item
