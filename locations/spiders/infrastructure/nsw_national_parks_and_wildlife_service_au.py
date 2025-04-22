@@ -25,7 +25,9 @@ class NswNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
         # Sitemap is broken and includes entries with an internal/incorrect domain.
         for entry in entries:
             if entry["loc"].startswith("https://auth-prd.nswparks.cloud/"):
-                entry["loc"] = entry["loc"].replace("https://auth-prd.nswparks.cloud/", "https://www.nationalparks.nsw.gov.au/")
+                entry["loc"] = entry["loc"].replace(
+                    "https://auth-prd.nswparks.cloud/", "https://www.nationalparks.nsw.gov.au/"
+                )
                 yield entry
 
     def post_process_item(self, item, response, ld_data):
