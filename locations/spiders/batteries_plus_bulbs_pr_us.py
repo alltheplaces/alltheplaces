@@ -1,4 +1,4 @@
-import json
+from json import loads
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
@@ -10,13 +10,14 @@ class BatteriesPlusBulbsPRUSSpider(Where2GetItSpider):
     name = "batteries_plus_bulbs_pr_us"
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
     api_key = "EC1E5D98-07CF-11EF-89F1-68CFC87EF9CB"
+    api_filter = {"opening_status": {"ne": "permanently_closed"}}
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")
         item["ref"] = location["localpage_url_id"].removeprefix("batteries-plus-")
         set_social_media(item, SocialMedia.YELP, location["yelp_url"])
 
-        attributes = {attribute["id"]: attribute["value"] for attribute in json.loads(location["attributes"])}
+        attributes = {attribute["id"]: attribute["value"] for attribute in loads(location["attributes"])}
         self.apply_attribute(PaymentMethods.DEBIT_CARDS, item, attributes, "pay_debit_card")
         self.apply_attribute(PaymentMethods.CREDIT_CARDS, item, attributes, "pay_credit_card")
         self.apply_attribute("recycling:electrical_appliances", item, attributes, "has_recycling_electronics")
@@ -30,7 +31,7 @@ class BatteriesPlusBulbsPRUSSpider(Where2GetItSpider):
                 oh.add_range(day, opening, closing, time_format="%H%M")
         item["opening_hours"] = oh
 
-        payment_forms = set(json.loads(location["payment_forms"]))
+        payment_forms = set(loads(location["payment_forms"]))
         apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_forms)
         apply_yes_no(PaymentMethods.APPLE_PAY, item, "Apple Pay" in payment_forms)
         apply_yes_no(PaymentMethods.CASH, item, "Cash" in payment_forms)
