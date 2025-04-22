@@ -7,13 +7,15 @@ from locations.items import Feature
 from locations.flatgeobuf_spider import FlatGeobufSpider
 
 
-class FrankstonCityCouncilPlaygroundsAUSpider(FlatGeobufSpider):
-    name = "frankston_city_council_playgrounds_au"
+class FrankstonCityCouncilAquaticCentresAUSpider(FlatGeobufSpider):
+    name = "frankston_city_council_aquatic_centres_au"
     item_attributes = {"operator": "Frankston City Council", "operator_wikidata": "Q132472668", "state": "VIC", "nsi_id": "N/A"}
     allowed_domains = ["connect.pozi.com"]
-    start_urls = ["https://connect.pozi.com/userdata/frankston-publisher/Recreation/Playground.fgb"]
+    start_urls = ["https://connect.pozi.com/userdata/frankston-publisher/Recreation/Aquatic_Centre.fgb"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["image"] = feature["image_url"]
-        apply_category(Categories.LEISURE_PLAYGROUND, item)
+        item["website"] = feature.get("Click for More Information")
+        apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+        apply_category({"access": "yes"}, item)
+        apply_category({"sport": "swimming"}, item)
         yield item
