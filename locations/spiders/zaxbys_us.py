@@ -20,4 +20,5 @@ class ZaxbysUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full", None)
             yield item
