@@ -21,4 +21,5 @@ class ZaxbysUSSpider(Spider):
         for store in response.json():
             item = DictParser.parse(store)
             item["street_address"] = item.pop("addr_full", None)
+            item["branch"] = item.pop("name").split(" -")[0]
             yield item
