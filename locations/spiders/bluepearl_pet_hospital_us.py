@@ -1,6 +1,8 @@
 from scrapy import Selector
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
