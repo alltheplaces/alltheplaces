@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 PAYMENT_MAPPING = {
     "CASH": PaymentMethods.CASH,
@@ -19,6 +20,7 @@ class SdekSpider(scrapy.Spider):
     allowed_domains = ["www.cdek.ru"]
     start_urls = ["https://www.cdek.ru/api-site/website/office/map/?websiteId=ru&locale=ru"]
     item_attributes = {"brand": "СДЭК", "brand_wikidata": "Q28665980", "extras": {"brand:en": "SDEK"}}
+    user_agent = BROWSER_DEFAULT
     requires_proxy = True
 
     def parse(self, response):
