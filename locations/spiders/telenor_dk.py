@@ -1,4 +1,5 @@
 import re
+from urllib.parse import urljoin
 
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
@@ -34,5 +35,7 @@ class TelenorDKSpider(Spider):
             item["opening_hours"].add_ranges_from_string(
                 hours_string, days=DAYS_DK, named_day_ranges=NAMED_DAY_RANGES_DK
             )
+            if website := item.get("website"):
+                item["website"] = urljoin("https://telenor.dk", website)
             apply_category(Categories.SHOP_MOBILE_PHONE, item)
             yield item
