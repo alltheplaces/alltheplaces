@@ -11,3 +11,8 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/car-hire\/[-\w]+\/[-\w]+\/[-\w]+\/$", "parse_sd")]
     user_agent = BROWSER_DEFAULT
     sitemap_follow = ["/car-hire/"]
+
+    def post_process_item(self, item, response, location):
+        item["country"] = item.pop("state")
+    
+        yield item
