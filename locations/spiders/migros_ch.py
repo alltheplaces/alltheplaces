@@ -31,9 +31,9 @@ class MigrosCHSpider(SitemapSpider):
     }
     obsolete_brands = {"mod"}
     allowed_domains = ["filialen.migros.ch"]
-    sitemap_urls = ["https://filialen.migros.ch/sitemap.xml"]
+    sitemap_urls = ["https://filialen.migros.ch/robots.txt"]
     sitemap_follow = ["/de/"]
-    sitemap_rules = [(r"https://filialen\.migros\.ch/de/", "parse")]
+    sitemap_rules = [(r"https://filialen\.migros\.ch/de/[-\w]+$", "parse")]
 
     def parse(self, response):
 
