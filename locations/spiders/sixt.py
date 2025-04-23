@@ -14,5 +14,5 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, location):
         item["country"] = item.pop("state")
-    
+
         yield item
