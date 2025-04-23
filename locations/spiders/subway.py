@@ -22,4 +22,5 @@ class SubwaySpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.FAST_FOOD, item)
         item["extras"]["cuisine"] = "sandwich"
+        item["extras"]["takeaway"] = "yes"
         yield item
