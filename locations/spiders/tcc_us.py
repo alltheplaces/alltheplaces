@@ -1,9 +1,9 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from scrapy.http import Response
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class TccUSSpider(SitemapSpider, StructuredDataSpider):
