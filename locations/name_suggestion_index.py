@@ -139,6 +139,8 @@ class NSI(metaclass=Singleton):
                     yield item
                 elif wikidata_code == item["tags"].get("operator:wikidata"):
                     yield item
+                elif wikidata_code == item["tags"].get("network:wikidata"):
+                    yield item
 
     @staticmethod
     def normalise_label(original_label: str) -> str:
