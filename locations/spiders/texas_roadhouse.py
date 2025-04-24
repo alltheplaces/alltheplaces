@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import Feature, set_closed
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
