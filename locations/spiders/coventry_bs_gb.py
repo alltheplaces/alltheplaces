@@ -1,4 +1,3 @@
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -14,5 +13,7 @@ class CoventryBSGBSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["branches"]:
-            item = DictParser.parse(location)
+            item = DictParser.parse(location["address"])
+            item["ref"]=location["branchdetails"]["branchname"]
+            item["branch"]=location["branchdetails"]["branchname"]
             yield item
