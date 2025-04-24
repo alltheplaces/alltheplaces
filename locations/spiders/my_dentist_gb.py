@@ -4,6 +4,7 @@ from scrapy import FormRequest
 from scrapy.exceptions import CloseSpider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
@@ -77,4 +78,5 @@ class MyDentistGBSpider(StructuredDataSpider):
         if item["name"].startswith("mydentist") or item["name"].startswith("{my}dentist"):
             item.update(self.MYDENTIST)
             item["name"] = "{my}dentist"
+        apply_category(Categories.DENTIST, item)
         yield item

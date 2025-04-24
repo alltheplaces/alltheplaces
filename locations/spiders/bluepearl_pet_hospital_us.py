@@ -1,6 +1,8 @@
 from scrapy import Selector
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -11,9 +13,8 @@ class BluepearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://bluepearlvet.com/hospital-sitemap.xml"]
     sitemap_rules = [(r"\/hospital\/[\w\-]+\/$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
-    requires_proxy = True  # Cloudflare bot protection used
 
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         name_html = Selector(text=ld_data["name"])
         item["name"] = " ".join((" ".join(name_html.xpath("//text()").getall())).split()).replace(
             " - BluePearl Pet Hospital", ""

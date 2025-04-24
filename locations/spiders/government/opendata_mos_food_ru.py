@@ -1,6 +1,6 @@
 from locations.categories import Categories
 from locations.items import Feature
-from locations.spiders.opendata_mos_household_services_ru import OpendataMosSpider
+from locations.spiders.government.opendata_mos_household_services_ru import OpendataMosSpider
 
 
 class OpendataMosFoodRUSpider(OpendataMosSpider):

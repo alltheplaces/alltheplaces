@@ -12,7 +12,7 @@ from locations.searchable_points import open_searchable_points
 from locations.spiders.tesco_gb import set_located_in
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
+STORELOCATOR = "https://www.starbucks.com/apiproxy/v1/locations?lat={}&lng={}"
 STARBUCKS_SHARED_ATTRIBUTES = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
 
 
