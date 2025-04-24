@@ -23,8 +23,10 @@ class ZaxbysUSSpider(Spider):
             item = DictParser.parse(store)
             item["street_address"] = item.pop("addr_full", None)
             item["branch"] = item.pop("name").split(" -")[0]
-            item["website"] = (
-                f'https://www.zaxbys.com/locations/{store["state"]}/{store["city"]}/{store["slug"]}'.lower()
+            item[
+                "website"
+            ] = f'https://www.zaxbys.com/locations/{store["state"]}/{store["city"]}/{store["slug"]}'.lower().replace(
+                " ", "-"
             )
             apply_yes_no(Extras.DELIVERY, item, store.get("supportsDelivery"))
             apply_yes_no(Extras.TAKEAWAY, item, store.get("supportsPickup"))
