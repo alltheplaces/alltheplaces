@@ -14,6 +14,6 @@ class CoventryBSGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["branches"]:
             item = DictParser.parse(location["address"])
-            item["ref"]=location["branchdetails"]["branchname"]
-            item["branch"]=location["branchdetails"]["branchname"]
+            item["ref"] = location["branchdetails"]["branchname"]
+            item["branch"] = location["branchdetails"]["branchname"]
             yield item
