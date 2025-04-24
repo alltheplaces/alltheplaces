@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class PolomarketPLSpider(CrawlSpider):
     name = "polomarket_pl"
-    item_attributes = {"brand": "Polomarket", "brand_wikidata": "Q11821937"}
+    item_attributes = {"brand": "POLOmarket", "brand_wikidata": "Q11821937"}
     start_urls = ["https://www.polomarket.pl/pl/nasze-sklepy.html"]
     rules = [
         Rule(

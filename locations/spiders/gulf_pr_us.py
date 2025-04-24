@@ -11,7 +11,7 @@ from locations.items import Feature
 
 class GulfPRUSSpider(Spider):
     name = "gulf_pr_us"
-    item_attributes = {"brand": "Gulf Oil", "brand_wikidata": "Q5617505"}
+    item_attributes = {"brand": "Gulf", "brand_wikidata": "Q5617505"}
     allowed_domains = ["www.gulfoil.com"]
 
     @staticmethod

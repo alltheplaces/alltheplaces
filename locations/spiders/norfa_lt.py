@@ -8,7 +8,7 @@ from locations.items import Feature
 class NorfaLTSpider(Spider):
     name = "norfa_lt"
     start_urls = ["https://www.norfa.lt/parduotuves/"]
-    item_attributes = {"brand": "Norfa", "brand_wikidata": "Q1998983"}
+    item_attributes = {"brand": "Norfa XL", "brand_wikidata": "Q1998983"}
 
     def parse(self, response):
         js = (

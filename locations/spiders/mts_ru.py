@@ -8,11 +8,12 @@ from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_T
 class MtsRUSpider(scrapy.Spider):
     name = "mts_ru"
     item_attributes = {"brand_wikidata": "Q1368919"}
-    start_urls = ["https://mts.ru/json/offices/points"]
+    start_urls = ["https://moskva.mts.ru/api/bff/v1/offices/points"]
 
     def parse(self, response):
         for poi in response.json():
             item = DictParser.parse(poi)
+            item["name"] = None
             # Coords are switched in raw data
             item["lat"] = poi["longitude"]
             item["lon"] = poi["latitude"]
@@ -28,6 +29,6 @@ class MtsRUSpider(scrapy.Spider):
             try:
                 oh = OpeningHours()
                 oh.add_ranges_from_string(details[0], DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, DELIMITERS_RU)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Failed to parse opening hours: {details}, {item['ref']}, {e}")

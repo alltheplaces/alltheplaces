@@ -1,5 +1,3 @@
-import re
-
 from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
@@ -15,5 +13,6 @@ class DangerfieldSpider(StockistSpider):
         else:
             item["country"] = "AU"
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(re.sub(r"\s+", " ", location.get("description")))
+        if location.get("description"):
+            item["opening_hours"].add_ranges_from_string(location.get("description"))
         yield item

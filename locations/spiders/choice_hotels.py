@@ -10,7 +10,6 @@ from locations.user_agents import CHROME_LATEST
 
 class ChoiceHotelsSpider(SitemapSpider):
     name = "choice_hotels"
-    item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
     # Sitemapindex with below in it is "https://www.choicehotels.com/sitemapindex.xml"
     sitemap_urls = ["https://www.choicehotels.com/brandsearchsitemap.xml.gz"]
@@ -58,6 +57,7 @@ class ChoiceHotelsSpider(SitemapSpider):
                 item["website"] = response.url
 
                 if brand_info := self.brand_mapping.get(location["brandCode"]):
+                    item["brand"] = brand_info[0]
                     item["brand_wikidata"] = brand_info[1]
                     if len(brand_info) == 3:
                         apply_category(brand_info[2], item)

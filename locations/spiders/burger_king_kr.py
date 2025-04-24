@@ -1,34 +1,71 @@
+import json
+from typing import Iterable
+
+from scrapy import FormRequest, Request
+from scrapy.http import JsonRequest
+
 from locations.categories import Extras, apply_yes_no
-from locations.hours import DAYS, DAYS_KR, DELIMITERS_KR, NAMED_DAY_RANGES_KR, OpeningHours
+from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import clean_address
-from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingKRSpider(JSONBlobSpider):
     download_timeout = 60
     name = "burger_king_kr"
-    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    start_urls = ["https://burgerking.co.kr/store/selectStore.json"]
-    locations_key = ["body", "storeList"]
+    item_attributes = {"brand_wikidata": "Q177054"}
+    locations_key = ["body", "storInfo"]
+
+    def start_requests(self) -> Iterable[JsonRequest | Request]:
+        yield FormRequest(
+            url="https://www.burgerking.co.kr/burgerking/BKR0343.json",
+            headers={"accept": "*/*"},
+            formdata={
+                "message": json.dumps(
+                    {
+                        "header": {
+                            "result": True,
+                            "error_code": "",
+                            "error_text": "",
+                            "info_text": "",
+                            "message_version": "",
+                            "login_session_id": "",
+                            "trcode": "BKR0343",
+                            "cd_call_chnn": "01",
+                        },
+                        "body": {
+                            "dataCount": "2000",
+                            "membershipYn": "",
+                            "orderType": "01",
+                            "page": "1",
+                            "searchKeyword": "",
+                            "serviceCode": [],
+                            "sort": "02",
+                            "yCoordinates": "37.5726506",
+                            "xCoordinates": "126.9810922",
+                            "isAllYn": "Y",
+                        },
+                    }
+                )
+            },
+        )
 
     def post_process_item(self, item, response, location):
-        item["ref"] = location["STOR_CD"]
-        item["lat"] = location["STOR_COORD_Y"]
-        item["lon"] = location["STOR_COORD_X"]
-        item["branch"] = location["STOR_NM"]
-        item["street_address"] = location["ADDR_1"]
-        item["addr_full"] = clean_address([location["ADDR_1"], location["ADDR_2"]])
-        apply_yes_no(Extras.DRIVE_THROUGH, item, location["DIRVE_TH"] == "1", False)
-        apply_yes_no(Extras.DELIVERY, item, location["DLVYN"] == "1", False)
+        item["ref"] = location["storCd"]
+        item["lat"] = location["storCoordY"]
+        item["lon"] = location["storCoordX"]
+        item["branch"] = location["storNm"]
+        item["addr_full"] = location["storAddr"]
+        item["phone"] = location["storTelNo"]
+        if services := location.get("storeServiceCodeList"):
+            services = [service["storeServiceName"] for service in services]
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "드라이브스루" in services, False)
+            apply_yes_no(Extras.DELIVERY, item, "딜리버리" in services, False)
 
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(
-            location["STORE_TIME"], days=DAYS_KR, named_day_ranges=NAMED_DAY_RANGES_KR, delimiters=DELIMITERS_KR
-        )
-        if location["DLVYN"] == "1":
-            oh = OpeningHours()
-            oh.add_days_range(DAYS, location["DLV_START_TIME"], location["DLV_FNSH_TIME"], time_format="%H%M")
-            item["extras"]["opening_hours:delivery"] = oh.as_opening_hours()
+        for days_key, days_val in [("storTimeDays", DAYS_WEEKDAY), ("storTimeWeekend", DAYS_WEEKEND)]:
+            if location[days_key]:
+                item["opening_hours"].add_days_range(days_val, *location[days_key].split("~"))
+
+        item["website"] = "https://www.burgerking.co.kr/store/{}".format(item["ref"])
 
         yield item

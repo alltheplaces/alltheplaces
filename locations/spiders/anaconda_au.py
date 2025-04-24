@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_EN, OpeningHours
@@ -8,20 +11,16 @@ from locations.structured_data_spider import extract_phone
 class AnacondaAUSpider(SitemapSpider):
     name = "anaconda_au"
     item_attributes = {"brand": "Anaconda", "brand_wikidata": "Q105981238"}
-    allowed_domains = ["www.anacondastores.com"]
     sitemap_urls = ["https://www.anacondastores.com/sitemap/store/store-sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"^https://www.anacondastores.com/store/(?:queensland|new-south-wales|victoria|tasmania|western-australia|south-australia|northern-territory|australian-capital-territory)/[\w\-]+/a\d{3}$",
-            "parse_store",
-        )
-    ]
+    sitemap_rules = [(r"/store/[-\w]+/[-\w]+/[-\w]+$", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse_store(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storeid').extract_first(),
-            "name": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storename').extract_first(),
+            "branch": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storename')
+            .extract_first()
+            .removeprefix("Anaconda "),
             "lat": response.xpath('//div[contains(@id, "maps_canvas")]/@data-latitude').extract_first(),
             "lon": response.xpath('//div[contains(@id, "maps_canvas")]/@data-longitude').extract_first(),
             "addr_full": " ".join(

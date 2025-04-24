@@ -9,9 +9,10 @@ from locations.items import Feature
 
 class SalvationArmyGBSpider(SitemapSpider):
     name = "salvation_army_gb"
-    item_attributes = {"brand": "Salvation Army", "brand_wikidata": "Q188307"}
-    sitemap_urls = ["https://www.salvationarmy.org.uk/robots.txt"]
+    item_attributes = {"brand": "The Salvation Army", "brand_wikidata": "Q188307"}
+    sitemap_urls = ["https://www.salvationarmy.org.uk/sitemap.xml?page=3"]
     sitemap_rules = [(r"^https:\/\/www\.salvationarmy\.org\.uk\/[^/]+-charity-shop(?:-\d+)?$", "parse")]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()

@@ -1,4 +1,6 @@
+from h2.exceptions import ProtocolError
 from scrapy.http import Response
+from scrapy.settings.default_settings import RETRY_EXCEPTIONS
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -10,11 +12,15 @@ from locations.user_agents import FIREFOX_LATEST
 class NettoDESpider(SitemapSpider, StructuredDataSpider):
     name = "netto_de"
     allowed_domains = ["netto-online.de"]
+    item_attributes = {"brand_wikidata": "Q879858"}
     sitemap_urls = ["https://www.netto-online.de/ueber-netto/sitemap/index"]
     sitemap_rules = [(r"/filialen/[^/]+/[^/]+/(\d+)$", "parse")]
     wanted_types = ["GroceryStore"]
     user_agent = FIREFOX_LATEST
-    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
+    custom_settings = {
+        "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
+        "RETRY_EXCEPTIONS": RETRY_EXCEPTIONS + [ProtocolError],
+    }
 
     categories = {
         "Netto City": Categories.SHOP_SUPERMARKET,
@@ -23,6 +29,7 @@ class NettoDESpider(SitemapSpider, StructuredDataSpider):
     }
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["website"] = response.url
         item["brand"] = item["name"] = ld_data["name"].split(" - ", 1)[0]
         if cat := self.categories.get(item["brand"]):
             apply_category(cat, item)

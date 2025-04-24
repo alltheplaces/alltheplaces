@@ -5,7 +5,7 @@ import re
 from parsel import Selector
 from scrapy.spiders import Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -18,12 +18,7 @@ def strip_tags(s):
 
 class AwaySpider(Spider):
     name = "away"
-    item_attributes = {
-        "brand": "Away",
-        "brand_wikidata": "Q48743138",
-        "extras": Categories.SHOP_BAG.value,
-        "name": "Away",
-    }
+    item_attributes = {"brand": "Away", "brand_wikidata": "Q48743138"}
     start_urls = ["https://www.awaytravel.com/stores"]
 
     def parse(self, response):
@@ -52,5 +47,7 @@ class AwaySpider(Spider):
                 for link in links:
                     if link.startswith("tel:"):
                         item["phone"] = link.removeprefix("tel:")
+
+            apply_category(Categories.SHOP_BAG, item)
 
             yield item

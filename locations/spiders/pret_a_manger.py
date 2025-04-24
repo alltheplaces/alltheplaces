@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -7,14 +8,8 @@ from locations.pipelines.address_clean_up import clean_address
 
 class PretAMangerSpider(scrapy.Spider):
     name = "pret_a_manger"
-    brands = {
-        "Pret A Manger": {"brand": "Pret A Manger", "brand_wikidata": "Q2109109"},
-        "Veggie Pret": {
-            "brand": "Veggie Pret",
-            "brand_wikidata": "Q108118332",
-            "extras": {"amenity": "fast_food", "diet:vegetarian": "only"},
-        },
-    }
+    item_attributes = {"brand": "Pret A Manger", "brand_wikidata": "Q2109109"}
+    VEGGIE_PRET = {"brand": "Veggie Pret", "brand_wikidata": "Q108118332"}
 
     start_urls = ["https://api1.pret.com/v1/shops"]
 
@@ -45,9 +40,7 @@ class PretAMangerSpider(scrapy.Spider):
 
                     oh.add_range(DAYS_3_LETTERS_FROM_SUNDAY[i], rule[0], rule[1], "%I:%M%p")
 
-            item["opening_hours"] = oh.as_opening_hours()
-
-            item["extras"] = {}
+            item["opening_hours"] = oh
 
             item["extras"]["delivery"] = "yes" if store["features"].get("delivery") else "no"
             item["extras"]["storeType"] = store["features"].get("storeType")
@@ -55,8 +48,8 @@ class PretAMangerSpider(scrapy.Spider):
             item["extras"]["internet_access"] = "wlan" if store["features"]["wifi"] else "no"
 
             if store["features"].get("storeType") == "veggie-pret":
-                item.update(self.brands["Veggie Pret"])
-            else:
-                item.update(self.brands["Pret A Manger"])
+                item.update(self.VEGGIE_PRET)
+                apply_category(Categories.FAST_FOOD, item)
+                item["extras"]["diet:vegetarian"] = "only"
 
             yield item

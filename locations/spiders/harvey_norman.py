@@ -2,6 +2,7 @@ import json
 
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -32,4 +33,5 @@ class HarveyNormanSpider(Spider):
                 if len(hours) < 2:
                     continue
                 item["opening_hours"].add_range(DAYS[day_number - 1], hours[0], hours[1])
+            apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
             yield item

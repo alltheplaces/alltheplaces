@@ -174,7 +174,8 @@ class FordSpider(scrapy.Spider):
             item["name"] = data.get("DealerName")
             item["country"] = self.get_country_code(data.get("CountryCode"))
             item["opening_hours"] = oh
-            item["website"] = data["PrimaryURL"]
+            item = self.repair_website(data["PrimaryURL"], item)
+
             item["brand"] = self.brand_mapping.get(data.get("Brand")).get("brand")
             item["brand_wikidata"] = self.brand_mapping.get(data.get("Brand")).get("brand_wikidata")
 
@@ -194,6 +195,20 @@ class FordSpider(scrapy.Spider):
 
     def is_ascii(self, str):
         return all(ord(c) < 128 for c in str)
+
+    def repair_website(self, website, item):
+        if "http://" in website:
+            website = website.replace("http://", "https://")
+            item["website"] = website
+        elif website.startswith("www."):
+            website = website.replace("www.", "https://www.")
+            item["website"] = website
+        elif website.startswith("ford-"):
+            website = website.replace("ford-", "https://ford-")
+            item["website"] = website
+        elif "@" in website:
+            item["email"] = website
+        return item
 
     @functools.lru_cache()
     def get_country_code(self, alpha_3):

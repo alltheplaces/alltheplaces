@@ -1,6 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 
@@ -27,6 +28,6 @@ class KiaUSSpider(scrapy.Spider):
             if phones := dealer.get("phones"):
                 item["phone"] = phones[0].get("number")
             item["website"] = f'https://www.kia.com/us/en/find-a-dealer/result?zipCode={dealer["zipCode"]}'
+            apply_category(Categories.SHOP_CAR, item)
             item["extras"] = {"website_2": dealer.get("url")}
-            item["extras"]["service"] = "dealer;repair"
             yield item
