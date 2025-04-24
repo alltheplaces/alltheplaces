@@ -3,8 +3,8 @@ from scrapy import Spider
 from locations.dict_parser import DictParser
 
 
-class CoventryBSGBSpider(Spider):
-    name = "coventry_bs_gb"
+class CoventryBuildingSocietyGBSpider(Spider):
+    name = "coventry_building_society_gb"
     item_attributes = {
         "brand": "Coventry Building Society",
         "brand_wikidata": "Q5179055",
