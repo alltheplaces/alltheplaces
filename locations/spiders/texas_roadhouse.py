@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
 
 
@@ -20,13 +20,16 @@ class TexasRoadhouseSpider(SitemapSpider):
         for store_times in store_hours:
             if ":" in store_times:
                 day, times = store_times.strip().split(" : ")
-                open_time, close_time = times.split(" - ")
-                opening_hours.add_range(
-                    day=day,
-                    open_time=open_time.replace(" ", ""),
-                    close_time=close_time.replace(" ", ""),
-                    time_format="%I:%M%p",
-                )
+                if "Closed" in times:
+                    opening_hours.set_closed(day)
+                else:
+                    open_time, close_time = times.split(" - ")
+                    opening_hours.add_range(
+                        day=day,
+                        open_time=open_time.replace(" ", ""),
+                        close_time=close_time.replace(" ", ""),
+                        time_format="%I:%M%p",
+                    )
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
