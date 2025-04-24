@@ -16,7 +16,6 @@ class SdekSpider(scrapy.Spider):
     allowed_domains = ["www.cdek.ru"]
     item_attributes = {"brand": "СДЭК", "brand_wikidata": "Q28665980", "extras": {"brand:en": "SDEK"}}
     user_agent = BROWSER_DEFAULT
-    requires_proxy = True
 
     # Because of bot detection after certain no. of requests querying GraphQL API https://www.cdek.ru/api-site/v1/graphql/ for individual POI details is no longer feasible.
     def make_request(self, page: int, limit: int = 100) -> JsonRequest:
