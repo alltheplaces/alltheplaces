@@ -12,8 +12,7 @@ class BureauOfMeteorologyWeatherStationsAUSpider(Spider):
     name = "bureau_of_meteorology_weather_stations_au"
     item_attributes = {"operator": "Bureau of Meteorology", "operator_wikidata": "Q923429"}
     start_urls = ["ftp://ftp.bom.gov.au/anon2/home/ncc/metadata/sitelists/stations.zip"]
-    skip_auto_cc_spider_name = True
-    skip_auto_cc_domain = True
+    skip_auto_cc = True  # Too coarse/Inaccurate polygons confuse outlying Australian islands/territories
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Scrapy always ignores FTP URLs unless ROBOTSTXT_OBEY=False
 
     def start_requests(self) -> Iterable[Request]:
