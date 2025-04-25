@@ -40,7 +40,9 @@ class BureauOfMeteorologyWeatherStationsAUSpider(Spider):
                 "website": "http://www.bom.gov.au/climate/averages/tables/cw_{}.shtml".format(site_id),
                 "extras": {
                     "start_date": start_date,
-                    "website:map": "http://www.bom.gov.au/clim_data/cdio/metadata/pdf/siteinfo/IDCJMD0040.{}.SiteInfo.pdf".format(site_id),
+                    "website:map": "http://www.bom.gov.au/clim_data/cdio/metadata/pdf/siteinfo/IDCJMD0040.{}.SiteInfo.pdf".format(
+                        site_id
+                    ),
                 },
             }
 
