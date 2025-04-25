@@ -5,7 +5,7 @@ from scrapy.spiders import Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
+from locations.geo import country_iseadgg_centroids
 
 
 class ZaxbysUSSpider(Spider):
@@ -13,9 +13,9 @@ class ZaxbysUSSpider(Spider):
     item_attributes = {"brand": "Zaxby's", "brand_wikidata": "Q8067525"}
 
     def start_requests(self) -> Iterable[Request]:
-        for city in city_locations("US", 15000):
+        for lat, lon in country_iseadgg_centroids("US", 94):
             yield JsonRequest(
-                url=f'https://zapi.zaxbys.com/v1/stores/near?latitude={city["latitude"]}&longitude={city["longitude"]}&radius=300',
+                url=f"https://zapi.zaxbys.com/v1/stores/near?latitude={lat}&longitude={lon}&radius=100&limit=100",
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
