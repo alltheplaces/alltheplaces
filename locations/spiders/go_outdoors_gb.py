@@ -1,15 +1,13 @@
-import re
 import json
 from typing import Any, Iterable
 from urllib.parse import urljoin
-from locations.hours import OpeningHours, DAYS
+
 from scrapy import FormRequest, Request
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
-from locations.items import Feature
-from locations.structured_data_spider import extract_phone
+from locations.hours import DAYS, OpeningHours
 
 
 class GoOutdoorsGBSpider(Spider):
@@ -32,15 +30,15 @@ class GoOutdoorsGBSpider(Spider):
         json_data = json.loads(data)
         for store in json_data:
             item = DictParser.parse(store)
-            item["addr_full"].replace("<br \>",",")
-            item["website"] = urljoin("https://www.gooutdoors.co.uk/stores/",store["filename"])
+            item["addr_full"].replace("<br \>", ",")
+            item["website"] = urljoin("https://www.gooutdoors.co.uk/stores/", store["filename"])
 
             item["opening_hours"] = OpeningHours()
             for rule in store["opening_times_data"].split(","):
-                day,ohour,omin,chour,cmin = rule.split(":")#map(int, rule.split(":"))
-                day=int(day)
-                open=ohour + ":" + omin
-                close=chour + ":" + cmin
+                day, ohour, omin, chour, cmin = rule.split(":")  # map(int, rule.split(":"))
+                day = int(day)
+                open = ohour + ":" + omin
+                close = chour + ":" + cmin
                 DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
                 item["opening_hours"].add_range(DAYS_FROM_SUNDAY[day], open, close)
 
