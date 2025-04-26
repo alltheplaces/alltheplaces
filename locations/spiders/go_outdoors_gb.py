@@ -35,7 +35,7 @@ class GoOutdoorsGBSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for rule in store["opening_times_data"].split(","):
-                day, ohour, omin, chour, cmin = rule.split(":")  # map(int, rule.split(":"))
+                day, ohour, omin, chour, cmin = rule.split(":")
                 day = int(day)
                 open = ohour + ":" + omin
                 close = chour + ":" + cmin
