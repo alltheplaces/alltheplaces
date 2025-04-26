@@ -5,7 +5,6 @@ from scrapy import FormRequest, Request
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import extract_phone
 
@@ -37,8 +36,8 @@ class GoOutdoorsGBSpider(Spider):
             extract_phone(item, location)
             item["website"] = response.urljoin(location.xpath('.//a[text()="View store details"]/@href').get())
 
-            #item["opening_hours"] = OpeningHours()
-            #for rule in location.xpath(".//tr/td/text()").getall():
+            # item["opening_hours"] = OpeningHours()
+            # for rule in location.xpath(".//tr/td/text()").getall():
             #    day, times = rule.split(" ", 1)
             #    start_time, end_time = times.split(" - ")
             #    item["opening_hours"].add_range(day, start_time, end_time, "%H%M")
