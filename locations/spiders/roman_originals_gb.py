@@ -25,7 +25,10 @@ class RomanOriginalsGBSpider(Spider):
         for stores in json_data:
             if stores["@type"] == "Store":
                 for store in stores["department"]:
+                    print(store)
                     item = DictParser.parse(store)
+                    item["ref"] = store["name"]
+                    item["branch"] = item["ref"]
                     item["street_address"] = merge_address_lines(
                         [store["address"]["streetAddress"], store["address"]["addressLocality"]]
                     )
@@ -36,4 +39,4 @@ class RomanOriginalsGBSpider(Spider):
                 #                    for day in store["openingHoursSpecification"][0]["dayOfWeek"]:
                 #                        item["opening_hours"].add_range(day, store["openingHoursSpecification"][0]["opens"], store["openingHoursSpecification"][0]["closes"])
 
-                yield item
+                    yield item
