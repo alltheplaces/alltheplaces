@@ -26,7 +26,7 @@ class RomanOriginalsGBSpider(Spider):
             if stores["@type"] == "Store":
                 for store in stores["department"]:
                     item = DictParser.parse(store)
-                    item["ref"] = store["name"]
+                    item["ref"] = store["areaServed"]["name"]
                     item["branch"] = item["ref"]
                     item["street_address"] = merge_address_lines(
                         [store["address"]["streetAddress"], store["address"]["addressLocality"]]
