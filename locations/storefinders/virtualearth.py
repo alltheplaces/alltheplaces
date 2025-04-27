@@ -21,7 +21,7 @@ class VirtualEarthSpider(Spider):
       - `dataset_name`: mandatory parameter
       - `api_key`: mandatory parameter
       - `dataset_filter`: optional parameter, default value is "Adresstyp Eq 1"
-      - `dataset_select`: optional parameter, default valus is "*"
+      - `dataset_select`: optional parameter, default value is "*"
       - `page_size`: optional parameter, default value is 250
     """
 

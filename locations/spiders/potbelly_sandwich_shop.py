@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class PotbellySandwichShopSpider(Spider):
     name = "potbelly_sandwich_shop"
-    item_attributes = {"brand": "Potbelly Sandwich Shop", "brand_wikidata": "Q7234777"}
+    item_attributes = {"brand": "Potbelly", "brand_wikidata": "Q7234777"}
     allowed_domains = ["www.potbelly.com", "api.prod.potbelly.com"]
     start_urls = [
         "https://www.potbelly.com/sitemap_locations.xml",

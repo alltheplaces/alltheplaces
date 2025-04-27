@@ -15,57 +15,84 @@ class TravisPerkinsGBSpider(Spider):
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
-            url="https://www.travisperkins.co.uk/graphql",
+            url="https://www.travisperkins.co.uk/graphql?op=getAllBranches",
             data={
-                "query": """
-                    query Branches {
-                        branches {
-                            ref: code
-                            email
-                            fax
-                            branch: name
-                            phone
-                            address {
-                                line1
-                                line2
-                                line3
-                                city: town
-                                postalCode
-                            }
-                            branchSchedule {
-                                closed
-                                closingTime
-                                dayOfWeek
-                                openingTime
-                            }
-                            location: geoPoint {
-                                latitude
-                                longitude
-                            }
-                        }
-                    }"""
+                "operationName": "getAllBranches",
+                "variables": {"brandId": "tp", "input": {"first": 2000, "features": []}},
+                "query": """query getAllBranches($brandId: ID!, $input: TpplcBranchSearchInput!) {
+                tpplcBrand(brandId: $brandId) {
+                  searchBranches(input: $input) {
+                    edges {
+                      ...TpplcBranchFields
+                      __typename
+                    }
+                    __typename
+                  }
+                  __typename
+                }
+              }
+
+              fragment TpplcBranchFields on TpplcBranch {
+                name
+                id
+                address {
+                  line1
+                  line2
+                  line3
+                  town
+                  postalCode
+                  __typename
+                }
+                geoPoint {
+                  latitude
+                  longitude
+                  __typename
+                }
+                branchSchedule {
+                  openingTime
+                  closingTime
+                  dayOfWeek
+                  closed
+                  __typename
+                }
+                phone
+                email
+                manager
+                features {
+                  code
+                  name
+                  __typename
+                }
+                capabilities {
+                  items {
+                    ... on TpplcBenchmarx {
+                      type
+                      __typename
+                    }
+                    __typename
+                  }
+                  __typename
+                }
+                __typename
+              }""",
             },
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["data"]["branches"]:
+        for location in response.json()["data"]["tpplcBrand"]["searchBranches"]["edges"]:
             item = DictParser.parse(location)
-            item["branch"] = location["branch"]
             item["street_address"] = merge_address_lines(
                 [location["address"]["line1"], location["address"]["line2"], location["address"]["line3"]]
             )
-            item["website"] = "https://www.travisperkins.co.uk/branch-locator/{}".format(location["ref"])
-            item["extras"]["fax"] = location["fax"]
+            item["website"] = "https://www.travisperkins.co.uk/branch-locator/{}".format(location["id"])
 
             item["opening_hours"] = OpeningHours()
             for rule in location["branchSchedule"]:
                 if rule["closed"]:
                     continue
                 item["opening_hours"].add_range(rule["dayOfWeek"], rule["openingTime"], rule["closingTime"])
-
-            if " BENCHMARX" in item["branch"]:
-                # Usually ends with "BENCHMARX KITCHENS & JOINERY", but sometimes spelt wrong
-                item["branch"] = item["branch"].split(" BENCHMARX")[0]
-                item.update(self.BENCHMARX)
+            if m := location["capabilities"]["items"]:
+                if "Benchmarx" in m[0]["__typename"]:
+                    item.update(self.BENCHMARX)
 
             yield item

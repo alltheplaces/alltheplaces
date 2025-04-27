@@ -8,16 +8,16 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class E5BESpider(Spider):
     name = "e5_be"
-    item_attributes = {"brand": "e5 Mode", "brand_wikidata": "Q85313633"}
+    item_attributes = {"brand": "E5 Mode", "brand_wikidata": "Q85313633"}
     start_urls = ["https://www.e5.be/nl/kledingwinkels"]
 
     def parse(self, response, **kwargs):
         data = json.loads(
             response.xpath(
-                '//script[@type="text/x-magento-init"][contains(text(), "locator_baldwin_storepickup_locator")]/text()'
+                '//script[@type="text/x-magento-init"][contains(text(), "locator_e5mode_storepickup_locator")]/text()'
             ).get()
         )
-        for location in data["[data-role=locator_baldwin_storepickup_locator]"]["baldwin/storeLocator"]["stores"][
+        for location in data["[data-role=locator_e5mode_storepickup_locator]"]["e5mode/storeLocator"]["stores"][
             "items"
         ]:
             if location["enabled"] != "1":

@@ -22,6 +22,8 @@ class BootbarnSpider(scrapy.Spider):
                 continue
             else:
                 open_time, close_time = hours[i + 1].split(" - ")
+                open_time = open_time.replace("*", "")
+                close_time = close_time.replace("*", "")
                 opening_hours.add_range(
                     day=day[:2],
                     open_time=open_time,
@@ -34,7 +36,7 @@ class BootbarnSpider(scrapy.Spider):
     def parse_location(self, response):
         properties = {
             "ref": re.search(r".+/?StoreID=(.+)", response.url).group(1),
-            "name": response.xpath('normalize-space(//span[@class="store-name"]//text())').extract_first(),
+            "branch": response.xpath('normalize-space(//span[@class="store-name"]//text())').extract_first(),
             "street_address": response.xpath(
                 'normalize-space(//span[@class="store-address1"]//text())'
             ).extract_first(),

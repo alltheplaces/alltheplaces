@@ -1,19 +1,19 @@
 from scrapy import Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 
 class NinetynineBikesAUSpider(Spider):
     name = "99_bikes_au"
-    item_attributes = {"brand": "99 Bikes", "brand_wikidata": "Q110288298", "extras": Categories.SHOP_BICYCLE.value}
+    item_attributes = {"brand": "99 Bikes", "brand_wikidata": "Q110288298"}
     allowed_domains = ["www.99bikes.com.au"]
     start_urls = ["https://www.99bikes.com.au//rest/V1/clickandcollect_getalllocations"]
 
     def parse(self, response):
         for item in response.xpath("item"):
-            store = {}
+            store = Feature()
             store["ref"] = item.xpath("id/text()").get()
             store["name"] = item.xpath("store_name/text()").get()
             store["email"] = item.xpath("email/text()").get()
@@ -32,8 +32,11 @@ class NinetynineBikesAUSpider(Spider):
             store["opening_hours"] = OpeningHours()
             for opening_time in item.xpath("extension_attributes/opening_time/item"):
                 day = opening_time.xpath("day/text()").get()
-                open_time = opening_time.xpath("open_time/text()").get()
-                close_time = opening_time.xpath("close_time/text()").get()
-
+                open_time = opening_time.xpath("open_time/text()").get().strip()
+                if close_time := opening_time.xpath("close_time/text()").get():
+                    close_time = close_time.strip()
                 store["opening_hours"].add_range(DAYS_EN[day], open_time, close_time, "%H:%M%p")
-            yield Feature(**store)
+
+            apply_category(Categories.SHOP_BICYCLE, store)
+
+            yield store

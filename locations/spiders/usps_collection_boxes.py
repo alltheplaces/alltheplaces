@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -26,11 +26,7 @@ USPS_HEADERS = {
 
 class UspsCollectionBoxesSpider(scrapy.Spider):
     name = "usps_collection_boxes"
-    item_attributes = {
-        "brand": "United States Postal Service",
-        "brand_wikidata": "Q668687",
-        "extras": Categories.POST_BOX.value,
-    }
+    item_attributes = {"operator": "United States Postal Service", "operator_wikidata": "Q668687"}
     allowed_domains = ["usps.com"]
     download_delay = 0.1
 
@@ -175,5 +171,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             elif properties.get("name") == "USPS COLLECTION BOX - PO LOBBY":
                 properties["extras"]["indoor"] = "yes"
                 properties.pop("name")
+
+            apply_category(Categories.POST_BOX, properties)
 
             yield Feature(**properties)

@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class ShellRechargeSpider(scrapy.Spider):
     name = "shell_recharge"
-    item_attributes = {"brand": "Shell Recharge", "brand_wikidata": "Q105883058"}
+    item_attributes = {"operator": "Shell Recharge Solutions", "operator_wikidata": "Q105883058"}
 
     def start_requests(self):
         yield scrapy.http.JsonRequest(

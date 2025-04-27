@@ -2,12 +2,13 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class MontessoriSchoolSpider(scrapy.Spider):
     name = "montessori_school"
-    item_attributes = {"brand": "Montessori School", "extras": {"amenity": "school"}}
+    item_attributes = {"brand": "Montessori School"}
     allowed_domains = ["www.montessori.com"]
     start_urls = ("https://www.montessori.com/montessori-schools/find-a-school/",)
 
@@ -34,5 +35,7 @@ class MontessoriSchoolSpider(scrapy.Spider):
                 "lon": float(addr_elem.xpath(".//@data-longitude").extract_first()),
                 "lat": float(addr_elem.xpath(".//@data-latitude").extract_first()),
             }
+
+            apply_category(Categories.SCHOOL, properties)
 
             yield Feature(**properties)

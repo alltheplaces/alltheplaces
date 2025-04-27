@@ -1,47 +1,53 @@
-import html
-import json
+import re
 from typing import Any
 
-from scrapy import Selector, Spider
+import scrapy
+from scrapy import Spider
 from scrapy.http import Response
 
-from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TrussellTrustGBSpider(Spider):
     name = "trussell_trust_gb"
     item_attributes = {"operator_wikidata": "Q15621299"}
-    start_urls = ["https://www.trusselltrust.org/get-help/find-a-foodbank/foodbank-search/?foodbank_s=all&callback=%20"]
-    no_refs = True
+    start_urls = ["https://www.trussell.org.uk/emergency-food/i-have-a-food-voucher/choose-a-foodbank?lat=&lng=&page=1"]
+
+    def make_request(self, page: int):
+        return scrapy.Request(
+            url="https://www.trussell.org.uk/emergency-food/i-have-a-food-voucher/choose-a-foodbank?lat=&lng=&page={}".format(
+                page
+            ),
+            cb_kwargs={"page": page},
+        )
+
+    def start_requests(self):
+        yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for foodbank in json.loads(response.text[2:-2]):
-            for location in foodbank["foodbank_centre"] if isinstance(foodbank.get("foodbank_centre"), list) else []:
+        if data := response.xpath('//script[contains(text(),"markers")]/text()').get():
+            raw_data = data.replace("\\", "").replace("groupT itle", "groupTitle").replace("p ostcode", "postcode")
+            pattern = re.compile(
+                r"\"groupTitle\":\"([^\"]+)\".*?\"domain\":\"([^\"]+)\".*?\"title\":\"([^\"]+)\".*?\"address01\":\"([^\"]+)\".*?\"address02\":\"?(null|[^\"]+)\"?.*?\"county\":\"?(null|[^\"]+)\"?.*?\"town\":\"?(null|[^\"]+)\"?.*?\"postcode\":\"(null|[^\"]+)\".*?\"email\":\"([^\"]+)\".*?\"telephone\":\"([^\"]+)\".*?\"uuid\":\"([^\"]+)\".*?\"coordinates\":\[\s*(-?\d+\.\d+),\s*(-?\d+\.\d+)\s*\]"
+            )
+            for food_bank in re.findall(pattern, raw_data):
                 item = Feature()
-                item["name"] = html.unescape(
-                    "{} - {}".format(foodbank["foodbank_information"]["name"], location.get("foodbank_name", "")).strip(
-                        " -"
-                    )
-                )
-                item["phone"] = (
-                    html.unescape(location.get("foodbank_telephone_number", ""))
-                    .replace(" or ", "; ")
-                    .replace("/", "; ")
-                )
-                item["addr_full"] = merge_address_lines(
-                    Selector(text=location.get("centre_address", "")).xpath("//text()").getall()
-                )
-                item["postcode"] = location.get("post_code")
-                item["lat"] = location["centre_geolocation"]["lat"]
-                item["lon"] = location["centre_geolocation"]["lng"]
-                item["website"] = foodbank["foodbank_information"]["permalink"]
-
-                item["opening_hours"] = OpeningHours()
-                for rule in location.get("opening_time", []):
-                    if rule["foodbank_status"] != "open":
-                        continue
-                    item["opening_hours"].add_range(rule["day"], rule["opening_time"], rule["closing_time"])
-
+                item["name"] = food_bank[0]
+                item["website"] = "https://" + food_bank[1]
+                item["branch"] = food_bank[2]
+                item["postcode"] = food_bank[7]
+                item["email"] = food_bank[8]
+                item["phone"] = food_bank[9]
+                item["ref"] = food_bank[10]
+                item["lat"] = food_bank[-1]
+                item["lon"] = food_bank[-2]
+                item["street"] = food_bank[3]
+                if food_bank[5] != "null":
+                    item["state"] = food_bank[5]
+                if food_bank[6] != "null":
+                    item["city"] = food_bank[6]
+                if food_bank[4] != "null":
+                    item["street_address"] = ",".join([food_bank[3], food_bank[4]])
                 yield item
+            next_page = kwargs["page"] + 1
+            yield self.make_request(next_page)

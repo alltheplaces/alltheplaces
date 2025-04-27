@@ -61,7 +61,8 @@ class PttTHSpider(Spider):
 
             if location_type == "TEXAS CHICKEN":
                 item.update(self.TEXAS_CHICKEN)
-                apply_category({"amenity": "fast_food", "cuisine": "chicken"}, item)
+                apply_category(Categories.FAST_FOOD, item)
+                item["extras"]["cuisine"] = "chicken"
             else:
                 if "2" in services:  # Jiffy shops co-located with PTT stations
                     shop = deepcopy(item)

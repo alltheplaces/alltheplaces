@@ -2,7 +2,7 @@ from scrapy.http import Request
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, PaymentMethods, apply_yes_no
+from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import extract_phone
@@ -12,7 +12,7 @@ class AdloSpider(CrawlSpider):
     name = "adlo"
     allowed_domains = ["www.adlo-securitydoors.com"]
     start_urls = ["https://www.adlo-securitydoors.com/en/shops/list"]
-    item_attributes = {"brand": "ADLO", "brand_wikidata": "Q116862985", "extras": Categories.SHOP_DOORS.value}
+    item_attributes = {"brand": "ADLO", "brand_wikidata": "Q116862985"}
 
     # split the page into separate countries
     rules = (
@@ -86,4 +86,7 @@ class AdloSpider(CrawlSpider):
             if card_accepted == "yes" or card_accepted == "no":
                 apply_yes_no(PaymentMethods.DEBIT_CARDS, item, card_accepted == "yes", False)
                 apply_yes_no(PaymentMethods.CREDIT_CARDS, item, card_accepted == "yes", False)
+
+        apply_category(Categories.SHOP_DOORS, item)
+
         return item

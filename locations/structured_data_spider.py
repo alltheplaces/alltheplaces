@@ -146,7 +146,7 @@ class StructuredDataSpider(Spider):
 
     By default the spider only looks for certain `wanted_types`.
     You can change this behaviour by specifying this as a list of your desired types.
-    Use either https://validator.schema.org/ or pipenv run scrapy sd <url> to examine potential structured data available.
+    Use either https://validator.schema.org/ or uv run scrapy sd <url> to examine potential structured data available.
 
     `time_format` can be specified if a non standard pattern is used.
 
@@ -345,7 +345,8 @@ class StructuredDataSpider(Spider):
         if isinstance(ld_item["paymentAccepted"], str):
             ld_item["paymentAccepted"] = [ld_item["paymentAccepted"]]
         for payment in ld_item["paymentAccepted"]:
-            payment = payment.strip()
+            if payment:
+                payment = payment.strip()
             if not payment:
                 continue
             if not map_payment(item, payment, PaymentMethods):
