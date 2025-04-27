@@ -25,7 +25,6 @@ class RomanOriginalsGBSpider(Spider):
         for stores in json_data:
             if stores["@type"] == "Store":
                 for store in stores["department"]:
-                    print(store)
                     item = DictParser.parse(store)
                     item["ref"] = store["name"]
                     item["branch"] = item["ref"]
@@ -33,7 +32,9 @@ class RomanOriginalsGBSpider(Spider):
                         [store["address"]["streetAddress"], store["address"]["addressLocality"]]
                     )
                     item["website"] = urljoin("https://www.roman.co.uk", store["url"])
-                    item["geometry"] = store["location"]["geo"]
+                    item["lat"] = store["location"]["geo"]["latitude"]
+                    item["lon"] = store["location"]["geo"]["longitude"]
+                    
                     #                    item["opening_hours"] = OpeningHours()
                     # Opening hours are wrong
                     #                    for day in store["openingHoursSpecification"][0]["dayOfWeek"]:
