@@ -34,7 +34,7 @@ class RomanOriginalsGBSpider(Spider):
                     item["website"] = urljoin("https://www.roman.co.uk", store["url"])
                     item["lat"] = store["location"]["geo"]["latitude"]
                     item["lon"] = store["location"]["geo"]["longitude"]
-                    
+
                     #                    item["opening_hours"] = OpeningHours()
                     # Opening hours are wrong
                     #                    for day in store["openingHoursSpecification"][0]["dayOfWeek"]:
