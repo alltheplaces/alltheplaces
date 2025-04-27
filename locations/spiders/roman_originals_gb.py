@@ -1,11 +1,12 @@
 import json
-
-from typing import Any, Iterable
+from typing import Any
 from urllib.parse import urljoin
+
 from scrapy.http import Response
 from scrapy.spiders import Spider
-from locations.pipelines.address_clean_up import merge_address_lines
+
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RomanOriginalsGBSpider(Spider):
@@ -22,15 +23,17 @@ class RomanOriginalsGBSpider(Spider):
         data = self.find_between(response.text, '"@graph":', "}</script>")
         json_data = json.loads(data)
         for stores in json_data:
-            if stores["@type"]=='Store':
+            if stores["@type"] == "Store":
                 for store in stores["department"]:
                     item = DictParser.parse(store)
-                    item["street_address"] = merge_address_lines([store["address"]["streetAddress"], store["address"]["addressLocality"]])
-                    item["website"] = urljoin("https://www.roman.co.uk",store["url"])
+                    item["street_address"] = merge_address_lines(
+                        [store["address"]["streetAddress"], store["address"]["addressLocality"]]
+                    )
+                    item["website"] = urljoin("https://www.roman.co.uk", store["url"])
                     item["geometry"] = store["location"]["geo"]
-#                    item["opening_hours"] = OpeningHours()
-                     #Opening hours are wrong
-#                    for day in store["openingHoursSpecification"][0]["dayOfWeek"]:
-#                        item["opening_hours"].add_range(day, store["openingHoursSpecification"][0]["opens"], store["openingHoursSpecification"][0]["closes"])
+                #                    item["opening_hours"] = OpeningHours()
+                # Opening hours are wrong
+                #                    for day in store["openingHoursSpecification"][0]["dayOfWeek"]:
+                #                        item["opening_hours"].add_range(day, store["openingHoursSpecification"][0]["opens"], store["openingHoursSpecification"][0]["closes"])
 
                 yield item
