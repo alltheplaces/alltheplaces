@@ -30,7 +30,7 @@ class GoOutdoorsGBSpider(Spider):
         json_data = json.loads(data)
         for store in json_data:
             item = DictParser.parse(store)
-            item["addr_full"].replace("<br \>", ",")
+            item["addr_full"].replace("<br />", ",")
             item["website"] = urljoin("https://www.gooutdoors.co.uk/stores/", store["filename"])
 
             item["opening_hours"] = OpeningHours()
