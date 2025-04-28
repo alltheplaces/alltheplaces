@@ -27,6 +27,7 @@ class McdonaldsSISpider(scrapy.Spider):
 
             item["opening_hours"] = OpeningHours()
             for rule in location["hours_shop"]:
-                item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["time_from"], rule["time_to"])
+                if rule.get("time_from") and rule.get("time_to"):
+                    item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["time_from"], rule["time_to"])
 
             yield item
