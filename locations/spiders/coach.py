@@ -9,10 +9,14 @@ class CoachSpider(CrawlSpider, StructuredDataSpider):
     name = "coach"
     item_attributes = {"brand": "Coach", "brand_wikidata": "Q727697"}
     start_urls = [
+        "https://at.coach.com/stores/index.html",
+        "https://be.coach.com/stores/index.html",
         "https://de.coach.com/stores/index.html",
         "https://es.coach.com/stores/index.html",
         "https://fr.coach.com/stores/index.html",
+        "https://ie.coach.com/stores/index.html",
         "https://it.coach.com/stores/index.html",
+        "https://nl.coach.com/stores/index.html",
         "https://uk.coach.com/stores/index.html",
     ]
     rules = [
