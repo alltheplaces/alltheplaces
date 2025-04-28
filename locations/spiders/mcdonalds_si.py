@@ -12,7 +12,7 @@ from locations.spiders.mcdonalds import McdonaldsSpider
 class McdonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
     item_attributes = McdonaldsSpider.item_attributes
-    start_urls = ["https://www.mcdonalds.si/restavracije/"]
+    start_urls = ["https://mcdonalds.si/restavracije"]
 
     def parse(self, response, **kwargs):
         for location in json.loads(re.search(r"docs = (\[.+\])\.map", response.text).group(1)):
