@@ -17,6 +17,7 @@ class LaComerMXSpider(JSONBlobSpider):
     ]
     locations_key = ["listLacomer"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True  # Seemingly just required to avoid blocked data centre IPs.
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["succId"])
