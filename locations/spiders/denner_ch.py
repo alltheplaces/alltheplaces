@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
@@ -45,4 +46,5 @@ class DennerCHSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["name"] = ld_data["name"].removesuffix(" Filiale")
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
