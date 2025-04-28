@@ -5,8 +5,8 @@ from locations.items import Feature
 from locations.storefinders.rosetta_apr import RosettaAPRDataFile, RosettaAPRSpider
 
 
-class EssentialEnergyAUSpider(RosettaAPRSpider):
-    name = "essential_energy_au"
+class EssentialEnergySubstationsAUSpider(RosettaAPRSpider):
+    name = "essential_energy_substations_au"
     item_attributes = {"operator": "Essential Energy", "operator_wikidata": "Q17003842"}
     start_urls = ["https://dapr.essentialenergy.com.au/"]
     data_files = [
