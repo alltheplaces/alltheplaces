@@ -41,6 +41,9 @@ def test_times():
     o = OpeningHours()
     o.add_range("Mo", time.strptime("07:00", "%H:%M"), time.strptime("17:00", "%H:%M"))
     o.add_range("Tu", "09:00", "19:00")
+    # Invalid ranges which should be ignored (single times, not ranges).
+    o.add_range("We", "00:00", "00:00")
+    o.add_range("Th", "15:55", "15:55")
 
     assert o.as_opening_hours() == "Mo 07:00-17:00; Tu 09:00-19:00"
 
