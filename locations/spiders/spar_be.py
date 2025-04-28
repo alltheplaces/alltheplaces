@@ -36,13 +36,12 @@ class SparBESpider(scrapy.Spider):
         for rule in response.xpath('//tr[contains(@class, "office-hours__item")]'):
             day = sanitise_day(rule.xpath(r'./td[@class="office-hours__item-label"]/text()').get(), DAYS_NL)
             time = rule.xpath('./td[@class="office-hours__item-slots"]/text()').get()
-
-            if (time == "Gesloten") or (day is None):
-                continue
-
-            for period in time.split(","):
-                open_time, close_time = period.split("-")
-                item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
+            if "Closed" in time:
+                item["opening_hours"].set_closed(day)
+            else:
+                for period in time.split(","):
+                    open_time, close_time = period.split("-")
+                    item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
 
         if item["name"].startswith("SPAR Express"):
             item["branch"] = item.pop("name").removeprefix("SPAR Express ")
