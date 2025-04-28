@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import DAYS_FULL
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
@@ -35,6 +36,12 @@ class DennerCHSpider(SitemapSpider, StructuredDataSpider):
                         yield ld_obj
                 elif wanted_types in types:
                     yield ld_obj
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        for index, rule in enumerate(
+            ld_data.get("openingHoursSpecification", [])
+        ):  # Actual hours starts from Monday, but raw data wrongly starts from Tuesday
+            rule["dayOfWeek"] = DAYS_FULL[index]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["name"] = ld_data["name"].removesuffix(" Filiale")
