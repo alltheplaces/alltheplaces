@@ -48,8 +48,10 @@ class AnPostIESpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for rule in location["OpeningHours"].split(";"):
-                if "closed" in rule.lower():
+
+                if "closed" in rule.lower() or not rule.strip():
                     continue
+
                 day, times = rule.strip().split(" ", maxsplit=1)
                 for start_time, end_time in re.findall(r"(\d\d:\d\d)\s*-\s*(\d\d:\d\d)", times):
                     item["opening_hours"].add_range(day, start_time, end_time)
