@@ -113,8 +113,9 @@ class Where2GetItSpider(Spider):
             url = self.api_endpoint
         yield JsonRequest(
             url=url,
+            # For hosted.where2getit.com a "limit" parameter value >10000 is rejected.
             data={
-                "request": {"appkey": self.api_key, "formdata": {"objectname": "Locator::Store", "where": where_clause}}
+                "request": {"appkey": self.api_key, "formdata": {"objectname": "Locator::Store", "limit": 10000, "where": where_clause}}
             },
             method="POST",
             callback=self.parse_locations,
@@ -154,6 +155,11 @@ class Where2GetItSpider(Spider):
         if response.json().get("code") and response.json()["code"] == 5007:
             # No results returned for the provided API filter.
             return
+
+        locations = response.json()["response"]["collection"]
+        if len(locations) == 10000:
+            raise RuntimeError("Locations have probably been truncated due to 10000 features being returned by a single query and the observed maximum limit which can be specified for query results being 10000. Try setting the api_filter_admin_level to a more specific value to avoid 10000 features being returned in any given request.")
+
         for location in response.json()["response"]["collection"]:
             self.pre_process_data(location)
 
