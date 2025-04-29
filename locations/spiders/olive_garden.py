@@ -34,15 +34,16 @@ class OliveGardenSpider(SitemapSpider):
         if lat_lon_txt := data.get("address", {}).get("longitudeLatitude"):
             item["lat"], item["lon"] = lat_lon_txt.split(",")
         item["website"] = website
-        days = [day for day in data.get("weeklyHours") if day.get("hourCode") == "OP"]
-        oh = OpeningHours()
-        for day in days:
-            oh.add_range(
-                day=DAYS[day.get("dayOfWeek") - 1],
-                open_time=day.get("startTime"),
-                close_time=day.get("endTime"),
-                time_format="%I:%M%p",
-            )
-        item["opening_hours"] = oh.as_opening_hours()
+        if hours := data.get("weeklyHours"):
+            days = [day for day in hours if day.get("hourCode") == "OP"]
+            oh = OpeningHours()
+            for day in days:
+                oh.add_range(
+                    day=DAYS[day.get("dayOfWeek") - 1],
+                    open_time=day.get("startTime"),
+                    close_time=day.get("endTime"),
+                    time_format="%I:%M%p",
+                )
+            item["opening_hours"] = oh.as_opening_hours()
 
         yield item
