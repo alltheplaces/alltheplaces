@@ -16,6 +16,9 @@ class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.t-mobile.com"]
     drop_attributes = {"facebook", "twitter"}
 
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data["openingHours"] = ld_data.pop("openingHoursSpecification", None)
+
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["addr_full"] = item.pop("street_address", None)
         item["image"] = (
