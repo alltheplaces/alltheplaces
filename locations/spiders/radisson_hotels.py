@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -26,7 +27,8 @@ class RadissonHotelsSpider(scrapy.Spider):
         "ri": ["Radisson Individuals", None],
         "pis": ["Park Inn & Suites by Radisson", None],
     }
-    custom_settings = {
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
         "DOWNLOAD_TIMEOUT": 300,
