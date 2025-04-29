@@ -21,4 +21,4 @@ class GlenEiraCityCouncilDogParksAUSpider(JSONBlobSpider):
         item["ref"] = str(feature["id"])
         item["name"] = feature["Park"]
         apply_category(Categories.LEISURE_DOG_PARK, item)
-        yield item 
+        yield item
