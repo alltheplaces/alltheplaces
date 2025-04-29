@@ -1,5 +1,6 @@
 from typing import Any, Iterable
 
+import chompjs
 import scrapy
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
@@ -40,7 +41,7 @@ class RadissonHotelsSpider(scrapy.Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel in response.json()["hotels"]:
+        for hotel in chompjs.parse_js_object(response.text)["hotels"]:
             hotel.update(hotel.pop("contactInfo"))
             item = DictParser.parse(hotel)
             item["ref"] = hotel.get("code")
