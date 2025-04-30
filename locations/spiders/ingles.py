@@ -39,8 +39,8 @@ class InglesSpider(scrapy.Spider):
                 open_time, close_time = hours.split("to")
                 opening_hours.add_range(
                     day=day,
-                    open_time=("".join(open_time).strip()),
-                    close_time=("".join(close_time).strip()),
+                    open_time=("".join(open_time).replace(" ", "")),
+                    close_time=("".join(close_time).replace(" ", "")),
                     time_format="%I:%M%p",
                 )
 
