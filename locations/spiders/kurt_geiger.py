@@ -1,4 +1,5 @@
 from urllib.parse import urljoin
+
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
