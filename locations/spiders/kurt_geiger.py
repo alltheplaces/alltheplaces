@@ -11,6 +11,8 @@ class KurtGeigerSpider(YextAnswersSpider):
     api_key = "672f8261f70abeb66b9ce6c5c0572e7f"
     locale = "en-GB"
 
-    def parse_item(self, item, location, **kwargs):
-        item["website"] = urljoin("https://www.kurtgeiger.com", location["data"]["slug"])
+    def parse_item(self, location, item, **kwargs):
+        slug = location["data"].get("slug")
+        item["website"] = urljoin("https://www.kurtgeiger.com", slug)
+        #item["website"] = urljoin("https://www.kurtgeiger.com", location["data"]["slug"])
         yield item
