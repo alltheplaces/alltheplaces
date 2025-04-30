@@ -11,7 +11,9 @@ class GreaterBendigoCityCouncilTreesAUSpider(VectorFileSpider):
     name = "greater_bendigo_city_council_trees_au"
     item_attributes = {"operator": "Greater Bendigo City Council", "operator_wikidata": "Q134285890", "state": "VIC"}
     allowed_domains = ["data.gov.au"]
-    start_urls = ["https://data.gov.au/data/dataset/d17c9e50-fab1-40e6-b91d-6e665faf2656/resource/b3f01081-924c-41b7-989a-cf521ca136ea/download/cogb-environment-trees.shz"]
+    start_urls = [
+        "https://data.gov.au/data/dataset/d17c9e50-fab1-40e6-b91d-6e665faf2656/resource/b3f01081-924c-41b7-989a-cf521ca136ea/download/cogb-environment-trees.shz"
+    ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["AssetID"]
@@ -23,7 +25,7 @@ class GreaterBendigoCityCouncilTreesAUSpider(VectorFileSpider):
             species = feature["Species"]
             if " - " in species:
                 item["extras"]["species"] = species.split(" - ", 1)[0]
-                item["extras"]["taxon:en"] = species.split(" - ",1 )[1]
+                item["extras"]["taxon:en"] = species.split(" - ", 1)[1]
             elif " (" in species and species.endswith(")"):
                 item["extras"]["species"] = species.split(" (", 1)[0]
                 item["extras"]["taxon:en"] = species.split(" (", 1)[1].removesuffix(")")
@@ -31,7 +33,7 @@ class GreaterBendigoCityCouncilTreesAUSpider(VectorFileSpider):
                 item["extras"]["species"] = species
         if feature["Cultivar"] and feature["Cultivar"] != "Not Specified":
             if "taxon:en" in item["extras"].keys():
-                item["extras"]["taxon:en"] = "{} \"{}\"".format(item["extras"]["taxon:en"], feature["Cultivar"])
+                item["extras"]["taxon:en"] = '{} "{}"'.format(item["extras"]["taxon:en"], feature["Cultivar"])
         # Ignore feature["Genus"] because it includes values such as
         # "Eucalyptus M to Z". feature["Species"] is used instead and is much
         # more useful and accurate.
