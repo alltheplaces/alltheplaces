@@ -16,4 +16,6 @@ class TofsGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["results"]["locations"]:
             item = DictParser.parse(location)
+            item["lat"] = location["loc_lat"]
+            item["lon"] = location["loc_long"]
             yield item
