@@ -17,4 +17,8 @@ class TofsGBSpider(Spider):
             item = DictParser.parse(location)
             item["lat"] = location["loc_lat"]
             item["lon"] = location["loc_long"]
+            item["branch"] = item["name"]
+            item["name"] = "The Original Factory Shop"
+            item.pop("website")
+            item["facebook"] = location["facebook"]
             yield item
