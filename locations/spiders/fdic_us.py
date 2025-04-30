@@ -28,7 +28,7 @@ class FdicUSSpider(Spider):
         for branch in branches:
             item = DictParser.parse(branch["data"])
             item["website"] = website
-            if item["website"][0:4] != "http":
+            if item and item["website"][0:4].lower() != "http":
                 item["website"] = f"https://{item['website']}"
             apply_category(Categories.BANK, item)
 
