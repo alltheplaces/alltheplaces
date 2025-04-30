@@ -1,8 +1,7 @@
-import json
 
 from scrapy import Spider
+
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TofsGBSpider(Spider):
