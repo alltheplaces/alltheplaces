@@ -11,7 +11,7 @@ from locations.structured_data_spider import extract_phone
 
 class LesliesPoolmartUSSpider(SitemapSpider):
     name = "leslies_poolmart_us"
-    item_attributes = {"brand": "Leslie's Poolmart", "brand_wikidata": "Q6530568"}
+    item_attributes = {"brand": "Leslie's Pool Supplies", "brand_wikidata": "Q6530568"}
     sitemap_urls = ["https://lesliespool.com/robots.txt"]
     sitemap_rules = [("/location/", "parse")]
 
@@ -30,9 +30,10 @@ class LesliesPoolmartUSSpider(SitemapSpider):
 
         item["opening_hours"] = OpeningHours()
         for rule in response.xpath('//div[contains(./h5/text(), "Hours")]/div/p/text()').getall():
-            day, times = rule.split(" : ")
-            if times == "Closed":
-                continue
-            item["opening_hours"].add_range(day, *times.split(" - "), "%I %p")
+            if "AM" in rule:
+                day, times = rule.split(" : ")
+                if times == "Closed":
+                    continue
+                item["opening_hours"].add_range(day, *times.split(" - "), "%I %p")
 
         yield item

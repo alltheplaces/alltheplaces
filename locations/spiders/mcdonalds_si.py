@@ -12,7 +12,7 @@ from locations.spiders.mcdonalds import McdonaldsSpider
 class McdonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
     item_attributes = McdonaldsSpider.item_attributes
-    start_urls = ["https://www.mcdonalds.si/restavracije/"]
+    start_urls = ["https://mcdonalds.si/restavracije"]
 
     def parse(self, response, **kwargs):
         for location in json.loads(re.search(r"docs = (\[.+\])\.map", response.text).group(1)):
@@ -27,6 +27,7 @@ class McdonaldsSISpider(scrapy.Spider):
 
             item["opening_hours"] = OpeningHours()
             for rule in location["hours_shop"]:
-                item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["time_from"], rule["time_to"])
+                if rule.get("time_from") and rule.get("time_to"):
+                    item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["time_from"], rule["time_to"])
 
             yield item

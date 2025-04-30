@@ -11,7 +11,7 @@ from locations.dict_parser import DictParser
 
 class JetATSpider(Spider):
     name = "jet_at"
-    item_attributes = {"brand": "Jet", "brand_wikidata": "Q568940"}
+    item_attributes = {"brand": "JET", "brand_wikidata": "Q568940"}
     start_urls = ["https://www.jet-austria.at/tankstellen-suche?"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

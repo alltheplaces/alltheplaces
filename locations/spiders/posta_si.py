@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class PostaSISpider(scrapy.Spider):
     name = "posta_si"
-    item_attributes = {"brand": "Pošta Slovenije", "brand_wikidata": "Q6522631"}
+    item_attributes = {"operator": "Pošta Slovenije", "operator_wikidata": "Q6522631"}
     allowed_domains = ["www.posta.si"]
 
     custom_settings = {"ROBOTSTXT_OBEY": False}

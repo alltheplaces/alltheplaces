@@ -15,7 +15,7 @@ class McdonaldsAUSpider(Spider):
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.com.au"]
     start_urls = ["https://mcdonalds.com.au/data/store"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
     @staticmethod
     def parse_hours(rules: list) -> OpeningHours:

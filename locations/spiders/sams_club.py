@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -26,4 +27,5 @@ class SamsClubSpider(scrapy.spiders.SitemapSpider):
         for day, interval in data["operationalHours"].items():
             oh.add_range(day[:2].title(), interval["startHrs"], interval["endHrs"])
         item["opening_hours"] = oh.as_opening_hours()
+        apply_category(Categories.SHOP_WHOLESALE, item)
         yield item

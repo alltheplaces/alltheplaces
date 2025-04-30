@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class DavitaSpider(scrapy.Spider):
     name = "davita"
-    item_attributes = {"brand": "DaVita", "brand_wikidata": "Q5207184", "country": "US"}
+    item_attributes = {"operator": "DaVita Dialysis", "operator_wikidata": "Q5207184", "country": "US"}
     allowed_domains = ["davita.com"]
 
     def start_requests(self):

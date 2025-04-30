@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 SPAR_ZA_BRANDS = {
-    "SPAR": {"brand": "SPAR", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value},
+    "SPAR": {"brand": "Spar", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value},
     "SUPERSPAR": {"brand": "Superspar", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value},
     "KWIKSPAR": {"brand": "KwikSpar", "brand_wikidata": "Q610492", "extras": Categories.SHOP_CONVENIENCE.value},
     "SPAR Express": {"brand": "Spar Express", "brand_wikidata": "Q610492", "extras": Categories.SHOP_CONVENIENCE.value},

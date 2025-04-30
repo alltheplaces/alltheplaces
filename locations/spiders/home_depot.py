@@ -4,6 +4,7 @@ import chompjs
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -49,5 +50,5 @@ class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
                 continue
 
             item["opening_hours"].add_range(day, info["open"], info["close"])
-
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item

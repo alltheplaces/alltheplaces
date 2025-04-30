@@ -13,7 +13,14 @@ class LittleFreeLibrarySpider(Spider):
         "extras": Categories.PUBLIC_BOOKCASE.value,
     }
     allowed_domains = ["appapi.littlefreelibrary.org"]
-    start_urls = ["https://appapi.littlefreelibrary.org/library/pin.json?page_size=500&distance=15000&near=0,0"]
+    start_urls = ["https://appapi.littlefreelibrary.org/library/map.json?page_size=500"]
+    # It takes a long time for the server to provide 500 locations in a
+    # single response. The server rate limits the total number of requests
+    # sent in a brief period of time. Thus it's necessary to ask for more
+    # locations at a time and wait for the slow responses, and also necessary
+    # to add a large delay between requests.
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    download_delay = 60
 
     def start_requests(self):
         for url in self.start_urls:
@@ -21,37 +28,31 @@ class LittleFreeLibrarySpider(Spider):
 
     def parse_library_list(self, response):
         for library in response.json()["libraries"]:
-            library_id = library["id"]
-            yield JsonRequest(
-                url=f"https://appapi.littlefreelibrary.org/libraries/{library_id}.json", callback=self.parse_library
-            )
+            properties = {
+                "ref": library.get("Official_Charter_Number__c"),
+                "lat": library.get("Library_Geolocation__Latitude__s"),
+                "lon": library.get("Library_Geolocation__Longitude__s"),
+                "street_address": library.get("Street__c"),
+                "city": library.get("City__c"),
+                "state": library.get("State_Province_Region__c"),
+                "postcode": library.get("Postal_Zip_Code__c"),
+                "country": library.get("Country__c"),
+                "image": library.get("primary_image"),
+                # These fields could potentially be considered
+                # personal/private information and don't add much value
+                # to ATP. It's easier to ignore these fields.
+                # "operator": library.get("Primary_Steward_s_Name__c"),
+                # "phone": library.get("Primary_Steward_s_Phone__c"),
+                # "email": library.get("Primary_Steward_s_Email__c"),
+            }
+            if library.get("Library_Name__c"):
+                properties["name"] = library.get("Library_Name__c")
+            elif library.get("List_As_Name__c"):
+                properties["name"] = library.get("List_As_Name__c")
+            else:
+                properties["name"] = library.get("Name")
+            yield Feature(**properties)
+
         if "&page=" not in response.url:
             for page in range(2, response.json()["page_count"]):
                 yield JsonRequest(response.url + f"&page={page}", callback=self.parse_library_list)
-
-    def parse_library(self, response):
-        location = response.json()
-        properties = {
-            "ref": location.get("Official_Charter_Number__c"),
-            "lat": location.get("Library_Geolocation__Latitude__s"),
-            "lon": location.get("Library_Geolocation__Longitude__s"),
-            "street_address": location.get("Street__c"),
-            "city": location.get("City__c"),
-            "state": location.get("State_Province_Region__c"),
-            "postcode": location.get("Postal_Zip_Code__c"),
-            "country": location.get("Country__c"),
-            "image": location.get("primary_image"),
-            # These fields could potentially be considered
-            # personal/private information and don't add much value
-            # to ATP. It's easier to ignore these fields.
-            # "operator": location.get("Primary_Steward_s_Name__c"),
-            # "phone": location.get("Primary_Steward_s_Phone__c"),
-            # "email": location.get("Primary_Steward_s_Email__c"),
-        }
-        if location.get("Library_Name__c"):
-            properties["name"] = location.get("Library_Name__c")
-        elif location.get("List_As_Name__c"):
-            properties["name"] = location.get("List_As_Name__c")
-        else:
-            properties["name"] = location.get("Name")
-        yield Feature(**properties)
