@@ -1,4 +1,3 @@
-from locations.spiders.central_england_cooperative import set_operator
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
