@@ -1,4 +1,3 @@
-
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
