@@ -1,6 +1,7 @@
-from urllib.parse import urljoin
+#from urllib.parse import urljoin
 
 from locations.storefinders.yext_answers import YextAnswersSpider
+from locations.categories import Categories, apply_category
 
 
 class KurtGeigerSpider(YextAnswersSpider):
@@ -12,7 +13,6 @@ class KurtGeigerSpider(YextAnswersSpider):
     locale = "en-GB"
 
     def parse_item(self, location, item, **kwargs):
-        slug = location["data"].get("slug")
-        item["website"] = urljoin("https://www.kurtgeiger.com", slug)
         # item["website"] = urljoin("https://www.kurtgeiger.com", location["data"]["slug"])
+        apply_category(Categories.SHOP_SHOES, item)
         yield item
