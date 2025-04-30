@@ -1,4 +1,3 @@
-from urllib.parse import urljoin
 
 from locations.storefinders.yext_answers import YextAnswersSpider
 
@@ -12,5 +11,5 @@ class KurtGeigerSpider(YextAnswersSpider):
     locale = "en-GB"
 
     def parse_item(self, location, item, **kwargs):
-        #item["website"] = urljoin("https://www.kurtgeiger.com", location["data"]["slug"])
+        # item["website"] = urljoin("https://www.kurtgeiger.com", location["data"]["slug"])
         yield item
