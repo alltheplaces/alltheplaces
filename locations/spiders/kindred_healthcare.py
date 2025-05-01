@@ -3,7 +3,6 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
