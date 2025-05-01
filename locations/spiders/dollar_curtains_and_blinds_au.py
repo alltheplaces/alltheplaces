@@ -1,5 +1,4 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -11,10 +10,6 @@ class DollarCurtainsAndBlindsAUSpider(Spider):
     item_attributes = {"brand": "dollar curtains+blinds", "brand_wikidata": "Q122430680"}
     allowed_domains = ["www.dollarcurtainsandblinds.com.au"]
     start_urls = ["https://www.dollarcurtainsandblinds.com.au/app/themes/dcb-tailwind-2/cache/store-cache.json"]
-
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json():
