@@ -1,8 +1,7 @@
-
 import scrapy
 
-from locations.items import Feature
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 
 
 class GdkGBSpider(scrapy.Spider):
