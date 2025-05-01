@@ -44,6 +44,6 @@ class OliveGardenSpider(SitemapSpider):
                     close_time=day.get("endTime"),
                     time_format="%I:%M%p",
                 )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
         yield item
