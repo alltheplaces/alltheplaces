@@ -9,20 +9,23 @@ from locations.items import Feature
 class GdkGBSpider(scrapy.Spider):
     name = "gdk_gb"
     item_attributes = {"brand": "German Doner Kebab", "brand_wikidata": "Q112913418"}
-    start_urls = ["https://www.gdk.com/AJAX_LoadStores.php"]
+    start_urls = ["https://www.gdk.com/german-doner-kebab-store-locations/uk""]
 
     def parse(self, response):
         data = response.xpath("//div[contains(@class, 'location-item')]")
         for location in data:
             item = Feature()
             item["branch"] = location.xpath(".//h3//text()").get()
-            item["addr_full"] = (
-                location.xpath(".//a[contains(@href, 'https://www.google.com/maps/dir/Current+Location/')]//@href")
-                .get()
-                .replace("https://www.google.com/maps/dir/Current+Location/", "")
-                .replace("\r", ",")
-                .replace("German Doner Kebab+", "")
-            )
+            if location.xpath(".//a[contains(@href, 'https://www.google.com/maps')]//@href"):
+                item["addr_full"] = (
+                    location.xpath(".//a[contains(@href, 'https://www.google.com/maps/dir/Current+Location/')]//@href")
+                    .get()
+                    .replace("https://www.google.com/maps/dir/Current+Location/", "")
+                    .replace("\r", ",")
+                    .replace("German Doner Kebab+", "")
+                )
+            else:
+                continue
             item["name"] = "German Doner Kebab"
             item["website"] = location.xpath(".//a[contains(@href, 'postcode')]//@href").get()
             address = item["addr_full"]
