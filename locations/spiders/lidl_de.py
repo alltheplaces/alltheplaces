@@ -16,22 +16,23 @@ class LidlDESpider(VirtualEarthSpider):
     api_key = "AnTPGpOQpGHsC_ryx9LY3fRTI27dwcRWuPrfg93-WZR2m-1ax9e9ghlD4s1RaHOq"
 
     def parse_item(self, item, feature, **kwargs):
-        item["opening_hours"] = OpeningHours()
-
-        days = Selector(text=feature["OpeningTimes"])
-        for day_text in days.xpath("//text()").getall():
-            day_text = re.sub(r"\s+", " ", day_text).strip()
-            if not day_text:
-                continue
-            try:
+        try:
+            oh = OpeningHours()
+            days = Selector(text=feature["OpeningTimes"])
+            for day_text in days.xpath("//text()").getall():
+                day_text = re.sub(r"\s+", " ", day_text).strip()
+                if not day_text:
+                    continue
                 day_name, hours_text = day_text.split(" ", 1)
                 day_name = sanitise_day(day_name, DAYS_DE)
 
                 if hours_text.lower() in CLOSED_DE:
-                    item["opening_hours"].set_closed(day_name)
+                    oh.set_closed(day_name)
                 else:
                     open_time, close_time = hours_text.split("-")
-                    item["opening_hours"].add_range(day_name, open_time, close_time)
-            except ValueError:
-                continue
+                    oh.add_range(day_name, open_time, close_time)
+            item["opening_hours"] = oh
+        except ValueError:
+            self.crawler.stats.inc_value(f"atp/{self.name}/hours/fail")
+
         yield item
