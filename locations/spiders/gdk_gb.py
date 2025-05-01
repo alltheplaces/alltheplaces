@@ -1,11 +1,9 @@
-
 import re
 
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class GdkGBSpider(scrapy.Spider):
@@ -35,7 +33,7 @@ class GdkGBSpider(scrapy.Spider):
             address = re.split(r"[,\s]+", address)[-2:]
             address = " ".join(address)
             if re.match(r"^([A-Z][A-HJ-Y]?\d[A-Z\d]? ?\d[A-Z]{2}|GIR ?0A{2})$", address):
-                item["postcode"]=address
+                item["postcode"] = address
             else:
                 raise ValueError(address + "is not a postcode")
             item["ref"] = item["postcode"]
