@@ -1,9 +1,11 @@
+
 import re
 
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class GdkGBSpider(scrapy.Spider):
@@ -20,6 +22,7 @@ class GdkGBSpider(scrapy.Spider):
                 item["addr_full"] = (
                     location.xpath(".//a[contains(@href, 'https://www.google.com/maps/dir/Current+Location/')]//@href")
                     .get()
+                    .rstrip()
                     .replace("https://www.google.com/maps/dir/Current+Location/", "")
                     .replace("\r", ",")
                     .replace("German Doner Kebab+", "")
@@ -31,7 +34,10 @@ class GdkGBSpider(scrapy.Spider):
             address = item["addr_full"]
             address = re.split(r"[,\s]+", address)[-2:]
             address = " ".join(address)
-            item["postcode"] = address
+            if re.match(r"^([A-Z][A-HJ-Y]?\d[A-Z\d]? ?\d[A-Z]{2}|GIR ?0A{2})$", address):
+                item["postcode"]=address
+            else:
+                raise ValueError(address + "is not a postcode")
             item["ref"] = item["postcode"]
             apply_category(Categories.FAST_FOOD, item)
             yield item
