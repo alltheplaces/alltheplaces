@@ -9,7 +9,7 @@ from locations.items import Feature
 class GdkGBSpider(scrapy.Spider):
     name = "gdk_gb"
     item_attributes = {"brand": "German Doner Kebab", "brand_wikidata": "Q112913418"}
-    start_urls = ["https://www.gdk.com/german-doner-kebab-store-locations/uk""]
+    start_urls = ["https://www.gdk.com/german-doner-kebab-store-locations/uk"]
 
     def parse(self, response):
         data = response.xpath("//div[contains(@class, 'location-item')]")
