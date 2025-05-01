@@ -19,7 +19,7 @@ class KindredHealthcareSpider(SitemapSpider):
         item = Feature()
         item["name"] = response.xpath("//h1/text()").get()
         item["addr_full"] = clean_address(response.xpath('//*[@class="cmp-text"]/p/text()').get())
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get().replace(".", "")
+        if phone := response.xpath('//*[contains(@href,"tel:")]/text()').get():
+            item["phone"] = phone.replace(".", "")
         item["ref"] = item["website"] = response.url
-        extract_google_position(item, response)
         yield item
