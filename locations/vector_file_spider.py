@@ -43,7 +43,6 @@ class VectorFileSpider(Spider):
         feature_collection = read_file(response.body).to_geo_dict()
         for feature in feature_collection["features"]:
             feature.update(feature.pop("properties"))
-            feature["geometry"]["coordinates"] = list(feature["geometry"]["coordinates"])
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
             yield from self.post_process_item(item, response, feature)
