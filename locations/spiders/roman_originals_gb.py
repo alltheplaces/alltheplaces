@@ -27,14 +27,8 @@ class RomanOriginalsGBSpider(Spider):
                     item = DictParser.parse(store)
                     item["ref"] = store["areaServed"][0]["name"][0]
                     item["branch"] = item["ref"]
-                    # item["street_address"] = merge_address_lines([store["address"]["streetAddress"], store["address"]["addressLocality"]]                    )
                     item["website"] = urljoin("https://www.roman.co.uk", store["url"])
                     item["lat"] = store["location"]["geo"]["latitude"]
                     item["lon"] = store["location"]["geo"]["longitude"]
-
-                    #                    item["opening_hours"] = OpeningHours()
-                    # Opening hours are wrong
-                    #                    for day in store["openingHoursSpecification"][0]["dayOfWeek"]:
-                    #                        item["opening_hours"].add_range(day, store["openingHoursSpecification"][0]["opens"], store["openingHoursSpecification"][0]["closes"])
 
                     yield item
