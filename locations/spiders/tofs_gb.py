@@ -23,5 +23,5 @@ class TofsGBSpider(Spider):
             item["name"] = "The Original Factory Shop"
             item.pop("website")
             item["facebook"] = location["facebook"]
-            apply_categoy(Categories.SHOP_VARIETY_STORE, item)
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
             yield item
