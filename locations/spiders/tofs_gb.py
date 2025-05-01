@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
