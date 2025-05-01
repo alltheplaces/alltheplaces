@@ -23,9 +23,9 @@ class GdkGBSpider(scrapy.Spider):
             item["name"] = "German Doner Kebab"
             item["website"] = location.xpath(".//a[contains(@href, 'postcode')]//@href").get()
             address = item["addr_full"]
-            address = re.split(r'[,\s]+', address)[-2:]
-            address = ' '.join(address)
-            item["postcode"]=address
+            address = re.split(r"[,\s]+", address)[-2:]
+            address = " ".join(address)
+            item["postcode"] = address
             item["ref"] = item["postcode"]
             apply_category(Categories.FAST_FOOD, item)
             yield item
