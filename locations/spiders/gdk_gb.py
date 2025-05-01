@@ -2,6 +2,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.categories import Categories, apply_category
 
 
 class GdkGBSpider(scrapy.Spider):
@@ -13,17 +14,19 @@ class GdkGBSpider(scrapy.Spider):
         data = response.xpath("//div[contains(@class, 'location-item')]")
         for location in data:
             item = Feature()
-            item["branch"] = location.xpath("//h3//text()").get()
+            item["branch"] = location.xpath(".//h3//text()").get()
             item["addr_full"] = (
-                location.xpath("//a[contains(@href, 'https://www.google.com/maps/dir/Current+Location/')]//@href")
+                location.xpath(".//a[contains(@href, 'https://www.google.com/maps/dir/Current+Location/')]//@href")
                 .get()
                 .replace("https://www.google.com/maps/dir/Current+Location/", "")
                 .replace("\r", ",")
             )
             item["name"] = "German Doner Kebab"
-            item["website"] = location.xpath("//a[contains(@href, 'postcode')]//@href").get()
-            item["postcode"] = item["website"].replace(
-                "https://www.order.gdk.com/takeaway/selectstore.php?auto=1&postcode=", ""
-            )
-            item["ref"] = item["postcode"]
+            item["website"] = location.xpath(".//a[contains(@href, 'postcode')]//@href").get()
+            if item["website"]:
+                item["postcode"] = item["website"].replace(
+                    "https://www.order.gdk.com/takeaway/selectstore.php?auto=1&postcode=", ""
+                )
+                item["ref"] = item["postcode"]
+            apply_category(Categories.FAST_FOOD, item)
             yield item
