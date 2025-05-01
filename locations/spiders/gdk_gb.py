@@ -21,7 +21,7 @@ class GdkGBSpider(scrapy.Spider):
                 .get()
                 .replace("https://www.google.com/maps/dir/Current+Location/", "")
                 .replace("\r", ",")
-                .replace("German Doner Kebab+","")
+                .replace("German Doner Kebab+", "")
             )
             item["name"] = "German Doner Kebab"
             item["website"] = location.xpath(".//a[contains(@href, 'postcode')]//@href").get()
