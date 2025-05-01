@@ -1,3 +1,4 @@
+import re
 import scrapy
 
 from locations.categories import Categories, apply_category
