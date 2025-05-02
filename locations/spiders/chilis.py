@@ -33,16 +33,15 @@ class ChilisSpider(CrawlSpider):
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "currentCityMergedData")]/text()')
-            .re_first(r"currentCityMergedData\\\":\[.+\]")
-            .replace("\\", "")
+        if locations := response.xpath('//script[contains(text(), "currentCityMergedData")]/text()').re_first(
+            r"currentCityMergedData\\\":\[.+\]"
         ):
-            item = DictParser.parse(location)
-            item["ref"] = location.get("restaurantId")
-            item["branch"] = item.pop("name")
-            item["street_address"] = merge_address_lines(
-                [location.get("streetaddress"), location.get("streetaddress2")]
-            )
-            item["website"] = f'{response.url.strip("/")}/{location["slug"]}'
-            yield item
+            for location in chompjs.parse_js_object(locations.replace("\\", "")):
+                item = DictParser.parse(location)
+                item["ref"] = location.get("restaurantId")
+                item["branch"] = item.pop("name")
+                item["street_address"] = merge_address_lines(
+                    [location.get("streetaddress"), location.get("streetaddress2")]
+                )
+                item["website"] = f'{response.url.strip("/")}/{location["slug"]}'
+                yield item
