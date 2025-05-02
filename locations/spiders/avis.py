@@ -30,7 +30,8 @@ class AvisSpider(CrawlSpider, StructuredDataSpider):
         item["lat"] = response.xpath('//meta[@itemprop="latitude"]/@content').get()
         item["lon"] = response.xpath('//meta[@itemprop="longitude"]/@content').get()
 
-        item["branch"] = item.pop("name").removeprefix("Avis ")
+        if item.get("name"):
+            item["branch"] = item.pop("name").removeprefix("Avis ")
 
         if hours := response.xpath('//meta[@itemprop="openingHours"]/@content').get():
             item["opening_hours"] = OpeningHours()
