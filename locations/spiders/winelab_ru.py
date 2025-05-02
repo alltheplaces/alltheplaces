@@ -23,8 +23,9 @@ class WinelabRUSpider(scrapy.Spider):
             if hours := poi.get("openingHours", {}).get("weekDayOpeningList", []):
                 oh = OpeningHours()
                 for hour in hours:
-                    open = hour.get("openingTime", {}).get("formattedHour")
-                    close = hour.get("closingTime", {}).get("formattedHour")
-                    oh.add_range(DAYS_RU[hour["weekDay"]], open, close)
+                    if open := hour.get("openingTime"):
+                        opening = open.get("formattedHour")
+                        close = hour.get("closingTime", {}).get("formattedHour")
+                        oh.add_range(DAYS_RU[hour["weekDay"]], opening, close)
                 item["opening_hours"] = oh.as_opening_hours()
             yield item

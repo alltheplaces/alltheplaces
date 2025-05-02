@@ -71,8 +71,9 @@ class IntermarcheSpider(scrapy.Spider):
                 place["address"] = place["addresses"][0]
                 place["address"]["street_address"] = place["address"].pop("address")
                 place["address"]["city"] = place["address"].pop("townLabel")
-                place["longitude"] = place["address"].pop("longitude")
-                place["latitude"] = place["address"].pop("latitude")
+                if place["address"].get("latitude") and place["address"].get("longitude"):
+                    place["longitude"] = place["address"].pop("longitude")
+                    place["latitude"] = place["address"].pop("latitude")
 
             for contact in place.get("contacts", []):
                 if contact.get("contactCode") == "telephone":
@@ -86,9 +87,10 @@ class IntermarcheSpider(scrapy.Spider):
 
             oh = OpeningHours()
             for rules in place["calendar"]["openingHours"]:
-                for i, d in enumerate(rules["days"]):
-                    if d == "1":
-                        oh.add_range(DAYS[i], rules["startHours"], rules["endHours"])
+                if rules.get("startHours") and rules.get("endHours"):
+                    for i, d in enumerate(rules["days"]):
+                        if d == "1":
+                            oh.add_range(DAYS[i], rules["startHours"], rules["endHours"])
             item["opening_hours"] = oh.as_opening_hours()
 
             apply_yes_no(Extras.ATM, item, any(s["code"] == "dis" for s in place["ecommerce"]["services"]), False)

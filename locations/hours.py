@@ -954,6 +954,10 @@ class OpeningHours:
         if isinstance(close_time, str):
             if close_time.lower() in closed:
                 return
+            if open_time in ("00:00", "0:00", "00:00:00") and close_time in ("00:00", "0:00", "00:00:00"):
+                # Invalid range supplied. Probably the source data uses this
+                # notation for closed days.
+                return
             if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
             if close_time in ("24:00:00", "00:00:00"):
@@ -967,6 +971,11 @@ class OpeningHours:
                 # may be 0:00 or even more divergent if time_format
                 # parameter was used with some exotic value
                 close_time = time.strptime("23:59", "%H:%M")
+        if open_time.tm_hour == close_time.tm_hour and open_time.tm_min == close_time.tm_min:
+            # A single time of day was provided, not a range. Ignore request.
+            # Sometimes source data uses 00:00-00:00 as a range denoting a
+            # closed day.
+            return
 
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))

@@ -9,6 +9,7 @@ RUN apt-get update \
     jq \
     git \
     curl \
+    zip \
  && rm -rf /var/lib/apt/lists/*
 
 # install tippecanoe
