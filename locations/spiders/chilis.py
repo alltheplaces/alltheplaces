@@ -7,6 +7,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ChilisSpider(CrawlSpider):
@@ -14,7 +15,11 @@ class ChilisSpider(CrawlSpider):
     item_attributes = {"brand": "Chili's", "brand_wikidata": "Q1072948"}
     allowed_domains = ["chilis.com"]
     start_urls = ["https://www.chilis.com/locations"]
-    download_delay = 0.5
+    custom_settings = {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,  # Avoid http 429 error
+        "DOWNLOAD_DELAY": 3,
+    }
     rules = [
         Rule(
             LinkExtractor(allow=r"/locations/[a-z]{2}/[-\w]+$"),
