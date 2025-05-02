@@ -30,6 +30,7 @@ class SparNorthernIrelandGBSpider(Spider):
 
             if "EUROSPAR" in item["name"]:
                 item.update(self.EUROSPAR)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             else:
                 apply_category(Categories.SHOP_CONVENIENCE, item)
 

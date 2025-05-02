@@ -1,8 +1,10 @@
 import re
+from urllib.parse import urljoin
 
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DK, NAMED_DAY_RANGES_DK, OpeningHours
 
@@ -33,4 +35,7 @@ class TelenorDKSpider(Spider):
             item["opening_hours"].add_ranges_from_string(
                 hours_string, days=DAYS_DK, named_day_ranges=NAMED_DAY_RANGES_DK
             )
+            if website := item.get("website"):
+                item["website"] = urljoin("https://telenor.dk", website)
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
             yield item

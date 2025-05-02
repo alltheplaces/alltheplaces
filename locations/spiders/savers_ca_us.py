@@ -18,7 +18,7 @@ class SaversCAUSSpider(RioSeoSpider):
             feature["branch"] = feature["branch"].removeprefix("Community Donation Center - ")
             feature["branch"] = feature["branch"].removeprefix("Community Donation Centre - ")
             apply_category(Categories.RECYCLING, feature)
-            feature["recycling_type"] = "centre"
+            feature["extras"]["recycling_type"] = "centre"
         else:
             apply_category(Categories.SHOP_SECOND_HAND, feature)
 

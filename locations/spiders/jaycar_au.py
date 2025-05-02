@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JaycarAUSpider(SitemapSpider, StructuredDataSpider):
@@ -9,9 +10,10 @@ class JaycarAUSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.jaycar.com.au/sitemap.xml"]
     sitemap_follow = ["/stores"]
     sitemap_rules = [("/stores/", "parse_sd")]
-    requires_proxy = True
     time_format = "%H:%M:%S"
     wanted_types = ["ElectronicsStore"]
+    user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
@@ -22,5 +24,5 @@ class JaycarAUSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data):
         if "RESELLER | " in item["name"]:
             return
-
+        item.pop("facebook", None)
         yield item

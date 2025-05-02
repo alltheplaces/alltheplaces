@@ -15,7 +15,8 @@ class IAndGBrokersSpider(Spider):
             data = data["data"]
             item = DictParser.parse(data)
 
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(data["worktime"], days=DAYS_BG)
+            if data.get("worktime"):
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(data["worktime"], days=DAYS_BG)
 
             yield item

@@ -3,7 +3,7 @@ import re
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.spiders.opendata_mos_household_services_ru import OpendataMosSpider
+from locations.spiders.government.opendata_mos_household_services_ru import OpendataMosSpider
 
 HOTEL_STARS_MAPPING = {
     "без звезд": None,

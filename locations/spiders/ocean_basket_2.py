@@ -24,18 +24,15 @@ class OceanBasket2Spider(SitemapSpider):
         item = Feature()
         item["ref"] = response.url
         item["website"] = response.url
-        item["branch"] = (
-            response.xpath('.//div[@class="page_title"]/h2/text()')
-            .get()
-            .replace(self.item_attributes["brand"], "")
-            .strip()
-        )
-        item["phone"] = response.xpath('.//p[@class="desc"][1]/text()').get().removeprefix(" : ")
-        item["addr_full"] = response.xpath('.//p[@class="desc"][3]/text()').get().removeprefix(" : ")
-        extract_google_position(item, response)
+        if page_title := response.xpath('.//div[@class="page_title"]/h2/text()').get():
+            # A page with no title is a template page for coming soon
+            item["branch"] = page_title.replace(self.item_attributes["brand"], "").strip()
+            item["phone"] = response.xpath('.//p[@class="desc"][1]/text()').get().removeprefix(" : ")
+            item["addr_full"] = response.xpath('.//p[@class="desc"][3]/text()').get().removeprefix(" : ")
+            extract_google_position(item, response)
 
-        item["opening_hours"] = OpeningHours()
-        for times in response.xpath('.//p[@class="desc"][2]/span/text()'):
-            swapped_times = re.sub(r"(.+)\((.+)\)", r"\2 \1", times.get())
-            item["opening_hours"].add_ranges_from_string(swapped_times)
-        yield item
+            item["opening_hours"] = OpeningHours()
+            for times in response.xpath('.//p[@class="desc"][2]/span/text()'):
+                swapped_times = re.sub(r"(.+)\((.+)\)", r"\2 \1", times.get())
+                item["opening_hours"].add_ranges_from_string(swapped_times)
+            yield item

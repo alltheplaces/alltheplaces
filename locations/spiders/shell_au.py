@@ -7,7 +7,7 @@ from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.spiders.otr_au import OtrAUSpider
 from locations.spiders.shell import ShellSpider
-from locations.spiders.vets4pets_gb import set_located_in
+from locations.spiders.tesco_gb import set_located_in
 from locations.storefinders.mapdata_services import MapDataServicesSpider
 
 SHOP_BRANDS = {
@@ -43,7 +43,7 @@ class ShellAUSpider(MapDataServicesSpider):
         if feature.get("retail_shop") == "1":
             shop = item.deepcopy()
             shop["ref"] = "{}-shop".format(shop["ref"])
-            set_located_in(shop, FUEL_BRANDS[feature["forecourt_brand"]])
+            set_located_in(FUEL_BRANDS[feature["forecourt_brand"]], shop)
 
             apply_category(Categories.SHOP_CONVENIENCE, shop)
 

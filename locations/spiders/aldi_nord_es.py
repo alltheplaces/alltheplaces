@@ -14,5 +14,5 @@ class AldiNordESSpider(UberallSpider):
     key = "ALDINORDES_kRpYT2HM1bFjL9vTpn5q0JupSiXqnB"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
-        apply_category(Categories.SHOP_SUPERMARKET)
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

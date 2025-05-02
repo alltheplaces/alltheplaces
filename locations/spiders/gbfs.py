@@ -353,7 +353,7 @@ class GbfsSpider(CSVFeedSpider):
 
     def parse_row(self, response, row):
         url = row["Auto-Discovery URL"]
-        if auth := row["Authentication Info"]:
+        if auth := row["Authentication Info URL"]:
             if auth.startswith("http"):
                 return
             else:
@@ -369,7 +369,7 @@ class GbfsSpider(CSVFeedSpider):
         for feed in DictParser.get_nested_key(data, "feeds") or []:
             if feed["name"] == "station_information":
                 url = feed["url"]
-                if auth := kwargs["Authentication Info"]:
+                if auth := kwargs["Authentication Info URL"]:
                     if auth not in url:
                         url = "{}?{}".format(url, auth)
                 yield JsonRequest(url=url, cb_kwargs=kwargs, callback=self.parse_stations)
