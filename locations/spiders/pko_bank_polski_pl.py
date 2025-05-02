@@ -15,7 +15,11 @@ class PkoBankPolskiPLSpider(Spider):
             item["ref"] = location["unique_id"]
             if location["label"] == "atm_pko":
                 apply_category(Categories.ATM, item)
+                item["street_address"] = item.pop("addr_full", None)
+                item["street_address"] = item.pop("addr_full", None)
                 yield item
             elif location["label"] == "facility":
                 apply_category(Categories.BANK, item)
+                item["street_address"] = item.pop("addr_full", None)
+                item["street_address"] = item.pop("addr_full", None)
                 yield item
