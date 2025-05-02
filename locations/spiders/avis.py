@@ -10,7 +10,6 @@ from locations.structured_data_spider import StructuredDataSpider
 class AvisSpider(CrawlSpider, StructuredDataSpider):
     name = "avis"
     item_attributes = {"brand": "Avis", "brand_wikidata": "Q791136"}
-    download_delay = 0.5
     allowed_domains = ["avis.com"]
     start_urls = [
         "https://www.avis.com/en/locations/avisworldwide",
