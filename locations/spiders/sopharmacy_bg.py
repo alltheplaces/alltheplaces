@@ -5,6 +5,7 @@ from locations.items import Feature
 
 requires_proxy = True  # Cloudflare bot protection used
 
+
 class SopharmacyBGSpider(scrapy.Spider):
     name = "sopharmacy_bg"
     item_attributes = {"brand": "SOpharmacy", "brand_wikidata": "Q108852081"}
