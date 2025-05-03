@@ -3,7 +3,7 @@ import scrapy
 from locations.hours import DAYS_BG, OpeningHours
 from locations.items import Feature
 
-requires_proxy = "BG"  # Cloudflare bot protection used
+requires_proxy = "US"  # Cloudflare bot protection used
 
 
 class SopharmacyBGSpider(scrapy.Spider):
