@@ -20,7 +20,7 @@ class PizzaHutAESASpider(scrapy.Spider):
             )
 
     def parse(self, response, **kwargs):
-        for data in response.json():
+        for data in response.json()["data"]:
             for store in data["store"]:
                 item = DictParser.parse(store)
                 item["name"] = store.get("name_en")
