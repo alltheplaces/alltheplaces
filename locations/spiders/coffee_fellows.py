@@ -27,7 +27,8 @@ class CoffeeFellowsSpider(scrapy.Spider):
             location["image"] = location.pop("coverImage")
             item = DictParser.parse(location)
             item["opening_hours"] = self.format_opening_hours(location)
-            item["extras"]["start_date"] = location["openingDate"].replace("T00:00:00.000Z", "")
+            if opening_date := location.get("openingDate"):
+                item["extras"]["start_date"] = opening_date.replace("T00:00:00.000Z", "")
             apply_yes_no("payment:credit_cards", item, location["hasCreditCard"])
             apply_yes_no("outdoor_seating", item, location["hasSeatsOutside"])
             apply_yes_no("wheelchair", item, location["isAccessible"])
