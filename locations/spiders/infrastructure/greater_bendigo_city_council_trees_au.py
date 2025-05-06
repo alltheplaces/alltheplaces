@@ -16,7 +16,7 @@ class GreaterBendigoCityCouncilTreesAUSpider(VectorFileSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["AssetID"]
+        item["ref"] = str(feature["AssetID"])
         item["housenumber"] = feature["House"]
         item["street"] = feature["St_Name"]
         item["city"] = feature["Suburb"]
