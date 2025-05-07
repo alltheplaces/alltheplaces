@@ -74,8 +74,8 @@ class AssociatedSupermarketGroupSpider(Spider):
                                 "lat": float(location["latitude"]),
                                 "lon": float(location["longitude"]),
                             }
-                except json.JSONDecodeError:
-                    self.logger.error("Failed to parse locations JSON data")
+                except json.JSONDecodeError as e:
+                    self.logger.error(f"Failed to parse locations JSON data: {e}")
 
         stores = response.css("li.locator-store-item")
 
