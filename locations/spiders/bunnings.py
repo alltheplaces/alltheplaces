@@ -18,7 +18,8 @@ class BunningsSpider(Spider):
         "https://api.prod.bunnings.com.au/v1/stores?latitude=-23.12&longitude=132.13&currentPage=0&fields=FULL&pageSize=10000&radius=9000000",
     ]
     item_attributes = {"brand": "Bunnings Warehouse", "brand_wikidata": "Q4997829"}
-    custom_settings = {"COOKIES_ENABLED": True, "ROBOTSTXT_OBEY": False}
+    custom_settings = {"COOKIES_ENABLED": True, "ROBOTSTXT_OBEY": False, "ZYTE_API_EXPERIMENTAL_COOKIES_ENABLED": True}
+    requires_proxy = "AU"  # Requires AU or NZ proxy, possibly residential IP addresses only.
 
     def start_requests(self) -> Iterable[Request]:
         yield Request(url="https://www.bunnings.com.au", callback=self.parse_apigee_client_id)
