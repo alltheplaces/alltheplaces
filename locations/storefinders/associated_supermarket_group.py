@@ -124,15 +124,13 @@ class AssociatedSupermarketGroupSpider(Spider):
                 "website": response.url,
                 "operator": self.operator,
                 "operator_wikidata": self.operator_wikidata,
+                "opening_hours": oh,
             }
 
             # Add coordinates from the JavaScript data if available
             if store_id in store_coords:
                 properties["lat"] = store_coords[store_id]["lat"]
                 properties["lon"] = store_coords[store_id]["lon"]
-
-            if oh.as_opening_hours():
-                properties["opening_hours"] = oh.as_opening_hours()
 
             item = Feature(**properties)
             apply_category(Categories.SHOP_SUPERMARKET, item)
