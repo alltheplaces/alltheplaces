@@ -6,8 +6,8 @@ Supermarket Group brands, including Met Foodmarket, Associated Supermarket,
 Compare Foods, and Pioneer Supermarket.
 """
 
-import re
 import json
+import re
 from typing import Iterable, List
 
 from scrapy import Request, Spider
