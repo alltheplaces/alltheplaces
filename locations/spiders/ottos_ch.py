@@ -6,7 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -27,7 +27,7 @@ class OttosCHSpider(scrapy.Spider):
             item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
             item["opening_hours"] = OpeningHours()
             for day_time in store["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
-                day = sanitise_day(day_time["weekDay"], DAYS_DE)
+                day = day_time["weekDay"]
                 if day_time["closed"] == "true":
                     item["opening_hours"].set_closed(day)
                 else:
