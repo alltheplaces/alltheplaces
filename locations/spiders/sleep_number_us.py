@@ -1,4 +1,5 @@
 from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
@@ -8,9 +9,18 @@ from locations.hours import DAYS_FULL, OpeningHours
 class SleepNumberUSSpider(Spider):
     name = "sleep_number_us"
     item_attributes = {"brand_wikidata": "Q7447640", "brand": "Sleep Number", "extras": Categories.SHOP_BED.value}
-    start_urls = [
-        "https://www.sleepnumber.com/api/storefront/store-locations?lat=42.8473561&lng=-106.26166833&limit=10000&radius=25000"
-    ]
+
+    def start_requests(self):
+        for city in [
+            (21.30694, -157.85833),
+            (26.12231, -80.14338),
+            (30.44332, -91.18747),
+            (39.95238, -75.16362),
+            (44.97997, -93.26384),
+        ]:
+            yield JsonRequest(
+                url=f"https://www.sleepnumber.com/api/storefront/store-locations?lat={city[0]}&lng={city[1]}&limit=190&radius=25000"
+            )
 
     def parse(self, response):
         for store in response.json()["entities"]:
