@@ -10,7 +10,7 @@ import json
 import re
 from typing import Iterable, List
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -42,10 +42,6 @@ class AssociatedSupermarketGroupSpider(Spider):
     # Set default operator information - can be overridden
     operator = "Associated Supermarket Group"
     operator_wikidata = "Q4809251"
-
-    def start_requests(self):
-        """Generate the initial requests to the brand-specific URL."""
-        yield Request(url=self.start_urls[0])
 
     def parse(self, response: Response) -> Iterable[Feature]:
         """Extract store information from the store locator page.
