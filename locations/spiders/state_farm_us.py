@@ -21,6 +21,7 @@ class StateFarmUSSpider(SitemapSpider, StructuredDataSpider):
             "User-Agent": BROWSER_DEFAULT,
         },
     }
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response, ld_data, **kwargs):
         mainEntity = ld_data.get("mainEntity")
