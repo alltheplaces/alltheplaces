@@ -3,10 +3,11 @@ from typing import Iterable
 from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_FROM_SUNDAY
+from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+
 
 class CashbuildSpider(JSONBlobSpider):
     name = "cashbuild"
@@ -31,7 +32,7 @@ class CashbuildSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if not feature["active"] or not feature["storeActive"]:
             return
-   
+
         item["ref"] = str(feature["id_store"])
         item["branch"] = item.pop("name", None)
         item["addr_full"] = merge_address_lines([feature["address1"], feature["address2"]])
