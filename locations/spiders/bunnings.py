@@ -77,9 +77,11 @@ class BunningsSpider(Spider):
     def parse(self, response: Response) -> Iterable[Feature]:
         if response.json()["statusDetails"]["state"] != "SUCCESS":
             return
+
         for location in response.json()["data"]["stores"]:
             if not location["isActiveLocation"]:
                 continue
+
             item = DictParser.parse(location)
             item["ref"] = location["name"]
             item.pop("name", None)
@@ -97,6 +99,7 @@ class BunningsSpider(Spider):
                     website_prefix + location["urlRegion"] + "/" + location["displayName"].lower().replace(" ", "-")
                 )
             item["extras"]["website:map"] = location.get("mapUrl")
+
             item["opening_hours"] = OpeningHours()
             for day in location["openingHours"]["weekDayOpeningList"]:
                 if (
@@ -112,5 +115,6 @@ class BunningsSpider(Spider):
                         close_time=day["closingTime"]["formattedHour"],
                         time_format="%I:%M %p",
                     )
-            apply_category(Categories.SHOP_HARDWARE, item)
+
+            apply_category(Categories.SHOP_DOITYOURSELF, item)
             yield item
