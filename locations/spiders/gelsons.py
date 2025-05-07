@@ -29,13 +29,14 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
             "pageProps"
         ]
         store_json = content["store"]
-        hours = content["pageComponents"][0]["headline"]
 
         item = DictParser.parse(store_json)
+        item["branch"] = item.pop("name")
         item["street_address"] = item.pop("addr_full", None)
         item["phone"] = store_json["storePhone"]
         item["website"] = response.url
-        item["opening_hours"] = self.parse_hours(hours)
+        if hours := content["pageComponents"][0]["headline"]:
+            item["opening_hours"] = self.parse_hours(hours)
 
         yield item
 
@@ -47,8 +48,14 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
 
         """
         hours = OpeningHours()
-        open_time = hour_string.split(": ")[1].split(" - ")[0].replace(" ", "")
-        close_time = hour_string.split(" - ")[1].split(",")[0].replace(" ", "")
+        hour_string = (
+            hour_string.replace("Hours:", "")
+            .replace("7 days a week", "")
+            .replace(",", "")
+            .replace(".", "")
+            .replace(" ", "")
+        )
+        open_time, close_time = hour_string.split("-")
 
         # Add minutes, if necessary
         if ":" not in open_time:
@@ -57,8 +64,7 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
         if ":" not in close_time:
             close_time = f"{close_time[:-2]}:00pm"
 
-        if "7 days a week" in hour_string:
-            for day in DAYS:
-                hours.add_range(day, open_time, close_time, time_format="%I:%M%p")
+        for day in DAYS:
+            hours.add_range(day, open_time, close_time, time_format="%I:%M%p")
 
         return hours
