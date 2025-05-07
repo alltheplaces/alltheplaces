@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 import scrapy
 
 from locations.items import Feature
-from locations.user_agents import BOT_USER_AGENT
+from locations.user_agents import BOT_USER_AGENT_SCRAPY
 
 # To emit proper OpenStreetMap tags for platforms, we need to keep some
 # per-station properties in memory.
@@ -42,7 +42,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
             "https://query.wikidata.org/sparql?{}".format(
                 urlencode({"query": "SELECT ?item ?sboid WHERE {?item p:P13221 ?s. ?s ps:P13221 ?sboid.}"})
             ),
-            headers={"Accept": "text/csv", "User-Agent": BOT_USER_AGENT},
+            headers={"Accept": "text/csv", "User-Agent": BOT_USER_AGENT_SCRAPY},
             callback=self.handle_wikidata_operators,
         )
 

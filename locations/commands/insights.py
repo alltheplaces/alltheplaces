@@ -12,6 +12,7 @@ from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
 from locations.name_suggestion_index import NSI
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
 def iter_json(stream, file_name):
@@ -215,7 +216,7 @@ class InsightsCommand(ScrapyCommand):
         re_qcode = re.compile(r"^Q\d+")
         osm_url_template = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page={}&rp=999&qtype=value"
         for page in range(1, 1000):
-            response = requests.get(osm_url_template.format(page))
+            response = requests.get(osm_url_template.format(page), headers={"User-Agent": BOT_USER_AGENT_REQUESTS})
             if not response.status_code == 200:
                 raise Exception("Failed to load OSM wikidata tag statistics")
             entries = response.json()["data"]
