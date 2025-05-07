@@ -2,14 +2,14 @@ import csv
 import datetime
 import io
 import re
-import urllib
 import zipfile
 from collections import namedtuple
+from urllib.parse import urlencode
 
 import scrapy
 
 from locations.items import Feature
-from locations.user_agents import ALLTHEPLACES_BOT
+from locations.user_agents import BOT_USER_AGENT
 
 # To emit proper OpenStreetMap tags for platforms, we need to keep some
 # per-station properties in memory.
@@ -35,22 +35,16 @@ class OpentransportdataSwissSpider(scrapy.Spider):
         "website": "https://opentransportdata.swiss/",
     }
     dataset_pattern = "https://data.opentransportdata.swiss/en/dataset/%s/permalink"
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DEFAULT_REQUEST_HEADERS": {
-            "User-Agent": ALLTHEPLACES_BOT,
-        },
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        query = "SELECT ?item ?sboid WHERE {?item p:P13221 ?s. ?s ps:P13221 ?sboid.}"
-        params = urllib.parse.urlencode({"query": query})
-        url = "https://query.wikidata.org/sparql?" + params
-        headers = {
-            "Accept": "text/csv",
-            "User-Agent": ALLTHEPLACES_BOT,
-        }
-        yield scrapy.Request(url, headers=headers, callback=self.handle_wikidata_operators)
+        yield scrapy.Request(
+            "https://query.wikidata.org/sparql?{}".format(
+                urlencode({"query": "SELECT ?item ?sboid WHERE {?item p:P13221 ?s. ?s ps:P13221 ?sboid.}"})
+            ),
+            headers={"Accept": "text/csv", "User-Agent": BOT_USER_AGENT},
+            callback=self.handle_wikidata_operators,
+        )
 
     def handle_wikidata_operators(self, response):
         self.operators = {}
