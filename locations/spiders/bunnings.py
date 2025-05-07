@@ -19,7 +19,6 @@ class BunningsSpider(Spider):
     ]
     item_attributes = {"brand": "Bunnings Warehouse", "brand_wikidata": "Q4997829"}
     custom_settings = {"COOKIES_ENABLED": True, "ROBOTSTXT_OBEY": False}
-    requires_proxy = "AU"  # Requires AU or NZ proxy, possibly residential IP addresses only.
 
     def start_requests(self) -> Iterable[Request]:
         yield Request(url="https://www.bunnings.com.au", callback=self.parse_apigee_client_id)
