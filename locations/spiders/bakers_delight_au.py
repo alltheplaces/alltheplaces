@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.storefinders.algolia import AlgoliaSpider
 

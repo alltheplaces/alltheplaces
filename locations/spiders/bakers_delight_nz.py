@@ -18,7 +18,11 @@ class BakersDelightNZSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["location"]
-        hours_string = " ".join(Selector(text=feature["operatingHours"]).xpath('//table[not(contains(@class, "wpsl-opening-hours--special"))]//text()').getall())
+        hours_string = " ".join(
+            Selector(text=feature["operatingHours"])
+            .xpath('//table[not(contains(@class, "wpsl-opening-hours--special"))]//text()')
+            .getall()
+        )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
         item["image"] = feature["storeimage"]
