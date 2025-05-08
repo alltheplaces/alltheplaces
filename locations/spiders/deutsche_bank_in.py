@@ -32,7 +32,7 @@ class DeutscheBankINSpider(scrapy.Spider):
                         apply_yes_no("cheque_in", item, True)
                     if "*" in match.group(0):
                         item["extras"]["access"] = "private"
-
+                    yield item
                 elif "IFSC" in location.get() or "Bank" in location.get():  # Bank
                     if "phone" in location_info[0].lower():  # no address or incorrect data
                         continue
@@ -50,5 +50,4 @@ class DeutscheBankINSpider(scrapy.Spider):
                     if not item.get("phone"):
                         item["addr_full"] = location_info  # only address is present
                     apply_category(Categories.BANK, item)
-
-                yield item
+                    yield item
