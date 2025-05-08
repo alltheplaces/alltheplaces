@@ -14,7 +14,6 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
         "country": "US",
     }
 
-    download_delay = 0.2
     sitemap_urls = ["https://www.gelsons.com/sitemap.xml"]
     sitemap_rules = [("/stores/", "parse_store")]
 
