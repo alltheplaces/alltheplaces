@@ -1,4 +1,3 @@
-import re
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -6,7 +5,6 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.central_england_cooperative import set_operator
 
@@ -45,16 +43,6 @@ class AnPostIESpider(Spider):
             item["country"] = "IE"
             item["website"] = urljoin("https://www.anpost.com/Store-Locator/", location["NameURL"])
             item["extras"]["collection_times"] = location["LastTimeOfPosting"]
-
-            item["opening_hours"] = OpeningHours()
-            for rule in location["OpeningHours"].split(";"):
-
-                if "closed" in rule.lower() or not rule.strip():
-                    continue
-
-                day, times = rule.strip().split(" ", maxsplit=1)
-                for start_time, end_time in re.findall(r"(\d\d:\d\d)\s*-\s*(\d\d:\d\d)", times):
-                    item["opening_hours"].add_range(day, start_time, end_time)
 
             if cat := self.cats.get(location["Type"]):
                 apply_category(cat, item)
