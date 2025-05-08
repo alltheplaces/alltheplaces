@@ -14,10 +14,8 @@ class AnPostIESpider(Spider):
     AN_POST = {"brand": "An Post", "brand_wikidata": "Q482490"}
 
     cats = {
-        "POSTPOINT": {"post_office": "post_partner"},
         "Parcel Locker": Categories.PARCEL_LOCKER,
         "Post Office": Categories.POST_OFFICE,
-        "PostPoint": {"post_office": "post_partner"},
     }
 
     def start_requests(self):
@@ -46,10 +44,12 @@ class AnPostIESpider(Spider):
 
             if cat := self.cats.get(location["Type"]):
                 apply_category(cat, item)
+                set_operator(self.AN_POST, item)
+            elif location["Type"].upper() == "POSTPOINT":
+                apply_category(Categories.GENERIC_POI, item)
+                item["extras"]["post_office"] = "post_partner"
             else:
                 item["extras"]["type"] = location["Type"]
-                self.crawler.stats.inc_value("an_post_ie/unmapped_category/{}".format(location["Type"]))
-
-            set_operator(self.AN_POST, item)
+                self.logger.error("Unexpected type: {}".format(location["Type"]))
 
             yield item
