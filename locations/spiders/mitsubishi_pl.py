@@ -25,7 +25,7 @@ class MitsubishiPLSpider(Spider):
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full")
             item["addr_full"] = location["full_address"]
-            item["branch"] = location["dealer_name"]
+            item["name"] = location["dealer_name"]
 
             services = location["services"]
             if "SHOWROOM" in services:
