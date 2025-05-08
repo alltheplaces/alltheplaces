@@ -1,6 +1,8 @@
+import json
+import re
 from typing import Any
 
-from scrapy import FormRequest, Spider
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -13,36 +15,27 @@ class MitsubishiPLSpider(Spider):
     start_urls = ["https://www.mitsubishi.pl/dealerzy"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        # Fetch cookie
-        user_session = ""
-        for cookie in response.headers.getlist("Set-Cookie"):
-            if b"user_session" in cookie:
-                user_session = cookie.split(b"=")[1].split(b";")[0].decode("utf-8")
-                break
-
-        token = response.xpath('//meta[@name="csrf-token"]/@content').get()
-
-        yield FormRequest(
-            url="https://www.mitsubishi.pl/api/modules/dealers/markers/pl",
-            headers={"x-csrf-token": token},
-            cookies={"user_session": user_session},
-            formdata={"filters[region]": "", "filters[query]": ""},
-            callback=self.parse_locations,
+        raw_data = json.loads(
+            re.search(
+                r"dealerLocations\":(\[.*\])}\]\],\[\[\"\$\"",
+                response.xpath('//*[contains(text(),"latitude")]/text()').get().replace("\\", ""),
+            ).group(1)
         )
-
-    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
-            location["street"] = location.pop("address_street", "")
+        for location in raw_data:
             item = DictParser.parse(location)
-            item["lat"] = location.get("marker_lat")
-            item["lon"] = location.get("marker_lng")
-            item["housenumber"] = location.get("address_number")
-            item["postcode"] = location.get("address_postal")
-            if phone := location.get("address_phone") or location.get("service_phone"):
-                item["phone"] = phone.strip().removeprefix("0")
-            if "serwis" in location["email"].lower() or "Serwis" in location["name"].title():
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            else:
+            item["street_address"] = item.pop("addr_full")
+            item["addr_full"] = location["full_address"]
+            item["branch"] = location["dealer_name"]
+
+            services = location["services"]
+            if "SHOWROOM" in services:
                 apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, location.get("service_phone"))
+                if "SERVICE" in services:
+                    apply_yes_no(Extras.CAR_REPAIR, item, True)
+            elif "SERVICE" in services:
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+
+            if isinstance(location["dealer_websites"], list):
+                item["website"] = location["dealer_websites"][0]["url"]
+
             yield item
