@@ -30,7 +30,11 @@ class OttosCHSpider(scrapy.Spider):
                 if day_time["closed"] == "true":
                     item["opening_hours"].set_closed(day_time["weekDay"])
                 else:
-                    item["opening_hours"].add_range(day_time["weekDay"], day_time["openingTime"]["formattedHour"], day_time["closingTime"]["formattedHour"])
+                    item["opening_hours"].add_range(
+                        day_time["weekDay"],
+                        day_time["openingTime"]["formattedHour"],
+                        day_time["closingTime"]["formattedHour"],
+                    )
 
             if store["displayName"].startswith("OTTO'S Beauty Shop "):
                 item["branch"] = store["displayName"].removeprefix("OTTO'S Beauty Shop ")
