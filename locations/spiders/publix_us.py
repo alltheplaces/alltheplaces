@@ -15,7 +15,6 @@ class PublixUSSpider(Spider):
     start_urls = [
         "https://services.publix.com/storelocator/api/v1/stores/?count=3000&distance=5000&includeOpenAndCloseDates=true&isWebsite=true&latitude=39.8422945&longitude=-74.8828235"
     ]
-    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:
