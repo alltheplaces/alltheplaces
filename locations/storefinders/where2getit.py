@@ -82,6 +82,7 @@ class Where2GetItSpider(Spider):
     #   1 = filter by country
     #   2 = filter by state/province
     api_filter_admin_level: int = 0
+    api_limit: int = 10000
 
     def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:
         where_clause = {}
@@ -113,14 +114,12 @@ class Where2GetItSpider(Spider):
             url = self.api_endpoint
         yield JsonRequest(
             url=url,
-            # For hosted.where2getit.com a "limit" parameter value >10000 is rejected.
             data={
                 "request": {
                     "appkey": self.api_key,
-                    "formdata": {"objectname": "Locator::Store", "limit": 10000, "where": where_clause},
+                    "formdata": {"objectname": "Locator::Store", "limit": self.api_limit, "where": where_clause},
                 }
             },
-            method="POST",
             callback=self.parse_locations,
             dont_filter=True,
         )
@@ -160,10 +159,11 @@ class Where2GetItSpider(Spider):
             return
 
         locations = response.json()["response"]["collection"]
-        if len(locations) == 10000:
-            raise RuntimeError(
-                "Locations have probably been truncated due to 10000 features being returned by a single query and the observed maximum limit which can be specified for query results being 10000. Try setting the api_filter_admin_level to a more specific value to avoid 10000 features being returned in any given request."
+        if len(locations) == self.api_limit:
+            self.logger.error(
+                f"Locations have probably been truncated due to {self.api_limit} features being returned by a single query. Increase api_limit to a higher value or try setting the api_filter_admin_level to a more specific value to avoid {self.api_limit} features being returned in any given request."
             )
+            self.crawler.stats.inc_value("api_limit_per_request_reached")
 
         for location in response.json()["response"]["collection"]:
             self.pre_process_data(location)
