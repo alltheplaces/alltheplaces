@@ -9,7 +9,6 @@ class RelayFRSpider(scrapy.Spider):
     name = "relay_fr"
     item_attributes = {"brand": "Relay", "brand_wikidata": "Q3424298"}
     allowed_domains = ["relay.com"]
-    requires_proxy = "FR"
 
     def start_requests(self):
         point_files = "eu_centroids_120km_radius_country.csv"
@@ -26,15 +25,20 @@ class RelayFRSpider(scrapy.Spider):
 
             days = scrapy.Selector(text=data.get("hours"))
             oh = OpeningHours()
+
             for day in days.xpath("//tr"):
                 if day.xpath("./td[2]/text()").get() == "Closed":
                     continue
-                oh.add_range(
-                    day=day.xpath("./td[1]/text()").get(),
-                    open_time=day.xpath(".//time/text()").get().split(" - ")[0],
-                    close_time=day.xpath(".//time/text()").get().split(" - ")[1],
-                )
-
+                elif time_range := day.xpath(".//time/text()").get():
+                    if "|" in time_range:
+                        # Unknown meaning of format e.g. "06:45 - 12:15|14:15"
+                        continue
+                    else:
+                        oh.add_range(
+                            day=day.xpath("./td[1]/text()").get(),
+                            open_time=time_range.split(" - ")[0],
+                            close_time=time_range.split(" - ")[1],
+                        )
             item["opening_hours"] = oh.as_opening_hours()
 
             yield item
