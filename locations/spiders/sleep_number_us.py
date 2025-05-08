@@ -32,6 +32,7 @@ class SleepNumberUSSpider(Spider):
             item = DictParser.parse(store)
             item["ref"] = store["cid"]
             item["website"] = store["c_storePagesURLURL"]
+            item["extras"]["ref:google:place_id"] = store.get("googlePlaceId")
 
             try:
                 item["opening_hours"] = self.parse_opening_hours(store.get("hours", {}))
