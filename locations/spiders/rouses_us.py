@@ -15,7 +15,9 @@ class RousesUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"^https:\/\/www\.rouses\.com\/locations\/rouses(?:-market|-store)-\d+\/$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
-        item["ref"] = ld_data.get("name", "").split("#", 1)[1].strip()
+        item["ref"] = ld_data.get("name", "").replace("Rouses Market ", "").replace(" ", "")
+        if "#" in item["ref"]:
+            item["ref"] = item["ref"].replace("#", "")
         item.pop("twitter", None)
         if m := re.match(
             r"(\d{1,2}(?::\d{1,2})?(?:am|pm))\s*-\s*(\d{1,2}(?::\d{1,2})?(?:am|pm))\s*<\/br>\s*Daily",
