@@ -11,7 +11,6 @@ class SopharmacyBGSpider(scrapy.Spider):
     start_urls = ["https://sopharmacy.bg/bg/mapbox/contactus.json"]
     requires_proxy = "US"  # Cloudflare bot protection used
 
-
     def parse(self, response):
         for store in response.json()["contact-map"]["features"]:
             item = {
