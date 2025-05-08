@@ -3,14 +3,14 @@ import scrapy
 from locations.hours import DAYS_BG, OpeningHours
 from locations.items import Feature
 
-requires_proxy = "US"  # Cloudflare bot protection used
-
 
 class SopharmacyBGSpider(scrapy.Spider):
     name = "sopharmacy_bg"
     item_attributes = {"brand": "SOpharmacy", "brand_wikidata": "Q108852081"}
     allowed_domains = ["sopharmacy.bg"]
     start_urls = ["https://sopharmacy.bg/bg/mapbox/contactus.json"]
+    requires_proxy = "US"  # Cloudflare bot protection used
+
 
     def parse(self, response):
         for store in response.json()["contact-map"]["features"]:
