@@ -39,7 +39,9 @@ class BudniDESpider(scrapy.Spider):
             store["address"] = store.pop("contact")
             store["address"]["street_address"] = store["address"].pop("streetAndNumber")
             store["location"] = store["address"]
+
             item = DictParser.parse(store)
+            item["website"] = "https://www.budni.de/filialen/{}".format(item["ref"])
             if item["name"].startswith("budni - "):
                 item["branch"] = item["name"].removeprefix("budni - ")
                 item["name"] = "Budni"
