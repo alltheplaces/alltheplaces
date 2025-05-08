@@ -21,11 +21,11 @@ class CoffeeFellowsSpider(scrapy.Spider):
         raw_json = json.loads(response.xpath('//script[@type="application/json"]/text()').get())
         data = json.loads(raw_json["props"]["pageProps"]["page"])["locations"]
         for location in data:
-            location["street_address"] = location.pop("street")
-            location["lon"] = location["geocode"]["lng"]
-            location["lat"] = location["geocode"]["lat"]
-            location["image"] = location.pop("coverImage")
             item = DictParser.parse(location)
+            item["street_address"] = item.pop("street")
+            item["lon"] = location["geocode"]["lng"]
+            item["lat"] = location["geocode"]["lat"]
+            item["image"] = location.pop("coverImage")
             item["branch"] = item.pop("name")
             item["opening_hours"] = self.format_opening_hours(location)
             if opening_date := location.get("openingDate"):
