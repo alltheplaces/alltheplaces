@@ -24,15 +24,16 @@ class BurgerKingGTSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         if result := response.json().get("data"):
-
-            if location := result.get("restaurant"):
-                item = DictParser.parse(location)
-                item["geometry"] = location.get("point")
-                item["branch"] = item.pop("name").removeprefix("BK ").removeprefix("Burger King ")
-                item["website"] = "https://app.bk.gt/#/"
-                apply_yes_no(Extras.KIDS_AREA, item, location.get("kidsZone"))
-                apply_yes_no(Extras.BREAKFAST, item, location.get("breakfast"))
-                apply_yes_no(Extras.DELIVERY, item, location.get("delivery"))
-                apply_yes_no(Extras.WIFI, item, location.get("wifi"))
-                apply_yes_no(Extras.SELF_CHECKOUT, item, location.get("selfService"))
-                yield item
+            location = result.get("restaurant")
+            if not location:
+                return
+            item = DictParser.parse(location)
+            item["geometry"] = location.get("point")
+            item["branch"] = item.pop("name").removeprefix("BK ").removeprefix("Burger King ")
+            item["website"] = "https://app.bk.gt/#/"
+            apply_yes_no(Extras.KIDS_AREA, item, location.get("kidsZone"))
+            apply_yes_no(Extras.BREAKFAST, item, location.get("breakfast"))
+            apply_yes_no(Extras.DELIVERY, item, location.get("delivery"))
+            apply_yes_no(Extras.WIFI, item, location.get("wifi"))
+            apply_yes_no(Extras.SELF_CHECKOUT, item, location.get("selfService"))
+            yield item
