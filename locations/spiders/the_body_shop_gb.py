@@ -10,7 +10,7 @@ class TheBodyShopGBSpider(StoreifySpider):
     name = "the_body_shop_gb"
     item_attributes = {"brand": "The Body Shop", "brand_wikidata": "Q837851"}
     api_key = "the-body-shop-uk.myshopify.com"
-    domain = "https://www.thebodyshop.com/"
+    domain = "https://www.thebodyshop.com"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("The Body Shop ")
