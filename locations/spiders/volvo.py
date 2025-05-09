@@ -38,7 +38,6 @@ class VolvoSpider(scrapy.Spider):
             item = DictParser.parse(row)
             item["ref"] = row.get("partnerId")
             item["country"] = row.get("country") or country
-            item["phone"] = row.get("phoneNumbers", {}).get("retailer")
             item["email"] = row.get("generalContactEmail")
 
             services = row.get("capabilities") or []
@@ -51,6 +50,8 @@ class VolvoSpider(scrapy.Spider):
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
 
             apply_yes_no(Extras.USED_CAR_SALES, item, "used car sales" in services)
+
+            item["phone"] = row.get("phoneNumbers", {}).get(category)
 
             if opening_hours := row.get("openingHours", {}).get(category):
                 item["opening_hours"] = OpeningHours()
