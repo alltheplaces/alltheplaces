@@ -6,6 +6,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -23,6 +24,8 @@ class VolvoSpider(scrapy.Spider):
         "https://www.volvocars.com/nl/dealers/autodealers",
     ]
     user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response):
         country = re.search(r"(\w\w)/dealers", response.url).group(1)
