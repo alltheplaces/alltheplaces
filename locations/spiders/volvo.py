@@ -4,8 +4,9 @@ import re
 import scrapy
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
-from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -33,17 +34,11 @@ class VolvoSpider(scrapy.Spider):
         data_raw = response.xpath('//script[@id="__NEXT_DATA__" and @type="application/json"]/text()').get()
         locator = json.loads(data_raw)["props"]["pageProps"]["retailers"]
         for row in locator:
-            item = Feature()
+            row["address"] = merge_address_lines([row.pop("addressLine1", ""), row.pop("addressLine2", "")])
+            item = DictParser.parse(row)
             item["ref"] = row.get("partnerId")
-            item["name"] = row.get("name")
-            item["street_address"] = row.get("addressLine1")
-            item["postcode"] = row.get("postalCode")
-            item["city"] = row.get("city")
-            item["lat"] = row.get("latitude")
-            item["lon"] = row.get("longitude")
             item["country"] = row.get("country") or country
             item["phone"] = row.get("phoneNumbers", {}).get("retailer")
-            item["website"] = row.get("url")
             item["email"] = row.get("generalContactEmail")
 
             if opening_hours := row.get("openingHours"):
