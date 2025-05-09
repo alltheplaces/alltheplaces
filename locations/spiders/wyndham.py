@@ -14,9 +14,9 @@ BRANDS = {
     "dolce": ["Dolce Hotels and Resorts", "Q28402655"],
     "echo-suites": ["ECHO Suites", None],
     "esplendor": ["Esplendor by Wyndham", None],
-    "hawthorn-extended-stay": ["Hawthorn Suites by Wyndham", "Q5685511"],
+    "hawthorn-extended-stay": ["Hawthorn Suites", "Q5685511"],
     "hojo": ["Howard Johnson", "Q5919997"],
-    "laquinta": ["La Quinta by Wyndham", "Q6464734"],
+    "laquinta": ["La Quinta Inn", "Q6464734"],
     "microtel": ["Microtel Inns & Suites", "Q6840402"],
     "ramada": ["Ramada", "Q1502859"],
     "registry-collection": ["Registry Collection", None],
@@ -25,12 +25,12 @@ BRANDS = {
     "travelodge": ["Travelodge", "Q7836087"],
     "tryp": ["TRYP", "Q6153452"],
     "vienna-house": ["Vienna House", "Q2523363"],
-    "wingate": ["Wingate by Wyndham", "Q8025144"],
+    "wingate": ["Wingate", "Q8025144"],
     "wyndham-alltra": ["Wyndham Alltra", None],
     "wyndham-garden": ["Wyndham Garden", "Q112144847"],
     "wyndham-grand": ["Wyndham Grand", "Q112144849"],
     "wyndham-vacations": ["Wyndham Vacation Clubs", "Q112144845"],
-    "wyndham": ["Wyndham Hotels and Resorts", "Q8040120"],
+    "wyndham": ["Wyndham", "Q8040120"],
 }
 
 
