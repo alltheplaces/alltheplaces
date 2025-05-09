@@ -205,7 +205,6 @@ class StructuredDataSpider(Spider):
         "HobbyShop",
         "HomeAndConstructionBusiness",
         "HomeGoodsStore",
-        "Hospital",
         "IceCreamShop",
         "JewelryStore",
         "LegalService",

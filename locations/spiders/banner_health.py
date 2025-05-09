@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-import scrapy
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -15,10 +15,11 @@ class BannerHealthSpider(StructuredDataSpider):
     allowed_domains = ["bannerhealth.com"]
     start_urls = ["https://www.bannerhealth.com/api/sitecore/location/LocationSearch"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    wanted_types = ["MedicalClinic"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in (json.loads(response.json()))["LocationModelList"]:
-            yield scrapy.Request(url="https://www.bannerhealth.com" + location["LocationURL"], callback=self.parse_sd)
+            yield Request(response.urljoin(location["LocationURL"]), callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.CLINIC, item)
