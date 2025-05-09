@@ -52,7 +52,7 @@ class VolvoSpider(scrapy.Spider):
 
             apply_yes_no(Extras.USED_CAR_SALES, item, "used car sales" in services)
 
-            if opening_hours := row.get("openingHours"):
+            if opening_hours := row.get("openingHours", {}).get(category):
                 item["opening_hours"] = OpeningHours()
                 for day, times in opening_hours.items():
                     day = sanitise_day(day)
