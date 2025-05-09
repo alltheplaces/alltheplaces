@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -41,6 +41,17 @@ class VolvoSpider(scrapy.Spider):
             item["phone"] = row.get("phoneNumbers", {}).get("retailer")
             item["email"] = row.get("generalContactEmail")
 
+            services = row.get("capabilities") or []
+            if "sales" or "used car sales" in services:
+                category = "retailer"
+                apply_category(Categories.SHOP_CAR, item)
+                apply_yes_no(Extras.CAR_REPAIR, item, "service" in services)
+            else:
+                category = "service"
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+
+            apply_yes_no(Extras.USED_CAR_SALES, item, "used car sales" in services)
+
             if opening_hours := row.get("openingHours"):
                 item["opening_hours"] = OpeningHours()
                 for day, times in opening_hours.items():
@@ -49,7 +60,5 @@ class VolvoSpider(scrapy.Spider):
                         continue
                     for time in times:
                         item["opening_hours"].add_range(day, time["start"], time["end"])
-
-            apply_category(Categories.SHOP_CAR, item)
 
             yield item
