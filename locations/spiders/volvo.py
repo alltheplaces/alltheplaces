@@ -3,9 +3,11 @@ import re
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
-from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -23,6 +25,8 @@ class VolvoSpider(scrapy.Spider):
         "https://www.volvocars.com/nl/dealers/autodealers",
     ]
     user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response):
         country = re.search(r"(\w\w)/dealers", response.url).group(1)
@@ -30,20 +34,26 @@ class VolvoSpider(scrapy.Spider):
         data_raw = response.xpath('//script[@id="__NEXT_DATA__" and @type="application/json"]/text()').get()
         locator = json.loads(data_raw)["props"]["pageProps"]["retailers"]
         for row in locator:
-            item = Feature()
+            row["address"] = merge_address_lines([row.pop("addressLine1", ""), row.pop("addressLine2", "")])
+            item = DictParser.parse(row)
             item["ref"] = row.get("partnerId")
-            item["name"] = row.get("name")
-            item["street_address"] = row.get("addressLine1")
-            item["postcode"] = row.get("postalCode")
-            item["city"] = row.get("city")
-            item["lat"] = row.get("latitude")
-            item["lon"] = row.get("longitude")
             item["country"] = row.get("country") or country
-            item["phone"] = row.get("phoneNumbers", {}).get("retailer")
-            item["website"] = row.get("url")
             item["email"] = row.get("generalContactEmail")
 
-            if opening_hours := row.get("openingHours"):
+            services = row.get("capabilities") or []
+            if "sales" or "used car sales" in services:
+                category = "retailer"
+                apply_category(Categories.SHOP_CAR, item)
+                apply_yes_no(Extras.CAR_REPAIR, item, "service" in services)
+            else:
+                category = "service"
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+
+            apply_yes_no(Extras.USED_CAR_SALES, item, "used car sales" in services)
+
+            item["phone"] = row.get("phoneNumbers", {}).get(category)
+
+            if opening_hours := row.get("openingHours", {}).get(category):
                 item["opening_hours"] = OpeningHours()
                 for day, times in opening_hours.items():
                     day = sanitise_day(day)
@@ -51,7 +61,5 @@ class VolvoSpider(scrapy.Spider):
                         continue
                     for time in times:
                         item["opening_hours"].add_range(day, time["start"], time["end"])
-
-            apply_category(Categories.SHOP_CAR, item)
 
             yield item
