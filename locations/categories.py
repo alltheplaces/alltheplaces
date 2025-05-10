@@ -350,6 +350,7 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
     ANTENNA = {"man_made": "antenna"}
+    CULVERT = {"tunnel": "culvert"}
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
     POWER_POLE = {"power": "pole"}
@@ -444,6 +445,7 @@ top_level_tags = [
     "shop",
     "telecom",
     "tourism",
+    "tunnel",
     "railway",
     "waterway",
 ]
