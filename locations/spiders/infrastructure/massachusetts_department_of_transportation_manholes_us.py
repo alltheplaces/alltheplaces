@@ -9,7 +9,12 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class MassachusettsDepartmentOfTransportationManholesUSSpider(ArcGISFeatureServerSpider):
     name = "massachusetts_department_of_transportation_manholes_us"
-    item_attributes = {"operator": "Massachusetts Department of Transportation", "operator_wikidata": "Q2483364", "state": "MA", "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "Massachusetts Department of Transportation",
+        "operator_wikidata": "Q2483364",
+        "state": "MA",
+        "nsi_id": "N/A",
+    }
     host = "gis.massdot.state.ma.us"
     context_path = "arcgis"
     service_id = "Assets/Stormwater"
