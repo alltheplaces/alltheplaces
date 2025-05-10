@@ -9,7 +9,12 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class MassachusettsDepartmentOfTransportationBasinsUSSpider(ArcGISFeatureServerSpider):
     name = "massachusetts_department_of_transportation_basins_us"
-    item_attributes = {"operator": "Massachusetts Department of Transportation", "operator_wikidata": "Q2483364", "state": "MA", "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "Massachusetts Department of Transportation",
+        "operator_wikidata": "Q2483364",
+        "state": "MA",
+        "nsi_id": "N/A",
+    }
     host = "gis.massdot.state.ma.us"
     context_path = "arcgis"
     service_id = "Assets/Stormwater"
@@ -23,11 +28,26 @@ class MassachusettsDepartmentOfTransportationBasinsUSSpider(ArcGISFeatureServerS
                 item["extras"]["basin"] = "retention"
             case "Detention Basin" | "Extended Dry Detention Basin":
                 item["extras"]["basin"] = "detention"
-            case "Infiltration Basin" | "Infiltration Linear Practice" | "Leaching Basin" | "Subsurface Infiltration Structure" | "Subsurface Infiltration System":
+            case (
+                "Infiltration Basin"
+                | "Infiltration Linear Practice"
+                | "Leaching Basin"
+                | "Subsurface Infiltration Structure"
+                | "Subsurface Infiltration System"
+            ):
                 item["extras"]["basin"] = "infiltration"
             case "Oil/Grit Separator":
                 item["extras"]["basin"] = "settling"
-            case "Constructed Stormwater Wetland" | "Gravel Wetland" | "Media Filter Drain and Embankment" | "Other" | "Pavement Disconnection" | "Porous Pavement" | "Vegetated Filter Strip" | None:
+            case (
+                "Constructed Stormwater Wetland"
+                | "Gravel Wetland"
+                | "Media Filter Drain and Embankment"
+                | "Other"
+                | "Pavement Disconnection"
+                | "Porous Pavement"
+                | "Vegetated Filter Strip"
+                | None
+            ):
                 pass
             case _:
                 self.logger.warning("Unknown basin type: {}".format(feature["BMPType"]))
