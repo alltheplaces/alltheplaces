@@ -385,6 +385,7 @@ class Categories(Enum):
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
     TRANSFORMER = {"power": "transformer"}
 
+    NATURAL_BASIN = {"natural": "water", "water": "basin"}
     NATURAL_TREE = {"natural": "tree"}
 
 
