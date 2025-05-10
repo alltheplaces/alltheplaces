@@ -2,7 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import FIREFOX_LATEST
 
 
 class KeybankUSSpider(SitemapSpider, StructuredDataSpider):
@@ -11,7 +11,7 @@ class KeybankUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.key.com/about/seo.sitemap-locator.xml"]
     sitemap_rules = [(r"locations/.*/.*/.*/.*", "parse_sd")]
     time_format = "%H:%M:%S"
-    user_agent = BROWSER_DEFAULT
+    user_agent = FIREFOX_LATEST
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = response.css("h1.address__title::text").get()
