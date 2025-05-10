@@ -12,7 +12,6 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
         "ROBOTSTXT_OBEY": False,
     }
     user_agent = BROWSER_DEFAULT
-    requires_proxy = True
 
     start_urls = [
         "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=AE",
