@@ -13,7 +13,7 @@ class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
     name = "nandos_gb_ie"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
     sitemap_urls = ["https://www.nandos.co.uk/robots.txt"]
-    sitemap_rules = [(".co.uk/restaurants/([-\w]+)$", "parse")]
+    sitemap_rules = [(r".co.uk/restaurants/([-\w]+)$", "parse")]
     wanted_types = ["Restaurant"]
     skip_auto_cc_domain = True
 
