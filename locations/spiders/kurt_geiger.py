@@ -1,4 +1,3 @@
-
 from locations.categories import Categories, apply_category
 from locations.storefinders.yext_answers import YextAnswersSpider
 
