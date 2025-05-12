@@ -22,5 +22,5 @@ class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
         if "our Nino restaurant" in response.text:
             item.update(NINO_NANDOS)
             apply_category(Categories.FAST_FOOD, item)
-        if not "This restaurant is now closed." in response.text:
+        if "This restaurant is now closed." not in response.text:
             yield item
