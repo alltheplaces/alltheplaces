@@ -13,6 +13,7 @@ class PkoBankPolskiPLSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location["unique_id"]
+            item["street_address"] = item.pop("addr_full", None)
             if location["label"] == "atm_pko":
                 apply_category(Categories.ATM, item)
                 yield item
