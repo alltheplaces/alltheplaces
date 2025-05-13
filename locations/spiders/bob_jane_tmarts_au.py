@@ -20,14 +20,17 @@ class BobJaneTmartsAUSpider(SitemapSpider):
     ]
 
     def parse(self, response: Response) -> Iterable[Feature]:
+        if not response.xpath('//div[@class="store-info"]'):
+            # Some store pages are blank and should be ignored.
+            return
         properties = {
-            "ref": response.xpath('//div[@class="store-info"]/p[@id="pageHandle"]/text()').get(),
+            "ref": response.url,
             "branch": response.xpath('//div[@class="store-info"]/h2/text()').get(),
             "addr_full": merge_address_lines(
-                response.xpath('//div[@class="store-info"]/div[@class="store-address"]/p[1]//text()').getall()
+                response.xpath('//div[@class="store-info"]/div[@class="store-address"]/p[1]/text()[position()>1]').getall()
             ),
             "phone": response.xpath(
-                '//div[@class="store-info"]/div[@class="store-address"]/a[contains(@href, "tel:")]/@href'
+                '//div[@class="store-info"]/div[@class="store-address"]/p[1]/a[contains(@href, "tel:")]/@href'
             )
             .get("")
             .replace("tel:", ""),
@@ -35,8 +38,8 @@ class BobJaneTmartsAUSpider(SitemapSpider):
             "opening_hours": OpeningHours(),
         }
         hours_text = " ".join(
-            response.xpath('//div[@class="store-info"]/div[@class="metafield-rich_text_field"]//text()').getall()
-        )
+            response.xpath('//div[@class="store-info"]/*[self::p or self::h4]/text()').getall()
+        ).upper().split("TRADING HOURS:", 1)[1]
         properties["opening_hours"].add_ranges_from_string(hours_text)
         extract_google_position(properties, response)
         apply_category(Categories.SHOP_TYRES, properties)
