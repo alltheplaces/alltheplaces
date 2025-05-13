@@ -27,7 +27,9 @@ class BobJaneTmartsAUSpider(SitemapSpider):
             "ref": response.url,
             "branch": response.xpath('//div[@class="store-info"]/h2/text()').get(),
             "addr_full": merge_address_lines(
-                response.xpath('//div[@class="store-info"]/div[@class="store-address"]/p[1]/text()[position()>1]').getall()
+                response.xpath(
+                    '//div[@class="store-info"]/div[@class="store-address"]/p[1]/text()[position()>1]'
+                ).getall()
             ),
             "phone": response.xpath(
                 '//div[@class="store-info"]/div[@class="store-address"]/p[1]/a[contains(@href, "tel:")]/@href'
@@ -37,9 +39,11 @@ class BobJaneTmartsAUSpider(SitemapSpider):
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
-        hours_text = " ".join(
-            response.xpath('//div[@class="store-info"]/*[self::p or self::h4]/text()').getall()
-        ).upper().split("TRADING HOURS:", 1)[1]
+        hours_text = (
+            " ".join(response.xpath('//div[@class="store-info"]/*[self::p or self::h4]/text()').getall())
+            .upper()
+            .split("TRADING HOURS:", 1)[1]
+        )
         properties["opening_hours"].add_ranges_from_string(hours_text)
         extract_google_position(properties, response)
         apply_category(Categories.SHOP_TYRES, properties)
