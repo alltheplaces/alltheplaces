@@ -5,7 +5,7 @@ import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
 class VivacomBGSpider(Spider):
@@ -22,12 +22,8 @@ class VivacomBGSpider(Spider):
             if "partners" in store["store_img"]:
                 continue
 
-            item = Feature()
-
-            item["ref"] = store["store_id"]
+            item = DictParser.parse(store)
             item["lat"], item["lon"] = store["latlng"].split(",")
-            item["name"] = store["store_name"]
-            item["phone"] = store["store_phone"]
 
             opening_hours = (
                 store["store_time"]
