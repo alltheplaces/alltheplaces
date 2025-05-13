@@ -8,6 +8,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
+
 class MomentFeedSpider(Spider):
     """
     MomentFeed (owned by Uberall)
@@ -48,7 +49,9 @@ class MomentFeedSpider(Spider):
                 rule = day.split(",")
                 if len(rule) == 3:
                     open_days.append(DAYS[int(rule[0]) - 1])
-                    item["opening_hours"].add_range(DAYS[int(rule[0]) - 1], rule[1], rule[2].replace("2400", "2359"), "%H%M")
+                    item["opening_hours"].add_range(
+                        DAYS[int(rule[0]) - 1], rule[1], rule[2].replace("2400", "2359"), "%H%M"
+                    )
             closed_days = list(set(DAYS) - set(open_days))
             for closed_day in closed_days:
                 item["opening_hours"].set_closed(closed_day)
