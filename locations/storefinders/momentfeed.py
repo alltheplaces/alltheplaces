@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-
+from locations.pipelines.address_clean_up import merge_address_lines
 
 class MomentFeedSpider(Spider):
     """
@@ -24,7 +24,8 @@ class MomentFeedSpider(Spider):
 
     def start_requests(self):
         yield JsonRequest(
-            url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.api_key}&pageSize={self.page_size}&page=1"
+            url=f"https://uberall.com/api/mf-lp-adapter/llp.json?center=0,0&coordinates=-90,180,90,-180&pageSize={self.page_size}&page=1",
+            headers={"Authorization": self.api_key},
         )
 
     def parse(self, response: Response):
@@ -36,33 +37,35 @@ class MomentFeedSpider(Spider):
                 continue
 
             store_info = feature["store_info"]
-
             item = DictParser.parse(store_info)
             item["ref"] = store_info["corporate_id"]
-            item["street_address"] = ", ".join(filter(None, [store_info["address"], store_info["address_extended"]]))
-            item["addr_full"] = None
+            item["street_address"] = merge_address_lines([store_info["address_extended"], store_info["address"]])
+            item.pop("addr_full", None)
 
-            oh = OpeningHours()
+            item["opening_hours"] = OpeningHours()
+            open_days = []
             for day in store_info["store_hours"].split(";"):
                 rule = day.split(",")
                 if len(rule) == 3:
-                    oh.add_range(day=DAYS[int(rule[0]) - 1], open_time=rule[1], close_time=rule[2], time_format="%H%M")
-
-            item["opening_hours"] = oh.as_opening_hours()
+                    open_days.append(DAYS[int(rule[0]) - 1])
+                    item["opening_hours"].add_range(DAYS[int(rule[0]) - 1], rule[1], rule[2].replace("2400", "2359"), "%H%M")
+            closed_days = list(set(DAYS) - set(open_days))
+            for closed_day in closed_days:
+                item["opening_hours"].set_closed(closed_day)
 
             for provider in store_info["providers"]:
                 if provider["_type"] == "Facebook":
                     item["facebook"] = provider["url"]
-                    break
-
-            item["twitter"] = feature["twitter_handle"]
+                elif provider["_type"] == "Google" and provider.get("place_id"):
+                    item["extras"]["ref:google:place_id"] = provider["place_id"]
 
             yield from self.parse_item(item, feature, store_info)
 
         if len(response.json()) == self.page_size:
             next_page = int(urllib.parse.parse_qs(urllib.parse.urlparse(response.url).query)["page"][0]) + 1
             yield JsonRequest(
-                url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.api_key}&pageSize={self.page_size}&page={next_page}"
+                url=f"https://uberall.com/api/mf-lp-adapter/llp.json?center=0,0&coordinates=-90,180,90,-180&pageSize={self.page_size}&page={next_page}",
+                headers={"Authorization": self.api_key},
             )
 
     def parse_item(self, item: Feature, feature: dict, store_info: dict):
