@@ -7,6 +7,8 @@ import requests
 import tldextract
 from unidecode import unidecode
 
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
+
 
 class Singleton(type):
     _instances = {}
@@ -31,7 +33,10 @@ class NSI(metaclass=Singleton):
 
     @staticmethod
     def _request_file(file: str) -> dict:
-        resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/" + file)
+        resp = requests.get(
+            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/{}".format(file),
+            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
+        )
         if not resp.status_code == 200:
             raise Exception("NSI load failure")
         return resp.json()

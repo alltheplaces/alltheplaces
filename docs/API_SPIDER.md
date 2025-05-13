@@ -14,7 +14,7 @@ While exploring the storefinder you wish to spider, look for indicators or commo
 
 Examples:
 - [univeral_store_au](../locations/spiders/universal_store_au.py) - Based on a [closeby](../locations/storefinders/closeby.py) storefinder.
-- [see_candies](../locations/spiders/see_candies.py) - Based on a [rioseo](../locations/storefinders/rio_seo.py) storefinder, overriding the default behaviours
+- [sees_candies](../locations/spiders/sees_candies.py) - Based on a [rioseo](../locations/storefinders/rio_seo.py) storefinder, overriding the default behaviours
 
 ### Investigating an API
 
@@ -24,8 +24,8 @@ There are a good number of sites that employ their own bespoke API (typically re
 
 You are encouraged to run the following checks as a first step:
 
-- `pipenv run scrapy sitemap http://example.com/` - determine if there are sitemaps and useful links - see [sitemap](./SITEMAP.md) for your next steps.
-- `pipenv run scrapy sd http://example.com/path/to/individual/store` or pasting the URL into https://validator.schema.org/ - see [structured data](./STRUCTURED_DATA.md)
+- `uv run scrapy sitemap http://example.com/` - determine if there are sitemaps and useful links - see [sitemap](./SITEMAP.md) for your next steps.
+- `uv run scrapy sd http://example.com/path/to/individual/store` or pasting the URL into https://validator.schema.org/ - see [structured data](./STRUCTURED_DATA.md)
 
 If these yield no results or you wish to explore more efficient ways to query; the next thing to do is to figure out that **there is an API** and **how it is driven**.
 
@@ -65,5 +65,5 @@ We provide a certain amount of library support for driving such APIs with data. 
 All the above is best illustrated with some further examples:
 
 * [spar_gb.py](../locations/spiders/spar_gb.py) (drive query API by postcode)
-* [petsathome_gb.py](../locations/spiders/pets_at_home_gb.py) (query GB at 20km point resolution)
-* [thebodyshop.py](../locations/spiders/the_body_shop.py) (use sitemap to generate API parameters)
+* [pets_at_home_gb.py](../locations/spiders/pets_at_home_gb.py) (query GB at 20km point resolution)
+* [the_body_shop.py](../locations/spiders/the_body_shop.py) (use sitemap to generate API parameters)

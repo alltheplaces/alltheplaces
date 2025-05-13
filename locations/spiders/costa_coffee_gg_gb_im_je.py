@@ -124,7 +124,7 @@ class CostaCoffeeGGGBIMJESpider(Spider):
             if location["siteType"] == "Global Express":
                 item["brand"] = "Costa Express"
                 item["brand_wikidata"] = "Q113556385"
-                apply_category(Categories.VENDING_MACHINE_COFFEE, item)
+                apply_category(Categories.VENDING_MACHINE, item)
             else:
                 apply_category(Categories.COFFEE_SHOP, item)
 

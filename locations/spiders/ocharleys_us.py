@@ -1,34 +1,34 @@
-# -*- coding: utf-8 -*-
+import json
+import re
 
-import scrapy
+import chompjs
 
-from locations.items import Feature
+from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class OcharleysUSSpider(scrapy.Spider):
+class OcharleysUSSpider(JSONBlobSpider):
     name = "ocharleys_us"
     item_attributes = {"brand": "O'Charley's", "brand_wikidata": "Q7071703"}
-    allowed_domains = ["ocharleys.com"]
-    start_urls = [
-        "https://orderback.ocharleys.com:8081/restaurants",
-    ]
+    start_urls = ["https://www.ocharleys.com/locations/"]
 
-    def parse(self, response):
-        data = response.json()
+    def extract_json(self, response):
+        script = response.xpath("//script[starts-with(text(), 'window.__NUXT__=')]/text()").get()
+        param_names = script[script.find("function(") + len("function(") : script.find(")")].split(",")
+        param_values = json.loads("[" + script[script.rfind("(") + 1 : script.rfind("))")] + "]")
+        body = script[script.find("{") : script.rfind("}") + 1]
+        for name, value in zip(param_names, param_values):
+            body = re.sub(":" + re.escape(name) + r"\b", ":" + json.dumps(value).replace("\\", "\\\\"), body)
+        return chompjs.parse_js_object(body[body.find("allLocations") :])
 
-        for place in data["restaurants"]:
-            properties = {
-                "name": place["storename"],
-                "ref": place["extref"],
-                "street_address": place["streetaddress"],
-                "city": place["city"],
-                "state": place["state"],
-                "postcode": place["zip"],
-                "country": place["country"],
-                "phone": place["telephone"],
-                "lat": place["latitude"],
-                "lon": place["longitude"],
-                "website": place["url"],
-            }
+    def post_process_item(self, item, response, feature):
+        item["branch"] = item.pop("name")
+        item["website"] = response.urljoin(feature["path"])
+        item["street_address"] = item.pop("addr_full")
 
-            yield Feature(**properties)
+        oh = OpeningHours()
+        for line in feature["hours"]:
+            oh.add_range(line["day"], line["open"], line["close"])
+        item["opening_hours"] = oh
+
+        yield item

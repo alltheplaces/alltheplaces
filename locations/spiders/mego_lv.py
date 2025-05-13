@@ -1,26 +1,31 @@
-import chompjs
-from scrapy import Spider
-from scrapy.http import HtmlResponse
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class MegoLVSpider(Spider):
+class MegoLVSpider(JSONBlobSpider):
     name = "mego_lv"
-    start_urls = ["https://mego.lv/en/contact-information"]
+    start_urls = ["https://mego.lv/wp-admin/admin-ajax.php?action=store_filter"]
     item_attributes = {"brand_wikidata": "Q16363314"}
+    download_timeout = 120
 
-    def parse(self, response):
-        for location in chompjs.parse_js_object(response.xpath("//div[@class='map']/script/text()").get()):
-            item = Feature()
-            item["ref"] = location["shop_id"]
-            item["lat"] = location["x"]
-            item["lon"] = location["y"]
-            item["street_address"] = location["address"]
+    def extract_json(self, response: Response) -> list[dict]:
+        stores = []
+        for stores_data in response.json()["data"].values():
+            stores.extend(stores_data["stores"])
+        return stores
 
-            fragment = HtmlResponse(url="#" + str(location["shop_id"]), body=location["info"], encoding="utf-8")
-            if hours := fragment.xpath("//p/text()").get().replace(".", ""):
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_ranges_from_string(hours)
-            yield item
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("mapLocation", {}))
+        feature["name"] = "Mego"
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if hours := feature.get("information"):
+            hours = hours.replace("Darba dienās", "Weekdays").replace("Sest.", "Sat.").replace("Sv.", "Sun.")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours)
+        yield item

@@ -23,6 +23,7 @@ class CaffeNeroSpider(Spider):
         "https://www.caffenero.com/uk/stores",
         "https://www.caffenero.com/us/stores",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         yield JsonRequest(

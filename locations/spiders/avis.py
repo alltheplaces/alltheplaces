@@ -10,7 +10,6 @@ from locations.structured_data_spider import StructuredDataSpider
 class AvisSpider(CrawlSpider, StructuredDataSpider):
     name = "avis"
     item_attributes = {"brand": "Avis", "brand_wikidata": "Q791136"}
-    download_delay = 0.5
     allowed_domains = ["avis.com"]
     start_urls = [
         "https://www.avis.com/en/locations/avisworldwide",
@@ -30,7 +29,8 @@ class AvisSpider(CrawlSpider, StructuredDataSpider):
         item["lat"] = response.xpath('//meta[@itemprop="latitude"]/@content').get()
         item["lon"] = response.xpath('//meta[@itemprop="longitude"]/@content').get()
 
-        item["branch"] = item.pop("name").removeprefix("Avis ")
+        if item.get("name"):
+            item["branch"] = item.pop("name").removeprefix("Avis ")
 
         if hours := response.xpath('//meta[@itemprop="openingHours"]/@content').get():
             item["opening_hours"] = OpeningHours()

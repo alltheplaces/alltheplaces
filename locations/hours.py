@@ -106,6 +106,7 @@ DAYS_BG = {
     "Четвъртък": "Th",
     "Че": "Th",
     "Чт": "Th",
+    "Четв": "Th",
     "Петък": "Fr",
     "Пет": "Fr",
     "Пе": "Fr",
@@ -117,7 +118,6 @@ DAYS_BG = {
     "Неделя": "Su",
     "Нед": "Su",
     "нед": "Su",
-    "Нед": "Su",
     "Не": "Su",
     "Нд": "Su",
 }
@@ -910,6 +910,18 @@ class OpeningHours:
 
         Recommended to use with an appropriate helper to pass a specific string or list, ie:
         `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
+
+        In the situation where source data does not explicitly state a feature
+        is closed on a specific day of a week, do not make an assumption of
+        closure status in the absence of other data. For example, source data
+        may be `{"open_days": ["monday", "wednesday"]}` for one feature, and
+        `{"open_days": ["monday", "tuesday", "wednesday"]}` for a different
+        feature. Do not assume that the first feature is closed on Tuesdays
+        unless there is other data explicitly stating this is the case. If the
+        front end website displaying this data treats the absence of `"Tuesday"`
+        in the `"open_days"` array as closure and visually states "Tuesdays:
+        closed" on the website, this function can then be used to set Tuesdays
+        to be closed.
         """
         for day in [days] if isinstance(days, str) else days:
             day = sanitise_day(day)
@@ -942,14 +954,28 @@ class OpeningHours:
         if isinstance(close_time, str):
             if close_time.lower() in closed:
                 return
-            if close_time == "24:00" or close_time == "00:00":
+            if open_time in ("00:00", "0:00", "00:00:00") and close_time in ("00:00", "0:00", "00:00:00"):
+                # Invalid range supplied. Probably the source data uses this
+                # notation for closed days.
+                return
+            if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
-            if close_time == "24:00:00" or close_time == "00:00:00":
+            if close_time in ("24:00:00", "00:00:00"):
                 close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
+            if close_time.tm_hour == 0 and close_time.tm_min == 0:
+                # weird format not caught by checks above
+                # may be 0:00 or even more divergent if time_format
+                # parameter was used with some exotic value
+                close_time = time.strptime("23:59", "%H:%M")
+        if open_time.tm_hour == close_time.tm_hour and open_time.tm_min == close_time.tm_min:
+            # A single time of day was provided, not a range. Ignore request.
+            # Sometimes source data uses 00:00-00:00 as a range denoting a
+            # closed day.
+            return
 
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
@@ -958,6 +984,34 @@ class OpeningHours:
         day_groups = []
         this_day_group = None
 
+        # usually ; works fine as a separator between different days
+        # but it has an annoying quirk, in OpenStreetMap opening_hours syntax
+        # it overrides previous definitions
+        # so for example
+        # Mo-Sa 10:00-02:00; Su 09:00-02:00
+        # means that object is closed on midnight between Saturday and Sunday
+        # Mo-Sa 10:00-02:00; Su 00:00-02:00,09:00-02:00
+        # in turn means that object is open also during early Sunday hours
+        #
+        # All the Places is using a small section of entire opening_hours syntax
+        # so we need only check whether time goes over midnight and split it
+        # in two regular ranges
+        day_hours_midnight_split = defaultdict(set)
+        time_format = "%H:%M"
+        midnight_end = time.strptime("23:59", time_format)
+        midnight_start = time.strptime("00:00", time_format)
+        for index, day in enumerate(DAYS):
+            for h in self.day_hours[day]:
+                if h[0].tm_hour * 60 + h[0].tm_min > h[1].tm_hour * 60 + h[1].tm_min:
+                    # start hour is greater than end hour, indicating that it is
+                    # an over-midnight range
+                    day_hours_midnight_split[day].add((h[0], midnight_end))
+                    next_day = DAYS[(index + 1) % len(DAYS)]
+                    day_hours_midnight_split[next_day].add((midnight_start, h[1]))
+                    if next_day in self.days_closed:
+                        self.days_closed.remove(next_day)
+                else:
+                    day_hours_midnight_split[day].add(h)
         for day in DAYS:
             if day in self.days_closed:
                 hours = "closed"
@@ -968,7 +1022,7 @@ class OpeningHours:
                         time.strftime("%H:%M", h[0]),
                         time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
                     )
-                    for h in sorted(self.day_hours[day])
+                    for h in sorted(day_hours_midnight_split[day])
                 )
 
             if not this_day_group:

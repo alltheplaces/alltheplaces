@@ -1,47 +1,63 @@
+import base64
+import hashlib
+import hmac
 import re
 import time
 import uuid
 from typing import Any
 
 import scrapy
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PizzaHutVNSpider(scrapy.Spider):
     name = "pizza_hut_vn"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    start_urls = ["https://pizzahut.vn/_next/static/chunks/700-ac6d47c5279a8d47.js"]
+    start_urls = ["https://pizzahut.vn/store-location?area=north"]
+    api_url = "https://rwapi.pizzahut.vn/api/store/GetAllStoreList"
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        next_action_token = re.search(r"([a-f0-9]{40})", response.text).group(1)
-        timestamp = int(time.time() * 1000)
-        device_uid = uuid.uuid4()
-        yield Request(
-            url="https://pizzahut.vn/store-location?area=north",
-            method="POST",
-            body=f'[{{"url":"/store/GetAllStoreList","method":"get","bodyData":"","timeStamp":"{timestamp}","deviceUID":"{device_uid}"}}]',
-            headers={
-                "next-action": next_action_token,
-            },
-            callback=self.parse_token,
-            meta=dict(timestamp=timestamp, device_uid=device_uid),
+        # Search for the desired JavaScript file
+        yield response.follow(
+            url=response.xpath("//script/@src").re(r"/_next/static/chunks/3070-\w+\.js")[-1],
+            callback=self.parse_auth_token,
         )
 
-    def parse_token(self, response: Response, **kwargs: Any) -> Any:
-        access_token = re.search(r"1[:\s]+\"(.+)\"", response.text).group(1)
+    def parse_auth_token(self, response: Response, **kwargs: Any) -> Any:
+        timestamp = int(time.time() * 1000)
+        device_uid = uuid.uuid4()
+
+        auth_data = {}
+        for auth_param in ["app_code", "access_key", "secret_key"]:
+            if identifier := self.find_identifier(response, auth_param.title().replace("_", "")):
+                pattern = re.compile(rf"{identifier}[\s=]+\(0,[\n\s]*[a-z]\.[a-z]\)\(\"([a-z0-9]+)\"\)")
+            else:  # secret_key
+                pattern = re.compile(r"s[\s=]+\(0,[\n\s]*[a-z]\.[a-z]\)\(\"([a-z0-9]+)\"\)")
+
+            auth_data[auth_param] = re.search(pattern, response.text).group(1)
+
+        query_string = f"TimeStamp={timestamp}&DeviceUID={device_uid}&AppCode={auth_data['app_code']}&AccessKey={auth_data['access_key']}&Method=GET&url={self.api_url}&Body="
+
+        key = base64.b64decode(auth_data["secret_key"])
+        message = query_string.encode("utf-8")
+        signature = hmac.new(key, message, hashlib.sha512)
+
+        access_token = base64.b64encode(signature.digest()).decode("utf-8")
+
         yield JsonRequest(
-            url="https://rwapi.pizzahut.vn/api/store/GetAllStoreList",
+            url=self.api_url,
             headers={
                 "Authorization": f"Bearer {access_token}",
-                "deviceuid": str(response.meta["device_uid"]),
+                "deviceuid": str(device_uid),
                 "project_id": "WEB",
-                "timestamp": str(response.meta["timestamp"]),
+                "timestamp": str(timestamp),
             },
             callback=self.parse_stores,
         )
@@ -60,3 +76,10 @@ class PizzaHutVNSpider(scrapy.Spider):
                 item["opening_hours"].add_days_range(DAYS, store["Open_Time"], store["Close_Time"])
             apply_category(Categories.RESTAURANT, item)
             yield item
+
+    def find_identifier(self, response: Response, key: str) -> str | None:
+        pattern = re.compile(rf"\"&{key}=\"\)\.concat\(([a-z]),")
+        if match := re.search(pattern, response.text):
+            return match.group(1)
+        else:
+            return None
