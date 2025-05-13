@@ -10,6 +10,7 @@ class CharlesClinkardGBSpider(scrapy.Spider):
     name = "charles_clinkard_gb"
     item_attributes = {
         "brand": "Charles Clinkard",
+        "wikidata": "Q134454710",
         "extras": Categories.SHOP_SHOES.value,
     }
     allowed_domains = [
