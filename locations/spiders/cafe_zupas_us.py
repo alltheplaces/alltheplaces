@@ -30,15 +30,24 @@ class CafeZupasUSSpider(JSONBlobSpider):
         if feature.get("mon_thurs_timings_open") == "Closed":
             item["opening_hours"].set_closed(["Mo", "Tu", "We", "Th"])
         elif feature.get("mon_thurs_timings_open"):
-            item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th"], feature["mon_thurs_timings_open"], feature["mon_thurs_timings_close"], "%I:%M %p")
+            item["opening_hours"].add_days_range(
+                ["Mo", "Tu", "We", "Th"],
+                feature["mon_thurs_timings_open"],
+                feature["mon_thurs_timings_close"],
+                "%I:%M %p",
+            )
         if feature.get("fri_sat_timings_open") == "Closed":
             item["opening_hours"].set_closed(["Fr", "Sa"])
         elif feature.get("fri_sat_timings_open"):
-            item["opening_hours"].add_days_range(["Fr", "Sa"], feature["fri_sat_timings_open"], feature["fri_sat_timings_close"], "%I:%M %p")
+            item["opening_hours"].add_days_range(
+                ["Fr", "Sa"], feature["fri_sat_timings_open"], feature["fri_sat_timings_close"], "%I:%M %p"
+            )
         if feature.get("sunday_timings_open") == "Closed":
             item["opening_hours"].set_closed(["Su"])
         elif feature.get("sunday_timings_open"):
-            item["opening_hours"].add_days_range(["Su"], feature["sunday_timings_open"], feature["sunday_timings_close"], "%I:%M %p")
+            item["opening_hours"].add_days_range(
+                ["Su"], feature["sunday_timings_open"], feature["sunday_timings_close"], "%I:%M %p"
+            )
         apply_category(Categories.FAST_FOOD, item)
         item["extras"]["ref:google:place_id"] = feature["place_id"]
         yield item
