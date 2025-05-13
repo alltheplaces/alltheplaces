@@ -8,7 +8,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
 
-class BancoDesioSpider(JSONBlobSpider):
+class BancoDesioITSpider(JSONBlobSpider):
     name = "banco_desio_it"
     item_attributes = {"brand": "Banco Desio", "brand_wikidata": "Q3633825"}
     start_urls = ["https://www.bancodesio.it/it/filiali-json/all"]
