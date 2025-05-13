@@ -1,4 +1,3 @@
-from locations.pipelines.address_clean_up import clean_address
 from typing import Iterable
 
 from scrapy.http import Response
@@ -6,6 +5,8 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import clean_address
+
 
 class BancoDesioSpider(JSONBlobSpider):
     name = "banco_desio_it"
