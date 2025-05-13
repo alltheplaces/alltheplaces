@@ -10,6 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.asda_gb import AsdaGBSpider
 from locations.spiders.bq import BqSpider
 from locations.spiders.homebase_gb_ie import HomebaseGBIESpider
+from locations.spiders.john_lewis_gb import JohnLewisGBSpider
 from locations.spiders.leyland_sdm_gb import LeylandSdmGBSpider
 from locations.spiders.morrisons_gb import MorrisonsGBSpider
 from locations.spiders.robert_dyas_gb import RobertDyasGBSpider
@@ -152,7 +153,7 @@ class TimpsonGroupSpider(JSONBlobSpider):
 
     def add_located_in(self, item: Feature, located_in_brand_key: str) -> None:
         match located_in_brand_key:
-            case "asda":
+            case "asda" | "Asda":
                 item["located_in"] = AsdaGBSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = AsdaGBSpider.item_attributes["brand_wikidata"]
             case "bq":
@@ -164,6 +165,9 @@ class TimpsonGroupSpider(JSONBlobSpider):
             case "homebase":
                 item["located_in"] = HomebaseGBIESpider.item_attributes["brand"]
                 item["located_in_wikidata"] = HomebaseGBIESpider.item_attributes["brand_wikidata"]
+            case "john-lewis":
+                item["located_in"] = JohnLewisGBSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = JohnLewisGBSpider.item_attributes["brand_wikidata"]
             case "leyland":
                 item["located_in"] = LeylandSdmGBSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = LeylandSdmGBSpider.item_attributes["brand_wikidata"]

@@ -353,6 +353,7 @@ class Categories(Enum):
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
     POWER_POLE = {"power": "pole"}
+    POWER_TOWER = {"power": "tower"}
     PUMPING_STATION_SEWAGE = {
         "man_made": "pumping_station",
         "pumping_station": "sewage",
@@ -371,7 +372,8 @@ class Categories(Enum):
         "utility": "water",
         "substance": "water",
     }
-    STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
+    STREET_CABINET_POWER = {"man_made": "street_cabinet", "street_cabinet": "power", "utility": "power"}
+    STREET_CABINET_TRAFFIC_CONTROL = {"man_made": "street_cabinet", "street_cabinet": "traffic_control"}
     STREET_LAMP = {"highway": "street_lamp", "support": "pole"}
     SUBSTATION = {"power": "substation"}
     SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
