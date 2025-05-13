@@ -6,6 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
+
 class ClintonsGBGGIMJESpider(WPStoreLocatorSpider):
     name = "clintons_gb_gg_im_je"
     item_attributes = {"brand": "Clintons", "brand_wikidata": "Q5134299"}
