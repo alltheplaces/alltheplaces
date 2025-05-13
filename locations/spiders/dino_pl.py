@@ -37,9 +37,7 @@ class DinoPLSpider(Spider):
             raise RuntimeError("Could not extract encrypted store data, AES-256-GCM key and IV.")
 
         aesgcm = AESGCM(bytes.fromhex(key))
-        geojson = json.loads(
-            aesgcm.decrypt(bytes.fromhex(iv), bytes.fromhex(encrypted_data), None).decode("utf-8")
-        )
+        geojson = json.loads(aesgcm.decrypt(bytes.fromhex(iv), bytes.fromhex(encrypted_data), None).decode("utf-8"))
         for location in geojson["features"]:
             item = DictParser.parse(location["properties"])
             item["geometry"] = location["geometry"]
