@@ -3,8 +3,6 @@ import re
 import scrapy
 
 from locations.categories import Categories
-
-# from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -25,7 +23,6 @@ class CharlesClinkardGBSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse_store(self, response):
-        # oh = OpeningHours()
         map_data = response.xpath('//script[contains(text(), "google.maps.LatLng")]/text()').extract_first()
         coordinates = re.search(r"var myLatlng = new google\.maps\.LatLng\((.*)\)", map_data).group(1)
         lat, lon = coordinates.split(",")
@@ -43,6 +40,5 @@ class CharlesClinkardGBSpider(scrapy.Spider):
             "website": response.url,
             "lat": lat,
             "lon": lon,
-            # "opening_hours": oh.as_opening_hours(),
         }
         yield Feature(**properties)
