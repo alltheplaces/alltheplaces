@@ -1,5 +1,5 @@
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_EN, DAYS_FULL
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
@@ -30,7 +30,11 @@ class CaptainDUSSpider(Where2GetItSpider):
             if not location.get("{}_open".format(day_name.lower())):
                 item["opening_hours"].set_closed(DAYS_EN[day_name])
             else:
-                item["opening_hours"].add_range(DAYS_EN[day_name], location["{}_open".format(day_name.lower())], location["{}_close".format(day_name.lower())])
+                item["opening_hours"].add_range(
+                    DAYS_EN[day_name],
+                    location["{}_open".format(day_name.lower())],
+                    location["{}_close".format(day_name.lower())],
+                )
 
         apply_category(Categories.FAST_FOOD, item)
         yield item
