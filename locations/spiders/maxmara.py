@@ -1,9 +1,11 @@
+from typing import Any, Iterable
+
 import chompjs
 import scrapy
 from geonamescache import GeonamesCache
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -18,13 +20,13 @@ class MaxmaraSpider(scrapy.Spider):
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         for country_code in self.gc.get_countries().keys():
             yield JsonRequest(
                 url=f"https://us.maxmara.com/store-locator?listJson=true&withoutRadius=false&country={country_code}"
             )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         stores = chompjs.parse_js_object(response.text).get("features", [])
         for store in stores:
             if not store.get("storeHidden"):
@@ -43,6 +45,6 @@ class MaxmaraSpider(scrapy.Spider):
                 item["opening_hours"] = oh
 
                 apply_category(Categories.SHOP_CLOTHES, item)
-                apply_category({"clothes": "women"}, item)
+                apply_clothes([Clothes.WOMEN], item)
 
                 yield item
