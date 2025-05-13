@@ -1,6 +1,9 @@
 import re
+from typing import Any
 
+import chompjs
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.items import Feature
 
@@ -14,8 +17,8 @@ class VivacomBGSpider(Spider):
     }
     start_urls = ["https://www.vivacom.bg/bg/stores/xhr?method=getJSON"]
 
-    def parse(self, response):
-        for store in response.json():
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in chompjs.parse_js_object(response.text):  # Sometimes server sends JSON embedded within HTML
             if "partners" in store["store_img"]:
                 continue
 
