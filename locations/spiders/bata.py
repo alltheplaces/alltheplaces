@@ -22,9 +22,7 @@ class BataSpider(JSONBlobSpider):
         "https://www.bata.com/on/demandware.store/Sites-bata-th-Site/en_TH/Stores-FindStores",
     ]
     user_agent = FIREFOX_LATEST
-
-    def extract_json(self, response: Response) -> dict | list:
-        return response.json()["stores"]
+    locations_key = "stores"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = None
