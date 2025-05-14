@@ -1,11 +1,9 @@
 import re
 from typing import Iterable
 
-import scrapy
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.google_url import url_to_coords
 from locations.hours import DAYS_BR, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
