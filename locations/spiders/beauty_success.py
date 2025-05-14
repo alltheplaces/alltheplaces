@@ -12,7 +12,6 @@ class BeautySuccessSpider(JSONBlobSpider):
     start_urls = ["https://www.beautysuccess.fr/storelocator/stockist/ajax"]
     locations_key = "store"
 
-
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = ", ".join(filter(None, [feature.get("address"), feature.get("address2")]))
         item["ref"] = feature["store_code"]
