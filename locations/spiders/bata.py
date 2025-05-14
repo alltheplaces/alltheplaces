@@ -1,10 +1,3 @@
-from typing import Any
-
-from scrapy import Spider
-from scrapy.http import Response
-
-from locations.dict_parser import DictParser
-from locations.user_agents import FIREFOX_LATEST
 from typing import Iterable
 
 from scrapy.http import Response
@@ -12,6 +5,8 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.user_agents import FIREFOX_LATEST
+
 
 class BataSpider(JSONBlobSpider):
     name = "bata"
