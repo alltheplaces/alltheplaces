@@ -6,7 +6,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import FIREFOX_LATEST
 
 
 class PrimarkSpider(SitemapSpider, StructuredDataSpider):
@@ -34,7 +34,7 @@ class PrimarkSpider(SitemapSpider, StructuredDataSpider):
         (r"/sk-sk/stores/[^/]+/[^/]+$", "parse"),
         (r"/en-us/stores/[^/]+/[^/]+$", "parse"),
     ]
-    user_agent = BROWSER_DEFAULT
+    user_agent = FIREFOX_LATEST
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
