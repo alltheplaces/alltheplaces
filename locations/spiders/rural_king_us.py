@@ -167,47 +167,23 @@ class RuralKingUSSpider(scrapy.Spider):
     allowed_domains = ["ruralking.com"]
     download_delay = 1.0  # Be nice to their servers
     
-    # Use predetermined points in states with Rural King locations
-    # These are geographic centers of states where Rural King operates
-    api_urls = [
-        # Indiana (Indianapolis)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/39.7684/longitude/-86.1581?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Ohio (Columbus)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/39.9612/longitude/-82.9988?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Illinois (Springfield)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/39.7817/longitude/-89.6501?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Kentucky (Frankfort)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/38.1970/longitude/-84.8630?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Tennessee (Nashville) 
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/36.1627/longitude/-86.7816?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Michigan (Lansing)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/42.7325/longitude/-84.5555?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Missouri (Jefferson City)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/38.5767/longitude/-92.1735?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Florida (Tallahassee)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/30.4383/longitude/-84.2807?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Georgia (Atlanta)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/33.7490/longitude/-84.3880?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Alabama (Montgomery)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/32.3792/longitude/-86.3077?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # North Carolina (Raleigh)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/35.7796/longitude/-78.6382?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Pennsylvania (Harrisburg)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/40.2732/longitude/-76.8867?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # Virginia (Richmond)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/37.5407/longitude/-77.4360?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-        # West Virginia (Charleston)
-        "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/38.3498/longitude/-81.6326?radius=250&radiusUOM=SMI&siteLevelStoreSearch=false",
-    ]
-    
     def start_requests(self):
         # Check if a specific URL was passed for testing
         if hasattr(self, 'url') and self.url:
             yield scrapy.Request(self.url, callback=self.parse_api)
         else:
-            # Use all predefined URLs
-            for url in self.api_urls:
-                yield scrapy.Request(url, callback=self.parse_api)
+            # Use searchable points to query for stores
+            # This approach allows for complete coverage across the US
+            # and accommodates future expansion to new regions
+            
+            with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points_file:
+                next(points_file)  # Skip the header
+                for point in points_file:
+                    _, lat, lon = point.strip().split(",")
+                    
+                    # Use a 100-mile radius to ensure good coverage while reducing API requests
+                    search_url = f"https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/{lat}/longitude/{lon}?radius=100&radiusUOM=SMI&siteLevelStoreSearch=false"
+                    yield scrapy.Request(search_url, callback=self.parse_api)
     
     def parse_api(self, response):
         try:
