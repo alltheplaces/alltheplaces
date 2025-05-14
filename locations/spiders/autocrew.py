@@ -14,9 +14,7 @@ class AutocrewSpider(JSONBlobSpider):
     start_urls = [
         "https://cm.emea.dxtservice.com/api/locator/findClosest?strategicClusterLevel2=117&longitude=10.176&latitude=51.068&searchRadius=100000&pageSize=200000"
     ]
-
-    def extract_json(self, response: Response) -> dict | list:
-        return response.json()["data"]
+    locations_key = "data"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["customerNumber"]
