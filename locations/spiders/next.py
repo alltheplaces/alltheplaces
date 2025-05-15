@@ -5,9 +5,8 @@ from scrapy import FormRequest, Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
-from locations.pipelines.address_clean_up import clean_address
 from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class NextSpider(Spider):
@@ -53,9 +52,7 @@ class NextSpider(Spider):
 
     def parse_country(self, response, **kwargs):
         for city in response.xpath("//option/@value").getall():
-            yield Request(
-                url=f"https://stores.next.co.uk/stores/single/{city}", callback=self.parse_location
-            )
+            yield Request(url=f"https://stores.next.co.uk/stores/single/{city}", callback=self.parse_location)
 
     def parse_location(self, response, **kwargs):
         if data := response.xpath('//script[contains(.,"window.lctr.single_search")]/text()').re_first(
