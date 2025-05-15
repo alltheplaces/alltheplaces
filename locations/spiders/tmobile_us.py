@@ -24,4 +24,5 @@ class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
         item["image"] = (
             ld_data["image"].split("(webp)")[1].strip("/") if "(webp)" in ld_data["image"] else ld_data["image"]
         )
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
