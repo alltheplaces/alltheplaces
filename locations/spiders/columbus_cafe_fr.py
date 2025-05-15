@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class ColumbusCafeFRSpider(JSONBlobSpider):
-    name = "columbuscafe_fr"
+    name = "columbus_cafe_fr"
     item_attributes = {"brand": "Columbus Café & Co", "brand_wikidata": "Q2984582"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://www.columbuscafe.com/wp/wp-admin/admin-ajax.php?action=storelocator"]
