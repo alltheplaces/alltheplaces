@@ -60,7 +60,7 @@ class JSONBlobSpider(Spider):
     locations_key: str | list[str] = None
     needs_json_request = False
 
-    def start_requests(self) -> Iterable[Request]:
+    def start_requests(self) -> Iterable[JsonRequest | Request]:
         if self.needs_json_request:
             for url in self.start_urls:
                 yield JsonRequest(url)
@@ -68,7 +68,7 @@ class JSONBlobSpider(Spider):
             for url in self.start_urls:
                 yield Request(url)
 
-    def extract_json(self, response: Response) -> dict | list:
+    def extract_json(self, response: Response) -> dict | list[dict]:
         """
         Override this method to extract the main JSON content from the page. The default
         behaviour is to treat the returned body as JSON and treat it as an array of
@@ -104,12 +104,16 @@ class JSONBlobSpider(Spider):
 
     def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
+            if feature is None:
+                continue
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
             yield from self.post_process_item(item, response, feature) or []
 
     def parse_feature_dict(self, response: Response, feature_dict: dict) -> Iterable[Feature]:
         for feature_id, feature in feature_dict.items():
+            if feature is None:
+                continue
             if not feature.get("id"):
                 feature["id"] = feature_id
             else:

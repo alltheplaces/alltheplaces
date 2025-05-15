@@ -11,7 +11,7 @@ class NoahsNyBagelsSpider(scrapy.Spider):
     """Copy of Einstein Bros. Bagels - all brands of the same parent company Coffee & Bagels"""
 
     name = "noahs_ny_bagels"
-    item_attributes = {"brand": "Noah's New York Bagels", "brand_wikidata": "Q64517373"}
+    item_attributes = {"brand": "Noah's Bagels", "brand_wikidata": "Q64517373"}
     allowed_domains = ["noahs.com"]
     start_urls = ("https://locations.noahs.com/us",)
 

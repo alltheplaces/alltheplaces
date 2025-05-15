@@ -25,7 +25,7 @@ class MisensoCHSpider(Spider):
 
             item["website"] = item["extras"]["website:de"] = location["page_link_de"]
             item["extras"]["website:fr"] = location["page_link_fr"]
-            item["extras"]["ref:google"] = location["place_id"]
+            item["extras"]["ref:google:place_id"] = location["place_id"]
 
             item["opening_hours"] = OpeningHours()
             for day, times in location["amparex"]["opening_hours"].items():

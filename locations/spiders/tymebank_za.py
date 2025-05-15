@@ -27,7 +27,7 @@ class TymebankZASpider(LocationBankSpider):
     brand_name_regex = re.compile(r"^(" + "|".join(located_in_brands) + r") ", re.IGNORECASE)
 
     def post_process_item(self, item, response, location):
-        apply_category(Categories.VENDING_MACHINE_GENERIC, item)
+        apply_category(Categories.VENDING_MACHINE, item)
         item.pop("website")
         item["branch"] = item["branch"].removeprefix("Kiosk ")
 

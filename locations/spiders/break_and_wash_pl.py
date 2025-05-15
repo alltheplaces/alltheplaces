@@ -4,7 +4,7 @@ from typing import Any
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -35,6 +35,7 @@ class BreakAndWashPLSpider(Spider):
 
             item["extras"]["access"] = ACCESS_MAP.get(colour)
 
-            apply_category({"amenity": "vending_machine", "vending": "laundry"}, item)
+            apply_category(Categories.VENDING_MACHINE, item)
+            add_vending(Vending.LAUNDRY, item)
 
             yield item

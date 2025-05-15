@@ -8,7 +8,7 @@ from locations.storefinders.wp_go_maps import WpGoMapsSpider
 class TacototeSpider(SitemapSpider, WpGoMapsSpider):
     name = "tacotote"
     item_attributes = {
-        "brand": "El Taco Tote",
+        "brand": "Tacotote",
         "brand_wikidata": "Q16992316",
         "extras": Categories.RESTAURANT.value,
     }

@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -9,11 +9,7 @@ from locations.items import Feature
 
 class UspsSpider(scrapy.Spider):
     name = "usps"
-    item_attributes = {
-        "brand": "United States Postal Service",
-        "brand_wikidata": "Q668687",
-        "extras": Categories.POST_OFFICE.value,
-    }
+    item_attributes = {"operator": "United States Postal Service", "operator_wikidata": "Q668687"}
 
     def start_requests(self):
         for lat, lon in point_locations("us_centroids_25mile_radius.csv"):
@@ -36,13 +32,17 @@ class UspsSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for store in response.json().get("locations", []):
+            if zip4 := store.get("zip4"):
+                postcode = store["zip5"] + "-" + zip4
+            else:
+                postcode = store["zip5"]
             properties = {
                 "ref": store["locationID"],
                 "name": store["locationName"],
                 "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
-                "postcode": store["zip5"] + "-" + store["zip4"],
+                "postcode": postcode,
                 "country": "US",
                 "lat": store["latitude"],
                 "lon": store["longitude"],
@@ -52,5 +52,7 @@ class UspsSpider(scrapy.Spider):
                 if service["name"] == "BUSINESS":
                     properties["opening_hours"] = self.parse_hours(service["dailyHoursList"])
                     break
+
+            apply_category(Categories.POST_OFFICE, properties)
 
             yield Feature(**properties)

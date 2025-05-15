@@ -1,36 +1,22 @@
 import re
 
-from scrapy.http import JsonRequest
-
 from locations.categories import Categories, Drink, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import SocialMedia, set_social_media
-from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.where2getit import Where2GetItSpider
 
 branch_code_re = re.compile(r"(BG|GK|DH)[ +]*\d{3}$")
 
 
-class DogHausUSSpider(JSONBlobSpider):
+class DogHausUSSpider(Where2GetItSpider):
     name = "dog_haus_us"
     item_attributes = {"brand": "Dog Haus", "brand_wikidata": "Q105529843"}
-    locations_key = ["response", "collection"]
+    api_endpoint = "https://locations.doghaus.com/rest/getlist"
+    api_key = "F9C9435A-1156-11EF-972B-1BEEB43C2251"
 
-    def start_requests(self):
-        yield JsonRequest(
-            "https://locations.doghaus.com/rest/locatorsearch",
-            data={
-                "request": {
-                    "appkey": "F9C9435A-1156-11EF-972B-1BEEB43C2251",
-                    "formdata": {"geolocs": {"geoloc": [{"latitude": 45, "longitude": -104}]}, "searchradius": "24902"},
-                }
-            },
-        )
-
-    def post_process_item(self, item, response, location):
+    def parse_item(self, item, location):
         item["ref"] = branch_code_re.search(item["name"]).group()
         item["branch"] = item.pop("name").removeprefix("DH-").removesuffix(item["ref"]).strip()
-        item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
         item["lat"] = location["latitude"]
         item["lon"] = location["longitude"]
         item["image"] = location["asset"]["Store Image 1"]["Image URL"]
@@ -94,20 +80,21 @@ class DogHausUSSpider(JSONBlobSpider):
         ):
             apply_yes_no(Extras.WHEELCHAIR_LIMITED, item, True)
 
-        cards = set(attributes["pay_credit_card_types_accepted"])
+        cards = set(attributes.get("pay_credit_card_types_accepted", []))
         apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "american_express" in cards)
         apply_yes_no(PaymentMethods.DINERS_CLUB, item, "diners_club" in cards)
         apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "discover" in cards)
         apply_yes_no(PaymentMethods.VISA, item, "visa" in cards)
         apply_yes_no(PaymentMethods.MASTER_CARD, item, "mastercard" in cards)
         cards.difference_update({"american_express", "discover", "visa", "mastercard", "diners_club"})
-        assert cards == set(), cards
+        for unknown_card in cards:
+            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_card/{unknown_card}")
 
-        item["extras"]["website:menu"] = attributes["url_menu"]
-        item["extras"]["website:orders"] = attributes["url_order_ahead"]
+        item["extras"]["website:menu"] = attributes.get("url_menu")
+        item["extras"]["website:orders"] = attributes.get("url_order_ahead")
         item["extras"]["website:booking"] = attributes.get("url_reservations")
 
-        if attributes["has_catering"] == "yes":
+        if attributes.get("has_catering") == "yes":
             apply_category(Categories.CRAFT_CATERER, item)
 
         yield item

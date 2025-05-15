@@ -31,9 +31,12 @@ def parse_opening_hours(times: dict, key: str) -> str | None | OpeningHours:
     if not times[key]:
         return None
     oh = OpeningHours()
-    oh.add_days_range(DAYS[0:4], times[key]["weekdays"]["open"], times[key]["weekdays"]["close"])
-    oh.add_range(DAYS[5], times[key]["saturday"]["open"], times[key]["saturday"]["close"])
-    oh.add_range(DAYS[6], times[key]["sunday"]["open"], times[key]["sunday"]["close"])
+    if weekdays := times[key].get("weekdays"):
+        oh.add_days_range(DAYS[0:4], weekdays["open"], weekdays["close"])
+    if saturday := times[key].get("saturday"):
+        oh.add_range(DAYS[5], saturday["open"], saturday["close"])
+    if sunday := times[key].get("sunday"):
+        oh.add_range(DAYS[6], sunday["open"], sunday["close"])
 
     return oh
 

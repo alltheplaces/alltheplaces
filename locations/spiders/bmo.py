@@ -10,8 +10,8 @@ from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
 from locations.spiders.food_city_southeast_us import FoodCitySoutheastUSSpider
-from locations.spiders.giant_food import GiantFoodSpider
 from locations.spiders.giant_food_stores import GiantFoodStoresSpider
+from locations.spiders.giant_food_us import GiantFoodUSSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
 from locations.spiders.h_e_b_us import HEBUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
@@ -122,8 +122,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = KROGER_BRANDS["https://www.frysfood.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.frysfood.com/"]["brand_wikidata"]
             elif item["name"] == "Giant Food":
-                item["located_in"] = GiantFoodSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = GiantFoodSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = GiantFoodUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = GiantFoodUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Giant Food Store" or item["name"] == "Giant Food Stores":
                 item["located_in"] = GiantFoodStoresSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = GiantFoodStoresSpider.item_attributes["brand_wikidata"]

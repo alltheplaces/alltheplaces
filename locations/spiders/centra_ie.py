@@ -17,11 +17,10 @@ class CentraIESpider(Spider):
             item["name"] = location.xpath('.//h4[@class="shop-title"]/text()').get()
             item["addr_full"] = location.xpath('.//p[@class="shop-address"]/text()').get()
             item["phone"] = location.xpath('.//li[@class="call"]/a/@href').get().replace("tel:", "")
-            item["lat"], item["lon"] = (
-                location.xpath('.//li[@class="directions"]/a/@onclick')
-                .re_first(r"\((-?\d+\.\d+,\s-?\d+\.\d+)\);")
-                .split(", ")
-            )
+            if location_data := location.xpath('.//li[@class="directions"]/a/@onclick').re_first(
+                r"\((-?\d+\.\d+,\s-?\d+\.\d+)\);"
+            ):
+                item["lat"], item["lon"] = location_data.split(", ")
 
             apply_category(Categories.SHOP_CONVENIENCE, item)
 
