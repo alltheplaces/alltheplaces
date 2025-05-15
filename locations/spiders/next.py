@@ -51,9 +51,7 @@ class NextSpider(Spider):
     def parse_country(self, response, **kwargs):
         for city in response.xpath("//option/@value").getall():
             yield Request(
-                url=f"https://stores.next.co.uk/stores/single/{city}",
-                callback=self.parse_location,
-                dont_filter=True
+                url=f"https://stores.next.co.uk/stores/single/{city}", callback=self.parse_location, dont_filter=True
             )
 
     def parse_location(self, response, **kwargs):
