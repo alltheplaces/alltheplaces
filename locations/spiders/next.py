@@ -16,7 +16,8 @@ class NextSpider(Spider):
     PINK = {"brand": "Pink", "brand_wikidata": "Q20716793"}
     item_attributes = NEXT
     start_urls = ["https://www.next.co.uk/countryselect"]
-
+    handle_httpstatus_all = True
+    
     @staticmethod
     def get_time(time: str) -> str:
         if len(time) == 3:
