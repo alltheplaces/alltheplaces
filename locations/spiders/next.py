@@ -17,7 +17,7 @@ class NextSpider(Spider):
     item_attributes = NEXT
     start_urls = ["https://www.next.co.uk/countryselect"]
     handle_httpstatus_all = True
-    
+
     @staticmethod
     def get_time(time: str) -> str:
         if len(time) == 3:
