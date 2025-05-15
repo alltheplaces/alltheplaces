@@ -4,9 +4,10 @@ import re
 from scrapy import FormRequest, Request, Spider
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.linked_data_parser import LinkedDataParser
+from locations.hours import DAYS_EN, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
+from locations.linked_data_parser import LinkedDataParser
+from locations.microdata_parser import MicrodataParser
 
 
 class NextSpider(Spider):
@@ -52,7 +53,9 @@ class NextSpider(Spider):
 
     def parse_country(self, response, **kwargs):
         for city in response.xpath("//option/@value").getall():
-            yield Request(url=f"https://stores.next.co.uk/stores/single/{city}", callback=self.parse_location)
+            yield Request(
+                url=f"https://stores.next.co.uk/stores/single/{city}", callback=self.parse_location
+            )
 
     def parse_location(self, response, **kwargs):
         if data := response.xpath('//script[contains(.,"window.lctr.single_search")]/text()').re_first(
@@ -91,4 +94,22 @@ class NextSpider(Spider):
         elif data := response.xpath('//script[@type="application/ld+json"]/text()').get():
             location = json.loads(data)
             item = LinkedDataParser.parse_ld(location)
+            item["ref"] = location["url"].split("/")[-1]
+            item["branch"] = item.pop("name")
+            oh = OpeningHours()
+            for opening_hour in location["openingHoursSpecification"]:
+                if "opens" in opening_hour:
+                    oh.add_range(
+                        DAYS_EN[opening_hour["dayOfWeek"]],
+                        opening_hour["opens"][0:5],
+                        opening_hour["closes"][0:5],
+                    )
+                    item["opening_hours"] = oh
+            if re.search(r"Victoria'?s Secret", item["branch"]):
+                if "PINK" in item["branch"]:
+                    item.update(self.PINK)
+                else:
+                    item.update(self.VICTORIAS_SECRET)
+            # else normal store
+
             yield item
