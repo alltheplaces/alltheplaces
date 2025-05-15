@@ -6,7 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -27,13 +27,14 @@ class OttosCHSpider(scrapy.Spider):
             item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
             item["opening_hours"] = OpeningHours()
             for day_time in store["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
-                day = sanitise_day(day_time["weekDay"], DAYS_DE)
                 if day_time["closed"] == "true":
-                    item["opening_hours"].set_closed(day)
+                    item["opening_hours"].set_closed(day_time["weekDay"])
                 else:
-                    open_time = day_time["openingTime"]["formattedHour"]
-                    close_time = day_time["closingTime"]["formattedHour"]
-                    item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+                    item["opening_hours"].add_range(
+                        day_time["weekDay"],
+                        day_time["openingTime"]["formattedHour"],
+                        day_time["closingTime"]["formattedHour"],
+                    )
 
             if store["displayName"].startswith("OTTO'S Beauty Shop "):
                 item["branch"] = store["displayName"].removeprefix("OTTO'S Beauty Shop ")
