@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CoCoIchibanyaSpider(JSONBlobSpider):
+class CocoIchibanyaSpider(JSONBlobSpider):
     name = "coco_ichibanya"
     item_attributes = {"brand": "CoCo Ichibanya", "brand_wikidata": "Q5986105"}
     start_urls = ["https://worldwide.ichibanya.co.jp/api/point/w/"]
