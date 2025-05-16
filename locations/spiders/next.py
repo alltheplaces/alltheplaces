@@ -93,6 +93,10 @@ class NextSpider(Spider):
             item = LinkedDataParser.parse_ld(location)
             item["ref"] = location["url"].split("/")[-1]
             item["branch"] = item.pop("name")
+            item["street_address"] = location["address"]["streetAddress"]
+            item["city"] = location["address"]["addressLocality"]
+            item["postcode"] = location["address"]["postalCode"]
+            item["country"] = location["address"]["addressCountry"]
             oh = OpeningHours()
             for opening_hour in location["openingHoursSpecification"]:
                 if "opens" in opening_hour:
