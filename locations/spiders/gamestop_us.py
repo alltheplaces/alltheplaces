@@ -26,6 +26,7 @@ class GamestopUSSpider(Spider):
     ]
     is_playwright_spider = True
     custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True  # Data centre IP ranges appear to be blocked.
 
     def start_requests(self):
         for coordinates in country_iseadgg_centroids(["US"], 458):
