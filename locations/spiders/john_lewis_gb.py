@@ -14,6 +14,7 @@ class JohnLewisGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.johnlewis.com/shops-services.xml"]
     sitemap_rules = [("/our-shops/", "parse_sd")]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["name"] = None

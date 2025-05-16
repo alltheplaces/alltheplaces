@@ -30,18 +30,13 @@ class TheBarMethodCAUSSpider(Spider):
 
         match = re.match(r"^([^,]*), (\w{2}) *(\d{5})?$", infos[1])
         if match is not None:
-            # US
-            city = match.group(1).strip()
-            state = match.group(2).strip()
-            postcode = match.group(3).strip() if len(match.groups()) > 2 else None
             country = "US"
         else:
-            # CA
             match = re.match(r"^([^,]*), (\w{2}) *(\w{3} \w{3})?$", infos[1])
-            city = match.group(1).strip()
-            state = match.group(2).strip()
-            postcode = match.group(3).strip() if len(match.groups()) > 2 else None
             country = "CA"
+        city = match.group(1)
+        state = match.group(2)
+        postcode = match.group(3) if len(match.groups()) > 2 else None
 
         email = infos[2]
         phone = infos[3]

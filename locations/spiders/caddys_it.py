@@ -24,7 +24,7 @@ class CaddysITSpider(JSONBlobSpider):
         # some stores are defined with wrong country code (DE/US), even if they're all in Italy
         if "countryCode" in location:
             del location["countryCode"]
-        # stateCode is unuseful, mostly 'Italia' or empty
+        # stateCode is not useful, mostly 'Italia' or empty
         if "stateCode" in location:
             del location["stateCode"]
 
