@@ -54,6 +54,10 @@ class IcelandFoodsSpider(Spider):
                 else:
                     item["opening_hours"].add_range(rule["day"], rule["open"], rule["close"], "%I:%M%p")
 
+            item["website"] = (
+                f'https://www.iceland.co.uk/store-finder/store?StoreID={item["ref"]}&StoreName={item["branch"].replace(" ", "-")}'
+            )
+
             yield item
 
         if next_page := response.json().get("next"):
