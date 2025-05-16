@@ -40,6 +40,9 @@ class RealCanadianSuperstoreCASpider(scrapy.Spider):
 
         item["opening_hours"] = OpeningHours()
         for rule in location["storeDetails"]["storeHours"]:
-            item["opening_hours"].add_range(rule["day"], *rule["hours"].split(" - "), time_format="%I:%M %p")
+            if "CLOSED" in rule.get("hours"):
+                item["opening_hours"].set_closed(rule["day"])
+            else:
+                item["opening_hours"].add_range(rule["day"], *rule["hours"].split(" - "), time_format="%I:%M %p")
 
         yield item

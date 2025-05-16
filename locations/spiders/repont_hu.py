@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import JsonRequest, Request
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -24,5 +24,6 @@ class RepontHUSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["name"] = None
         item["street_address"] = item.pop("addr_full")
-        apply_category(Categories.VENDING_MACHINE_BOTTLE_RETURN, item)
+        apply_category(Categories.VENDING_MACHINE, item)
+        add_vending(Vending.BOTTLE_RETURN, item)
         yield item

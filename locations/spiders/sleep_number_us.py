@@ -1,28 +1,58 @@
-from scrapy import Spider
+from typing import Any
 
-from locations.categories import Categories
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.geo import country_iseadgg_centroids
+from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SleepNumberUSSpider(Spider):
     name = "sleep_number_us"
-    item_attributes = {"brand_wikidata": "Q7447640", "brand": "Sleep Number", "extras": Categories.SHOP_BED.value}
-    start_urls = [
-        "https://www.sleepnumber.com/api/storefront/store-locations?lat=42.8473561&lng=-106.26166833&limit=10000&radius=25000"
-    ]
+    item_attributes = {"brand": "Sleep Number", "brand_wikidata": "Q7447640"}
+    custom_settings = {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_TIMEOUT": 90,
+        "CONCURRENT_REQUESTS": 1,
+        "RETRY_TIMES": 5,
+        "DOWNLOAD_DELAY": 3,
+    }
 
-    def parse(self, response):
+    def start_requests(self):
+        for lat, lon in country_iseadgg_centroids("US", 458):
+            yield JsonRequest(
+                url="https://www.sleepnumber.com/api/storefront/store-locations?lat={}&lng={}&limit=100&radius=300".format(
+                    lat, lon
+                )
+            )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["entities"]:
             item = DictParser.parse(store)
             item["ref"] = store["cid"]
             item["website"] = store["c_storePagesURLURL"]
+            item["extras"]["ref:google:place_id"] = store.get("googlePlaceId")
 
-            item["opening_hours"] = OpeningHours()
-            for day_name, day_hours in store.get("hours", {}).items():
-                if not isinstance(day_hours, dict) or day_hours.get("isClosed") or day_name.title() not in DAYS_FULL:
-                    continue
-                for time_period in day_hours["openIntervals"]:
-                    item["opening_hours"].add_range(day_name.title(), time_period["start"], time_period["end"])
+            try:
+                item["opening_hours"] = self.parse_opening_hours(store.get("hours", {}))
+            except:
+                self.logger.error("Error parsing opening hours")
+
+            apply_category(Categories.SHOP_BED, item)
 
             yield item
+
+    def parse_opening_hours(self, hours: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day_name, day_hours in hours.items():
+            if not day_hours:
+                continue
+            if day_hours.get("isClosed"):
+                oh.set_closed(day_name)
+            else:
+                for time_period in day_hours["openIntervals"]:
+                    oh.add_range(day_name, time_period["start"], time_period["end"])
+        return oh
