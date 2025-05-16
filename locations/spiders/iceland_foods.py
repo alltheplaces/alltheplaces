@@ -4,6 +4,7 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -45,6 +46,13 @@ class IcelandFoodsSpider(Spider):
                 item["country"] = "IE"
             else:
                 item["country"] = "GB"
+
+            item["opening_hours"] = OpeningHours()
+            for rule in store.get("c_storeHoursJson", []):
+                if rule["open"].upper() == "CLOSED":
+                    item["opening_hours"].set_closed(rule["day"])
+                else:
+                    item["opening_hours"].add_range(rule["day"], rule["open"], rule["close"], "%I:%M%p")
 
             yield item
 
