@@ -14,26 +14,25 @@ class EuromasterNLSpider(scrapy.Spider):
     def parse(self, response):
         regions = response.xpath('//*[@class="list-province w-100"]//@href').getall()
         for region in regions:
-            yield scrapy.Request(url="https://www.euromaster.nl" + region, callback=self.parse_region)
+            yield scrapy.Request(url=region, callback=self.parse_region)
 
     def parse_region(self, response):
         cities = response.xpath('//*[@class="list-province w-100"]//@href').getall()
         for city in cities:
-            yield scrapy.Request(url="https://www.euromaster.nl" + city, callback=self.parse_city)
+            yield scrapy.Request(url=city, callback=self.parse_city)
 
     def parse_city(self, response):
         shops = set(response.xpath("//a[text()='Meer informatie']/@href").getall())
         for shop in shops:
-            yield scrapy.Request(url="https://www.euromaster.nl" + shop, callback=self.parse_shop)
+            yield scrapy.Request(url=shop, callback=self.parse_shop)
 
     def parse_shop(self, response):
         data = json.loads(response.xpath('//*[@type="application/ld+json"]/text()').get())
         if not data["name"].startswith("Euromaster"):
             return
         item = Feature()
-        item["ref"] = data["url"]
+        item["ref"] = item["website"] = response.url
         item["name"] = data["name"]
-        item["website"] = data["url"]
         item["phone"] = data["telephone"]
         item["street_address"] = data["address"]["streetAddress"]
         item["postcode"] = data["address"]["postalCode"]
