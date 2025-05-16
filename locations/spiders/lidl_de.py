@@ -1,6 +1,8 @@
 import re
 
-from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from scrapy import Selector
+
+from locations.hours import CLOSED_DE, DAYS_DE, OpeningHours, sanitise_day
 from locations.spiders.lidl_gb import LidlGBSpider
 from locations.storefinders.virtualearth import VirtualEarthSpider
 
@@ -14,12 +16,23 @@ class LidlDESpider(VirtualEarthSpider):
     api_key = "AnTPGpOQpGHsC_ryx9LY3fRTI27dwcRWuPrfg93-WZR2m-1ax9e9ghlD4s1RaHOq"
 
     def parse_item(self, item, feature, **kwargs):
-        item["opening_hours"] = OpeningHours()
-        for day, start_time, end_time in re.findall(
-            r"(\w{2} ?- ?\w{2}|\w{2}) (\d{2}:\d{2})\*?-(\d{2}:\d{2})",
-            feature["OpeningTimes"],
-        ):
-            if day := sanitise_day(day, DAYS_DE):
-                item["opening_hours"].add_range(day, start_time, end_time)
+        try:
+            oh = OpeningHours()
+            days = Selector(text=feature["OpeningTimes"])
+            for day_text in days.xpath("//text()").getall():
+                day_text = re.sub(r"\s+", " ", day_text).strip()
+                if not day_text:
+                    continue
+                day_name, hours_text = day_text.split(" ", 1)
+                day_name = sanitise_day(day_name, DAYS_DE)
+
+                if hours_text.lower() in CLOSED_DE:
+                    oh.set_closed(day_name)
+                else:
+                    open_time, close_time = hours_text.split("-")
+                    oh.add_range(day_name, open_time, close_time)
+            item["opening_hours"] = oh
+        except ValueError:
+            self.crawler.stats.inc_value(f"atp/{self.name}/hours/fail")
 
         yield item

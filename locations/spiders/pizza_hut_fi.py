@@ -23,7 +23,7 @@ class PizzaHutFISpider(JSONBlobSpider):
         item["branch"] = item["extras"]["branch:fi"] = feature["title"]["fi_FI"].removeprefix("PIZZA HUT ")
         item["country"] = feature["address"]["countryCode"]
         item["addr_full"] = feature["address"]["formatted"]
-        item["city"] = feature["address"]["city"]
+        item["city"] = feature["address"].get("city")
         item["lat"] = feature["address"]["latLng"]["lat"]
         item["lon"] = feature["address"]["latLng"]["lng"]
         item["phone"] = feature["contact"]["phone"]

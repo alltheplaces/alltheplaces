@@ -25,6 +25,8 @@ class BccITSpider(JSONBlobSpider):
         if location["TIPO"] == "FILIALE":
             apply_category(Categories.BANK, item)
             item["extras"]["atm"] = location["BANCOMAT"]
+            if item["extras"]["atm"] in ["True", True]:
+                item["extras"]["atm"] = "yes"
         elif location["TIPO"] == "BANCOMAT":
             apply_category(Categories.ATM, item)
         else:
@@ -34,6 +36,8 @@ class BccITSpider(JSONBlobSpider):
         item["name"] = location["DENOMINAZIONE"]
         item["branch"] = location["NOME_SPORTELLO"]
         item["extras"]["wheelchair"] = location["ACCESSO_DISABILI"]
+        if item["extras"]["wheelchair"] in ["True", True]:
+            item["extras"]["wheelchair"] = "yes"
 
         if opening := location["ORARIO_APERTURA"]:
             times = " ".join(Selector(text=opening).css("*::text").getall())
