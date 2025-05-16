@@ -1,16 +1,15 @@
-from json import loads
 import re
+from json import loads
 
 from scrapy import Spider
 from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
 
 GAMESTOP_SHARED_ATTRIBUTES = {
     "brand": "GameStop",
@@ -22,7 +21,9 @@ class GamestopUSSpider(Spider):
     name = "gamestop_us"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     allowed_domains = ["www.gamestop.com"]
-    start_urls = ["https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?radius=900"]
+    start_urls = [
+        "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?radius=900"
+    ]
     is_playwright_spider = True
     custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
 
@@ -39,15 +40,27 @@ class GamestopUSSpider(Spider):
                 "branch": store_name_clean,
                 "lat": store["latitude"],
                 "lon": store["longitude"],
-                "street_address": re.sub(r"\bSTE ", "Suite ", merge_address_lines([store["address2"], store["address1"]]), flags=re.IGNORECASE),
+                "street_address": re.sub(
+                    r"\bSTE ",
+                    "Suite ",
+                    merge_address_lines([store["address2"], store["address1"]]),
+                    flags=re.IGNORECASE,
+                ),
                 "city": store["city"],
                 "postcode": store["postalCode"],
                 "state": store["stateCode"],
                 "phone": store["phone"],
-                "website": "https://www.gamestop.com/store/us/{}/{}/{}/{}-gamestop".format(store["stateCode"].lower(), store["city"].lower().replace(" ", "-"), store["ID"], store_name_clean.lower().replace(" ", "-")),
+                "website": "https://www.gamestop.com/store/us/{}/{}/{}/{}-gamestop".format(
+                    store["stateCode"].lower(),
+                    store["city"].lower().replace(" ", "-"),
+                    store["ID"],
+                    store_name_clean.lower().replace(" ", "-"),
+                ),
                 "opening_hours": OpeningHours(),
             }
             for day_hours in loads(store["storeOperationHours"]):
-                properties["opening_hours"].add_range(DAYS_EN[day_hours["day"]], day_hours["open"], day_hours["close"], "%H%M")
+                properties["opening_hours"].add_range(
+                    DAYS_EN[day_hours["day"]], day_hours["open"], day_hours["close"], "%H%M"
+                )
             apply_category(Categories.SHOP_VIDEO_GAMES, properties)
             yield Feature(**properties)
