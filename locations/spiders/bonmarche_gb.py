@@ -13,7 +13,7 @@ from locations.items import Feature
 
 class BonmarcheGBSpider(Spider):
     name = "bonmarche_gb"
-    item_attributes = {"brand": "Bonmarche", "brand_wikidata": "Q4942146"}
+    item_attributes = {"brand": "Bonmarché", "brand_wikidata": "Q4942146"}
 
     def start_requests(self) -> Iterable[Request]:
         country = "GB"

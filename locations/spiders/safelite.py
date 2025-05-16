@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class SafeliteSpider(SitemapSpider, StructuredDataSpider):
     name = "safelite"
-    item_attributes = {"brand": "Safelite", "brand_wikidata": "Q28797369"}
+    item_attributes = {"brand": "Safelite AutoGlass", "brand_wikidata": "Q28797369"}
     sitemap_urls = ["https://www.safelite.com/sitemap.xml"]
     sitemap_rules = [(r"/stores/", "parse_sd")]
     wanted_types = ["AutoGlass", "AutoRepair", "Service"]

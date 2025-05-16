@@ -13,11 +13,7 @@ STORELOCATOR = "https://api.gls-pakete.de/parcelshops?latitude={:0.5}&longitude=
 class GeneralLogisticsSystemsDESpider(scrapy.Spider):
     name = "general_logistics_systems_de"
     allowed_domains = ["gls-pakete.de"]
-    item_attributes = {
-        "brand": "General Logistics Systems",
-        "brand_wikidata": "Q46495823",
-        "country": "DE",
-    }
+    item_attributes = {"operator": "General Logistics Systems Germany", "operator_wikidata": "Q46495823"}
 
     def start_requests(self):
         searchable_point_files = [

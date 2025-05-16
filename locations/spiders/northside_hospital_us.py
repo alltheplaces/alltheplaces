@@ -1,17 +1,20 @@
+import chompjs
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class NorthsideHospitalUSSpider(Spider):
     name = "northside_hospital_us"
     item_attributes = {"brand": "Northside Hospital", "brand_wikidata": "Q7059745"}
-    start_urls = [
-        "https://locations-api.northside.production.merge-digital.com/api/LocationsSearch?page=1&pageSize=500&sortField=Name"
-    ]
+    start_urls = ["https://locations-api-prod.northside.com/api/LocationsSearch?&Page=1&PageSize=10"]
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     categories = {
         "Cancer Services": {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "oncology"},
@@ -42,7 +45,8 @@ class NorthsideHospitalUSSpider(Spider):
     }
 
     def parse(self, response, **kwargs):
-        for location in response.json()["data"]:
+        json_response = chompjs.parse_js_object(response.text)  # Extract JSON from HTML Response
+        for location in json_response["data"]:
             location["street_address"] = merge_address_lines([location.pop("address"), location.pop("addressLine2")])
             item = DictParser.parse(location)
             item["ref"] = location["id_string"]
@@ -58,5 +62,5 @@ class NorthsideHospitalUSSpider(Spider):
 
             yield item
 
-        if next_page := response.json()["nextPageUrl"]:
+        if next_page := json_response["nextPageUrl"]:
             yield JsonRequest(next_page.replace("pageNumber", "page"))

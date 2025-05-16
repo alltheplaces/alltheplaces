@@ -11,3 +11,8 @@ class BanfieldPetHospitalSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.banfield.com/robots.txt"]
     sitemap_rules = [(r"/locations/veterinarians/\w\w/[-\w]+/\w\w\w$", "parse_sd")]
     wanted_types = [["VeterinaryCare", "LocalBusiness"]]
+
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            entry["loc"] = entry["loc"].replace("www.prod-sitecorebf-cd.cloud-effem.com", "www.banfield.com")
+            yield entry

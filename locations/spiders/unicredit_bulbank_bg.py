@@ -26,4 +26,5 @@ class UnicreditBulbankBGSpider(JSONBlobSpider):
             for k, v in workhours.items():
                 r = v.split(" - ")
                 oh.add_range(DAYS_EN[k.title()], r[0], r[1])
+        item["street_address"] = item.pop("addr_full", None)
         yield item

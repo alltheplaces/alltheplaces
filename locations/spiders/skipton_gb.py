@@ -1,39 +1,22 @@
-import json
 from typing import Any
 
+import scrapy
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
-from locations.structured_data_spider import extract_email
+from locations.dict_parser import DictParser
 
 
-class SkiptonGBSpider(SitemapSpider):
+class SkiptonGBSpider(scrapy.Spider):
     name = "skipton_gb"
     item_attributes = {"brand": "Skipton Building Society", "brand_wikidata": "Q16931747"}
-    sitemap_urls = ["https://www.skipton.co.uk/robots.txt"]
-    sitemap_rules = [(r"/branchfinder/[^/]+$", "parse")]
+    start_urls = ["https://www.skipton.co.uk/graphql/execute.json/sbs-sites/branchFinderList"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        if response.url == "https://www.skipton.co.uk/branchfinder/branches":
-            return
-        try:
-            json_data = response.xpath('//input[@id="jsonData"]/@value').get()
-            branch = json.loads(json_data)[0]
-        except:
-            return
-
-        item = Feature()
-        item["website"] = item["ref"] = response.url
-        item["branch"] = branch["BranchName"]
-        item["lat"] = branch["BranchLatitude"]
-        item["lon"] = branch["BranchLongitude"]
-        address = response.xpath("//address/text()").extract()
-        cleaned = clean_address(address)
-        item["addr_full"] = cleaned
-        item["postcode"] = cleaned.split(", ")[-1]
-        extract_email(item, response)
-        apply_category(Categories.BANK, item)
-        yield item
+        for bank in response.json()["data"]["branchFinderList"]["items"]:
+            item = DictParser.parse(bank)
+            item["ref"] = item["website"] = bank["moreLink"]
+            item["addr_full"] = bank["address"]["plaintext"]
+            item["branch"] = item.pop("name")
+            apply_category(Categories.BANK, item)
+            yield item

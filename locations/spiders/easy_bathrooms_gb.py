@@ -18,13 +18,9 @@ class EasyBathroomsGBSpider(CrawlSpider):
     rules = [Rule(LinkExtractor(allow=r"^https:\/\/www\.easybathrooms\.com\/our-showrooms\/[^/]+$"), callback="parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        js_blob = response.xpath('//script[contains(text(), "function initMap()")]/text()').get()
-        lat, lon = js_blob.split("google.maps.LatLng(", 1)[1].split(")", 1)[0].split(", ", 1)
         properties = {
             "ref": response.url.split("/(?!$)")[-1],
             "branch": response.xpath("//h1/span[2]/text()").get(),
-            "lat": lat,
-            "lon": lon,
             "addr_full": merge_address_lines(
                 response.xpath('//div[contains(span/text(), "Find Us")]/ul/li/text()').getall()
             ),

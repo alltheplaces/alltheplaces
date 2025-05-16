@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class CostPlusWorldMarketSpider(scrapy.Spider):
     name = "cost_plus_world_market"
-    item_attributes = {"brand": "Cost Plus World Market", "brand_wikidata": "Q5174750"}
+    item_attributes = {"brand": "World Market", "brand_wikidata": "Q5174750"}
     allowed_domains = ["stores.worldmarket.com"]
     start_urls = ("https://stores.worldmarket.com/",)
 

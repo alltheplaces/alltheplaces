@@ -1,21 +1,10 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BlazePizzaSpider(scrapy.Spider):
+class BlazePizzaSpider(SitemapSpider, StructuredDataSpider):
     name = "blaze_pizza"
     item_attributes = {"brand": "Blaze Pizza", "brand_wikidata": "Q23016666"}
-    allowed_domains = ["nomnom-prod-api.blazepizza.com"]
-    start_urls = ["https://nomnom-prod-api.blazepizza.com/extras/restaurant/summary/state"]
-
-    def parse(self, response):
-        url = "https://nomnom-prod-api.blazepizza.com"
-        for data in response.json().get("data"):
-            for row in data.get("cities"):
-                yield scrapy.Request(url=f'{url}{row.get("datauri")}', callback=self.parse_store)
-
-    def parse_store(self, response):
-        item = DictParser.parse(response.json().get("data")[0].get("restaurants")[0])
-
-        yield item
+    sitemap_urls = ["https://locations.blazepizza.com/sitemap.xml"]
+    sitemap_rules = [(r"https://locations.blazepizza.com/[^/]+/[^/]+/[a-zA-z0-9-]+", "parse_sd")]

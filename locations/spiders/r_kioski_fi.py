@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class RKioskiFISpider(CrawlSpider):
     name = "r_kioski_fi"
-    item_attributes = {"brand": "R-kioski", "brand_wikidata": "Q1571400"}
+    item_attributes = {"brand": "R-Kioski", "brand_wikidata": "Q1571400"}
     start_urls = ["https://www.r-kioski.fi/kioskit/"]
     rules = [Rule(LinkExtractor(restrict_xpaths='//div[@role="main"]/*/p/a'), callback="parse")]
 

@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class NormaDESpider(scrapy.Spider):
     name = "norma_de"
-    item_attributes = {"brand": "Norma", "brand_wikidata": "Q450180"}
+    item_attributes = {"brand_wikidata": "Q450180"}
     allowed_domains = ["www.norma-online.de"]
 
     def start_requests(self):

@@ -1,3 +1,4 @@
+from locations.items import Feature
 from locations.storefinders.metizsoft import MetizsoftSpider
 
 
@@ -8,3 +9,7 @@ class BosCoffeePHSpider(MetizsoftSpider):
         "brand": "Bo's Coffee",
     }
     shopify_url = "bos-coffee.myshopify.com"
+
+    def parse_item(self, item: Feature, location: dict):
+        item.pop("website")
+        yield item
