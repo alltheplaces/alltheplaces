@@ -14,7 +14,7 @@ class HRBlockSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://www\.hrblock\.com/local-tax-offices/[^/]+/[^/]+/[^/]+/\d+/$", "parse_sd")]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "DOWNLOADER_MIDDLEWARES": {"scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware": None},
+        "METAREFRESH_ENABLED": False,
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
