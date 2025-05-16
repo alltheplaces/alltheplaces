@@ -122,6 +122,23 @@ DAYS_BG = {
     "Нд": "Su",
 }
 
+DAYS_BR = {
+    "Segunda": "Mo",
+    "Seg": "Mo",
+    "Terça": "Tu",
+    "Ter": "Tu",
+    "Quarta": "We",
+    "Qua": "We",
+    "Quinta": "Th",
+    "Qui": "Th",
+    "Sexta": "Fr",
+    "Sex": "Fr",
+    "Sábado": "Sa",
+    "Sáb": "Sa",
+    "Domingos": "Su",
+    "Dom": "Su",
+}
+
 DAYS_CH = {
     "Mo": "Mo",
     "Di": "Tu",
