@@ -2,6 +2,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -11,7 +12,8 @@ class HRBlockSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "H&R Block", "brand_wikidata": "Q5627799"}
     sitemap_urls = ["https://www.hrblock.com/sitemap.xml"]
     sitemap_rules = [(r"https://www\.hrblock\.com/local-tax-offices/[^/]+/[^/]+/[^/]+/\d+/$", "parse_sd")]
-    custom_settings = {
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "DOWNLOADER_MIDDLEWARES": {"scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware": None},
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
