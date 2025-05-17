@@ -16,7 +16,6 @@ class TheLearningExperienceUSSpider(SitemapSpider):
     allowed_domains = ["thelearningexperience.com"]
     sitemap_urls = ["https://thelearningexperience.com/centers-sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/thelearningexperience\.com\/centers\/.+", "parse")]
-    download_delay = 0.2
 
     def parse(self, response: Response) -> Iterable[Feature]:
         if response.xpath('//p[@class="center-status"]/text()').get() == "Coming soon":
