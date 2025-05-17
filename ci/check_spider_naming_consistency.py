@@ -117,6 +117,7 @@ COUNTRYCODE_COMPONENTS = {
     "SG",
     "SI",
     "SK",
+    "SV",
     "SX",
     "SZ",
     "TH",
