@@ -16,8 +16,8 @@ class Phillips66Conoco76Spider(scrapy.Spider):
     )
 
     BRANDS = {
-        "76": {"brand": "U76", "brand_wikidata": "Q1658320"},
-        "U76": {"brand": "U76", "brand_wikidata": "Q1658320"},
+        "76": {"brand": "76", "brand_wikidata": "Q1658320"},
+        "U76": {"brand": "76", "brand_wikidata": "Q1658320"},
         "CON": {"brand": "Conoco", "brand_wikidata": "Q109341187"},
         "COP": None,
         "P66": {"brand": "Phillips 66", "brand_wikidata": "Q1656230"},
