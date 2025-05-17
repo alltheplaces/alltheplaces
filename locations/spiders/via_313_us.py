@@ -1,9 +1,7 @@
-from typing import Iterable
 
-from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_FULL, DAYS_EN
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
