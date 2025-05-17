@@ -24,6 +24,7 @@ class Via313USSpider(Where2GetItSpider):
         item["lat"] = location["location"]["address"]["lat"]
         item["lon"] = location["location"]["address"]["long"]
         item["website"] = location["links"][0]
+        item.pop("email", None)
         item["opening_hours"] = OpeningHours()
         for day_name in DAYS_FULL:
             open_time = location["{}_open".format(day_name.lower())]
