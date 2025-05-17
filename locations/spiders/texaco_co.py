@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories,apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -20,12 +20,15 @@ class TexacoCOSpider(Spider):
     def parse(self, response: Response) -> Iterable[Feature]:
         for station in response.xpath("//div[@data-station-id]"):
             properties = {
-                "branch": station.xpath('./@data-station-id').get(),
-                "lat": station.xpath('./div[2]/button[1]/@onclick').get().split("selectStation('", 1)[1].split("'", 1)[0],
-                "lon": station.xpath('./div[2]/button[1]/@onclick').get().split("', '", 1)[1].split("'", 1)[0],
-                "addr_full": merge_address_lines(station.xpath('./div[1]/p[1]//text()').getall()),
-                "city": station.xpath('./@data-city').get(),
-                "state": station.xpath('./@data-province').get(),
+                "branch": station.xpath("./@data-station-id").get(),
+                "lat": station.xpath("./div[2]/button[1]/@onclick")
+                .get()
+                .split("selectStation('", 1)[1]
+                .split("'", 1)[0],
+                "lon": station.xpath("./div[2]/button[1]/@onclick").get().split("', '", 1)[1].split("'", 1)[0],
+                "addr_full": merge_address_lines(station.xpath("./div[1]/p[1]//text()").getall()),
+                "city": station.xpath("./@data-city").get(),
+                "state": station.xpath("./@data-province").get(),
             }
             apply_category(Categories.FUEL_STATION, properties)
             yield Feature(**properties)
