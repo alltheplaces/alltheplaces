@@ -14,5 +14,5 @@ class BelhavenPubsGBSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["facebook"] = None
-        if not item["name"] == 'Belhaven':
+        if not item["name"] == "Belhaven":
             yield item
