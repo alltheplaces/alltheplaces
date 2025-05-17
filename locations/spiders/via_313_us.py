@@ -1,5 +1,3 @@
-
-
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
