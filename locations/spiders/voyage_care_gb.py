@@ -23,7 +23,9 @@ class VoyageCareGBSpider(JSONBlobSpider):
         item["ref"] = str(feature["id"])
         item["branch"] = feature["post_title"]
         item["addr_full"] = clean_address([feature["address1_composite"]])
-        item["street_address"] = merge_address_lines([feature.get("address1_line1"), feature.get("address1_line2"), feature.get("address1_line3")])
+        item["street_address"] = merge_address_lines(
+            [feature.get("address1_line1"), feature.get("address1_line2"), feature.get("address1_line3")]
+        )
         item["city"] = feature["address1_city"]
         item["postcode"] = feature["address1_postalcode"]
         item["state"] = feature["address1_stateorprovince"]
