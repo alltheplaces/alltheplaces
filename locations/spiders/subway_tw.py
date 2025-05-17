@@ -1,12 +1,14 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.spiders.subway import SubwaySpider
 
 
 class SubwayTWSpider(CrawlSpider):
     name = "subway_tw"
-    item_attributes = {"brand": "Subway", "brand_wikidata": "Q244457"}
+    item_attributes = SubwaySpider.item_attributes
     start_urls = ["https://subway.com.tw/en/include/index.php#newStore"]
     rules = [
         Rule(LinkExtractor(allow=r"pageNum"), callback="parse", follow=True),
@@ -20,4 +22,7 @@ class SubwayTWSpider(CrawlSpider):
             item["phone"] = store.xpath('.//a[contains(@href, "tel")]/@href').get()
             item["ref"] = store.xpath('./*[@data-title="NO"]/text()').get().strip()
             item["website"] = response.url
+            apply_category(Categories.FAST_FOOD, item)
+            item["extras"]["cuisine"] = "sandwich"
+            item["extras"]["takeaway"] = "yes"
             yield item

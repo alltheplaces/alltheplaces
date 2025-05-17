@@ -7,6 +7,8 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class SubwaySpider(SitemapSpider, StructuredDataSpider):
+    """Also see SubwayWorldwideSpider for API-based spider."""
+
     name = "subway"
     item_attributes = {"brand": "Subway", "brand_wikidata": "Q244457"}
     allowed_domains = ["restaurants.subway.com"]
