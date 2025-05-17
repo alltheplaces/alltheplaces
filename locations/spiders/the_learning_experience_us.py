@@ -21,20 +21,32 @@ class TheLearningExperienceUSSpider(SitemapSpider):
     def parse(self, response: Response) -> Iterable[Feature]:
         if response.xpath('//p[@class="center-status"]/text()').get() == "Coming soon":
             return
-        if response.xpath('//p[@class="center-register"]/text()').get() in ["Pre-Registration Now Open", "Tours Available"]:
+        if response.xpath('//p[@class="center-register"]/text()').get() in [
+            "Pre-Registration Now Open",
+            "Tours Available",
+        ]:
             return
         properties = {
             "ref": response.url,
             "branch": response.xpath('//h1[@class="banner__title"]/span[1]/text()').get(),
-            "addr_full": merge_address_lines(response.xpath('//div[@class="banner__left_contacts_item location"]/p[1]//text()').getall()),
-            "phone": response.xpath('//div[@class="banner__left_contacts_item phone"]/a[1]/@href').get().removeprefix("tel:"),
-            "email": response.xpath('//div[@class="banner__left_contacts_item mail"]/a[1]/@href').get().removeprefix("mailto:"),
+            "addr_full": merge_address_lines(
+                response.xpath('//div[@class="banner__left_contacts_item location"]/p[1]//text()').getall()
+            ),
+            "phone": response.xpath('//div[@class="banner__left_contacts_item phone"]/a[1]/@href')
+            .get()
+            .removeprefix("tel:"),
+            "email": response.xpath('//div[@class="banner__left_contacts_item mail"]/a[1]/@href')
+            .get()
+            .removeprefix("mailto:"),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
-        hours_text = response.xpath('//div[@class="banner__left_contacts_item time"]/p[1]/text()').get().replace("M-F", "Mon-Fri")
+        hours_text = (
+            response.xpath('//div[@class="banner__left_contacts_item time"]/p[1]/text()')
+            .get()
+            .replace("M-F", "Mon-Fri")
+        )
         properties["opening_hours"].add_ranges_from_string(hours_text)
         extract_google_position(properties, response)
         apply_category(Categories.KINDERGARTEN, properties)
         yield Feature(**properties)
-
