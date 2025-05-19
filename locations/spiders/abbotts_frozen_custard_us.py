@@ -10,8 +10,8 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AbbottsFrozenCustardSpider(SitemapSpider):
-    name = "abbotts_frozen_custard"
+class AbbottsFrozenCustardUSSpider(SitemapSpider):
+    name = "abbotts_frozen_custard_us"
     item_attributes = {
         "brand": "Abbott's Frozen Custard",
         "brand_wikidata": "Q4664334",
