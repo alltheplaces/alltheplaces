@@ -42,6 +42,7 @@ class MomentFeedSpider(Spider):
             item["ref"] = store_info["corporate_id"]
             item["street_address"] = merge_address_lines([store_info["address_extended"], store_info["address"]])
             item.pop("addr_full", None)
+            item["extras"]["start_date"] = store_info["openingDate"]
 
             item["opening_hours"] = OpeningHours()
             open_days = []
