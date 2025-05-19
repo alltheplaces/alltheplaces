@@ -45,18 +45,10 @@ class MomentFeedSpider(Spider):
             item.pop("addr_full", None)
             item["extras"]["start_date"] = store_info["openingDate"]
 
-            item["opening_hours"] = OpeningHours()
-            open_days = []
-            for day in store_info["store_hours"].split(";"):
-                rule = day.split(",")
-                if len(rule) == 3:
-                    open_days.append(DAYS[int(rule[0]) - 1])
-                    item["opening_hours"].add_range(
-                        DAYS[int(rule[0]) - 1], rule[1], rule[2].replace("2400", "2359"), "%H%M"
-                    )
-            closed_days = list(set(DAYS) - set(open_days))
-            for closed_day in closed_days:
-                item["opening_hours"].set_closed(closed_day)
+            try:
+                item["opening_hours"] = self.parse_opening_hours(store_info)
+            except:
+                self.logger.error("Error parsing opening hours")
 
             for provider in store_info["providers"]:
                 if provider["_type"] == "Facebook":
@@ -79,6 +71,14 @@ class MomentFeedSpider(Spider):
                 url=f"https://uberall.com/api/mf-lp-adapter/llp.json?center=0,0&coordinates=-90,180,90,-180&pageSize={self.page_size}&page={next_page}",
                 headers={"Authorization": self.api_key},
             )
+
+    def parse_opening_hours(self, store_info: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in store_info["store_hours"].split(";"):
+            rule = day.split(",")
+            if len(rule) == 3:
+                oh.add_range(DAYS[int(rule[0]) - 1], rule[1], rule[2].replace("2400", "2359"), "%H%M")
+        return oh
 
     def parse_item(self, item: Feature, feature: dict, store_info: dict):
         yield item
