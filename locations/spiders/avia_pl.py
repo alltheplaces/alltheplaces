@@ -49,7 +49,7 @@ class AviaPLSpider(Spider):
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for station in response.json()["data"]:
             item = DictParser.parse(station)
-            item["branch"] = item.pop("name")
+            item["branch"] = item.pop("name").removeprefix("AVIA ")
 
             try:
                 item["opening_hours"] = self.parse_opening_hours(station["opening_hours"])
