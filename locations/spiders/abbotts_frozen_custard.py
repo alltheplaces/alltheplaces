@@ -7,6 +7,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class AbbottsFrozenCustardSpider(SitemapSpider):
@@ -18,11 +19,7 @@ class AbbottsFrozenCustardSpider(SitemapSpider):
     allowed_domains = ["abbottscustard.com"]
     sitemap_urls = ["https://www.abbottscustard.com/wpsl_stores-sitemap.xml"]
     sitemap_rules = [(r"/location/", "parse")]
-
-    # Custom headers to mimic browser requests
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
-    }
+    user_agent = BROWSER_DEFAULT
 
     # State centroids for Abbott's locations
     # Based on states mentioned in get_state_abbrev
