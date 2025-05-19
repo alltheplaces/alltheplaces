@@ -30,9 +30,14 @@ FUELS_AND_SERVICES_MAPPING = {
 class AviaPLSpider(Spider):
     name = "avia_pl"
     item_attributes = AVIA_SHARED_ATTRIBUTES
-    start_urls = ["https://b2c.aviastacjapaliw.pl/static/js/main.bd46d667.js"]
+    start_urls = ["https://b2c.aviastacjapaliw.pl/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield from response.follow_all(
+            response.xpath('//script[contains(@src, "main")]/@src').getall(), self.parse_token
+        )
+
+    def parse_token(self, response: Response, **kwargs: Any) -> Any:
         token = re.search(r"Authorization:\"Bearer.*concat\(\"(.*)\"\)}}\)", response.text).group(1)
         yield scrapy.Request(
             url="https://mapa.aviastacjapaliw.pl/api/stations?populate[0]=logo&populate[1]=address&populate[2]=coordinates&populate[3]=opening_hours&populate[4]=features.stations&populate[5]=features.fuels&populate[6]=features.cards&populate[7]=features.services&populate[8]=station_types&filters[station_types][type][$eq]=B2C",
