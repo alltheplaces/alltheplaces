@@ -3,6 +3,7 @@ import re
 from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -103,6 +104,9 @@ class BillGraysUSSpider(Spider):
         if not item.get("street_address"):
             self._parse_from_meta(item, response)
 
+        # Extract coordinates from Google Maps link
+        extract_google_position(item, response)
+        
         # Set defaults
         item["country"] = "US"
         if not item.get("state"):
