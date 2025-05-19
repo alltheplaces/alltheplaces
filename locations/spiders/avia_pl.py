@@ -50,6 +50,9 @@ class AviaPLSpider(Spider):
         for station in response.json()["data"]:
             item = DictParser.parse(station)
             item["branch"] = item.pop("name").removeprefix("AVIA ")
+            item["website"] = "https://aviastacjapaliw.pl/mapa-stacji?target_station={}".format(
+                station["name"].lower().replace(" ", "+")
+            )
 
             try:
                 item["opening_hours"] = self.parse_opening_hours(station["opening_hours"])
