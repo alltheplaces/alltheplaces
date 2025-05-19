@@ -106,7 +106,7 @@ class BillGraysUSSpider(Spider):
 
         # Extract coordinates from Google Maps link
         extract_google_position(item, response)
-        
+
         # Set defaults
         item["country"] = "US"
         if not item.get("state"):
