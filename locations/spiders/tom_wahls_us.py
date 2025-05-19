@@ -37,7 +37,7 @@ class TomWahlsUSSpider(scrapy.Spider):
         # Set ref based on branch name or city
         item["ref"] = item.get("branch") or item.get("city")
 
-        apply_category(Categories.FAST_FOOD, item)
+        apply_category(Categories.RESTAURANT, item)
         item["extras"]["cuisine"] = "burger"
 
         return item
