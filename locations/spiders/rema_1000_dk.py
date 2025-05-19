@@ -1,10 +1,13 @@
+from datetime import datetime
 from typing import Any
 
+import pytz
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class Rema1000DKSpider(Spider):
@@ -20,4 +23,22 @@ class Rema1000DKSpider(Spider):
             item["street_address"] = item.pop("addr_full", None)
             item["website"] = f'https://rema1000.dk/find-butik-og-abningstider/{item["ref"]}'
             apply_category(Categories.SHOP_SUPERMARKET, item)
+
+            try:
+                item["opening_hours"] = OpeningHours()
+                for rule in location.get("opening_hours", []):
+                    day = datetime.strptime(rule["date"], "%Y-%m-%d").strftime("%A")
+                    if rule["opening_at"] and rule["closing_at"]:
+                        open_time = self.calculate_local_time(rule["opening_at"])
+                        close_time = self.calculate_local_time(rule["closing_at"])
+                        item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+            except Exception as e:
+                self.logger.warning(f"Failed to parse opening hours: {e}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
             yield item
+
+    def calculate_local_time(self, time_string: str) -> str:
+        utc_datetime = datetime.fromisoformat(time_string)
+        denmark_tz = pytz.timezone("Europe/Copenhagen")
+        local_time = utc_datetime.astimezone(denmark_tz)
+        return local_time.strftime("%H:%M")
