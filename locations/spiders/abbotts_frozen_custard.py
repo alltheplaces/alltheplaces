@@ -1,5 +1,7 @@
+import json
 import re
 
+from scrapy import Request
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -16,6 +18,65 @@ class AbbottsFrozenCustardSpider(SitemapSpider):
     allowed_domains = ["abbottscustard.com"]
     sitemap_urls = ["https://www.abbottscustard.com/wpsl_stores-sitemap.xml"]
     sitemap_rules = [(r"/location/", "parse")]
+
+    # Custom headers to mimic browser requests
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+    }
+
+    # State centroids for Abbott's locations
+    # Based on states mentioned in get_state_abbrev
+    state_centroids = {
+        "NY": {"lat": 43.0, "lon": -76.0},  # New York
+        "MA": {"lat": 42.4, "lon": -71.4},  # Massachusetts
+        "FL": {"lat": 27.8, "lon": -81.8},  # Florida
+        "TX": {"lat": 31.0, "lon": -99.0},  # Texas
+        "LA": {"lat": 30.5, "lon": -91.1},  # Louisiana
+        "SC": {"lat": 33.8, "lon": -80.5},  # South Carolina
+        "NC": {"lat": 35.5, "lon": -79.0},  # North Carolina
+        "TN": {"lat": 35.5, "lon": -86.0},  # Tennessee
+    }
+
+    def start_requests(self):
+        # Initialize coordinate storage
+        self.coordinates = {}
+
+        # Make API calls for each state where Abbott's operates
+        for state, coords in self.state_centroids.items():
+            ajax_url = (
+                f"https://www.abbottscustard.com/wp-admin/admin-ajax.php?"
+                f"action=store_search&lat={coords['lat']}&lng={coords['lon']}&max_results=100&search_radius=300"
+            )
+            yield Request(
+                url=ajax_url,
+                headers={"X-Requested-With": "XMLHttpRequest", "Accept": "*/*"},
+                callback=self.parse_locations_data,
+                dont_filter=True,
+                meta={"state": state},
+            )
+
+    def parse_locations_data(self, response):
+        """Parse location data from AJAX endpoint to store coordinates"""
+        state = response.meta.get("state")
+
+        try:
+            locations = json.loads(response.text)
+            for location in locations:
+                # Get the slug from the permalink
+                permalink = location.get("permalink", "")
+                if "/location/" in permalink:
+                    slug = permalink.split("/location/")[-1].rstrip("/")
+                    # Avoid duplicates by checking if we've already stored this location
+                    if slug not in self.coordinates:
+                        self.coordinates[slug] = {"lat": location.get("lat"), "lon": location.get("lng")}
+            self.logger.info(f"Found {len(locations)} locations for state {state}")
+        except Exception as e:
+            self.logger.error(f"Error parsing JSON for state {state}: {e}")
+
+        # After all state requests are complete, proceed with sitemap crawl
+        # (This is handled by Scrapy's scheduler)
+        for url in self.sitemap_urls:
+            yield Request(url, callback=self._parse_sitemap)
 
     def parse(self, response):
         item = Feature()
@@ -97,6 +158,16 @@ class AbbottsFrozenCustardSpider(SitemapSpider):
 
         # Set country
         item["country"] = "US"
+
+        # Add coordinates from AJAX data
+        if hasattr(self, "coordinates") and item["ref"] in self.coordinates:
+            coords = self.coordinates[item["ref"]]
+            if coords.get("lat") and coords.get("lon"):
+                try:
+                    item["lat"] = float(coords["lat"])
+                    item["lon"] = float(coords["lon"])
+                except (ValueError, TypeError):
+                    pass
 
         # All Abbott's locations are ice cream shops
         apply_category(Categories.ICE_CREAM, item)
