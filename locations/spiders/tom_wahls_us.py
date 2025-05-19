@@ -10,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class TomWahlsUSSpider(scrapy.Spider):
     name = "tom_wahls_us"
-    item_attributes = {"brand": "Tom Wahl's", "brand_wikidata": "Q7817965"}
+    item_attributes = {"name": "Tom Wahl's", "brand": "Tom Wahl's", "brand_wikidata": "Q7817965"}
     allowed_domains = ["tomwahls.com"]
     start_urls = ["https://www.tomwahls.com/"]
     user_agent = BROWSER_DEFAULT
