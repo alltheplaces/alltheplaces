@@ -5,24 +5,26 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SleepNumberUSSpider(Spider):
     name = "sleep_number_us"
     item_attributes = {"brand": "Sleep Number", "brand_wikidata": "Q7447640"}
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    custom_settings = {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_TIMEOUT": 90,
+        "CONCURRENT_REQUESTS": 1,
+        "RETRY_TIMES": 5,
+        "DOWNLOAD_DELAY": 3,
+    }
 
     def start_requests(self):
-        for lat, lon in [
-            (21.30694, -157.85833),
-            (26.12231, -80.14338),
-            (30.44332, -91.18747),
-            (39.95238, -75.16362),
-            (44.97997, -93.26384),
-        ]:
+        for lat, lon in country_iseadgg_centroids("US", 458):
             yield JsonRequest(
-                url="https://www.sleepnumber.com/api/storefront/store-locations?lat={}&lng={}&limit=190&radius=25000".format(
+                url="https://www.sleepnumber.com/api/storefront/store-locations?lat={}&lng={}&limit=100&radius=300".format(
                     lat, lon
                 )
             )
