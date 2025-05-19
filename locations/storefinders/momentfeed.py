@@ -1,11 +1,12 @@
 import urllib.parse
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
+from locations.items import Feature, SocialMedia, set_social_media
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -29,7 +30,7 @@ class MomentFeedSpider(Spider):
             headers={"Authorization": self.api_key},
         )
 
-    def parse(self, response: Response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         if "message" in response.json():
             return
 
@@ -59,9 +60,16 @@ class MomentFeedSpider(Spider):
 
             for provider in store_info["providers"]:
                 if provider["_type"] == "Facebook":
-                    item["facebook"] = provider["url"]
+                    set_social_media(item, SocialMedia.FACEBOOK, provider["url"])
                 elif provider["_type"] == "Google" and provider.get("place_id"):
                     item["extras"]["ref:google:place_id"] = provider["place_id"]
+                elif provider["_type"] == "Instagram":
+                    if "/explore/locations/" not in provider["url"]:
+                        set_social_media(item, SocialMedia.INSTAGRAM, provider["url"])
+                elif provider["_type"] == "Yelp":
+                    set_social_media(item, SocialMedia.YELP, provider["url"])
+                elif provider["_type"] == "Foursquare":
+                    set_social_media(item, "foursquare", provider["url"])
 
             yield from self.parse_item(item, feature, store_info)
 
