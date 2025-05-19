@@ -19,27 +19,32 @@ class Rema1000DKSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
             item = DictParser.parse(location)
+            item["street_address"] = item.pop("addr_full", None)
             item["ref"] = location.get("internal_id")
             item["branch"] = item.pop("name")
-            item["street_address"] = item.pop("addr_full", None)
-            item["website"] = f'https://rema1000.dk/find-butik-og-abningstider/{item["ref"]}'
-            apply_category(Categories.SHOP_SUPERMARKET, item)
+            item["website"] = "https://rema1000.dk/find-butik-og-abningstider/{}".format(item["ref"])
             set_social_media(item, SocialMedia.FACEBOOK, location.get("facebook_page_url"))
 
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+
             try:
-                item["opening_hours"] = OpeningHours()
-                for rule in location.get("opening_hours", []):
-                    day = datetime.strptime(rule["date"], "%Y-%m-%d").strftime("%A")
-                    if rule["opening_at"] and rule["closing_at"]:
-                        open_time = self.calculate_local_time(rule["opening_at"])
-                        close_time = self.calculate_local_time(rule["closing_at"])
-                        item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
-                    else:
-                        item["opening_hours"].set_closed(day)
-            except Exception as e:
-                self.logger.warning(f"Failed to parse opening hours: {e}")
-                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
+                item["opening_hours"] = self.parse_opening_hours(location.get("opening_hours", []))
+            except:
+                self.logger.error("Error paring opening hours: {}".format(location.get("opening_hours", [])))
+
             yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            day = datetime.strptime(rule["date"], "%Y-%m-%d").strftime("%A")
+            if rule["label"] == "Lukket":
+                oh.set_closed(day)
+            elif rule["opening_at"] and rule["closing_at"]:
+                oh.add_range(
+                    day, self.calculate_local_time(rule["opening_at"]), self.calculate_local_time(rule["closing_at"])
+                )
+        return oh
 
     def calculate_local_time(self, time_string: str) -> str:
         utc_datetime = datetime.fromisoformat(time_string)
