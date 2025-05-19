@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
-import pytz
 from scrapy import Spider
 from scrapy.http import Response
 
@@ -41,6 +41,5 @@ class Rema1000DKSpider(Spider):
 
     def calculate_local_time(self, time_string: str) -> str:
         utc_datetime = datetime.fromisoformat(time_string)
-        denmark_tz = pytz.timezone("Europe/Copenhagen")
-        local_time = utc_datetime.astimezone(denmark_tz)
+        local_time = utc_datetime.astimezone(ZoneInfo("Europe/Copenhagen"))
         return local_time.strftime("%H:%M")
