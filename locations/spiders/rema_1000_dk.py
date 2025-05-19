@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import SocialMedia, set_social_media
 
 
 class Rema1000DKSpider(Spider):
@@ -23,6 +24,7 @@ class Rema1000DKSpider(Spider):
             item["street_address"] = item.pop("addr_full", None)
             item["website"] = f'https://rema1000.dk/find-butik-og-abningstider/{item["ref"]}'
             apply_category(Categories.SHOP_SUPERMARKET, item)
+            set_social_media(item, SocialMedia.FACEBOOK, location.get("facebook_page_url"))
 
             try:
                 item["opening_hours"] = OpeningHours()
