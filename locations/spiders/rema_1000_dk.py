@@ -34,6 +34,8 @@ class Rema1000DKSpider(Spider):
                         open_time = self.calculate_local_time(rule["opening_at"])
                         close_time = self.calculate_local_time(rule["closing_at"])
                         item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+                    else:
+                        item["opening_hours"].set_closed(day)
             except Exception as e:
                 self.logger.warning(f"Failed to parse opening hours: {e}")
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
