@@ -12,7 +12,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 
 class MyDentistGBSpider(StructuredDataSpider):
-    MYDENTIST = {"brand": "My Dentist", "brand_wikidata": "Q65118035"}
+    MYDENTIST = {"brand": "mydentist", "brand_wikidata": "Q65118035"}
     name = "my_dentist_gb"
     allowed_domains = ["mydentist.co.uk"]
     start_urls = ["https://www.mydentist.co.uk/practice-directory"]
