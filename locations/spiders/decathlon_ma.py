@@ -13,3 +13,8 @@ class DecathlonMASpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(LinkExtractor(allow=r"/content/\d+-store-"), "parse_sd"),
     ]
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        for rule in ld_data.get("openingHoursSpecification", []):
+            for key in ["opens", "closes"]:
+                rule[key] = rule.get(key, "").replace("H", ":")
