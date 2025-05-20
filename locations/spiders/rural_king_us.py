@@ -3,7 +3,6 @@ import json
 import scrapy
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
-from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -13,6 +12,9 @@ class RuralKingUSSpider(scrapy.Spider):
     Rural King spider that visits each store page to collect service information
     and other details. This spider identifies services like RKGuns, propane,
     pickup, and ship-to-store that vary by location.
+
+    This spider uses a single API request to efficiently retrieve all store data
+    rather than making multiple geographic queries.
     """
 
     name = "rural_king_us"
@@ -28,18 +30,11 @@ class RuralKingUSSpider(scrapy.Spider):
         if hasattr(self, "url") and self.url:
             yield scrapy.Request(self.url, callback=self.parse_api)
         else:
-            # Use searchable points to query for stores
-            # This approach allows for complete coverage across the US
-            # and accommodates future expansion to new regions
-
-            # Rural King operates in these states according to their website
-            # This limits queries to relevant areas while covering all their locations
-            rural_king_states = ["FL", "GA", "IL", "IN", "KY", "TN", "OH", "MI", "MO", "NC", "PA", "VA", "WV", "AL"]
-
-            for lat, lon in point_locations("us_centroids_50mile_radius_state.csv", rural_king_states):
-                # Use a 100-mile radius to ensure good coverage while reducing API requests
-                search_url = f"https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/{lat}/longitude/{lon}?radius=100&radiusUOM=SMI&siteLevelStoreSearch=false"
-                yield scrapy.Request(search_url, callback=self.parse_api)
+            # Use a single API request to get all stores at once
+            # This uses origin point (0,0) with a large radius to cover the entire US
+            # and maxItems=1000 to ensure all stores are returned
+            all_stores_url = "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/0/longitude/0?maxItems=1000&radius=2500&siteLevelStoreSearch=false"
+            yield scrapy.Request(all_stores_url, callback=self.parse_api)
 
     def parse_api(self, response):
         data = json.loads(response.text)
