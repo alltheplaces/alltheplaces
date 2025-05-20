@@ -18,9 +18,10 @@ class HammerDESpider(JSONBlobSpider):
         feature.update(feature.pop("address"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature.get("id")
-        item["name"] = feature["description"]
-        item["website"] = f"https://www.hammer-zuhause.de/maerkte/storeDetail?storeCode={item['ref']}"
+        item["ref"] = item.pop("name")
+        item["branch"] = feature["description"].removeprefix("HK-").removeprefix("Hammer ").removeprefix("Fachmarkt ")
+        item["website"] = "https://www.hammer-zuhause.de/maerkte/storeDetail?storeCode={}".format(item["ref"])
+
         item["opening_hours"] = OpeningHours()
         for hour in feature["openingHours"]["weekDayOpeningList"]:
             item["opening_hours"].add_range(
