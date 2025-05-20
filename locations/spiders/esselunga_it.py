@@ -16,6 +16,8 @@ class EsselungaITSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["abbrev"]
+        item["extras"]["start_date"] = feature["openingDate"].split(" ", 1)[0]
+
         item["branch"] = feature["description"] or ""
         if item["branch"].lower().startswith("laesse"):
             item["name"] = "La Esse"
