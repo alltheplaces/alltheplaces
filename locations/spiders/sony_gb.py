@@ -1,7 +1,6 @@
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class SonyGBSpider(Spider):
