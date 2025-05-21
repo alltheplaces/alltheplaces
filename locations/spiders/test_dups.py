@@ -8,6 +8,7 @@ from locations.items import Feature
 
 class TestDupsSpider(Spider):
     name = "test_dups"
+    item_attributes = {"extras": {"shop": "no"}}
     start_urls = ["data:,"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
