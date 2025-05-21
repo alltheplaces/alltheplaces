@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class LosAngelesCountyDepartmentOfPublicWorksSewerPumpStationsUSSpider(ArcGISFeatureServerSpider):
-    name = "los_angeles_county_department_of_public_works_sewer_pump_stations_us"
+class LosAngelesCountyDepartmentOfPublicWorksSewerManholesUSSpider(ArcGISFeatureServerSpider):
+    name = "los_angeles_county_department_of_public_works_sewer_manholes_us"
     item_attributes = {
         "operator": "Los Angeles County Department of Public Works",
         "operator_wikidata": "Q6682081",
