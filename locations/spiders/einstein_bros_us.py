@@ -18,4 +18,5 @@ class EinsteinBrosUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
+        item["branch"] = item.pop("name").removeprefix("Einstein Bros. Bagels ")
         yield item
