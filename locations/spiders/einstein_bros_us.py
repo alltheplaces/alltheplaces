@@ -24,7 +24,7 @@ class EinsteinBrosUSSpider(SitemapSpider, StructuredDataSpider):
 
     def extract_amenity_features(self, item, response: Response, ld_item):
         features = [feature["name"] for feature in ld_item.get("amenityFeature") or []]
-        apply_yes_no(Extras.DELIVERY, item, "WiFi" in features)
+        apply_yes_no(Extras.WIFI, item, "WiFi" in features)
         apply_yes_no(Extras.INDOOR_SEATING, item, "Dine-In" in features)
         if "Takeout Only" in features:
             item["extras"]["takeaway"] = "only"
