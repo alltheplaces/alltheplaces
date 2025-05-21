@@ -355,7 +355,7 @@ class Categories(Enum):
     OUTFALL_STORMWATER = {
         "man_made": "outfall",
         "utility": "stormwater",
-        "substance": "wastewater",
+        "substance": "rainwater",
     }
     POWER_POLE = {"power": "pole"}
     POWER_TOWER = {"power": "tower"}
