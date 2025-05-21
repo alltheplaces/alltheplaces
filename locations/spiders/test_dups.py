@@ -12,5 +12,5 @@ class TestDupsSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         yield Feature(ref="a")
-        yield Feature(ref="a")
-        yield Feature(ref="b")
+        for _ in range(100):
+            yield Feature(ref="b")
