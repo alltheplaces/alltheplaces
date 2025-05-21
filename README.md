@@ -1,10 +1,10 @@
 # All the Places
 
-
 A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [from websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to execute individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) that retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials on the Internet and [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
 
 ```mermaid
 flowchart
+   Spiders(["Thousands of first party datasets"])
    ATP(["All The Places"])
    click ATP "https://alltheplaces.xyz/"
    OSM(["OpenStreetMap"])
@@ -14,6 +14,7 @@ flowchart
    Overture(["Overture"])
    click Overture "https://overturemaps.org/"
 
+   Spiders --> ATP
    ATP --> TT
    ATP --> OSM
    ATP --> Overture
