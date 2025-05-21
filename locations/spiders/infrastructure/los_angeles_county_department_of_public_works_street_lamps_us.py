@@ -35,7 +35,7 @@ class LosAngelesCountyDepartmentOfPublicWorksStreetLampsUSSpider(ArcGISFeatureSe
                 item["extras"]["material"] = "steel"
             case "W":
                 item["extras"]["material"] = "wood"
-            case None:
+            case "HSL" | "SUP" | None:
                 pass
             case _:
                 self.logger.warning("Unknown material type: {}".format(feature["POLE_TYPE"]))
