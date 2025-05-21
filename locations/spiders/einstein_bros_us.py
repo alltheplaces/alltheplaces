@@ -3,6 +3,7 @@ import re
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -20,3 +21,10 @@ class EinsteinBrosUSSpider(SitemapSpider, StructuredDataSpider):
             item["lat"], item["lon"] = coordinates.groups()
         item["branch"] = item.pop("name").removeprefix("Einstein Bros. Bagels ")
         yield item
+
+    def extract_amenity_features(self, item, response: Response, ld_item):
+        features = [feature["name"] for feature in ld_item.get("amenityFeature") or []]
+        apply_yes_no(Extras.DELIVERY, item, "WiFi" in features)
+        apply_yes_no(Extras.INDOOR_SEATING, item, "Dine-In" in features)
+        if "Takeout Only" in features:
+            item["extras"]["takeaway"] = "only"
