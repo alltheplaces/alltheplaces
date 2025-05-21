@@ -352,6 +352,11 @@ class Categories(Enum):
     ANTENNA = {"man_made": "antenna"}
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
+    OUTFALL_STORMWATER = {
+        "man_made": "outfall",
+        "utility": "stormwater",
+        "substance": "wastewater",
+    }
     POWER_POLE = {"power": "pole"}
     POWER_TOWER = {"power": "tower"}
     PUMPING_STATION_SEWAGE = {
