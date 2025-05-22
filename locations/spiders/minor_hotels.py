@@ -3,6 +3,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -30,4 +31,5 @@ class MinorHotelsSpider(SitemapSpider, StructuredDataSpider):
             location_info.get("brandcode"), (location_info.get("brandname"), None)
         )
         apply_category(Categories.HOTEL, item)
+        extract_google_position(item, response)  # ld_data contains incorrect coordinates for a few locations.
         yield item
