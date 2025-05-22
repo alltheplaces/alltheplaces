@@ -1,14 +1,15 @@
-import re
+from typing import Any
 
-import scrapy
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class FarmersHomeFurnitureUSSpider(scrapy.Spider):
+class FarmersHomeFurnitureUSSpider(SitemapSpider):
     name = "farmers_home_furniture_us"
     item_attributes = {
         "brand": "Farmers Home Furniture",
@@ -16,64 +17,14 @@ class FarmersHomeFurnitureUSSpider(scrapy.Spider):
         "country": "US",
     }
     allowed_domains = ["www.farmershomefurniture.com"]
-    start_urls = ["https://www.farmershomefurniture.com/store-list.inc"]
+    sitemap_urls = ["https://www.farmershomefurniture.com/sitemaps/sitemap_stores.xml"]
+    sitemap_rules = [("/stores/", "parse")]
     user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response):
-        for store in response.xpath("//tr"):
-            store_data = store.xpath("./td/text()").getall()
-            if store_data:
-                properties = {
-                    "city": store_data[0],
-                    "state": store_data[1],
-                    "address": store_data[2],
-                    "phone": store_data[3],
-                }
-
-                store_link = store.xpath("./@onclick").re_first("/stores/[0-9a-z-]+.inc")
-                store_url = f"https://www.farmershomefurniture.com{store_link}"
-
-                yield scrapy.Request(store_url, callback=self.parse_store, cb_kwargs=properties)
-
-    def parse_store(self, response, city, state, address, phone):
-        opening_hours = OpeningHours()
-        store_hours = response.xpath('//div[@class="workspacearea"]/div/div/p/text()').extract()[2:]
-
-        for hours in store_hours:
-            if "closed" in hours.lower():
-                continue
-            hours = hours.strip()
-            if m := re.match(r"(\w{3}):\s?(\d+)(:\d+)?(AM|PM)?-(\d+)(:\d+)?(AM|PM)?", hours):
-                (
-                    day,
-                    start_hour,
-                    start_min,
-                    start_ampm,
-                    end_hour,
-                    end_min,
-                    end_ampm,
-                ) = m.groups()
-                opening_hours.add_range(
-                    day=day,
-                    open_time=start_hour + (start_min or ":00") + (start_ampm or "AM"),
-                    close_time=end_hour + (end_min or ":00") + (end_ampm or "PM"),
-                    time_format="%I:%M%p",
-                )
-
-        store_coordinates = response.xpath("//script/text()").re_first("lat .*[\n].*").split(";")[:2]
-
-        properties = {
-            "street_address": address,
-            "city": city,
-            "phone": phone,
-            "state": state,
-            "lat": store_coordinates[0].split('"')[1],
-            "lon": store_coordinates[1].split('"')[1],
-            "opening_hours": opening_hours.as_opening_hours(),
-            "ref": re.search(r".+/(.+?)/?(?:\.inc|$)", response.url).group(1),
-            "website": response.url,
-        }
-
-        yield Feature(**properties)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["addr_full"] = clean_address(response.xpath('//*[contains(@id,"address")]/span/text()').getall())
+        yield item
