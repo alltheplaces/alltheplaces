@@ -1,26 +1,18 @@
-import re
-
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CornerBakeryCafeUSSpider(StructuredDataSpider):
+class CornerBakeryCafeUSSpider(CrawlSpider, StructuredDataSpider):
     name = "corner_bakery_cafe_us"
     item_attributes = {"brand": "Corner Bakery", "brand_wikidata": "Q5171598"}
     allowed_domains = ["cornerbakerycafe.com"]
     start_urls = [
         "https://cornerbakerycafe.com/locations/all",
     ]
-
-    def parse(self, response):
-        place_urls = response.xpath('//*[@class="loc-icon-home"]/a[1]/@href').extract()
-        for path in place_urls:
-            yield scrapy.Request(
-                url=response.urljoin(path),
-                callback=self.parse_sd,
-            )
+    rules = [Rule(LinkExtractor(allow=r"/location/[-\w]+/?$"), callback="parse_sd")]
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
@@ -48,7 +40,7 @@ class CornerBakeryCafeUSSpider(StructuredDataSpider):
         return opening_hours.as_opening_hours()
 
     def post_process_item(self, item, response, ld_data):
-        item["ref"] = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
+        item["ref"] = response.url
 
         try:
             hours = self.parse_hours(ld_data["openingHours"])
