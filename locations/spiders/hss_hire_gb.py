@@ -8,16 +8,19 @@ from locations.items import Feature
 
 class HssHireGBSpider(SitemapSpider):
     name = "hss_hire_gb"
-    item_attributes = {
-        "brand": "HSS Hire",
-        "brand_wikidata": "Q5636000",
-    }
+    item_attributes = {"brand": "HSS Hire", "brand_wikidata": "Q5636000"}
     sitemap_urls = ["https://www.hss.com/sitemap-branches.xml"]
     sitemap_rules = [(r"/branches/(?!virtual-test).+$", "parse")]
 
     def parse(self, response: Response, **kwargs):
         item = Feature()
-        item["name"] = response.xpath("//h1/text()").get()
+
+        label = response.xpath("//h1/text()").get()
+        if label.startswith("HSS at "):
+            item["located_in"], item["branch"] = label.removeprefix("HSS at ").split(" - ", 1)
+        elif label.startswith("HSS "):
+            item["branch"] = label.removeprefix("HSS ")
+
         item["addr_full"] = (
             response.xpath('//*[@class="rounded-2xl bg-gray-100 p-5 lg:p-8"]/p').xpath("normalize-space()").get()
         )
