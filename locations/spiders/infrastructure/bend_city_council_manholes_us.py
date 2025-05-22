@@ -22,5 +22,5 @@ class BendCityCouncilManholesUSSpider(ArcGISFeatureServerSpider):
             item["extras"]["alt_ref"] = alt_ref
         if diameter_in := feature.get("Diameter"):
             if int(diameter_in) > 0:
-                item["extras"]["diameter"] = f"{diameter_in}\""
+                item["extras"]["diameter"] = f'{diameter_in}"'
         yield item
