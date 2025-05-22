@@ -6,8 +6,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class FarmersHomeFurnitureSpider(scrapy.Spider):
-    name = "farmers_home_furniture"
+class FarmersHomeFurnitureUSSpider(scrapy.Spider):
+    name = "farmers_home_furniture_us"
     item_attributes = {
         "brand": "Farmers Home Furniture",
         "brand_wikidata": "Q121586393",
