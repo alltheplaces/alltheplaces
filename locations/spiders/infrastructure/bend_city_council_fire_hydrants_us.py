@@ -24,9 +24,9 @@ class BendCityCouncilFireHydrantsUSSpider(ArcGISFeatureServerSpider):
             item["extras"]["fire_hydrant:pressure"] = f"{pressure_psi} psi"
         if diameter_1_in := feature.get("diameter"):
             if diameter_2_in := feature.get("secondarydiameter"):
-                item["extras"]["fire_hydrant:diameter"] = f"{diameter_1_in}\";{diameter_2_in}\""
+                item["extras"]["fire_hydrant:diameter"] = f'{diameter_1_in}";{diameter_2_in}"'
             else:
-                item["extras"]["fire_hydrant:diameter"] = f"{diameter_1_in}\""
+                item["extras"]["fire_hydrant:diameter"] = f'{diameter_1_in}"'
         if install_date_int := feature.get("installdate"):
             install_date = datetime.fromtimestamp(int(float(install_date_int) / 1000), UTC)
             item["extras"]["start_date"] = install_date.isoformat().split("T", 1)[0]
