@@ -19,17 +19,17 @@ class GeorgJensenSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature["GeorgJensenStore"]:
             item["addr_full"] = feature["Address"]
-            item["opening_hours"] = OpeningHours()
             item["branch"] = item.pop("name")
-            for timings in feature["OpeningHours"]:
-                try:
+            try:
+                item["opening_hours"] = OpeningHours()
+                for timings in feature["OpeningHours"]:
                     item["opening_hours"].add_range(
                         DAYS_EN[timings["Day"]],
                         timings["TimeFrom"].strip(),
                         timings["TimeTo"].strip(),
                         "%I:%M %p",
                     )
-                except:
-                    pass
+            except Exception as e:
+                self.logger.error(f"Failed to parse hours: {e}")
             apply_category(Categories.SHOP_JEWELRY, item)
             yield item
