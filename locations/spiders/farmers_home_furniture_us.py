@@ -4,6 +4,8 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class FarmersHomeFurnitureUSSpider(scrapy.Spider):
@@ -15,6 +17,9 @@ class FarmersHomeFurnitureUSSpider(scrapy.Spider):
     }
     allowed_domains = ["www.farmershomefurniture.com"]
     start_urls = ["https://www.farmershomefurniture.com/store-list.inc"]
+    user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response):
         for store in response.xpath("//tr"):
