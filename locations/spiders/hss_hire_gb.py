@@ -28,7 +28,11 @@ class HssHireGBSpider(SitemapSpider):
         )
         item["ref"] = item["website"] = response.url
 
-        item["opening_hours"] = self.parse_opening_hours(response.xpath("//main//ul/li"))
+        try:
+            item["opening_hours"] = self.parse_opening_hours(response.xpath("//main//ul/li"))
+        except:
+            self.logger.error("Error parsing opening hours")
+
         extract_email(item, response)
         extract_phone(item, response)
         extract_google_position(item, response)
