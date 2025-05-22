@@ -21,6 +21,7 @@ class CornerBakeryCafeUSSpider(CrawlSpider, StructuredDataSpider):
         item["ref"] = response.url
         if "opening on" in response.xpath('//*[@id="loc-about-this"]/p/text()').get("").lower():  # coming soon
             return
+        item["branch"] = item.pop("name", "")
         services = response.xpath('//*[@class="loc-amenities"]/span/text()').getall()
         apply_yes_no(Extras.WIFI, item, "Wifi" in services)
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in services)
