@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from scrapy.http import Response
@@ -22,9 +23,12 @@ class FarmersHomeFurnitureUSSpider(SitemapSpider):
     user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    coordinates_pattern = re.compile(r"position: {lat:\s*([-\d.]+)[,\s]+lng:\s*([-\d.]+)}")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = item["website"] = response.url
         item["addr_full"] = clean_address(response.xpath('//*[contains(@id,"address")]/span/text()').getall())
+        if coordinates := re.search(self.coordinates_pattern, response.text):
+            item["lat"], item["lon"] = coordinates.groups()
         yield item
