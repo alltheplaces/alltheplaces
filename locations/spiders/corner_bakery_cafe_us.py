@@ -1,7 +1,8 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,39 +15,6 @@ class CornerBakeryCafeUSSpider(CrawlSpider, StructuredDataSpider):
     ]
     rules = [Rule(LinkExtractor(allow=r"/location/[-\w]+/?$"), callback="parse_sd")]
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for hour in hours:
-            days, times = hour.split(" ")
-            open_hour, close_hour = times.split("-")
-            if len(days) > 2:
-                day = days.split(",")
-                for d in day:
-                    opening_hours.add_range(
-                        day=d,
-                        open_time=open_hour,
-                        close_time=close_hour,
-                        time_format="%H:%M",
-                    )
-            else:
-                opening_hours.add_range(
-                    day=days,
-                    open_time=open_hour,
-                    close_time=close_hour,
-                    time_format="%H:%M",
-                )
-
-        return opening_hours.as_opening_hours()
-
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["ref"] = response.url
-
-        try:
-            hours = self.parse_hours(ld_data["openingHours"])
-            if hours:
-                item["opening_hours"] = hours
-        except:
-            pass
-
         yield item
