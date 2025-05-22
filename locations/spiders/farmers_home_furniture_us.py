@@ -31,4 +31,5 @@ class FarmersHomeFurnitureUSSpider(SitemapSpider):
         item["addr_full"] = clean_address(response.xpath('//*[contains(@id,"address")]/span/text()').getall())
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
+        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("")
         yield item
