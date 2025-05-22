@@ -38,24 +38,31 @@ class MassachusettsDepartmentOfTransportationManholesUSSpider(ArcGISFeatureServe
                 self.logger.warning("Unknown manhole shape: {}".format(feature["ManholeType"]))
         match feature["Utility"]:
             case "Combined sewer":
+                item["extras"]["manhole"] = "sewer"
                 item["extras"]["utility"] = "sewerage"
-                item["extras"]["substance"] = "sewage;wastewater"
+                item["extras"]["substance"] = "rainwater;sewage;wastewater"
             case "Cable" | "Communication":
+                item["extras"]["manhole"] = "telecom"
                 item["extras"]["utility"] = "telecom"
             case "Drainage":
+                item["extras"]["manhole"] = "drain"
                 item["extras"]["utility"] = "stormwater"
                 item["extras"]["substance"] = "wastewater"
             case "Electric":
+                item["extras"]["manhole"] = "power"
                 item["extras"]["utility"] = "power"
             case "Gas":
+                item["extras"]["manhole"] = "gas"
                 item["extras"]["utility"] = "gas"
                 item["extras"]["substance"] = "gas"
             case "Sewer":
+                item["extras"]["manhole"] = "sewer"
                 item["extras"]["utility"] = "sewerage"
                 item["extras"]["substance"] = "sewage"
             case "Unknown" | None:
                 pass
             case "Water":
+                item["extras"]["manhole"] = "water"
                 item["extras"]["utility"] = "water"
                 item["extras"]["substance"] = "water"
             case _:
