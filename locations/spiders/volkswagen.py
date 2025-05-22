@@ -1,16 +1,18 @@
 from typing import Iterable
 
 from babel import Locale, UnknownLocaleError
+from geonamescache import GeonamesCache
 from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from geonamescache import GeonamesCache
-
 
 VOLKSWAGEN_SHARED_ATTRIBUTES = {"brand": "Volkswagen", "brand_wikidata": "Q246"}
-VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES = {"brand": "Volkswagen Commercial Vehicles", "brand_wikidata": "Q699709"}
+VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES = {
+    "brand": "Volkswagen Commercial Vehicles",
+    "brand_wikidata": "Q699709",
+}
 
 
 class VolkswagenSpider(JSONBlobSpider):
@@ -51,7 +53,7 @@ class VolkswagenSpider(JSONBlobSpider):
                     f'"country":"{country.lower()}","language":"{language.split("-")[0]}","content":"{content}",'
                     f'"envName":"prod","testScenarioId":null}},"signature":"{signature}"}}'
                     f'&lufthansaApiKey={api_key}&query={{"type":"DEALER","language":"{language}",'
-                    f'"countryCode":"{country}","dealerServiceFilter":[],"contentDealerServiceFilter":[],"usePrimaryTenant":true,"name":" "}}'                                    
+                    f'"countryCode":"{country}","dealerServiceFilter":[],"contentDealerServiceFilter":[],"usePrimaryTenant":true,"name":" "}}'
                 )
 
                 yield JsonRequest(
@@ -65,7 +67,6 @@ class VolkswagenSpider(JSONBlobSpider):
                     },
                 )
 
-
     def check_status(self, response):
         if response.status == 500:
             self.crawler.stats.set_value(
@@ -75,7 +76,6 @@ class VolkswagenSpider(JSONBlobSpider):
         else:
             yield from self.parse(response)
 
-
     def pre_process_data(self, feature: dict):
         feature["id"] = str(feature["coordinates"][0]) + str(feature["coordinates"][1]) + feature["brand"]
 
@@ -83,12 +83,11 @@ class VolkswagenSpider(JSONBlobSpider):
             if not feature["contact"]["website"].startswith("http"):
                 feature["contact"]["website"] = "".join(["https://", feature["contact"]["website"]])
 
-
     def post_process_item(self, item, response, location):
         item["lat"], item["lon"] = location["coordinates"]
         if item["country"] is None:
             item["country"] = response.meta["country"]
-        
+
         if location["brand"] == "V":
             item["brand"] = VOLKSWAGEN_SHARED_ATTRIBUTES["brand"]
             item["brand_wikidata"] = VOLKSWAGEN_SHARED_ATTRIBUTES["brand_wikidata"]
@@ -101,7 +100,6 @@ class VolkswagenSpider(JSONBlobSpider):
         # Some provided states are actually countries, where one country's search gives results for other nearby countries
         if item["state"] in ["Botswana", "Namibia"]:
             item["country"] = item.pop("state")
-
 
         if "rawServices" in location:
             if "DEALER_REVIEW" or "NEW_PC" in location["rawServices"]:
@@ -117,7 +115,6 @@ class VolkswagenSpider(JSONBlobSpider):
                 for service in location["rawServices"]:
                     self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
                 # self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{str(location['coordinates']) + str(location['name'])}")
-
 
         if "businessHours" in location and len(location["businessHours"]) > 0:
             item["opening_hours"] = OpeningHours()
