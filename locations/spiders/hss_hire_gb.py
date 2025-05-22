@@ -1,9 +1,11 @@
+from scrapy import Selector
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.structured_data_spider import extract_email, extract_phone
 
 
 class HssHireGBSpider(SitemapSpider):
@@ -25,15 +27,23 @@ class HssHireGBSpider(SitemapSpider):
             response.xpath('//*[@class="rounded-2xl bg-gray-100 p-5 lg:p-8"]/p').xpath("normalize-space()").get()
         )
         item["ref"] = item["website"] = response.url
-        item["email"] = response.xpath('//*[contains(@href,"mailto:")]//text()').get()
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]//text()').get()
+
+        item["opening_hours"] = self.parse_opening_hours(response.xpath("//main//ul/li"))
+        extract_email(item, response)
+        extract_phone(item, response)
         extract_google_position(item, response)
-        item["opening_hours"] = OpeningHours()
-        for day_time in response.xpath("//main//ul/li"):
+
+        yield item
+
+    def parse_opening_hours(self, rules: Selector) -> OpeningHours:
+        oh = OpeningHours()
+        for day_time in rules:
             day = day_time.xpath("./span[1]/text()").get()
             time = day_time.xpath("./span[2]/text()").get()
-            if time in ["Closed"]:
+            if day == "Bank holidays":
                 continue
-            open_time, close_time = time.split("-")
-            item["opening_hours"].add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
-        yield item
+            if time == "Closed":
+                oh.set_closed(day)
+            else:
+                oh.add_range(day, *time.split(" - "))
+        return oh
