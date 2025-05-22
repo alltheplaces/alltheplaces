@@ -14,6 +14,7 @@ class CornerBakeryCafeUSSpider(CrawlSpider, StructuredDataSpider):
         "https://cornerbakerycafe.com/locations/all",
     ]
     rules = [Rule(LinkExtractor(allow=r"/location/[-\w]+/?$"), callback="parse_sd")]
+    wanted_types = [["Restaurant", "CafeOrCoffeeShop"]]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["ref"] = response.url
