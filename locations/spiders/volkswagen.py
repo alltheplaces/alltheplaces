@@ -114,7 +114,6 @@ class VolkswagenSpider(JSONBlobSpider):
             else:
                 for service in location["rawServices"]:
                     self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
-                # self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{str(location['coordinates']) + str(location['name'])}")
 
         if "businessHours" in location and len(location["businessHours"]) > 0:
             item["opening_hours"] = OpeningHours()
