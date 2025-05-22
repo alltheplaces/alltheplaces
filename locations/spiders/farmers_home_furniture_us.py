@@ -32,4 +32,5 @@ class FarmersHomeFurnitureUSSpider(SitemapSpider):
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("")
+        # opening hours are not in a good format, hence ignored.
         yield item
