@@ -18,4 +18,6 @@ class CornerBakeryCafeUSSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["ref"] = response.url
+        if "opening on" in response.xpath('//*[@id="loc-about-this"]/p/text()').get("").lower():  # coming soon
+            return
         yield item
