@@ -8,4 +8,3 @@ class BleuLibelluleFRSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Bleu Libellule", "brand_wikidata": "Q101830610"}
     sitemap_urls = ["https://magasins.bleulibellule.com/sitemap.xml"]
     sitemap_rules = [(r"magasins\.bleulibellule\.com/[-\w]+/[-\w]+/[-\w]+/[-\w]+", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
