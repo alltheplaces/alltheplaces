@@ -13,6 +13,7 @@ class TalismanHireSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"talisman\.co\.za/[-\w]+/[-\w]+/talisman-hire-[-\w]+$", "parse_sd")]
     skip_auto_cc_spider_name = True
     skip_auto_cc_domain = True
+    drop_attributes = {"facebook", "twitter"}
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         ld_data.get("address", {}).pop("addressCountry", None)  # It's always ZA, which isn't true
