@@ -20,16 +20,13 @@ class VolkswagenSpider(JSONBlobSpider):
     name = "volkswagen"
     locations_key = "dealers"
     start_urls = ["https://www.vw.com/en.global-config.json"]
-    
-    BRAND_MAPPING = {
-        "V": VOLKSWAGEN_SHARED_ATTRIBUTES,
-        "N": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES
-    }
+
+    BRAND_MAPPING = {"V": VOLKSWAGEN_SHARED_ATTRIBUTES, "N": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES}
 
     SERVICES_MAPPING = {
         "SERVICE": Extras.CAR_REPAIR,
         "MOT": "service:vehicle:inspection",
-        "USED_PC": Extras.USED_CAR_SALES
+        "USED_PC": Extras.USED_CAR_SALES,
     }
 
     countries = {}
