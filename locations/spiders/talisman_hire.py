@@ -2,6 +2,8 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
+from locations.spiders.buco_na_za import BucoNAZASpider
+from locations.spiders.builders import BuildersSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -22,4 +24,18 @@ class TalismanHireSpider(SitemapSpider, StructuredDataSpider):
         item["branch"] = item.pop("name").removeprefix("Talisman Hire ")
         if item.get("state") == "Mpumalanga":  # country wrongly reverse geocoded as SZ
             item["country"] = "ZA"
+
+        if "inside-" in response.url:
+            located_in_location = response.url.split("inside-")[-1].strip("/") if "inside-" in response.url else ""
+            if located_in_location == "buco":
+                item["located_in"] = BucoNAZASpider.item_attributes["brand"]
+                item["located_in_wikidata"] = BucoNAZASpider.item_attributes["brand_wikidata"]
+            elif located_in_location == "builders":
+                item["located_in"] = BuildersSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = BuildersSpider.item_attributes["brand_wikidata"]
+            elif located_in_location == "builders-express":
+                item["located_in"] = located_in_location.replace("-", " ").title()
+                item["located_in_wikidata"] = BuildersSpider.item_attributes["brand_wikidata"]
+            else:
+                item["located_in"] = located_in_location.replace("-", " ").title()
         yield item
