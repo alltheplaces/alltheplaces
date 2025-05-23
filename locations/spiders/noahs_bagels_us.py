@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class NoahsBagelsSpider(SitemapSpider, StructuredDataSpider):
+class NoahsBagelsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "noahs_bagels_us"
     item_attributes = {"brand": "Noah's Bagels", "brand_wikidata": "Q64517373"}
     sitemap_urls = ["https://locations.noahs.com/robots.txt"]
