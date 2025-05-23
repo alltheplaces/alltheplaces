@@ -1,10 +1,10 @@
 from typing import Iterable
 
-from babel import Locale, UnknownLocaleError
 from geonamescache import GeonamesCache
 from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.country_utils import get_locale
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -20,15 +20,23 @@ class VolkswagenSpider(JSONBlobSpider):
     name = "volkswagen"
     locations_key = "dealers"
     start_urls = ["https://www.vw.com/en.global-config.json"]
+    
+    BRAND_MAPPING = {
+        "V": VOLKSWAGEN_SHARED_ATTRIBUTES,
+        "N": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES
+    }
+
+    SERVICES_MAPPING = {
+        "SERVICE": Extras.CAR_REPAIR,
+        "MOT": "service:vehicle:inspection",
+        "USED_PC": Extras.USED_CAR_SALES
+    }
 
     countries = {}
 
     for country in GeonamesCache().get_countries().keys():
-        try:
-            lang = str(Locale.parse("und_" + country))
-            countries[country] = lang.replace("_", "-")
-        except UnknownLocaleError:
-            pass
+        if lang := get_locale(country):
+            countries[country] = lang
 
     countries.pop("BE")  # volkswagen_be spider
     countries.pop("BW")  # included in ZA
@@ -88,12 +96,9 @@ class VolkswagenSpider(JSONBlobSpider):
         if item["country"] is None:
             item["country"] = response.meta["country"]
 
-        if location["brand"] == "V":
-            item["brand"] = VOLKSWAGEN_SHARED_ATTRIBUTES["brand"]
-            item["brand_wikidata"] = VOLKSWAGEN_SHARED_ATTRIBUTES["brand_wikidata"]
-        elif location["brand"] == "N" or location["brand"] == "n":
-            item["brand"] = VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES["brand"]
-            item["brand_wikidata"] = VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES["brand_wikidata"]
+        if match := self.BRAND_MAPPING.get(location["brand"].upper()):
+            item["brand"] = match["brand"]
+            item["brand_wikidata"] = match["brand_wikidata"]
         else:
             self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{location['brand']}")
 
@@ -102,17 +107,11 @@ class VolkswagenSpider(JSONBlobSpider):
             item["country"] = item.pop("state")
 
         if "rawServices" in location:
-            if "DEALER_REVIEW" or "NEW_PC" in location["rawServices"]:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, "SERVICE" in location["rawServices"])
-                apply_yes_no(Extras.USED_CAR_SALES, item, "USED_PC" in location["rawServices"])
-            elif "SERVICE" in location["rawServices"]:
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            elif "USED_PC" in location["rawServices"]:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.USED_CAR_SALES, item, True)
-            else:
-                for service in location["rawServices"]:
+            apply_category(Categories.SHOP_CAR, item)
+            for service in location["rawServices"]:
+                if match := self.SERVICES_MAPPING.get(service):
+                    apply_yes_no(match, item, True)
+                else:
                     self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
 
         if "businessHours" in location and len(location["businessHours"]) > 0:
