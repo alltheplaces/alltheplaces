@@ -21,12 +21,13 @@ class JohnDorysZASpider(scrapy.Spider):
             )
 
     def parse_details(self, response):
-        item = DictParser.parse(response.json()["res"]["store"])
-        item["website"] = "/".join(
-            [
-                "https://www.johndorys.com/za/restaurants",
-                item["state"].lower().replace(" ", "-").replace("'", ""),
-                item["name"].lower().replace(" ", "-").replace("'", ""),
-            ]
-        )
-        yield item
+        if data := response.json().get("res").get("store"):
+            item = DictParser.parse(data)
+            item["website"] = "/".join(
+                [
+                    "https://www.johndorys.com/za/restaurants",
+                    item["state"].lower().replace(" ", "-").replace("'", ""),
+                    item["name"].lower().replace(" ", "-").replace("'", ""),
+                ]
+            )
+            yield item
