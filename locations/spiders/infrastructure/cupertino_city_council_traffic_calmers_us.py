@@ -30,13 +30,13 @@ class CupertinoCityCouncilTrafficCalmersUSSpider(ArcGISFeatureServerSpider):
                     item["extras"]["height"] = f"{delineator_height_in}\""
             case "OM2-2H":
                 # Reflective sign -- ignore.
-                pass
+                return
             case "Raised Curb":
-                # Unknown calming device
-                pass
+                # Unknown calming device -- ignore.
+                return
             case "Soldier":
-                # Unknown calming device
-                pass
+                # Unknown calming device -- ignore.
+                return
             case "Speed Bump":
                 apply_category({"traffic_calming": "bump"}, item)
             case "Speed Hump":
@@ -44,8 +44,8 @@ class CupertinoCityCouncilTrafficCalmersUSSpider(ArcGISFeatureServerSpider):
             case "Speed Table":
                 apply_category({"traffic_calming": "table"}, item)
             case "Type Q":
-                # Unknown calming device
-                pass
+                # Unknown calming device -- ignore.
+                return
             case _:
                 self.logger.warning("Unknown traffic calming device type: {}".format(feature["DeviceType"]))
                 return
