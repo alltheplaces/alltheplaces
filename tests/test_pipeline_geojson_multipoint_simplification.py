@@ -35,7 +35,7 @@ def test_multi_coordinate_multipoint():
 def test_undefined_geometry():
     item, pipeline, spider = get_objects()
     pipeline.process_item(item, spider)
-    assert item.get("geometry", None) is None
+    assert item.get("geometry") is None
 
 
 def test_blank_geometry():

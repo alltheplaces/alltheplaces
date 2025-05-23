@@ -17,6 +17,7 @@ class GeoJSONGeometryReprojectionPipeline:
 
         Currently only works for `Point` geometry.
         """
-        if new_geometry := convert_gj2008_to_rfc7946_point_geometry(item["geometry"]):
-            item["geometry"] = new_geometry
+        if geometry := item.get("geometry"):
+            if new_geometry := convert_gj2008_to_rfc7946_point_geometry(geometry):
+                item["geometry"] = new_geometry
         return item

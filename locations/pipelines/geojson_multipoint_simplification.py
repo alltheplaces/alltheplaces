@@ -12,6 +12,7 @@ class GeoJSONMultiPointSimplificationPipeline:
         can be changed from MultiPoint to Point. Point is simpler for ATP
         users and tools to work with and has broader support than MultiPoint.
         """
-        if new_geometry := extract_geojson_point_geometry(item["geometry"]):
-            item["geometry"] = new_geometry
+        if geometry := item.get("geometry"):
+            if new_geometry := extract_geojson_point_geometry(geometry):
+                item["geometry"] = new_geometry
         return item
