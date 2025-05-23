@@ -9,7 +9,12 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class CupertinoCityCouncilTreesUSSpider(ArcGISFeatureServerSpider):
     name = "cupertino_city_council_trees_us"
-    item_attributes = {"operator": "Cupertino City Council", "operator_wikidata": "Q134548005", "state": "CA", "nsi_id": "N/A"}
+    item_attributes = {
+        "operator": "Cupertino City Council",
+        "operator_wikidata": "Q134548005",
+        "state": "CA",
+        "nsi_id": "N/A",
+    }
     host = "gis.cupertino.org"
     context_path = "cupgis"
     service_id = "Public/AmazonData"
