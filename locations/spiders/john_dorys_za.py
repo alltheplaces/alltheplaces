@@ -1,27 +1,32 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import re
+from typing import Any
+
+import scrapy
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
 
 
-class JohnDorysZASpider(CrawlSpider, StructuredDataSpider):
+class JohnDorysZASpider(scrapy.Spider):
     name = "john_dorys_za"
     item_attributes = {"brand": "John Dory's", "brand_wikidata": "Q130140080", "extras": Categories.RESTAURANT.value}
-    start_urls = ["https://www.johndorys.com/za/find-a-restaurant/?ParentId=1300&Results=true"]
-    allowed_domains = ["johndorys.com", "johndorys.co.za"]
-    rules = [
-        Rule(
-            LinkExtractor(allow=r"https://www.johndorys.com/za/find-a-restaurant/.+"), callback="parse_sd", follow=True
-        )
-    ]
+    start_urls = ["https://www.johndorys.com/za/restaurants/all"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
-        item["website"] = response.url  # SD has outdated url for at least some locations
-        item.pop("image", None)
-        if "JohnDorysSA" in item.get("facebook"):
-            item.pop("facebook")
-        if "johndoryssa" in item.get("twitter"):
-            item.pop("twitter")
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        url_key = re.findall(r"\"modifiedOn\":\d+},(\d+),", response.xpath('//*[@id="__NUXT_DATA__"]/text()').get())
+        for key in url_key:
+            yield JsonRequest(
+                url="https://www.johndorys.com/api/gostore", data={"key": f"{key}"}, callback=self.parse_details
+            )
+
+    def parse_details(self, response):
+        item = DictParser.parse(response.json()["res"]["store"])
+        item["website"] = "/".join(
+            [
+                "https://www.johndorys.com/za/restaurants",
+                item["state"].lower().replace(" ", "-").replace("'", ""),
+                item["name"].lower().replace(" ", "-").replace("'", ""),
+            ]
+        )
         yield item
