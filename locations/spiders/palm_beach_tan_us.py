@@ -42,6 +42,7 @@ class PalmBeachTanUSSpider(SitemapSpider):
             .replace(" pm", "PM")
             .replace("-", " ")
             .replace("—", "")
+            .replace("89:00PM", "9:00PM")
             .split()
         )
         hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
@@ -52,6 +53,6 @@ class PalmBeachTanUSSpider(SitemapSpider):
             if ":" not in day[1]:
                 continue
             oh.add_range(DAYS_EN[day[0]], day[1], day[2], "%I:%M%p")
-        properties["opening_hours"] = oh.as_opening_hours()
+        properties["opening_hours"] = oh
 
         yield Feature(**properties)

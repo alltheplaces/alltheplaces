@@ -22,11 +22,13 @@ class CuisinellaFRSpider(SitemapSpider, StructuredDataSpider):
         # }
 
         if (ld_data.get("geo") or {}).get("latitude").endswith("?.Latitude"):
-            ld_data["geo"]["latitude"], ld_data["geo"]["longitude"] = (
-                ld_data["geo"]["latitude"].split("?", 1)[0].split(", ", 1)
-            )
+            lat_lon = ld_data["geo"]["latitude"].split("?", 1)
+            if lat_lon[0]:
+                ld_data["geo"]["latitude"], ld_data["geo"]["longitude"] = lat_lon[0].split(", ", 1)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
-        item["branch"] = html.unescape(item.pop("name"))
-        yield item
+        if item.get("name"):
+            item["branch"] = html.unescape(item.pop("name"))
+            # no name indicates a template page, perhaps coming soon.
+            yield item

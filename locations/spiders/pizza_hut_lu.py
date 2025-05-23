@@ -1,31 +1,30 @@
-import re
+from typing import Any, Iterable
 
-import scrapy
-from scrapy.linkextractors import LinkExtractor
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class PizzaHutLUSpider(scrapy.Spider):
+class PizzaHutLUSpider(Spider):
     name = "pizza_hut_lu"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    start_urls = ["https://restaurants.pizzahut.lu"]
 
-    def parse(self, response, **kwargs):
-        for link in LinkExtractor(restrict_xpaths='//*[@id="restaurant_submenu"]').extract_links(response):
-            parsed_link = re.sub(r"/restaurant/(.+)", r"/pages/restaurant.php?attr=\1", link.url)
-            yield response.follow(parsed_link, callback=self.parse_restaurant, cb_kwargs=dict(website=link.url))
+    def start_requests(self) -> Iterable[JsonRequest]:
+        # https://restaurants.pizzahut.lu/ provide few locations and without coordinates.
+        yield JsonRequest(
+            url="https://takeout.pizzahut.lu/api/1/restaurants/",
+        )
 
-    def parse_restaurant(self, response, **kwargs):
-        item = Feature()
-        item["ref"] = item["website"] = kwargs.get("website")
-        address = response.xpath('//*[@id="left_bar_content"]//b/text()').getall()
-        item["name"] = "Pizza Hut " + address[0].title()
-        item["addr_full"] = clean_address(address[1:]).strip(", Tél.")
-        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "")
-        if map_data := response.xpath('//script[contains(text(), "google.maps.LatLng")]/text()').get():
-            item["lat"], item["lon"] = re.search(r"LatLng\(([-\d.]+)\s*,\s*([-\d.]+)\)", map_data).groups()
-        apply_category(Categories.RESTAURANT, item)
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json():
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Pizza Hut ")
+            item["geometry"] = location.get("coordinate")
+            item["addr_full"] = merge_address_lines([location.get("address"), location.get("address_2")])
+            email = location.get("email") or ""
+            item["email"] = email if "@test.com" not in email else None
+            apply_category(Categories.RESTAURANT, item)
+            yield item

@@ -25,13 +25,15 @@ class BurgerKingRUSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        if "RSA PRIVATE KEY" in response.text:  # set cookies using the response received if expected JSON is not there
+        if "PRIVATE KEY" in response.text:  # set cookies using the response received if expected JSON is not there
             sp_id = ""
             rsa_key_pem = ""
             encrypted_text = ""
             if match := re.search(r"\"spid=(\w+)\"", response.text):
                 sp_id = match.group(1)
-            if match := re.search(r"(-+BEGIN RSA PRIVATE KEY-+.+?-+END RSA PRIVATE KEY-+)", response.text, re.DOTALL):
+            if match := re.search(
+                r"(-+BEGIN (RSA)?\s*PRIVATE KEY-+.+?-+END (RSA)?\s*PRIVATE KEY-+)", response.text, re.DOTALL
+            ):
                 rsa_key_pem = match.group(1)
             if match := re.search(r"crypto.Cipher.decrypt\(\"(\w+)\",", response.text):
                 encrypted_text = match.group(1)
