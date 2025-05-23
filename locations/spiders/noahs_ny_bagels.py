@@ -14,6 +14,8 @@ class NoahsNyBagelsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/us/[^/]+/[^/]+/[0-9a-z-]+$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Noah's NY Bagels ")
+
         item["lat"], item["lon"] = re.search(
             r"latitude%22%3A(-?\d+\.\d+)%2C%22longitude%22%3A(-?\d+\.\d+)",
             response.xpath('//*[contains(text(),"pageProps")]/text()').get(),
