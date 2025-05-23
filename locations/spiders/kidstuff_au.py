@@ -14,5 +14,6 @@ class KidstuffAUSpider(StockInStoreSpider):
 
     def parse_item(self, item: Feature, location: dict):
         item["website"] = urljoin(self.api_origin, item["website"])
+        item["branch"] = item.pop("name").removeprefix("Kidstuff ")
         apply_category(Categories.SHOP_TOYS, item)
         yield item
