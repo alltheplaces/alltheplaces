@@ -439,6 +439,7 @@ def country_coordinates(return_lookup: bool = False) -> dict:
     else:
         return file
 
+
 def extract_geojson_point_geometry(geometry: dict) -> dict | None:
     """
     Attempts to fuzzily extract RFC7946 GeoJSON Point Geometry from a
@@ -487,7 +488,9 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:
             return None
         if not isinstance(geometry["coordinates"][0][1], float) and not isinstance(geometry["coordinates"][0][1], int):
             return None
-    elif not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][0], int)) or not (isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)):
+    elif not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][0], int)) or not (
+        isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
+    ):
         return None
 
     # At this point, we either have validly typed Point or Multi-Point geometry.
@@ -504,6 +507,7 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:
         return reprojected_geometry
 
     return None
+
 
 def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:
     """
@@ -534,7 +538,9 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:
         return None
     if len(geometry["coordinates"]) != 2:
         return None
-    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][1], int)) or not (isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)):
+    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][1], int)) or not (
+        isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
+    ):
         return None
     if geometry.get("crs"):
         if geometry["crs"].get("type") != "name":
@@ -544,9 +550,13 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:
         if not geometry["crs"]["properties"].get("name"):
             return None
         if geometry["crs"]["properties"]["name"].startswith("http://www.opengis.net/def/objectType/EPSG/0/"):
-            original_projection = int(geometry["crs"]["properties"]["name"].removeprefix("http://www.opengis.net/def/objectType/EPSG/0/"))
+            original_projection = int(
+                geometry["crs"]["properties"]["name"].removeprefix("http://www.opengis.net/def/objectType/EPSG/0/")
+            )
         elif geometry["crs"]["properties"]["name"].startswith("urn:ogc:def:objectType:EPSG::"):
-            original_projection = int(geometry["crs"]["properties"]["name"].removeprefix("urn:ogc:def:objectType:EPSG::"))
+            original_projection = int(
+                geometry["crs"]["properties"]["name"].removeprefix("urn:ogc:def:objectType:EPSG::")
+            )
         elif geometry["crs"]["properties"]["name"].startswith("EPSG:"):
             original_projection = int(geometry["crs"]["properties"]["name"].removeprefix("EPSG:"))
         elif geometry["crs"]["properties"]["name"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84":
@@ -559,7 +569,9 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:
             lat = geometry["coordinates"][1]
             lon = geometry["coordinates"][0]
         else:
-            lat, lon = Transformer.from_crs(original_projection, 4326).transform(geometry["coordinates"][0], geometry["coordinates"][1])
+            lat, lon = Transformer.from_crs(original_projection, 4326).transform(
+                geometry["coordinates"][0], geometry["coordinates"][1]
+            )
     else:
         lat = geometry["coordinates"][1]
         lon = geometry["coordinates"][0]
@@ -570,4 +582,3 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:
         "coordinates": [lon, lat],
     }
     return new_geometry
-    

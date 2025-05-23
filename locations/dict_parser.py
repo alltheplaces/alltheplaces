@@ -292,7 +292,14 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        if obj.get("geometry") and obj["geometry"].get("type") in ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]:
+        if obj.get("geometry") and obj["geometry"].get("type") in [
+            "Point",
+            "MultiPoint",
+            "LineString",
+            "MultiLineString",
+            "Polygon",
+            "MultiPolygon",
+        ]:
             if rfc7946_point_geometry := extract_geojson_point_geometry(obj["geometry"]):
                 item["geometry"] = rfc7946_point_geometry
             else:

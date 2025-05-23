@@ -133,6 +133,7 @@ def test_bbox_to_geojson():
         "type": "Polygon",
     }
 
+
 def test_extract_geojson_point_geometry():
     rfc7946_point_geometry_list = {
         "type": "Point",
@@ -208,6 +209,7 @@ def test_extract_geojson_point_geometry():
     assert extract_geojson_point_geometry(rfc7946_point_coordinates_invalid_2) is None
     assert extract_geojson_point_geometry(rfc7946_point_coordinates_invalid_3) is None
 
+
 def test_convert_gj2008_to_rfc7946_point_geometry():
     gj2008_point_geometry_crs84_url_list = {
         "type": "Point",
@@ -261,6 +263,7 @@ def test_convert_gj2008_to_rfc7946_point_geometry():
     assert convert_gj2008_to_rfc7946_point_geometry(gj2008_point_geometry_crs84_urn_tuple) == tentwenty_rfc7946
     assert convert_gj2008_to_rfc7946_point_geometry(gj2008_point_geometry_epsg4326_url_list) == tentwenty_rfc7946
     assert convert_gj2008_to_rfc7946_point_geometry(gj2008_point_geometry_epsg7855_urn_list) == aus_rfc7946
+
 
 def test_antimeridian_safe_longitude_sum():
     assert antimeridian_safe_longitude_sum(179.9, 0.2) == -179.9
