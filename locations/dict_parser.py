@@ -302,11 +302,11 @@ class DictParser:
         ]:
             if rfc7946_point_geometry := extract_geojson_point_geometry(obj["geometry"]):
                 item["geometry"] = rfc7946_point_geometry
-            else:
-                # Source geometry is seemingly supplied as a non-Point
-                # geometry type (such as Polygon) and should be returned
-                # as-is. There are no further checks done to ensure this
-                # geometry is valid RFC7946 GeoJSON or GJ2008 geometry.
+            elif obj["geometry"]["type"] != "Point":
+                # Source geometry is supplied as a non-Point geometry type
+                # (such as Polygon) and should be returned as-is. There are no
+                # further checks done to ensure this geometry is valid RFC7946
+                # GeoJSON or GJ2008 geometry.
                 item["geometry"] = obj["geometry"]
         else:
             location = DictParser.get_first_key(
