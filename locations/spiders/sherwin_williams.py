@@ -91,7 +91,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
-                    meta={"store_type": "Sherwin-Williams Paint Store"},
+                    meta={"store_type": "Sherwin-Williams"},
                 )
 
         with open_searchable_points("ca_centroids_50mile_radius.csv") as points:
@@ -102,7 +102,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
-                    meta={"store_type": "Sherwin-Williams Paint Store"},
+                    meta={"store_type": "Sherwin-Williams"},
                 )
 
         for lat, lon in addtional_lat_lons:
@@ -110,7 +110,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
             yield scrapy.Request(
                 url=base_url + urlencode(params),
                 callback=self.parse,
-                meta={"store_type": "Sherwin-Williams Paint Store"},
+                meta={"store_type": "Sherwin-Williams"},
             )
 
         # the other store types are much more sparse so we can search with a larger
@@ -147,7 +147,8 @@ class SherwinWilliamsSpider(scrapy.Spider):
             for store in data["stores"]:
                 properties = {
                     "ref": store["storeNumber"],
-                    "name": store["name"],
+                    "name": store_type,
+                    "branch": store["name"],
                     "addr_full": html.unescape(store["address"].strip()),
                     "city": store["city"].strip(),
                     "state": store["state"].strip(),
@@ -156,10 +157,6 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     "lat": float(store["latitude"]),
                     "lon": float(store["longitude"]),
                     "website": "https://www.sherwin-williams.com" + store["url"],
-                    "brand": store_type,
-                    "extras": {
-                        "number": store["storeNumber"],
-                    },
                 }
 
                 yield Feature(**properties)

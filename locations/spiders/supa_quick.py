@@ -21,8 +21,8 @@ class SupaQuickSpider(SitemapSpider, StructuredDataSpider):
             item.pop("facebook")
         for brand in SUPA_QUICK_BRANDS:
             if "name" in item and brand in item["name"]:
-                item["brand"] = brand
                 item["branch"] = item.pop("name").replace(brand, "").strip()
+                item["name"] = brand
         item["opening_hours"] = OpeningHours()
         for row in response.xpath('.//div[contains(text(), "REGULAR HOURS")]/.././/table/tr'):
             hours_string = re.sub(r"(?<=\d)h(?=\d)", ":", row.xpath("string(.)").get())

@@ -4,7 +4,8 @@ import re
 from scrapy import FormRequest, Request, Spider
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_EN, OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 from locations.pipelines.address_clean_up import clean_address
 
 
@@ -16,6 +17,7 @@ class NextSpider(Spider):
     PINK = {"brand": "Pink", "brand_wikidata": "Q20716793"}
     item_attributes = NEXT
     start_urls = ["https://www.next.co.uk/countryselect"]
+    handle_httpstatus_all = True
 
     @staticmethod
     def get_time(time: str) -> str:
@@ -50,17 +52,13 @@ class NextSpider(Spider):
 
     def parse_country(self, response, **kwargs):
         for city in response.xpath("//option/@value").getall():
-            yield Request(
-                url=f"https://stores.next.co.uk/stores/single/{city}",
-                callback=self.parse_location,
-            )
+            yield Request(url=f"https://stores.next.co.uk/stores/single/{city}", callback=self.parse_location)
 
     def parse_location(self, response, **kwargs):
         if data := response.xpath('//script[contains(.,"window.lctr.single_search")]/text()').re_first(
             r"window\.lctr\.results\.push\(({.+})\)"
         ):
             location = json.loads(data)
-
             location["street_address"] = clean_address(
                 [
                     # Fields aren't descriptive of contents
@@ -70,9 +68,7 @@ class NextSpider(Spider):
                     location.pop("town"),
                 ]
             )
-
             item = DictParser.parse(location)
-
             item["ref"] = location["location_id"]
             item["branch"] = item.pop("name")
             item["website"] = response.url
@@ -91,4 +87,30 @@ class NextSpider(Spider):
             if "phone" in item and item["phone"] is not None:
                 if item["phone"].replace(" ", "").startswith("+443"):
                     item.pop("phone", None)
+            yield item
+        elif data := response.xpath('//script[@type="application/ld+json"]/text()').get():
+            location = json.loads(data)
+            item = LinkedDataParser.parse_ld(location)
+            item["ref"] = location["url"].split("/")[-1]
+            item["branch"] = item.pop("name")
+            item["street_address"] = location["address"]["streetAddress"]
+            item["city"] = location["address"]["addressLocality"]
+            item["postcode"] = location["address"]["postalCode"]
+            item["country"] = location["address"]["addressCountry"]
+            oh = OpeningHours()
+            for opening_hour in location["openingHoursSpecification"]:
+                if "opens" in opening_hour:
+                    oh.add_range(
+                        DAYS_EN[opening_hour["dayOfWeek"]],
+                        opening_hour["opens"][0:5],
+                        opening_hour["closes"][0:5],
+                    )
+                    item["opening_hours"] = oh
+            if re.search(r"Victoria'?s Secret", item["branch"]):
+                if "PINK" in item["branch"]:
+                    item.update(self.PINK)
+                else:
+                    item.update(self.VICTORIAS_SECRET)
+            # else normal store
+
             yield item

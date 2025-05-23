@@ -280,6 +280,112 @@ def make_subdivisions(
     return tiles
 
 
+def antimeridian_safe_longitude_sum(longitude: float, summand: float, precision: int = 9) -> float:
+    """
+    Adds or subtracts a decimal degree value from a longitude, factoring in
+    the antimeridian at a longitude of -180.0 or 180.0. For example, if
+    `longitude` is -179.9 and `summand` is 0.2, the result will be 179.9. As
+    a further example, if `longitude` is 179.9 and `summand` is 0.2, the
+    result will be -179.9.
+    :param longitude: Longitude as a floating point decimal degrees number
+                       within range [-180.0, 180.0].
+    :param summand: Floating point decimal degrees number. This function will
+                    handle large summands (such as 720.0) by clamping the
+                    returned longitude to range [-179.999..., 180.0].
+    :param precision: The number of decimal places to round latitudes and
+                      longitudes to. Default is 9 decimal places.
+    :return: Result of the sum of `longitude` and `summand` as a floating
+             point number in range [-179.999..., 180.0]. A value of -180.0 is
+             never returned, instead, 180.0 will be returned.
+    """
+    if longitude + summand > 0.0:
+        modulo_sum = (longitude + summand) % 360.0
+    else:
+        modulo_sum = (longitude + summand) % -360.0
+    if modulo_sum > 180.0:
+        return round(-180.0 + (modulo_sum % 180.0), precision)
+    elif modulo_sum < -180.0:
+        return round(180.0 + (modulo_sum % -180.0), precision)
+    elif modulo_sum == -180.0:
+        return 180.0
+    return round(modulo_sum, precision)
+
+
+def bbox_split(
+    bbox: tuple[tuple[float, float], tuple[float, float]],
+    lat_parts: int = 2,
+    lon_parts: int = 2,
+    precision: int = 2,
+    buffer: float = 0.01,
+) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    """
+    Splits a bounding box rectangle by a given number of latitude and
+    longitude partitions. Split bounding boxes are by default slightly
+    buffered (have their area increased in all dimensions) so each split
+    bounding box overlaps slightly. This buffering is done to accomodate APIs
+    which may round coordinates in unknown ways, or include/exclude features
+    exactly on the edge of a bounding box.
+
+    :param bbox: A tuple of two coordinates, the first being a Northwest
+                 coordinate, the second being a Southeast coordinate. Each
+                 coordinate is specified as a floating point number for the
+                 latitude, followed by a floating point number for the
+                 longitude. Latitudes must be in range [-90, 90] and
+                 longitudes must be in range [-180, 180].
+    :param lat_parts: The number of partitions to make for latitude.
+    :param lon_parts: The number of partitions to make for longitude.
+    :param precision: The number of decimal places to round latitudes and
+                      longitudes to. Default is 2 decimal places.
+    :param buffer: The percentage buffer to apply to latitudes and longitudes
+                   to expand a bounding box in NW and SE directions. A
+                   positive floating point number typically in the range of
+                   [0, 0.1] (0% to 10% expansion of a bounding box) should be
+                   specified. Default is 0.01 (1%) meaning the bounding box of
+                   ((10,10),(-10,-10)) will be expanded to
+                   ((10.1,10.1),(-10.1,10.1)). This bounding box overlap is
+                   useful to avoid problems of not knowing if an API endpoint
+                   will apply rounding and will include or exclude features
+                   on the border of a bounding box.
+    :return: List of smaller (split) bounding boxes where each bounding box
+             matches the format used for the `bbox` parameter.
+    """
+    bbox_list = []
+
+    coord_nw = bbox[0]
+    lat_nw = coord_nw[0]
+    lon_nw = coord_nw[1]
+    coord_se = bbox[1]
+    lat_se = coord_se[0]
+    lon_se = coord_se[1]
+
+    if lat_se > lat_nw:
+        raise ValueError("Supplied SE coordinates cannot be north of the supplied NW coordinates.")
+
+    lat_inc = abs((lat_se - lat_nw) / lat_parts)
+    if lon_nw >= 0.0 and lon_se < 0.0:
+        lon_inc = ((180.0 - lon_nw) + (180.0 + lon_se)) / lat_parts
+    else:
+        lon_inc = abs((lon_se - lon_nw) / lon_parts)
+
+    for lon_gridref in range(0, lon_parts):
+        bbox_lon_nw = antimeridian_safe_longitude_sum(lon_nw, lon_gridref * lon_inc)
+        for lat_gridref in range(0, lat_parts):
+            bbox_lat_nw = lat_nw - lat_gridref * lat_inc
+
+            def clamp(n: float, minimum: float, maximum: float) -> float:
+                return max(min(maximum, n), minimum)
+
+            new_bbox_lat_nw = clamp(round(bbox_lat_nw + (lat_inc * buffer), precision), -90.0, 90.0)
+            new_bbox_lon_nw = round(antimeridian_safe_longitude_sum(bbox_lon_nw, -lon_inc * buffer), precision)
+            new_bbox_lat_se = clamp(round(bbox_lat_nw - (lat_inc + (lat_inc * buffer)), precision), -90.0, 90.0)
+            new_bbox_lon_se = round(
+                antimeridian_safe_longitude_sum(bbox_lon_nw, lon_inc + (lon_inc * buffer)), precision
+            )
+            bbox_list.append(((new_bbox_lat_nw, new_bbox_lon_nw), (new_bbox_lat_se, new_bbox_lon_se)))
+
+    return bbox_list
+
+
 def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float, float]) -> bool:
     """
     Returns true if the lat/lon point is contained in the given lat/lon bounding box.

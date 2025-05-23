@@ -17,7 +17,7 @@ class ValoraSpider(scrapy.Spider):
     brands = {
         # For most Valora brands, we take tags such as "shop=bakery"
         # from the OpenStreetMap Name Suggestion Index (NSI).
-        "avec": ("Avec", "Q103863974", {}),
+        "avec": ("avec", "Q103863974", {}),
         "Back-Factory": ("Back-Factory", "Q21200483", {}),
         "Backwerk": ("BackWerk", "Q798298", {}),
         "Brezelkönig": ("Brezelkönig", "Q111728604", {}),

@@ -15,6 +15,7 @@ class CrossFitSpider(scrapy.Spider):
         for location in response.json()["features"]:
             item = DictParser.parse(location["properties"])
             item["street_address"] = item.pop("street", "")
+            item.pop("addr_full", None)
             item["geometry"] = location["geometry"]
             item["ref"] = item["website"] = urljoin("https://www.crossfit.com/", location["properties"]["slug"])
             item["image"] = location["properties"]["images"]["primary"]["url"]

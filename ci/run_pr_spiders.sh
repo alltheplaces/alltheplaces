@@ -257,7 +257,7 @@ do
             fi
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
-            dupe_dropped=$(jq '."dupefilter/filtered" // 0' "${STATSFILE}")
+            dupe_dropped=$(jq '."atp/duplicate_count" // 0' "${STATSFILE}")
             dupe_percent=$(awk -v dd="${dupe_dropped}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (dd / fc) * 100 }')
             if awk -v dp="${dupe_percent}" 'BEGIN { exit !(dp > 30) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
