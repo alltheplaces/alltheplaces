@@ -18,6 +18,7 @@ class TalismanHireSpider(SitemapSpider, StructuredDataSpider):
         ld_data.get("address", {}).pop("addressCountry", None)  # It's always ZA, which isn't true
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Talisman Hire ")
         if item.get("state") == "Mpumalanga":  # country wrongly reverse geocoded as SZ
             item["country"] = "ZA"
         yield item
