@@ -1,13 +1,10 @@
-from locations.storefinders.sweetiq import SweetIQSpider
+from locations.storefinders.uberall import UberallSpider
 
 
-class PenningtonsCASpider(SweetIQSpider):
+class PenningtonsCASpider(UberallSpider):
     name = "penningtons_ca"
     item_attributes = {
         "brand_wikidata": "Q16956527",
         "brand": "Penningtons",
     }
-    allowed_domains = ["locations.penningtons.com", "sls-api-service.sweetiq-sls-production-east.sweetiq.com"]
-    start_urls = [
-        "https://locations.penningtons.com/en",
-    ]
+    key = "plEhL7SEWWjub5NBhsr8Iidzl8GgaX"
