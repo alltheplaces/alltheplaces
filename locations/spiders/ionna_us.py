@@ -1,7 +1,8 @@
 import json
+
 import scrapy
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -42,18 +43,20 @@ class IonnaUSSpider(scrapy.Spider):
             if "Coming Soon" in location["note"]:
                 continue
 
-            item = Feature({
-                "ref": location_id,
-                "street_address": location["street"],
-                "city": location["city"],
-                "state": location["state"],
-                "postcode": location["postcode"],
-                "country": location["country"],
-                "image": location["image"],
-                "website": location["link"],
-                "lat": location["lat"],
-                "lon": location["lon"],
-            })
+            item = Feature(
+                {
+                    "ref": location_id,
+                    "street_address": location["street"],
+                    "city": location["city"],
+                    "state": location["state"],
+                    "postcode": location["postcode"],
+                    "country": location["country"],
+                    "image": location["image"],
+                    "website": location["link"],
+                    "lat": location["lat"],
+                    "lon": location["lon"],
+                }
+            )
 
             apply_category(Categories.CHARGING_STATION, item)
             item["extras"] = {
