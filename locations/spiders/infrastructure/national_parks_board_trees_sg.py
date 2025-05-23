@@ -42,12 +42,15 @@ class NationalParksBoardTreesSGSpider(ArcGISFeatureServerSpider):
                 height_min = m.group(1)
                 height_max = m.group(2)
                 item["extras"]["height:range"] = f"{height_min}-{height_max} m"
-            elif m := re.match(r"[<≤](\d+)", height_range_m):
+            elif m := re.match(r"[<≤(?:<=)](\d+)", height_range_m):
                 height_max = m.group(1)
                 item["extras"]["height:range"] = f"0-{height_max} m"
             elif m := re.match(r">(\d+)", height_range_m):
                 height_min = m.group(1)
                 item["extras"]["height"] = f"{height_min} m"
+            elif height_range_m.startswith("-"):
+                # Unknown height range listed as -1. Ignore.
+                pass
             else:
                 self.logger.warning("Unknown height range format: {}".format(height_range_m))
 
