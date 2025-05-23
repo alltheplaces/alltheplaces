@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, NAMED_DAY_RANGES_RU, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TeremokRUSpider(scrapy.Spider):
@@ -12,6 +13,12 @@ class TeremokRUSpider(scrapy.Spider):
     allowed_domains = ["teremok.ru"]
     item_attributes = {"brand": "Теремок", "brand_wikidata": "Q4455593"}
     start_urls = ["https://teremok.ru/"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_TIMEOUT": 300,
+        "RETRY_TIMES": 10,  # Sometimes connection refused by server, increased retry might help
+    }
 
     def parse(self, response):
         city_selectors = response.xpath("//a[@class='b-geo__link b-link b-link--br-white b-link--thin js-city']")
