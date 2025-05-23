@@ -440,7 +440,7 @@ def country_coordinates(return_lookup: bool = False) -> dict:
         return file
 
 
-def extract_geojson_point_geometry(geometry: dict) -> dict | None:
+def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
     """
     Attempts to fuzzily extract RFC7946 GeoJSON Point Geometry from a
     supplied dictionary which is an unknown GeoJSON-like geometry. If no
@@ -509,7 +509,7 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:
     return None
 
 
-def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:
+def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:  # noqa: C901
     """
     Convert GJ2008 Point geometry with a projection other than EPSG:4326
     (WGS84) to RFC7946 Point geometry which must always have a projection of
