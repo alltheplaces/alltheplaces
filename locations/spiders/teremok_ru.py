@@ -1,5 +1,4 @@
 from typing import Any
-from urllib.parse import urljoin
 
 import scrapy
 from scrapy.http import Response
@@ -28,7 +27,7 @@ class TeremokRUSpider(scrapy.Spider):
             item = DictParser.parse(poi)
             item.pop("name")  # location description?
             item["lat"], item["lon"] = poi.get("map", [None, None])
-            item["website"] = urljoin(self.start_urls[0], poi.get("url"))
+            item["website"] = response.urljoin(poi.get("url"))
             self.parse_hours(poi, item)
             yield item
 
