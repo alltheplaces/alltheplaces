@@ -26,7 +26,7 @@ class TalismanHireSpider(SitemapSpider, StructuredDataSpider):
             item["country"] = "ZA"
 
         if "inside-" in response.url:
-            located_in_location = response.url.split("inside-")[-1].strip("/") if "inside-" in response.url else ""
+            located_in_location = response.url.split("inside-")[-1].strip("/")
             if located_in_location == "buco":
                 item["located_in"] = BucoNAZASpider.item_attributes["brand"]
                 item["located_in_wikidata"] = BucoNAZASpider.item_attributes["brand_wikidata"]
