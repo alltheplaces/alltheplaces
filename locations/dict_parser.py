@@ -1,3 +1,4 @@
+from locations.geo import extract_geojson_point_geometry
 from locations.items import Feature
 
 
@@ -291,13 +292,22 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        if (
-            obj.get("geometry")
-            and obj["geometry"].get("type")
-            in ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]
-            and isinstance(obj["geometry"].get("coordinates"), list)
-        ):
-            item["geometry"] = obj["geometry"]
+        if obj.get("geometry") and obj["geometry"].get("type") in [
+            "Point",
+            "MultiPoint",
+            "LineString",
+            "MultiLineString",
+            "Polygon",
+            "MultiPolygon",
+        ]:
+            if rfc7946_point_geometry := extract_geojson_point_geometry(obj["geometry"]):
+                item["geometry"] = rfc7946_point_geometry
+            else:
+                # Source geometry is seemingly supplied as a non-Point
+                # geometry type (such as Polygon) and should be returned
+                # as-is. There are no further checks done to ensure this
+                # geometry is valid RFC7946 GeoJSON or GJ2008 geometry.
+                item["geometry"] = obj["geometry"]
         else:
             location = DictParser.get_first_key(
                 obj,
