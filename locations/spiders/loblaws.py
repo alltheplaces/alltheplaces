@@ -3,6 +3,7 @@ from typing import Any, Iterable
 import scrapy
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
@@ -49,4 +50,6 @@ class LoblawsSpider(scrapy.Spider):
                 if brand_details := self.BRANDS.get(location.get("storeBannerId")):
                     item["brand"], item["brand_wikidata"], slug = brand_details
                     item["website"] = f'https://www.{slug}.ca/en/store-locator/details/{location["storeId"]}'
+
+                apply_category(Categories.SHOP_SUPERMARKET, item)
                 yield item
