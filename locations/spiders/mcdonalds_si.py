@@ -18,6 +18,7 @@ class McdonaldsSISpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in json.loads(re.search(r"docs = (\[.+\])\.map", response.text).group(1)):
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["website"] = location["slugs"]
             item["image"] = location["thumbnail"]
             item["lat"] = location["marker"]["position"]["lat"]
