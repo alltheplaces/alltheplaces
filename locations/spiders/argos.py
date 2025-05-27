@@ -11,8 +11,9 @@ from locations.user_agents import BROWSER_DEFAULT
 class ArgosSpider(SitemapSpider, StructuredDataSpider):
     name = "argos"
     item_attributes = {"brand": "Argos", "brand_wikidata": "Q4789707"}
-    sitemap_urls = ["https://www.argos.co.uk/stores_sitemap.xml"]
+    sitemap_urls = ["https://www.argos.co.uk/robots.txt"]
     sitemap_rules = [(r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)", "parse")]
+    sitemap_follow = ["stores"]
     user_agent = BROWSER_DEFAULT
     requires_proxy = True
 
