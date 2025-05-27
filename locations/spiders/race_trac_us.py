@@ -37,7 +37,6 @@ class RaceTracUSSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.racetrac.com"]
     sitemap_urls = ["https://www.racetrac.com/robots.txt"]
     sitemap_rules = [(r"/locations/[^/]+/[^/]+/[^/]+$", "parse_sd")]
-    wanted_types = ["GasStation"]
 
     def sitemap_filter(self, entries):
         for entry in entries:
