@@ -12,10 +12,8 @@ class SamsClubSpider(scrapy.spiders.SitemapSpider):
     name = "sams_club"
     item_attributes = {"brand": "Sam's Club", "brand_wikidata": "Q1972120"}
     allowed_domains = ["www.samsclub.com"]
-    sitemap_urls = [
-        "https://www.samsclub.com/sitemap_locators.xml",
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
+    sitemap_urls = ["https://www.samsclub.com/sitemap_locators.xml"]
+    user_agent = FIREFOX_LATEST
 
     def parse(self, response):
         [script] = filter(
