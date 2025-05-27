@@ -25,4 +25,5 @@ class ArgosSpider(YextAnswersSpider):
             item["name"] = item["name"].removesuffix(" Local")
             set_located_in(SainsburysSpider.SAINSBURYS_LOCAL, item)
         item["branch"] = item.pop("name").removesuffix(" Argos")
+        item["website"] = item["website"].replace("(", "").replace(")", "").replace("'", "")
         yield item
