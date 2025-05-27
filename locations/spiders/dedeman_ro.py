@@ -14,7 +14,7 @@ class DedemanROSpider(JSONBlobSpider):
 
     def extract_json(self, response: Response) -> list[dict]:
         return chompjs.parse_js_object(
-            response.xpath('//*[@class="dedeman-network"]/@data-mage-init').re_first('{\s*"stores":\s*(\[.+?]),')
+            response.xpath('//*[@class="dedeman-network"]/@data-mage-init').re_first(r'{\s*"stores":\s*(\[.+?]),')
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
