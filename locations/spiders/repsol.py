@@ -8,8 +8,8 @@ from locations.hours import DAYS_EN, DAYS_ES, OpeningHours
 from locations.items import Feature
 
 
-class RepsolESSpider(Spider):
-    name = "repsol_es"
+class RepsolSpider(Spider):
+    name = "repsol"
     item_attributes = {"brand": "Repsol", "brand_wikidata": "Q174747"}
     allowed_domains = ["www.repsol.es"]
     start_urls = ["https://www.repsol.es/bin/repsol/searchmiddleware/station-search.json?action=search&tipo=1,2"]
