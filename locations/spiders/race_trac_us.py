@@ -44,11 +44,9 @@ class RaceTracUSSpider(SitemapSpider, StructuredDataSpider):
                 entry["loc"] = urljoin("https://www.racetrac.com/", entry["loc"])
             yield entry
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["url"] = None
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
+        item["website"] = response.url
         apply_category(Categories.FUEL_STATION, item)
 
         for amenity in response.xpath('//li[@class="amCol"]/span[@class="displayName"]/text()').getall():
