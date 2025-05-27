@@ -48,6 +48,7 @@ class RaceTracUSSpider(SitemapSpider, StructuredDataSpider):
         ld_data["url"] = None
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = None
         apply_category(Categories.FUEL_STATION, item)
 
         for amenity in response.xpath('//li[@class="amCol"]/span[@class="displayName"]/text()').getall():
