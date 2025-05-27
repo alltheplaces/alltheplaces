@@ -18,7 +18,7 @@ class PekaoPLSpider(Spider):
         )
 
     def parse_atms(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
+        for location in response.json()["items"]:
             item = Feature()
             item["ref"] = location["atmItemId"]
             item["lat"] = location["lt"]
@@ -32,7 +32,7 @@ class PekaoPLSpider(Spider):
             yield item
 
     def parse_banks(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
+        for location in response.json()["items"]:
             if location["t"] == "PARTNER_BRANCH":
                 continue
             item = Feature()
