@@ -1,6 +1,8 @@
 import json
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -15,17 +17,18 @@ class SamsClubSpider(scrapy.spiders.SitemapSpider):
     sitemap_urls = ["https://www.samsclub.com/sitemap_locators.xml"]
     user_agent = FIREFOX_LATEST
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         [script] = filter(
             lambda script: "clubDetails" in script,
             response.xpath('//script[@type="application/json"]/text()').extract(),
         )
         data = json.loads(script)["clubDetails"]
         item = DictParser.parse(data)
+        item["branch"] = item.pop("name").removesuffix(" Sam's Club")
         item["website"] = response.url
         oh = OpeningHours()
         for day, interval in data["operationalHours"].items():
-            oh.add_range(day[:2].title(), interval["startHrs"], interval["endHrs"])
-        item["opening_hours"] = oh.as_opening_hours()
+            oh.add_range(day[:2], interval["startHrs"], interval["endHrs"])
+        item["opening_hours"] = oh
         apply_category(Categories.SHOP_WHOLESALE, item)
         yield item
