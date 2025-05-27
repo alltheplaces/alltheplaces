@@ -19,5 +19,12 @@ class KpnNLSpider(SitemapSpider, StructuredDataSpider):
         ld_data["openingHours"] = hours
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = (
+            item.pop("name")
+            .removesuffix(" | KPN")
+            .removeprefix("KPN XL winkel ")
+            .removeprefix("KPN winkel ")
+            .removeprefix("KPN Experience Store ")
+        )
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
