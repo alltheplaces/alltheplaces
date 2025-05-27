@@ -33,6 +33,7 @@ class RepsolSpider(Spider):
                 "postcode": location.get("cp"),
                 "phone": location.get("telefono"),
                 "website": location.get("urlSP"),
+                "country": location.get("pais"),
             }
 
             properties["opening_hours"] = OpeningHours()
