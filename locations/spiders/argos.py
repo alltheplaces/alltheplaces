@@ -24,4 +24,5 @@ class ArgosSpider(YextAnswersSpider):
         if item["name"].endswith(" Local"):
             item["name"] = item["name"].removesuffix(" Local")
             set_located_in(SainsburysSpider.SAINSBURYS_LOCAL, item)
+        item["branch"] = item.pop("name").removesuffix(" Argos")
         yield item
