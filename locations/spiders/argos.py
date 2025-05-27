@@ -1,6 +1,9 @@
+import re
 from typing import Iterable
 
 from locations.items import Feature
+from locations.spiders.sainsburys import SainsburysSpider
+from locations.spiders.tesco_gb import set_located_in
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
@@ -15,4 +18,10 @@ class ArgosSpider(YextAnswersSpider):
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         if "Collection Point" in item["name"]:
             return
+        if m := re.search(r"((?:in|inside|) Sainsbury'?s?)", item["name"], flags=re.IGNORECASE):
+            item["name"] = item["name"].replace(m.group(1), "").replace("()", "").strip()
+            set_located_in(SainsburysSpider.SAINSBURYS, item)
+        if item["name"].endswith(" Local"):
+            item["name"] = item["name"].removesuffix(" Local")
+            set_located_in(SainsburysSpider.SAINSBURYS_LOCAL, item)
         yield item
