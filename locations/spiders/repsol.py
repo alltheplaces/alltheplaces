@@ -1,7 +1,8 @@
 import re
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.hours import DAYS_EN, DAYS_ES, OpeningHours
@@ -13,12 +14,13 @@ class RepsolSpider(Spider):
     item_attributes = {"brand": "Repsol", "brand_wikidata": "Q174747"}
     allowed_domains = ["www.repsol.es"]
     start_urls = ["https://www.repsol.es/bin/repsol/searchmiddleware/station-search.json?action=search&tipo=1,2"]
+    skip_auto_cc_domain = True
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         for url in self.start_urls:
             yield JsonRequest(url=url, method="POST")
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["eess"]["items"]:
             properties = {
                 "ref": location.get("id"),
@@ -30,6 +32,7 @@ class RepsolSpider(Spider):
                 "state": location.get("provincia"),
                 "postcode": location.get("cp"),
                 "phone": location.get("telefono"),
+                "website": location.get("urlSP"),
             }
 
             properties["opening_hours"] = OpeningHours()
