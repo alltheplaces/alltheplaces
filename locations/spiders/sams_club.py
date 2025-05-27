@@ -5,6 +5,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import FIREFOX_LATEST
 
 
 class SamsClubSpider(scrapy.spiders.SitemapSpider):
@@ -14,6 +15,7 @@ class SamsClubSpider(scrapy.spiders.SitemapSpider):
     sitemap_urls = [
         "https://www.samsclub.com/sitemap_locators.xml",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
 
     def parse(self, response):
         [script] = filter(
