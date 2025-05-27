@@ -7,6 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 ATTRIBUTES_MAP = {
     "Bulk DEF": None,
+    "Certified Truck Scales": None,
     "Check Cashing": None,
     "Compressed Air": Extras.COMPRESSED_AIR,
     "Diesel": Fuel.DIESEL,
@@ -19,6 +20,7 @@ ATTRIBUTES_MAP = {
     "Gaming Machines": None,
     "High Flow Diesel Lanes": "hgv",
     "Mid-grade 89": Fuel.OCTANE_89,
+    "Online Ordering": None,
     "Pizza": "food",
     "Premium 93": Fuel.OCTANE_93,
     "Regular 87": Fuel.OCTANE_87,
@@ -26,6 +28,7 @@ ATTRIBUTES_MAP = {
     "Seating Area": None,
     "Self Checkout": Extras.SELF_CHECKOUT,
     "Swirl World": None,
+    "Travel Center": None,
     "Truck Merchandise": None,
     "Truck Parking": None,
 }
