@@ -1,9 +1,11 @@
 import json
+from typing import Iterable
 
-from scrapy import Spider
+from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 def decode_email(s):
@@ -14,8 +16,16 @@ def decode_email(s):
 class OutdoorSupplyHardwareUSSpider(Spider):
     name = "outdoor_supply_hardware_us"
     item_attributes = {"brand": "Outdoor Supply Hardware", "brand_wikidata": "Q119104427"}
-    start_urls = ["https://www.outdoorsupplyhardware.com/Locations"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    user_agent = BROWSER_DEFAULT
+
+    def start_requests(self) -> Iterable[Request]:
+        yield Request(
+            url="https://www.outdoorsupplyhardware.com/Locations",
+            headers={
+                "sec-fetch-site": "same-origin",
+            },
+        )
 
     def parse(self, response, **kwargs):
         root = response.xpath('//*[@id="hiddenLocationData"]')[0].root
