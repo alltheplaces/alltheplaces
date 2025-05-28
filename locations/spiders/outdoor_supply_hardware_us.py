@@ -24,7 +24,10 @@ class OutdoorSupplyHardwareUSSpider(Spider):
         yield Request(
             url="https://www.outdoorsupplyhardware.com/Locations",
             headers={
+                "sec-fetch-dest": "document",
+                "sec-fetch-mode": "navigate",
                 "sec-fetch-site": "same-origin",
+                "sec-fetch-user": "?1",
             },
         )
 
