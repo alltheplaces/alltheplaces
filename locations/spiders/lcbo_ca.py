@@ -5,7 +5,7 @@ from scrapy import Selector
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
@@ -16,19 +16,38 @@ class LcboCA2Spider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "LCBO", "brand_wikidata": "Q845263"}
     allowed_domains = ["www.lcbo.com"]
     pagination_mode = True
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt has a blocking rule for any URL with a query component ("?attrib=value")
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False
+    }  # robots.txt has a blocking rule for any URL with a query component ("?attrib=value")
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
-        item["ref"] = popup_html.xpath('.//@data-storeidentifier').get()
-        item["branch"] = popup_html.xpath('.//@data-storename').get()
-        item["postcode"] = popup_html.xpath('(.//div[@class="amlocator-info-popup"]/text())[2]').get("").strip(", ").split(" ", 1)[1]
-        item["state"] = popup_html.xpath('(.//div[@class="amlocator-info-popup"]/text())[2]').get("").strip(", ").split(" ", 1)[0]
-        item["addr_full"] = merge_address_lines([popup_html.xpath('.//span[@class="amlocator-info-address"]/text()').get(), item.get("state"), item.get("postcode")])
+        item["ref"] = popup_html.xpath(".//@data-storeidentifier").get()
+        item["branch"] = popup_html.xpath(".//@data-storename").get()
+        item["postcode"] = (
+            popup_html.xpath('(.//div[@class="amlocator-info-popup"]/text())[2]').get("").strip(", ").split(" ", 1)[1]
+        )
+        item["state"] = (
+            popup_html.xpath('(.//div[@class="amlocator-info-popup"]/text())[2]').get("").strip(", ").split(" ", 1)[0]
+        )
+        item["addr_full"] = merge_address_lines(
+            [
+                popup_html.xpath('.//span[@class="amlocator-info-address"]/text()').get(),
+                item.get("state"),
+                item.get("postcode"),
+            ]
+        )
         item["website"] = popup_html.xpath('.//a[@class="amlocator-link-store-details"]/@href').get()
-        item["phone"] = popup_html.xpath('.//a[@class="amlocator-phone-number"]/@href').get("").replace("tel:", "").strip("[]")
+        item["phone"] = (
+            popup_html.xpath('.//a[@class="amlocator-phone-number"]/@href').get("").replace("tel:", "").strip("[]")
+        )
         apply_category(Categories.SHOP_ALCOHOL, item)
         item["extras"]["alt_ref"] = str(feature["id"])
-        yield Request(url="https://www.lcbo.com/en/storepickup/selection/store/?value={}&st_loc_flag=true".format(item["ref"]), meta={"item": item}, headers={"X-Requested-With": "XMLHttpRequest"}, callback=self.parse_additional_attributes)
+        yield Request(
+            url="https://www.lcbo.com/en/storepickup/selection/store/?value={}&st_loc_flag=true".format(item["ref"]),
+            meta={"item": item},
+            headers={"X-Requested-With": "XMLHttpRequest"},
+            callback=self.parse_additional_attributes,
+        )
 
     def parse_additional_attributes(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]

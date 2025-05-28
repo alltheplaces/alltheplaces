@@ -32,6 +32,7 @@ class AmastyStoreLocatorSpider(Spider):
     overriding the `pre_process_data` and/or `post_process_item` functions of
     this spider.
     """
+
     # Public attributes. You may set these attributes in a spider.
     pagination_mode: bool = False
 
@@ -40,15 +41,15 @@ class AmastyStoreLocatorSpider(Spider):
     _crawl_completed: bool = False
 
     def start_requests(self) -> Iterable[Request]:
-        headers = {
-            "X-Requested-With": "XMLHttpRequest"
-        }
+        headers = {"X-Requested-With": "XMLHttpRequest"}
         pagination_attribute = ""
         if self.pagination_mode:
             pagination_attribute = "?p=1"
         if len(self.start_urls) == 0:
             for domain in self.allowed_domains:
-                yield Request(url=f"https://{domain}/amlocator/index/ajax/{pagination_attribute}", headers=headers, method="POST")
+                yield Request(
+                    url=f"https://{domain}/amlocator/index/ajax/{pagination_attribute}", headers=headers, method="POST"
+                )
         else:
             for url in self.start_urls:
                 yield Request(url=f"{url}{pagination_attribute}", headers=headers, method="POST")
@@ -63,9 +64,7 @@ class AmastyStoreLocatorSpider(Spider):
             if m := re.search(r"\?p=(\d+)$", response.url):
                 next_page_number = int(m.group(1)) + 1
                 next_page_url = re.sub(r"\?p=\d+$", f"?p={next_page_number}", response.url)
-                headers = {
-                    "X-Requested-With": "XMLHttpRequest"
-                }
+                headers = {"X-Requested-With": "XMLHttpRequest"}
                 yield Request(url=next_page_url, headers=headers, method="POST", dont_filter=True)
 
     def parse_features(self, features: dict) -> Iterable[Feature | Request]:
