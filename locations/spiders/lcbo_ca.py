@@ -1,5 +1,5 @@
-from json import loads
 import re
+from json import loads
 from typing import Iterable
 
 from scrapy import Spider
@@ -7,7 +7,7 @@ from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 
@@ -34,7 +34,11 @@ class LcboCASpider(Spider):
         js_blob = js_blob.split('var _pageData = "', 1)[1].split('";', 1)[0]
         if matches := re.findall(r'\[\[\\"Store\\",\[null,null,(\d+)\],', js_blob):
             for store_id in matches:
-                yield Request(url=f"https://www.lcbo.com/en/storepickup/selection/store/?value={store_id}&st_loc_flag=true", headers={"X-Requested-With": "XMLHttpRequest"}, callback=self.parse_store)
+                yield Request(
+                    url=f"https://www.lcbo.com/en/storepickup/selection/store/?value={store_id}&st_loc_flag=true",
+                    headers={"X-Requested-With": "XMLHttpRequest"},
+                    callback=self.parse_store,
+                )
 
     def parse_store(self, response: Response) -> Iterable[Feature]:
         if not response.json()["success"]:
