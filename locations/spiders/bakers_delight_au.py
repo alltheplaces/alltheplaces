@@ -25,7 +25,9 @@ class BakersDelightAUSpider(AlgoliaSpider):
         if hours := feature.get("opening_hours"):
             item["opening_hours"] = OpeningHours()
             for day_hours in hours:
-                item["opening_hours"].add_range(DAYS_EN[day_hours["day"].title()], day_hours["open"], day_hours["close"])
+                item["opening_hours"].add_range(
+                    DAYS_EN[day_hours["day"].title()], day_hours["open"], day_hours["close"]
+                )
 
         apply_category(Categories.SHOP_BAKERY, item)
         yield item
