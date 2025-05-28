@@ -18,6 +18,7 @@ class LeeannChinUSSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.leeannchin.com/locations"]
     rules = [Rule(LinkExtractor(allow=r"/restaurant/[-\w]+/[-\w]+/?$"), callback="parse_sd")]
     json_parser = "chompjs"
+    drop_attributes = {"facebook", "twitter"}
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         ld_data.pop("openingHoursSpecification", None)  # Current day is missing from ld_data
