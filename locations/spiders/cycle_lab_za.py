@@ -19,9 +19,10 @@ class CycleLabZASpider(Spider):
     no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath('//*[@class="Store-Location-Content"]'):
+        for location in response.xpath('//*[@class="Store-Location"]'):
             item = Feature()
             # Only addresses are available, no coordinates are there.
+            item["branch"] = location.xpath('.//*[contains(@class,"card-link")]//p/text()').get("").strip()
             item["addr_full"] = clean_address(
                 location.xpath('.//*[@class="Store-Location-Address"]//p/text()').getall()
             )
