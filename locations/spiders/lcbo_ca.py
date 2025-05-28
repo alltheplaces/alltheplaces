@@ -1,57 +1,50 @@
-import re
 from json import loads
 from typing import Iterable
 
-from scrapy import Spider
+from scrapy import Selector
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours, DAYS_EN
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class LcboCASpider(Spider):
-    name = "lcbo_ca"
+class LcboCA2Spider(AmastyStoreLocatorSpider):
+    name = "lcbo_ca_2"
     item_attributes = {"brand": "LCBO", "brand_wikidata": "Q845263"}
-    allowed_domains = ["www.lcbo.com", "www.google.com"]
-    start_urls = ["https://www.google.com/maps/d/embed?mid=1yX0dX1020jTzQfMfIcYpdsxORg8"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # Required for www.lcbo.com URLs
+    allowed_domains = ["www.lcbo.com"]
+    pagination_mode = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt has a blocking rule for any URL with a query component ("?attrib=value")
 
-    def parse(self, response: Response) -> Iterable[Request]:
-        # The start URL being an embedded Google Maps page created by LCBO is
-        # listed at https://www.doingbusinesswithlcbo.com/content/dbwl/en/basepage/home/retail/StoreOpenings.html
-        # and embeds within the page some basic store information, including
-        # the store ID. We can take this store ID and use it to ask an LCBO
-        # API to return more complete store data in JSON format.
-        #
-        # Note: This embedded Google Maps page has nothing to do with the
-        # Google Maps API, despite the overloaded branding. LCBO have uploaded
-        # location information and this is embedded within the page.
-        # robots.txt on www.google.com allows these embedded map pages to be
-        # crawled.
-        js_blob = response.xpath('//script[contains(text(), "var _pageData = ")]/text()').get()
-        js_blob = js_blob.split('var _pageData = "', 1)[1].split('";', 1)[0]
-        if matches := re.findall(r'\[\[\\"Store\\",\[null,null,(\d+)\],', js_blob):
-            for store_id in matches:
-                yield Request(
-                    url=f"https://www.lcbo.com/en/storepickup/selection/store/?value={store_id}&st_loc_flag=true",
-                    headers={"X-Requested-With": "XMLHttpRequest"},
-                    callback=self.parse_store,
-                )
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
+        item["ref"] = popup_html.xpath('.//@data-storeidentifier').get()
+        item["branch"] = popup_html.xpath('.//@data-storename').get()
+        item["postcode"] = popup_html.xpath('(.//div[@class="amlocator-info-popup"]/text())[2]').get("").strip(", ").split(" ", 1)[1]
+        item["state"] = popup_html.xpath('(.//div[@class="amlocator-info-popup"]/text())[2]').get("").strip(", ").split(" ", 1)[0]
+        item["addr_full"] = merge_address_lines([popup_html.xpath('.//span[@class="amlocator-info-address"]/text()').get(), item.get("state"), item.get("postcode")])
+        item["website"] = popup_html.xpath('.//a[@class="amlocator-link-store-details"]/@href').get()
+        item["phone"] = popup_html.xpath('.//a[@class="amlocator-phone-number"]/@href').get("").replace("tel:", "").strip("[]")
+        apply_category(Categories.SHOP_ALCOHOL, item)
+        item["extras"]["alt_ref"] = str(feature["id"])
+        yield Request(url="https://www.lcbo.com/en/storepickup/selection/store/?value={}&st_loc_flag=true".format(item["ref"]), meta={"item": item}, headers={"X-Requested-With": "XMLHttpRequest"}, callback=self.parse_additional_attributes)
 
-    def parse_store(self, response: Response) -> Iterable[Feature]:
+    def parse_additional_attributes(self, response: Response) -> Iterable[Feature]:
+        item = response.meta["item"]
+
         if not response.json()["success"]:
-            # Store ID probably doesn't exist anymore and the embedded Google
-            # Maps page linked from www.doingbusinesswithlcbo.com is probably
-            # slightly out-of-date with the website.
+            # Store ID may not exist anymore, or may be a new store, and there
+            # is a mismatch between store data in the Amasty and store pickup
+            # selection APIs.
             # At 2025-05-28, only 3 of 688 responses reached this code branch.
+            yield item
             return
+
         feature = response.json()["output"]
-        item = DictParser.parse(feature)
-        item["branch"] = item.pop("name", None)
-        item["street_address"] = item.pop("addr_full", None)
-        item["website"] = "https://www.lcbo.com/en/stores/" + feature["url_key"]
+        item["street_address"] = feature["address"]
+        item["city"] = feature["city"]
+
         item["opening_hours"] = OpeningHours()
         for day_name, day_hours in loads(feature["schedule"]).items():
             if day_hours[f"{day_name}_status"] != "1":
@@ -68,6 +61,5 @@ class LcboCASpider(Spider):
                     # Day has a break in the middle.
                     item["opening_hours"].add_range(DAYS_EN[day_name.title()], day_start, break_start)
                     item["opening_hours"].add_range(DAYS_EN[day_name.title()], break_end, day_end)
-        apply_category(Categories.SHOP_ALCOHOL, item)
-        item["extras"]["alt_ref"] = feature["stloc_identifier"]
+
         yield item
