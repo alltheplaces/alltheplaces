@@ -12,3 +12,4 @@ class LeeannChinUSSpider(CrawlSpider, StructuredDataSpider):
     }
     start_urls = ["https://www.leeannchin.com/locations"]
     rules = [Rule(LinkExtractor(allow=r"/restaurant/[-\w]+/[-\w]+/?$"), callback="parse_sd")]
+    json_parser = "chompjs"
