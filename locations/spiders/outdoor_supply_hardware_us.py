@@ -23,6 +23,7 @@ class OutdoorSupplyHardwareUSSpider(Spider):
         "RETRY_TIMES": 5,
     }
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def start_requests(self) -> Iterable[Request]:
         yield Request(
