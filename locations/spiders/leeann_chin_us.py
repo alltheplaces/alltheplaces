@@ -23,6 +23,7 @@ class LeeannChinUSSpider(CrawlSpider, StructuredDataSpider):
         ld_data.pop("openingHoursSpecification", None)  # Current day is missing from ld_data
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["name"] = item["name"].removesuffix(" Fresh Asian Flavors")
         item["opening_hours"] = OpeningHours()
         for rule in response.xpath('//*[@class="opening-hours"]//li'):
             item["opening_hours"].add_ranges_from_string(rule.xpath("./text()").get())
