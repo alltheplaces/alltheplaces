@@ -1,7 +1,8 @@
 import json
-from typing import Iterable
+from typing import Any, Iterable
 
 from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -27,7 +28,7 @@ class OutdoorSupplyHardwareUSSpider(Spider):
             },
         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         root = response.xpath('//*[@id="hiddenLocationData"]')[0].root
 
         for el in root:
@@ -45,6 +46,6 @@ class OutdoorSupplyHardwareUSSpider(Spider):
             hours = OpeningHours()
             for line in location["workHour"][len("<p>") : -len("</p>")].split("</br>"):
                 hours.add_ranges_from_string(line)
-            item["opening_hours"] = hours.as_opening_hours()
+            item["opening_hours"] = hours
 
             yield item
