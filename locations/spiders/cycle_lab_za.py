@@ -1,5 +1,7 @@
-import chompjs
-from scrapy import Spider
+from typing import Any, Iterable
+
+from scrapy import Selector, Spider
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -16,30 +18,21 @@ class CycleLabZASpider(Spider):
     start_urls = ["https://www.cyclelab.com/store"]
     no_refs = True
 
-    def parse(self, response):
-        locations = chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "var markers = ")]/text()').get().split("var markers =")[1]
-        )
-        for location in locations:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath('//*[@class="Store-Location-Content"]'):
             item = Feature()
-
-            item["branch"] = location["name"].replace(self.item_attributes["brand"], "").strip()
-            item["lat"] = location["lat"]
-            item["lon"] = location["lng"]
-
-            info = response.xpath('//div[@class="Store-Location"][.//h3[text()="' + location["name"] + '"]]')
-
+            # Only addresses are available, no coordinates are there.
             item["addr_full"] = clean_address(
-                info.xpath('.//div[@class="Store-Location-Address"]/div/div/p/text()').getall()
+                location.xpath('.//*[@class="Store-Location-Address"]//p/text()').getall()
             )
 
-            item["phone"] = info.xpath('.//i[@class="fa fa-phone"]/../text()').get()
-            item["email"] = info.xpath('.//i[@class="fa fa-envelope"]/../text()').get()
+            item["phone"] = location.xpath('.//i[@class="fa fa-phone"]/../text()').get("")
+            item["email"] = location.xpath('.//i[@class="fa fa-envelope"]/../text()').get("")
 
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(info.xpath('string(.//div[@class="hours-location"])').get())
+            item["opening_hours"].add_ranges_from_string(location.xpath('string(.//*[@class="hours-location"])').get())
 
             yield from self.post_process_item(item, response, location)
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, location: Selector) -> Iterable[Feature]:
         yield item
