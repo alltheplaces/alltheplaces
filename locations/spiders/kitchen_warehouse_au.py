@@ -28,6 +28,7 @@ class KitchenWarehouseAUSpider(JSONBlobSpider):
             "customer_reference": "",
             "skipIntrospection": True,
             "token": f"Bearer {access_token}",
+            "isAnonymousUser": True,
         }
         yield JsonRequest(url=self.start_urls[0], data=data, meta={"access_token": access_token}, method="POST")
 
@@ -50,6 +51,7 @@ class KitchenWarehouseAUSpider(JSONBlobSpider):
             "key": item["ref"],
             "skipIntrospection": True,
             "token": f"Bearer {access_token}",
+            "isAnonymousUser": True,
         }
         yield JsonRequest(
             url="https://kwh-kitchenwarehouse.frontastic.live/frontastic/action/storelocator/storedetail",
