@@ -17,7 +17,11 @@ def decode_email(s):
 class OutdoorSupplyHardwareUSSpider(Spider):
     name = "outdoor_supply_hardware_us"
     item_attributes = {"brand": "Outdoor Supply Hardware", "brand_wikidata": "Q119104427"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "RETRY_HTTP_CODES": [403],  # Sometimes server blocks and sometimes allows
+        "RETRY_TIMES": 5,
+    }
     user_agent = BROWSER_DEFAULT
 
     def start_requests(self) -> Iterable[Request]:
