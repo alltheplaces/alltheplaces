@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -63,14 +63,14 @@ class KitchenWarehouseAUSpider(JSONBlobSpider):
 
     def add_opening_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
-        item["opening_hours"] = OpeningHours()
-        for day_hours in response.json()["storeHours"]:
-            if day_hours["day"] not in DAYS_EN:
-                continue
-            item["opening_hours"].add_range(
-                DAYS_EN[day_hours["day"]],
-                day_hours["openTime"].replace(" ", ""),
-                day_hours["closeTime"].replace(" ", ""),
-                "%I.%M%p",
-            )
+        try:
+            item["opening_hours"] = OpeningHours()
+            for day_hours in response.json().get("storeHours", []):
+                if day := sanitise_day(day_hours.get("day")):
+                    item["opening_hours"].add_range(
+                        day, day_hours["openTime"].replace(" ", ""), day_hours["closeTime"].replace(" ", ""), "%I.%M%p"
+                    )
+        except:
+            item["opening_hours"] = None
+            self.logger.error(f'Error parsing opening hours: {response.json().get("storeHours", [])}')
         yield item
