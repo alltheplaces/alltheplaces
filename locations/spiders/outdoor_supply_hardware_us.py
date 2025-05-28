@@ -36,11 +36,8 @@ class OutdoorSupplyHardwareUSSpider(Spider):
 
         for location in json.loads(root.text_content()):
             item = DictParser.parse(location)
-            del item["street"]
-
-            item["branch"] = location["branchName"]
-            item["ref"] = location["branchId"]
-            item["street_address"] = location["street"]
+            item["branch"] = item.pop("name")
+            item["street_address"] = item.pop("street", None)
             item["extras"]["fax"] = location["faxNum"]
 
             hours = OpeningHours()
