@@ -13,8 +13,8 @@ class CityOfSydneyParkingSpacesAUSpider(ArcGISFeatureServerSpider):
     name = "city_of_sydney_parking_spaces_au"
     item_attributes = {"operator": "City of Sydney", "operator_wikidata": "Q56477532", "state": "NSW"}
     host = "utility.arcgis.com"
-    context_path = "usrsvcs/servers/4f7beba11d28427282b97f024a695c14"
-    service_id = "ParkingMeters"
+    context_path = "usrsvcs/servers/71bb12507a3240c4b12e7fbba5be58e1"
+    service_id = "ParkingMeters/ParkingMeters"
     server_type = "MapServer"
     layer_id = "78"
 
