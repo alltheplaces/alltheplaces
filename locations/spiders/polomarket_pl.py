@@ -24,5 +24,12 @@ class PolomarketPLSpider(Spider):
             item["lat"] = location.get("latitude")
             item["lon"] = location.get("longitude")
             item["street_address"] = clean_address(location.get("street"), min_length=3)
+            # Use the street_address text to locate the full address within the HTML tags
+            if street_address := item["street_address"]:
+                item["addr_full"] = clean_address(
+                    response.xpath(
+                        f'//*[@class="shop-list__list-address-street" and normalize-space(text()) = "{street_address}"]/parent::*[@class="shop-list__list-address"]//text()'
+                    ).getall()
+                )
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
