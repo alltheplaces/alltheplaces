@@ -37,6 +37,6 @@ class WhsmithSpider(SitemapSpider):
         item["opening_hours"] = OpeningHours()
         for rule in response.xpath('//li[@class="whs-hours-item"]'):
             day = rule.xpath('.//*[contains(@class, "day")]/text()').get("")
-            hours = rule.xpath('.//*[contains(@class, "time")]/text()').get("")
+            hours = rule.xpath('.//*[contains(@class, "time")]/text()').get("").replace("24hr-24hr", "00:00-23:59")
             item["opening_hours"].add_ranges_from_string(f"{day} {hours}")
         yield item
