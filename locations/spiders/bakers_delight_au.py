@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.algolia import AlgoliaSpider
 
@@ -25,9 +25,7 @@ class BakersDelightAUSpider(AlgoliaSpider):
         if hours := feature.get("opening_hours"):
             item["opening_hours"] = OpeningHours()
             for day_hours in hours:
-                item["opening_hours"].add_range(
-                    DAYS_EN[day_hours["day"].title()], day_hours["open"], day_hours["close"]
-                )
+                item["opening_hours"].add_range(day_hours["day"], day_hours["open"], day_hours["close"])
 
         apply_category(Categories.SHOP_BAKERY, item)
         yield item
