@@ -10,6 +10,7 @@ class ChampionSpider(StockistSpider):
     key = "map_w3rk47yq"
 
     def parse_item(self, item: Feature, location: dict):
+        item["branch"] = item.pop("name")
         item["opening_hours"] = OpeningHours()
         for custom_field in location["custom_fields"]:
             if custom_field["name"] in DAYS_FULL:
