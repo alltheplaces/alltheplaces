@@ -29,6 +29,7 @@ class CityOfSydneyParkingSpacesAUSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["Meter_ID"]
         apply_category(Categories.PARKING, item)
+        item["extras"]["parking"] = "street_side"
         if capacity := feature.get("ApproxPaySpaces"):
             item["extras"]["capacity"] = int(capacity)
 
