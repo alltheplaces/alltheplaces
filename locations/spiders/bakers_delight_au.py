@@ -17,7 +17,7 @@ class BakersDelightAUSpider(AlgoliaSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["id"])
-        item["branch"] = item.pop("name", None)
+        item["branch"] = item.pop("name", "").removesuffix(" Bakery")
         item["addr_full"] = feature["formatted_address"]["display"]
         item["phone"] = feature["phone_number"]["display"]
         item["website"] = "https://www.bakersdelight.com.au" + feature["url"]
