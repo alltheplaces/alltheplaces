@@ -60,7 +60,6 @@ class AmastyStoreLocatorSpider(Spider):
 
         if self.pagination_mode and not self._crawl_completed:
             # Continue the crawl by requesting the next page of features.
-            print(response.url)
             if m := re.search(r"\?p=(\d+)$", response.url):
                 next_page_number = int(m.group(1)) + 1
                 next_page_url = re.sub(r"\?p=\d+$", f"?p={next_page_number}", response.url)
