@@ -1,8 +1,6 @@
-import json
 from typing import Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -16,8 +14,9 @@ class ChestersTHSpider(JSONBlobSpider):
     locations_key = ["data", "master_branchs", "data"]
 
     def start_requests(self):
-        payload = json.dumps(
-            {
+        yield JsonRequest(
+            url="https://chester-api.chesters.co.th/api/gql",
+            data={
                 "query": """query {
     master_branchs(status: "active", brand_id: "62f9c84ebc4a20ae9e5ae88f") {
         data {
@@ -37,10 +36,8 @@ class ChestersTHSpider(JSONBlobSpider):
         }
     }
 }"""
-            }
+            },
         )
-        url = "https://chester-api.chesters.co.th/api/gql"
-        yield scrapy.Request(url=url, body=payload, method="POST")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["opening_hours"] = OpeningHours()
