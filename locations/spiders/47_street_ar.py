@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class FortySevenStreetARSpider(JSONBlobSpider):
+class FortysevenStreetARSpider(JSONBlobSpider):
     name = "47_street_ar"
     item_attributes = {"brand": "47 Street", "brand_wikidata": "Q4638513"}
     locations_key = ["data", "getStores", "items"]
