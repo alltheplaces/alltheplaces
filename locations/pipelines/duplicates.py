@@ -25,4 +25,4 @@ class DuplicatesPipeline:
             return item
 
     def close_spider(self, spider: Spider):
-        logger.info("Dropped {} duplicate items".format(spider.crawler.stats.get_value("atp/duplicate_count")))
+        logger.info("Dropped {} duplicate items".format(spider.crawler.stats.get_value("atp/duplicate_count", 0)))
