@@ -9,7 +9,6 @@ from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 GAMESTOP_SHARED_ATTRIBUTES = {
     "brand": "GameStop",
@@ -24,8 +23,7 @@ class GamestopUSSpider(Spider):
     start_urls = [
         "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?radius=900"
     ]
-    is_playwright_spider = True
-    custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True  # Data centre IP ranges appear to be blocked.
     user_agent = None
 
