@@ -11,6 +11,7 @@ class TriumphSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["storelocator.triumph.com"]
     sitemap_urls = ["https://storelocator.triumph.com/en/sitemap.xml"]
     sitemap_rules = [(r"/en/.+/triumph-[-\w]+-(\d+)/?$", "parse_sd")]
+    drop_attributes = {"facebook"}
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         ld_data.pop("@id", None)  # capture store id as ref instead of website
