@@ -10,7 +10,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class AsbNZSpider(JSONBlobSpider):
     name = "asb_nz"
-    item_attributes = {"brand": "ASB", "brand_wikidata": "Q297214"}
+    item_attributes = {"brand_wikidata": "Q297214"}
     locations_key = "value"
 
     def start_requests(self):
