@@ -11,8 +11,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class LcboCA2Spider(AmastyStoreLocatorSpider):
-    name = "lcbo_ca_2"
+class LcboCASpider(AmastyStoreLocatorSpider):
+    name = "lcbo_ca"
     item_attributes = {"brand": "LCBO", "brand_wikidata": "Q845263"}
     allowed_domains = ["www.lcbo.com"]
     pagination_mode = True
