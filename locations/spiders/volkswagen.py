@@ -20,6 +20,7 @@ class VolkswagenSpider(JSONBlobSpider):
     name = "volkswagen"
     locations_key = "dealers"
     start_urls = ["https://www.vw.com/en.global-config.json"]
+    no_refs = True
 
     BRAND_MAPPING = {"V": VOLKSWAGEN_SHARED_ATTRIBUTES, "N": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES}
 
@@ -82,8 +83,6 @@ class VolkswagenSpider(JSONBlobSpider):
             yield from self.parse(response)
 
     def pre_process_data(self, feature: dict):
-        feature["id"] = str(feature["coordinates"][0]) + str(feature["coordinates"][1]) + feature["brand"]
-
         if feature.get("contact") and feature["contact"].get("website"):
             if not feature["contact"]["website"].startswith("http"):
                 feature["contact"]["website"] = "".join(["https://", feature["contact"]["website"]])
