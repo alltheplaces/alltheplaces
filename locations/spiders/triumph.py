@@ -18,4 +18,8 @@ class TriumphSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if "Partner" in item["name"].title():
             return
+        if "Outlet" in item["name"].title():
+            item["name"] = "Triumph Outlet"
+        else:
+            item["name"] = "Triumph"
         yield item
