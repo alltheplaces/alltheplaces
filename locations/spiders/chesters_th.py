@@ -40,6 +40,7 @@ class ChestersTHSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = feature["branch"]
         item["opening_hours"] = OpeningHours()
         for day_time in feature.get("branch_time_detail"):
             item["opening_hours"].add_range(day_time["day"], day_time["time_open"], day_time["time_close"])
