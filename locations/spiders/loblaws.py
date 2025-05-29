@@ -1,76 +1,55 @@
+from typing import Any, Iterable
+
 import scrapy
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
 class LoblawsSpider(scrapy.Spider):
     name = "loblaws"
-    allowed_domains = ["www.loblaws.ca"]
-    start_urls = ("https://www.loblaws.ca/api/pickup-locations",)
+    BRANDS = {
+        "loblaw": ("Loblaws", "Q3257626", "loblaws"),
+        "dominion": ("Dominion", "Q5291079", "newfoundlandgrocerystores"),
+        "extrafoods": ("Extra Foods", "Q5422144", "extrafoods"),
+        "fortinos": ("Fortinos", "Q5472662", "fortinos"),
+        "independent": ("Your Independent Grocer", "Q8058833", "yourindependentgrocer"),
+        "independentcitymarket": ("Independent City Market", None, "independentcitymarket"),
+        "maxi": ("Maxi", "Q3302441", "maxi"),
+        "nofrills": ("No Frills", "Q3342407", "nofrills"),
+        "provigo": ("Provigo", "Q3408306", "provigo"),
+        "superstore": ("Real Canadian Superstore", "Q7300856", "realcanadiansuperstore"),
+        "rass": ("Atlantic Superstore", "Q4816566", "atlanticsuperstore"),
+        "valumart": ("Valu-mart", "Q7912687", "valumart"),
+        "wholesaleclub": ("Wholesale Club", "Q7997568", "wholesaleclub"),
+        "zehrs": ("Zehrs", "Q8068546", "zehrs"),
+    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response):
+    def start_requests(self) -> Iterable[JsonRequest]:
+        for banner_id in self.BRANDS:
+            yield JsonRequest(
+                url=f"https://api.pcexpress.ca/pcx-bff/api/v1/pickup-locations?bannerIds={banner_id}",
+                headers={"x-apikey": "C1xujSegT5j3ap3yexJjqhOfELwGKYvz"},
+            )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         results = response.json()
-        for i in results:
-            if i["visible"] is False:
-                continue
-            if i["locationType"] == "STORE":
-                if i["storeBannerId"] == "dominion":
-                    brand = "Dominion"
-                    wikidata = "Q5291079"
-                elif i["storeBannerId"] == "extrafoods":
-                    brand = "Extra Foods"
-                    wikidata = "Q5422144"
-                elif i["storeBannerId"] == "zehrs":
-                    brand = "Zehrs"
-                    wikidata = "Q8068546"
-                elif i["storeBannerId"] == "fortinos":
-                    brand = "Fortinos"
-                    wikidata = "Q5472662"
-                elif i["storeBannerId"] == "rass":
-                    brand = "Real Canadian Superstore"
-                    wikidata = "Q7300856"
-                elif i["storeBannerId"] == "loblaw":
-                    brand = "Loblaws"
-                    wikidata = "Q3257626"
-                elif i["storeBannerId"] == "wholesaleclub":
-                    brand = "Wholesale Club"
-                    wikidata = "Q7997568"
-                elif i["storeBannerId"] == "valumart":
-                    brand = "Valu-mart"
-                    wikidata = "Q7912687"
-                elif i["storeBannerId"] == "superstore":
-                    brand = "Atlantic Superstore"
-                    wikidata = "Q4816566"
-                elif i["storeBannerId"] == "maxi":
-                    brand = "Maxi"
-                    wikidata = "Q3302441"
-                elif i["storeBannerId"] == "provigo":
-                    brand = "Provigo"
-                    wikidata = "Q3408306"
-                elif i["storeBannerId"] == "nofrills":
-                    brand = "No Frills"
-                    wikidata = "Q3342407"
-                else:
-                    brand = "Your Independent Grocer"
-                    wikidata = "Q8058833"
+        if isinstance(results, dict) and "errors" in results:  # bannerId might be invalid/changed.
+            self.logger.error(f'Error message: {results["errors"][0]["message"]}')
+        else:
+            for location in results:
+                if location.get("visible") is False:
+                    continue
+                item = DictParser.parse(location)
+                item["street_address"] = clean_address(
+                    [location["address"].get("line1"), location["address"].get("line2")]
+                )
+                if brand_details := self.BRANDS.get(location.get("storeBannerId")):
+                    item["brand"], item["brand_wikidata"], slug = brand_details
+                    item["website"] = f'https://www.{slug}.ca/en/store-locator/details/{location["storeId"]}'
 
-                properties = {
-                    "brand": brand,
-                    "brand_wikidata": wikidata,
-                    "ref": i["storeId"],
-                    "name": i["name"],
-                    "lat": i["geoPoint"]["latitude"],
-                    "lon": i["geoPoint"]["longitude"],
-                    "street_address": clean_address([i["address"].get("line2"), i["address"].get("line1")]),
-                    "city": i["address"]["town"],
-                    "state": i["address"]["region"],
-                    "postcode": i["address"]["postalCode"],
-                    "country": i["address"]["country"],
-                    "website": "https://www.loblaws.ca/store-locator/details/{}".format(i["storeId"]),
-                }
-
-                apply_category(Categories.SHOP_SUPERMARKET, properties)
-
-                yield Feature(**properties)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+                yield item
