@@ -6,6 +6,7 @@ from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PolomarketPLSpider(Spider):
@@ -22,5 +23,6 @@ class PolomarketPLSpider(Spider):
             item["ref"] = location.get("id")
             item["lat"] = location.get("latitude")
             item["lon"] = location.get("longitude")
+            item["street_address"] = clean_address(location.get("street"), min_length=3)
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
