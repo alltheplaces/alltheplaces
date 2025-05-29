@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CPFreshmartTHSpider(JSONBlobSpider):
+class CpFreshmartTHSpider(JSONBlobSpider):
     name = "cp_freshmart_th"
     item_attributes = {"brand": "CP Freshmart", "brand_wikidata": "Q125917787", "country": "TH"}
 
@@ -18,5 +18,6 @@ class CPFreshmartTHSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["name"] = None
         apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
