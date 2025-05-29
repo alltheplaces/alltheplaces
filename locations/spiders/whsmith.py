@@ -5,6 +5,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -30,5 +31,12 @@ class WhsmithSpider(SitemapSpider):
         item["addr_full"] = clean_address(response.xpath('//*[@class="shop-styling__address"]/p/text()').getall())
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
+
         apply_category(Categories.SHOP_NEWSAGENT, item)
+
+        item["opening_hours"] = OpeningHours()
+        for rule in response.xpath('//li[@class="whs-hours-item"]'):
+            day = rule.xpath('.//*[contains(@class, "day")]/text()').get("")
+            hours = rule.xpath('.//*[contains(@class, "time")]/text()').get("")
+            item["opening_hours"].add_ranges_from_string(f"{day} {hours}")
         yield item
