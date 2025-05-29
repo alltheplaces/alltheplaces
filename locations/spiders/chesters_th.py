@@ -42,9 +42,6 @@ class ChestersTHSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["opening_hours"] = OpeningHours()
         for day_time in feature.get("branch_time_detail"):
-            day = day_time.get("day")
-            open_time = day_time.get("time_open")
-            close_time = day_time.get("time_close")
-            item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+            item["opening_hours"].add_range(day_time["day"], day_time["time_open"], day_time["time_close"])
         apply_category(Categories.FAST_FOOD, item)
         yield item
