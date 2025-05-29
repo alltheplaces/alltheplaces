@@ -10,6 +10,7 @@ class SvetoforRUSpider(scrapy.Spider):
     item_attributes = {"brand_wikidata": "Q61875920"}
     start_urls = ["https://svetoforonline.ru/shops/"]
     requires_proxy = True  # Cloudflare blockage
+    user_agent = None
 
     def parse(self, response):
         data = response.xpath('//script[@type="text/javascript" and contains(text(), "var myPlacemark")]').get()
