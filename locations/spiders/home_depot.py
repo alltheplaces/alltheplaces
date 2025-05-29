@@ -13,7 +13,6 @@ from locations.user_agents import BROWSER_DEFAULT
 class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
     name = "home_depot"
     item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
-    # allowed_domains = ["www.homedepot.com"]
     start_urls = ["https://www.homedepot.com/l/storeDirectory"]
     rules = [
         Rule(LinkExtractor(allow=r"^https:\/\/www.homedepot.com\/l\/..$")),
