@@ -52,18 +52,19 @@ class FortysevenStreetARSpider(JSONBlobSpider):
         feature["location"] = feature["address"].pop("location")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature.get("isActive"):
-            oh = OpeningHours()
-            for rule in feature["businessHours"]:
-                try:
-                    oh.add_range(
-                        DAYS[rule["dayOfWeek"] - 1],
-                        rule["openingTime"],
-                        rule["closingTime"].replace("24.00:00:00", "23:59:00"),
-                        time_format="%H:%M:%S",
-                    )
-                except:
-                    pass
-            item["opening_hours"] = oh
-            apply_category(Categories.SHOP_CLOTHES, item)
-            yield item
+        if not feature.get("isActive"):
+            return
+        oh = OpeningHours()
+        for rule in feature["businessHours"]:
+            try:
+                oh.add_range(
+                    DAYS[rule["dayOfWeek"] - 1],
+                    rule["openingTime"],
+                    rule["closingTime"].replace("24.00:00:00", "23:59:00"),
+                    time_format="%H:%M:%S",
+                )
+            except:
+                pass
+        item["opening_hours"] = oh
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item
