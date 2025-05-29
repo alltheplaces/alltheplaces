@@ -11,7 +11,8 @@ class SprinterSpider(JSONBlobSpider):
     name = "sprinter"
     SPRINTER = {"brand": "Sprinter", "brand_wikidata": "Q6133465"}
     SPORT_ZONE = {"brand": "Sport Zone", "brand_wikidata": "Q18485899"}
-    requires_proxy = "ES"
+    requires_proxy = True
+    user_agent = None
     locations_key = "stores"
 
     def start_requests(self) -> Iterable[JsonRequest | Request]:
