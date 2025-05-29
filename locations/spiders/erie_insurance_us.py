@@ -47,7 +47,7 @@ class ErieInsuranceUSSpider(scrapy.Spider):
                     day = day_time["DayName"]
                     start_time = day_time["StartTime"]
                     end_time = day_time["EndTime"]
-                    if (start_time not in ["Closed", None]) and (end_time != None):
+                    if (start_time not in ["Closed", None]) and (end_time is not None):
                         item["opening_hours"].add_range(
                             day=day,
                             open_time=start_time.strip()
