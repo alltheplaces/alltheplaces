@@ -1,6 +1,7 @@
 import re
 from typing import Any
 
+import reverse_geocoder
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -24,6 +25,7 @@ class WhsmithSpider(SitemapSpider):
         "ROBOTSTXT_OBEY": False,
     }
     coordinates_pattern = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)")
+    skip_auto_cc_domain = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
@@ -31,6 +33,18 @@ class WhsmithSpider(SitemapSpider):
         item["addr_full"] = clean_address(response.xpath('//*[@class="shop-styling__address"]/p/text()').getall())
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
+        # Some stores have wildly incorrect coordinates for
+        # locations as far away as the Indian Ocean. Remove
+        # these incorrect coordinates.
+        # Some stores are located in IE rather than GB. Make
+        # the required change to the item's country.
+        if result := reverse_geocoder.get((float(item["lat"]), float(item["lon"])), mode=1, verbose=False):
+            match result["cc"]:
+                case "GB" | "IE" | "JE" | "IM" | "GG":
+                    item["country"] = result["cc"]
+                case _:
+                    item.pop("lat")
+                    item.pop("lon")
 
         apply_category(Categories.SHOP_NEWSAGENT, item)
 
