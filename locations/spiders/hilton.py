@@ -44,7 +44,7 @@ class HiltonSpider(Spider):
         "HW": ("Homewood Suites", "Q5890701"),
         "LX": ("Small Luxury Hotels of the World", None),
         "ND": ("NoMad", None),
-        "OL": ("LXR Hotels & Resorts", "Q64605184"),
+        "OL": ("LXR", "Q64605184"),
         "OU": ("AutoCamp", None),
         "PE": ("Spark by Hilton", None),
         "PO": ("Tempo", "Q112144357"),

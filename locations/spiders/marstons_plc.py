@@ -88,7 +88,7 @@ class MarstonsPlcSpider(scrapy.Spider):
                 "brand": place["pfLabel"],
             }
 
-            if properties["brand"] == "Marston's":
+            if properties["brand"] in ("Marston’s Carvery", "Marston’s Pub", "Marston’s Town Centre Pub", None):
                 properties.update(self.MARSTONS)
 
             apply_category(Categories.PUB, properties)

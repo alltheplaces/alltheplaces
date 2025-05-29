@@ -1,12 +1,13 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
 class SushiExpressTWSpider(Spider):
     name = "sushi_express_tw"
-    item_attributes = {"brand": "Sushi Express", "brand_wikidata": "Q15920674"}
+    item_attributes = {"brand_wikidata": "Q15920674"}
     start_urls = ["https://www.sushiexpress.com.tw/WCF/getSpot.ashx"]
 
     def parse(self, response):
@@ -16,6 +17,8 @@ class SushiExpressTWSpider(Spider):
             item["state"] = store.get("district")
             item["extras"]["fax"] = store.get("faxNumber")
             self.parse_opening_hours(item, store.get("openingHours"))
+
+            apply_category(Categories.RESTAURANT, item)
 
             yield item
 
