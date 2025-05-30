@@ -7,8 +7,8 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class ApplegreenSpider(Spider):
-    name = "applegreen"
+class ApplegreenIESpider(Spider):
+    name = "applegreen_ie"
     item_attributes = {"brand": "Applegreen", "brand_wikidata": "Q7178908"}
     start_urls = ["https://locations.applegreen.com/wp-json/locations/v1/search?distance=100"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
