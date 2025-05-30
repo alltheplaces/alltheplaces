@@ -26,7 +26,6 @@ class PlanetFitnessSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"/clubs/[a-z]{2}/[-\w]+?$", deny=r"/[a-z]{2}/clubs")),
         Rule(LinkExtractor(allow=r"/gyms/[-\w]+/?$", deny=r"/[a-z]{2}/gyms"), callback="parse_sd"),
     ]
-    requires_proxy = True
     user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
