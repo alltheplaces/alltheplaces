@@ -10,8 +10,8 @@ from locations.user_agents import FIREFOX_LATEST
 class KrefelBESpider(Spider):
     name = "krefel_be"
     item_attributes = {"brand": "Krëfel", "brand_wikidata": "Q3200093"}
-    user_agent = FIREFOX_LATEST
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
+    requires_proxy = True
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(url="https://api.krefel.be/occ/v2/krefel/stores?fields=STORE_FINDER&pageSize=1000&lang=nl")
