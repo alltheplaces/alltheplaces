@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.user_agents import FIREFOX_LATEST
+from urllib.parse import urljoin
 
 
 class KrefelBESpider(Spider):
@@ -21,5 +22,5 @@ class KrefelBESpider(Spider):
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
             item["ref"] = store["krefelId"]
-            item["website"] = "/".join(["https://www.krefel.be/nl/winkels", store["name"].lower()])
+            item["website"] = urljoin("https://www.krefel.be/nl/winkels", store["name"])
             yield item
