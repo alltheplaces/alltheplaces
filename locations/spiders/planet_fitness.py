@@ -1,6 +1,11 @@
+import html
+
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -28,3 +33,13 @@ class PlanetFitnessSpider(CrawlSpider, StructuredDataSpider):
         "DOWNLOAD_DELAY": 3,
         "RETRY_TIMES": 5,
     }
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["opening_hours"] = OpeningHours()
+        hours = response.xpath('//*[@id="club-hours"]')
+        if "24/7" in hours.get(""):
+            item["opening_hours"] = "24/7"
+        else:
+            for rule in hours.xpath(".//li/text() | .//p/text()").getall():
+                item["opening_hours"].add_ranges_from_string(html.unescape(rule).replace("&", "-"))
+        yield item
