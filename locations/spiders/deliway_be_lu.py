@@ -11,8 +11,7 @@ from locations.json_blob_spider import JSONBlobSpider
 class DeliwayBELUSpider(JSONBlobSpider):
     name = "deliway_be_lu"
     start_urls = ["https://stores.deliway.be/api/v3/locations"]
-    Deliway = {"brand": "Deliway", "brand_wikidata": "Q121814802"}
-    item_attributes = Deliway
+    item_attributes = {"brand": "Deliway", "brand_wikidata": "Q126195408"}
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
@@ -26,6 +25,6 @@ class DeliwayBELUSpider(JSONBlobSpider):
             item["opening_hours"].add_range(
                 DAYS[rule.get("startDay") - 1], rule.get("openTimeFormat"), rule.get("closeTimeFormat"), "%H:%M"
             )
-        apply_category(Categories.RESTAURANT, item)
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item
