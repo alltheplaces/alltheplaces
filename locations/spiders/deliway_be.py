@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class DeliwayBELUSpider(JSONBlobSpider):
-    name = "deliway_be_lu"
+class DeliwayBESpider(JSONBlobSpider):
+    name = "deliway_be"
     start_urls = ["https://stores.deliway.be/api/v3/locations"]
     item_attributes = {"brand": "Deliway", "brand_wikidata": "Q126195408"}
 
