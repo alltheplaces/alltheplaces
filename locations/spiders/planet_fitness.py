@@ -10,7 +10,10 @@ from locations.user_agents import BROWSER_DEFAULT
 class PlanetFitnessSpider(CrawlSpider, StructuredDataSpider):
     name = "planet_fitness"
     item_attributes = {"brand": "Planet Fitness", "brand_wikidata": "Q7201095"}
-    start_urls = ["https://www.planetfitness.com/clubs"]
+    start_urls = [
+        "https://www.planetfitness.com/clubs",
+        "https://www.planetfitness.ca/clubs",
+    ]
     rules = [
         Rule(LinkExtractor(allow=r"/clubs/[a-z]{2}/?$")),
         Rule(LinkExtractor(allow="/gyms/[-\w]+/?$"), callback="parse_sd"),
