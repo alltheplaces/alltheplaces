@@ -20,11 +20,18 @@ class DeliwayBELUSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Deliway ", "")
         item["ref"] = feature.get("externalId")
-        item["opening_hours"] = OpeningHours()
-        for rule in feature["businessHours"]:
-            item["opening_hours"].add_range(
-                DAYS[rule.get("startDay") - 1], rule.get("openTimeFormat"), rule.get("closeTimeFormat"), "%H:%M"
-            )
+
+        try:
+            item["opening_hours"] = self.parse_opening_hours(feature["businessHours"])
+        except:
+            self.logger.error("Error parsing opening hours")
+
         apply_category(Categories.FAST_FOOD, item)
 
         yield item
+
+    def parse_opening_hours(self, business_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in business_hours:
+            oh.add_range(DAYS[rule["startDay"] - 1], rule["openTimeFormat"], rule["closeTimeFormat"])
+        return oh
