@@ -1,11 +1,11 @@
 from typing import Any, Iterable
+from urllib.parse import urljoin
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.user_agents import FIREFOX_LATEST
-from urllib.parse import urljoin
 
 
 class KrefelBESpider(Spider):
