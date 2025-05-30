@@ -36,7 +36,7 @@ class WhsmithSpider(SitemapSpider):
         # Some stores have wildly incorrect coordinates for
         # locations as far away as the Indian Ocean. Remove
         # these incorrect coordinates.
-        # Some stores are located in IE rather than GB. Make
+        # Some stores are located in countries other than GB. Make
         # the required change to the item's country.
         if result := reverse_geocoder.get((float(item["lat"]), float(item["lon"])), mode=1, verbose=False):
             match result["cc"]:
