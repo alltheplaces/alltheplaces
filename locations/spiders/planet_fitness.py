@@ -43,5 +43,6 @@ class PlanetFitnessSpider(CrawlSpider, StructuredDataSpider):
             item["opening_hours"] = "24/7"
         else:
             for rule in hours.xpath(".//li/text() | .//p/text()").getall():
-                item["opening_hours"].add_ranges_from_string(html.unescape(rule).replace("&", "-"))
+                rule = html.unescape(rule).replace("&", "-").replace("12:00 AM - 12:00 AM", "12:00 AM - 11:59 AM")
+                item["opening_hours"].add_ranges_from_string(rule)
         yield item
