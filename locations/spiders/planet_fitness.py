@@ -20,9 +20,11 @@ class PlanetFitnessSpider(CrawlSpider, StructuredDataSpider):
         "https://www.planetfitness.ca/clubs",
     ]
     rules = [
-        Rule(LinkExtractor(allow=r"/clubs/[a-z]{2}/?$")),
-        Rule(LinkExtractor(allow=r"/clubs/[a-z]{2}/[-\w]+?$")),
-        Rule(LinkExtractor(allow="/gyms/[-\w]+/?$"), callback="parse_sd"),
+        Rule(
+            LinkExtractor(allow=r"/clubs/[a-z]{2}/?$", deny=r"/[a-z]{2}/clubs")
+        ),  # Deny language-specific versions like /es/
+        Rule(LinkExtractor(allow=r"/clubs/[a-z]{2}/[-\w]+?$", deny=r"/[a-z]{2}/clubs")),
+        Rule(LinkExtractor(allow=r"/gyms/[-\w]+/?$", deny=r"/[a-z]{2}/gyms"), callback="parse_sd"),
     ]
     requires_proxy = True
     user_agent = BROWSER_DEFAULT
