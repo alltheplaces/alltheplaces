@@ -1,4 +1,5 @@
 from typing import Any, Iterable
+from urllib.parse import urljoin
 
 import scrapy
 from scrapy import Request
@@ -36,6 +37,7 @@ class WawaSpider(scrapy.Spider):
         for store in response.json()["data"]["findNearLocations"]["results"]:
             item = DictParser.parse(store)
             item["street_address"] = store["address"]["address"]
+            item["website"] = urljoin("https://www.wawa.com/locations/", store["storeNumber"])
             apply_category(Categories.SHOP_CONVENIENCE, item)
             item["opening_hours"] = OpeningHours()
             if store["scheduleType"] == "24hours":
