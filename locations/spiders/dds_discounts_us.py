@@ -14,6 +14,8 @@ class DdsDiscountsUSSpider(Where2GetItSpider):
     def parse_item(self, item, location):
         item["branch"] = location["name1"]
         item["state"] = location["state"] or location["province"]
+        item["lat"] = location["latitude"]
+        item["lon"] = location["longitude"]
 
         oh = OpeningHours()
         for day in DAYS_FULL:
