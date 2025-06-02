@@ -18,7 +18,12 @@ class DdsDiscountsUSSpider(Where2GetItSpider):
         oh = OpeningHours()
         for day in DAYS_FULL:
             if hours := location.get(day.lower()):
-                oh.add_range(day, *hours.split(" - "), time_format="%I:%M %p")
+                if hours == "Closed":
+                    oh.set_closed(day)
+                elif " - " in hours:
+                    oh.add_range(day, *hours.split(" - "), time_format="%I:%M %p")
+                else:
+                    self.logger.error(f"Unknown hours format: {hours!r}")
         item["opening_hours"] = oh
 
         yield item
