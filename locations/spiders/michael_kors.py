@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class MichaelKorsSpider(SitemapSpider, StructuredDataSpider):
     name = "michael_kors"
-    item_attributes = {"brand": "Michael Kors", "brand_wikidata": "Q19572998"}
+    item_attributes = {"brand": "Michael Kors", "brand_wikidata": "Q134612138"}
     sitemap_urls = ["https://locations.michaelkors.com/sitemap.xml"]
     sitemap_rules = [(r"^https://locations.michaelkors.com/[\w-]+(?:/[\w-]+)?/[\w-]+/[\w-]+$", "parse_sd")]
     search_for_twitter = False
