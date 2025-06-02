@@ -5,6 +5,8 @@ from chompjs import parse_js_object
 from locations.categories import Categories
 from locations.hours import DAYS_ES, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SupercorESSpider(JSONBlobSpider):
@@ -12,6 +14,9 @@ class SupercorESSpider(JSONBlobSpider):
     item_attributes = {"brand": "Supercor", "brand_wikidata": "Q6135841", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.supercor.es"]
     start_urls = ["https://www.supercor.es/tiendas/"]
+    user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def extract_json(self, response):
         js_blob = response.xpath('//script[contains(text(), "var tiendas = `")]/text()').get()
