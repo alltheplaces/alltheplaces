@@ -2,7 +2,7 @@ from hashlib import sha1
 
 from chompjs import parse_js_object
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_ES, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -11,7 +11,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class SupercorESSpider(JSONBlobSpider):
     name = "supercor_es"
-    item_attributes = {"brand": "Supercor", "brand_wikidata": "Q6135841", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Supercor", "brand_wikidata": "Q6135841"}
     allowed_domains = ["www.supercor.es"]
     start_urls = ["https://www.supercor.es/tiendas/"]
     user_agent = BROWSER_DEFAULT
@@ -45,5 +45,7 @@ class SupercorESSpider(JSONBlobSpider):
         hours_text = " ".join(location["horario"]).replace(":|", ": ")
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_ES)
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
