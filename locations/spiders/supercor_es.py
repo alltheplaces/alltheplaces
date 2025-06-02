@@ -37,6 +37,11 @@ class SupercorESSpider(JSONBlobSpider):
         item["ref"] = sha1(location["direccion"].encode("UTF-8")).hexdigest()
         item["postcode"] = location["cp"]
 
+        if "Exprés" in item["name"].title():
+            item["name"] = "Supercor Exprés"
+        else:
+            item["name"] = "Supercor"
+
         hours_text = " ".join(location["horario"]).replace(":|", ": ")
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_ES)
