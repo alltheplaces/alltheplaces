@@ -14,7 +14,7 @@ from locations.user_agents import CHROME_LATEST
 
 class CarrefourBESpider(scrapy.Spider):
     name = "carrefour_be"
-    start_urls = ["https://winkels.carrefour.be/api/v3/locations"]
+    start_urls = ["https://winkels.carrefour.be/locations"]
     brands = {
         "express": CARREFOUR_EXPRESS,
         "orange": CARREFOUR_EXPRESS,
