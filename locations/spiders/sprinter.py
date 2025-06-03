@@ -30,16 +30,17 @@ class SprinterSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature["active"] is True:
-            item["branch"] = item.pop("name").replace("Sprinter ", "").replace("Sport Zone ", "")
-            item["street_address"] = item.pop("addr_full")
+        if not feature["active"]:
+            return
+        item["branch"] = item.pop("name").replace("Sprinter ", "").replace("Sport Zone ", "")
+        item["street_address"] = item.pop("addr_full")
 
-            if not item["website"].startswith("http"):
-                item["website"] = "https://{}".format(item["website"])
+        if not item["website"].startswith("http"):
+            item["website"] = "https://{}".format(item["website"])
 
-            if feature["id_market"] == 2:
-                item.update(self.SPORT_ZONE)
-            elif feature["id_market"] == 1:
-                item.update(self.SPRINTER)
+        if feature["id_market"] == 2:
+            item.update(self.SPORT_ZONE)
+        elif feature["id_market"] == 1:
+            item.update(self.SPRINTER)
 
-            yield item
+        yield item
