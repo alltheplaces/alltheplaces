@@ -12,6 +12,7 @@ class DdsDiscountsUSSpider(Where2GetItSpider):
     api_key = "4E0CC702-70E5-11E8-923C-16F58D89CD5A"
 
     def parse_item(self, item, location):
+        item["name"] = None
         item["branch"] = location["name1"]
         item["state"] = location["state"] or location["province"]
         item["lat"] = location["latitude"]
