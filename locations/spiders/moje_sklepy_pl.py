@@ -25,14 +25,16 @@ class MojeSklepyPLSpider(JSONBlobSpider):
     def parse_auth_token(self, response: Response) -> Iterable[JsonRequest]:
         js_blob = response.xpath('//script[contains(text(), "var mojeSklepySettings = ")]/text()').get()
         auth_token = js_blob.split('{"authToken":"', 1)[1].split('"', 1)[0]
-        yield JsonRequest(url=self.start_urls[0], headers={"Authorization": f"Bearer {auth_token}"}, meta={"auth_token": auth_token})
+        yield JsonRequest(
+            url=self.start_urls[0], headers={"Authorization": f"Bearer {auth_token}"}, meta={"auth_token": auth_token}
+        )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[JsonRequest]:
         item["ref"] = str(feature["shopId"])
         if feature["brand"] in self.brands.keys():
             item["brand"] = self.brands[feature["brand"]][0]
             item["brand_wikidata"] = self.brands[feature["brand"]][1]
-        elif feature["brand"] == "niezrzeszony": # "unaffiliated"
+        elif feature["brand"] == "niezrzeszony":  # "unaffiliated"
             # Ignore unbranded independent stores.
             return
         else:
@@ -47,7 +49,12 @@ class MojeSklepyPLSpider(JSONBlobSpider):
 
         shop_id = feature["shopId"]
         auth_token = response.meta["auth_token"]
-        yield JsonRequest(url=f"https://prod-www-api-iph.mojpos.pl/api/v2/shops/{shop_id}", headers={"Authorization": f"Bearer {auth_token}"}, meta={"item": item}, callback=self.parse_extra_details)
+        yield JsonRequest(
+            url=f"https://prod-www-api-iph.mojpos.pl/api/v2/shops/{shop_id}",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            meta={"item": item},
+            callback=self.parse_extra_details,
+        )
 
     def parse_extra_details(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
@@ -79,6 +86,10 @@ class MojeSklepyPLSpider(JSONBlobSpider):
                     # simply as "Su closed".
                     continue
                 else:
-                    item["opening_hours"].add_range(day_name, day_hours["timeFrom"].split("T", 1)[1].removesuffix(":00"), day_hours["timeTo"].split("T", 1)[1].removesuffix(":00"))
+                    item["opening_hours"].add_range(
+                        day_name,
+                        day_hours["timeFrom"].split("T", 1)[1].removesuffix(":00"),
+                        day_hours["timeTo"].split("T", 1)[1].removesuffix(":00"),
+                    )
 
         yield item
