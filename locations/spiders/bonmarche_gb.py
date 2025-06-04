@@ -1,5 +1,5 @@
-from json import loads
 import re
+from json import loads
 from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
@@ -20,7 +20,9 @@ class BonmarcheGBSpider(JSONBlobSpider):
     def start_requests(self) -> Iterable[JsonRequest]:
         for city in city_locations("GB", 500):
             lat, lon = city["latitude"], city["longitude"]
-            yield JsonRequest(url=f"https://www.bonmarche.co.uk/on/demandware.store/Sites-BONMARCHE-GB-Site/en_GB/Stores-FindStores?lat={lat}&long={lon}")
+            yield JsonRequest(
+                url=f"https://www.bonmarche.co.uk/on/demandware.store/Sites-BONMARCHE-GB-Site/en_GB/Stores-FindStores?lat={lat}&long={lon}"
+            )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["name"]
