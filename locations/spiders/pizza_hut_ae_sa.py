@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PizzaHutAESASpider(scrapy.Spider):
@@ -13,13 +14,12 @@ class PizzaHutAESASpider(scrapy.Spider):
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
-    user_agent = None
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self) -> Iterable[JsonRequest]:
         for key, value in {"uae": "uae", "saudi": "ksa"}.items():
             body = f'{{"payload":{{"path":"https://phprodblob-a0gebddqcze0bwhz.a03.azurefd.net/phprodblobstorage/phd/production/","country":"{value}","subPath":"?sv=2020-02-10&ss=bf&srt=o&sp=rlf&se=2025-06-21T02:09:06Z&st=2021-06-20T18:09:06Z&spr=https&sig=1jVlax0%2FNb2czQlUGw6kZv5KEvtVHSu4T7F0s0%2Fefyw%3D"}}}}'
             headers = {
-                "Content-Type": "application/json",
                 "brand": "PHD",
                 "country": value.upper(),
                 "deviceid": str(uuid.uuid4()),
