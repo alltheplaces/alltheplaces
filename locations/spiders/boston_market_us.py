@@ -1,7 +1,7 @@
-from chompjs import parse_js_object
 import re
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import Request, Response
 
@@ -29,7 +29,11 @@ class BostonMarketUSSpider(Spider):
             # location information.
             return
 
-        js_blob = '[{name:"Boston Market Corporation",' + response.text.split('=[{name:"Boston Market Corporation",', 1)[1].split("}]", 1)[0] + "}]"
+        js_blob = (
+            '[{name:"Boston Market Corporation",'
+            + response.text.split('=[{name:"Boston Market Corporation",', 1)[1].split("}]", 1)[0]
+            + "}]"
+        )
         features = parse_js_object(js_blob)
         for feature in features:
             if feature["status"] != "Open":
