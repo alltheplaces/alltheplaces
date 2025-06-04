@@ -13,7 +13,9 @@ class BootBarnSpider(JSONBlobSpider):
     name = "boot_barn_us"
     item_attributes = {"brand": "Boot Barn", "brand_wikidata": "Q109825187"}
     allowed_domains = ["www.bootbarn.com"]
-    start_urls = ["https://www.bootbarn.com/on/demandware.store/Sites-bootbarn_us-Site/default/LocationSearch-GetStoresForGeolocationPositionAjax"]
+    start_urls = [
+        "https://www.bootbarn.com/on/demandware.store/Sites-bootbarn_us-Site/default/LocationSearch-GetStoresForGeolocationPositionAjax"
+    ]
     locations_key = ["InquiryResult", "data"]
     user_agent = BROWSER_DEFAULT
 
