@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class BootBarnSpider(JSONBlobSpider):
+class BootBarnUSSpider(JSONBlobSpider):
     name = "boot_barn_us"
     item_attributes = {"brand": "Boot Barn", "brand_wikidata": "Q109825187"}
     allowed_domains = ["www.bootbarn.com"]
