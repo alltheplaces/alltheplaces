@@ -14,6 +14,6 @@ class MadameFrigoCHSpider(Spider):
             item["ref"] = location.xpath("./@id").get()
             item["lat"] = location.xpath("./@data-lat").get()
             item["lon"] = location.xpath("./@data-lng").get()
-            item["name"] = location.xpath('.//p[@class="hyphenate"]/text()').get()
+            item["branch"] = location.xpath('.//p[@class="hyphenate"]/text()').get()
 
             yield item
