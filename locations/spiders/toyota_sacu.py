@@ -12,6 +12,7 @@ BRANDS = {
 class ToyotaSacuSpider(JSONBlobSpider):
     name = "toyota_sacu"
     start_urls = ["https://api-toyota.azure-api.net/suppliers?filter[where][supplierType]=dealer"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, location):
         brands = []
