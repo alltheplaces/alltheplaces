@@ -1,6 +1,7 @@
 from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
+from locations.user_agents import BROWSER_DEFAULT
 
 BRANDS = {
     "toyotaSupplier": TOYOTA_SHARED_ATTRIBUTES,
@@ -13,6 +14,7 @@ class ToyotaSacuSpider(JSONBlobSpider):
     name = "toyota_sacu"
     start_urls = ["https://api-toyota.azure-api.net/suppliers?filter[where][supplierType]=dealer"]
     requires_proxy = True
+    custom_settings = {"USER_AGENT":BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, location):
         brands = []
