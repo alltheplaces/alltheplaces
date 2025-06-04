@@ -13,7 +13,7 @@ class BubbakoosBurritosUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"^https:\/\/locations\.bubbakoos\.com\/locations\/[a-z]{2}\/[\w\-]+$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict):
-        item["branch"] = response.xpath('//h1/text()').get()
+        item["branch"] = response.xpath("//h1/text()").get()
         item.pop("facebook", None)
         apply_category(Categories.FAST_FOOD, item)
         yield item
