@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -44,4 +45,9 @@ class ValoraSpider(JSONBlobSpider):
         item["brand"], item["brand_wikidata"], category = self.brands.get(feature["format"], (None, None, None))
         if category:
             apply_category(category, item)
+
+        item["opening_hours"] = OpeningHours()
+        for day, hours in feature.get("openingHours").items():
+            for shift in hours:
+                item["opening_hours"].add_range(day, shift.get("from"), shift.get("to"))
         yield item
