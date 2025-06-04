@@ -1,5 +1,5 @@
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.storefinders.storemapper import StoremapperSpider
 
@@ -16,6 +16,8 @@ class BridgeheadCASpider(StoremapperSpider):
             if day_hours["open_24hrs"] is not None:
                 item["opening_hours"].add_range(DAYS_FULL[int(day_hours["week_day"]) - 1], "00:01", "23:59")
             else:
-                item["opening_hours"].add_range(DAYS_FULL[int(day_hours["week_day"]) - 1], day_hours["open_time"], day_hours["close_time"])
+                item["opening_hours"].add_range(
+                    DAYS_FULL[int(day_hours["week_day"]) - 1], day_hours["open_time"], day_hours["close_time"]
+                )
         apply_category(Categories.COFFEE_SHOP, item)
         yield item
