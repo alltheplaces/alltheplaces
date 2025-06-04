@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -13,8 +13,8 @@ class BoboliESPTSpider(JSONBlobSpider):
     item_attributes = {"brand": "Boboli", "brand_wikidata": "Q39073733"}
     allowed_domains = ["www.boboli.es"]
     start_urls = [
-        "https://www.boboli.es/es/tiendas?all=1&id_country=6", # ES
-        "https://www.boboli.es/es/tiendas?all=1&id_country=15", # PT
+        "https://www.boboli.es/es/tiendas?all=1&id_country=6",  # ES
+        "https://www.boboli.es/es/tiendas?all=1&id_country=15",  # PT
     ]
     needs_json_request = True
 
