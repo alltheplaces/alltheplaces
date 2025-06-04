@@ -25,6 +25,7 @@ class DinoPLSpider(JSONBlobSpider):
         feature.update(feature.pop("properties"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", "").strip().rsplit(" ", 1)[0]
         item["opening_hours"] = OpeningHours()
         try:
             if week_hours := feature.get("weekHours"):
