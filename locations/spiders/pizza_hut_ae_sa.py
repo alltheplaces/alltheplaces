@@ -1,3 +1,5 @@
+import uuid
+
 import scrapy
 
 from locations.categories import Categories, apply_category
@@ -14,7 +16,12 @@ class PizzaHutAESASpider(scrapy.Spider):
     def start_requests(self):
         for key, value in {"uae": "uae", "saudi": "ksa"}.items():
             body = f'{{"payload":{{"path":"https://phprodblob-a0gebddqcze0bwhz.a03.azurefd.net/phprodblobstorage/phd/production/","country":"{value}","subPath":"?sv=2020-02-10&ss=bf&srt=o&sp=rlf&se=2025-06-21T02:09:06Z&st=2021-06-20T18:09:06Z&spr=https&sig=1jVlax0%2FNb2czQlUGw6kZv5KEvtVHSu4T7F0s0%2Fefyw%3D"}}}}'
-            headers = {"Content-Type": "application/json", "brand": "PHD", "country": value.upper()}
+            headers = {
+                "Content-Type": "application/json",
+                "brand": "PHD",
+                "country": value.upper(),
+                "deviceid": str(uuid.uuid4()),
+            }
             url = f"https://{key}.pizzahut.me/api/getStoreList"
             yield scrapy.Request(
                 url=url, method="POST", body=body, headers=headers, callback=self.parse, cb_kwargs={"country": key}
