@@ -29,8 +29,8 @@ class O2CZSpider(SitemapSpider):
         item["addr_full"] = (
             response.xpath("//a[contains(@href, 'www.google.com/maps')]/@href").get().split("destination=")[-1]
         )
-        item["lat"] = response.xpath("//*[@id='stores-config']/@data-store-lat").get()
-        item["lon"] = response.xpath("//*[@id='stores-config']/@data-store-lng").get()
+        item["lat"] = response.xpath("//@data-lat").get()
+        item["lon"] = response.xpath("//@data-lng").get()
         item["website"] = get_url(response)
         extract_email(item, response)
         extract_phone(item, response)
