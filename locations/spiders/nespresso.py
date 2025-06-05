@@ -1,8 +1,7 @@
 import scrapy
 
-from locations.items import Feature
 from locations.geo import city_locations
-
+from locations.items import Feature
 
 
 class NespressoSpider(scrapy.Spider):
@@ -76,13 +75,12 @@ class NespressoSpider(scrapy.Spider):
             "YT",
             "ZA",
         ]
-         
 
-        base_url = "https://www.nespresso.com/storelocator/app/find_poi-v4.php?&lang=EN&lat={lat}&lng={lon}" 
+        base_url = "https://www.nespresso.com/storelocator/app/find_poi-v4.php?&lang=EN&lat={lat}&lng={lon}"
         for country in countries:
             for city in city_locations(country, 1000000):
                 lat, lon = city["latitude"], city["longitude"]
-                url = base_url.format(lat=lat, lon=lon) 
+                url = base_url.format(lat=lat, lon=lon)
                 yield scrapy.Request(url, callback=self.parse)
 
     def parse(self, response):
