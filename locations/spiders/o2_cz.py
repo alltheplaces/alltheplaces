@@ -26,7 +26,6 @@ class O2CZSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = response.url.removeprefix("https://www.o2.cz/prodejny/")
-        item["name"] = response.xpath("//h1/text()").get()
         item["addr_full"] = (
             response.xpath("//a[contains(@href, 'www.google.com/maps')]/@href").get().split("destination=")[-1]
         )
