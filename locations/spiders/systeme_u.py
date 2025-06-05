@@ -75,15 +75,17 @@ class SystemeUSpider(SitemapSpider):
             "website": response.url,
         }
 
-        if m := re.search(r"/(magasin|station)/(uexpress|superu|marcheu|hyperu)-\w+", response.url):
+        if m := re.search(r"/(magasin|station)/(uexpress|superu|marcheu|marcheru|hyperu)-\w+", response.url):
             if m.group(1) == "magasin":
                 apply_category(Categories.SHOP_SUPERMARKET, properties)
                 hours_xpath = '//div[@id="magasin-tab"]//div[@class="u-horaire"]//tr[@class="u-horaire__line-day"]'
             else:
                 apply_category(Categories.FUEL_STATION, properties)
                 hours_xpath = '//div[@class="u-station__magasin"]/p[2]/text()'
-
-            properties.update(self.brands[m.group(2)])
+            category_name = m.group(2)
+            if category_name == "marcheru":
+                category_name = "marcheu"
+            properties.update(self.brands[category_name])
 
         try:
             hours = response.xpath(hours_xpath)
@@ -93,5 +95,4 @@ class SystemeUSpider(SitemapSpider):
                 properties["opening_hours"] = h
         except:
             pass
-
         yield Feature(**properties)
