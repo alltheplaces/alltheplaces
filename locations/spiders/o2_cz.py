@@ -3,7 +3,7 @@ from typing import Any, Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import DAYS_CZ, OpeningHours
+from locations.hours import DAYS_CZ, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import extract_email, extract_phone, get_url
 
@@ -38,7 +38,11 @@ class O2CZSpider(SitemapSpider):
         oh = OpeningHours()
         for row in response.xpath("//div[contains(.,'Otevírací doba')]//tr"):
             day, hrs = row.xpath("td/text()[normalize-space()]").getall()
-            oh.add_ranges_from_string(day.strip() + " " + hrs.strip(), DAYS_CZ)
-        item["opening_hours"] = oh.as_opening_hours()
+            if day := sanitise_day(day.strip(), DAYS_CZ):
+                if "Zavřeno" in hrs.title():
+                    oh.set_closed(day)
+                else:
+                    oh.add_ranges_from_string(day + " " + hrs.strip())
+        item["opening_hours"] = oh
 
         yield item
