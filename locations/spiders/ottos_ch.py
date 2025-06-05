@@ -18,15 +18,15 @@ class OttosCHSpider(scrapy.Spider):
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in xmltodict.parse(response.text)["StoreFinderSearchPageWsDTO"]["stores"]["stores"]:
+        for store in DictParser.get_nested_key(xmltodict.parse(response.text), "stores"):
             store.update(store.pop("address"))
             item = DictParser.parse(store)
             item["ref"] = item.pop("name")
             if state := item.get("state"):
                 item["state"] = state["isocodeShort"]
-            item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
+            item["street_address"] = merge_address_lines([store.get("line1"), store.get("line2")])
             item["opening_hours"] = OpeningHours()
-            for day_time in store["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
+            for day_time in store["openingHours"]["weekDayOpeningList"]:
                 if day_time["closed"] == "true":
                     item["opening_hours"].set_closed(day_time["weekDay"])
                 else:
