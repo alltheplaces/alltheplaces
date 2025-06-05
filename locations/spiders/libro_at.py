@@ -22,5 +22,5 @@ class LibroATSpider(AmastyStoreLocatorSpider):
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["ref"], item["street_address"] = item.pop("name").split(": ", 1)
         item["addr_full"] = clean_address(popup_html.xpath("//span/text()").getall()).removesuffix(", Filiale wählen")
-
+        item["website"] = f'https://www.libro.at/filialfinder/{item["ref"]}/'
         yield item
