@@ -53,5 +53,9 @@ class OttosCHSpider(scrapy.Spider):
                 item["branch"] = store["displayName"].removeprefix("OTTO'S ")
                 apply_category(Categories.SHOP_VARIETY_STORE, item)
 
-            item["website"] = urljoin("https://www.ottos.ch", store["storeDetailUrl"]).replace(".ch/", ".ch/de/")
+            slug = store["storeDetailUrl"].removeprefix("/")
+            item["website"] = item["extras"]["website:de"] = urljoin("https://www.ottos.ch/de/", slug)
+            item["extras"]["website:it"] = urljoin("https://www.ottos.ch/it/", slug)
+            item["extras"]["website:de"] = urljoin("https://www.ottos.ch/fr/", slug)
+
             yield item
