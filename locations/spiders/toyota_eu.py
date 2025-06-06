@@ -8,11 +8,12 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 
+LEXUS_SHARED_ATTRIBUTES = {"brand": "Lexus", "brand_wikidata": "Q35919"}
 
 class ToyotaEUSpider(JSONBlobSpider):
     download_timeout = 60
     name = "toyota_eu"
-    item_attributes = TOYOTA_SHARED_ATTRIBUTES
+    BRAND_MAPPING = {"Lexus": LEXUS_SHARED_ATTRIBUTES, "Toyota": TOYOTA_SHARED_ATTRIBUTES}
     locations_key = "dealers"
 
     all_countries = [country.alpha_2.lower() for country in pycountry.countries]
@@ -57,17 +58,25 @@ class ToyotaEUSpider(JSONBlobSpider):
 
     def start_requests(self):
         available_countries = [c for c in self.all_countries if c not in self.exclude_countries]
-        for country in available_countries:
-            yield scrapy.Request(
-                f"https://kong-proxy-intranet.toyota-europe.com/dxp/dealers/api/toyota/{country}/en/all",
-                callback=self.parse,
-            )
+        for brand in ["toyota", "lexus"]:
+            for country in available_countries:
+                yield scrapy.Request(
+                    f"https://kong-proxy-intranet.toyota-europe.com/dxp/dealers/api/{brand}/{country}/en/all",
+                    callback=self.parse,
+                )
 
     def pre_process_data(self, feature):
         feature["geo"] = feature["address"].pop("geo", None)
         feature["email"] = feature.pop("eMail")
 
     def post_process_item(self, item, response, location):
+
+        if match := self.BRAND_MAPPING.get(location["brand"]):
+            item["brand"] = match["brand"]
+            item["brand_wikidata"] = match["brand_wikidata"]
+        else:
+            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{location['brand']}")
+
         services = [i["service"] for i in location["services"]]
         for service in services:
             self.crawler.stats.inc_value(f"atp/{self.name}/services/{service}")
