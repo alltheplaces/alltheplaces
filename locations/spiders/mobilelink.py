@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Request, Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -33,5 +34,5 @@ class MobilelinkSpider(Spider):
                 else:
                     oh.add_range(day, location["Opentime"], location["Closetime"], "%H:%M:%S")
             item["opening_hours"] = oh
-
+            apply_category(Categories.SHOP_TELECOMMUNICATION, item)
             yield item
