@@ -10,6 +10,7 @@ from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
 
 LEXUS_SHARED_ATTRIBUTES = {"brand": "Lexus", "brand_wikidata": "Q35919"}
 
+
 class ToyotaEUSpider(JSONBlobSpider):
     download_timeout = 60
     name = "toyota_eu"
