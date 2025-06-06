@@ -10,7 +10,7 @@ from locations.hours import DAYS, OpeningHours
 
 class MobilelinkSpider(Spider):
     name = "mobilelink"
-    item_attributes = {"brand": "Mobilelink"}
+    item_attributes = {"brand": "Cricket Wireless", "brand_wikidata": "Q5184987", "operator": "Mobilelink"}
     allowed_domains = ["mobilelinkusa.com"]
 
     def start_requests(self):
@@ -34,5 +34,5 @@ class MobilelinkSpider(Spider):
                 else:
                     oh.add_range(day, location["Opentime"], location["Closetime"], "%H:%M:%S")
             item["opening_hours"] = oh
-            apply_category(Categories.SHOP_TELECOMMUNICATION, item)
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
             yield item
