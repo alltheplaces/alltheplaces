@@ -2,6 +2,7 @@ from typing import Iterable
 
 from requests import Response
 from scrapy.http import JsonRequest, Request, Response
+
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -13,9 +14,8 @@ class ToyotaUSSpider(JSONBlobSpider):
     item_attributes = TOYOTA_SHARED_ATTRIBUTES
     locations_key = "dealers"
 
-
     def start_requests(self) -> Iterable[JsonRequest | Request]:
-        # API can not handle huge radius coverage, therefore 
+        # API can not handle huge radius coverage, therefore
         # I decicded to use zipcodes from:
         # Alaska(99775), Florida(33040), California(91932), Washington(98221), Kansas(66952), Maine(04619)
         for zip_code in ["99775", "33040", "91932", "98221", "66952", "04619"]:
@@ -32,7 +32,7 @@ class ToyotaUSSpider(JSONBlobSpider):
         item["postcode"] = location[len(location) - 1].split(" ")[1]
         item["name"] = feature["label"]
         item["website"] = feature["details"]["uriWebsite"]
-        
+
         departments = feature["details"]["departmentInformation"]
         apply_category(Categories.SHOP_CAR, item)
         apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments)
