@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import urljoin
 
 from scrapy import Request, Spider
 from scrapy.http import Response
@@ -23,6 +24,7 @@ class MobilelinkSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["branch"] = location["Store"]
+            item["website"] = urljoin("https://mobilelinkusa.com/stores/", location["StoreSEOTag"])
             item["phone"] = location["Contact"]
 
             oh = OpeningHours()
