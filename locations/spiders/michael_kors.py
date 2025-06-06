@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -29,5 +30,5 @@ class MichaelKorsSpider(SitemapSpider, StructuredDataSpider):
             item["name"] = "Michael Kors Outlet"
         else:
             item["branch"] = item.pop("name").removeprefix("Michael Kors ")
-
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item
