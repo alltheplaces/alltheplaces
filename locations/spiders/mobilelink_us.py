@@ -9,8 +9,8 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class MobilelinkSpider(Spider):
-    name = "mobilelink"
+class MobilelinkUSSpider(Spider):
+    name = "mobilelink_us"
     item_attributes = {"brand": "Cricket Wireless", "brand_wikidata": "Q5184987", "operator": "Mobilelink"}
     allowed_domains = ["mobilelinkusa.com"]
 
