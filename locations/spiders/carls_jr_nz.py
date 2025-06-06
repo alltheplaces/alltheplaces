@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
@@ -25,7 +25,7 @@ class CarlsJrNZSpider(Spider):
             item["branch"] = item.pop("name").removeprefix("Carl's Jr ")
 
             item["opening_hours"] = OpeningHours()
-            for day_time in store["operatingHoursStore"]:
-                item["opening_hours"].add_range(day_time["dayofweek"], day_time["start"], day_time["end"])
+            for rule in store["operatingHoursStore"]:
+                item["opening_hours"].add_range(DAYS[rule["dayofweek"]], rule["start"], rule["end"])
 
             yield item
