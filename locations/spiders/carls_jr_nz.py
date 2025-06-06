@@ -36,12 +36,6 @@ class CarlsJrNZSpider(Spider):
                 store.get("operatingHoursDriveThru")
             ).as_opening_hours()
 
-            if False:  # delivery area
-                item["geometry"] = {"type": "LineString", "coordinates": []}
-                for coords in store["polygon"].split(" "):
-                    lat, lon = coords.split("|")
-                    item["geometry"]["coordinates"].append([float(lon), float(lat)])
-
             yield item
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:
