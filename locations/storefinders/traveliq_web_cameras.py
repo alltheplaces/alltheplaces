@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy import Spider
@@ -30,12 +31,7 @@ class TravelIQWebCamerasSpider(Spider):
 
     To use, specify:
      - 'allowed_domains': mandatory parameter
-     - 'operators': mandatory parameter, a dictionary mapping operator codes
-                    to a tuple of operator name, operator Wikidata item and
-                    state.
     """
-
-    operators: dict[tuple[str, str, str]] = {}
 
     def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(
@@ -54,17 +50,21 @@ class TravelIQWebCamerasSpider(Spider):
     def parse_cameras(self, response: Response) -> Iterable[Feature]:
         for camera in response.json()["data"]:
             properties = {
-                "ref": camera["id"],
-                "name": camera["displayName"],
-                "lat": camera["latitude"],
-                "lon": camera["longitude"],
-                "operator": self.operators[camera["agencyName"]][0],
-                "operator_wikidata": self.operators[camera["agencyName"]][1],
-                "state": self.operators[camera["agencyName"]][2],
+                "ref": str(camera["id"]),
+                "name": camera["location"],
+                "state": camera["state"],
             }
+            wkt = camera["latLng"]["geography"]["wellKnownText"]
+            if m := re.fullmatch(r"POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)", wkt):
+                properties["lat"] = m.group(1)
+                properties["lon"] = m.group(2)
             apply_category(Categories.SURVEILLANCE_CAMERA, properties)
             properties["extras"]["contact:webcam"] = "https://{}/tooltip/Cameras/{}".format(
                 self.allowed_domains[0], properties["ref"]
             )
             properties["extras"]["camera:type"] = "fixed"
-            yield Feature(**properties)
+            yield from self.post_process_item(Feature(**properties), response, camera) or []
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        """Override to perform post-processing of the extracted feature."""
+        yield item
