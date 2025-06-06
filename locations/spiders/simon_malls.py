@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.pipelines.address_clean_up import clean_address
@@ -43,5 +44,5 @@ class SimonMallsSpider(scrapy.Spider):
             item["image"] = location["propertyPhotoLrg"]
             item["facebook"] = location["socialLinks"].get("Facebook")
             item["twitter"] = location["socialLinks"].get("Twitter")
-
+            apply_category(Categories.SHOP_MALL, item)
             yield item
