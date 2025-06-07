@@ -3,7 +3,7 @@ import csv
 import scrapy
 from scrapy import FormRequest
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -93,7 +93,8 @@ class DpdDESpider(scrapy.Spider):
             item["postcode"] = plz
             item["ref"] = lat + lng
             item["housenumber"] = housenumber
-            apply_category({"post_office": "post_partner"}, item)
+            apply_category(Categories.GENERIC_POI, item)
+            item["extras"]["post_office"] = "post_partner"
 
             formdata = {
                 "ctl00$ctl16": "ctl00$ContentPlaceHolder1$modShopFinder$ctl01|ctl00$ContentPlaceHolder1$modShopFinder$repShopList$ctl0"
