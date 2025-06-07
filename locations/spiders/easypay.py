@@ -1,5 +1,6 @@
 from scrapy.spiders import CSVFeedSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -13,4 +14,7 @@ class EasypaySpider(CSVFeedSpider):
     def parse_row(self, response, row):
         item = DictParser.parse(row)
         item["operator"] = row["operator"]
+
+        apply_category(Categories.PAYMENT_CENTRE, item)
+
         yield item
