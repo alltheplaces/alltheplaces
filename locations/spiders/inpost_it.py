@@ -55,17 +55,16 @@ class InpostITSpider(JSONBlobSpider):
 
         apply_yes_no(Extras.PARCEL_MAIL_IN, item, True)
         apply_yes_no(Extras.PARCEL_PICKUP, item, True)
+        self.set_brand(item, location)
         item["website"] = response.urljoin("/" + self.parse_slug(item, location))
         self.clean_address(item, location)
         if int(location["type"]) == 1:
-            item.update(self.brand_locker)
             apply_category(Categories.PARCEL_LOCKER, item)
             item.update(self.operator)
             yield from self.post_process_locker(item, location)
         else:
             apply_category(Categories.GENERIC_POI, item)
             item["extras"]["post_office"] = "post_partner"
-            item["extras"].update(self.brand_partner)
             item["extras"]["ref:inpost"] = item["ref"]
             yield from self.post_process_partner(item, location)
 
@@ -77,6 +76,12 @@ class InpostITSpider(JSONBlobSpider):
             named_times=NAMED_TIMES_IT,
             closed=CLOSED_IT,
         )
+
+    def set_brand(self, item, location):
+        if int(location["type"]) == 1:
+            item.update(self.brand_locker)
+        else:
+            item["extras"].update(self.brand_partner)
 
     def clean_address(self, item, location):
         item["addr_full"] = [
