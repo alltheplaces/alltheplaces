@@ -97,9 +97,13 @@ class NextSpider(Spider):
             item["city"] = location["address"]["addressLocality"]
             item["postcode"] = location["address"]["postalCode"]
             item["country"] = location["address"]["addressCountry"]
-            coords = response.xpath('//script[contains(.,"storeLocator.mapSelectedStore")]/text()').re_first(r"storeLocator\.mapSelectedStore\((.+)\)").split(",")
-            item["lat"]=coords[-2]
-            item["lon"]=coords[-1]
+            coords = (
+                response.xpath('//script[contains(.,"storeLocator.mapSelectedStore")]/text()')
+                .re_first(r"storeLocator\.mapSelectedStore\((.+)\)")
+                .split(",")
+            )
+            item["lat"] = coords[-2]
+            item["lon"] = coords[-1]
             oh = OpeningHours()
             for opening_hour in location["openingHoursSpecification"]:
                 if "opens" in opening_hour:
