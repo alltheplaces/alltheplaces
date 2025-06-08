@@ -5,12 +5,13 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class BissuMXSpider(CrawlSpider):
     name = "bissu_mx"
-    item_attributes = {"brand": "Bissú", "brand_wikidata": "Q130466489"}
+    item_attributes = {"brand": "Bissú", "brand_wikidata": "Q130466489", "extras": Categories.SHOP_COSMETICS.value}
     start_urls = ["https://bissu.com/tiendas"]
     rules = [Rule(LinkExtractor(allow=r"/tiendas/"), callback="parse")]
 
