@@ -13,7 +13,7 @@ class BissuMXSpider(CrawlSpider):
     name = "bissu_mx"
     item_attributes = {"brand": "Bissú", "brand_wikidata": "Q130466489"}
     start_urls = ["https://bissu.com/tiendas"]
-    rules = [Rule(LinkExtractor(allow=r"/tiendas/"), callback="parse")]
+    rules = [Rule(LinkExtractor(allow=r"/tiendas/", restrict_text="Bissú"), callback="parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         item = Feature()
