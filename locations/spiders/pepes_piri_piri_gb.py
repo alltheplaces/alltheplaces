@@ -9,7 +9,7 @@ from locations.storefinders.uberall import UberallSpider
 
 class PepesPiriPiriGBSpider(UberallSpider):
     name = "pepes_piri_piri_gb"
-    item_attributes = {"brand": "Pepes Piri Piri", "brand_wikidata": "Q120645662"}
+    item_attributes = {"brand": "Pepe's", "brand_wikidata": "Q120645662"}
     key = "AvaxP06WrnMGLVlO7F1k5uryHxCd0R"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
