@@ -13,7 +13,6 @@ class FraserHartGBSpider(JSONBlobSpider):
     host = "core.service.elfsight.com"
     shop = "www.fraserhart.co.uk"
     api_key = "4a4f06f9-ddef-4c3e-a843-7ed8bb1de4c4"
-    no_refs = True
 
     def start_requests(self) -> Iterable[JsonRequest | Request]:
         yield JsonRequest(f"https://{self.host}/p/boot/?w={self.api_key}")
@@ -29,5 +28,6 @@ class FraserHartGBSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item, response, location):
+        item["branch"] = item.pop("name").removeprefix("Fraser Hart, ").removesuffix(" - Fraser Hart")
         apply_category(Categories.SHOP_JEWELRY, item)
         yield item
