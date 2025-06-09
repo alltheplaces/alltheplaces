@@ -88,50 +88,13 @@ class YextAnswersSpider(Spider):
     def start_requests(self) -> Iterable[Request]:
         yield self.make_request(0)
 
-    # flake8: noqa: C901
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["results"]:
             location = location["data"]
             item = DictParser.parse(location)
             item["branch"] = location.get("geomodifier")
 
-            phones = []
-            for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
-                if phone := location.get(phone_type):
-                    if isinstance(phone, dict):
-                        phones.append(phone.get("number"))
-                    elif isinstance(phone, str):
-                        phones.append(phone)
-            if len(phones) > 0:
-                item["phone"] = "; ".join(phones)
-
-            if emails := location.get("emails"):
-                item["email"] = ";".join(emails)
-
-            if google_place_id := location.get("googlePlaceId"):
-                item["extras"]["ref:google"] = google_place_id
-            if twitter_handle := location.get("tritterHandle"):
-                item["twitter"] = twitter_handle
-            if instagram_handle := location.get("instagramHandle"):
-                item["extras"]["contact:instagram"] = instagram_handle
-            if fax_number := location.get("fax"):
-                item["extras"]["fax"] = fax_number
-            if "facebookVanityUrl" in location.keys():
-                item["facebook"] = clean_facebook(location["facebookVanityUrl"])
-            elif "facebookPageUrl" in location.keys():
-                item["facebook"] = clean_facebook(location["facebookPageUrl"])
-
-            if website_url_dict := location.get("websiteUrl"):
-                if website_url_dict.get("preferDisplayUrl"):
-                    item["website"] = website_url_dict.get("displayUrl")
-                else:
-                    item["website"] = website_url_dict.get("url")
-
-            if menu_url_dict := location.get("menuUrl"):
-                if menu_url_dict.get("preferDisplayUrl"):
-                    item["extras"]["website:menu"] = menu_url_dict.get("displayUrl")
-                else:
-                    item["extras"]["website:menu"] = menu_url_dict.get("url")
+            self._parse_socials(item, location)
 
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
             if delivery_hours := location.get("deliveryHours"):
@@ -148,6 +111,45 @@ class YextAnswersSpider(Spider):
 
         if len(response.json()["response"]["results"]) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
+
+    def _parse_socials(self, item: Feature, location: dict):
+        phones = []
+        for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
+            if phone := location.get(phone_type):
+                if isinstance(phone, dict):
+                    phones.append(phone.get("number"))
+                elif isinstance(phone, str):
+                    phones.append(phone)
+        if len(phones) > 0:
+            item["phone"] = "; ".join(phones)
+
+        if emails := location.get("emails"):
+            item["email"] = ";".join(emails)
+
+        if google_place_id := location.get("googlePlaceId"):
+            item["extras"]["ref:google"] = google_place_id
+        if twitter_handle := location.get("tritterHandle"):
+            item["twitter"] = twitter_handle
+        if instagram_handle := location.get("instagramHandle"):
+            item["extras"]["contact:instagram"] = instagram_handle
+        if fax_number := location.get("fax"):
+            item["extras"]["fax"] = fax_number
+        if "facebookVanityUrl" in location.keys():
+            item["facebook"] = clean_facebook(location["facebookVanityUrl"])
+        elif "facebookPageUrl" in location.keys():
+            item["facebook"] = clean_facebook(location["facebookPageUrl"])
+
+        if website_url_dict := location.get("websiteUrl"):
+            if website_url_dict.get("preferDisplayUrl"):
+                item["website"] = website_url_dict.get("displayUrl")
+            else:
+                item["website"] = website_url_dict.get("url")
+
+        if menu_url_dict := location.get("menuUrl"):
+            if menu_url_dict.get("preferDisplayUrl"):
+                item["extras"]["website:menu"] = menu_url_dict.get("displayUrl")
+            else:
+                item["extras"]["website:menu"] = menu_url_dict.get("url")
 
     def parse_opening_hours(self, hours: dict, **kwargs: Any) -> str | None:
         if not hours:
