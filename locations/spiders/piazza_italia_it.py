@@ -3,6 +3,7 @@ import re
 
 import chompjs
 
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -26,7 +27,14 @@ class PiazzaItaliaITSpider(JSONBlobSpider):
         location["street_address"] = location.pop("address")
 
     def post_process_item(self, item, response, location):
-        item["branch"] = item.pop("name")
+        if "Piazza Italia Kids" in item["name"]:
+            item["branch"] = item.pop("name").removesuffix(", Piazza Italia Kids")
+            item["name"] = "Piazza Italia Kids"
+            apply_clothes([Clothes.CHILDREN], item)
+        else:
+            item["branch"] = item.pop("name").removesuffix(", Piazza Italia")
+            item["name"] = "Piazza Italia"
+
         hours = OpeningHours()
         for index, day in enumerate(DAYS):
             day_definition = location["openings"][str(index + 1)]
@@ -38,4 +46,7 @@ class PiazzaItaliaITSpider(JSONBlobSpider):
                     except ValueError:
                         logging.warning("Invalid opening hours period '%s'", period)
         item["opening_hours"] = hours
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+
         yield item
