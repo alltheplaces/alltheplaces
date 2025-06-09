@@ -1,5 +1,5 @@
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
