@@ -16,5 +16,9 @@ class KuoniGBSpider(JSONBlobSpider):
         if "Kuoni Partner" not in item["name"]:
             item["branch"] = feature["baseName"]
             item["name"] = None
+
+        item["website"] = response.urljoin(feature["link"])
+
         apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+
         yield item
