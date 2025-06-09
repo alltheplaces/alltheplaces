@@ -13,7 +13,8 @@ class KuoniGBSpider(JSONBlobSpider):
     start_urls = ["https://www.kuoni.co.uk/api/appointment/get-stores/?r=20250609123615"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-
-        item["branch"] = item.pop("name").removeprefix("Kuoni ")
+        if "Kuoni Partner" not in item["name"]:
+            item["branch"] = feature["baseName"]
+            item["name"] = None
         apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
         yield item
