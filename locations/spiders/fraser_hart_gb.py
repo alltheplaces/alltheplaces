@@ -3,8 +3,8 @@ from typing import Iterable
 import chompjs
 from scrapy.http import JsonRequest, Request, Response
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.categories import Categories, apply_category
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class FraserHartGBSpider(JSONBlobSpider):
@@ -30,4 +30,3 @@ class FraserHartGBSpider(JSONBlobSpider):
 
     def post_process_data(self, item)
         apply_category(Categories.SHOP_JEWELRY, item)
-
