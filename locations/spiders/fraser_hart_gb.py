@@ -28,5 +28,6 @@ class FraserHartGBSpider(JSONBlobSpider):
             location.get("place")["coordinates"]["lng"],
         )
 
-    def post_process_data(self, item)
+    def post_process_item(self, item, response, location):
         apply_category(Categories.SHOP_JEWELRY, item)
+        yield item
