@@ -33,7 +33,7 @@ class TommyHilfigerAESpider(Spider):
                 continue
             hours_text_raw = hours_text_raw.replace("12:00 MIDNIGHT", "11:59 PM").replace(" & ", " - ")
             hours_text_clean = ""
-            if matches := re.findall("(\d+:\d+ [AP]M) - (\d+:\d+ [AP]M) \(([^\)]+)\)", hours_text_raw):
+            if matches := re.findall(r"(\d+:\d+ [AP]M) - (\d+:\d+ [AP]M) \(([^\)]+)\)", hours_text_raw):
                 for match in matches:
                     print(match)
                     hours_text_clean = "{} {}: {} - {}".format(hours_text_clean, match[2], match[0], match[1])
