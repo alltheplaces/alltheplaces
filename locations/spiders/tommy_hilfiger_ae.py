@@ -35,7 +35,6 @@ class TommyHilfigerAESpider(Spider):
             hours_text_clean = ""
             if matches := re.findall(r"(\d+:\d+ [AP]M) - (\d+:\d+ [AP]M) \(([^\)]+)\)", hours_text_raw):
                 for match in matches:
-                    print(match)
                     hours_text_clean = "{} {}: {} - {}".format(hours_text_clean, match[2], match[0], match[1])
             properties["opening_hours"].add_ranges_from_string(hours_text_clean)
             apply_category(Categories.SHOP_CLOTHES, properties)
