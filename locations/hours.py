@@ -745,7 +745,9 @@ NAMED_DAY_RANGES_DK = {
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "All Days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "Weekday": ["Mo", "Tu", "We", "Th", "Fr"],
     "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
+    "Weekend": ["Sa", "Su"],
     "Weekends": ["Sa", "Su"],
 }
 
