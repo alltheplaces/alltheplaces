@@ -19,7 +19,7 @@ class TommyHilfigerCAUSSpider(Where2GetItSpider):
         for day_name in DAYS_FULL:
             open_key = "{}_open".format(day_name.lower())
             close_key = "{}_close".format(day_name.lower())
-            if open_time := location.get(open_key):
+            if location.get(open_key):
                 item["opening_hours"].add_range(day_name, location.get(open_key), location.get(close_key))
 
         apply_category(Categories.SHOP_CLOTHES, item)
