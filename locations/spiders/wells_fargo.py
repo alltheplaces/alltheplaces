@@ -28,7 +28,7 @@ class WellsFargoSpider(scrapy.Spider):
         item = Feature()
         item["website"] = response.url
         item["ref"] = response.url.split("/")[-2]
-        item["addr_full"] = response.xpath('.//div[@itemprop="addressRegion"]/text()').get()
+        item["street_address"] = response.xpath('.//div[@itemprop="addressRegion"]/text()').get()
         item["city"] = response.xpath('.//span[@itemprop="addressLocality"]/text()').get()
         item["state"] = response.xpath('.//abbr[@itemprop="addressRegion"]/text()').get()
         item["postcode"] = response.xpath('.//span[@itemprop="postalCode"]/text()').get()

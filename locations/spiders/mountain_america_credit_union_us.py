@@ -23,7 +23,8 @@ class MountainAmericaCreditUnionUSSpider(JSONBlobSpider):
 
         del item["name"]
         item["ref"] = location["branch_id"]
-        item["state"], _ = location["name"].split(" - ")
+        if name := location.get("name"):
+            item["state"], _ = name.split(" - ")
         item["branch"] = location["headline"]
         item["street_address"] = location["address_line_1"]
         item["addr_full"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])

@@ -1,50 +1,39 @@
-import json
-import re
+from typing import Iterable
 
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from scrapy import Request, Spider
+import chompjs
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class DinoPLSpider(Spider):
+class DinoPLSpider(JSONBlobSpider):
     name = "dino_pl"
     item_attributes = {"brand": "Dino", "brand_wikidata": "Q11694239"}
     allowed_domains = ["marketdino.pl"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://marketdino.pl/map"]
+    no_refs = True
 
-    def start_requests(self):
-        yield Request(
-            url="https://marketdino.pl/external/map/_next/static/chunks/pages/index-d599ac5e0a5fa37c.js",
-            callback=self.parse_decryption_params,
-        )
+    def extract_json(self, response: Response) -> list[dict]:
+        return chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "mapData")]/text()').re_first(r"data[:\s]+(\[{.+}\]),")
+        )[0]["mapData"]["features"]
 
-    def parse_decryption_params(self, response):
-        if m := re.search(r"""\.from\([\n ]*['"]([0-9a-f]{64})['"],[\n ]*['"]hex['"][\n ]*\)""", response.text):
-            key = m.group(1)
-        if m := re.search(r"""\.from\([\n ]*['"]([0-9a-f]{32})['"],[\n ]*['"]hex['"][\n ]*\)""", response.text):
-            iv = m.group(1)
-        yield Request(
-            url="https://api.marketdino.pl/api/v1/dino_content/geofile/",
-            meta={"key": key, "iv": iv},
-            callback=self.parse_encrypted_geojson,
-        )
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("properties"))
 
-    def parse_encrypted_geojson(self, response):
-        aesgcm = AESGCM(bytes.fromhex(response.meta["key"]))
-        geojson = json.loads(
-            aesgcm.decrypt(bytes.fromhex(response.meta["iv"]), bytes.fromhex(response.text), None).decode("utf-8")
-        )
-        for location in geojson["features"]:
-            if location["properties"]["status"] != "MARKET OTWARTY":  # "MARKET OPEN"
-                continue
-            item = DictParser.parse(location["properties"])
-            item.pop("name", None)
-            item["geometry"] = location["geometry"]
-            item["opening_hours"] = OpeningHours()
-            if week_hours := location["properties"].get("weekHours"):
-                item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th", "Fr", "Sa"], *week_hours.split("-", 1))
-            if sun_hours := location["properties"].get("sundayHours"):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", "").strip().rsplit(" ", 1)[0]
+        item["opening_hours"] = OpeningHours()
+        try:
+            if week_hours := feature.get("weekHours"):
+                item["opening_hours"].add_days_range(DAYS[:-1], *week_hours.split("-", 1))
+            if sun_hours := feature.get("sundayHours"):
                 item["opening_hours"].add_range("Su", *sun_hours.split("-", 1))
-            yield item
+        except:
+            self.logger.error(
+                f'Failed to parse opening hours: Week Hours: {feature.get("weekHours")}, Sunday Hours: {feature.get("sundayHours")}'
+            )
+        yield item

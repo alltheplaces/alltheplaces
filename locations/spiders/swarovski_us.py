@@ -4,14 +4,14 @@ import scrapy
 
 from locations.geo import point_locations
 from locations.linked_data_parser import LinkedDataParser
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import FIREFOX_LATEST
 
 
 class SwarovskiUSSpider(scrapy.Spider):
     name = "swarovski_us"
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     allowed_domains = ["swarovski.com"]
-    headers = {"User-Agent": BROWSER_DEFAULT}
+    headers = {"User-Agent": FIREFOX_LATEST}
 
     def start_requests(self):
         point_files = "us_centroids_100mile_radius_state.csv"

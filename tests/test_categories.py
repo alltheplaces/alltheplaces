@@ -4,6 +4,8 @@ from locations.categories import (
     Fuel,
     HealthcareSpecialities,
     PaymentMethods,
+    Vending,
+    add_vending,
     apply_category,
     apply_clothes,
     apply_healthcare_specialities,
@@ -143,3 +145,26 @@ def test_map_payment():
     item = Feature()
     invalid_alias_result = map_payment(item, "AllThePlaces Payment Card", PaymentMethods)
     assert not invalid_alias_result
+
+
+def test_vending():
+    item = Feature()
+
+    add_vending(Vending.FOOD, item)
+    assert item["extras"]["vending"] == "food"
+
+    add_vending(Vending.FOOD, item)
+    add_vending(Vending.FOOD, item)
+    assert item["extras"]["vending"] == "food"
+
+    add_vending(Vending.COFFEE, item)
+    v = item["extras"]["vending"].split(";")
+    assert "coffee" in v
+    assert "food" in v
+
+    item = Feature()
+    add_vending(Vending.FOOD, item)
+    add_vending(Vending.COFFEE, item)
+    v = item["extras"]["vending"].split(";")
+    assert "coffee" in v
+    assert "food" in v

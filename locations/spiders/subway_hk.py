@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.subway import SubwaySpider
 
@@ -17,4 +18,7 @@ class SubwayHKSpider(scrapy.Spider):
         )
         for store in data.values():
             item = DictParser.parse(store)
+            apply_category(Categories.FAST_FOOD, item)
+            item["extras"]["cuisine"] = "sandwich"
+            item["extras"]["takeaway"] = "yes"
             yield item

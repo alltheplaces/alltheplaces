@@ -1,15 +1,13 @@
-from scrapy import Selector
+from typing import Any
 
-from locations.storefinders.wp_go_maps import WpGoMapsSpider
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-MOCHACHOS_BRANDS = {
-    "3": {"brand": "Bacini's"},  # Only 1 and 2 co-located, so no wikidata
-    "2": {"brand_wikidata": "Q116619140", "brand": "Skippers"},
-    "1": {"brand_wikidata": "Q116619117", "brand": "Mochachos"},
-}
+from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
-class MochachosSpider(WpGoMapsSpider):
+class MochachosSpider(SitemapSpider):
     name = "mochachos"
     item_attributes = {
         "brand_wikidata": "Q116619117",
@@ -18,13 +16,16 @@ class MochachosSpider(WpGoMapsSpider):
     allowed_domains = [
         "www.mochachos.com",
     ]
+    sitemap_urls = ["https://www.mochachos.com/store-sitemap.xml"]
+    sitemap_rules = [(r"/store/[-\w]+", "parse")]
 
-    def post_process_item(self, item, location):
-        sel = Selector(text=location["description"])
-        item["phone"] = "; ".join(sel.xpath('//a[contains(@href, "tel:")]/@href').getall())
-        item["addr_full"] = sel.xpath('//strong[contains(text(), "Address")]/../text()').getall()
-        item["branch"] = item.pop("name")
-        for brand_id, brand_details in MOCHACHOS_BRANDS.items():
-            if brand_id in location["categories"]:
-                item.update(brand_details)
-        return item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        address = clean_address(response.xpath('//strong[contains(text(), "Address")]/../text()').getall())
+        if not address:
+            return
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["phone"] = "; ".join(response.xpath('//a[contains(@href, "tel:")]/@href').getall())
+        item["addr_full"] = address
+        item["branch"] = response.xpath('//*[@itemprop="headline"]/text()').get()
+        yield item

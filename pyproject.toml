@@ -1,3 +1,60 @@
+[project]
+name = "alltheplaces"
+version = "0.0.0"
+description = "A set of spiders ato extract location information from places that post their location on the internet."
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "babel",
+    "boto3",
+    "brotli",
+    "chompjs",
+    "cryptography",
+    "geonamescache",
+    "geopandas",
+    "ijson",
+    "json5",
+    "openpyxl",
+    "pdfplumber",
+    "phonenumbers",
+    "phpserialize",
+    "pyarrow",
+    "pycountry",
+    "pygeohash<4",
+    "pygithub",
+    "pyproj",
+    "python-json-logger",
+    "requests",
+    "requests-cache",
+    "reverse-geocoder",
+    "scrapy",
+    "scrapy-playwright",
+    "scrapy-zyte-api",
+    "shapely",
+    "twisted[http2]",
+    "tzdata",
+    "unidecode",
+    "xmltodict",
+]
+
+[tool.uv]
+dev-dependencies = [ "autoflake8",
+    "awscli",
+    "black",
+    "boto3",
+    "flake8",
+    "isort",
+    "pep8-naming",
+    "pre-commit",
+    "pylint",
+    "pytest",
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.python.org/simple"
+
+[tool.uv.sources]
+
 [tool.black]
 line-length = 120
 target-version = ['py311']

@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import quote
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -10,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class CostcoGlobalSpider(Spider):
     name = "costco_global"
-    item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
+    item_attributes = {"brand_wikidata": "Q715583"}
     start_urls = [
         "https://www.costco.co.uk/store-finder/search?q=",
         "https://www.costco.com.au/store-finder/search?q=",
@@ -30,7 +31,7 @@ class CostcoGlobalSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = merge_address_lines([location["line1"], location["line2"]])
-            item["website"] = response.urljoin(item["website"].removeprefix("/store/").split("?", 1)[0])
+            item["website"] = response.urljoin(quote(item["website"].removeprefix("/store/").split("?", 1)[0]))
 
             item["ref"] = location["warehouseCode"]
 
