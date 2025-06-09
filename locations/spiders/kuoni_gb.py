@@ -1,6 +1,6 @@
 from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class KuoniGBSpider(JSONBlobSpider):
