@@ -9,6 +9,7 @@ class PepeJeansSpider(YextSpider):
 
 
 def parse_item(self, item, location, **kwargs):
-    item["branch"] = item.pop("name").removeprefix("Pepe Jeans ")
-    apply_category(Categories.SHOP_CLOTHES, item)
-    yield item
+    if "Pepe Jeans" in item["name"]:
+        item["branch"] = item.pop("name").removeprefix("Pepe Jeans ")
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item
