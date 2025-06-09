@@ -88,6 +88,7 @@ class YextAnswersSpider(Spider):
     def start_requests(self) -> Iterable[Request]:
         yield self.make_request(0)
 
+    # flake8: noqa: C901
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["results"]:
             location = location["data"]
