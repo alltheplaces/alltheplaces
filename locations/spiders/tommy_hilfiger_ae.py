@@ -19,14 +19,16 @@ class TommyHilfigerAESpider(Spider):
     def parse(self, response: Response) -> Iterable[Feature]:
         for store in response.xpath('//div[@class="store"]'):
             properties = {
-                "branch": store.xpath('./div/div[2]/text()').get(),
-                "lat": store.xpath('.//@data-lat').get(),
-                "lon": store.xpath('.//@data-long').get(),
-                "addr_full": store.xpath('./div/div[3]/text()').get(),
+                "branch": store.xpath("./div/div[2]/text()").get(),
+                "lat": store.xpath(".//@data-lat").get(),
+                "lon": store.xpath(".//@data-long").get(),
+                "addr_full": store.xpath("./div/div[3]/text()").get(),
                 "phone": store.xpath('.//a[contains(@href, "tel:")]/@href').get().removeprefix("tel:"),
                 "opening_hours": OpeningHours(),
             }
-            hours_text_raw = re.sub(r"\s+", " ", " ".join(store.xpath('.//div[@class="store-opening-hours"]//text()').getall()))
+            hours_text_raw = re.sub(
+                r"\s+", " ", " ".join(store.xpath('.//div[@class="store-opening-hours"]//text()').getall())
+            )
             if "PERMANENTLY CLOSED" in hours_text_raw.upper():
                 continue
             hours_text_raw = hours_text_raw.replace("12:00 MIDNIGHT", "11:59 PM").replace(" & ", " - ")
