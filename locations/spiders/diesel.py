@@ -17,6 +17,6 @@ class DieselSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["website"] = item["ref"] = "https://uk.diesel.com/en/store-detail?sid={}".format(feature["ID"])
-        item["branch"] = item.pop("name").removeprefix("Diesel Store ")
+        item["branch"] = item.pop("name").removeprefix("DIESEL STORE ")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
