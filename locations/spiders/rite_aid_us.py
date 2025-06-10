@@ -6,6 +6,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -27,8 +28,11 @@ class RiteAidUSSpider(CrawlSpider, StructuredDataSpider):
         item.pop("image")
         item.pop("twitter")
 
-        for department in ld_data.get("department"):
+        for department in ld_data.get("department", []):
             if department.get("@type") == "Pharmacy":
+                item["extras"]["opening_hours:pharmacy"] = LinkedDataParser.parse_opening_hours(
+                    department
+                ).as_opening_hours()
                 break
 
         apply_category(Categories.SHOP_CHEMIST, item)
