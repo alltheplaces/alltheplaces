@@ -20,7 +20,9 @@ class FreshiiSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street"] = None
         item["branch"] = item.pop("name")
+        item["state"] = feature["StateProvinceCode"]
         item["phone"] = feature["PhoneNum"]
+
         item["opening_hours"] = OpeningHours()
         for rule in feature["AvailabilitySchedules"]:
             item["opening_hours"].add_range(rule["Day"], rule["StartTime"], rule["EndTime"], "%H:%M:%S")
