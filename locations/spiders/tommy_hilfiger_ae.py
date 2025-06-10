@@ -32,7 +32,12 @@ class TommyHilfigerAESpider(Spider):
             )
             if "PERMANENTLY CLOSED" in hours_text_raw.upper():
                 continue
-            hours_text_raw = hours_text_raw.replace("12:00 MIDNIGHT", "11:59 PM").replace(" & ", " - ").replace("OPENING HOURS ", "").strip()
+            hours_text_raw = (
+                hours_text_raw.replace("12:00 MIDNIGHT", "11:59 PM")
+                .replace(" & ", " - ")
+                .replace("OPENING HOURS ", "")
+                .strip()
+            )
             if hours_text_raw.startswith("DAILY ") or hours_text_raw.startswith("WEEKDAYS "):
                 properties["opening_hours"].add_ranges_from_string(hours_text_raw)
             else:
