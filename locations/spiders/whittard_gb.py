@@ -7,7 +7,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class WhittardGBSpider(Spider):
     name = "whittard_gb"
-    item_attributes = {"brand": "Whittard", "brand_wikidata": "Q7996831"}
+    item_attributes = {"brand": "Whittard of Chelsea", "brand_wikidata": "Q7996831"}
 
     def request_page(self, next_offset):
         yield Request(
