@@ -1,7 +1,7 @@
-from chompjs import parse_js_object
 import re
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import Request, Response
 
@@ -29,7 +29,9 @@ class AquilaAUSpider(Spider):
                 item["branch"] = item.pop("name", None).removeprefix("Aquila Myer ").removesuffix(" Store")
             else:
                 item["branch"] = item.pop("name", None).removeprefix("Aquila ").removesuffix(" Store")
-            item["addr_full"] = re.sub(r"\s+", " ", item["addr_full"].replace("<br>", " ").replace("<b>", "").replace("</b>", "")).strip()
+            item["addr_full"] = re.sub(
+                r"\s+", " ", item["addr_full"].replace("<br>", " ").replace("<b>", "").replace("</b>", "")
+            ).strip()
             item["website"] = "https://www.aquila.com.au/store-locator/" + feature["id"]
             item["ref"] = item["website"]
             apply_category(Categories.SHOP_SHOES, item)
@@ -37,7 +39,9 @@ class AquilaAUSpider(Spider):
 
     def parse_opening_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
-        hours_text = re.sub(r"\s+", " ", " ".join(response.xpath('//div[@class="js-store-description"]//td/text()').getall()))
+        hours_text = re.sub(
+            r"\s+", " ", " ".join(response.xpath('//div[@class="js-store-description"]//td/text()').getall())
+        )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text)
         yield item
