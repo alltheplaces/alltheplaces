@@ -1,9 +1,11 @@
+from datetime import timedelta
 from typing import Iterable
 
 from requests import Response
 from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.toyota_au import TOYOTA_SHARED_ATTRIBUTES
@@ -42,28 +44,26 @@ class ToyotaUSSpider(JSONBlobSpider):
         yield item
 
     def parse_hours(self, item, hours_type):
-        oh = OpeningHours()
-        for day_times in hours_type:
-            if "availabilityStartTimeMeasure" in day_times:
-                units_start = day_times["availabilityStartTimeMeasure"]["unitCode"]
-                units_end = day_times["availabilityEndTimeMeasure"]["unitCode"]
-                oh.add_range(
-                    day_times["dayOfWeekCode"][:2],
-                    str(timedelta(minutes=day_times["availabilityStartTimeMeasure"]["value"])),
-                    str(timedelta(minutes=day_times["availabilityEndTimeMeasure"]["value"])),
-                    time_format="%H:%M:%S",
-                )
-                if units_start != "MINUTE":
-                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_start}")
-                if units_end != "MINUTE":
-                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_end}")
-            else:
-                oh.set_closed(day_times["dayOfWeekCode"])
-
-        if suffix := self.HOURS_TYPES.get(hours_type["hoursTypeCode"]):
-            if item.get("opening_hours") is None:
-                item["opening_hours"] = oh.as_opening_hours()
-            elif item["opening_hours"] != oh.as_opening_hours():
-                item["extras"]["opening_hours:" + suffix] = oh.as_opening_hours()
-        else:
-            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_opening_hours_type/{hours_type['hoursTypeCode']}")
+        try:     
+            oh = OpeningHours()
+            for day_times in hours_type:
+                if "availabilityStartTimeMeasure" in day_times:
+                    units_start = day_times["availabilityStartTimeMeasure"]["unitCode"]
+                    units_end = day_times["availabilityEndTimeMeasure"]["unitCode"]
+                    if units_start == "MINUTE" and units_end == "MINUTE":
+                        oh.add_range(
+                            day_times["dayOfWeekCode"][:2],
+                            str(timedelta(minutes=day_times["availabilityStartTimeMeasure"]["value"])),
+                            str(timedelta(minutes=day_times["availabilityEndTimeMeasure"]["value"])),
+                            time_format="%H:%M:%S",
+                        )
+                    else:
+                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_start}/{units_end}")
+                else:
+                    oh.set_closed(day_times["dayOfWeekCode"])
+            
+            if len(oh.day_hours) > 0:
+                item["opening_hours"] = oh
+        
+        except Exception:
+            self.crawler.stats.inc_value(f"atp/{self.name}/error_during_parse_hours/{item['ref']}")
