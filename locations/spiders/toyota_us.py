@@ -44,7 +44,7 @@ class ToyotaUSSpider(JSONBlobSpider):
         yield item
 
     def parse_hours(self, item, hours_type):
-        try:     
+        try:
             oh = OpeningHours()
             for day_times in hours_type:
                 if "availabilityStartTimeMeasure" in day_times:
@@ -61,9 +61,9 @@ class ToyotaUSSpider(JSONBlobSpider):
                         self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_start}/{units_end}")
                 else:
                     oh.set_closed(day_times["dayOfWeekCode"])
-            
+
             if len(oh.day_hours) > 0:
                 item["opening_hours"] = oh
-        
+
         except Exception:
             self.crawler.stats.inc_value(f"atp/{self.name}/error_during_parse_hours/{item['ref']}")
