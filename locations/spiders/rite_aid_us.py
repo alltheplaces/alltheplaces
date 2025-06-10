@@ -13,6 +13,6 @@ class RiteAidUSSpider(CrawlSpider, StructuredDataSpider):
         Rule(
             LinkExtractor(allow=r"/\w{2}\.html$"),
         ),
-        Rule(LinkExtractor(allow=r"/\w{2}/[^/]+/[^/]+\.html$"), callback="parse_sd", follow=True),
+        Rule(LinkExtractor(allow=r"/\w{2}/[^/]+\.html$")),
         Rule(LinkExtractor(allow=r"/\w{2}/[^/]+/[^/]+\.html$"), callback="parse_sd"),
     ]
