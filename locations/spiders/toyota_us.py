@@ -32,6 +32,7 @@ class ToyotaUSSpider(JSONBlobSpider):
         item["postcode"] = location[len(location) - 1].split(" ")[1]
         item["name"] = feature["label"]
         item["website"] = feature["details"]["uriWebsite"]
+        self.parse_hours(item, feature["hoursOfOperation"])
 
         departments = feature["details"]["departmentInformation"]
         apply_category(Categories.SHOP_CAR, item)
@@ -39,3 +40,30 @@ class ToyotaUSSpider(JSONBlobSpider):
         apply_yes_no(Extras.CAR_PARTS, item, "Parts" in departments)
 
         yield item
+
+    def parse_hours(self, item, hours_type):
+        oh = OpeningHours()
+        for day_times in hours_type:
+            if "availabilityStartTimeMeasure" in day_times:
+                units_start = day_times["availabilityStartTimeMeasure"]["unitCode"]
+                units_end = day_times["availabilityEndTimeMeasure"]["unitCode"]
+                oh.add_range(
+                    day_times["dayOfWeekCode"][:2],
+                    str(timedelta(minutes=day_times["availabilityStartTimeMeasure"]["value"])),
+                    str(timedelta(minutes=day_times["availabilityEndTimeMeasure"]["value"])),
+                    time_format="%H:%M:%S",
+                )
+                if units_start != "MINUTE":
+                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_start}")
+                if units_end != "MINUTE":
+                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_time_unit/{units_end}")
+            else:
+                oh.set_closed(day_times["dayOfWeekCode"])
+
+        if suffix := self.HOURS_TYPES.get(hours_type["hoursTypeCode"]):
+            if item.get("opening_hours") is None:
+                item["opening_hours"] = oh.as_opening_hours()
+            elif item["opening_hours"] != oh.as_opening_hours():
+                item["extras"]["opening_hours:" + suffix] = oh.as_opening_hours()
+        else:
+            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_opening_hours_type/{hours_type['hoursTypeCode']}")
