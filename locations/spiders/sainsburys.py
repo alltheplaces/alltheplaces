@@ -14,7 +14,7 @@ class SainsburysSpider(scrapy.Spider):
     SAINSBURYS_LOCAL = {"brand": "Sainsbury's Local", "brand_wikidata": "Q13218434"}
     item_attributes = SAINSBURYS
     allowed_domains = ["stores.sainsburys.co.uk"]
-    start_urls = ["https://stores.sainsburys.co.uk/api/v1/stores?api_client_id=slfe"]
+    start_urls = ["https://api.stores.sainsburys.co.uk/v1/stores/?api_client_id=slfe"]
 
     def parse(self, response):
         data = response.json()
