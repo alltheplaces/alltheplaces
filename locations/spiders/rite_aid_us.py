@@ -21,13 +21,14 @@ class RiteAidUSSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["Store"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["image"] = None
-
         if m := re.match(r"Rite Aid #(\d+) (.+)", item.pop("name")):
             item["ref"], item["branch"] = m.groups()
 
-        for department in ld_data["department"]:
-            if department["@type"] == "Pharmacy":
+        item.pop("image")
+        item.pop("twitter")
+
+        for department in ld_data.get("department"):
+            if department.get("@type") == "Pharmacy":
                 break
 
         apply_category(Categories.SHOP_CHEMIST, item)
