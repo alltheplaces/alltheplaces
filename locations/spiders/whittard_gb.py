@@ -22,12 +22,16 @@ class WhittardGBSpider(Spider):
         for location in response.xpath('.//div[@class="store-row-container "]'):
             item = Feature()
             item["ref"] = location.xpath('.//div[@class="store-row grid-x location-cell"]/@data-storeid').get()
-            item["lat"],item["lon"] = location.xpath('.//span[@class="store-header"]/@data-lat').get(),location.xpath('.//span[@class="store-header"]/@data-lng').get()
+            item["lat"], item["lon"] = (
+                location.xpath('.//span[@class="store-header"]/@data-lat').get(),
+                location.xpath('.//span[@class="store-header"]/@data-lng').get(),
+            )
             item["branch"] = location.xpath('.//span[@class="store-header"]//text()').get().strip()
-            item["addr_full"] = clean_address(location.xpath('.//div[@class="cell small-12 store-details"]//text()').getall())
+            item["addr_full"] = clean_address(
+                location.xpath('.//div[@class="cell small-12 store-details"]//text()').getall()
+            )
             item["phone"] = location.xpath('.//div[@class="contacts contacts-desktop"]//text()')[2].get()
             yield item
-
 
         if "View More Stores" in response.text:
             next_offset = response.meta["offset"] + 5
