@@ -28,7 +28,7 @@ class WhittardGBSpider(Spider):
             )
             item["branch"] = location.xpath('.//span[@class="store-header"]//text()').get().strip()
             item["addr_full"] = clean_address(
-                location.xpath('.//div[contains(@class, "store-details"]//text()').getall()
+                location.xpath('.//div[contains(@class, "store-details")]//text()').getall()
             )
             item["phone"] = location.xpath('.//div[@class="contacts contacts-desktop"]//text()')[1].get()
             yield item
