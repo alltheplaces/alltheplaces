@@ -15,7 +15,6 @@ class XianFamousFoodsSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Xi'an Famous Foods",
         "brand_wikidata": "Q8044020",
-        "extras": Categories.RESTAURANT.value,
     }
     allowed_domains = ["xianfoods.com"]
     start_urls = ["https://www.xianfoods.com/locations"]
