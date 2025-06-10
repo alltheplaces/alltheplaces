@@ -15,7 +15,7 @@ class MyerAUSpider(StructuredDataSpider):
 
     def parse(self, response: Response) -> Iterable[Request]:
         for store in response.xpath('//a[contains(@class, "store-locator-click")]'):
-            url = "https://www.myer.com.au" + store.xpath('./@href').get()
+            url = "https://www.myer.com.au" + store.xpath("./@href").get()
             yield Request(url=url, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict) -> Iterable[Feature]:
