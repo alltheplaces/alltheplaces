@@ -303,6 +303,7 @@ class Categories(Enum):
     NUTRITIONIST = {"healthcare": "nutrition_counselling"}
     OPTOMETRIST = {"healthcare": "optometrist"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PAYMENT_CENTRE = {"amenity": "payment_centre"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
