@@ -2,6 +2,7 @@ import unicodedata
 from urllib.parse import urlparse
 
 import geonamescache
+import pycountry
 from babel import Locale, UnknownLocaleError
 
 
@@ -63,25 +64,77 @@ class CountryUtils:
         # Finally let's go digging in the random country string collection!
         return self.UNHANDLED_COUNTRY_MAPPINGS.get(country_name)
 
-    def _convert_to_iso2_country_code(self, splits):
-        if len(splits) > 0 and len(splits[-1]) == 2:
-            candidate = splits[-1].upper()
+    def country_code_from_spider_name(self, spider_name: str) -> str | None:
+        """
+        If a spider name has a single ISO 3166-1 alpha-2 country code in
+        lowercase as a suffix, return this country code. For example, in a
+        spider name of "example_spider_us", the string "US" is returned as the
+        ISO 3166-1 alpha-2 country code. This function returns None in all
+        other circumstances including these examples:
+          - "example_spider_zz" (invalid ISO 3166-1 alpha-2 country code)
+          - "example_spider_uk" (invalid ISO 3166-1 alpha-2 country code)
+          - "example_spider_US" (incorrect case in spider name)
+          - "example_spider_fr_gb" (more than one country specified)
+
+        Note that "example_spider_zz_us" will return the string "US" because
+        there is only one valid ISO 3166-1 alpha-2 country code provided as
+        a suffix. The "zz" is ignored.
+
+        :param spider_name: name of an All The Places spider in snake case
+        :return: ISO 3166-1 alpha-2 country code as an uppercase string, or
+                 None if a single valid ISO 3166-1 alpha-2 country code is not
+                 included as a suffix for the provided spider name.
+        """
+        if isinstance(spider_name, str):
+            spider_name_parts = spider_name.split("_")
+            country_code_candidates = list(
+                map(
+                    str.upper,
+                    filter(
+                        lambda x: len(x) == 2 and x.upper() in [country.alpha_2 for country in pycountry.countries],
+                        spider_name_parts,
+                    ),
+                )
+            )
+            if len(country_code_candidates) == 1:
+                if country_code_candidates[-1].lower() == spider_name_parts[-1]:
+                    return country_code_candidates[-1]
+            elif len(country_code_candidates) >= 2:
+                if (
+                    country_code_candidates[-1].lower() == spider_name_parts[-1]
+                    and country_code_candidates[-2].lower() != spider_name_parts[-2]
+                ):
+                    return country_code_candidates[-1]
+        return None
+
+    def country_code_from_url(self, url: str) -> str | None:
+        """
+        Return an ISO 3166-1 alpha-2 country code from a URL which contains a
+        country code top-level domain (ccTLD). Refer to the full list of
+        registered ccTLD at https://www.iana.org/domains/root/db
+
+        :param url: URL to extract an ISO 3166-1 alpha-2 country code from
+        :return: ISO 3166-1 alpha-2 country code as an uppercase string, or
+                 None if a valid ccTLD is not included in the URL.
+        """
+        if not isinstance(url, str):
+            return None
+        if not url.strip():
+            return None
+        url_domain_parts = urlparse(url).netloc.split(".")
+        if len(url_domain_parts) > 0 and len(url_domain_parts[-1]) == 2:
+            candidate = url_domain_parts[-1].upper()
             if self.gc.get_countries().get(candidate):
                 return candidate
             if candidate == "UK":
+                # United Kingdom uses the ccTLD of "UK" but the corresponding
+                # ISO 3166-1 alpha-2 code is "GB" for Great Britain.
                 return "GB"
-        return None
-
-    def country_code_from_spider_name(self, spider_name):
-        if isinstance(spider_name, str):
-            splits = [split for split in spider_name.split("_") if len(split) == 2]
-            if len(splits) == 1:  # Skip multiple countries e.g. homebase_gb_ie
-                return self._convert_to_iso2_country_code(splits)
-        return None
-
-    def country_code_from_url(self, url):
-        if isinstance(url, str):
-            return self._convert_to_iso2_country_code(urlparse(url).netloc.split("."))
+            if candidate == "AC":
+                # Ascension Island uses the ccTLD of "AC" but the
+                # corresponding ISO 3166-1 alpha-2 code is "SH" for Saint
+                # Helena, Ascension and Tristan de Cunha.
+                return "SH"
         return None
 
 
