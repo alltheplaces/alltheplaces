@@ -10,7 +10,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class FairwoodHKSpider(JSONBlobSpider):
     name = "fairwood_hk"
-    item_attributes = {"brand": "大快活", "brand_wikidata": "Q5430935"}
+    item_attributes = {"brand": "大快活 Fairwood", "brand_wikidata": "Q5430935"}
     start_urls = ["https://www.fairwood.com.hk/stores"]
 
     def extract_json(self, response: Response) -> dict | list[dict]:
