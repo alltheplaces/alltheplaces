@@ -1,10 +1,10 @@
 import json
-import re
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -26,6 +26,10 @@ class SephoraUSCASpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.pop("image")
         apply_category(Categories.SHOP_COSMETICS, item)
-        if location_info := re.search(r"\"store\"[:\s]+{.+?\"address\"[:\s]+({.+?})", response.text):
-            item["country"] = json.loads(location_info.group(1)).get("country")
+        location_info = DictParser.get_nested_key(
+            json.loads(response.xpath('//*[contains(text(), "latitude")]/text()').get()), "store"
+        )
+        item["country"] = location_info.get("address", {}).get("country")
+        item["lat"] = location_info.get("latitude")
+        item["lon"] = location_info.get("longitude")
         yield item
