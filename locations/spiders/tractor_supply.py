@@ -8,7 +8,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class TractorSupplySpider(scrapy.Spider):
     name = "tractor_supply"
-    item_attributes = {"brand": "Tractor Supply", "brand_wikidata": "Q15109925"}
+    item_attributes = {"brand": "Tractor Supply Company", "brand_wikidata": "Q15109925"}
     allowed_domains = ["tractorsupply.com"]
     download_delay = 1.5
     user_agent = BROWSER_DEFAULT

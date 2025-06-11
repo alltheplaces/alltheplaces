@@ -22,7 +22,8 @@ class SuzukiFRSpider(SitemapSpider):
         item["addr_full"] = (
             item["street_address"] + ", " + clean_address(response.xpath(r'//*[@class = "uppercase"]/text()[2]').get())
         )
-        item["phone"] = response.xpath(r'//*[contains(@href,"tel:")]/text()').get().replace(".", "")
+        if phone := response.xpath(r'//*[contains(@href,"tel:")]/text()').get():
+            item["phone"] = phone.replace(".", "")
         item["ref"] = item["website"] = response.url
         apply_category(Categories.SHOP_CAR, item)
         yield item

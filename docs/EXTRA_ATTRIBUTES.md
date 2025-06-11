@@ -2,7 +2,7 @@
 
 We provide the `Extras` enum from `location.categories`, as well as the `apply_yes_no` helper.
 
-This is great for modelling common (or even uncommon) atrributes like:
+This is great for modelling common (or even uncommon) attributes like:
 
 * Wheelchair accessibility
 * Wifi
@@ -49,7 +49,7 @@ class ShellSpider(GeoMeSpider):
 
 ### I have something that is a valid attribute, but there is no enum
 
-If you have important information that isnt modelled, any valid OSM tags can be manually applied to the extras key.
+If you have important information that isn't modelled, any valid OSM tags can be manually applied to the extras key.
 
 Consider adding a pull request to add your enumeration value if is commonly available for your feature.
 

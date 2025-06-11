@@ -1,5 +1,8 @@
 from scrapy.spiders import XMLFeedSpider
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+
 
 class $classname(XMLFeedSpider):
     name = "$name"
@@ -13,12 +16,11 @@ class $classname(XMLFeedSpider):
         # "brand_wikidata": "$brand_wikidata",
         # "operator": "$operator",
         # "operator_wikidata": "$operator_wikidata",
-        # "extras": Categories.SHOP_XYZ.value
     }
 
     def parse_node(self, response, selector):
-        item = {}
-        #item["url"] = selector.select("url").get()
-        #item["name"] = selector.select("name").get()
-        #item["description"] = selector.select("description").get()
+        item = Feature()
+        # item["ref"] = selector.select("id").get()
+        # item["website"] = selector.select("url").get()
+        # apply_category(Categories.SHOP_XYZ, item)
         return item

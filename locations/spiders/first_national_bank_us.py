@@ -9,13 +9,13 @@ class FirstNationalBankUSSpider(YextAnswersSpider):
     experience_key = "fnb-answers"
 
     def parse_item(self, location, item):
-        if location["data"]["type"] == "atm":
+        if location["type"] == "atm":
             apply_category(Categories.ATM, item)
-        elif location["data"]["type"] == "location":
+        elif location["type"] == "location":
             apply_category(Categories.BANK, item)
-            if amenities := location["data"].get("c_branchFilters"):
+            if amenities := location.get("c_branchFilters"):
                 apply_yes_no(Extras.ATM, item, "ATM" in amenities, False)
                 apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru" in amenities, False)
         else:
-            self.logger.error("Unknown location type: {}".format(location["data"]["type"]))
+            self.logger.error("Unknown location type: {}".format(location["type"]))
         yield item

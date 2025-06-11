@@ -1,6 +1,6 @@
 ## Open Graph Protocol
 
-Similar to [Structured Data](./docs/STRUCTURED_DATA.md]; [Open Graph Protocol](https://ogp.me) is a way for sites to assert facts in the `<meta>` tags of their websites.
+Similar to [Structured Data](./STRUCTURED_DATA.md); [Open Graph Protocol](https://ogp.me) is a way for sites to assert facts in the `<meta>` tags of their websites.
 
 While this can be any RDFa/Schema.org/similar terminology, it is commonly used with open graph specific vocabularies.
 
@@ -42,7 +42,7 @@ This is best illustrated by reference to some example spiders in the project:
 We can run the `scrapy og` custom tool on one of the URLs:
 
 ```
-$ pipenv run scrapy og https://www.budgens.co.uk/our-stores/praed-street
+$ uv run scrapy og https://www.budgens.co.uk/our-stores/praed-street
 {'city': 'Paddington',
  'country': 'United Kingdom',
  'email': None,

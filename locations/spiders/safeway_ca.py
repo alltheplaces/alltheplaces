@@ -37,11 +37,14 @@ class SafewayCASpider(SitemapSpider):
         opening_hours = OpeningHours()
         for day, span in zip(*[iter(vals)] * 2):
             day = day[:2]
-            span_split = span.split(" to ")
-            if len(span_split) == 2:
-                open_time = span_split[0]
-                close_time = span_split[1]
+            if "Closed" in span:
+                opening_hours.set_closed(day)
             else:
-                continue
-            opening_hours.add_range(day, open_time, close_time, "%I:%M %p")
+                span_split = span.split(" to ")
+                if len(span_split) == 2:
+                    open_time = span_split[0].replace("a.m.", "AM")
+                    close_time = span_split[1].replace("p.m.", "PM")
+                else:
+                    continue
+                opening_hours.add_range(day, open_time, close_time, "%I:%M %p")
         return opening_hours.as_opening_hours()

@@ -1,4 +1,6 @@
-from scrapy import Spider
+from typing import Iterable
+
+from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
@@ -9,7 +11,9 @@ from locations.pipelines.address_clean_up import clean_address
 class GoldsmithsGBSpider(Spider):
     name = "goldsmiths_gb"
     item_attributes = {"brand": "Goldsmiths", "brand_wikidata": "Q16993095"}
-    start_urls = ["https://www.goldsmiths.co.uk/store-finder?q=&latitude=0&longitude=0&page=0"]
+
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(url="https://www.goldsmiths.co.uk/store-finder?q=&latitude=0&longitude=0&page=0")
 
     def parse(self, response, **kwargs):
         for location in response.json()["results"]:
