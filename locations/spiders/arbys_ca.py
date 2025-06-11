@@ -29,4 +29,5 @@ class ArbysCASpider(Spider):
         for location in json.loads(response.json()["d"]):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").rsplit("-", 1)[0].removeprefix("Arby’s ")
+            item["website"] = "https://arbys.ca"
             yield item
