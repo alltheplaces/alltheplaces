@@ -1,4 +1,5 @@
 import json
+import re
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
@@ -25,8 +26,6 @@ class SephoraUSCASpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.pop("image")
         apply_category(Categories.SHOP_COSMETICS, item)
-        if "sephora.com" in response.url:
-            item["country"] = json.loads(response.xpath('//*[@id="linkStore"]/text()').get())["ssrProps"][
-                "ErrorBoundary(ReduxProvider(StoreDetail))"
-            ]["stores"][0]["address"]["country"]
+        if location_info := re.search(r"\"store\"[:\s]+{.+?\"address\"[:\s]+({.+?})", response.text):
+            item["country"] = json.loads(location_info.group(1)).get("country")
         yield item
