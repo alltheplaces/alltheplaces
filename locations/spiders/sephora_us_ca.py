@@ -1,9 +1,10 @@
 import json
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -21,11 +22,8 @@ class SephoraUSCASpider(SitemapSpider, StructuredDataSpider):
     ]
     user_agent = BROWSER_DEFAULT
 
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.pop("image")
-        hours_string = " ".join(ld_data["openingHours"])
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
         apply_category(Categories.SHOP_COSMETICS, item)
         if "sephora.com" in response.url:
             item["country"] = json.loads(response.xpath('//*[@id="linkStore"]/text()').get())["ssrProps"][
