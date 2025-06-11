@@ -28,4 +28,5 @@ class ArbysCASpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(response.json()["d"]):
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name").rsplit("-", 1)[0].removeprefix("Arby’s ")
             yield item
