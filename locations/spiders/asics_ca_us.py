@@ -1,8 +1,8 @@
 from locations.storefinders.locally import LocallySpider
 
 
-class AsicsUSSpider(LocallySpider):
-    name = "asics_us"
+class AsicsCAUSSpider(LocallySpider):
+    name = "asics_ca_us"
     item_attributes = {"brand": "ASICS", "brand_wikidata": "Q327247"}
     start_urls = [
         "https://www.locally.com/stores/conversion_data?has_data=true&company_id=1682&map_distance_diag=25000"
