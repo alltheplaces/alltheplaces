@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any, Iterable
 
 from scrapy.http import JsonRequest, Response
@@ -29,8 +30,8 @@ class ArbysCASpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(response.json()["d"]):
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name").rsplit("-", 1)[0].removeprefix("Arby’s ")
-            item["website"] = "https://arbys.ca"
+            if m := re.match(r"(?:Arby’s )?(.+)\s-\s*(\d+)", item.pop("name")):
+                item["branch"], item["ref"] = m.groups()
             apply_yes_no(Extras.DELIVERY, item, location.get("allowDelivery"))
             apply_yes_no(Extras.TAKEAWAY, item, location.get("allowTakeWay"))
             apply_yes_no(Extras.DRIVE_THROUGH, item, location.get("allowdriveThru"))
