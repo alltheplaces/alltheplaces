@@ -10,5 +10,12 @@ class AsicsUSSpider(LocallySpider):
     ]
 
     def post_process_item(self, item, response, location):
-        item["street_address"] = item.pop("addr_full")
-        yield item
+        if location["company_id"] == 1682:
+            item["street_address"] = item.pop("addr_full")
+            if item["name"].startswith("ASICS Outlet "):
+                item["branch"] = item["name"].removeprefix("ASICS Outlet ")
+                item["name"] = "ASICS Outlet"
+            else:
+                item["branch"] = item["name"].removeprefix("ASICS ")
+                item["name"] = "ASICS"
+            yield item
