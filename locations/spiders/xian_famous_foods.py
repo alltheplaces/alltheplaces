@@ -15,7 +15,6 @@ class XianFamousFoodsSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Xi'an Famous Foods",
         "brand_wikidata": "Q8044020",
-        "extras": Categories.RESTAURANT.value,
     }
     allowed_domains = ["xianfoods.com"]
     start_urls = ["https://www.xianfoods.com/locations"]
@@ -23,8 +22,8 @@ class XianFamousFoodsSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         """Parse the locations page to extract store information."""
         # The page is organized by region (Manhattan, Brooklyn, Queens)
-        for borough_container in response.css(".page-locations_borough-container"):
-            borough = borough_container.css(".page-locations_borough-title::text").get()
+        for borough_container in response.css(".page-locations_metro-container"):
+            borough = borough_container.css(".page-locations_metro-title::text").get()
 
             # Process each location item within this borough
             for location_item in borough_container.css(".page-location_location-item"):

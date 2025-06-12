@@ -7,12 +7,11 @@ from locations.items import Feature
 from locations.storefinders.uberall import UberallSpider
 
 
-class RegisSalonsGBSpider(UberallSpider):
-    name = "regis_salons_gb"
-    item_attributes = {"brand": "Regis Salons", "brand_wikidata": "Q110166032"}
-    key = "616eo7rrGeXiZ0jL1wrJ2JAlyx5RxR"
+class PepesPiriPiriGBSpider(UberallSpider):
+    name = "pepes_piri_piri_gb"
+    item_attributes = {"brand": "Pepe's", "brand_wikidata": "Q120645662"}
+    key = "AvaxP06WrnMGLVlO7F1k5uryHxCd0R"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").removeprefix("Regis Salon ")
-        apply_category(Categories.SHOP_HAIRDRESSER, item)
+        apply_category(Categories.FAST_FOOD, item)
         yield item
