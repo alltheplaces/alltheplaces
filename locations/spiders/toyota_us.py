@@ -1,7 +1,6 @@
 from datetime import timedelta
 from typing import Iterable
 
-from requests import Response
 from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
