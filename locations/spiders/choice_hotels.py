@@ -22,7 +22,7 @@ class ChoiceHotelsSpider(SitemapSpider):
         "BR": ("Cambria Hotel", "Q113152476"),
         "CC": ("Circus Circus", "", Categories.HOTEL),
         "CI": ("Comfort Inn", "Q113152349", Categories.HOTEL),
-        "CL": ("Clarion Hotels", "Q10454567"),
+        "CL": ("Clarion", "Q10454567"),
         "CS": ("Comfort Suites", "Q55525150"),
         "CX": ("Country", "", Categories.HOTEL),
         "EC": ("El Cid", "", Categories.HOTEL),

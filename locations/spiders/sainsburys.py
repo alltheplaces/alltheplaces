@@ -1,5 +1,7 @@
-import scrapy
-from scrapy import Request
+from typing import Any
+
+from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -8,15 +10,15 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class SainsburysSpider(scrapy.Spider):
+class SainsburysSpider(Spider):
     name = "sainsburys"
     SAINSBURYS = {"brand": "Sainsbury's", "brand_wikidata": "Q152096"}
     SAINSBURYS_LOCAL = {"brand": "Sainsbury's Local", "brand_wikidata": "Q13218434"}
     item_attributes = SAINSBURYS
     allowed_domains = ["stores.sainsburys.co.uk"]
-    start_urls = ["https://stores.sainsburys.co.uk/api/v1/stores?api_client_id=slfe"]
+    start_urls = ["https://api.stores.sainsburys.co.uk/v1/stores/?api_client_id=slfe"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
 
         if len(data["results"]) == 0:
@@ -52,7 +54,7 @@ class SainsburysSpider(scrapy.Spider):
             url=f'{self.start_urls[0]}&offset={str(int(data["page_meta"]["offset"] + data["page_meta"]["limit"]))}'
         )
 
-    def parse_extras(self, item: Feature, store: dict):
+    def parse_extras(self, item: Feature, store: dict) -> Feature:
         if fhrs := store["fsa_scores"].get("fhrs_id"):
             item["extras"]["fhrs:id"] = str(fhrs)
 

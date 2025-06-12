@@ -2,6 +2,7 @@ import csv
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.searchable_points import open_searchable_points
@@ -44,10 +45,14 @@ class GeneralLogisticsSystemsDESpider(scrapy.Spider):
             item["lat"] = coordinates["latitude"]
             item["lon"] = coordinates["longitude"]
             item["name"] = address["name"]
+
             opening_hours = OpeningHours()
             for day, time_ranges in poi["openingHours"].items():
                 for time_range in time_ranges:
                     opening_hours.add_range(day, time_range["from"], time_range["to"])
+            item["opening_hours"] = opening_hours
 
-            item["opening_hours"] = opening_hours.as_opening_hours()
+            apply_category(Categories.GENERIC_POI, item)
+            item["extras"]["post_office"] = "post_partner"
+
             yield item

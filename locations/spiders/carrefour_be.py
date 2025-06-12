@@ -9,12 +9,11 @@ from locations.spiders.carrefour_fr import (
     CARREFOUR_SUPERMARKET,
     parse_brand_and_category_from_mapping,
 )
-from locations.user_agents import CHROME_LATEST
 
 
 class CarrefourBESpider(scrapy.Spider):
     name = "carrefour_be"
-    start_urls = ["https://winkels.carrefour.be/api/v3/locations"]
+    start_urls = ["https://winkels.carrefour.be/locations"]
     brands = {
         "express": CARREFOUR_EXPRESS,
         "orange": CARREFOUR_EXPRESS,
@@ -23,8 +22,8 @@ class CarrefourBESpider(scrapy.Spider):
         "drive-2": CARREFOUR_SUPERMARKET,
         "Maxi": CARREFOUR_SUPERMARKET,
     }
-    user_agent = CHROME_LATEST
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True  # Cloudflare blockage
 
     def parse(self, response):
         for data in response.json():

@@ -4,16 +4,18 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class VictorianGovernmentRoadSafetyCamerasAUSpider(ArcGISFeatureServerSpider):
+class VictorianGovernmentRoadSafetyCamerasAUSpider(JSONBlobSpider):
     name = "victorian_government_road_safety_cameras_au"
     item_attributes = {"operator": "Department of Justice and Community Safety", "operator_wikidata": "Q5260361"}
-    host = "services-ap1.arcgis.com"
-    context_path = "qP7JqzPTuwJlaCRD/ArcGIS"
-    service_id = "road_safety_camera_network_data_v3"
-    layer_id = "0"
+    allowed_domains = ["www.vic.gov.au"]
+    start_urls = ["https://www.vic.gov.au/api/tide/elasticsearch/sdp_data_pipelines_scl/_search?size=10000"]
+    locations_key = ["hits", "hits"]
+
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("_source"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["camera_id"]

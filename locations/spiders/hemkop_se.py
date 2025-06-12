@@ -13,7 +13,7 @@ class HemkopSESpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json()["results"]:
             item = DictParser.parse(store)
-            item["branch"] = item.pop("name").removeprefix("Hemköp ")
+            item["branch"] = (item.pop("name", "") or "").removeprefix("Hemköp ")
             item["phone"] = store["address"]["phoneNumber"]
             item["website"] = "https://www.hemkop.se/butik/{}".format(item["ref"])
 

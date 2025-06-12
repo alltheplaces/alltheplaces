@@ -1,61 +1,77 @@
-from typing import Any
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.geo import city_locations
 from locations.hours import DAYS_EN, DAYS_FR, OpeningHours, sanitise_day
 
-BRANDS = {
-    "Beauty Boutique by Shoppers": None,
-    "Pharmaprix": ({"brand": "Pharmaprix", "brand_wikidata": "Q1820137"}, Categories.PHARMACY),
-    "Pharmaprix Simplement Santé": None,
-    "Shoppers Drug Mart": ({"brand": "Shoppers Drug Mart", "brand_wikidata": "Q1820137"}, Categories.PHARMACY),
-    "Shoppers Simply Pharmacy": ({"brand": "Shoppers Drug Mart", "brand_wikidata": "Q1820137"}, Categories.PHARMACY),
-    "Specialty Care Centre": None,
-    "The Health Clinic by Shoppers<sup>TM</sup>": ({"name": "The Health Clinic by Shoppers"}, Categories.CLINIC),
-    "Wellwise": ({"brand": "Wellwise"}, Categories.SHOP_MEDICAL_SUPPLY),
+PHARMAPRIX = {"name": "Pharmaprix", "brand": "Pharmaprix", "brand_wikidata": "Q1820137"}
+SHOPPERS_DRUG_MART = {"name": "Shoppers Drug Mart", "brand": "Shoppers Drug Mart", "brand_wikidata": "Q1820137"}
+SHOPPERS_SIMPLY_PHARMACY = {
+    "name": "Shoppers Simply Pharmacy",
+    "brand": "Shoppers Drug Mart",
+    "brand_wikidata": "Q1820137",
 }
 
 
 class ShoppersDrugMartCASpider(Spider):
     name = "shoppers_drug_mart_ca"
-    start_urls = ["https://www.shoppersdrugmart.ca/en/store-locator", "https://www.pharmaprix.ca/en/store-locator"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        # Collect cookies
-        yield response.follow(
-            "/sdmapi/store/getnearbystoresbyminmax?minLat=-90&minLng=-180&maxLat=90&maxLng=180",
-            callback=self.parse_api,
-        )
-
-    def parse_api(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full")
-            item["state"] = location["Province"]["Abbreviation"]
-            item["name"] = location["StoreType"]["DisplayName"]
-            item["branch"] = location["Name"]
-            item["website"] = item["extras"]["website:en"] = response.urljoin(
-                "/en/store-locator/store/{}".format(location["StoreID"])
-            )
-            item["extras"]["website:fr"] = response.urljoin("/fr/store-locator/store/{}".format(location["StoreID"]))
-
-            item["opening_hours"] = OpeningHours()
-            for day, times in zip(location["WeekDays"], location["StoreHours"]):
-                if times == "CLOSED":
-                    continue
-                elif times == "24 Hours":
-                    times = "12:00 AM - 12:00 AM"
-                times = times.replace("Midnight", "12:00 AM")
-
-                item["opening_hours"].add_range(
-                    sanitise_day(day, DAYS_FR | DAYS_EN), *times.split(" - "), time_format="%I:%M %p"
+    def start_requests(self) -> Iterable[Request]:
+        for store_type in ["pharmaprix", "shoppersdrugmart"]:
+            for city in city_locations("CA", 90000):
+                yield JsonRequest(
+                    url=f"https://api.shoppersdrugmart.ca/beauty/v2/{store_type}/store-locator/search?lang=en",
+                    headers={"x-apikey": "r3kEMAxRsQQtyjXiIJOTFNN75vcsJFxH"},
+                    data={"radius": 5000.166034400522, "longitude": city["longitude"], "latitude": city["latitude"]},
                 )
 
-            if props := BRANDS.get(location["StoreType"]["DisplayName"]):
-                item.update(props[0])
-                apply_category(props[1], item)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["layout"]["sections"]["mainContentCollection"]["components"][0]["data"]:
+            item = DictParser.parse(store)
+            item["ref"] = store["viewStoreDetailsCTA"].rsplit("/", 1)[1]
+            item["website"] = store["viewStoreDetailsCTA"]
+
+            if (
+                store["canadaPostOfficeCTA"]
+                and store["canadaPostOfficeCTA"]
+                != "https://www.canadapost-postescanada.ca/cpc/en/tools/find-a-post-office.page?outletId=&detail=true"
+            ):
+                item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:website"] = store["canadaPostOfficeCTA"]
+
+            item["branch"] = item.pop("name")
+            if store["bannerName"] == "PHARMAPRIX":
+                item.update(PHARMAPRIX)
+                apply_category(Categories.PHARMACY, item)
+            elif store["bannerName"] == "SHOPPERS DRUG MART":
+                item.update(SHOPPERS_DRUG_MART)
+                apply_category(Categories.PHARMACY, item)
+            elif store["bannerName"] == "SHOPPERS SIMPLY PHARMACY":
+                item.update(SHOPPERS_SIMPLY_PHARMACY)
+                apply_category(Categories.PHARMACY, item)
+            else:
+                continue
+            item["branch"] = item["branch"].removeprefix(item["name"]).strip()
+
+            item["opening_hours"] = self.parse_opening_hours(store["storeHours"])
 
             yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            day = sanitise_day(rule["nameOfDay"], DAYS_FR | DAYS_EN)
+            if rule["timeRange"] == "Closed":
+                oh.set_closed(day)
+            elif rule["timeRange"] == "24 hours":
+                oh.add_range(day, "00:00", "24:00")
+            else:
+                oh.add_range(
+                    day, *rule["timeRange"].replace("Midnight", "12:00 AM").split(" - "), time_format="%I:%M %p"
+                )
+
+        return oh

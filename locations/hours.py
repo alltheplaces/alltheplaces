@@ -51,6 +51,7 @@ DAYS_EN = {
     "Tu": "Tu",
     "Wednesday": "We",
     "Wednesdays": "We",
+    "Wednes": "We",
     "Weds": "We",
     "Wed": "We",
     "We": "We",
@@ -68,6 +69,7 @@ DAYS_EN = {
     "Fr": "Fr",
     "Saturday": "Sa",
     "Saturdays": "Sa",
+    "Satur": "Sa",
     "Sat": "Sa",
     "Sa": "Sa",
     "Sunday": "Su",
@@ -120,6 +122,23 @@ DAYS_BG = {
     "нед": "Su",
     "Не": "Su",
     "Нд": "Su",
+}
+
+DAYS_BR = {
+    "Segunda": "Mo",
+    "Seg": "Mo",
+    "Terça": "Tu",
+    "Ter": "Tu",
+    "Quarta": "We",
+    "Qua": "We",
+    "Quinta": "Th",
+    "Qui": "Th",
+    "Sexta": "Fr",
+    "Sex": "Fr",
+    "Sábado": "Sa",
+    "Sáb": "Sa",
+    "Domingos": "Su",
+    "Dom": "Su",
 }
 
 DAYS_CH = {
@@ -726,7 +745,9 @@ NAMED_DAY_RANGES_DK = {
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "All Days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "Weekday": ["Mo", "Tu", "We", "Th", "Fr"],
     "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
+    "Weekend": ["Sa", "Su"],
     "Weekends": ["Sa", "Su"],
 }
 
