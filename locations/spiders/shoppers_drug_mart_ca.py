@@ -35,9 +35,7 @@ class ShoppersDrugMartCASpider(Spider):
                 )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        print(response.json())
         for store in response.json()["layout"]["sections"]["mainContentCollection"]["components"][0]["data"]:
-            print(store)
             item = DictParser.parse(store)
             item["ref"] = item["website"] = store["viewStoreDetailsCTA"]
             item["street"] = store["bannerName"]
