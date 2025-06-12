@@ -8,12 +8,12 @@ from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_EN, DAYS_FR, OpeningHours, sanitise_day
 
-BRANDS = {
-    "PHARMAPRIX": ({"brand": "Pharmaprix", "brand_wikidata": "Q1820137"}, Categories.PHARMACY),
-    "Pharmaprix Simplement Santé": None,
-    "SHOPPERS DRUG MART": ({"brand": "Shoppers Drug Mart", "brand_wikidata": "Q1820137"}, Categories.PHARMACY),
-    "SHOPPERS SIMPLY PHARMACY": ({"brand": "Shoppers Drug Mart", "brand_wikidata": "Q1820137"}, Categories.PHARMACY),
-    "SPECIALTY HEALTH NETWORK": None,
+PHARMAPRIX = {"name": "Pharmaprix", "brand": "Pharmaprix", "brand_wikidata": "Q1820137"}
+SHOPPERS_DRUG_MART = {"name": "Shoppers Drug Mart", "brand": "Shoppers Drug Mart", "brand_wikidata": "Q1820137"}
+SHOPPERS_SIMPLY_PHARMACY = {
+    "name": "Shoppers Simply Pharmacy",
+    "brand": "Shoppers Drug Mart",
+    "brand_wikidata": "Q1820137",
 }
 
 
@@ -32,15 +32,26 @@ class ShoppersDrugMartCASpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["layout"]["sections"]["mainContentCollection"]["components"][0]["data"]:
             item = DictParser.parse(store)
-            item["ref"] = item["website"] = store["viewStoreDetailsCTA"]
+            item["ref"] = store["viewStoreDetailsCTA"].rsplit("/", 1)[1]
+            item["website"] = store["viewStoreDetailsCTA"]
+
+            item["branch"] = item.pop("name")
+            if store["bannerName"] == "PHARMAPRIX":
+                item.update(PHARMAPRIX)
+                apply_category(Categories.PHARMACY, item)
+            elif store["bannerName"] == "SHOPPERS DRUG MART":
+                item.update(SHOPPERS_DRUG_MART)
+                apply_category(Categories.PHARMACY, item)
+            elif store["bannerName"] == "SHOPPERS SIMPLY PHARMACY":
+                item.update(SHOPPERS_SIMPLY_PHARMACY)
+                apply_category(Categories.PHARMACY, item)
+            else:
+                continue
+            item["branch"] = item["branch"].removeprefix(item["name"]).strip()
 
             item["opening_hours"] = self.parse_opening_hours(store["storeHours"])
 
-            if props := BRANDS.get(store["bannerName"]):
-                item.update(props[0])
-                apply_category(props[1], item)
-
-                yield item
+            yield item
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:
         oh = OpeningHours()
