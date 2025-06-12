@@ -3,6 +3,7 @@ from scrapy.http import Request
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.categories import Categories, apply_category
 
 
 class WhittardGBSpider(Spider):
@@ -32,6 +33,9 @@ class WhittardGBSpider(Spider):
             )
             item["phone"] = location.xpath('.//div[@class="contacts contacts-desktop"]/text()').get()
             item["website"] = location.xpath('.//a[contains(@href, "stores.whittard.co.uk")]//@href').get()
+
+            apply_category(Categories.SHOP_TEA, properties)
+            
             yield item
 
         if "View More Stores" in response.text:
