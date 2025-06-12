@@ -41,9 +41,9 @@ class MojeSklepyPLSpider(JSONBlobSpider):
             self.logger.warning("Unknown brand: {}".format(feature["brand"]))
         match feature["format"]:
             case "ExpressMarket" | "MiniMarket":
-                apply_category(Categories.SHOP_SUPERMARKET, item)
-            case "Market" | "Supermarket":
                 apply_category(Categories.SHOP_CONVENIENCE, item)
+            case "Market" | "Supermarket":
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             case _:
                 self.logger.warning("Unknown feature type: {}".format(feature["format"]))
 
