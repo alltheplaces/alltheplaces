@@ -33,7 +33,7 @@ class ShoppersDrugMartCASpider(Spider):
         for store in response.json()["layout"]["sections"]["mainContentCollection"]["components"][0]["data"]:
             item = DictParser.parse(store)
             item["ref"] = item["website"] = store["viewStoreDetailsCTA"]
-            item["street"] = store["bannerName"]
+
             item["opening_hours"] = OpeningHours()
             for day_time in store["storeHours"]:
                 day = day_time["nameOfDay"]
@@ -52,4 +52,4 @@ class ShoppersDrugMartCASpider(Spider):
                 item.update(props[0])
                 apply_category(props[1], item)
 
-            yield item
+                yield item
