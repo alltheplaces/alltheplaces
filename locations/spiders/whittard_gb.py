@@ -34,7 +34,7 @@ class WhittardGBSpider(Spider):
             item["phone"] = location.xpath('.//div[@class="contacts contacts-desktop"]/text()').get()
             item["website"] = location.xpath('.//a[contains(@href, "stores.whittard.co.uk")]//@href').get()
 
-            apply_category(Categories.SHOP_TEA, properties)
+            apply_category(Categories.SHOP_TEA, item)
 
             yield item
 
