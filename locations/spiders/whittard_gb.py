@@ -30,7 +30,8 @@ class WhittardGBSpider(Spider):
             item["addr_full"] = clean_address(
                 location.xpath('.//div[contains(@class, "store-details")]//text()').getall()
             )
-            item["phone"] = location.xpath('.//div[@class="contacts contacts-desktop"]//text()').get()
+            item["phone"] = location.xpath('.//div[@class="contacts contacts-desktop"]//text()')[1].get()
+            item["website"] = location.xpath('.//a[contains(@href, "stores.whittard.co.uk")]//@href').get()
             yield item
 
         if "View More Stores" in response.text:
