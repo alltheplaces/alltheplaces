@@ -15,7 +15,7 @@ class GoGrillBGSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature.get("store").replace("GO GRILL • ", "")
         item["website"] = None
-        
+
         apply_category(Categories.RESTAURANT, item)
-        
+
         yield item
