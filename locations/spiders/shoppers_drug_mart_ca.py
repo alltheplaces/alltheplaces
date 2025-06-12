@@ -35,6 +35,14 @@ class ShoppersDrugMartCASpider(Spider):
             item["ref"] = store["viewStoreDetailsCTA"].rsplit("/", 1)[1]
             item["website"] = store["viewStoreDetailsCTA"]
 
+            if (
+                store["canadaPostOfficeCTA"]
+                and store["canadaPostOfficeCTA"]
+                != "https://www.canadapost-postescanada.ca/cpc/en/tools/find-a-post-office.page?outletId=&detail=true"
+            ):
+                item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:website"] = store["canadaPostOfficeCTA"]
+
             item["branch"] = item.pop("name")
             if store["bannerName"] == "PHARMAPRIX":
                 item.update(PHARMAPRIX)
