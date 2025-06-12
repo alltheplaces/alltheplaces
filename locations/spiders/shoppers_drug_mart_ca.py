@@ -19,19 +19,14 @@ BRANDS = {
 
 class ShoppersDrugMartCASpider(Spider):
     name = "shoppers_drug_mart_ca"
-    start_urls = ["https://www.shoppersdrugmart.ca/en/store-locator", "https://www.pharmaprix.ca/en/store-locator"]
 
     def start_requests(self) -> Iterable[Request]:
         for store_type in ["pharmaprix", "shoppersdrugmart"]:
             for city in city_locations("CA", 90000):
                 yield JsonRequest(
                     url=f"https://api.shoppersdrugmart.ca/beauty/v2/{store_type}/store-locator/search?lang=en",
-                    headers={
-                        "content-type": "application/json",
-                        "x-apikey": "r3kEMAxRsQQtyjXiIJOTFNN75vcsJFxH",
-                    },
+                    headers={"x-apikey": "r3kEMAxRsQQtyjXiIJOTFNN75vcsJFxH"},
                     data={"radius": 5000.166034400522, "longitude": city["longitude"], "latitude": city["latitude"]},
-                    callback=self.parse,
                 )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
