@@ -32,4 +32,5 @@ class SephoraUSCASpider(SitemapSpider, StructuredDataSpider):
         item["country"] = location_info.get("address", {}).get("country")
         item["lat"] = location_info.get("latitude")
         item["lon"] = location_info.get("longitude")
+        item["branch"] = item.pop("name").title().removeprefix("Sephora ")
         yield item
