@@ -64,5 +64,6 @@ class ToyotaUSSpider(JSONBlobSpider):
             if len(oh.day_hours) > 0:
                 item["opening_hours"] = oh
 
-        except Exception:
+        except Exception as e:
+            self.logger.error(f"Error during parsing hours for {item['ref']}: {e}")
             self.crawler.stats.inc_value(f"atp/{self.name}/error_during_parse_hours/{item['ref']}")
