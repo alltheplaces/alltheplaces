@@ -36,5 +36,6 @@ class GbarbosaBRSpider(JSONBlobSpider):
         elif feature["storeType"] in ["Hipermercado", "Supermercado"]:
             apply_category(Categories.SHOP_SUPERMARKET, item)
         else:
-            self.crawler.stats.inc_value(f'atp/gbarbosa_br/unmapped_cat/{feature["storeType"]}')
+            self.logger.error("Unexpected type: {}".format(feature["storeType"]))
+
         yield item
