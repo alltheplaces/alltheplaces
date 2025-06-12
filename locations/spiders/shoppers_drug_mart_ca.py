@@ -34,22 +34,25 @@ class ShoppersDrugMartCASpider(Spider):
             item = DictParser.parse(store)
             item["ref"] = item["website"] = store["viewStoreDetailsCTA"]
 
-            item["opening_hours"] = OpeningHours()
-            for day_time in store["storeHours"]:
-                day = day_time["nameOfDay"]
-                times = day_time["timeRange"]
-                if times == "Closed":
-                    continue
-                elif times == "24 hours":
-                    times = "12:00 AM - 12:00 AM"
-                times = times.replace("Midnight", "12:00 AM")
-
-                item["opening_hours"].add_range(
-                    sanitise_day(day, DAYS_FR | DAYS_EN), *times.split(" - "), time_format="%I:%M %p"
-                )
+            item["opening_hours"] = self.parse_opening_hours(store["storeHours"])
 
             if props := BRANDS.get(store["bannerName"]):
                 item.update(props[0])
                 apply_category(props[1], item)
 
                 yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            day = sanitise_day(rule["nameOfDay"], DAYS_FR | DAYS_EN)
+            if rule["timeRange"] == "Closed":
+                oh.set_closed(day)
+            elif rule["timeRange"] == "24 hours":
+                oh.add_range(day, "00:00", "24:00")
+            else:
+                oh.add_range(
+                    day, *rule["timeRange"].replace("Midnight", "12:00 AM").split(" - "), time_format="%I:%M %p"
+                )
+
+        return oh
