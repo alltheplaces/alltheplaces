@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -29,4 +30,5 @@ class RataplanNLSpider(SitemapSpider):
             response.xpath('//*[contains(text(),"Adresgegevens")]/following-sibling::p/text()').getall()[:2]
         )
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get()
+        extract_google_position(item, response)
         yield item
