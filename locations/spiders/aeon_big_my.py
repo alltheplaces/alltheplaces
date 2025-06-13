@@ -19,8 +19,8 @@ class AeonBigMYSpider(Spider):
                 item = Feature()
                 item["ref"] = item["branch"] = branch
                 item["website"] = response.url
-                item["addr_full"] = location.xpath(
-                    './/div[contains(@class,"p-5")]/p[contains(@class,"text-slate")]/text()'
-                ).get()
+                address = location.xpath('.//div[contains(@class,"p-5")]')
+                item["state"] = address.xpath('./p[contains(@class,"inline-block")]/text()').get()
+                item["addr_full"] = address.xpath('./p[contains(@class,"text-slate")]/text()').get()
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 yield item
