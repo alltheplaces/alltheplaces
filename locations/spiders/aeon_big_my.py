@@ -24,5 +24,6 @@ class AeonBigMYSpider(Spider):
                 item["state"] = address.xpath('./p[contains(@class,"inline-block")]/text()').get()
                 item["addr_full"] = address.xpath('./p[contains(@class,"text-slate")]/text()').get()
                 item["image"] = html.unescape(location.xpath(".//img/@src").get(""))
+                item["phone"] = location.xpath('.//*[contains(text(),"Telephone")]/following-sibling::p/text()').get()
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 yield item
