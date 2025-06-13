@@ -14,6 +14,7 @@ class CakeBoxGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Cake Box ")
             item["facebook"] = location.get("facebook_link")
             item["street_address"] = location["address"]["address_1"]
             yield item
