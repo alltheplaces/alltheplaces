@@ -1,6 +1,6 @@
 from locations.spiders.valero import ValeroSpider
 
-uusa_bbox = [-10, 49, 2, 61]
+usa_bbox = [-10, 49, 2, 61]
 
 xstep = 5
 ystep = 3
