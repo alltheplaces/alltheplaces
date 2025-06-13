@@ -1,5 +1,7 @@
+from typing import Any
+
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -10,16 +12,16 @@ class WhittardGBSpider(Spider):
     name = "whittard_gb"
     item_attributes = {"brand": "Whittard of Chelsea", "brand_wikidata": "Q7996831"}
 
-    def request_page(self, next_offset):
-        yield Request(
+    def request_page(self, next_offset: int) -> Request:
+        return Request(
             url=f"https://www.whittard.co.uk/stores?ajax=true&start={next_offset}",
             meta={"offset": next_offset},
         )
 
     def start_requests(self):
-        yield from self.request_page(0)
+        yield self.request_page(0)
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('.//div[@class="store-row-container "]'):
             item = Feature()
             item["ref"] = location.xpath('.//div[@class="store-row grid-x location-cell"]/@data-storeid').get()
@@ -31,9 +33,8 @@ class WhittardGBSpider(Spider):
             item["addr_full"] = clean_address(
                 location.xpath('.//div[contains(@class, "store-details")]//text()').getall()
             )
-            item["phone"] = location.xpath('.//div[@class="contacts contacts-desktop"]/text()[2]').get()
-            if item["phone"]:
-                item["phone"] = item["phone"].strip()
+            if phone := location.xpath('.//div[@class="contacts contacts-desktop"]/text()[2]').get():
+                item["phone"] = phone.strip()
             item["website"] = location.xpath('.//a[contains(@href, "stores.whittard.co.uk")]//@href').get()
 
             apply_category(Categories.SHOP_TEA, item)
@@ -41,5 +42,4 @@ class WhittardGBSpider(Spider):
             yield item
 
         if "View More Stores" in response.text:
-            next_offset = response.meta["offset"] + 5
-            yield from self.request_page(next_offset)
+            yield self.request_page(response.meta["offset"] + 5)
