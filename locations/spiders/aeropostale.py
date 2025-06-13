@@ -11,5 +11,6 @@ class AeropostaleSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://stores.aeropostale.com/.+?/.+/.+?$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
