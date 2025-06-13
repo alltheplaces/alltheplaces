@@ -31,5 +31,8 @@ class TommyHRSpider(Spider):
             item["lat"] = store["position"]["latitude"]
             item["lon"] = store["position"]["longitude"]
             item["state"] = store["location"]["provinceName"]
-            apply_category(Categories.SHOP_SUPERMARKET, item)
+            if store["storeType"] == "Market":
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+            else:
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
