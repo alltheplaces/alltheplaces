@@ -61,7 +61,7 @@ class AstronEnergyZASpider(JSONBlobSpider):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
         images = location.get("imageUrls") or []
         if images:
-            item["image"] = "https://www.astronenergy.co.za" + images[0]
+            item["image"] = response.urljoin(images[0])
         for tag, service in ASTRON_PROPERTIES.items():
             apply_yes_no(service, item, location["properties"].get(tag), False)
         item["opening_hours"] = OpeningHours()
