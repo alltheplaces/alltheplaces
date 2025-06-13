@@ -13,5 +13,6 @@ class AdlerModemarkteSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
+        item.pop("email")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
