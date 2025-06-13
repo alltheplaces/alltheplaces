@@ -3,14 +3,14 @@ import scrapy
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
-uk_bbox = [-9, 49, 2, 61]
+uk_bbox = [-10, 49, 2, 61]
 
 xstep = 5
 ystep = 3
 
 
-class TexacoGBSpider(scrapy.Spider):
-    name = "texaco_gb"
+class TexacoGBIESpider(scrapy.Spider):
+    name = "texaco_gb_ie"
     item_attributes = {"brand": "Texaco", "brand_wikidata": "Q775060"}
     allowed_domains = ["valero.com"]
 
