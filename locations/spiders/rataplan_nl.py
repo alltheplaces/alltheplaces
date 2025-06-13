@@ -28,9 +28,7 @@ class RataplanNLSpider(SitemapSpider):
         item = Feature()
         item["ref"] = response.xpath("//@data-gt-widget-id").get()
         item["website"] = response.url
-        item["addr_full"] = clean_address(
-            response.xpath('//*[contains(text(),"Adresgegevens")]/following-sibling::p/text()').getall()[:2]
-        )
+        item["addr_full"] = clean_address(address.xpath("./following-sibling::p/text()").getall()[:2])
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get()
         extract_google_position(item, response)
         item["name"] = self.item_attributes["brand"]
