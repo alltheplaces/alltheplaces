@@ -26,7 +26,6 @@ class AmericanGolfGBSpider(Spider):
         )
         for location in raw_data:
             location.update(location.pop("resources"))
-            print(location)
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["addr_full"] = location["listAddress"]
