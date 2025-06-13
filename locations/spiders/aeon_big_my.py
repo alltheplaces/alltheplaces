@@ -5,6 +5,7 @@ from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -25,5 +26,11 @@ class AeonBigMYSpider(Spider):
                 item["addr_full"] = address.xpath('./p[contains(@class,"text-slate")]/text()').get()
                 item["image"] = html.unescape(location.xpath(".//img/@src").get(""))
                 item["phone"] = location.xpath('.//*[contains(text(),"Telephone")]/following-sibling::p/text()').get()
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(
+                    location.xpath('.//*[contains(text(),"Business Hours")]/following-sibling::p/text()')
+                    .get("")
+                    .replace("& PH", "")
+                )
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 yield item
