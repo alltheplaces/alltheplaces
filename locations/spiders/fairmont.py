@@ -1,5 +1,4 @@
 from msilib import Feature
-
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
