@@ -3,8 +3,9 @@ from typing import Iterable
 
 from scrapy import Selector
 
-from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 from locations.items import Feature
+from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+
 
 class CakeBoxGBSpider(AmastyStoreLocatorSpider):
     name = "cake_box_gb"
