@@ -31,4 +31,5 @@ class RataplanNLSpider(SitemapSpider):
         )
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get()
         extract_google_position(item, response)
+        item["name"] = self.item_attributes["brand"]
         yield item
