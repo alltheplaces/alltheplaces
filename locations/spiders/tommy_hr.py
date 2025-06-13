@@ -17,16 +17,7 @@ class TommyHRSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["hydra:member"]:
             item = DictParser.parse(store["location"])
-            item["branch"] = (
-                item.pop("name")
-                .removeprefix("Tommy ")
-                .removeprefix("Hipermarket ")
-                .removeprefix("Supermarket ")
-                .removeprefix("supermarket ")
-                .removeprefix("Market ")
-                .removeprefix("Maximarket ")
-                .removeprefix("maximarket ")
-            )
+            item["name"] = "Tommy {}".format(store["storeType"])
             item["ref"] = store["storeCode"]
             item["lat"] = store["position"]["latitude"]
             item["lon"] = store["position"]["longitude"]
