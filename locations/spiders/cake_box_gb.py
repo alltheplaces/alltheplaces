@@ -1,20 +1,24 @@
-from typing import Any
 
-from scrapy import Spider
-from scrapy.http import Response
-
-from locations.dict_parser import DictParser
+from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class CakeBoxGBSpider(Spider):
+class CakeBoxGBSpider(AmastyStoreLocatorSpider):
     name = "cake_box_gb"
     item_attributes = {"brand": "Cake Box", "brand_wikidata": "Q110057905"}
-    start_urls = ["https://api.cakebox.com/sf/store/store-locations/search?limit=0&offset=0"]
+    allowed_domains = ["www.cakebox.com"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["stores"]:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name").removeprefix("Cake Box ")
-            item["facebook"] = location.get("facebook_link")
-            item["street_address"] = location["address"]["address_1"]
-            yield item
+    #def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
+        #data = response.xpath('//script[contains(text(), "jsonLocations")]/text()').get()
+        #data = re.sub(r"^.*jsonLocations: ", "", data, flags=re.DOTALL)
+        #data = re.sub(r",\s+imageLocations.*$", "", data, flags=re.DOTALL)
+        #jsondata = json.loads(data)
+        #for location in jsondata["items"]:
+        #    item = Feature()
+        #    item["ref"] = location["id"]
+        #    item["lat"] = location["lat"]
+        #    item["lon"] = location["lng"]
+        #    sel = location["popup_html"]
+        #    item["city"] = re.search(r"(?<=City: )[^<]+", sel).group(0)
+        #    item["street_address"] = re.search(r"(?<=Address: )[^<]+", sel).group(0)
+        #    item["postcode"] = re.search(r"(?<=Zip: )[^<]+", sel).group(0)
+        #    yield item
