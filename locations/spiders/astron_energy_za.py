@@ -43,6 +43,7 @@ class AstronEnergyZASpider(JSONBlobSpider):
     item_attributes = {"brand": "Astron Energy", "brand_wikidata": "Q120752181"}
     start_urls = ["https://www.astronenergy.co.za/umbraco/api/station/Stations"]
     locations_key = "stations"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for url in self.start_urls:
