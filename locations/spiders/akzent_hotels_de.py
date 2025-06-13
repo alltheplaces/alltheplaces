@@ -11,6 +11,5 @@ class AkzentHotelsDESpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/hotels\/[a-z-]+$", "parse")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").replace("AKZENT ", "")
         apply_category(Categories.HOTEL, item)
         yield item
