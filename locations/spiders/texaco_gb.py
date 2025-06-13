@@ -9,9 +9,9 @@ xstep = 5
 ystep = 3
 
 
-class ValeroSpider(scrapy.Spider):
-    name = "valero"
-    item_attributes = {"brand": "Valero", "brand_wikidata": "Q1283291"}
+class TexacoGBSpider(scrapy.Spider):
+    name = "texaco_gb"
+    item_attributes = {"brand": "Texaco", "brand_wikidata": "Q775060"}
     allowed_domains = ["valero.com"]
 
     def make_search(self, xmin, ymin, xmax, ymax):
