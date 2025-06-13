@@ -10,5 +10,3 @@ class TexacoGBIESpider(ValeroSpider):
     name = "texaco_gb_ie"
     item_attributes = {"brand": "Texaco", "brand_wikidata": "Q775060"}
     allowed_domains = ["valero.com"]
-
- 
