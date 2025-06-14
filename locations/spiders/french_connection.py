@@ -8,3 +8,7 @@ class FrenchConnectionSpider(StoremapperSpider):
         "brand": "French Connection",
     }
     company_id = "11232"
+
+    def parse_item(self, item: Feature, location: dict):
+        item["branch"] = item.pop("name")
+        yield item
