@@ -1,5 +1,7 @@
 from locations.items import Feature
 from locations.storefinders.storemapper import StoremapperSpider
+from locations.spiders.john_lewis_gb import JohnLewisGBSpider
+from locations.spiders.tesco_gb import set_located_in
 
 
 class FrenchConnectionSpider(StoremapperSpider):
@@ -12,4 +14,6 @@ class FrenchConnectionSpider(StoremapperSpider):
 
     def parse_item(self, item: Feature, location: dict):
         item["branch"] = item.pop("name")
+        if "John Lewis" in location["name"]:
+            set_located_in(JohnLewisGBSpider.item_attributes, item)
         yield item
