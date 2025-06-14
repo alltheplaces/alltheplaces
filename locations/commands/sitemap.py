@@ -16,6 +16,7 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     pages = False
     download_delay = 0.5
+    requires_proxy = False
     # Generated from the codebase, see https://github.com/alltheplaces/alltheplaces/issues/7723
     common_sitemap_patterns = [
         r"(.+)/marktseite$",
@@ -370,6 +371,11 @@ class SitemapCommand(BaseRunSpiderCommand):
     def add_options(self, parser):
         super().add_options(parser)
         parser.add_argument(
+            "--requires-proxy",
+            action="store_true",
+            help="if possible enable HTTP proxying when making requests",
+        )
+        parser.add_argument(
             "--pages",
             action="store_true",
             help="print HTTP page links rather than sitemap XML links, helps identify POI pages",
@@ -390,7 +396,7 @@ class SitemapCommand(BaseRunSpiderCommand):
             # If URL has no path data then take a chance on robots.txt being there to help.
             url = parsed.scheme + "://" + parsed.netloc + "/robots.txt"
         MySitemapSpider.sitemap_urls = [url]
-
+        MySitemapSpider.requires_proxy = opts.requires_proxy
         MySitemapSpider.pages = opts.pages
 
         crawler = self.crawler_process.create_crawler(MySitemapSpider, **opts.spargs)

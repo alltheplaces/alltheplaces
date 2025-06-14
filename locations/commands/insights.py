@@ -11,8 +11,8 @@ import scrapy.statscollectors
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
-from locations.country_utils import CountryUtils
 from locations.name_suggestion_index import NSI
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
 def iter_json(stream, file_name):
@@ -105,12 +105,6 @@ class InsightsCommand(ScrapyCommand):
             help="Check property values are strings",
         )
         parser.add_argument(
-            "--country-codes",
-            dest="country_codes",
-            action="store_true",
-            help="Look at country code values, are they present? do they map to an ISO alpha code cleanly?",
-        )
-        parser.add_argument(
             "--wikidata-codes",
             dest="wikidata_codes",
             action="store_true",
@@ -130,12 +124,6 @@ class InsightsCommand(ScrapyCommand):
             help="Write result of run to file",
         )
         parser.add_argument(
-            "--html-encoding",
-            dest="html_encoding",
-            action="store_true",
-            help="Check fields for html escaped content",
-        )
-        parser.add_argument(
             "--nsi-overrides",
             dest="nsi_overrides",
             action="store_true",
@@ -148,17 +136,11 @@ class InsightsCommand(ScrapyCommand):
         if opts.value_types:
             self.check_value_types(args, opts)
             return
-        if opts.country_codes:
-            self.check_country_codes(args, opts)
-            return
         if opts.wikidata_codes:
             self.check_wikidata_codes(args, opts)
             return
         if opts.atp_nsi_osm:
             self.analyze_atp_nsi_osm(args, opts)
-            return
-        if opts.html_encoding:
-            self.check_html_encoding(args, opts)
             return
         if opts.nsi_overrides:
             self.nsi_overrides(args, opts)
@@ -179,37 +161,6 @@ class InsightsCommand(ScrapyCommand):
 
             pprint.pp(stats._stats)
 
-    def check_country_codes(self, args, opts):
-        country_utils = CountryUtils()
-        country_clean_counter = Counter()
-        invalid_country_counter = Counter()
-        spider_failed_counter = Counter()
-        spider_missing_counter = Counter()
-        fixed_country_counter = Counter()
-        country_counter = Counter()
-        for feature in iter_features(args, opts.filter_spiders):
-            spider_name = feature["properties"].get("@spider")
-            country = feature["properties"].get("addr:country")
-            if country:
-                mapped = country_utils.to_iso_alpha2_country_code(country)
-                if not mapped:
-                    invalid_country_counter[country] += 1
-                    spider_failed_counter[spider_name] += 1
-                    continue
-                if mapped == country:
-                    country_clean_counter[country] += 1
-                else:
-                    fixed_country_counter[country + " -> " + mapped] += 1
-                country_counter[mapped] += 1
-            else:
-                spider_missing_counter[spider_name] += 1
-        self.show_counter("ORIGINAL CLEAN COUNTRY CODES:", country_clean_counter)
-        self.show_counter("MAPPED/FIXED COUNTRY CODES:", fixed_country_counter)
-        self.show_counter("CLEAN/MAPPED COUNTRY CODES:", country_counter)
-        self.show_counter("INVALID COUNTRY CODES:", invalid_country_counter)
-        self.show_counter("NO COUNTRY CODE SUPPLIED BY SPIDER:", spider_missing_counter)
-        self.show_counter("INVALID COUNTRY CODES BY SPIDER:", spider_failed_counter)
-
     def check_wikidata_codes(self, args, opts):
         nsi = NSI()
         spider_empty_counter = Counter()
@@ -226,17 +177,6 @@ class InsightsCommand(ScrapyCommand):
                 pass
         self.show_counter("SPIDERS WITH NO BRAND DATA:", spider_empty_counter)
         self.show_counter("NSI MISSING WIKIDATA CODE:", spider_nsi_missing_counter)
-
-    def check_html_encoding(self, args, opts):
-        spider_counter = Counter()
-        for feature in iter_features(args, opts.filter_spiders):
-            spider_name = feature["properties"]["@spider"]
-            for key, value in feature["properties"].items():
-                if isinstance(value, str):
-                    if re.search(r"&#?\w+;", value):
-                        spider_counter[spider_name] += 1
-                        break
-        self.show_counter("SPIDERS WITH HTML ENCODED OUTPUT:", spider_counter)
 
     def analyze_atp_nsi_osm(self, args, opts):
         """
@@ -273,9 +213,10 @@ class InsightsCommand(ScrapyCommand):
 
         # First data set to merge into the output table is wikidata tag count info from OSM.
         # There are a lot of unique wikidata codes so use paging on the taginfo service.
+        re_qcode = re.compile(r"^Q\d+")
         osm_url_template = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page={}&rp=999&qtype=value"
         for page in range(1, 1000):
-            response = requests.get(osm_url_template.format(page))
+            response = requests.get(osm_url_template.format(page), headers={"User-Agent": BOT_USER_AGENT_REQUESTS})
             if not response.status_code == 200:
                 raise Exception("Failed to load OSM wikidata tag statistics")
             entries = response.json()["data"]
@@ -283,7 +224,8 @@ class InsightsCommand(ScrapyCommand):
                 # We've run of the end of OSM wikidata entries.
                 break
             for r in entries:
-                lookup_code(r["value"])["osm_count"] = r["count"]
+                if re_qcode.match(r["value"]):
+                    lookup_code(r["value"])["osm_count"] = r["count"]
 
         # Now load each wikidata entry in the NSI dataset and merge into our wikidata table.
         nsi = NSI()

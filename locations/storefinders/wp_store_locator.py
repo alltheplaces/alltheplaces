@@ -187,7 +187,7 @@ class WPStoreLocatorSpider(Spider):
             if self.days is not None:
                 # If we have preconfigured the exact days to use, start there
                 item["opening_hours"] = self.parse_opening_hours(feature, self.days)
-            else:
+            elif DictParser.get_first_key(feature, DictParser.hours_keys):
                 # Otherwise, iterate over the possibilities until we get a first match
                 self.logger.warning(
                     "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"

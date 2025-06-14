@@ -1,27 +1,45 @@
-from scrapy import Request, Spider
+import json
+from typing import Any
 
-from locations.categories import Categories
-from locations.items import Feature
+from scrapy import Request, Spider
+from scrapy.http import Response
+
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class DecathlonTWSpider(Spider):
     name = "decathlon_tw"
-    item_attributes = {"brand": "Decathlon", "brand_wikidata": "Q509349", "extras": Categories.SHOP_SPORTS.value}
-    start_urls = ["https://decathlon.tw/store/taipei_guilin_store"]
+    item_attributes = {"brand": "Decathlon", "brand_wikidata": "Q509349"}
+    start_urls = ["https://www.decathlon.tw/api/store-setting?countryCode=TW"]
 
-    def parse(self, response):
-        store_urls = response.xpath('//select[@id="store-selector"]/option/@value').extract()
-        for store_url in store_urls:
-            if store_url == "#":
-                continue
-            else:
-                yield Request(response.urljoin(store_url), self.parse_store)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield Request(
+            url="https://www.decathlon.tw/s/門市資訊",
+            callback=self.parse_store_details,
+            meta=dict(stores=response.json()),
+        )
 
-    def parse_store(self, response):
-        item = Feature()
-        item["ref"] = response.url
-        item["name"] = response.xpath('//span[@data-ui-id="page-title-wrapper"]/text()').extract_first()
-        store_info = response.xpath('//div[@class="store-info mb-4"]')
-        item["addr_full"] = store_info.xpath('.//div[@class="col-md-4 col-12"]/p[1]/text()').extract_first()
-        item["phone"] = store_info.xpath('.//div[@class="col-md-4 col-12"]/p/a/text()').extract_first()
-        yield item
+    def parse_store_details(self, response: Response, **kwargs: Any) -> Any:
+        store_list_with_extra_info = []
+        for obj in json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())["props"]["pageProps"]["content"][
+            "floor"
+        ]:
+            if store_list := obj.get("fields", {}).get("storeList"):
+                store_list_with_extra_info.extend(store_list)
+        store_pages = {
+            store["fields"]["storeId"]: store["fields"]["ctaLink"]
+            for store in store_list_with_extra_info
+            if store.get("fields")
+        }
+        for store in response.meta["stores"]:
+            store.update(store.pop("address"))
+            item = DictParser.parse(store)
+            item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name").strip("店")
+            item["phone"] = store.get("phone1")
+            item["website"] = response.urljoin(store_pages.get(store["id"]))
+            item["opening_hours"] = OpeningHours()
+            for rule in store.get("workingHours", []):
+                item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["open"], rule["close"])
+            yield item

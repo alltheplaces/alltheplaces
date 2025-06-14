@@ -13,6 +13,7 @@ class HootersSpider(scrapy.Spider):
     item_attributes = {"brand": "Hooters", "brand_wikidata": "Q1025921"}
     allowed_domains = ["www.hooters.com"]
     start_urls = ["https://www.hooters.com/api/location_names.php"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

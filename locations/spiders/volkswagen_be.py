@@ -31,7 +31,8 @@ class VolkswagenBESpider(Spider):
             brand = location.get("BRAND")
             item["ref"] = item["ref"] + brand  # update ref to avoid dropping same location for different brands
             if brand_info := self.BRANDS.get(brand):
-                item.update(brand_info)
+                item["brand"] = brand_info["brand"]
+                item["brand_wikidata"] = brand_info["brand_wikidata"]
             item["lat"] = location.get("GPSLAT")
             item["lon"] = location.get("GPSLONG")
             item["street_address"] = item.pop("addr_full")

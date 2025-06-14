@@ -60,54 +60,54 @@ class TopgolfUSSpider(JSONBlobSpider):
     def parse_amenities(self, item, amenities):
         if 19 in amenities:
             # "3 floors"
-            item["extras"]["building:levels"] = 3
+            item["extras"]["building:levels"] = "3"
         if 20 in amenities:
             # "2 floors"
-            item["extras"]["building:levels"] = 2
+            item["extras"]["building:levels"] = "2"
         if 21 in amenities:
             # "1 floor"
-            item["extras"]["building:levels"] = 1
+            item["extras"]["building:levels"] = "1"
         if 15 in amenities:
             # "120 all-weather bays"
-            item["extras"]["rooms"] = 120
+            item["extras"]["rooms"] = "120"
         if 14 in amenities:
             # "100+ all-weather bays"
-            item["extras"]["rooms"] = 100
+            item["extras"]["rooms"] = "100"
         if 12 in amenities:
             # "90+ all-weather bays"
-            item["extras"]["rooms"] = 90
+            item["extras"]["rooms"] = "90"
         if 2 in amenities:
             # "70+ all-weather bays"
-            item["extras"]["rooms"] = 70
+            item["extras"]["rooms"] = "70"
         if 127 in amenities:
             # "60 all-weather bays"
-            item["extras"]["rooms"] = 60
+            item["extras"]["rooms"] = "60"
         if 67 in amenities:
             # "50+ all-weather bays"
-            item["extras"]["rooms"] = 50
+            item["extras"]["rooms"] = "50"
         if 102 in amenities:
             # "44 all-weather bays"
-            item["extras"]["rooms"] = 44
+            item["extras"]["rooms"] = "44"
         if 16 in amenities:
             # "30+ all-weather bays"
-            item["extras"]["rooms"] = 30
+            item["extras"]["rooms"] = "30"
         if 30 in amenities:
             # "48-foot video wall"
-            item["extras"]["screens"] = 1
+            item["extras"]["screens"] = "1"
         if 157 in amenities:
             # "36-foot video wall and 200+ HDTVs"
-            item["extras"]["screens"] = 200
+            item["extras"]["screens"] = "200"
         if 152 in amenities:
             # "28-foot video wall and 200+ HDTVs"
-            item["extras"]["screens"] = 200
+            item["extras"]["screens"] = "200"
         if 142 in amenities:
             # "22-foot video wall and 100+ HDTVs"
-            item["extras"]["screens"] = 100
+            item["extras"]["screens"] = "100"
         if 17 in amenities:
             # "13-foot video wall and 50+ HDTVs"
-            item["extras"]["screens"] = 50
+            item["extras"]["screens"] = "50"
         if 5 in amenities:
             # "Over 200 HDTVs"
-            item["extras"]["screens"] = 200
+            item["extras"]["screens"] = "200"
         apply_yes_no(Extras.WIFI, item, 18 in amenities)  # "Free Wi-Fi"
         apply_yes_no("restaurant", item, 9 in amenities)  # "Bar & restaurant"

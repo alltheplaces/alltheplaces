@@ -1,18 +1,14 @@
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class Arb4x4AccessoriesSpider(Spider):
     name = "arb_4x4_accessories"
-    item_attributes = {
-        "brand": "ARB 4×4 Accessories",
-        "brand_wikidata": "Q126166453",
-        "extras": Categories.SHOP_CAR_PARTS.value,
-    }
+    item_attributes = {"brand": "ARB 4×4 Accessories", "brand_wikidata": "Q126166453"}
     allowed_domains = ["www.arb.com.au"]
     start_urls = ["https://www.arb.com.au/wp-content/themes/arb_2017/assets/inc/json/stores.json"]
 
@@ -46,5 +42,7 @@ class Arb4x4AccessoriesSpider(Spider):
             )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
+
+            apply_category(Categories.SHOP_CAR_PARTS, item)
 
             yield item

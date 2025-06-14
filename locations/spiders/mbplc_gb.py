@@ -14,13 +14,9 @@ class MbplcGBSpider(WoosmapSpider):
         "Ember Inns": {"brand": "Ember Inns", "brand_wikidata": "Q116272278"},
         "Harvester": {"brand": "Harvester", "brand_wikidata": "Q5676915"},
         "Miller & Carter": {"brand": "Miller & Carter", "brand_wikidata": "Q87067401"},
-        "Nicholsons": {"brand": "Nicholsons", "brand_wikidata": "Q113130666"},
+        "Nicholsons": {"brand": "Nicholson's", "brand_wikidata": "Q113130666"},
         "O'Neill's": {"brand": "O'Neill's", "brand_wikidata": "Q7071905"},
-        "Premium Country Pubs": {
-            "brand": "Premium Country Pubs",
-            "brand_wikidata": "Q118606900",
-            "extras": Categories.PUB.value,
-        },
+        "Premium Country Pubs": {"brand": "Premium Country Pubs", "brand_wikidata": "Q118606900"},
         "Stonehouse": {"brand": "Stonehouse", "brand_wikidata": "Q78192049"},
         "Toby Carvery": {"brand": "Toby Carvery", "brand_wikidata": "Q7811777"},
         "Oak Tree pubs": {
@@ -28,11 +24,7 @@ class MbplcGBSpider(WoosmapSpider):
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },
-        "Inn Keepers Collection": {
-            "brand": "Inn Keepers Collection",
-            "brand_wikidata": "",
-            "extras": Categories.PUB.value,
-        },
+        "Inn Keepers Collection": {"brand": "Inn Keepers Collection", "brand_wikidata": "Q6035891"},
         "Vintage Inns": {"brand": "Vintage Inns", "brand_wikidata": "Q87067899"},
         "Browns": {"brand": "Browns", "brand_wikidata": "Q4976672"},
         "Son of Steak": {
@@ -45,8 +37,10 @@ class MbplcGBSpider(WoosmapSpider):
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },
-        "Castle": {
-            "brand": "Castle",
+        "Castle": {"brand": "Castle Pubs", "brand_wikidata": "Q133280052"},
+        "EGO Mediterranean": {"brand": "EGO Mediterranean", "brand_wikidata": "Q133279746"},
+        "Orleans Smokehouse": {
+            "brand": "Orleans Smokehouse",
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },

@@ -1,12 +1,40 @@
-from scrapy.spiders import SitemapSpider
+import json
+import re
+from typing import Any, Iterable
 
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
+
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.spiders.arbys_us import ArbysUSSpider
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class ArbysCASpider(SitemapSpider, StructuredDataSpider):
+class ArbysCASpider(Spider):
     name = "arbys_ca"
     item_attributes = ArbysUSSpider.item_attributes
-    sitemap_urls = ["https://locations.arbys.ca/sitemap.xml"]
-    sitemap_rules = [(r"ca/\w\w/[^/]+/[^/]+.html", "parse")]
-    wanted_types = ["Restaurant"]
+
+    def start_requests(self) -> Iterable[JsonRequest]:
+        yield JsonRequest(
+            url="https://arbys.ca/asmx/WebMethods.asmx/getMapStoresList",
+            data={
+                "searchVal": "",
+                "latitude": "0",
+                "longitude": "0",
+                "allowString": "",
+                "searchlat": "0",
+                "searchlong": "0",
+            },
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in json.loads(response.json()["d"]):
+            item = DictParser.parse(location)
+            if m := re.match(r"(?:Arby’s )?(.+)\s-\s*(\d+)", item.pop("name")):
+                item["branch"], item["ref"] = m.groups()
+            apply_yes_no(Extras.DELIVERY, item, location.get("allowDelivery"))
+            apply_yes_no(Extras.TAKEAWAY, item, location.get("allowTakeWay"))
+            apply_yes_no(Extras.DRIVE_THROUGH, item, location.get("allowdriveThru"))
+            apply_yes_no(Extras.INDOOR_SEATING, item, location.get("allowDineIn"))
+            apply_yes_no(Extras.WIFI, item, location.get("allowWifi"))
+            yield item

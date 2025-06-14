@@ -1,8 +1,9 @@
 from typing import Iterable
+from urllib.parse import urljoin
 
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -15,56 +16,64 @@ class HealiusAUSpider(JSONBlobSpider):
         "ABBOTT": {
             "brand": "Abbott Pathology",
             "brand_wikidata": "Q126165721",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.abbottpathology.com.au",
         },
         "DOREVITCH": {
             "brand": "Dorevitch Pathology",
             "brand_wikidata": "Q126165490",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.dorevitch.com.au",
         },
         "LAVERTY": {
             "brand": "Laverty Pathology",
             "brand_wikidata": "Q105256033",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.laverty.com.au",
         },
         "LUMUS": {
             "brand": "Lumus Imaging",
             "brand_wikidata": "Q130311754",
             # Note: Proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
-            "extras": Categories.MEDICAL_IMAGING.value,
+            "category": Categories.MEDICAL_IMAGING,
+            "website": "https://www.lumusimaging.com.au",
         },
         "QML": {
             "brand": "QML Pathology",
             "brand_wikidata": "Q126165557",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.qml.com.au",
         },
         "TML": {
             "brand": "TML Pathology",
             "brand_wikidata": "Q126165745",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.tmlpath.com.au",
         },
         "WDP": {
             "brand": "Western Diagnostic Pathology",
             "brand_wikidata": "Q126165699",
-            "extras": Categories.SAMPLE_COLLECTION.value,
+            "category": Categories.SAMPLE_COLLECTION,
+            "website": "https://www.wdp.com.au",
         },
     }
     allowed_domains = ["api.apps.healius.com.au"]
     start_urls = [
-        "https://api.apps.healius.com.au/entity/location/location/filtered?fields=ID,ADDRESS,ADDRESS2,BROCHURE,CC_ID,CLOSURES,DAYS,EMAIL,FACILITIES,FAX,GALLERY_IMAGES,HERO_IMAGE,IS_ADF_SITE,IS_ADF_SITE,LOGO,MODALITIES,MODALITIES,NAME,NEXT_OPEN,OPEN_DAYS,OPEN_EARLY_DAYS,OPEN_LATE_DAYS,PHONE,POSITION,SERVICE_TYPE,SPECIAL_TESTS,STATE,STATUS,TODAY_SHIFTS,NOTICE_EXTERNAL,NOTICE_EXTERNAL_TITLE&serviceType=ALL&includeAdfSites=true"
+        "https://api.apps.healius.com.au/entity/location/location/filtered?fields=ID,ADDRESS,ADDRESS2,BROCHURE,CC_ID,CLOSURES,DAYS,EMAIL,FACILITIES,FAX,GALLERY_IMAGES,HERO_IMAGE,IS_ADF_SITE,LOGO,MODALITIES,NAME,NEXT_OPEN,OPEN_DAYS,OPEN_EARLY_DAYS,OPEN_LATE_DAYS,PHONE,POSITION,SERVICE_TYPE,SPECIAL_TESTS,STATE,STATUS,TODAY_SHIFTS,NOTICE_EXTERNAL,URL&serviceType=ALL"
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
         if brand_code := feature.get("logo"):
             brand_code = brand_code.upper()
             if brand_code in self.brands.keys():
-                item["brand"] = self.brands[brand_code]["brand"]
+                item["name"] = item["brand"] = self.brands[brand_code]["brand"]
                 item["brand_wikidata"] = self.brands[brand_code]["brand_wikidata"]
-                item["extras"] = self.brands[brand_code]["extras"]
+                item["website"] = urljoin(self.brands[brand_code]["website"], f'/locations/{feature["url"]}')
+                apply_category(self.brands[brand_code]["category"], item)
             else:
                 raise ValueError("Unknown brand code: {}".format(brand_code))
 
-        item["branch"] = item.pop("name", None)
         item["street_address"] = item["addr_full"]
         item["addr_full"] = clean_address([feature.get("address"), feature.get("address2")])
         item["opening_hours"] = self.parse_opening_hours(feature)

@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class DodoPizzaSpider(Spider):
     name = "dodo_pizza"
-    item_attributes = {"brand": "Dodo Pizza", "brand_wikidata": "Q61949318"}
+    item_attributes = {"brand_wikidata": "Q61949318"}
     allowed_domains = ["publicapi.dodois.io"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     # TODO: update list of countries in 2024

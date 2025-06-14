@@ -9,4 +9,5 @@ class UnitedColorsOfBenettonSpider(WoosmapSpider):
 
     def parse_item(self, item, feature, **kwargs):
         item.pop("website")
+        item.pop("email")
         yield item

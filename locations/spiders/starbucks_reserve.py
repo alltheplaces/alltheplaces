@@ -19,5 +19,5 @@ class StarbucksReserveSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["addr_full"] = clean_address([location["address1"], location["address2"]])
-        item["extras"]["ref:google"] = location.get("placeId")
+        item["extras"]["ref:google:place_id"] = location.get("placeId")
         yield item
