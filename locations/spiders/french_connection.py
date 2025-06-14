@@ -1,7 +1,7 @@
 from locations.items import Feature
-from locations.storefinders.storemapper import StoremapperSpider
 from locations.spiders.john_lewis_gb import JohnLewisGBSpider
 from locations.spiders.tesco_gb import set_located_in
+from locations.storefinders.storemapper import StoremapperSpider
 
 
 class FrenchConnectionSpider(StoremapperSpider):
