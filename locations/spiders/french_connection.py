@@ -1,4 +1,5 @@
 from locations.storefinders.storemapper import StoremapperSpider
+from locations.items import Feature
 
 
 class FrenchConnectionSpider(StoremapperSpider):
