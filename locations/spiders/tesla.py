@@ -23,7 +23,7 @@ class TeslaSpider(scrapy.Spider):
         )
 
     def parse_json_subrequest(self, response):
-        for location in response.json():
+        for location in chompjs.parse_js_object(response.text):
             # Skip if "Coming Soon" - no content to capture yet
             if location.get("open_soon") == "1":
                 continue
