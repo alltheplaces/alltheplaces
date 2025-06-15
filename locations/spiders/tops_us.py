@@ -8,6 +8,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
+
 class TopsUSSpider(Spider):
     name = "tops_us"
     item_attributes = {"brand": "Tops", "brand_wikidata": "Q7825137"}
@@ -22,7 +23,11 @@ class TopsUSSpider(Spider):
                 "lat": feature["Latitude"],
                 "lon": feature["Longitude"],
             }
-            yield Request(url=f"https://www.topsmarkets.com/StoreLocator/Store?L={store_number}", meta={"item": Feature(**properties)}, callback=self.parse_store_details)
+            yield Request(
+                url=f"https://www.topsmarkets.com/StoreLocator/Store?L={store_number}",
+                meta={"item": Feature(**properties)},
+                callback=self.parse_store_details,
+            )
 
     def parse_store_details(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
