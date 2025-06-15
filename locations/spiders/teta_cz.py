@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_CZ, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -33,5 +34,7 @@ class TetaCZSpider(SitemapSpider):
                 oh.add_range(day, open_time.strip(), close_time.strip())
 
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_CHEMIST, item)
 
         yield item

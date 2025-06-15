@@ -7,7 +7,7 @@ from locations.hours import DAYS_EN, OpeningHours
 
 class FreedomFurnitureSpider(Spider):
     name = "freedom_furniture"
-    item_attributes = {"brand": "Freedom Furniture", "brand_wikidata": "Q5500546"}
+    item_attributes = {"brand": "Freedom", "brand_wikidata": "Q5500546"}
     allowed_domains = ["api-prod.freedom.com.au"]
     start_urls = [
         "https://api-prod.freedom.com.au/greenlitrest/v2/freedomfurniture/stores/country/AU?fields=FULL&lang=en&curr=AUD",
@@ -20,18 +20,16 @@ class FreedomFurnitureSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["pointOfServices"]:
+            location.update(location.pop("address"))
             item = DictParser.parse(location)
-            item["ref"] = location["name"]
-            item["name"] = location["displayName"]
+            item.pop("name")
+            item["branch"] = location["displayName"]
             if item["country"] == "NZ":
                 item.pop("state")
                 item["website"] = "https://www.freedomfurniture.co.nz/store-finder/stores/" + item["ref"]
             elif item["country"] == "AU":
-                item["state"] = location["address"]["region"]["name"]
+                item["state"] = location["region"]["name"]
                 item["website"] = "https://www.freedom.com.au/store-finder/stores/" + item["ref"]
-            item["phone"] = location["address"]["phone"]
-            if "storeEmail" in location:
-                item["email"] = location["storeEmail"]
 
             if "openingHours" in location:
                 oh = OpeningHours()

@@ -16,7 +16,8 @@ class CareoneUSSpider(WPStoreLocatorSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs) -> Iterable[Feature]:
         item.pop("addr_full", None)
         if "Assisted Living" in item.get("name"):
-            apply_category({"amenity": "social_facility", "social_facility": "assisted_living"}, item)
+            apply_category(Categories.SOCIAL_FACILITY, item)
+            item["extras"]["social_facility"] = "assisted_living"
         else:
             apply_category(Categories.NURSING_HOME, item)
         yield item

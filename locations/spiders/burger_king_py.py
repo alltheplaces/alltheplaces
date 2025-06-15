@@ -6,3 +6,4 @@ class BurgerKingPYSpider(BurgerKingBSSpider):
     allowed_domains = ["www.burgerking.com.py"]
     host = "https://www.burgerking.com.py"
     country_code = "PY"
+    download_timeout = 120

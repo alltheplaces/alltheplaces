@@ -4,23 +4,41 @@ from math import sqrt
 
 from scrapy import Request, Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import open_searchable_points
+from locations.spiders.tesco_gb import set_located_in
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
+STORELOCATOR = "https://www.starbucks.com/apiproxy/v1/locations?lat={}&lng={}"
 STARBUCKS_SHARED_ATTRIBUTES = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
 
 
 class StarbucksUSSpider(Spider):
     name = "starbucks_us"
-    item_attributes = STARBUCKS_SHARED_ATTRIBUTES | {"extras": Categories.COFFEE_SHOP.value}
+    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     allowed_domains = ["www.starbucks.com"]
     searchable_point_files = ["us_centroids_50mile_radius.csv"]
     country_filter = ["US"]
+
+    located_in = {
+        "Fred Meyer ": {"brand": "Fred Meyer", "brand_wikidata": "Q5495932"},
+        "Harris Teeter ": {"brand": "Harris Teeter", "brand_wikidata": "Q5665067"},
+        "Hy-Vee ": {"brand": "Hy-Vee", "brand_wikidata": "Q1639719"},
+        "Ingles ": {"brand": "Ingles", "brand_wikidata": "Q6032595"},
+        "King Soopers ": {"brand": "King Soopers", "brand_wikidata": "Q6412065"},
+        "Kroger ": {"brand": "Kroger", "brand_wikidata": "Q153417"},
+        "Safeway ": {"brand": "Safeway", "brand_wikidata": "Q17111901"},
+        "Target ": {"brand": "Target", "brand_wikidata": "Q1046951"},
+        "Albertsons ": {"brand": "Albertsons", "brand_wikidata": "Q2831861"},
+        "Food City ": {"brand": "Food City"},
+        "Vons ": {"brand": "Vons", "brand_wikidata": "Q7941609"},
+        "Giant Eagle ": {"brand": "Giant Eagle", "brand_wikidata": "Q1522721"},
+        "Giant ": {"brand": "Giant"},
+        "Ralphs ": {"brand": "Ralphs", "brand_wikidata": "Q3929820"},
+    }
 
     def start_requests(self):
         for point_file in self.searchable_point_files:
@@ -52,7 +70,6 @@ class StarbucksUSSpider(Spider):
             store_lon = store.get("coordinates", {}).get("longitude")
 
             properties = {
-                "name": store["name"],
                 "branch": store["name"],
                 "street_address": clean_address(
                     [
@@ -69,10 +86,18 @@ class StarbucksUSSpider(Spider):
                 "ref": store["id"],
                 "lon": store_lon,
                 "lat": store_lat,
-                "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
-                "extras": {"number": store["storeNumber"], "ownership_type": store["ownershipTypeCode"]},
+                "website": f'https://www.starbucks.com/store-locator/store/{store["storeNumber"]}/{store["slug"]}',
+                "extras": {"ownership_type": store["ownershipTypeCode"]},
             }
             item = Feature(**properties)
+
+            if store["ownershipTypeCode"] == "LS":
+                for prefix, brand in self.located_in.items():
+                    if item["branch"].startswith(prefix):
+                        set_located_in(brand, item)
+                        break
+
+            apply_category(Categories.COFFEE_SHOP, item)
             self.parse_hours(item, store)
             yield item
 

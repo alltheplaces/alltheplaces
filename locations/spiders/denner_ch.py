@@ -1,53 +1,50 @@
-import re
-from datetime import date
+from typing import Iterable
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_FULL
+from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class DennerCHSpider(SitemapSpider, StructuredDataSpider):
     name = "denner_ch"
     item_attributes = {"brand": "Denner", "brand_wikidata": "Q379911"}
-    allowed_domains = ["www.denner.ch"]
-    sitemap_urls = ["https://www.denner.ch/sitemap.xml"]
-    sitemap_follow = ["denner_stores"]
-    sitemap_rules = [(r"/de/filialen/", "parse")]
-    wanted_types = ["LocalBusiness"]
+    sitemap_urls = ["https://www.denner.ch/sitemap.store.xml"]
+    sitemap_rules = [("/de/filialen/", "parse_sd")]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = "Denner"
-        item["lat"], item["lon"] = self.parse_lat_lon(response)
-        item["country"] = "LI" if 9485 <= int(item.get("postcode", 0)) <= 9499 else "CH"
-        item["phone"] = self.parse_phone(response)
-        item.setdefault("extras", {}).update(self.parse_opening_date(response))
-        item["extras"]["website:de"] = response.xpath('//link[@rel="alternate"][@hreflang="de"]/@href').get()
-        item["extras"]["website:fr"] = response.xpath('//link[@rel="alternate"][@hreflang="fr"]/@href').get()
-        item["extras"]["website:it"] = response.xpath('//link[@rel="alternate"][@hreflang="it"]/@href').get()
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
+            if isinstance(ld_obj.get("@graph"), list):
+                ld_obj = ld_obj["@graph"][0]
 
+            if not ld_obj.get("@type"):
+                continue
+
+            types = ld_obj["@type"]
+
+            if not isinstance(types, list):
+                types = [types]
+
+            types = [LinkedDataParser.clean_type(t) for t in types]
+
+            for wanted_types in self.wanted_types:
+                if isinstance(wanted_types, list):
+                    if all(wanted in types for wanted in wanted_types):
+                        yield ld_obj
+                elif wanted_types in types:
+                    yield ld_obj
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        for index, rule in enumerate(
+            ld_data.get("openingHoursSpecification", [])
+        ):  # Actual hours starts from Monday, but raw data wrongly starts from Tuesday
+            rule["dayOfWeek"] = DAYS_FULL[index]
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["name"] = ld_data["name"].removesuffix(" Filiale")
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
-
-    @staticmethod
-    def parse_lat_lon(response):
-        return (
-            float(response.xpath('//input[@id="storeLatitude"]/@value').get()),
-            float(response.xpath('//input[@id="storeLongitude"]/@value').get()),
-        )
-
-    @staticmethod
-    def parse_opening_date(response):
-        if opening := response.xpath('//div[normalize-space(text())="Neueröffnung"]/..').get():
-            if match := re.search(r"Ab (\d+)\.(\d+)\.(2\d{3})", opening):
-                day, month, year = [int(x) for x in match.groups()]
-                if date(year, month, day) > date.today():
-                    tag = "opening_date"
-                else:
-                    tag = "start_date"
-                return {tag: "%04d-%02d-%02d" % (year, month, day)}
-        return {}
-
-    @staticmethod
-    def parse_phone(response):
-        if match := re.search(r"Tel\. ([\d\s]+)", response.text):
-            return match.group(1).strip()
-        return None

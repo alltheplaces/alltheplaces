@@ -14,6 +14,5 @@ class HamleysINSpider(CrawlSpider, StructuredDataSpider):
     time_format = "%I:%M %p"
 
     def post_process_item(self, item, response, ld_data):
-        item["branch"] = ld_data["alternateName"]
-
+        item["branch"] = ld_data.get("alternateName")
         yield item

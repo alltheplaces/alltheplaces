@@ -1,6 +1,7 @@
 import re
 
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_DE, OpeningHours
@@ -9,22 +10,25 @@ from locations.items import Feature
 
 # Technically, the site uses linked data, but in reality that contains only
 # boilerplate. Anything interesting needs to be extracted from HTML.
-class RotpunktApothekenCHSpider(scrapy.spiders.SitemapSpider):
+class RotpunktApothekenCHSpider(CrawlSpider):
     name = "rotpunkt_apotheken_ch"
     allowed_domains = ["www.rotpunkt-apotheken.ch"]
-    sitemap_urls = ["https://www.rotpunkt-apotheken.ch/sitemaps-1-section-pharmaciesDetailPages-1-sitemap.xml"]
+
+    start_urls = ["https://www.rotpunkt-apotheken.ch/apotheken"]
+    rules = [
+        Rule(LinkExtractor(allow=r"/apotheken/[-\w]+$"), callback="parse"),
+    ]
 
     def parse(self, response):
         props = {
             "email": self.parse_email(response),
             "extras": {
-                "source:website": response.url,
+                "website": response.url,
             },
             "image": self.parse_image(response),
             "opening_hours": self.parse_opening_hours(response),
             "phone": self.parse_phone(response),
             "ref": response.url.split("/")[-1],
-            "website": self.parse_website(response),
         }
         props.update(self.parse_addr(response))
         props.update(self.parse_lat_lon(response))

@@ -28,7 +28,7 @@ BRANDS = {
     "https://www.kingsoopers.com/": {"brand": "King Soopers", "brand_wikidata": "Q6412065"},
     "https://www.kroger.com/": {"brand": "Kroger", "brand_wikidata": "Q153417"},
     "https://www.marianos.com/": {"brand": "Mariano's Fresh Market", "brand_wikidata": "Q55622168"},
-    "https://www.metromarket.net/": {"brand": "Metro Market", "brand_wikidata": "Q7371288"},
+    "https://www.metromarket.net/": {"brand": "Metro Market"},
     "https://www.pay-less.com/": {"brand": "Pay Less", "brand_wikidata": "Q7156587"},
     "https://www.picknsave.com/": {"brand": "Pick 'n Save", "brand_wikidata": "Q7371288"},
     "https://www.qfc.com/": {"brand": "QFC", "brand_wikidata": "Q7265425"},
@@ -81,6 +81,8 @@ class KrogerUSSpider(SitemapSpider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]["stores"]:
+            if phone_number := location.get("phoneNumber"):
+                phone_number = phone_number.get("raw")
             properties = {
                 "ref": location["locationId"],
                 "name": location["facilityName"],
@@ -91,7 +93,7 @@ class KrogerUSSpider(SitemapSpider):
                 "postcode": location["locale"]["address"]["postalCode"],
                 "state": location["locale"]["address"]["stateProvince"],
                 "country": location["locale"]["address"]["countryCode"],
-                "phone": location["phoneNumber"].get("raw"),
+                "phone": phone_number,
                 "website": response.meta["url_map"][location["locationId"]],
                 "branch": location["vanityName"],
                 "operator": location["legalName"],

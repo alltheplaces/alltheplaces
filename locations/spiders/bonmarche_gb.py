@@ -1,93 +1,40 @@
-import json
 import re
+from json import loads
 from typing import Iterable
-from urllib.parse import urljoin
 
-from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.geo import city_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class BonmarcheGBSpider(Spider):
+class BonmarcheGBSpider(JSONBlobSpider):
     name = "bonmarche_gb"
-    item_attributes = {"brand": "Bonmarche", "brand_wikidata": "Q4942146"}
+    item_attributes = {"brand": "Bonmarché", "brand_wikidata": "Q4942146"}
+    allowed_domains = ["www.bonmarche.co.uk"]
+    locations_key = "stores"
 
-    def start_requests(self) -> Iterable[Request]:
-        country = "GB"
-        language = "en-GB"
+    def start_requests(self) -> Iterable[JsonRequest]:
         for city in city_locations("GB", 500):
             lat, lon = city["latitude"], city["longitude"]
-            yield self.make_request(lat, lon, country, 1, language)
+            yield JsonRequest(
+                url=f"https://www.bonmarche.co.uk/on/demandware.store/Sites-BONMARCHE-GB-Site/en_GB/Stores-FindStores?lat={lat}&long={lon}"
+            )
 
-    def make_request(self, lat, lon, country_code: str, start_index: int, language: str) -> Request:
-        url = f"https://www.bonmarche.co.uk/on/demandware.store/Sites-BONMARCHE-GB-Site/en_GB/Stores-FindStores?lat={lat}&lng={lon}&dwfrm_storelocator_findbygeocoord=Search&format=ajax&amountStoresToRender=5&checkout=false"
-        return Request(
-            url,
-            meta={
-                "lat": lat,
-                "lon": lon,
-                "country_code": country_code,
-                "start_index": start_index,
-                "language": language,
-            },
-            callback=self.parse,
-        )
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = feature["name"]
+        item.pop("name", None)
+        item["addr_full"] = feature["address2"]
+        item.pop("street_address", None)
+        item.pop("website", None)
 
-    def parse(self, response: Response) -> Iterable[Feature]:
-        if response.xpath('//div[@id = "map"]'):
-            geo = json.loads(response.xpath('//div[@id = "map"]//@data-results').get())
-            data = response.xpath('//li[@class = "stores-list-item"]')
-            for location in data:
-                item = Feature()
-                addr = location.xpath('div/div/div[@class = "store-address"]').get()
-                item["addr_full"] = re.sub("(</?div[^>]*>|<br>|\n)", "", addr)
-                if "Bonmarch" in item["addr_full"]:
-                    item["addr_full"] = re.sub("Bonmarch[^,]+,", "", item["addr_full"])
-                tel = location.xpath('div/div/div/a[contains(@href, "tel:")]/text()').get()
-                if tel:
-                    item["phone"] = re.sub("(Tel:|\n)", "", tel)
-                item["ref"] = location.xpath("a//@data-storeid").get()
-                item["branch"] = location.xpath('a[@class = "store-link accordion-toggle"]//text()').get()
-                for store in geo["stores"]:
-                    if store["id"] == item["ref"]:
-                        item["lat"] = store["lat"]
-                        item["lon"] = store["lng"]
-                slug = location.xpath('div/div/a[@class = "button"]/@href').get()
-                item["website"] = urljoin("https://www.bonmarche.co.uk", slug)
+        item["opening_hours"] = OpeningHours()
+        hours = loads(re.sub(r"\s+", "", feature["storeHours"]).replace(".", ":"))
+        for day_name, day_hours in hours.items():
+            item["opening_hours"].add_range(day_name.title(), *day_hours.split("-", 1), "%I:%M%p")
 
-                table = location.xpath('div/div/div/div/div[@class = "storehours"]/table//tr')
-                opening_hours = OpeningHours()
-                for row in table:
-                    day = row.xpath('td[@class = "storeday"]//text()').get()
-                    start = row.xpath('td[@class = "storehours-from"]//text()').get().replace(".", ":")
-                    end = row.xpath('td[@class = "storehours-to"]//text()').get().replace(".", ":")
-                    # '--' or closed
-                    if bool(re.search(r"\d", start)) == 0:
-                        continue
-                    # '10:00'
-                    if "m" not in start:
-                        if int(start.split(":")[0]) > 11:
-                            start = start + "pm"
-                        else:
-                            start = start + "am"
-                    # '4:00' - all closing times must be pm?
-                    if "m" not in end:
-                        end = end + "pm"
-                    # '17:30pm'
-                    if int(end.split(":")[0]) > 12:
-                        newhour = int(end.split(":")[0]) - 12
-                        end = str(newhour) + ":" + end.split(":")[1]
-                    # '10am'
-                    if ":" not in start:
-                        start = start.replace("am", ":00am").replace("pm", ":00pm")
-                    if ":" not in end:
-                        end = end.replace("am", ":00am").replace("pm", ":00pm")
-                    # there's also a 'om' which I haven't corrected
-                    if "am" not in end and "pm" not in end:
-                        continue
-                    opening_hours.add_range(day=day, open_time=start, close_time=end, time_format="%I:%M%p")
-                item["opening_hours"] = opening_hours
-                yield item
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item

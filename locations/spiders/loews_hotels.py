@@ -1,12 +1,14 @@
 import scrapy
+from scrapy.http import Response
 
-from locations.categories import Categories, apply_yes_no
+from locations.categories import Categories, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class LoewsHotelsSpider(StructuredDataSpider):
     name = "loews_hotels"
-    item_attributes = {"brand": "Loews Hotels", "brand_wikidata": "Q6666622", "extras": Categories.HOTEL.value}
+    item_attributes = {"brand": "Loews Hotels", "brand_wikidata": "Q6666622"}
     allowed_domains = ["loewshotels.com"]
     start_urls = ("https://www.loewshotels.com/destinations",)
     search_for_twitter = False
@@ -54,7 +56,7 @@ class LoewsHotelsSpider(StructuredDataSpider):
                 elif amenity_feature["name"] == "Kid-friendly":
                     pass
                 elif amenity_feature["name"] == "Restaurant":
-                    item["extras"]["amenity"] = "restaurant"
+                    apply_yes_no("food", item, True)
 
                 elif amenity_feature["name"] == "Fitness Center":
                     item["extras"]["fitness_centre"] = "yes"
@@ -63,3 +65,7 @@ class LoewsHotelsSpider(StructuredDataSpider):
                     item["extras"]["bar"] = "yes"
                 else:
                     pass
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        apply_category(Categories.HOTEL, item)
+        yield item

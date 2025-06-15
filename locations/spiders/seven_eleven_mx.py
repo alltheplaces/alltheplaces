@@ -1,10 +1,9 @@
 from typing import Any
 
-import w3lib
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
@@ -12,14 +11,19 @@ from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 class SevenElevenMXSpider(Spider):
     name = "seven_eleven_mx"
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
-    start_urls = ["https://7-eleven.com.mx/wp-json/wpgmza/v1/features/"]
+    start_urls = ["https://www.7-eleven.com.mx/buscador-de-tiendas/fetch_data.php"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["markers"]:
-            if location["map_id"] == "7":
-                # Skip duplicates with different map_id, it's not clear from the website how they are used
-                continue
-            item = DictParser.parse(location)
-            item["addr_full"] = w3lib.html.remove_tags(item.get("addr_full", ""))
+        store_keys = [key.removesuffix("_tienda") for key in response.json()["values"][0]]
+        for store in response.json()["values"][1:]:
+            store = {store_keys[i]: store[i] for i in range(len(store))}
+            item = DictParser.parse(store)
+            item["branch"] = item.pop("name").title()
+            item["street_address"] = item.pop("addr_full")
+            item["postcode"] = store.get("cp")
+            if store.get("Petro Seven") == "1":
+                item["located_in"] = "Petro Seven"
+                item["located_in_wikidata"] = "Q118601740"
+            apply_yes_no(Extras.DRIVE_THROUGH, item, store.get("7-drive") == "1")
             apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item

@@ -6,6 +6,8 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SpecsaversSpider(Spider):
@@ -16,6 +18,12 @@ class SpecsaversSpider(Spider):
         "www.specsavers.ca",
         "www.specsavers.com.au",
     ]
+
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+    }
 
     def start_requests(self):
         for domain in self.allowed_domains:
@@ -113,7 +121,10 @@ fragment sectionalNotification on StoreSectionalNotification {
                     },
                 },
             }
-            yield JsonRequest(url=url, data=data, method="POST")
+            headers = {
+                "x-specsavers-application-id": "nuxt-find-and-book/1.702.0",
+            }
+            yield JsonRequest(url=url, data=data, headers=headers, method="POST")
 
     def parse(self, response):
         for location in response.json()["data"]["storesSearch"]["stores"]:
@@ -140,6 +151,7 @@ fragment sectionalNotification on StoreSectionalNotification {
                     continue
                 item = deepcopy(base_item)
                 item["ref"] = store[store_type]["storeNumber"]
+                item["branch"] = item.pop("name")
                 if store[store_type].get("contactInfo"):
                     item["phone"] = store[store_type]["contactInfo"].get("phone")
                     item["email"] = store[store_type]["contactInfo"].get("email")

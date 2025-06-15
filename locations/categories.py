@@ -12,11 +12,17 @@ from locations.items import Feature
 # of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
+    GENERIC_POI = {"amenity": "yes"}
+    GENERIC_SHOP = {"shop": "yes"}
+
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
+    KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     PARKING = {"amenity": "parking"}
+    PARKING_SPACE = {"amenity": "parking_space"}
+
     SCHOOL = {"amenity": "school"}
     UNIVERSITY = {"amenity": "university"}
     COLLEGE = {"amenity": "college"}
@@ -29,7 +35,9 @@ class Categories(Enum):
     GYM = {"leisure": "fitness_centre"}
     SAUNA = {"leisure": "sauna"}
 
+    FOOTWAY_CROSSING = {"highway": "footway", "footway": "crossing"}
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
+    HIGHWAY_TRAFFIC_SIGNALS = {"highway": "traffic_signals"}
 
     ENFORCEMENT_AVERAGE_SPEED = {"enforcement": "average_speed"}
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
@@ -44,16 +52,25 @@ class Categories(Enum):
     CRAFT_JEWELLER = {"craft": "jeweller"}
     CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
     CRAFT_LOCKSMITH = {"craft": "locksmith"}
-    CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
+    CRAFT_TAILOR = {"craft": "tailor"}
+    CRAFT_WATCHMAKER = {"craft": "watchmaker"}
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
 
+    LEISURE_GARDEN = {"leisure": "garden"}
+    LEISURE_DOG_PARK = {"leisure": "dog_park"}
+    LEISURE_FITNESS_STATION = {"leisure": "fitness_station"}
+    LEISURE_INDOOR_PLAY = {"leisure": "indoor_play"}
+    LEISURE_NATURE_RESERVE = {"leisure": "nature_reserve"}
+    LEISURE_PARK = {"leisure": "park"}
+    LEISURE_PICNIC_TABLE = {"leisure": "picnic_table"}
+    LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
-    LEISURE_PARK = {"leisure": "park"}
+    LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -68,9 +85,11 @@ class Categories(Enum):
     SHOP_BED = {"shop": "bed"}
     SHOP_BEVERAGES = {"shop": "beverages"}
     SHOP_BICYCLE = {"shop": "bicycle"}
+    SHOP_BOAT = {"shop": "boat"}
+    SHOP_BOAT_PARTS = {"shop": "boat_parts"}
+    SHOP_BOAT_REPAIR = {"shop": "boat_repair"}
     SHOP_BOOKMAKER = {"shop": "bookmaker"}
     SHOP_BOOKS = {"shop": "books"}
-    SHOP_BOAT = {"shop": "boat"}
     SHOP_BUTCHER = {"shop": "butcher"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
@@ -87,6 +106,7 @@ class Categories(Enum):
     SHOP_CHOCOLATE = {"shop": "chocolate"}
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_COFFEE = {"shop": "coffee"}
+    SHOP_COLLECTOR = {"shop": "collector"}
     SHOP_COMPUTER = {"shop": "computer"}
     SHOP_CONFECTIONERY = {"shop": "confectionery"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
@@ -169,8 +189,8 @@ class Categories(Enum):
     SHOP_RENTAL = {"shop": "rental"}
     SHOP_SEAFOOD = {"shop": "seafood"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
-    SHOP_SHOES = {"shop": "shoes"}
     SHOP_SHOE_REPAIR = {"shop": "shoe_repair"}
+    SHOP_SHOES = {"shop": "shoes"}
     SHOP_SPICES = {"shop": "spices"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_STATIONERY = {"shop": "stationery"}
@@ -194,13 +214,14 @@ class Categories(Enum):
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VACUUM_CLEANER = {"shop": "vacuum_cleaner"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
-    SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_VIDEO = {"shop": "video"}
+    SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
     SHOP_WINE = {"shop": "wine"}
 
+    OFFICE_ARCHITECT = {"office": "architect"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_ENGINEER = {"office": "engineer"}
@@ -218,19 +239,26 @@ class Categories(Enum):
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
+    ANIMAL_BOARDING = {"amenity": "animal_boarding"}
+    ARCHIVE = {"amenity": "archive"}
     ATM = {"amenity": "atm"}
     AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
     BAR = {"amenity": "bar"}
+    BARBECUE = {"amenity": "bbq"}
     BENCH = {"amenity": "bench"}
+    BICYCLE_REPAIR_STATION = {"amenity": "bicycle_repair_station"}
     BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
     BLOOD_BANK = {"healthcare": "blood_bank"}
     BLOOD_DONATION = {"healthcare": "blood_donation"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
+    BOTTLE_REFILL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "bottle_refill"}
+    BUBBLER = {"amenity": "drinking_water", "fountain": "bubbler"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
     CANTEEN = {"amenity": "canteen"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
+    CASINO = {"amenity": "casino"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
     CINEMA = {"amenity": "cinema"}
@@ -239,33 +267,47 @@ class Categories(Enum):
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
-    DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
+    CONFERENCE_CENTRE = {"amenity": "conference_centre"}
+    COURTHOUSE = {"amenity": "courthouse"}
     DEFIBRILLATOR = {"emergency": "defibrillator"}
+    DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
     DIALYSIS = {"healthcare": "dialysis"}
+    DISASTER_HELP_POINT = {"emergency": "disaster_help_point"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
+    DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     FAST_FOOD = {"amenity": "fast_food"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
-    HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
+    GRAVE = {"cemetery": "grave"}
+    GRIT_BIN = {"amenity": "grit_bin"}
     HOSPICE = {"healthcare": "hospice"}
+    HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    ICE_CREAM = {"amenity": "ice_cream"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MANHOLE = {"man_made": "manhole"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"
     }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MORTUARY = {"amenity": "mortuary"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
+    MUSIC_VENUE = {"amenity": "music_venue"}
     NIGHTCLUB = {"amenity": "nightclub"}
+    NURSE_CLINIC = {"healthcare": "nurse"}
     NURSING_HOME = {"amenity": "social_facility", "social_facility": "nursing_home", "social_facility:for": "senior"}
     NUTRITIONIST = {"healthcare": "nutrition_counselling"}
     OPTOMETRIST = {"healthcare": "optometrist"}
-    PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PAYMENT_CENTRE = {"amenity": "payment_centre"}
+    PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
+    PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
+    PLACE_OF_WORSHIP = {"amenity": "place_of_worship"}
     PODIATRIST = {"healthcare": "podiatrist"}
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
@@ -276,25 +318,25 @@ class Categories(Enum):
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
     PUBLIC_BOOKCASE = {"amenity": "public_bookcase"}
+    RECYCLING = {"amenity": "recycling"}
     REHABILITATION = {"healthcare": "rehabilitation"}
     RESCUE_BUOY = {"emergency": "rescue_buoy"}
-    SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
-    SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
-    TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
+    SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
+    SHARPS_WASTE_BASKET = {"amenity": "waste_basket", "waste": "sharps"}
+    SOCIAL_CENTRE = {"amenity": "social_centre"}
+    SOCIAL_FACILITY = {"amenity": "social_facility"}
+    SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
+    TAXI = {"amenity": "taxi"}
+    TELEPHONE = {"amenity": "telephone"}
+    TOILETS = {"amenity": "toilets"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
+    VENDING_MACHINE = {"amenity": "vending_machine"}
     VETERINARY = {"amenity": "veterinary"}
+    WASTE_BASKET = {"amenity": "waste_basket"}
     WATER_RESCUE = {"emergency": "water_rescue"}
-    ANIMAL_BOARDING = {"amenity": "animal_boarding"}
-    MORTUARY = {"amenity": "mortuary"}
 
     DATA_CENTRE = {"telecom": "data_center"}
-
-    VENDING_MACHINE_GENERIC = {"amenity": "vending_machine"}
-    VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
-    VENDING_MACHINE_BOTTLE_RETURN = {"amenity": "vending_machine", "vending": "bottle_return"}
-    VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
-    VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
@@ -309,21 +351,63 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
     ANTENNA = {"man_made": "antenna"}
-
+    CULVERT = {"tunnel": "culvert"}
+    FIRE_HYDRANT = {"emergency": "fire_hydrant"}
+    MONITORING_STATION = {"man_made": "monitoring_station"}
+    OUTFALL_STORMWATER = {
+        "man_made": "outfall",
+        "utility": "stormwater",
+        "substance": "rainwater",
+    }
+    POWER_POLE = {"power": "pole"}
+    POWER_TOWER = {"power": "tower"}
+    PUMPING_STATION_SEWAGE = {
+        "man_made": "pumping_station",
+        "pumping_station": "sewage",
+        "utility": "sewerage",
+        "substance": "sewage",
+    }
+    PUMPING_STATION_WASTEWATER = {
+        "man_made": "pumping_station",
+        "pumping_station": "wastewater",
+        "utility": "sewerage",
+        "substance": "wastewater",
+    }
+    PUMPING_STATION_WATER = {
+        "man_made": "pumping_station",
+        "pumping_station": "water",
+        "utility": "water",
+        "substance": "water",
+    }
+    STREET_CABINET_POWER = {"man_made": "street_cabinet", "street_cabinet": "power", "utility": "power"}
+    STREET_CABINET_TRAFFIC_CONTROL = {"man_made": "street_cabinet", "street_cabinet": "traffic_control"}
+    STREET_LAMP = {"highway": "street_lamp", "support": "pole"}
+    SUBSTATION = {"power": "substation"}
+    SUBSTATION_GENERATION = {"power": "substation", "substation": "generation"}
+    SUBSTATION_MINOR_DISTRIBUTION = {"power": "substation", "substation": "minor_distribution"}
+    SUBSTATION_INDUSTRIAL = {"power": "substation", "substation": "industrial"}
+    SUBSTATION_TRACTION = {"power": "substation", "substation": "traction"}
+    SUBSTATION_TRANSMISSION = {"power": "substation", "substation": "transmission"}
+    SUBSTATION_ZONE = {"power": "substation", "substation": "distribution"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
+    TRANSFORMER = {"power": "transformer"}
+
+    NATURAL_BASIN = {"natural": "water", "water": "basin"}
+    NATURAL_TREE = {"natural": "tree"}
 
 
 def apply_category(category, item: Feature):
     """
-    Apply categories to a Feature, where categories can be supplied
-    as a single Enum, or dictionary of key-value strings. If a
-    value for the category key is already defined, the new value for
-    the category key is appended rather than overwritten. When
-    appending the new value, the list of values is sorted and each
-    value is separated with a semi-colon.
-    :param category: Either an Enum member representing a single
-                     category to add, or a dictionary of key-value
-                     strings representing multiple categories to add.
+    Apply categories to a Feature, where categories can be supplied as a
+    single Enum, or dictionary of key-value strings. If a value for the
+    category key is already defined, the new value for the category key is
+    appended rather than overwritten. When appending the new value, the list
+    of values is sorted and each value is separated with a semi-colon. Any
+    duplication of values is avoided by ignoring second attempts to add an
+    already existing value.
+    :param category: Either an Enum member representing a single category to
+                     add, or a dictionary of key-value strings representing
+                     multiple categories to add.
     :param item: Feature to which categories should be added to.
     """
     if isinstance(category, Enum):
@@ -349,7 +433,10 @@ def apply_category(category, item: Feature):
 
 
 top_level_tags = [
+    "aeroway",
     "amenity",
+    "barrier",
+    "cemetery",
     "club",
     "craft",
     "dark_store",
@@ -359,20 +446,23 @@ top_level_tags = [
     "landuse",
     "leisure",
     "man_made",
+    "natural",
     "office",
+    "power",
     "public_transport",
-    "shop",
-    "tourism",
-    "aeroway",
     "railway",
-    "waterway",
+    "shop",
     "telecom",
+    "tourism",
+    "traffic_calming",
+    "tunnel",
+    "waterway",
 ]
 
 
 def get_category_tags(source: Feature | Enum | dict) -> dict:
     """
-    Retreive OpenStreetMap top level tags from a Feature, Enum or
+    Retrieve OpenStreetMap top level tags from a Feature, Enum or
     dict. All top level tags can exist on their own and do not
     require the presence of other tags. If the Feature, Enum or dict
     supplied contains other tags, these are ignored.
@@ -457,7 +547,7 @@ class Fuel(Enum):
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
-    ELECTRIC = "fuel:electric"  # Electric vehicle charger
+    ELECTRIC = "fuel:electricity"  # Electric vehicle charger
 
 
 class Extras(Enum):
@@ -466,7 +556,7 @@ class Extras(Enum):
     BABY_CHANGING_TABLE = "changing_table"
     BACKUP_GENERATOR = "backup_generator"
     BAR = "bar"
-    BARBEQUES = "bbq"
+    BARBECUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
@@ -485,6 +575,7 @@ class Extras(Enum):
     FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
+    FEMALE = "female"
     HALAL = "diet:halal"
     HIGH_CHAIR = "highchair"
     ICE_CREAM = "ice_cream"
@@ -492,11 +583,15 @@ class Extras(Enum):
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
     LIVE_MUSIC = "live_music"
+    MALE = "male"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
+    USED_MOTORCYCLE_SALES = "motorcycle:sales=used"
+    MOTORCYCLE_REPAIR = "motorcycle:repair"
     NEW_CAR_SALES = "service:vehicle:new_car_sales"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
+    PARCEL_MAIL_IN = "parcel_mail_in"
     PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
@@ -518,6 +613,7 @@ class Extras(Enum):
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     TYRE_SERVICES = "service:vehicle:tyres"
+    UNISEX = "unisex"
     USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
     VEGAN = "diet:vegan"
@@ -537,6 +633,8 @@ class PaymentMethods(Enum):
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
     APP = "payment:app"
     APPLE_PAY = "payment:apple_pay"
+    BANCOPOSTA = "payment:bancoposta"
+    BANCOMAT = "payment:bancomat"
     BCA_CARD = "payment:bca_card"
     BLIK = "payment:blik"
     CARDS = "payment:cards"
@@ -573,6 +671,8 @@ class PaymentMethods(Enum):
     PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
+    POSTEPAY = "payment:postepay"
+    POSTFINANCE_CARD = "payment:postfinance_card"
     QUICPAY = "payment:quicpay"
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
@@ -597,9 +697,12 @@ payment_method_aliases = {
     "China UnionPay": PaymentMethods.UNIONPAY,
     "Discover": PaymentMethods.DISCOVER_CARD,
     "Diners": PaymentMethods.DINERS_CLUB,
+    "JCB Card": PaymentMethods.JCB,
     "Maestro (Ausland)": PaymentMethods.MAESTRO,
     "MasterCard": PaymentMethods.MASTER_CARD,
+    "PostFinance Card": PaymentMethods.POSTFINANCE_CARD,
     "PowerCard": PaymentMethods.POWERCARD,
+    "UnionPay": PaymentMethods.UNIONPAY,
 }
 
 
@@ -626,7 +729,7 @@ class FuelCards(Enum):
     MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
     MOLGROUP_CARDS = "payment:molgroup_cards"  # https://www.molgroupcards.com/
     MORGAN_FUELS = "payment:morgan_fuels"
-    OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
+    OMV = "payment:omv_card"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
     SHELL = "payment:shell"
     SLOVNAFT = "payment:slovnaft"  # https://slovnaft.sk/en/
@@ -646,13 +749,27 @@ class Access(Enum):
     MOTOR_CAR = "motorcar"
 
 
-def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
+def apply_yes_no(attribute: str | Enum, item: Feature | dict, state: bool, apply_positive_only: bool = True) -> None:
     """
-    Many OSM POI attribute tags values are "yes"/"no". Provide support for setting these from spider code.
-    :param attribute: the tag to use for the attribute (str or Enum accepted)
-    :param item: the POI instance to update
-    :param state: if the attribute to set True or False
-    :param apply_positive_only: only add the tag if state is True
+    Many OSM POI attribute tags values are "yes"/"no". This function provides
+    a convenient method for adding an extras tag to a Feature or dictionary
+    with a "yes" or "no" value.
+
+    The apply_positive_only parameter should only be set to False if the
+    source data explicitly states "yes" or "no". For example, if the source
+    data has `{"drive_through": True}` or `{"drive_through": False}`. Or as
+    another example, if the source data has `{"features": ["drive_through"]}`
+    or `{"features": []}` AND the front end website displaying the data
+    provides a visual indication of a missing `"drive_through"` value in the
+    `"features"` array meaning the absence of a drive through service. If in
+    this second example the website does not display "Drive Through: not
+    available" (or similar) then do not assume anything about the availability
+    of a drive through and keep the default True value of apply_positive_only.
+
+    :param attribute: The tag to use for the attribute (str or Enum accepted).
+    :param item: The POI instance to update.
+    :param state: Whether the attribute is to be set to True or False.
+    :param apply_positive_only: Only add the tag if state is True.
     """
     if not state and apply_positive_only:
         return
@@ -687,18 +804,75 @@ class Clothes(Enum):
 
 def apply_clothes(clothes: [Clothes], item: Feature):
     """
-    Apply clothing categories to a Feature. If the Feature
-    already has clothing categories defined, this function will
-    append to the list of clothing categories rather than
-    overwriting existing clothing categories. When appending,
-    the list of clothing categories is sorted and then each value
-    is separated with a semi-colon.
+    Apply clothing categories to a Feature. If the Feature already has
+    clothing categories defined, this function will append to the list of
+    clothing categories rather than overwriting existing clothing categories.
+    When appending, the list of clothing categories is sorted and then each
+    value is separated with a semi-colon. Duplication of clothing categories
+    is avoided by ignoring subsequent attempts to add an already existing
+    clothing category.
     :param clothes: array of Clothes Enum members
     :param item: Feature which should have clothing categories applied.
     """
     for c in clothes:
         apply_yes_no(f"clothes:{c.value}", item, True)
         apply_category({"clothes": c.value}, item)
+
+
+class Vending(Enum):
+    """
+    https://wiki.openstreetmap.org/wiki/Key:vending
+    """
+
+    BICYCLE_TUBE = "bicycle_tube"
+    BOTTLE_RETURN = "bottle_return"
+    COFFEE = "coffee"
+    DRINKS = "drinks"
+    FOOD = "food"
+    KEYS = "key"
+    LAUNDRY = "laundry"
+    PARKING_TICKETS = "parking_tickets"
+
+
+def add_vending(vending: Vending | list[Vending], item: Feature):
+    if item["extras"].get("vending"):
+        current = item["extras"]["vending"].split(";")
+    else:
+        current = []
+
+    for v in vending if isinstance(vending, list) else [vending]:
+        if v.value not in current:
+            current.append(v.value)
+
+    item["extras"]["vending"] = ";".join(current)
+
+
+class Sport(Enum):
+    """
+    https://wiki.openstreetmap.org/wiki/Key:sport
+    """
+
+    SOCCER = "soccer"
+    TENNIS = "tennis"
+    BASKETBALL = "basketball"
+    BASEBALL = "baseball"
+    SWIMMING = "swimming"
+    EQUESTRIAN = "equestrian"
+    AMERICAN_FOOTBALL = "american_football"
+    CRICKET = "cricket"
+
+
+def add_sport(sport: Sport | list[Sport], item: Feature):
+    if item["extras"].get("sport"):
+        current = item["extras"]["sport"].split(";")
+    else:
+        current = []
+
+    for v in sport if isinstance(sport, list) else [sport]:
+        if v.value not in current:
+            current.append(v.value)
+
+    item["extras"]["sport"] = ";".join(current)
 
 
 class HealthcareSpecialities(Enum):
@@ -804,17 +978,70 @@ class HealthcareSpecialities(Enum):
 
 def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
     """
-    Apply healthcare specialities to a Feature. If the Feature
-    already has healthcare specialities defined, this function will
-    append to the list of healthcare specialities rather than
-    overwriting existing healthcare specialities. When appending,
-    the list of healthcare specialities is sorted and then each
-    value is separated with a semi-colon.
+    Apply healthcare specialities to a Feature. If the Feature already has
+    healthcare specialities defined, this function will append to the list of
+    healthcare specialities rather than overwriting existing healthcare
+    specialities. When appending, the list of healthcare specialities is
+    sorted and then each value is separated with a semi-colon. Duplication of
+    healthcare specialities is avoided by ignoring subsequent attempts to add
+    an already existing healthcare speciality.
     :param specialities: array of HealthcareSpecialities Enum members
     :param item: Feature which should have healthcare specialities applied.
     """
     for s in specialities:
         apply_category({"healthcare:speciality": s.value}, item)
+
+
+class MonitoringTypes(Enum):
+    """
+    Monitored phenomena per https://wiki.openstreetmap.org/wiki/Tag:man_made=monitoring_station
+    """
+
+    AIR_HUMIDITY = "monitoring:air_humidity"
+    AIR_PRESSURE = "monitoring:air_pressure"
+    AIR_TEMPERATURE = "monitoring:air_temperature"
+    AIR_QUALITY = "monitoring:air_quality"
+    BICYCLE = "monitoring:bicycle"  # counting bicycles
+    COSMIC_RAY = "monitoring:cosmic_ray"
+    DISSOLVED_OXYGEN = "monitoring:dissolved_oxygen"  # in water
+    FLOW_RATE = "monitoring:flow_rate"  # of water in a river
+    GLONASS = "monitoring:glonass"  # satellite ground station
+    GPS = "monitoring:gps"  # satellite ground station
+    GROUNDWATER = "monitoring:groundwater"
+    GROUNDWATER_LEVEL = "monitoring:groundwater_level"
+    METEORIC_ACTIVITY = "monitoring:meteoric_activity"
+    NOISE = "monitoring:noise"  # ambient sound levels
+    PARTICULATE_MATTER = "monitoring:particulate_matter"  # in air
+    PEDESTRIAN = "monitoring:pedestrian"  # counting pedestrians
+    PRECIPITATION = "monitoring:precipitation"  # rain and snow
+    RADIATION = "monitoring:radiation"
+    RAINFALL = "monitoring:rainfall"  # rain only
+    SALINITY = "monitoring:salinity"  # in water
+    SEISMIC_ACTIVITY = "monitoring:seismic_activity"
+    SHORTWAVE_RADIATION = "monitoring:shortwave_radiation"
+    SOLAR_RADIATION = "monitoring:solar_radiation"
+    SNOW = "monitoring:snow"
+    SNOW_DEPTH = "monitoring:snow_depth"
+    SNOW_DENSITY = "monitoring:snow_density"
+    SOIL_TEMPERATURE = "monitoring:soil_temperature"
+    SOIL_MOISTURE = "monitoring:soil_moisture"
+    TIDE_GAUGE = "monitoring:tide_gauge"
+    TRAFFIC = "monitoring:traffic"  # counting road vehicles
+    VISIBILITY = "monitoring:visibility"  # in air
+    WATER_CONDUCTIVITY = "monitoring:water_conductivity"
+    WATER_LEVEL = "monitoring:water_level"
+    WATER_NITRATE = "monitoring:water_nitrate"
+    WATER_NITRITE = "monitoring:water_nitrite"
+    WATER_PH = "monitoring:water_pH"
+    WATER_QUALITY = "monitoring:water_quality"
+    WATER_TEMPERATURE = "monitoring:water_temperature"
+    WATER_TURBIDITY = "monitoring:water_turbidity"
+    WATER_VELOCITY = "monitoring:water_velocity"
+    WATER_VOLUME = "monitoring:water_volume"
+    WEATHER = "monitoring:weather"
+    WIND = "monitoring:wind"
+    WIND_DIRECTION = "monitoring:wind_direction"
+    WIND_SPEED = "monitoring:wind_speed"
 
 
 class Drink(Enum):
@@ -838,6 +1065,23 @@ class Drink(Enum):
     WATER = "drink:water"
     WHISKY = "drink:whisky"
     WINE = "drink:wine"
+
+
+class Sells(Enum):
+    """
+    For uncommon sold items, prefix sells:* is in proposal
+    https://wiki.openstreetmap.org/wiki/Proposal:Sells:
+    """
+
+    BOOKS = "sells:books"
+    CLOTHES = "sells:clothes"
+    CONTACT_LENSES = "sells:contact_lenses"
+    ELECTRONICS = "sells:electronics"
+    EYEGLASSES = "sells:eyeglasses"
+    JEWELRY = "sells:jewelry"
+    NEWSPAPERS = "sells:newspapers"
+    PET_SUPPLIES = "sells:pet_supplies"
+    TOBACCO = "sells:tobacco"
 
 
 # TODO: something similar for fuel types

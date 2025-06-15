@@ -130,7 +130,7 @@ class TopsSpider(scrapy.Spider):
         data = response.xpath('//p[@class="PhoneNumber"]//text()').extract()
         phone = self.parse_phone(data)
         properties = {
-            "addr_full": address,
+            "street_address": address,
             "city": city,
             "state": state,
             "postcode": postal_code,
