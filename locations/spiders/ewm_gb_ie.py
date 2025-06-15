@@ -8,7 +8,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class EwmGBIESpider(JSONBlobSpider):
     name = "ewm_gb_ie"
-    item_attributes = {"brand": "Edinburgh Woollen Mill", "brand_wikidata": "Q16834657"}
+    item_attributes = {"brand": "The Edinburgh Woollen Mill", "brand_wikidata": "Q16834657"}
     start_urls = ["https://www.ewm.co.uk/store-finder"]
 
     def parse(self, response):
