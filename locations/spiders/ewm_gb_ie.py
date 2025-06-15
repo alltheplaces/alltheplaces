@@ -6,8 +6,8 @@ from locations.dict_parser import DictParser
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class EwmGBSpider(JSONBlobSpider):
-    name = "ewm_gb"
+class EwmGBIESpider(JSONBlobSpider):
+    name = "ewm_gb_ie"
     item_attributes = {"brand": "Edinburgh Woollen Mill", "brand_wikidata": "Q16834657"}
     start_urls = ["https://www.ewm.co.uk/store-finder"]
 
