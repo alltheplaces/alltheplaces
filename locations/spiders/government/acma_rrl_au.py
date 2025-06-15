@@ -94,9 +94,14 @@ class AcmaRrlAUSpider(Spider):
             self.extract_acma_reference_properties(properties, device)
             self.extract_category(properties, device)
             if device["DEVICE_REGISTRATION_IDENTIFIER"]:
-                properties["website"] = "https://web.acma.gov.au/rrl/assignment_search.lookup?pDEVICE_REGISTRATION_ID=" + str(device["DEVICE_REGISTRATION_IDENTIFIER"])
+                properties["website"] = (
+                    "https://web.acma.gov.au/rrl/assignment_search.lookup?pDEVICE_REGISTRATION_ID="
+                    + str(device["DEVICE_REGISTRATION_IDENTIFIER"])
+                )
             elif device["EFL_ID"]:
-                properties["website"] = "https://web.acma.gov.au/rrl/assignment_search.lookup?pEFL_ID=" + str(device["EFL_ID"])
+                properties["website"] = "https://web.acma.gov.au/rrl/assignment_search.lookup?pEFL_ID=" + str(
+                    device["EFL_ID"]
+                )
             yield Feature(**properties)
 
     def extract_site_properties(self, properties: dict, device_details: dict) -> None:
