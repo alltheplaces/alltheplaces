@@ -2,6 +2,7 @@ import re
 
 import chompjs
 import scrapy
+from scrapy_zyte_api.responses import ZyteAPITextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -20,6 +21,9 @@ class TeslaSpider(scrapy.Spider):
         )
 
     def parse_json_subrequest(self, response):
+        # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
+        response = ZyteAPITextResponse.from_api_response(response.raw_api_response, request=response.request)
+
         for location in chompjs.parse_js_object(response.text):
             # Skip if "Coming Soon" - no content to capture yet
             if location.get("open_soon") == "1":
@@ -35,10 +39,14 @@ class TeslaSpider(scrapy.Spider):
             )
 
     def parse_location(self, response):
+        # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
+        response = ZyteAPITextResponse.from_api_response(response.raw_api_response, request=response.request)
+
         # Many responses have false error message appended to the json data, clean them to get a proper json
         location_data = chompjs.parse_js_object(response.text)
         if isinstance(location_data, list):
             return
+
         feature = DictParser.parse(location_data)
         feature["ref"] = location_data.get("location_id")
         feature["street_address"] = location_data["address_line_1"].replace("<br />", ", ")
