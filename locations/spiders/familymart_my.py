@@ -1,6 +1,6 @@
-from chompjs import parse_js_object
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
@@ -26,8 +26,8 @@ class FamilymartMYSpider(Spider):
                 "ref": str(feature["id"]),
                 "lat": feature["position"]["lat"],
                 "lon": feature["position"]["lng"],
-                "branch": description_html.xpath('//h5/span/text()').get(),
-                "addr_full": merge_address_lines(description_html.xpath('//p/text()').getall()),
+                "branch": description_html.xpath("//h5/span/text()").get(),
+                "addr_full": merge_address_lines(description_html.xpath("//p/text()").getall()),
             }
             apply_category(Categories.SHOP_CONVENIENCE, properties)
             yield Feature(**properties)
