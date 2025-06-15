@@ -72,8 +72,18 @@ class CentralFoodRetailTHSpider(JSONBlobSpider):
                     store_name_th = feature["store_name"]
                 store_name_en = re.sub(r"\s+", " ", store_name_en)
                 store_name_th = re.sub(r"\s+", " ", store_name_th)
-                store_name_en = store_name_en.removeprefix("Tops Wine Cellar ").removeprefix("Tops Food Hall ").removeprefix("Tops Fine Food ").removeprefix("Tops ")
-                store_name_th = store_name_th.removeprefix("ท็อปส์ ไวน์ เซลล่าร์ ").removeprefix("ท็อปส์ ฟู้ด ฮอลล์ ").removeprefix("ท็อปส์ ไฟน์ ฟู้ด ").removeprefix("ท็อปส์ ")
+                store_name_en = (
+                    store_name_en.removeprefix("Tops Wine Cellar ")
+                    .removeprefix("Tops Food Hall ")
+                    .removeprefix("Tops Fine Food ")
+                    .removeprefix("Tops ")
+                )
+                store_name_th = (
+                    store_name_th.removeprefix("ท็อปส์ ไวน์ เซลล่าร์ ")
+                    .removeprefix("ท็อปส์ ฟู้ด ฮอลล์ ")
+                    .removeprefix("ท็อปส์ ไฟน์ ฟู้ด ")
+                    .removeprefix("ท็อปส์ ")
+                )
                 if not store_name_en.startswith("ท็อปส์ ") and not store_name_th.startswith("Tops "):
                     item["branch"] = store_name_th
                     item["extras"]["branch:en"] = store_name_en
@@ -81,7 +91,15 @@ class CentralFoodRetailTHSpider(JSONBlobSpider):
         # Opening hours information is a bit of a mess of freetext formats.
         # The below wrangling should get close to 100% extraction of hours.
         if hours_text := feature["operation_time"]:
-            hours_text = hours_text.upper().replace("& HOLIDAY", "").replace(" AND HOLIDAY", "").replace("&HOLIDAY", "").replace("CLOSE ON SUNDAY AND PUBLIC HOLIDAY", " SUNDAY: CLOSED").replace("24 HRS", "00:01-23:59").replace("จ.- อา.", "MON-SUN")
+            hours_text = (
+                hours_text.upper()
+                .replace("& HOLIDAY", "")
+                .replace(" AND HOLIDAY", "")
+                .replace("&HOLIDAY", "")
+                .replace("CLOSE ON SUNDAY AND PUBLIC HOLIDAY", " SUNDAY: CLOSED")
+                .replace("24 HRS", "00:01-23:59")
+                .replace("จ.- อา.", "MON-SUN")
+            )
             if "MON" not in hours_text and "SAT" not in hours_text and "SUN" not in hours_text:
                 hours_text = f"MON-SUN: {hours_text}"
             item["opening_hours"] = OpeningHours()
