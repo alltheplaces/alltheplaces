@@ -7,7 +7,7 @@ import scrapy
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import set_closed
@@ -68,6 +68,8 @@ class DrMaxSpider(scrapy.Spider):
                             close_time = self.calculate_local_time(opening_hours["to"], country)
                             if open_time and close_time:
                                 item["opening_hours"].add_range(weekday, open_time, close_time)
+
+            apply_category(Categories.PHARMACY, item)
 
             yield item
 
