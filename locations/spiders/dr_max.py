@@ -48,7 +48,6 @@ class DrMaxSpider(scrapy.Spider):
             item["extras"]["start_date"] = location["openingDate"]
             if location["closureDate"]:
                 set_closed(item, datetime.fromisoformat(location["closureDate"]))
-                return
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]:
