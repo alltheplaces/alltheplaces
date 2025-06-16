@@ -32,6 +32,7 @@ class ChemistWarehouseAUSpider(Spider):
             )
             item = DictParser.parse(location_info)
             item["ref"] = location_info.get("key")
+            item["extras"]["fax"] = location_info.get("fax")
             yield item
         if len(locations) == limit:
             yield self.make_request(lat, lon, offset + limit)
