@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class QualityDairyUSSpider(scrapy.Spider):
     name = "quality_dairy_us"
-    item_attributes = {"brand": "Quality Dairy", "brand_wikidata": "Q23461886"}
+    item_attributes = {"name": "Quality Dairy", "brand": "Quality Dairy", "brand_wikidata": "Q23461886"}
     start_urls = ["https://qualitydairy.com/v15/stores/"]
     requires_proxy = True
 
