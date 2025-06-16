@@ -1,7 +1,7 @@
-import json
 import re
 from typing import Any
 
+import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
@@ -15,7 +15,7 @@ class MitsubishiPLSpider(Spider):
     start_urls = ["https://www.mitsubishi.pl/dealerzy"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        raw_data = json.loads(
+        raw_data = chompjs.parse_js_object(
             re.search(
                 r"dealerLocations\":(\[.*\])}\]\],\[\[\"\$\"",
                 response.xpath('//*[contains(text(),"latitude")]/text()').get().replace("\\", ""),
