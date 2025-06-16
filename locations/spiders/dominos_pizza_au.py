@@ -1,5 +1,3 @@
-from html import unescape
-
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -19,9 +17,7 @@ class DominosPizzaAUSpider(SitemapSpider):
     def parse(self, response):
         properties = {
             "ref": response.url.split("-")[-1],
-            "name": unescape(
-                " ".join(filter(None, map(str.strip, response.xpath('//div[@class="storetitle"]/text()').getall())))
-            ),
+            "branch": response.xpath('//div[@class="storetitle"]/text()').get().removeprefix("Domino's "),
             "addr_full": merge_address_lines(
                 filter(None, map(str.strip, response.xpath('//a[@id="open-map-address"]/text()').getall()))
             ),
