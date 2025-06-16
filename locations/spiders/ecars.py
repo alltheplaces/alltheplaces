@@ -9,7 +9,7 @@ from locations.dict_parser import DictParser
 
 class EcarsSpider(Spider):
     name = "ecars"
-    item_attributes = {"brand": "ecars", "brand_wikidata": "Q3050566"}
+    item_attributes = {"brand": "ESB ecars", "brand_wikidata": "Q134882112"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
