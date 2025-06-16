@@ -33,6 +33,7 @@ class ChemistWarehouseAUSpider(Spider):
             )
             item = DictParser.parse(location_info)
             item["ref"] = location_info.get("key")
+            item["branch"] = item.pop("name").removeprefix("Chemist Warehouse ")
             item["extras"]["fax"] = location_info.get("fax")
 
             item["opening_hours"] = OpeningHours()
