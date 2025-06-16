@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class PetrocityKEUG(WPStoreLocatorSpider):
+class PetrocityKEUGSpider(WPStoreLocatorSpider):
     name = "petrocity_ke_ug"
     item_attributes = {"brand": "Petrocity", "brand_wikidata": "Q134958497"}
     allowed_domains = ["petrocityafrica.com"]
