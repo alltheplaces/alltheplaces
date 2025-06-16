@@ -33,6 +33,8 @@ class DrMaxSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
+            if location["pharmacyVisibility"]["pharmacyList"] is False:
+                continue
             location.update(location.pop("location"))
             item = DictParser.parse(location)
             item["ref"] = location["urlKey"]  # id is not unique globally
