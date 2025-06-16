@@ -50,6 +50,8 @@ class MinistopJPSpider(JSONBlobSpider):
 
         item["opening_hours"] = OpeningHours()
         for day_hours in feature["businessHours"]:
-            item["opening_hours"].add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
+            item["opening_hours"].add_range(
+                day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S"
+            )
 
         yield item
