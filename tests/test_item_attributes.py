@@ -22,6 +22,7 @@ def test_item_attributes_brand_strings_match_nsi():
     """
     ignored_spiders = [
         "sparkasse_de",  # Overcomplicated in NSI
+        "ecars",  # Complex brand/operator combination in NSI
     ]
 
     fails = []
