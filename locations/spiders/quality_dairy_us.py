@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -10,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class QualityDairyUSSpider(scrapy.Spider):
     name = "quality_dairy_us"
-    item_attributes = {"brand": "Quality Dairy", "brand_wikidata": "Q23461886"}
+    item_attributes = {"name": "Quality Dairy", "brand": "Quality Dairy", "brand_wikidata": "Q23461886"}
     start_urls = ["https://qualitydairy.com/v15/stores/"]
     requires_proxy = True
 
@@ -33,7 +34,8 @@ class QualityDairyUSSpider(scrapy.Spider):
             item["opening_hours"].add_range(
                 day, self.clean_time(start_time), self.clean_time(end_time), time_format="%I:%M %p"
             )
-
+        item["branch"] = item.pop("name").replace("Quality Dairy Store - ", "")
+        apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
 
     @staticmethod
