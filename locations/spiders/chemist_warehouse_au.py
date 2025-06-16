@@ -5,6 +5,7 @@ from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -33,6 +34,17 @@ class ChemistWarehouseAUSpider(Spider):
             item = DictParser.parse(location_info)
             item["ref"] = location_info.get("key")
             item["extras"]["fax"] = location_info.get("fax")
+
+            item["opening_hours"] = OpeningHours()
+            opening_hours = location_info.get("openingHours", {})
+            for day in opening_hours:
+                open_time = opening_hours[day].get("from")
+                close_time = opening_hours[day].get("to")
+                if open_time and close_time:
+                    item["opening_hours"].add_range(
+                        day, open_time.removesuffix(".000"), close_time.removesuffix(".000"), "%H:%M:%S"
+                    )
             yield item
+
         if len(locations) == limit:
             yield self.make_request(lat, lon, offset + limit)
