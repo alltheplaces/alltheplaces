@@ -21,9 +21,9 @@ def test_item_attributes_brand_strings_match_nsi():
     If you face such a case, please add the spider to the ignored_spiders list.
     """
     ignored_spiders = [
-        "sparkasse_de", # Overcomplicated in NSI
-        "ecars", # Complex brand/operator combination in NSI
-        ]    
+        "sparkasse_de",  # Overcomplicated in NSI
+        "ecars",  # Complex brand/operator combination in NSI
+    ]
 
     fails = []
     spider_names = set()
