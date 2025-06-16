@@ -1,40 +1,37 @@
-from scrapy.spiders import XMLFeedSpider
+from typing import Any, Iterable
 
-from locations.hours import OpeningHours
-from locations.items import Feature
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
+
+from locations.dict_parser import DictParser
+from locations.geo import city_locations
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class ChemistWarehouseAUSpider(XMLFeedSpider):
+class ChemistWarehouseAUSpider(Spider):
     name = "chemist_warehouse_au"
     item_attributes = {"brand": "Chemist Warehouse", "brand_wikidata": "Q48782120"}
-    allowed_domains = ["www.chemistwarehouse.com.au"]
-    start_urls = [
-        "https://www.chemistwarehouse.com.au/webapi/store/store-locator?BusinessGroupId=2&SortByDistance=true&SearchByState=0&Coordinate=(-37.8152065,%20144.963937)&ShowNearbyOnly=false"
-    ]
-    requires_proxy = True  # Residential IP addresses appear to be required.
-    iterator = "xml"
-    namespaces = [("cw", "http://schemas.datacontract.org/2004/07/AmSolutions.ChemistWarehouse.Models.Store")]
-    itertag = "cw:StoreLocationModel"
 
-    def parse_node(self, response, node):
-        properties = {
-            "ref": node.xpath("cw:Id/text()").get(),
-            "name": node.xpath("cw:Name/text()").get(),
-            "lat": node.xpath("cw:GeoPoint/cw:Latitude/text()").get(),
-            "lon": node.xpath("cw:GeoPoint/cw:Longitude/text()").get(),
-            "street_address": node.xpath("cw:Address/text()").get(),
-            "city": node.xpath("cw:Suburb/text()").get(),
-            "state": node.xpath("cw:State/text()").get(),
-            "postcode": node.xpath("cw:Postcode/text()").get(),
-            "phone": node.xpath("cw:Phone/text()").get(),
-            "email": node.xpath("cw:Email/text()").get(),
-        }
-        properties["opening_hours"] = OpeningHours()
-        for day_hours in node.xpath("cw:OpenHours/cw:OpenHour"):
-            properties["opening_hours"].add_range(
-                day_hours.xpath("cw:WeekDay/text()").get(),
-                day_hours.xpath("cw:OpenTime/text()").get(),
-                day_hours.xpath("cw:CloseTime/text()").get(),
-                "%I:%M %p",
+    def make_request(self, lat: float, lon: float, offset: int, limit: int = 100) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://api.chemistwarehouse.com.au/web/v1/channels/cwr-cw-au/en/radius?channel-type=store&latitude={lat}&longitude={lon}&search-type=store-locator&offset={offset}&limit={limit}",
+            cb_kwargs=dict(lat=lat, lon=lon, offset=offset, limit=limit),
+        )
+
+    def start_requests(self) -> Iterable[JsonRequest]:
+        for city in city_locations("AU", 15000):
+            yield self.make_request(city["latitude"], city["longitude"], 0)
+
+    def parse(self, response: Response, lat: float, lon: float, offset: int, limit: int) -> Any:
+        locations = response.json().get("channels", [])
+        for location in locations:
+            location_info = location.get("channel", {})
+            location_info.update(location_info.pop("address", {}))
+            location_info["street-address"] = merge_address_lines(
+                [location_info.pop("streetNumber", ""), location_info.pop("streetName", "")]
             )
-        yield Feature(**properties)
+            item = DictParser.parse(location_info)
+            item["ref"] = location_info.get("key")
+            yield item
+        if len(locations) == limit:
+            yield self.make_request(lat, lon, offset + limit)
