@@ -36,16 +36,15 @@ class ChemistWarehouseAUSpider(Spider):
             item["branch"] = item.pop("name").removeprefix("Chemist Warehouse ")
             item["extras"]["fax"] = location_info.get("fax")
 
-            item["opening_hours"] = OpeningHours()
-            opening_hours = location_info.get("openingHours", {})
-            for day in opening_hours:
-                open_time = opening_hours[day].get("from")
-                close_time = opening_hours[day].get("to")
-                if open_time and close_time:
-                    item["opening_hours"].add_range(
-                        day, open_time.removesuffix(".000"), close_time.removesuffix(".000"), "%H:%M:%S"
-                    )
+            item["opening_hours"] = self.parse_opening_hours(location_info.get("openingHours", {}))
+
             yield item
 
         if len(locations) == limit:
             yield self.make_request(lat, lon, offset + limit)
+
+    def parse_opening_hours(self, opening_hours: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day, times in opening_hours.items():
+            oh.add_range(day, times["from"], times["to"], "%H:%M:%S.%f")
+        return oh
