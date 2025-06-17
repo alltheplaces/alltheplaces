@@ -25,8 +25,10 @@ class TopsUSSpider(Spider):
 
     def parse_store_details(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
+        item["branch"] = response.xpath("//h3/text()").get()
         item["addr_full"] = merge_address_lines(response.xpath('//p[@class="Address"]/text()').getall())
         item["phone"] = response.xpath('//p[@class="PhoneNumber"]/a/text()').get()
+        item["website"] = response.url
         hours_text = response.xpath('//table[@id="hours_info-BS"]//dd/text()').get()
         if hours_text:
             hours_text = hours_text.upper().replace("24 HOURS", "00:01AM-11:59PM")
