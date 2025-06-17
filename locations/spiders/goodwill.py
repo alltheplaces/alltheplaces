@@ -49,7 +49,7 @@ class GoodwillSpider(scrapy.Spider):
                 yield scrapy.Request(url=url)
 
     def parse(self, response):
-        for store in response.json():
+        for store in response.json().get("data", []):
             properties = {
                 "name": store["LocationName"],
                 "ref": store["LocationId"],
