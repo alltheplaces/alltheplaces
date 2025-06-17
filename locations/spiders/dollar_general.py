@@ -36,7 +36,7 @@ class DollarGeneralSpider(SitemapSpider):
 
         try:
             properties["opening_hours"] = self.parse_opening_hours(response)
-        except Exception as e:
+        except:
             self.logger.error("Error parsing hours")
 
         apply_category(Categories.SHOP_VARIETY_STORE, properties)
