@@ -31,6 +31,7 @@ class DollarGeneralSpider(SitemapSpider):
             "phone": response.xpath("//div[@data-phone]/@data-phone").extract_first(),
             "website": response.url,
             "ref": response.url.rsplit("/", 1)[-1].rsplit(".")[0],
+            "name": self.item_attributes["brand"],
         }
 
         oh = OpeningHours()
