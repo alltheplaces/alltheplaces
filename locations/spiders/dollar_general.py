@@ -3,7 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
@@ -14,7 +14,6 @@ class DollarGeneralSpider(SitemapSpider):
         "brand": "Dollar General",
         "brand_wikidata": "Q145168",
         "country": "US",
-        "extras": Categories.SHOP_VARIETY_STORE.value,
     }
     allowed_domains = ["dollargeneral.com"]
     sitemap_urls = ["https://www.dollargeneral.com/sitemap-main.xml"]
@@ -42,5 +41,7 @@ class DollarGeneralSpider(SitemapSpider):
             oh.add_ranges_from_string(f"{d} {hours}")
 
         properties["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_VARIETY_STORE, properties)
 
         yield Feature(**properties)
