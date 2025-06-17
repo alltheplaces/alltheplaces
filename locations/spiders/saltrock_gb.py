@@ -1,6 +1,4 @@
-from typing import Iterable
 
-from scrapy.http import Response
 
 from locations.items import Feature
 from locations.storefinders.stockist import StockistSpider
