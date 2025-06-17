@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 import scrapy
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
@@ -29,7 +29,6 @@ class GoodwillSpider(scrapy.Spider):
         "brand": "Goodwill",
         "brand_wikidata": "Q5583655",
         "nsi_id": "-1",
-        "extras": Categories.SHOP_CHARITY.value,
     }
     allowed_domains = ["www.goodwill.org"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -71,5 +70,6 @@ class GoodwillSpider(scrapy.Spider):
                     "operator:twitter": store.get("LocationParentURLTwitter"),
                 },
             }
+            apply_category(Categories.SHOP_CHARITY, properties)
 
             yield Feature(**properties)
