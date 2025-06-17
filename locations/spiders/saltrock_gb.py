@@ -1,5 +1,3 @@
-
-
 from locations.items import Feature
 from locations.storefinders.stockist import StockistSpider
 
