@@ -31,7 +31,11 @@ class McgrathAUSpider(Spider):
             )
 
     def parse_office(self, response: Response, **kwargs: Any) -> Any:
-        data = DictParser.get_nested_key(dict(parse_rsc(response.body)), "profile")
+        rsc_bytes = response.body
+        # Unwrap RSC data if HTML-wrapped due to playwright.
+        if match := re.search(b"<pre>(.*?)</pre>", rsc_bytes, re.DOTALL):
+            rsc_bytes = match.group(1).strip()
+        data = DictParser.get_nested_key(dict(parse_rsc(rsc_bytes)), "profile")
         if not data:
             return
 
