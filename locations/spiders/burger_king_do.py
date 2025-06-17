@@ -6,3 +6,4 @@ class BurgerKingDOSpider(BurgerKingBSSpider):
     allowed_domains = ["www.burgerking.com.do"]
     host = "https://www.burgerking.com.do"
     country_code = "DO"
+    download_timeout = 120
