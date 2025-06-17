@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class NoptaPetroleumWellsAUSpider(ArcGISFeatureServerSpider):
-    name = "nopta_petroleum_wells_au"
+class NoptaBoreholesSpider(ArcGISFeatureServerSpider):
+    name = "nopta_boreholes"
     allowed_domains = ["services.neats.nopta.gov.au", "arcgis.nopta.gov.au"]
     start_urls = [
         "https://services.neats.nopta.gov.au/odata/v1/public/nopims/well/PublicNopimsWells?$orderby=Kick_Off_Date desc&$top=100000&$skip=0&$filter=contains(Well,'')"
@@ -42,7 +42,8 @@ class NoptaPetroleumWellsAUSpider(ArcGISFeatureServerSpider):
         elif operator := feature["Well_Operator"]:
             item["operator"] = operator
         if state := feature["State"]:
-            item["state"] = state
+            if state != "Outside of Australia":
+                item["state"] = state
 
         if feature["Borehole_Status"] in ["Abandoned", "Plugged and Abandoned"]:
             item["extras"]["abandoned:man_made"] = "petroleum_well"
@@ -97,5 +98,7 @@ class NoptaPetroleumWellsAUSpider(ArcGISFeatureServerSpider):
                     self.logger.warning("Unknown borehole type: {}".format(feature["Type"]))
         if "abandoned:man_made" in odata_feature["extras"]:
             odata_feature["extras"]["abandoned:man_made"] = odata_feature["extras"].pop("man_made")
+
+        odata_feature["extras"]["@source"] = response.url + ";" + self.start_urls[0]
 
         yield odata_feature
