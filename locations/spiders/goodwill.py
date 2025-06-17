@@ -51,7 +51,7 @@ class GoodwillSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json().get("data", []):
             properties = {
-                "name": store["LocationName"],
+                "name": self.item_attributes["brand"],
                 "ref": store["LocationId"],
                 "street_address": store["LocationStreetAddress1"],
                 "city": store["LocationCity1"],
