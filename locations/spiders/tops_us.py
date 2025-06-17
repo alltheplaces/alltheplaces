@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Iterable
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -15,17 +15,11 @@ class TopsUSSpider(Spider):
     allowed_domains = ["www.topsmarkets.com"]
     start_urls = ["http://www.topsmarkets.com/StoreLocator/Store_MapLocation_S.las?State=all"]
 
-    def parse(self, response: Response) -> Iterable[Request]:
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
         for feature in response.json():
-            store_number = feature["StoreNbr"]
-            properties = {
-                "ref": store_number,
-                "lat": feature["Latitude"],
-                "lon": feature["Longitude"],
-            }
             yield Request(
-                url=f"https://www.topsmarkets.com/StoreLocator/Store?L={store_number}",
-                meta={"item": Feature(**properties)},
+                url="https://www.topsmarkets.com/StoreLocator/Store?L={}&S=".format(feature["StoreNbr"]),
+                meta={"item": Feature(ref=feature["StoreNbr"], lat=feature["Latitude"], lon=feature["Longitude"])},
                 callback=self.parse_store_details,
             )
 
@@ -40,5 +34,7 @@ class TopsUSSpider(Spider):
                 hours_text = "MONDAY-SUNDAY: " + hours_text
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_text)
+
         apply_category(Categories.SHOP_SUPERMARKET, item)
+
         yield item
