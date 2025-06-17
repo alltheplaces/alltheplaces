@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
@@ -16,8 +19,9 @@ class DollarGeneralSpider(SitemapSpider):
     allowed_domains = ["dollargeneral.com"]
     sitemap_urls = ["https://www.dollargeneral.com/sitemap-main.xml"]
     sitemap_rules = [(r"https:\/\/www\.dollargeneral\.com\/store-directory\/\w{2}\/.*\/\d+$", "parse")]
+    handle_httpstatus_list = [401]  # The server responds with HTTP 401, but the page content is still returned.
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "street_address": response.xpath("//@data-address").extract_first(),
             "city": response.xpath("//div[@data-city]/@data-city").extract_first(),
