@@ -10,7 +10,9 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 class NoptaPetroleumWellsAUSpider(ArcGISFeatureServerSpider):
     name = "nopta_petroleum_wells_au"
     allowed_domains = ["services.neats.nopta.gov.au", "arcgis.nopta.gov.au"]
-    start_urls = ["https://services.neats.nopta.gov.au/odata/v1/public/nopims/well/PublicNopimsWells?$orderby=Kick_Off_Date desc&$top=100000&$skip=0&$filter=contains(Well,'')"]
+    start_urls = [
+        "https://services.neats.nopta.gov.au/odata/v1/public/nopims/well/PublicNopimsWells?$orderby=Kick_Off_Date desc&$top=100000&$skip=0&$filter=contains(Well,'')"
+    ]
 
     host = "arcgis.nopta.gov.au"
     context_path = "arcgis"
@@ -26,7 +28,10 @@ class NoptaPetroleumWellsAUSpider(ArcGISFeatureServerSpider):
     def parse_odata_well_list(self, response: Response) -> Iterable[JsonRequest]:
         for well in response.json()["value"]:
             self._wells[well["Borehole_ID"]] = self.extract_odata_well(well)
-        yield JsonRequest(url=f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}?f=json", callback=self.parse_layer_details)
+        yield JsonRequest(
+            url=f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}?f=json",
+            callback=self.parse_layer_details,
+        )
 
     def extract_odata_well(self, feature: dict) -> Feature:
         item = Feature()
@@ -64,7 +69,11 @@ class NoptaPetroleumWellsAUSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         ubhi = feature["Ubhi"]
         if ubhi not in self._wells.keys():
-            raise ValueError("Borehole {} present in ArcGIS FeatureServer layer, but not present in odata API response for list of wells. Borehole ignored.".format(ubhi))
+            raise ValueError(
+                "Borehole {} present in ArcGIS FeatureServer layer, but not present in odata API response for list of wells. Borehole ignored.".format(
+                    ubhi
+                )
+            )
         odata_feature = self._wells[ubhi]
         odata_feature["lat"] = feature["Latitude"]
         odata_feature["lon"] = feature["Longitude"]
