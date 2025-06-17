@@ -34,15 +34,17 @@ class DollarGeneralSpider(SitemapSpider):
             "name": self.item_attributes["brand"],
         }
 
-        oh = OpeningHours()
-        for d in DAYS_FULL:
-            hours = response.xpath(f"//@data-{d.lower()}").get()
-            if not hours:
-                continue
-            oh.add_ranges_from_string(f"{d} {hours}")
-
-        properties["opening_hours"] = oh
+        try:
+            properties["opening_hours"] = self.parse_opening_hours(response)
+        except Exception as e:
+            self.logger.error("Error parsing hours")
 
         apply_category(Categories.SHOP_VARIETY_STORE, properties)
 
         yield Feature(**properties)
+
+    def parse_opening_hours(self, response: Response) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            oh.add_range(day, *response.xpath(f"//@data-{day.lower()}").get().split(" - "), "%I:%M %p")
+        return oh
