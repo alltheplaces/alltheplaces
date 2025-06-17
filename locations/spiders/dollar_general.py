@@ -34,14 +34,13 @@ class DollarGeneralSpider(SitemapSpider):
             "ref": response.url.rsplit("/", 1)[-1].rsplit(".")[0],
         }
 
-        o = OpeningHours()
+        oh = OpeningHours()
         for d in DAYS_FULL:
             hours = response.xpath(f"//@data-{d.lower()}").get()
             if not hours:
                 continue
-            from_time, to_time = hours.split(":")
-            o.add_range(d, from_time, to_time, "%H%M")
+            oh.add_ranges_from_string(f"{d} {hours}")
 
-        properties["opening_hours"] = o.as_opening_hours()
+        properties["opening_hours"] = oh
 
         yield Feature(**properties)
