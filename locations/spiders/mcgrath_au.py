@@ -27,15 +27,13 @@ class McgrathAUSpider(Spider):
             yield Request(
                 f"https://www.mcgrath.com.au/offices/{slug}-{office['id']}",
                 callback=self.parse_office,
-                headers={"RSC": "1"},
             )
 
     def parse_office(self, response: Response, **kwargs: Any) -> Any:
-        rsc_bytes = response.body
-        # Unwrap RSC data if HTML-wrapped due to playwright.
-        if match := re.search(b"<pre>(.*?)</pre>", rsc_bytes, re.DOTALL):
-            rsc_bytes = match.group(1).strip()
-        data = DictParser.get_nested_key(dict(parse_rsc(rsc_bytes)), "profile")
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        objs = [chompjs.parse_js_object(s) for s in scripts]
+        rsc = "".join([s for n, s in objs]).encode()
+        data = DictParser.get_nested_key(dict(parse_rsc(rsc)), "profile")
         if not data:
             return
 
