@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -11,6 +12,8 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://www.autonation.com/dealers/[^/]+$", "parse")]
     wanted_types = ["AutoDealer"]
     time_format = "%I:%M %p"
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath('//input[@id="storeLatitude"]/@value').get()
