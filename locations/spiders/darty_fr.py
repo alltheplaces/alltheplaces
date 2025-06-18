@@ -16,4 +16,5 @@ class DartyFRSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.SHOP_ELECTRICAL, item)
         item["branch"] = item.pop("name").replace("DARTY ", "")
+        item.pop("phone")
         yield item
