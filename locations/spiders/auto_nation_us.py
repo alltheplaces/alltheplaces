@@ -25,4 +25,5 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider):
         store_info = DictParser.get_nested_key(store_data, "storeInfo")
         item["lat"] = store_info.get("latitude")
         item["lon"] = store_info.get("longitude")
+        item["ref"] = store_info.get("hyperionId")
         yield item
