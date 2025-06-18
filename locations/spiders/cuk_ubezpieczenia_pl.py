@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CUKUbezpieczeniaPLSpider(SitemapSpider, StructuredDataSpider):
+class CukUbezpieczeniaPLSpider(SitemapSpider, StructuredDataSpider):
     name = "cuk_ubezpieczenia_pl"
     item_attributes = {"brand": "CUK Ubezpieczenia", "brand_wikidata": "Q113230028"}
     sitemap_urls = [
