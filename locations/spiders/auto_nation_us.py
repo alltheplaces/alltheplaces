@@ -21,7 +21,8 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        store_details = json.loads(response.xpath('//script[@id="store-detail-state"]/text()').get())
-        item["lat"] = DictParser.get_nested_key(store_details, "latitude")
-        item["lon"] = DictParser.get_nested_key(store_details, "longitude")
+        store_data = json.loads(response.xpath('//script[@id="store-detail-state"]/text()').get())
+        store_info = DictParser.get_nested_key(store_data, "storeInfo")
+        item["lat"] = store_info.get("latitude")
+        item["lon"] = store_info.get("longitude")
         yield item
