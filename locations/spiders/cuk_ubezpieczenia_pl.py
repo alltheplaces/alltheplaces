@@ -11,6 +11,6 @@ class CukUbezpieczeniaPLSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/placowki/([^/]+)$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("CUK Ubezpieczenia - ")
+        item["name"] = None
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
