@@ -3,6 +3,7 @@ import json
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -27,6 +28,12 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider):
         item["ref"] = store_info.get("hyperionId")
         # ld_data has opening hours of sales and services all merged, difficult to differentiate.
         item["opening_hours"] = self.parse_opening_hours(store_info.get("detailedHours") or [])
+        departments = [department.get("name") for department in store_info.get("departments", [])]
+        if "Sales" in departments:
+            apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments or "Collision" in departments)
+        else:
+            apply_category(Categories.SHOP_CAR_REPAIR, item)
         yield item
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:
