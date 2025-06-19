@@ -479,31 +479,29 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
         return None
     if len(geometry["coordinates"]) not in [1, 2]:
         return None
-    if len(geometry["coordinates"]) == 1 and not (
-        isinstance(geometry["coordinates"], list) or isinstance(geometry["coordinates"], tuple)
-    ):
-        return None
-    if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
+    if len(geometry["coordinates"]) == 1:
         # Multi-Point geometry possibly detected. Perform specific Multi-Point
         # geometry validation checks.
+        if not isinstance(geometry["coordinates"][0], list) and not isinstance(geometry["coordinates"][0], tuple):
+            return None
         if len(geometry["coordinates"][0]) != 2:
-            # More than one point exists therefore it's not possible to
-            # extract a single Point geometry.
+            # More than one Point exists in the Multi-Point geometry therefore
+            # it is not possible to extract a single Point geometry.
             return None
         if not isinstance(geometry["coordinates"][0][0], float) and not isinstance(geometry["coordinates"][0][0], int):
             return None
         if not isinstance(geometry["coordinates"][0][1], float) and not isinstance(geometry["coordinates"][0][1], int):
             return None
-    elif not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][0], int)) or not (
+    elif len(geometry["coordinates"]) == 2:
         # Point geometry possible detected. Perform specific Point geometry
         # validation checks.
-        isinstance(geometry["coordinates"][1], float)
-        or isinstance(geometry["coordinates"][1], int)
-    ):
-        return None
+        if not isinstance(geometry["coordinates"][0], float) and not isinstance(geometry["coordinates"][0], int):
+            return None
+        if not isinstance(geometry["coordinates"][1], float) and not isinstance(geometry["coordinates"][1], int):
+            return None
 
-    # At this point, we either have validly typed Point or Multi-Point geometry.
-    # Convert Multi-Point geometry to Point geometry.
+    # At this point, we either have validly typed Point geometry or a validly
+    # typed Multi-Point geometry containing a single point.
     new_geometry = {"type": "Point"}
     if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
         # Multi-Point geometry with a single point confirmed. Convert to Point
