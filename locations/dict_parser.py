@@ -326,11 +326,9 @@ class DictParser:
                     "yextDisplayCoordinate",
                 ],
             )
-            # If not a good location object then use the parent
-            if not location or not isinstance(location, dict):
-                location = obj
-            item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
-            item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+            if location and isinstance(location, dict):
+                item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+                item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 
