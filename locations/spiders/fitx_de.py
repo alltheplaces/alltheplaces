@@ -14,5 +14,5 @@ class FitXDESpider(SitemapSpider, StructuredDataSpider):
         if ld_data.get("openingHours") == "Monday through Sunday, all day":
             item["opening_hours"] = "24/7"
         apply_category(Categories.GYM, item)
-        item["branch"] = item["name"].replace("FitX Fitnessstudio ", "")
+        item["branch"] = item.pop("name").removeprefix("FitX Fitnessstudio ")
         yield item
