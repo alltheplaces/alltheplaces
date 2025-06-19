@@ -327,8 +327,15 @@ class DictParser:
                 ],
             )
             if location and isinstance(location, dict):
+                # Latitude/longitude are wrapped inside a "coordinates" /
+                # "location" style of named dictionary.
                 item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
                 item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+            else:
+                # Latitude/longitude are properties of the root dictionary or
+                # any other nested dictionary of any name.
+                item["lat"] = DictParser.get_first_key(obj, DictParser.lat_keys)
+                item["lon"] = DictParser.get_first_key(obj, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 
