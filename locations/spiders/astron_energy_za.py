@@ -43,6 +43,7 @@ class AstronEnergyZASpider(JSONBlobSpider):
     item_attributes = {"brand": "Astron Energy", "brand_wikidata": "Q120752181"}
     start_urls = ["https://www.astronenergy.co.za/umbraco/api/station/Stations"]
     locations_key = "stations"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for url in self.start_urls:
@@ -58,8 +59,9 @@ class AstronEnergyZASpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
-        if len(location["images"]) > 0:
-            item["image"] = "https://www.astronenergy.co.za" + location["images"][0]
+        images = location.get("imageUrls") or []
+        if images:
+            item["image"] = response.urljoin(images[0])
         for tag, service in ASTRON_PROPERTIES.items():
             apply_yes_no(service, item, location["properties"].get(tag), False)
         item["opening_hours"] = OpeningHours()
