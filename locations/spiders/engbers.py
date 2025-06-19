@@ -1,4 +1,5 @@
 from typing import Iterable
+
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
