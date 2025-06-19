@@ -18,7 +18,11 @@ class CottonOnGroupSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     brands = {
         "Cotton On": {"brand": "Cotton On", "brand_wikidata": "Q5175717", "category": Categories.SHOP_CLOTHES},
-        "Cotton On Body": {"brand": "Cotton On Body", "brand_wikidata": "Q134983660", "category": Categories.SHOP_CLOTHES},
+        "Cotton On Body": {
+            "brand": "Cotton On Body",
+            "brand_wikidata": "Q134983660",
+            "category": Categories.SHOP_CLOTHES,
+        },
         "Cotton On Kids": {
             "brand": "Cotton On Kids",
             "brand_wikidata": "Q113961498",
