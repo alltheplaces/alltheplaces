@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FitXDESpider(SitemapSpider, StructuredDataSpider):
+class FitxDESpider(SitemapSpider, StructuredDataSpider):
     name = "fitx_de"
     item_attributes = {"brand": "FitX", "brand_wikidata": "Q29031618"}
     sitemap_urls = ["https://www.fitx.de/studios/sitemap.xml"]
