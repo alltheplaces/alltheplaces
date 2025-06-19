@@ -110,6 +110,7 @@ class PorscheSpider(scrapy.Spider):
         "VN",
         "ZA",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for country in self.countries:
