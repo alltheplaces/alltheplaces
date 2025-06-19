@@ -479,16 +479,22 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
         return None
     if len(geometry["coordinates"]) not in [1, 2]:
         return None
-    if len(geometry["coordinates"]) == 1 and not isinstance(geometry["coordinates"], list):
+    if len(geometry["coordinates"]) == 1 and not (isinstance(geometry["coordinates"], list) or isinstance(geometry["coordinates"], tuple)):
         return None
     if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
+        # Multi-Point geometry possibly detected. Perform specific Multi-Point
+        # geometry validation checks.
         if len(geometry["coordinates"][0]) != 2:
+            # More than one point exists therefore it's not possible to
+            # extract a single Point geometry.
             return None
         if not isinstance(geometry["coordinates"][0][0], float) and not isinstance(geometry["coordinates"][0][0], int):
             return None
         if not isinstance(geometry["coordinates"][0][1], float) and not isinstance(geometry["coordinates"][0][1], int):
             return None
     elif not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][0], int)) or not (
+        # Point geometry possible detected. Perform specific Point geometry
+        # validation checks.
         isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
     ):
         return None
@@ -497,8 +503,11 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
     # Convert Multi-Point geometry to Point geometry.
     new_geometry = {"type": "Point"}
     if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
+        # Multi-Point geometry with a single point confirmed. Convert to Point
+        # geometry.
         new_geometry["coordinates"] = [geometry["coordinates"][0][0], geometry["coordinates"][0][1]]
     else:
+        # Point geometry confirmed.
         new_geometry["coordinates"] = [geometry["coordinates"][0], geometry["coordinates"][1]]
 
     # Convert GJ2008 to RFC7946 Point geometry (if necessary).
