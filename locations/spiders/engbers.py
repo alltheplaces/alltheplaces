@@ -25,7 +25,7 @@ class EngbersSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         opening_hours = feature.get("openingHours", "").replace("<br>", " ").replace("Uhr<br>", ",")
         item["opening_hours"].add_ranges_from_string(opening_hours, days=DAYS_DE)
-        if "Emilio Adani" in item["name"].title():
+        if "Emilio Adani" in item.pop("name").title():
             item.update(self.EMILIO_ADANI)
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
