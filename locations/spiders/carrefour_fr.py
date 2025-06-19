@@ -60,6 +60,11 @@ class CarrefourFRSpider(WoosmapSpider):
             "brand_wikidata": "Q90153100",
             "category": Categories.SHOP_CONVENIENCE,
         },
+        "POTAGER CITY": {
+            "brand": "Potager City",
+            "brand_wikidata": "Q60964464",
+            "category": Categories.SHOP_CONVENIENCE,
+        },
     }
 
     def parse_item(self, item, feature, **kwargs):

@@ -97,15 +97,23 @@ class NextSpider(Spider):
             item["city"] = location["address"]["addressLocality"]
             item["postcode"] = location["address"]["postalCode"]
             item["country"] = location["address"]["addressCountry"]
+            coords = (
+                response.xpath('//script[contains(.,"storeLocator.mapSelectedStore")]/text()')
+                .re_first(r"storeLocator\.mapSelectedStore\((.+)\)")
+                .split(",")
+            )
+            item["lat"] = coords[-2]
+            item["lon"] = coords[-1]
             oh = OpeningHours()
             for opening_hour in location["openingHoursSpecification"]:
                 if "opens" in opening_hour:
-                    oh.add_range(
-                        DAYS_EN[opening_hour["dayOfWeek"]],
-                        opening_hour["opens"][0:5],
-                        opening_hour["closes"][0:5],
-                    )
-                    item["opening_hours"] = oh
+                    if "Closed" not in opening_hour:
+                        oh.add_range(
+                            DAYS_EN[opening_hour["dayOfWeek"]],
+                            opening_hour["opens"][0:5],
+                            opening_hour["closes"][0:5],
+                        )
+                        item["opening_hours"] = oh
             if re.search(r"Victoria'?s Secret", item["branch"]):
                 if "PINK" in item["branch"]:
                     item.update(self.PINK)

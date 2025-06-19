@@ -1,7 +1,7 @@
 import re
 
-from locations.categories import Categories
-from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.storefinders.virtualearth import VirtualEarthSpider
 
 
@@ -28,28 +28,23 @@ class LidlGBSpider(VirtualEarthSpider):
             item["postcode"] = feature["PostalCode"]
             item["city"] = feature["Locality"]
 
-        oh = OpeningHours()
-        for day, start_time, end_time in re.findall(
-            r"(\w{3} ?- ?\w{3}|\w{3}) (\d{2}:\d{2})\*?-(\d{2}:\d{2})",
-            feature["OpeningTimes"],
-        ):
-            if "-" in day:
-                start_day, end_day = day.split("-")
-            else:
-                start_day = end_day = day
+        item["opening_hours"] = self.parse_opening_hours(feature["OpeningTimes"])
 
-            start_day = sanitise_day(start_day)
-            end_day = sanitise_day(end_day)
-
-            for d in day_range(start_day, end_day):
-                oh.add_range(d, start_time, end_time)
-
-            item["opening_hours"] = oh.as_opening_hours()
-
-        item["extras"] = {}
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         if feature["INFOICON17"] == "customerToilet":
             item["extras"]["toilets"] = "yes"
             item["extras"]["toilets:access"] = "customers"
 
         yield item
+
+    def parse_opening_hours(self, opening_times: str) -> OpeningHours:
+        oh = OpeningHours()
+
+        for day, hours in re.findall(r">(\w\w) {3}(.+?)(?:<|$)", opening_times):
+            if hours == "Closed":
+                oh.set_closed(day)
+            else:
+                oh.add_range(day, *hours.split("-"))
+
+        return oh

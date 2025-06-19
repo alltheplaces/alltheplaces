@@ -3,15 +3,14 @@ import scrapy
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
-usa_bbox = [-125, 24, -65, 51]
-xstep = 5
-ystep = 3
-
 
 class ValeroSpider(scrapy.Spider):
     name = "valero"
     item_attributes = {"brand": "Valero", "brand_wikidata": "Q1283291"}
     allowed_domains = ["valero.com"]
+    usa_bbox = [-125, 24, -65, 51]
+    xstep = 5
+    ystep = 3
 
     def make_search(self, xmin, ymin, xmax, ymax):
         return scrapy.FormRequest(
@@ -28,8 +27,8 @@ class ValeroSpider(scrapy.Spider):
         )
 
     def start_requests(self):
-        xs = list(range(usa_bbox[0], usa_bbox[2] + xstep, xstep))
-        ys = list(range(usa_bbox[1], usa_bbox[3] + ystep, ystep))
+        xs = list(range(self.usa_bbox[0], self.usa_bbox[2] + self.xstep, self.xstep))
+        ys = list(range(self.usa_bbox[1], self.usa_bbox[3] + self.ystep, self.ystep))
         for xmin, xmax in zip(xs, xs[1:]):
             for ymin, ymax in zip(ys, ys[1:]):
                 yield self.make_search(xmin, ymin, xmax, ymax)

@@ -1,10 +1,12 @@
 import base64
 import csv
+from typing import Any, Iterable
 from urllib.parse import urlencode
 
 import scrapy
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
@@ -27,13 +29,12 @@ class GoodwillSpider(scrapy.Spider):
         "brand": "Goodwill",
         "brand_wikidata": "Q5583655",
         "nsi_id": "-1",
-        "extras": Categories.SHOP_CHARITY.value,
     }
     allowed_domains = ["www.goodwill.org"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.2
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         with open_searchable_points("us_centroids_25mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
@@ -45,13 +46,12 @@ class GoodwillSpider(scrapy.Spider):
                     "cats": "3,1,2,4,5",  # Includes donation sites
                 }
 
-                url = "https://www.goodwill.org/GetLocAPI.php?" + urlencode(params)
-                yield scrapy.Request(url=url)
+                yield JsonRequest(url="https://www.goodwill.org/GetLocAPI.php?" + urlencode(params))
 
-    def parse(self, response):
-        for store in response.json():
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json().get("data", []):
             properties = {
-                "name": store["LocationName"],
+                "name": self.item_attributes["brand"],
                 "ref": store["LocationId"],
                 "street_address": store["LocationStreetAddress1"],
                 "city": store["LocationCity1"],
@@ -70,5 +70,6 @@ class GoodwillSpider(scrapy.Spider):
                     "operator:twitter": store.get("LocationParentURLTwitter"),
                 },
             }
+            apply_category(Categories.SHOP_CHARITY, properties)
 
             yield Feature(**properties)

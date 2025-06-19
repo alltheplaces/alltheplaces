@@ -58,7 +58,6 @@ class IonnaUSSpider(scrapy.Spider):
                 }
             )
 
-            apply_category(Categories.CHARGING_STATION, item)
             item["extras"] = {
                 "access": "public",
                 "fee": "yes",
@@ -76,5 +75,5 @@ class IonnaUSSpider(scrapy.Spider):
                 item["extras"]["connector:type1_combo"] = ccs_count
                 item["extras"]["connector:nacs"] = nacs_count
                 item["extras"]["capacity"] = str(int(ccs_count) + int(nacs_count))
-
+            apply_category(Categories.CHARGING_STATION, item)
             yield item

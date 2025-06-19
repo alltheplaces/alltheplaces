@@ -303,6 +303,7 @@ class Categories(Enum):
     NUTRITIONIST = {"healthcare": "nutrition_counselling"}
     OPTOMETRIST = {"healthcare": "optometrist"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PAYMENT_CENTRE = {"amenity": "payment_centre"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
@@ -350,6 +351,7 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
     ANTENNA = {"man_made": "antenna"}
+    BOREHOLE = {"man_made": "borehole"}
     CULVERT = {"tunnel": "culvert"}
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     MONITORING_STATION = {"man_made": "monitoring_station"}
@@ -358,6 +360,7 @@ class Categories(Enum):
         "utility": "stormwater",
         "substance": "rainwater",
     }
+    PETROLEUM_WELL = {"man_made": "petroleum_well"}
     POWER_POLE = {"power": "pole"}
     POWER_TOWER = {"power": "tower"}
     PUMPING_STATION_SEWAGE = {
@@ -390,6 +393,7 @@ class Categories(Enum):
     SUBSTATION_ZONE = {"power": "substation", "substation": "distribution"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
     TRANSFORMER = {"power": "transformer"}
+    WATER_WELL = {"man_made": "water_well"}
 
     NATURAL_BASIN = {"natural": "water", "water": "basin"}
     NATURAL_TREE = {"natural": "tree"}
@@ -434,6 +438,7 @@ def apply_category(category, item: Feature):
 top_level_tags = [
     "aeroway",
     "amenity",
+    "barrier",
     "cemetery",
     "club",
     "craft",
@@ -448,11 +453,12 @@ top_level_tags = [
     "office",
     "power",
     "public_transport",
+    "railway",
     "shop",
     "telecom",
     "tourism",
+    "traffic_calming",
     "tunnel",
-    "railway",
     "waterway",
 ]
 

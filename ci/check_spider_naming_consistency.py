@@ -126,6 +126,7 @@ COUNTRYCODE_COMPONENTS = {
     "TW",
     "TZ",
     "UA",
+    "UG",
     "US",
     "UY",
     "UZ",
