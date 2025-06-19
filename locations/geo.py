@@ -479,7 +479,9 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
         return None
     if len(geometry["coordinates"]) not in [1, 2]:
         return None
-    if len(geometry["coordinates"]) == 1 and not (isinstance(geometry["coordinates"], list) or isinstance(geometry["coordinates"], tuple)):
+    if len(geometry["coordinates"]) == 1 and not (
+        isinstance(geometry["coordinates"], list) or isinstance(geometry["coordinates"], tuple)
+    ):
         return None
     if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
         # Multi-Point geometry possibly detected. Perform specific Multi-Point
@@ -495,7 +497,8 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
     elif not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][0], int)) or not (
         # Point geometry possible detected. Perform specific Point geometry
         # validation checks.
-        isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
+        isinstance(geometry["coordinates"][1], float)
+        or isinstance(geometry["coordinates"][1], int)
     ):
         return None
 
