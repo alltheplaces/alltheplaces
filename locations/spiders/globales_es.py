@@ -9,6 +9,7 @@ class GlobalesESSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Globales", "brand_wikidata": "Q24279046"}
     sitemap_urls = ["https://www.globales.com/en/sitemap.xml"]
     sitemap_rules = [(r"/map/$", "parse_sd")]
+    search_for_twitter = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.HOTEL, item)
