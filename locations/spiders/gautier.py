@@ -15,5 +15,5 @@ class GautierSpider(SitemapSpider, StructuredDataSpider):
         item["lon"] = response.xpath("//@data-lng").get()
         item.pop("image")
         apply_category(Categories.SHOP_FURNITURE, item)
-        item["branch"] = item.get("name").replace("Meubles ", "").replace("Gautier ", "")
+        item["branch"] = item.pop("name").replace("Meubles ", "").replace("Gautier ", "")
         yield item
