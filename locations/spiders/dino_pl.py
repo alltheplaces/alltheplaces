@@ -29,9 +29,11 @@ class DinoPLSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         try:
             if week_hours := feature.get("weekHours"):
-                item["opening_hours"].add_days_range(DAYS[:-1], *week_hours.split("-", 1))
+                if ":" in week_hours:
+                    item["opening_hours"].add_days_range(DAYS[:-1], *week_hours.split("-", 1))
             if sun_hours := feature.get("sundayHours"):
-                item["opening_hours"].add_range("Su", *sun_hours.split("-", 1))
+                if ":" in sun_hours:
+                    item["opening_hours"].add_range("Su", *sun_hours.split("-", 1))
         except:
             self.logger.error(
                 f'Failed to parse opening hours: Week Hours: {feature.get("weekHours")}, Sunday Hours: {feature.get("sundayHours")}'
