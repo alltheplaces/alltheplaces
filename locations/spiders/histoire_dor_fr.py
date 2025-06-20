@@ -13,5 +13,6 @@ class HistoireDorFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").replace("Histoire dʼOr - ", "")
+        item.pop("image")
         apply_category(Categories.SHOP_JEWELRY, item)
         yield item
