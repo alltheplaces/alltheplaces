@@ -4,7 +4,7 @@ import scrapy
 from scrapy import FormRequest
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -15,7 +15,6 @@ class BancoDelBienestarMXSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Banco del Bienestar",
         "brand_wikidata": "Q5719137",
-        "extras": Categories.BANK.value,
     }
     start_urls = ["https://directoriodesucursales.bancodelbienestar.gob.mx"]
     no_refs = True
@@ -38,4 +37,5 @@ class BancoDelBienestarMXSpider(scrapy.Spider):
             item["addr_full"] = clean_address(location.xpath('.//p[@class="card-text"]/text()').getall())
             if map_url := location.xpath('.//a[contains(@href, "maps")]/@href').get():
                 item["lat"], item["lon"] = url_to_coords(map_url)
+            apply_category(Categories.BANK, item)
             yield item
