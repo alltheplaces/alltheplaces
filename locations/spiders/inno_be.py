@@ -5,7 +5,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_NL
+from locations.hours import DAYS_NL, OpeningHours
 from locations.items import Feature
 
 
@@ -21,7 +21,11 @@ class InnoBESpider(CrawlSpider):
             "ref": response.url,
             "branch": response.xpath('//h1[@class="store-detail__name"]/text()').get().removeprefix("INNO "),
             "addr_full": response.xpath('//h2[@class="store-detail__address"]/text()').get(),
-            "phone": response.xpath('//a[contains(@class, "store-detail__phone")]/@href').get().removeprefix("tel:").replace("/", "").replace(".", ""),
+            "phone": response.xpath('//a[contains(@class, "store-detail__phone")]/@href')
+            .get()
+            .removeprefix("tel:")
+            .replace("/", "")
+            .replace(".", ""),
             "email": response.xpath('//a[contains(@class, "store-detail__email")]/@href').get().removeprefix("mailto:"),
             "opening_hours": OpeningHours(),
         }
