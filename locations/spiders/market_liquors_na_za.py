@@ -19,13 +19,17 @@ class MarketLiquorsNAZASpider(Spider):
     def parse(self, response: Response) -> Iterable[Feature]:
         for store in response.xpath('.//div[contains(@class, "mk-text-block")]'):
             properties = {
-                "branch": store.xpath('./h3/strong/text()').get().removeprefix("Market Liquors "),
-                "country": store.xpath('(./ancestor::div[contains(@class, "wpb_row")]/preceding-sibling::div/div/div/h2[contains(@class, "mk-fancy-title")]/span/p/span/text())[last()]').get().removeprefix("MARKET LIQUORS "),
+                "branch": store.xpath("./h3/strong/text()").get().removeprefix("Market Liquors "),
+                "country": store.xpath(
+                    '(./ancestor::div[contains(@class, "wpb_row")]/preceding-sibling::div/div/div/h2[contains(@class, "mk-fancy-title")]/span/p/span/text())[last()]'
+                )
+                .get()
+                .removeprefix("MARKET LIQUORS "),
                 "opening_hours": OpeningHours(),
             }
-            if addr_full := merge_address_lines(store.xpath('./p/text()').getall()):
+            if addr_full := merge_address_lines(store.xpath("./p/text()").getall()):
                 properties["addr_full"] = addr_full.split("Telephone:", 1)[0]
-            elif addr_full := merge_address_lines(store.xpath('./div/p/text()').getall()):
+            elif addr_full := merge_address_lines(store.xpath("./div/p/text()").getall()):
                 properties["addr_full"] = addr_full.split("Telephone:", 1)[0]
             if phone_line := store.xpath('./p/strong[contains(text(), "Telephone: ")]/text()').get():
                 properties["phone"] = phone_line.removeprefix("Telephone: ")
