@@ -1,3 +1,4 @@
+from locations.geo import extract_geojson_point_geometry
 from locations.items import Feature
 
 
@@ -291,13 +292,22 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        if (
-            obj.get("geometry")
-            and obj["geometry"].get("type")
-            in ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]
-            and isinstance(obj["geometry"].get("coordinates"), list)
-        ):
-            item["geometry"] = obj["geometry"]
+        if obj.get("geometry") and obj["geometry"].get("type") in [
+            "Point",
+            "MultiPoint",
+            "LineString",
+            "MultiLineString",
+            "Polygon",
+            "MultiPolygon",
+        ]:
+            if rfc7946_point_geometry := extract_geojson_point_geometry(obj["geometry"]):
+                item["geometry"] = rfc7946_point_geometry
+            elif obj["geometry"]["type"] != "Point":
+                # Source geometry is supplied as a non-Point geometry type
+                # (such as Polygon) and should be returned as-is. There are no
+                # further checks done to ensure this geometry is valid RFC7946
+                # GeoJSON or GJ2008 geometry.
+                item["geometry"] = obj["geometry"]
         else:
             location = DictParser.get_first_key(
                 obj,
@@ -316,11 +326,16 @@ class DictParser:
                     "yextDisplayCoordinate",
                 ],
             )
-            # If not a good location object then use the parent
-            if not location or not isinstance(location, dict):
-                location = obj
-            item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
-            item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+            if location and isinstance(location, dict):
+                # Latitude/longitude are wrapped inside a "coordinates" /
+                # "location" style of named dictionary.
+                item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+                item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+            else:
+                # Latitude/longitude are properties of the root dictionary or
+                # any other nested dictionary of any name.
+                item["lat"] = DictParser.get_first_key(obj, DictParser.lat_keys)
+                item["lon"] = DictParser.get_first_key(obj, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 
