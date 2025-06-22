@@ -11,7 +11,9 @@ class WyndhamCityCouncilStreetTreesAUSpider(JSONBlobSpider):
     name = "wyndham_city_council_street_trees_au"
     item_attributes = {"brand": "Wyndham City Council", "brand_wikidata": "Q96773743", "state": "VIC"}
     allowed_domains = ["digital.wyndham.vic.gov.au"]
-    start_urls = ["https://digital.wyndham.vic.gov.au/treeplanting-season/getGeoJson/-37.72700873131489,-38.02023822658594,143.70666503906253,145.05249023437503"]
+    start_urls = [
+        "https://digital.wyndham.vic.gov.au/treeplanting-season/getGeoJson/-37.72700873131489,-38.02023822658594,143.70666503906253,145.05249023437503"
+    ]
     locations_key = "features"
 
     def pre_process_data(self, feature: dict) -> None:
