@@ -23,13 +23,13 @@ class WyndhamCityCouncilStreetTreesAUSpider(JSONBlobSpider):
         item["ref"] = str(feature["id"])
         item["addr_full"] = feature["property_address"]
         if status := feature["status"]:
-            match feature["status"].lower().removesuffix("2023").strip():
+            match status.lower().removesuffix("2023").strip():
                 case "pending" | "proposedsite" | "vandalised":
                     return
                 case "alive" | "dead" | "notsuitable" | "planted" | "suitable" | "unchecked":
                     pass
                 case _:
-                    self.logger.warning("Unknown tree status: {}".format(feature["status"]))
+                    self.logger.warning("Unknown tree status: {}".format(status))
         apply_category(Categories.NATURAL_TREE, item)
         item["extras"]["protected"] = "yes"
         item["extras"]["species"] = feature["current_botanical_name"]
