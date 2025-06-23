@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
+from locations.items import SocialMedia, set_social_media
 
 
 class BarnesAndNobleUSSpider(Spider):
@@ -41,6 +42,8 @@ class BarnesAndNobleUSSpider(Spider):
             except:
                 self.logger.error(f"Failed to parse opening hours: {store_hours}")
                 item["opening_hours"] = None
+            if instagram := store.get("instagramLink"):
+                set_social_media(item, SocialMedia.INSTAGRAM, instagram)
             yield item
 
     def parse_opening_hours(self, hours: list) -> OpeningHours:
