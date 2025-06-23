@@ -15,6 +15,6 @@ class LeroidumatelasFRSpider(CrawlSpider, StructuredDataSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").replace("Mon magasin Le Roi du Matelas ","")
+        item["branch"] = item.pop("name").replace("Mon magasin Le Roi du Matelas ", "")
         apply_category(Categories.SHOP_BED, item)
         yield item
