@@ -36,7 +36,7 @@ class BarnesAndNobleUSSpider(Spider):
             item["branch"] = item.pop("name")
             item["website"] = f'https://stores.barnesandnoble.com/store/{item["ref"]}'
             store_hours = store.get("hoursList", [])
-            if "Opening " in store_hours[0].get("hourDesc", "").title():  # opening soon
+            if "Opening " in store.get("hours", "").title():  # opening soon
                 return
             try:
                 item["opening_hours"] = self.parse_opening_hours(store_hours)
