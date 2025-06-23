@@ -30,5 +30,6 @@ class BarnesAndNobleUSSpider(Spider):
             item = DictParser.parse(store)
             # When both address1, address2 fields are present, address1 is venue/mall name else street address.
             item["street_address"] = store.get("address2") or store.get("address1")
+            item["branch"] = item.pop("name")
             item["website"] = f'https://stores.barnesandnoble.com/store/{item["ref"]}'
             yield item
