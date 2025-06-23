@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.hours import OpeningHours
 
 
 class BarnesAndNobleUSSpider(Spider):
@@ -32,4 +33,20 @@ class BarnesAndNobleUSSpider(Spider):
             item["street_address"] = store.get("address2") or store.get("address1")
             item["branch"] = item.pop("name")
             item["website"] = f'https://stores.barnesandnoble.com/store/{item["ref"]}'
+            try:
+                item["opening_hours"] = self.parse_opening_hours(store.get("hoursList", []))
+            except:
+                self.logger.error(f'Failed to parse opening hours: {store.get("hoursList", [])}')
+                item["opening_hours"] = None
             yield item
+
+    def parse_opening_hours(self, hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in hours:
+            oh.add_range(
+                rule["dayName"],
+                rule["openTime"] + " AM",
+                rule["closeTime"] + " PM",
+                time_format="%I:%M %p",
+            )
+        return oh
