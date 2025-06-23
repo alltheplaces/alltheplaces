@@ -4,6 +4,7 @@ from typing import Any
 from scrapy import Request, Spider
 from scrapy.http import Response
 
+from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
@@ -44,6 +45,7 @@ class BarnesAndNobleUSSpider(Spider):
                 item["opening_hours"] = None
             if instagram := store.get("instagramLink"):
                 set_social_media(item, SocialMedia.INSTAGRAM, instagram)
+            apply_yes_no("second_hand", item, store.get("usedBook"))
             yield item
 
     def parse_opening_hours(self, hours: list) -> OpeningHours:
