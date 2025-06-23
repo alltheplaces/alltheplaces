@@ -1,11 +1,10 @@
-import re
 from typing import Iterable
 
 from scrapy import Selector
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_CZ
+from locations.hours import DAYS_CZ, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -22,7 +21,10 @@ class BrnenkaCZSpider(JSONBlobSpider):
         item["ref"] = details_html.xpath('//a[contains(@href, "/detail-prodejny/")]/@href').get().split("/")[2]
         item["lat"] = feature["position"][0]
         item["lon"] = feature["position"][1]
-        item["website"] = "http://www.brnenka.cz/detail-prodejny/" + details_html.xpath('//a[contains(@href, "/detail-prodejny/")]/@href').get().split("/")[2]
+        item["website"] = (
+            "http://www.brnenka.cz/detail-prodejny/"
+            + details_html.xpath('//a[contains(@href, "/detail-prodejny/")]/@href').get().split("/")[2]
+        )
         item["addr_full"] = merge_address_lines(details_html.xpath('//p[@class="address"]//text()').getall())
         hours_text = " ".join(details_html.xpath('//table[@class="opening"]//text()').getall())
         item["opening_hours"] = OpeningHours()
