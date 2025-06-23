@@ -9,8 +9,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class HesburgerEUSpider(JSONBlobSpider):
-    name = "hesburger_eu"
+class HesburgerSpider(JSONBlobSpider):
+    name = "hesburger"
     item_attributes = {"brand": "Hesburger", "brand_wikidata": "Q1276832"}
 
     def start_requests(self):
