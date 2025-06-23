@@ -94,7 +94,7 @@ class SheetzSpider(scrapy.Spider):
 
         if features.get("evTeslaSupercharger"):
             apply_category(Categories.CHARGING_STATION, item)
-            apply_yes_no("socket:tesla_supercharger", item, True)
+            apply_yes_no("socket:nacs", item, True)
 
         if features.get("evChaDemoDcFastCharging"):
             apply_category(Categories.CHARGING_STATION, item)

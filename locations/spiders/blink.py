@@ -13,7 +13,7 @@ SOCKET_TYPES = {
     "GBT": "gb_ac",
     "J1772": "type1",
     "MENNEKES": "type2",
-    "NACS": "tesla_supercharger",
+    "NACS": "nacs",
 }
 
 

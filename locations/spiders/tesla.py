@@ -70,11 +70,11 @@ class TeslaSpider(scrapy.Spider):
                     capacity, output, ccs_compat = match
 
                     if ccs_compat:
-                        feature["extras"]["socket:tesla_supercharger_ccs"] = capacity
-                        feature["extras"]["socket:tesla_supercharger_ccs:output"] = output
+                        feature["extras"]["socket:type2_combo"] = capacity
+                        feature["extras"]["socket:type2_combo:output"] = output
                     else:
-                        feature["extras"]["socket:tesla_supercharger"] = capacity
-                        feature["extras"]["socket:tesla_supercharger:output"] = output
+                        feature["extras"]["socket:nacs"] = capacity
+                        feature["extras"]["socket:nacs:output"] = output
 
         if "tesla_center_delivery" in location_data.get("location_type"):
             apply_category(Categories.SHOP_CAR, feature)
