@@ -10,7 +10,7 @@ from locations.geo import city_locations
 
 class BarnesAndNobleUSSpider(Spider):
     name = "barnes_and_noble_us"
-    item_attributes = {"brand": "Barnes and Noble"}
+    item_attributes = {"brand": "Barnes & Noble", "brand_wikidata": "Q795454"}
     allowed_domains = [
         "stores.barnesandnoble.com",
     ]
