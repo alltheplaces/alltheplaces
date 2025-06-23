@@ -1,22 +1,20 @@
 import scrapy
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from locations.dict_parser import DictParser
 
 
-class BigLotsSpider(scrapy.spiders.SitemapSpider):
+class BigLotsSpider(scrapy.Spider):
     name = "big_lots"
     item_attributes = {"brand": "Big Lots", "brand_wikidata": "Q4905973"}
-    allowed_domains = ["local.biglots.com"]
-    sitemap_urls = [
-        "https://local.biglots.com/robots.txt",
+    start_urls = [
+        "https://core.service.elfsight.com/p/boot/?page=https%3A%2F%2Fbiglots.com%2Fstore-locator%2F&w=38636f5f-4115-4585-8c00-9e245fd92818",
     ]
-    sitemap_rules = [
-        (r"https://local\.biglots\.com/[^/]+/[^/]+/[^/]+$", "parse"),
-    ]
-    drop_attributes = {"image"}
 
     def parse(self, response):
-        MicrodataParser.convert_to_json_ld(response)
-        item = LinkedDataParser.parse(response, "Store")
-        yield item
+        for location in response.json()["data"]["widgets"]["38636f5f-4115-4585-8c00-9e245fd92818"]["data"]["settings"][
+            "locations"
+        ]:
+            location.update(location.pop("place"))
+            item = DictParser.parse(location)
+            item.pop("website")
+            yield item
