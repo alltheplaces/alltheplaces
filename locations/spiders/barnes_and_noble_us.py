@@ -8,7 +8,7 @@ from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
-from locations.items import SocialMedia, set_social_media
+from locations.items import SocialMedia, set_closed, set_social_media
 
 
 class BarnesAndNobleUSSpider(Spider):
@@ -36,8 +36,11 @@ class BarnesAndNobleUSSpider(Spider):
             item["branch"] = item.pop("name")
             item["website"] = f'https://stores.barnesandnoble.com/store/{item["ref"]}'
             item["extras"]["start_date"] = store.get("openDate")
+            if "closed" in store.get("message", "").lower():
+                set_closed(item, store.get("closeDate"))
+
             store_hours = store.get("hoursList", [])
-            if "Opening " in store.get("hours", "").title():  # opening soon
+            if "Opening" in store.get("hours", "").title():  # opening soon
                 return
             try:
                 item["opening_hours"] = self.parse_opening_hours(store_hours)
