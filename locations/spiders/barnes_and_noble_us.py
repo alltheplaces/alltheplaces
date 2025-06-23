@@ -35,6 +35,7 @@ class BarnesAndNobleUSSpider(Spider):
             item["street_address"] = store.get("address2") or store.get("address1")
             item["branch"] = item.pop("name")
             item["website"] = f'https://stores.barnesandnoble.com/store/{item["ref"]}'
+            item["extras"]["start_date"] = store.get("openDate")
             store_hours = store.get("hoursList", [])
             if "Opening " in store.get("hours", "").title():  # opening soon
                 return
