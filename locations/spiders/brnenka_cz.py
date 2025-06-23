@@ -21,10 +21,7 @@ class BrnenkaCZSpider(JSONBlobSpider):
         item["ref"] = details_html.xpath('//a[contains(@href, "/detail-prodejny/")]/@href').get().split("/")[2]
         item["lat"] = feature["position"][0]
         item["lon"] = feature["position"][1]
-        item["website"] = (
-            "http://www.brnenka.cz/detail-prodejny/"
-            + details_html.xpath('//a[contains(@href, "/detail-prodejny/")]/@href').get().split("/")[2]
-        )
+        item["website"] = response.urljoin(details_html.xpath('//a[contains(@href, "/detail-prodejny/")]/@href').get())
         item["addr_full"] = merge_address_lines(details_html.xpath('//p[@class="address"]//text()').getall())
         hours_text = " ".join(details_html.xpath('//table[@class="opening"]//text()').getall())
         item["opening_hours"] = OpeningHours()
