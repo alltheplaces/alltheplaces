@@ -33,10 +33,13 @@ class BarnesAndNobleUSSpider(Spider):
             item["street_address"] = store.get("address2") or store.get("address1")
             item["branch"] = item.pop("name")
             item["website"] = f'https://stores.barnesandnoble.com/store/{item["ref"]}'
+            store_hours = store.get("hoursList", [])
+            if "Opening " in store_hours[0].get("hourDesc", "").title():  # opening soon
+                return
             try:
-                item["opening_hours"] = self.parse_opening_hours(store.get("hoursList", []))
+                item["opening_hours"] = self.parse_opening_hours(store_hours)
             except:
-                self.logger.error(f'Failed to parse opening hours: {store.get("hoursList", [])}')
+                self.logger.error(f"Failed to parse opening hours: {store_hours}")
                 item["opening_hours"] = None
             yield item
 
