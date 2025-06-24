@@ -9,12 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class MedievalTimesSpider(CrawlSpider, StructuredDataSpider):
     name = "medieval_times"
-    item_attributes = {
-        "name": "Medieval Times Dinner & Tournament",
-        "brand": "Medieval Times Dinner & Tournament",
-        "brand_wikidata": "Q6806841",
-        "extras": {"short_name": "Medieval Times"},
-    }
+    item_attributes = {"name": "Medieval Times", "brand": "Medieval Times", "brand_wikidata": "Q6806841"}
     start_urls = ["https://www.medievaltimes.com/locations"]
     rules = [Rule(LinkExtractor(restrict_xpaths='//a[@gtm-category="locations"]'), "parse")]
 
