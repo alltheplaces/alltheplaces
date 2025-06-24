@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -26,6 +27,7 @@ class PrintempsSpider(JSONBlobSpider):
         item["image"] = feature["MEDIA_PATH"].split("?", 1)[0]
         item["opening_hours"] = OpeningHours()
         for day_name, day_hours in feature["HORAIRES"].items():
+            day_hours = re.sub(r"(?<![\d:])(\d{1,2})\s*-\s*(\d{1,2})(?![\d:])", r"\1:00-\2:00", day_hours)
             if day_hours.startswith("Ferm"):
                 item["opening_hours"].set_closed(DAYS_FR[day_name.title()])
             else:
