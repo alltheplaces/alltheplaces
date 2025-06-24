@@ -1,7 +1,7 @@
 from typing import Any, Iterable
 
-import scrapy
 from chompjs import chompjs
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
@@ -10,7 +10,7 @@ from locations.items import Feature
 from locations.react_server_components import parse_rsc
 
 
-class BudniDESpider(scrapy.Spider):
+class BudniDESpider(Spider):
     name = "budni_de"
     allowed_domains = ["www.budni.de"]
     start_urls = ["https://www.budni.de/filialen"]
