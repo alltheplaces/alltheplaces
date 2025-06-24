@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class BlindsToGoSpider(SitemapSpider):
     name = "blinds_to_go"
-    item_attributes = {"brand": "Blinds to Go", "brand_wikidata": "Q123409913"}
+    item_attributes = {"name": "Blinds to Go", "brand": "Blinds to Go", "brand_wikidata": "Q123409913"}
     start_urls = ["https://www.blindstogo.com/en/stores"]
     sitemap_urls = ["https://www.blindstogo.com/sitemap.xml"]
     sitemap_rules = [(r"/stores/[^/]+", "parse")]
@@ -19,8 +19,7 @@ class BlindsToGoSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["branch"] = response.xpath("//h5/text()").get()
-        item["name"] = self.item_attributes["brand"]
+        item["branch"] = response.xpath("//h5/text()").get("").replace("Showroom", "").strip("- ")
         item["addr_full"] = response.xpath('//*[@class="flex items-center flex-wrap"]//p//a//text()').get()
         item["phone"] = response.xpath(
             '//*[@class="flex items-center flex-wrap"]//*[contains(@href,"tel:")]/text()'
