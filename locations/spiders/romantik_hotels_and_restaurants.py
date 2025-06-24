@@ -6,7 +6,7 @@ from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class RomantikHotelsAndRestaurentsSpider(CrawlSpider, StructuredDataSpider):
+class RomantikHotelsAndRestaurantsSpider(CrawlSpider, StructuredDataSpider):
     name = "romantik_hotels_and_restaurants"
     item_attributes = {"brand": "Romantik Hotels & Restaurants", "brand_wikidata": "Q126075497"}
     start_urls = ["https://www.romantikhotels.com/en/hotels/"]
