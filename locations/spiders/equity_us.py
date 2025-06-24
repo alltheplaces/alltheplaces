@@ -10,6 +10,7 @@ class EquityUSSpider(SitemapSpider, StructuredDataSpider):
         "operator": "Equity Residential",
         "operator_wikidata": "Q187740",
     }
+    requires_proxy = True
     sitemap_urls = ["https://www.equityapartments.com/sitemap.xml"]
     sitemap_rules = [
         (r"/[\w-]+/[\w-]+/[\w-]+-apartments$", "parse"),
