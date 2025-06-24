@@ -55,7 +55,7 @@ class TeslaSpider(scrapy.Spider):
         # Deal with https://github.com/alltheplaces/alltheplaces/issues/10892
         feature_email = feature.get("email")
         if feature_email and isinstance(feature_email, dict) and "value" in feature_email:
-            feature["email"] = feature_email["email"]["value"]
+            feature["email"] = feature_email["value"]
 
         if "supercharger" in location_data.get("location_type"):
             apply_category(Categories.CHARGING_STATION, feature)
