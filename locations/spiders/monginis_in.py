@@ -17,5 +17,6 @@ class MonginisINSpider(CrawlSpider, StructuredDataSpider):
     time_format = "%I:%M %p"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = None
         apply_category(Categories.SHOP_BAKERY, item)
         yield item
