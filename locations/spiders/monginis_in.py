@@ -18,5 +18,5 @@ class MonginisINSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
-        apply_category(Categories.SHOP_BAKERY, item)
+        apply_category(Categories.SHOP_PASTRY, item)
         yield item
