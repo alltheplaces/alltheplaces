@@ -21,6 +21,7 @@ class McgrathAUSpider(Spider):
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for office in chompjs.parse_js_object(response.text)["data"]:
             slug = re.sub(r"\W+", "-", office["name"].strip()).lower()
