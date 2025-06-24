@@ -44,7 +44,9 @@ class SigmaITSpider(JSONBlobSpider):
     def parse_store_page(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
         item["website"] = response.url  # Capture redirect destination
-        if m := re.findall(r"\b\d{10}\b", " ".join(response.xpath('//span[contains(@class, "littleaddress")]/span[3]/text()').getall())):
+        if m := re.findall(
+            r"\b\d{10}\b", " ".join(response.xpath('//span[contains(@class, "littleaddress")]/span[3]/text()').getall())
+        ):
             item["phone"] = "; ".join(m)
         item["email"] = response.xpath('//span[contains(@class, "littleaddress")]/span[4]/text()').get()
         item["opening_hours"] = OpeningHours()
