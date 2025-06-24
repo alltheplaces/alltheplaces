@@ -5,7 +5,7 @@ from locations.categories import apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MedievalTimesUSSpider(CrawlSpider, StructuredDataSpider):
+class MedievalTimesSpider(CrawlSpider, StructuredDataSpider):
     name = "medieval_times"
     item_attributes = {
         "name": "Medieval Times Dinner & Tournament",
