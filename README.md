@@ -117,7 +117,7 @@ The output from running the project is [published on a regular cadence](docs/WEE
 
 ## Contact us
 
-Communication is primarily through tickets on the project GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues). Many contributors are also present on [OSM US Slack](https://slack.openstreetmap.us/), in particular we watch the [#poi](https://osmus.slack.com/archives/CDJ4LKA2Y) channel.
+Communication is primarily through tickets on the project GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues). Many contributors are also present on [OSM US Slack](https://slack.openstreetmap.us/), which has an [#alltheplaces](https://osmus.slack.com/archives/C07EY4Y3M6F) channel.
 
 ## License
 

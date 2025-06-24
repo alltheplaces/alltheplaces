@@ -18,10 +18,14 @@ def parse_rsc(data_raw: Iterable[int]) -> Iterator[tuple[int, Any]]:
     while True:
         row_id_str = bytes(itertools.takewhile(lambda c: c != ord(":"), data))
         if len(row_id_str) == 0:
-            break
-        row_id = int(row_id_str, 16)
+            row_id = 0
+        else:
+            row_id = int(row_id_str, 16)
 
-        row_tag = chr(next(data))
+        try:
+            row_tag = chr(next(data))
+        except StopIteration:
+            break
 
         if row_tag in "AGLMOSTUVglmos":
             row_length = int(bytes(itertools.takewhile(lambda c: c != ord(","), data)), 16)
