@@ -22,7 +22,9 @@ class BlindsToGoSpider(SitemapSpider):
         item["branch"] = response.xpath("//h5/text()").get()
         item["name"] = self.item_attributes["brand"]
         item["addr_full"] = response.xpath('//*[@class="flex items-center flex-wrap"]//p//a//text()').get()
-        item["phone"] = response.xpath('//*[@class="flex items-center flex-wrap"]//*[contains(@href,"tel:")]/text()').get()
+        item["phone"] = response.xpath(
+            '//*[@class="flex items-center flex-wrap"]//*[contains(@href,"tel:")]/text()'
+        ).get()
         item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
