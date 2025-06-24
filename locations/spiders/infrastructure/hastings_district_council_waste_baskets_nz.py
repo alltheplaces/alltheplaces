@@ -15,6 +15,7 @@ class HastingsDistrictCouncilWasteBasketsNZSpider(ArcGISFeatureServerSpider):
     service_id = "ParksReserves/Parks_and_Reserves"
     server_type = "MapServer"
     layer_id = "0"
+    requires_proxy = True  # Data centre IP ranges appear to be blocked.
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["system_id"])
