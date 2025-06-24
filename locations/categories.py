@@ -330,6 +330,7 @@ class Categories(Enum):
     TAXI = {"amenity": "taxi"}
     TELEPHONE = {"amenity": "telephone"}
     TOILETS = {"amenity": "toilets"}
+    THEATRE = {"amenity": "theatre"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VENDING_MACHINE = {"amenity": "vending_machine"}
     VETERINARY = {"amenity": "veterinary"}
