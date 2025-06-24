@@ -5,15 +5,19 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class BaylorScottWhiteHealthSpider(scrapy.Spider):
-    name = "baylor_scott_white_health"
+class BaylorScottWhiteHealthUSSpider(scrapy.Spider):
+    name = "baylor_scott_white_health_us"
     item_attributes = {"operator": "Baylor Scott & White Health", "operator_wikidata": "Q41568258"}
     allowed_domains = ["phyndapi.bswapi.com"]
     base_url = "https://phyndapi.bswapi.com/V4/Places/GetLocations"
+    headers = {
+        "x-bsw-clientid": "BSWHealth.com",
+    }
 
     def start_requests(self):
         yield scrapy.Request(
             self.base_url + "?perPage=1",
+            headers=self.headers,
             callback=self.get_pages,
         )
 
@@ -23,7 +27,9 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
         page_size = 100
 
         while page_number * page_size < total_count:
-            yield scrapy.Request(self.base_url + f"?perPage={page_size}&pageNumber={page_number + 1}")
+            yield scrapy.Request(
+                self.base_url + f"?perPage={page_size}&pageNumber={page_number + 1}", headers=self.headers
+            )
             page_number += 1
 
     def parse(self, response):
@@ -53,6 +59,6 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
                     "%H:%M:%S",
                 )
 
-            properties["opening_hours"] = oh.as_opening_hours()
+            properties["opening_hours"] = oh
 
             yield Feature(**properties)
