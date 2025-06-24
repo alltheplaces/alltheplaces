@@ -19,6 +19,6 @@ class HastingsDistrictCouncilPlaygroundsNZSpider(ArcGISFeatureServerSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["id"])
-        item["name"]  = feature["TAG"]
+        item["name"] = feature["TAG"]
         apply_category(Categories.LEISURE_PLAYGROUND, item)
         yield item
