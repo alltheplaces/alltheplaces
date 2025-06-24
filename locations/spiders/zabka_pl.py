@@ -17,7 +17,7 @@ class ZabkaPLSpider(scrapy.Spider):
         for store in response.json():
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street")
-            item.pop("website") # links general locator page, not POI
+            item.pop("website")  # links general locator page, not POI
 
             item["opening_hours"] = OpeningHours()
             for day, hours in store.get("openingHours", {}).items():
