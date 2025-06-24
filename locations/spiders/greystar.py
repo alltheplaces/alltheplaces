@@ -1,5 +1,7 @@
 from locations.categories import apply_category
+from locations.country_utils import CountryUtils
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.state_clean_up import STATES
 
 
 class GreystarSpider(JSONBlobSpider):
@@ -19,6 +21,14 @@ class GreystarSpider(JSONBlobSpider):
 
         if len(location["Images"]) > 0:
             item["image"] = location["Images"][0]["Src"]
+
+        # Try to guess the country, given just the state.
+        # Sometimes the "State" field is the country.
+        for country, states in STATES.items():
+            if location["State"] in states:
+                item["country"] = country
+        if not item["country"]:
+            item["country"] = CountryUtils().to_iso_alpha2_country_code(location["State"])
 
         apply_category({"landuse": "residential", "residential": "apartments"}, item)
 
