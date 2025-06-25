@@ -19,7 +19,7 @@ class TheWhiskyShopGBSpider(JSONBlobSpider):
         json_data = json.loads(data)
         for location in json_data.values():
             item = DictParser.parse(location)
-            item["street_address"] = merge_address_lines([location["Address_line_1"], location["address_line_2"]])
+            item["street_address"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])
             item["branch"] = item.pop("name").removeprefix("The Whisky Shop ")
             oh = OpeningHours()
             for day in DAYS_FULL:
