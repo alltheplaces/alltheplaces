@@ -389,7 +389,8 @@ class Categories(Enum):
         "utility": "water",
         "substance": "water",
     }
-    STREET_CABINET_POWER = {"man_made": "street_cabinet", "street_cabinet": "power", "utility": "power"}
+    STREET_CABINET_LIGHTING = {"man_made": "street_cabinet", "utility": "street_lighting"}
+    STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
     STREET_CABINET_TRAFFIC_CONTROL = {"man_made": "street_cabinet", "street_cabinet": "traffic_control"}
     STREET_LAMP = {"highway": "street_lamp", "support": "pole"}
     SUBSTATION = {"power": "substation"}
