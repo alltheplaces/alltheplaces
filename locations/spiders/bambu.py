@@ -60,12 +60,13 @@ class BambuSpider(Spider):
         if response.json().get("exception", False):
             raise RuntimeError(result["name"] + result["message"])
         for location in result["data"]["items"]:
-            location.update(location.pop("mapLocation"))
+            location.update(location.pop("mapLocation", {}))
             item = DictParser.parse(location)
-            item["housenumber"] = location["streetAddress"]["number"]
-            item["street"] = location["streetAddress"]["name"]
-            item["street_address"] = item["street_address"].get("formattedAddressLine")
-            item["extras"]["addr:unit"] = location["streetAddress"]["apt"]
+            street_address = location.get("streetAddress", {})
+            item["housenumber"] = street_address.get("number")
+            item["street"] = street_address.get("name")
+            item["street_address"] = street_address.get("formattedAddressLine")
+            item["extras"]["addr:unit"] = street_address.get("apt")
             if email := location.get("agentEmail"):
                 if "@" in email:
                     item["email"] = email
@@ -73,13 +74,13 @@ class BambuSpider(Spider):
             item["phone"] = location.get("storePhone")
             set_social_media(item, SocialMedia.FACEBOOK, location.get("facebook"))
             set_social_media(item, SocialMedia.YELP, location.get("yelp"))
-            item["addr_full"] = location["address"]
-            item["branch"] = location["title"].removeprefix("Bambu ")
+            item["addr_full"] = location.get("address")
+            item["branch"] = location.get("title", "").removeprefix("Bambu ")
 
             if location.get("instagram") != "https://www.instagram.com/bambudessertdrinks/":
                 set_social_media(item, SocialMedia.INSTAGRAM, location.get("instagram"))
 
-            item["website"] = response.urljoin(location["link-location-pages-title"])
+            item["website"] = response.urljoin(location.get("link-location-pages-title"))
 
             oh = OpeningHours()
             for i, day in enumerate(DAYS):

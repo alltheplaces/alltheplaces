@@ -25,7 +25,7 @@ class LosAngelesCountyDepartmentOfPublicWorksStreetLampsUSSpider(ArcGISFeatureSe
         item["ref"] = str(feature["OBJECTID"])
         apply_category(Categories.STREET_LAMP, item)
         if sce_id := feature.get("SCE_POL_I"):
-            item["extras"]["alt_ref"] = feature["SCE_POL_I"]
+            item["extras"]["alt_ref"] = sce_id
         match feature["POLE_TYPE"]:
             case "C":
                 item["extras"]["material"] = "concrete"

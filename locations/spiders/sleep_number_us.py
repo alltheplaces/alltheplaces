@@ -32,8 +32,7 @@ class SleepNumberUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["entities"]:
             item = DictParser.parse(store)
-            item["ref"] = store["cid"]
-            item["website"] = store["c_storePagesURLURL"]
+            item["ref"] = item["website"] = store["c_storePagesURLURL"]
             item["extras"]["ref:google:place_id"] = store.get("googlePlaceId")
 
             try:
