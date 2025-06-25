@@ -14,7 +14,6 @@ class ThePizzaCompanyTHSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Pizza Com ")
-        item["website"] = "https://www.1112.com/store"
         apply_category(Categories.RESTAURANT, item)
         item["extras"]["cuisine"] = "pizza"
         yield item
