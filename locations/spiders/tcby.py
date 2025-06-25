@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class TCBYSpider(JSONBlobSpider):
+class TcbySpider(JSONBlobSpider):
     name = "tcby"
     item_attributes = {"brand": "TCBY", "brand_wikidata": "Q7669631"}
     start_urls = [
