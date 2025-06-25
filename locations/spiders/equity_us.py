@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -18,6 +18,6 @@ class EquityUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["ApartmentComplex"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category({"landuse": "residential", "residential": "apartments"}, item)
+        apply_category(Categories.RESIDENTIAL_APARTMENTS, item)
 
         yield item

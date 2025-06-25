@@ -2,7 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -55,6 +55,6 @@ class AvalonUSSpider(SitemapSpider):
                 oh.add_ranges_from_string(line)
             item["extras"]["opening_hours:office"] = oh.as_opening_hours()
 
-        apply_category({"landuse": "residential", "residential": "apartments"}, item)
+        apply_category(Categories.RESIDENTIAL_APARTMENTS, item)
 
         yield item
