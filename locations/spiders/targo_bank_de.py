@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TargoBAnkDESpider(SitemapSpider, StructuredDataSpider):
+class TargoBankDESpider(SitemapSpider, StructuredDataSpider):
     name = "targo_bank_de"
     item_attributes = {"brand": "Targobank", "brand_wikidata": "Q1455437"}
     sitemap_urls = ["https://www.targobank.de/de/branch-sitemap.aspx"]
