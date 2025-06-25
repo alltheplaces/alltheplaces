@@ -8,9 +8,10 @@ class Bubbas33USSpider(SitemapSpider, StructuredDataSpider):
     name = "bubbas33_us"
     item_attributes = {"brand": "Bubba's 33", "brand_wikidata": "Q119359352"}
     sitemap_urls = ["https://www.bubbas33.com/sitemap.xml"]
-    sitemap_rules = [("/locations/", "parse_sd")]
+    sitemap_rules = [("/locations/", "parse")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
+        item["website"] = response.url
         extract_google_position(item, response)
         yield item
