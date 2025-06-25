@@ -29,4 +29,5 @@ class CavaUSSpider(JSONBlobSpider):
         item["branch"] = item.pop("name", "")
         item["phone"] = feature.get("telephones", {}).get("primary", {}).get("number")
         item["email"] = feature.get("emailAddresses", {}).get("primary", {}).get("address")
+        item["website"] = f'{response.url}/{feature.get("locationRef")}'
         yield item
