@@ -15,6 +15,7 @@ class CashbuildSpider(JSONBlobSpider):
     allowed_domains = ["www.cashbuild.co.za"]
     start_urls = ["https://www.cashbuild.co.za/module/radiusdelivery/StoreSelectorAjax"]
     locations_key = "stores"
+    requires_proxy = True
 
     def start_requests(self) -> Iterable[FormRequest]:
         for country_code in ["BW", "LS", "MW", "NA", "SZ", "ZA"]:
