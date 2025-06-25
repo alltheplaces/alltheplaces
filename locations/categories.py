@@ -355,6 +355,13 @@ class Categories(Enum):
     BOREHOLE = {"man_made": "borehole"}
     CULVERT = {"tunnel": "culvert"}
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
+    KERB_GRATE = {
+        "man_made": "manhole",
+        "manhole": "drain",
+        "inlet": "kerb_grate",
+        "utility": "stormwater",
+        "substance": "rainwater",
+    }
     MONITORING_STATION = {"man_made": "monitoring_station"}
     OUTFALL_STORMWATER = {
         "man_made": "outfall",
