@@ -4,6 +4,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -30,4 +31,16 @@ class CavaUSSpider(JSONBlobSpider):
         item["phone"] = feature.get("telephones", {}).get("primary", {}).get("number")
         item["email"] = feature.get("emailAddresses", {}).get("primary", {}).get("address")
         item["website"] = f'{response.url}/{feature.get("locationRef")}'
+        hours_list = feature.get("channels", {}).get("nonChannel", {}).get("storeStoreHours", {}).get("hours") or [{}]
+        try:
+            item["opening_hours"] = self.parse_opening_hours(hours_list[0])
+        except:
+            self.logger.error(f"Failed to parse opening hours: {hours_list[0]}")
         yield item
+
+    def parse_opening_hours(self, opening_hours: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            if hours := opening_hours.get(day.lower()):
+                oh.add_range(day, hours["open"], hours["close"])
+        return oh
