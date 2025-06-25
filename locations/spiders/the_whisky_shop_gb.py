@@ -3,8 +3,8 @@ import re
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class TheWhiskyShopGBSpider(JSONBlobSpider):
@@ -22,7 +22,7 @@ class TheWhiskyShopGBSpider(JSONBlobSpider):
             item["branch"] = item.pop("name").removeprefix("The Whisky Shop ")
             oh = OpeningHours()
             for day in DAYS_FULL:
-                myday=location["normal_hours"][day]
+                myday = location["normal_hours"][day]
                 oh.add_range(day, myday["from"], myday["to"])
             item["opening_hours"] = oh
             apply_category(Categories.SHOP_ALCOHOL, item)
