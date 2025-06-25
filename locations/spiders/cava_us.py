@@ -1,8 +1,10 @@
 import json
+from typing import Iterable
 
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -20,3 +22,7 @@ class CavaUSSpider(JSONBlobSpider):
         feature.update(feature.pop("geographic", {}))
         feature.update(feature.pop("address", {}))
         feature["address"] = feature.pop("primary", {})
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature.get("storeNumber")
+        yield item
