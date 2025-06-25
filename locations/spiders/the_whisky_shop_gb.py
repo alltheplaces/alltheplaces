@@ -8,7 +8,6 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-
 class TheWhiskyShopGBSpider(JSONBlobSpider):
     name = "the_whisky_shop_gb"
     item_attributes = {"brand": "The Whisky Shop", "brand_wikidata": "Q134400495"}
