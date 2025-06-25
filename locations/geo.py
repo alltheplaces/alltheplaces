@@ -6,6 +6,7 @@ from itertools import groupby
 from typing import Iterable
 
 import geonamescache
+from pyproj import Transformer
 
 from locations.searchable_points import get_searchable_points_path, open_searchable_points
 
@@ -437,3 +438,157 @@ def country_coordinates(return_lookup: bool = False) -> dict:
         return {row["isocode"]: (row["lat"], row["lon"]) for row in file}
     else:
         return file
+
+
+def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
+    """
+    Attempts to fuzzily extract RFC7946 GeoJSON Point Geometry from a
+    supplied dictionary which is an unknown GeoJSON-like geometry. If no
+    compatible Point geometry is detected, the function will return None.
+
+    The supplied GeoJSON-like geometry must not be a FeatureCollection but
+    rather a type of geometry. This function expects Point or MultiPoint
+    geometry only and will return None for FeatureCollection's and other
+    geometry types.
+
+    The predecessor to RFC7946 GeoJSON was GJ2008 GeoJSON which allows for
+    definition of an object "CRS" for defining a EPSG registered Coordinate
+    Reference System (CRS) as an alternative to EPSG:4326 (WGS84) which
+    RFC7946 requires use of. This function will detect GJ2008 CRS' and attempt
+    to reproject coordinates to EPS:4326 as expected by RFC7946 GeoJSON,
+    removing the "crs" object from the output as well, as this object is not
+    part of RFC7946 GeoJSON.
+
+    Some source data may also store a position (latitude/longitude pair) as a
+    tuple type, rather than the more commonly used list type in Python. This
+    function will detect use of tuple types for positions and convert to a
+    list type instead.
+
+    :param geometry: dictionary containing source GeoJSON-like geometry.
+    :return: RFC7946 compliant Point geometry as a dictionary, or None.
+    """
+    if not isinstance(geometry, dict):
+        return None
+    if not geometry.get("type"):
+        return None
+    if not geometry.get("coordinates"):
+        return None
+    if geometry["type"] not in ["Point", "MultiPoint"]:
+        return None
+    if not isinstance(geometry["coordinates"], list) and not isinstance(geometry["coordinates"], tuple):
+        return None
+    if len(geometry["coordinates"]) not in [1, 2]:
+        return None
+    if len(geometry["coordinates"]) == 1:
+        # Multi-Point geometry possibly detected. Perform specific Multi-Point
+        # geometry validation checks.
+        if not isinstance(geometry["coordinates"][0], list) and not isinstance(geometry["coordinates"][0], tuple):
+            return None
+        if len(geometry["coordinates"][0]) != 2:
+            # More than one Point exists in the Multi-Point geometry therefore
+            # it is not possible to extract a single Point geometry.
+            return None
+        if not isinstance(geometry["coordinates"][0][0], float) and not isinstance(geometry["coordinates"][0][0], int):
+            return None
+        if not isinstance(geometry["coordinates"][0][1], float) and not isinstance(geometry["coordinates"][0][1], int):
+            return None
+    elif len(geometry["coordinates"]) == 2:
+        # Point geometry possible detected. Perform specific Point geometry
+        # validation checks.
+        if not isinstance(geometry["coordinates"][0], float) and not isinstance(geometry["coordinates"][0], int):
+            return None
+        if not isinstance(geometry["coordinates"][1], float) and not isinstance(geometry["coordinates"][1], int):
+            return None
+
+    # At this point, we either have validly typed Point geometry or a validly
+    # typed Multi-Point geometry containing a single point.
+    new_geometry = {"type": "Point"}
+    if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
+        # Multi-Point geometry with a single point confirmed. Convert to Point
+        # geometry.
+        new_geometry["coordinates"] = [geometry["coordinates"][0][0], geometry["coordinates"][0][1]]
+    else:
+        # Point geometry confirmed.
+        new_geometry["coordinates"] = [geometry["coordinates"][0], geometry["coordinates"][1]]
+
+    # Convert GJ2008 to RFC7946 Point geometry (if necessary).
+    # Return RFC7946 Point geometry.
+    if reprojected_geometry := convert_gj2008_to_rfc7946_point_geometry(new_geometry):
+        return reprojected_geometry
+
+    return None
+
+
+def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:  # noqa: C901
+    """
+    Convert GJ2008 Point geometry with a projection other than EPSG:4326
+    (WGS84) to RFC7946 Point geometry which must always have a projection of
+    EPSG:4326.
+
+    If the supplied geometry is GJ2008 formatted (with a CRS nominated) and
+    the CRS is already EPSG:4326, this function will return the supplied
+    geometry without the "crs" definition, ensuring the geometry is formatted
+    according to RFC7946.
+
+    If the supplied geometry is not Point geometry or cannot be reprojected to
+    EPSG:4326, this function returns None.
+
+    :param geometry: dictionary containing source GJ2008 Point geometry.
+    :return: RFC7946 compliant Point geometry as a dictionary, or None.
+    """
+    if not isinstance(geometry, dict):
+        return None
+    if not geometry.get("type"):
+        return None
+    if not geometry.get("coordinates"):
+        return None
+    if geometry["type"] != "Point":
+        return None
+    if not isinstance(geometry["coordinates"], list) and not isinstance(geometry["coordinates"], tuple):
+        return None
+    if len(geometry["coordinates"]) != 2:
+        return None
+    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][1], int)) or not (
+        isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
+    ):
+        return None
+    if geometry.get("crs"):
+        if geometry["crs"].get("type") != "name":
+            return None
+        if not geometry["crs"].get("properties"):
+            return None
+        if not geometry["crs"]["properties"].get("name"):
+            return None
+        if geometry["crs"]["properties"]["name"].startswith("http://www.opengis.net/def/objectType/EPSG/0/"):
+            original_projection = int(
+                geometry["crs"]["properties"]["name"].removeprefix("http://www.opengis.net/def/objectType/EPSG/0/")
+            )
+        elif geometry["crs"]["properties"]["name"].startswith("urn:ogc:def:objectType:EPSG::"):
+            original_projection = int(
+                geometry["crs"]["properties"]["name"].removeprefix("urn:ogc:def:objectType:EPSG::")
+            )
+        elif geometry["crs"]["properties"]["name"].startswith("EPSG:"):
+            original_projection = int(geometry["crs"]["properties"]["name"].removeprefix("EPSG:"))
+        elif geometry["crs"]["properties"]["name"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84":
+            original_projection = 4326
+        elif geometry["crs"]["properties"]["name"] == "urn:ogc:def:crs:OGC:1.3:CRS84":
+            original_projection = 4326
+        else:
+            return None
+        if original_projection == 4326:
+            lat = geometry["coordinates"][1]
+            lon = geometry["coordinates"][0]
+        else:
+            lat, lon = Transformer.from_crs(original_projection, 4326).transform(
+                geometry["coordinates"][0], geometry["coordinates"][1]
+            )
+    else:
+        lat = geometry["coordinates"][1]
+        lon = geometry["coordinates"][0]
+    if not (isinstance(lat, float) or isinstance(lat, int)) or not (isinstance(lon, float) or isinstance(lon, int)):
+        return None
+    new_geometry = {
+        "type": "Point",
+        "coordinates": [lon, lat],
+    }
+    return new_geometry
