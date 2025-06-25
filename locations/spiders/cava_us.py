@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -36,6 +37,11 @@ class CavaUSSpider(JSONBlobSpider):
             item["opening_hours"] = self.parse_opening_hours(hours_list[0])
         except:
             self.logger.error(f"Failed to parse opening hours: {hours_list[0]}")
+
+        services = feature.get("channels", {}).get("fulfillment") or {}
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "pickUpByCar" in services)
+        apply_yes_no(Extras.INDOOR_SEATING, item, "dineInDineIn" in services)
+        apply_yes_no(Extras.TAKEAWAY, item, "pickUpCarryOut" in services)
         yield item
 
     def parse_opening_hours(self, opening_hours: dict) -> OpeningHours:
