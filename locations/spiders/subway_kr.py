@@ -4,6 +4,7 @@ from scrapy import Request
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.subway import SubwaySpider
@@ -40,4 +41,7 @@ class SubwayKRSpider(scrapy.Spider):
         item["addr_full"] = merge_address_lines([data.get("storAddr1"), data.get("storAddr2")])
         item["phone"] = data.get("storTel")
         item["ref"] = item["website"] = response.url
+        apply_category(Categories.FAST_FOOD, item)
+        item["extras"]["cuisine"] = "sandwich"
+        item["extras"]["takeaway"] = "yes"
         yield item

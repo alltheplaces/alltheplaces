@@ -2,19 +2,17 @@ import re
 
 import chompjs
 import scrapy
+from scrapy_zyte_api.responses import ZyteAPITextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.user_agents import FIREFOX_LATEST
 
 
 class TeslaSpider(scrapy.Spider):
     name = "tesla"
     item_attributes = {"brand": "Tesla", "brand_wikidata": "Q478214"}
     requires_proxy = True
-    custom_settings = {
-        "USER_AGENT": FIREFOX_LATEST,
-    }
+    download_timeout = 60
 
     def start_requests(self):
         yield scrapy.Request(
@@ -23,7 +21,10 @@ class TeslaSpider(scrapy.Spider):
         )
 
     def parse_json_subrequest(self, response):
-        for location in response.json():
+        # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
+        response = ZyteAPITextResponse.from_api_response(response.raw_api_response, request=response.request)
+
+        for location in chompjs.parse_js_object(response.text):
             # Skip if "Coming Soon" - no content to capture yet
             if location.get("open_soon") == "1":
                 continue
@@ -38,18 +39,23 @@ class TeslaSpider(scrapy.Spider):
             )
 
     def parse_location(self, response):
+        # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
+        response = ZyteAPITextResponse.from_api_response(response.raw_api_response, request=response.request)
+
         # Many responses have false error message appended to the json data, clean them to get a proper json
         location_data = chompjs.parse_js_object(response.text)
         if isinstance(location_data, list):
             return
+
         feature = DictParser.parse(location_data)
         feature["ref"] = location_data.get("location_id")
         feature["street_address"] = location_data["address_line_1"].replace("<br />", ", ")
         feature["state"] = location_data.get("province_state") or None
 
         # Deal with https://github.com/alltheplaces/alltheplaces/issues/10892
-        if "email" in location_data and isinstance(location_data["email"], dict) and "value" in location_data["email"]:
-            feature["email"] = location_data["email"]["value"]
+        feature_email = feature.get("email")
+        if feature_email and isinstance(feature_email, dict) and "value" in feature_email:
+            feature["email"] = feature_email["value"]
 
         if "supercharger" in location_data.get("location_type"):
             apply_category(Categories.CHARGING_STATION, feature)
@@ -64,11 +70,11 @@ class TeslaSpider(scrapy.Spider):
                     capacity, output, ccs_compat = match
 
                     if ccs_compat:
-                        feature["extras"]["socket:tesla_supercharger_ccs"] = capacity
-                        feature["extras"]["socket:tesla_supercharger_ccs:output"] = output
+                        feature["extras"]["socket:type2_combo"] = capacity
+                        feature["extras"]["socket:type2_combo:output"] = output
                     else:
-                        feature["extras"]["socket:tesla_supercharger"] = capacity
-                        feature["extras"]["socket:tesla_supercharger:output"] = output
+                        feature["extras"]["socket:nacs"] = capacity
+                        feature["extras"]["socket:nacs:output"] = output
 
         if "tesla_center_delivery" in location_data.get("location_type"):
             apply_category(Categories.SHOP_CAR, feature)

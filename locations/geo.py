@@ -6,6 +6,7 @@ from itertools import groupby
 from typing import Iterable
 
 import geonamescache
+from pyproj import Transformer
 
 from locations.searchable_points import get_searchable_points_path, open_searchable_points
 
@@ -279,6 +280,112 @@ def make_subdivisions(
     return tiles
 
 
+def antimeridian_safe_longitude_sum(longitude: float, summand: float, precision: int = 9) -> float:
+    """
+    Adds or subtracts a decimal degree value from a longitude, factoring in
+    the antimeridian at a longitude of -180.0 or 180.0. For example, if
+    `longitude` is -179.9 and `summand` is 0.2, the result will be 179.9. As
+    a further example, if `longitude` is 179.9 and `summand` is 0.2, the
+    result will be -179.9.
+    :param longitude: Longitude as a floating point decimal degrees number
+                       within range [-180.0, 180.0].
+    :param summand: Floating point decimal degrees number. This function will
+                    handle large summands (such as 720.0) by clamping the
+                    returned longitude to range [-179.999..., 180.0].
+    :param precision: The number of decimal places to round latitudes and
+                      longitudes to. Default is 9 decimal places.
+    :return: Result of the sum of `longitude` and `summand` as a floating
+             point number in range [-179.999..., 180.0]. A value of -180.0 is
+             never returned, instead, 180.0 will be returned.
+    """
+    if longitude + summand > 0.0:
+        modulo_sum = (longitude + summand) % 360.0
+    else:
+        modulo_sum = (longitude + summand) % -360.0
+    if modulo_sum > 180.0:
+        return round(-180.0 + (modulo_sum % 180.0), precision)
+    elif modulo_sum < -180.0:
+        return round(180.0 + (modulo_sum % -180.0), precision)
+    elif modulo_sum == -180.0:
+        return 180.0
+    return round(modulo_sum, precision)
+
+
+def bbox_split(
+    bbox: tuple[tuple[float, float], tuple[float, float]],
+    lat_parts: int = 2,
+    lon_parts: int = 2,
+    precision: int = 2,
+    buffer: float = 0.01,
+) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    """
+    Splits a bounding box rectangle by a given number of latitude and
+    longitude partitions. Split bounding boxes are by default slightly
+    buffered (have their area increased in all dimensions) so each split
+    bounding box overlaps slightly. This buffering is done to accomodate APIs
+    which may round coordinates in unknown ways, or include/exclude features
+    exactly on the edge of a bounding box.
+
+    :param bbox: A tuple of two coordinates, the first being a Northwest
+                 coordinate, the second being a Southeast coordinate. Each
+                 coordinate is specified as a floating point number for the
+                 latitude, followed by a floating point number for the
+                 longitude. Latitudes must be in range [-90, 90] and
+                 longitudes must be in range [-180, 180].
+    :param lat_parts: The number of partitions to make for latitude.
+    :param lon_parts: The number of partitions to make for longitude.
+    :param precision: The number of decimal places to round latitudes and
+                      longitudes to. Default is 2 decimal places.
+    :param buffer: The percentage buffer to apply to latitudes and longitudes
+                   to expand a bounding box in NW and SE directions. A
+                   positive floating point number typically in the range of
+                   [0, 0.1] (0% to 10% expansion of a bounding box) should be
+                   specified. Default is 0.01 (1%) meaning the bounding box of
+                   ((10,10),(-10,-10)) will be expanded to
+                   ((10.1,10.1),(-10.1,10.1)). This bounding box overlap is
+                   useful to avoid problems of not knowing if an API endpoint
+                   will apply rounding and will include or exclude features
+                   on the border of a bounding box.
+    :return: List of smaller (split) bounding boxes where each bounding box
+             matches the format used for the `bbox` parameter.
+    """
+    bbox_list = []
+
+    coord_nw = bbox[0]
+    lat_nw = coord_nw[0]
+    lon_nw = coord_nw[1]
+    coord_se = bbox[1]
+    lat_se = coord_se[0]
+    lon_se = coord_se[1]
+
+    if lat_se > lat_nw:
+        raise ValueError("Supplied SE coordinates cannot be north of the supplied NW coordinates.")
+
+    lat_inc = abs((lat_se - lat_nw) / lat_parts)
+    if lon_nw >= 0.0 and lon_se < 0.0:
+        lon_inc = ((180.0 - lon_nw) + (180.0 + lon_se)) / lat_parts
+    else:
+        lon_inc = abs((lon_se - lon_nw) / lon_parts)
+
+    for lon_gridref in range(0, lon_parts):
+        bbox_lon_nw = antimeridian_safe_longitude_sum(lon_nw, lon_gridref * lon_inc)
+        for lat_gridref in range(0, lat_parts):
+            bbox_lat_nw = lat_nw - lat_gridref * lat_inc
+
+            def clamp(n: float, minimum: float, maximum: float) -> float:
+                return max(min(maximum, n), minimum)
+
+            new_bbox_lat_nw = clamp(round(bbox_lat_nw + (lat_inc * buffer), precision), -90.0, 90.0)
+            new_bbox_lon_nw = round(antimeridian_safe_longitude_sum(bbox_lon_nw, -lon_inc * buffer), precision)
+            new_bbox_lat_se = clamp(round(bbox_lat_nw - (lat_inc + (lat_inc * buffer)), precision), -90.0, 90.0)
+            new_bbox_lon_se = round(
+                antimeridian_safe_longitude_sum(bbox_lon_nw, lon_inc + (lon_inc * buffer)), precision
+            )
+            bbox_list.append(((new_bbox_lat_nw, new_bbox_lon_nw), (new_bbox_lat_se, new_bbox_lon_se)))
+
+    return bbox_list
+
+
 def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float, float]) -> bool:
     """
     Returns true if the lat/lon point is contained in the given lat/lon bounding box.
@@ -331,3 +438,157 @@ def country_coordinates(return_lookup: bool = False) -> dict:
         return {row["isocode"]: (row["lat"], row["lon"]) for row in file}
     else:
         return file
+
+
+def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
+    """
+    Attempts to fuzzily extract RFC7946 GeoJSON Point Geometry from a
+    supplied dictionary which is an unknown GeoJSON-like geometry. If no
+    compatible Point geometry is detected, the function will return None.
+
+    The supplied GeoJSON-like geometry must not be a FeatureCollection but
+    rather a type of geometry. This function expects Point or MultiPoint
+    geometry only and will return None for FeatureCollection's and other
+    geometry types.
+
+    The predecessor to RFC7946 GeoJSON was GJ2008 GeoJSON which allows for
+    definition of an object "CRS" for defining a EPSG registered Coordinate
+    Reference System (CRS) as an alternative to EPSG:4326 (WGS84) which
+    RFC7946 requires use of. This function will detect GJ2008 CRS' and attempt
+    to reproject coordinates to EPS:4326 as expected by RFC7946 GeoJSON,
+    removing the "crs" object from the output as well, as this object is not
+    part of RFC7946 GeoJSON.
+
+    Some source data may also store a position (latitude/longitude pair) as a
+    tuple type, rather than the more commonly used list type in Python. This
+    function will detect use of tuple types for positions and convert to a
+    list type instead.
+
+    :param geometry: dictionary containing source GeoJSON-like geometry.
+    :return: RFC7946 compliant Point geometry as a dictionary, or None.
+    """
+    if not isinstance(geometry, dict):
+        return None
+    if not geometry.get("type"):
+        return None
+    if not geometry.get("coordinates"):
+        return None
+    if geometry["type"] not in ["Point", "MultiPoint"]:
+        return None
+    if not isinstance(geometry["coordinates"], list) and not isinstance(geometry["coordinates"], tuple):
+        return None
+    if len(geometry["coordinates"]) not in [1, 2]:
+        return None
+    if len(geometry["coordinates"]) == 1:
+        # Multi-Point geometry possibly detected. Perform specific Multi-Point
+        # geometry validation checks.
+        if not isinstance(geometry["coordinates"][0], list) and not isinstance(geometry["coordinates"][0], tuple):
+            return None
+        if len(geometry["coordinates"][0]) != 2:
+            # More than one Point exists in the Multi-Point geometry therefore
+            # it is not possible to extract a single Point geometry.
+            return None
+        if not isinstance(geometry["coordinates"][0][0], float) and not isinstance(geometry["coordinates"][0][0], int):
+            return None
+        if not isinstance(geometry["coordinates"][0][1], float) and not isinstance(geometry["coordinates"][0][1], int):
+            return None
+    elif len(geometry["coordinates"]) == 2:
+        # Point geometry possible detected. Perform specific Point geometry
+        # validation checks.
+        if not isinstance(geometry["coordinates"][0], float) and not isinstance(geometry["coordinates"][0], int):
+            return None
+        if not isinstance(geometry["coordinates"][1], float) and not isinstance(geometry["coordinates"][1], int):
+            return None
+
+    # At this point, we either have validly typed Point geometry or a validly
+    # typed Multi-Point geometry containing a single point.
+    new_geometry = {"type": "Point"}
+    if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
+        # Multi-Point geometry with a single point confirmed. Convert to Point
+        # geometry.
+        new_geometry["coordinates"] = [geometry["coordinates"][0][0], geometry["coordinates"][0][1]]
+    else:
+        # Point geometry confirmed.
+        new_geometry["coordinates"] = [geometry["coordinates"][0], geometry["coordinates"][1]]
+
+    # Convert GJ2008 to RFC7946 Point geometry (if necessary).
+    # Return RFC7946 Point geometry.
+    if reprojected_geometry := convert_gj2008_to_rfc7946_point_geometry(new_geometry):
+        return reprojected_geometry
+
+    return None
+
+
+def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:  # noqa: C901
+    """
+    Convert GJ2008 Point geometry with a projection other than EPSG:4326
+    (WGS84) to RFC7946 Point geometry which must always have a projection of
+    EPSG:4326.
+
+    If the supplied geometry is GJ2008 formatted (with a CRS nominated) and
+    the CRS is already EPSG:4326, this function will return the supplied
+    geometry without the "crs" definition, ensuring the geometry is formatted
+    according to RFC7946.
+
+    If the supplied geometry is not Point geometry or cannot be reprojected to
+    EPSG:4326, this function returns None.
+
+    :param geometry: dictionary containing source GJ2008 Point geometry.
+    :return: RFC7946 compliant Point geometry as a dictionary, or None.
+    """
+    if not isinstance(geometry, dict):
+        return None
+    if not geometry.get("type"):
+        return None
+    if not geometry.get("coordinates"):
+        return None
+    if geometry["type"] != "Point":
+        return None
+    if not isinstance(geometry["coordinates"], list) and not isinstance(geometry["coordinates"], tuple):
+        return None
+    if len(geometry["coordinates"]) != 2:
+        return None
+    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][1], int)) or not (
+        isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
+    ):
+        return None
+    if geometry.get("crs"):
+        if geometry["crs"].get("type") != "name":
+            return None
+        if not geometry["crs"].get("properties"):
+            return None
+        if not geometry["crs"]["properties"].get("name"):
+            return None
+        if geometry["crs"]["properties"]["name"].startswith("http://www.opengis.net/def/objectType/EPSG/0/"):
+            original_projection = int(
+                geometry["crs"]["properties"]["name"].removeprefix("http://www.opengis.net/def/objectType/EPSG/0/")
+            )
+        elif geometry["crs"]["properties"]["name"].startswith("urn:ogc:def:objectType:EPSG::"):
+            original_projection = int(
+                geometry["crs"]["properties"]["name"].removeprefix("urn:ogc:def:objectType:EPSG::")
+            )
+        elif geometry["crs"]["properties"]["name"].startswith("EPSG:"):
+            original_projection = int(geometry["crs"]["properties"]["name"].removeprefix("EPSG:"))
+        elif geometry["crs"]["properties"]["name"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84":
+            original_projection = 4326
+        elif geometry["crs"]["properties"]["name"] == "urn:ogc:def:crs:OGC:1.3:CRS84":
+            original_projection = 4326
+        else:
+            return None
+        if original_projection == 4326:
+            lat = geometry["coordinates"][1]
+            lon = geometry["coordinates"][0]
+        else:
+            lat, lon = Transformer.from_crs(original_projection, 4326).transform(
+                geometry["coordinates"][0], geometry["coordinates"][1]
+            )
+    else:
+        lat = geometry["coordinates"][1]
+        lon = geometry["coordinates"][0]
+    if not (isinstance(lat, float) or isinstance(lat, int)) or not (isinstance(lon, float) or isinstance(lon, int)):
+        return None
+    new_geometry = {
+        "type": "Point",
+        "coordinates": [lon, lat],
+    }
+    return new_geometry

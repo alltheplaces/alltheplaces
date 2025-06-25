@@ -82,6 +82,7 @@ class Where2GetItSpider(Spider):
     #   1 = filter by country
     #   2 = filter by state/province
     api_filter_admin_level: int = 0
+    api_limit: int = 10000
 
     def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:
         where_clause = {}
@@ -114,9 +115,11 @@ class Where2GetItSpider(Spider):
         yield JsonRequest(
             url=url,
             data={
-                "request": {"appkey": self.api_key, "formdata": {"objectname": "Locator::Store", "where": where_clause}}
+                "request": {
+                    "appkey": self.api_key,
+                    "formdata": {"objectname": "Locator::Store", "limit": self.api_limit, "where": where_clause},
+                }
             },
-            method="POST",
             callback=self.parse_locations,
             dont_filter=True,
         )
@@ -154,6 +157,14 @@ class Where2GetItSpider(Spider):
         if response.json().get("code") and response.json()["code"] == 5007:
             # No results returned for the provided API filter.
             return
+
+        locations = response.json()["response"]["collection"]
+        if len(locations) == self.api_limit:
+            self.logger.error(
+                f"Locations have probably been truncated due to {self.api_limit} features being returned by a single query. Increase api_limit to a higher value or try setting the api_filter_admin_level to a more specific value to avoid {self.api_limit} features being returned in any given request."
+            )
+            self.crawler.stats.inc_value("api_limit_per_request_reached")
+
         for location in response.json()["response"]["collection"]:
             self.pre_process_data(location)
 

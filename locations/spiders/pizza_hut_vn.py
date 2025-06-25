@@ -1,47 +1,47 @@
-import re
+import base64
+import hashlib
+import hmac
 import time
 import uuid
 from typing import Any
 
 import scrapy
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PizzaHutVNSpider(scrapy.Spider):
     name = "pizza_hut_vn"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    start_urls = ["https://pizzahut.vn/_next/static/chunks/700-ac6d47c5279a8d47.js"]
+    api_url = "https://rwapi.pizzahut.vn/api/store/GetAllStoreList"
+    user_agent = BROWSER_DEFAULT
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        next_action_token = re.search(r"([a-f0-9]{40})", response.text).group(1)
+    def start_requests(self):
         timestamp = int(time.time() * 1000)
         device_uid = uuid.uuid4()
-        yield Request(
-            url="https://pizzahut.vn/store-location?area=north",
-            method="POST",
-            body=f'[{{"url":"/store/GetAllStoreList","method":"get","bodyData":"","timeStamp":"{timestamp}","deviceUID":"{device_uid}"}}]',
-            headers={
-                "next-action": next_action_token,
-            },
-            callback=self.parse_token,
-            meta=dict(timestamp=timestamp, device_uid=device_uid),
-        )
 
-    def parse_token(self, response: Response, **kwargs: Any) -> Any:
-        access_token = re.search(r"1[:\s]+\"(.+)\"", response.text).group(1)
+        auth_data = {"app_code": "REDWEB_DI1rpn3vHlyp", "access_key": "9GQ3cVW5Vqq4", "secret_key": "1YWkf7Rh0oJB"}
+
+        query_string = f"TimeStamp={timestamp}&DeviceUID={device_uid}&AppCode={auth_data['app_code']}&AccessKey={auth_data['access_key']}&Method=GET&url=/STORE/GETALLSTORELIST&Body="
+
+        key = base64.b64decode(auth_data["secret_key"])
+        message = query_string.encode("utf-8")
+        signature = hmac.new(key, message, hashlib.sha512)
+
+        access_token = base64.b64encode(signature.digest()).decode("utf-8")
+
         yield JsonRequest(
-            url="https://rwapi.pizzahut.vn/api/store/GetAllStoreList",
+            url=self.api_url,
             headers={
                 "Authorization": f"Bearer {access_token}",
-                "deviceuid": str(response.meta["device_uid"]),
+                "deviceuid": str(device_uid),
                 "project_id": "WEB",
-                "timestamp": str(response.meta["timestamp"]),
+                "timestamp": str(timestamp),
             },
             callback=self.parse_stores,
         )

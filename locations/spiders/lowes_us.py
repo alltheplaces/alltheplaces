@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import FIREFOX_LATEST
@@ -67,5 +68,7 @@ class LowesUSSpider(SitemapSpider):
 
         if start_date := json_data["storeDetails"].get("openDate"):
             properties["extras"]["start_date"] = start_date
+
+        apply_category(Categories.SHOP_DOITYOURSELF, properties)
 
         yield Feature(**properties)

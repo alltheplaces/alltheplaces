@@ -1,6 +1,6 @@
 from unidecode import unidecode
 
-from locations.categories import Categories, apply_yes_no
+from locations.categories import apply_yes_no
 from locations.hours import DAYS_PL
 
 from .inpost_it import InpostITSpider
@@ -16,7 +16,7 @@ class PaczkomatInpostPLSpider(InpostITSpider):
 
     def set_brand(self, item, location):
         if item["ref"].endswith("APP"):
-            if location["category"] != Categories.PARCEL_LOCKER:
+            if int(location["type"]) != 1:
                 raise ValueError("Appkomat only expected for lockers")
             item.update(self.brand_app)
             apply_yes_no("app_operated=only", item, True)
@@ -32,7 +32,7 @@ class PaczkomatInpostPLSpider(InpostITSpider):
         city = unidecode(item["city"])
         street = unidecode(item["street"])
         state = unidecode(item["state"])
-        if location["category"] == Categories.PARCEL_LOCKER:
+        if int(location["type"]) == 1:
             return ["paczkomat", city, ref, street, "paczkomaty", state]
         else:
             return ["punkt-obslugi-paczek", ref, city, street]

@@ -34,11 +34,6 @@ class MountainMikesUSSpider(StructuredDataSpider):
 
     def parse_location(self, response, lat, lon):
         for item in self.parse_sd(response):
-            item["ref"] = response.xpath("//button/@data-storecode").get()
-            if item["ref"] is None:
-                # coming soon
-                break
-
             item["addr_full"] = item.pop("street_address")
             item["branch"] = response.xpath("//meta[@property='og:title']/@content").get()
             del item["image"]

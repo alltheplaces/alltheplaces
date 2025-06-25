@@ -19,6 +19,7 @@ class KfcHKSpider(scrapy.Spider):
                 "actionName": "candao.storeStandard.getStoreList",
                 "langType": 2,
                 "content": {
+                    "cityId": 810000,
                     "businessType": ["3"],
                     "searchName": "",
                     "pageNow": 1,

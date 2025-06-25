@@ -133,20 +133,24 @@ class TreePlotterSpider(Spider):
         )
 
     def parse_tree_details(self, response: Response) -> Iterable[Feature]:
-        for tree in response.json()["results"]["trees"]["geojson"]["features"]:
+        for tree in response.json()["results"][self.layer_name]["geojson"]["features"]:
             properties = {
                 "ref": str(tree["properties"]["pid"]),
                 "geometry": tree["geometry"],
             }
             apply_category(Categories.NATURAL_TREE, properties)
             if not tree["properties"].get("species_common"):
-                # Generally a lack of species code means low quality data, for
-                # example, a location where a tree was once located or is
-                # planned to be located, but no tree currently exists. Ignore
-                # these trees (or potential tree sites) if they have no
-                # species code.
-                continue
-            species_id = str(tree["properties"]["species_common"])
+                if not tree["properties"].get("species_latin"):
+                    # Generally a lack of species code means low quality data,
+                    # for example, a location where a tree was once located or
+                    # is planned to be located, but no tree currently exists.
+                    # Ignore these trees (or potential tree sites) if they
+                    # have no species code.
+                    continue
+                else:
+                    species_id = str(tree["properties"]["species_latin"])
+            else:
+                species_id = str(tree["properties"]["species_common"])
             if species_id not in self._species.keys():
                 self.logger.warning(
                     "Tree with PID={} has unknown species {}.".format(tree["properties"]["pid"], species_id)

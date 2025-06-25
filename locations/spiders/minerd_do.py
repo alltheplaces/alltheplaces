@@ -3,7 +3,7 @@ import json
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -50,7 +50,7 @@ class MinerdDOSpider(Spider):
             item["phone"] = school["Telefono"]
             item["extras"]["school:type"] = school["Sector"]
 
-            apply_category({"amenity": "school"}, item)
+            apply_category(Categories.SCHOOL, item)
 
             yield item
 

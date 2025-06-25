@@ -1,4 +1,3 @@
-import re
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -6,7 +5,6 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.central_england_cooperative import set_operator
 
@@ -16,10 +14,8 @@ class AnPostIESpider(Spider):
     AN_POST = {"brand": "An Post", "brand_wikidata": "Q482490"}
 
     cats = {
-        "POSTPOINT": {"post_office": "post_partner"},
         "Parcel Locker": Categories.PARCEL_LOCKER,
         "Post Office": Categories.POST_OFFICE,
-        "PostPoint": {"post_office": "post_partner"},
     }
 
     def start_requests(self):
@@ -46,20 +42,14 @@ class AnPostIESpider(Spider):
             item["website"] = urljoin("https://www.anpost.com/Store-Locator/", location["NameURL"])
             item["extras"]["collection_times"] = location["LastTimeOfPosting"]
 
-            item["opening_hours"] = OpeningHours()
-            for rule in location["OpeningHours"].split(";"):
-                if "closed" in rule.lower():
-                    continue
-                day, times = rule.strip().split(" ", maxsplit=1)
-                for start_time, end_time in re.findall(r"(\d\d:\d\d)\s*-\s*(\d\d:\d\d)", times):
-                    item["opening_hours"].add_range(day, start_time, end_time)
-
             if cat := self.cats.get(location["Type"]):
                 apply_category(cat, item)
+                set_operator(self.AN_POST, item)
+            elif location["Type"].upper() == "POSTPOINT":
+                apply_category(Categories.GENERIC_POI, item)
+                item["extras"]["post_office"] = "post_partner"
             else:
                 item["extras"]["type"] = location["Type"]
-                self.crawler.stats.inc_value("an_post_ie/unmapped_category/{}".format(location["Type"]))
-
-            set_operator(self.AN_POST, item)
+                self.logger.error("Unexpected type: {}".format(location["Type"]))
 
             yield item

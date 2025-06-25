@@ -29,6 +29,7 @@ class CountryUtils:
         "luxemburg (groothertogdom)": "LU",
         "belgie": "BE",
         "u s a": "US",
+        "deutschland": "DE",
     }
 
     def to_iso_alpha2_country_code(self, country_str):

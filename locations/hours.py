@@ -51,6 +51,7 @@ DAYS_EN = {
     "Tu": "Tu",
     "Wednesday": "We",
     "Wednesdays": "We",
+    "Wednes": "We",
     "Weds": "We",
     "Wed": "We",
     "We": "We",
@@ -68,6 +69,7 @@ DAYS_EN = {
     "Fr": "Fr",
     "Saturday": "Sa",
     "Saturdays": "Sa",
+    "Satur": "Sa",
     "Sat": "Sa",
     "Sa": "Sa",
     "Sunday": "Su",
@@ -106,6 +108,7 @@ DAYS_BG = {
     "Четвъртък": "Th",
     "Че": "Th",
     "Чт": "Th",
+    "Четв": "Th",
     "Петък": "Fr",
     "Пет": "Fr",
     "Пе": "Fr",
@@ -117,9 +120,25 @@ DAYS_BG = {
     "Неделя": "Su",
     "Нед": "Su",
     "нед": "Su",
-    "Нед": "Su",
     "Не": "Su",
     "Нд": "Su",
+}
+
+DAYS_BR = {
+    "Segunda": "Mo",
+    "Seg": "Mo",
+    "Terça": "Tu",
+    "Ter": "Tu",
+    "Quarta": "We",
+    "Qua": "We",
+    "Quinta": "Th",
+    "Qui": "Th",
+    "Sexta": "Fr",
+    "Sex": "Fr",
+    "Sábado": "Sa",
+    "Sáb": "Sa",
+    "Domingos": "Su",
+    "Dom": "Su",
 }
 
 DAYS_CH = {
@@ -726,7 +745,9 @@ NAMED_DAY_RANGES_DK = {
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "All Days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "Weekday": ["Mo", "Tu", "We", "Th", "Fr"],
     "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
+    "Weekend": ["Sa", "Su"],
     "Weekends": ["Sa", "Su"],
 }
 
@@ -910,6 +931,18 @@ class OpeningHours:
 
         Recommended to use with an appropriate helper to pass a specific string or list, ie:
         `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
+
+        In the situation where source data does not explicitly state a feature
+        is closed on a specific day of a week, do not make an assumption of
+        closure status in the absence of other data. For example, source data
+        may be `{"open_days": ["monday", "wednesday"]}` for one feature, and
+        `{"open_days": ["monday", "tuesday", "wednesday"]}` for a different
+        feature. Do not assume that the first feature is closed on Tuesdays
+        unless there is other data explicitly stating this is the case. If the
+        front end website displaying this data treats the absence of `"Tuesday"`
+        in the `"open_days"` array as closure and visually states "Tuesdays:
+        closed" on the website, this function can then be used to set Tuesdays
+        to be closed.
         """
         for day in [days] if isinstance(days, str) else days:
             day = sanitise_day(day)
@@ -942,14 +975,28 @@ class OpeningHours:
         if isinstance(close_time, str):
             if close_time.lower() in closed:
                 return
-            if close_time == "24:00" or close_time == "00:00":
+            if open_time in ("00:00", "0:00", "00:00:00") and close_time in ("00:00", "0:00", "00:00:00"):
+                # Invalid range supplied. Probably the source data uses this
+                # notation for closed days.
+                return
+            if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
-            if close_time == "24:00:00" or close_time == "00:00:00":
+            if close_time in ("24:00:00", "00:00:00"):
                 close_time = "23:59:00"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
+            if close_time.tm_hour == 0 and close_time.tm_min == 0:
+                # weird format not caught by checks above
+                # may be 0:00 or even more divergent if time_format
+                # parameter was used with some exotic value
+                close_time = time.strptime("23:59", "%H:%M")
+        if open_time.tm_hour == close_time.tm_hour and open_time.tm_min == close_time.tm_min:
+            # A single time of day was provided, not a range. Ignore request.
+            # Sometimes source data uses 00:00-00:00 as a range denoting a
+            # closed day.
+            return
 
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))

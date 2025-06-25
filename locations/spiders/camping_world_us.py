@@ -12,7 +12,7 @@ class CampingWorldUSSpider(scrapy.Spider):
     name = "camping_world_us"
     item_attributes = {"brand": "Camping World", "brand_wikidata": "Q5028383"}
 
-    locator_url = "https://rv.campingworld.com/state-directory"
+    locator_url = "https://rv.campingworld.com/locations"
     api_url = "https://api.rvs.com/api/geodata/getclosestdealer"
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS

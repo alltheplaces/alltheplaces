@@ -4,8 +4,9 @@ from gzip import compress
 
 from scrapy import Request, Spider
 
+from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature, SocialMedia, set_social_media
+from locations.items import SocialMedia, set_social_media
 
 
 class BambuSpider(Spider):
@@ -42,11 +43,16 @@ class BambuSpider(Spider):
             },
         }
         query = b64encode(compress(json.dumps(params, separators=(",", ":")).encode())).decode()
+        access_tokens = response.json()
+        authorization = [
+            app["instance"] for app in access_tokens["apps"].values() if app["instance"].startswith("wixcode-pub.")
+        ][0]
         req = Request(
             f"https://www.drinkbambu.com/_api/dynamic-pages-router/v1/pages?{query}",
+            headers={"authorization": authorization},
             callback=self.parse_pages,
         )
-        req.cookies["svSession"] = response.json()["svSession"]
+        req.cookies["svSession"] = access_tokens["svSession"]
         yield req
 
     def parse_pages(self, response):
@@ -54,33 +60,31 @@ class BambuSpider(Spider):
         if response.json().get("exception", False):
             raise RuntimeError(result["name"] + result["message"])
         for location in result["data"]["items"]:
-            item = Feature()
-            item["city"] = location["mapLocation"]["city"]
-            item["lat"] = location["mapLocation"]["location"]["latitude"]
-            item["lon"] = location["mapLocation"]["location"]["longitude"]
-            item["housenumber"] = location["mapLocation"]["streetAddress"]["number"]
-            item["street"] = location["mapLocation"]["streetAddress"]["name"]
-            item["extras"]["addr:unit"] = location["mapLocation"]["streetAddress"]["apt"]
-            item["country"] = location["mapLocation"]["country"]
-            item["postcode"] = location["mapLocation"].get("postalCode")
-            item["state"] = location["mapLocation"].get("subdivision")
-            item["email"] = location["agentEmail"]
+            location.update(location.pop("mapLocation", {}))
+            item = DictParser.parse(location)
+            street_address = location.get("streetAddress", {})
+            item["housenumber"] = street_address.get("number")
+            item["street"] = street_address.get("name")
+            item["street_address"] = street_address.get("formattedAddressLine")
+            item["extras"]["addr:unit"] = street_address.get("apt")
+            if email := location.get("agentEmail"):
+                if "@" in email:
+                    item["email"] = email
             item["ref"] = location["_id"]
-            item["phone"] = location["storePhone"]
+            item["phone"] = location.get("storePhone")
             set_social_media(item, SocialMedia.FACEBOOK, location.get("facebook"))
             set_social_media(item, SocialMedia.YELP, location.get("yelp"))
-            item["addr_full"] = location["address"]
-            item["branch"] = location["title"].removeprefix("Bambu ")
+            item["addr_full"] = location.get("address")
+            item["branch"] = location.get("title", "").removeprefix("Bambu ")
 
             if location.get("instagram") != "https://www.instagram.com/bambudessertdrinks/":
                 set_social_media(item, SocialMedia.INSTAGRAM, location.get("instagram"))
 
-            item["website"] = response.urljoin(location["link-location-pages-title"])
+            item["website"] = response.urljoin(location.get("link-location-pages-title"))
 
             oh = OpeningHours()
             for i, day in enumerate(DAYS):
                 hours = location.get("storeHours" + ("1" * i), "")
                 oh.add_ranges_from_string(f"{day} {hours}")
             item["opening_hours"] = oh
-
             yield item

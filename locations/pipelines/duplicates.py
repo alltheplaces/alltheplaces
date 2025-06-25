@@ -1,6 +1,9 @@
 import logging
 
+from scrapy import Spider
 from scrapy.exceptions import DropItem
+
+from locations.items import Feature
 
 logger = logging.getLogger(__name__)
 
@@ -8,19 +11,18 @@ logger = logging.getLogger(__name__)
 class DuplicatesPipeline:
     def __init__(self):
         self.ids_seen = set()
-        self.duplicate_count = 0
 
-    def process_item(self, item, spider):
+    def process_item(self, item: Feature, spider: Spider):
         if getattr(spider, "no_refs", False):
             return item
 
         ref = (spider.name, item["ref"])
         if ref in self.ids_seen:
-            self.duplicate_count = self.duplicate_count + 1
+            spider.crawler.stats.inc_value("atp/duplicate_count")
             raise DropItem()
         else:
             self.ids_seen.add(ref)
             return item
 
-    def close_spider(self, spider):
-        logger.info(f"Dropped {self.duplicate_count} duplicate items")
+    def close_spider(self, spider: Spider):
+        logger.info("Dropped {} duplicate items".format(spider.crawler.stats.get_value("atp/duplicate_count", 0)))

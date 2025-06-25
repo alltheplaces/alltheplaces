@@ -13,9 +13,8 @@ class VodafoneITSpider(YextAnswersSpider):
     locale = "it"
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        self.crawler.stats.inc_value("x/c_storeType/{}".format(location["data"].get("c_storeType")))
-        if location["data"].get("c_storeType") != "Vodafone Store":
+        self.crawler.stats.inc_value("x/c_storeType/{}".format(location.get("c_storeType")))
+        if location.get("c_storeType") != "Vodafone Store":
             return None
-
         item["branch"] = item.pop("name").removeprefix("Vodafone Store").strip(" |")
         yield item

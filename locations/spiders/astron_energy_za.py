@@ -1,6 +1,6 @@
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -40,13 +40,10 @@ ASTRON_PROPERTIES = {
 
 class AstronEnergyZASpider(JSONBlobSpider):
     name = "astron_energy_za"
-    item_attributes = {
-        "brand": "Astron Energy",
-        "brand_wikidata": "Q120752181",
-        "extras": Categories.FUEL_STATION.value,
-    }
+    item_attributes = {"brand": "Astron Energy", "brand_wikidata": "Q120752181"}
     start_urls = ["https://www.astronenergy.co.za/umbraco/api/station/Stations"]
     locations_key = "stations"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for url in self.start_urls:
@@ -62,8 +59,9 @@ class AstronEnergyZASpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
-        if len(location["images"]) > 0:
-            item["image"] = "https://www.astronenergy.co.za" + location["images"][0]
+        images = location.get("imageUrls") or []
+        if images:
+            item["image"] = response.urljoin(images[0])
         for tag, service in ASTRON_PROPERTIES.items():
             apply_yes_no(service, item, location["properties"].get(tag), False)
         item["opening_hours"] = OpeningHours()
@@ -71,4 +69,7 @@ class AstronEnergyZASpider(JSONBlobSpider):
             item["opening_hours"].add_days_range(DAYS, "00:00", "24:00")
         else:
             item["opening_hours"].add_ranges_from_string("Mo-Su " + location["workingHours"])
+
+        apply_category(Categories.FUEL_STATION, item)
+
         yield item
