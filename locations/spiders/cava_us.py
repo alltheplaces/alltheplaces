@@ -22,8 +22,11 @@ class CavaUSSpider(JSONBlobSpider):
         feature.update(feature.pop("geographic", {}))
         feature.update(feature.pop("address", {}))
         feature["address"] = feature.pop("primary", {})
+        feature.update(feature.pop("communication", {}))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature.get("storeNumber")
         item["branch"] = item.pop("name", "")
+        item["phone"] = feature.get("telephones", {}).get("primary", {}).get("number")
+        item["email"] = feature.get("emailAddresses", {}).get("primary", {}).get("address")
         yield item
