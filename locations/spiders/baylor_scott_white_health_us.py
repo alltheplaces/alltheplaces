@@ -1,35 +1,42 @@
-import scrapy
+from typing import Any, Iterable
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class BaylorScottWhiteHealthSpider(scrapy.Spider):
-    name = "baylor_scott_white_health"
+class BaylorScottWhiteHealthUSSpider(Spider):
+    name = "baylor_scott_white_health_us"
     item_attributes = {"operator": "Baylor Scott & White Health", "operator_wikidata": "Q41568258"}
     allowed_domains = ["phyndapi.bswapi.com"]
     base_url = "https://phyndapi.bswapi.com/V4/Places/GetLocations"
+    headers = {
+        "x-bsw-clientid": "BSWHealth.com",
+    }
 
-    def start_requests(self):
-        yield scrapy.Request(
-            self.base_url + "?perPage=1",
+    def start_requests(self) -> Iterable[JsonRequest]:
+        yield JsonRequest(
+            url=self.base_url + "?perPage=1",
+            headers=self.headers,
             callback=self.get_pages,
         )
 
-    def get_pages(self, response):
+    def get_pages(self, response: Response) -> Iterable[JsonRequest]:
         total_count = response.json()["locationCount"]
         page_number = 0
         page_size = 100
 
         while page_number * page_size < total_count:
-            yield scrapy.Request(self.base_url + f"?perPage={page_size}&pageNumber={page_number + 1}")
+            yield JsonRequest(
+                self.base_url + f"?perPage={page_size}&pageNumber={page_number + 1}", headers=self.headers
+            )
             page_number += 1
 
-    def parse(self, response):
-        ldata = response.json()["locationResults"]
-
-        for row in ldata:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for row in response.json()["locationResults"]:
             properties = {
                 "ref": row["locationID"],
                 "name": row["locationName"],
@@ -53,6 +60,6 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
                     "%H:%M:%S",
                 )
 
-            properties["opening_hours"] = oh.as_opening_hours()
+            properties["opening_hours"] = oh
 
             yield Feature(**properties)
