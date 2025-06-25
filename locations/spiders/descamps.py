@@ -5,7 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.spiders.inno_be import InnoBESpider
 from locations.spiders.printemps import PrintempsSpider
@@ -43,9 +43,15 @@ class DescampsSpider(Spider):
                         if not day_hours:
                             item["opening_hours"].set_closed(DAYS[day_number])
                         elif len(day_hours.split("|")) == 4:
-                            item["opening_hours"].add_range(DAYS[day_number], day_hours.split("|")[0], day_hours.split("|")[1])
-                            item["opening_hours"].add_range(DAYS[day_number], day_hours.split("|")[2], day_hours.split("|")[3])
+                            item["opening_hours"].add_range(
+                                DAYS[day_number], day_hours.split("|")[0], day_hours.split("|")[1]
+                            )
+                            item["opening_hours"].add_range(
+                                DAYS[day_number], day_hours.split("|")[2], day_hours.split("|")[3]
+                            )
                         elif len(day_hours.split("|")) == 2:
-                            item["opening_hours"].add_range(DAYS[day_number], day_hours.split("|")[0], day_hours.split("|")[1])
+                            item["opening_hours"].add_range(
+                                DAYS[day_number], day_hours.split("|")[0], day_hours.split("|")[1]
+                            )
                     apply_category(Categories.SHOP_HOUSEHOLD_LINEN, item)
                     yield item
