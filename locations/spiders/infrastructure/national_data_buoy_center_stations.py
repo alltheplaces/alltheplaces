@@ -40,7 +40,7 @@ class NationalDataBuoyCenterStationsSpider(XMLFeedSpider):
                 # https://www.ndbc.noaa.gov/marine_notice.shtml
                 # These might not apply to all buoys, perhaps only NOAA
                 # operated buoys. The website is ambiguous.
-                properties["extras"]["seamark:light:character"] = "IQ"
+                properties["extras"]["seamark:light:character"] = "Fl"
                 properties["extras"]["seamark:light:group"] = "4"
                 properties["extras"]["seamark:light:period"] = "20"
                 properties["extras"]["seamark:light:colour"] = "yellow"
