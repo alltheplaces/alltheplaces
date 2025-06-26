@@ -86,9 +86,16 @@ class ToyotaAfricaSpider(CrawlSpider):
     no_refs = True
 
     CATEGORY_SALES_KEYS = ["New vehicles", "Company sales", "Neuves", "Novos"]
-    CATEGORY_SERVICE_KEYS = ["Service", "After sales", "Aftersales", "Após-venda", "Autorised mechanic", "Express Service", "SAV"]
+    CATEGORY_SERVICE_KEYS = [
+        "Service",
+        "After sales",
+        "Aftersales",
+        "Após-venda",
+        "Autorised mechanic",
+        "Express Service",
+        "SAV",
+    ]
     CATEGORY_PARTS_KEYS = ["Parts", "Pièces Détachées", "Spare Parts"]
-
 
     def parse(self, response):
         item = Feature()
@@ -99,10 +106,10 @@ class ToyotaAfricaSpider(CrawlSpider):
 
         link = response.xpath('//a[contains(@href, "maps")]/@href').get()
         if link:
-            if match := re.search(r'3d(-?\d+\.\d+)!4d(-?\d+\.\d+)', link):
+            if match := re.search(r"3d(-?\d+\.\d+)!4d(-?\d+\.\d+)", link):
                 item["lat"] = match.group(1)
                 item["lon"] = match.group(2)
-        
+
         if item.get("lat") is None and item.get("lon") is None:
             item["lat"], item["lon"] = parse_js_object(
                 response.xpath('.//script[contains(text(), "var map_markers")]/text()').get()
@@ -156,5 +163,5 @@ class ToyotaAfricaSpider(CrawlSpider):
                 break
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/unknown_category/{category}/{response.url}")
-        
+
         yield item
