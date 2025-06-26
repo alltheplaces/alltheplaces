@@ -15,6 +15,9 @@ class CbreSpider(Spider):
     start_urls = ["https://www.cbre.com/offices"]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    country_map = {
+        "Korea": "KR",
+    }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for country_selector in response.xpath('//a[contains(@class, "countrySelector")]'):
@@ -33,6 +36,7 @@ class CbreSpider(Spider):
             yield from self.parse_locations(response, country)
 
     def parse_locations(self, response: Response, country: str) -> Any:
+        country = self.country_map.get(country, country)
         primary_location = response.xpath('//*[contains(@class,"contactCardWrapper")]')
         locations = response.xpath(
             '//*[contains(@class,"listCards--office")]'
