@@ -36,6 +36,14 @@ class NationalDataBuoyCenterStationsSpider(XMLFeedSpider):
                 apply_category(Categories.MONITORING_STATION, properties)
                 properties["extras"]["seamark:type"] = "buoy_special_purpose"
                 properties["extras"]["seamark:buoy_special_purpose:category"] = "recording"
+                # Light characteristics are described at:
+                # https://www.ndbc.noaa.gov/marine_notice.shtml
+                # These might not apply to all buoys, perhaps only NOAA
+                # operated buoys. The website is ambiguous.
+                properties["extras"]["seamark:light:character"] = "IQ"
+                properties["extras"]["seamark:light:group"] = "4"
+                properties["extras"]["seamark:light:period"] = "20"
+                properties["extras"]["seamark:light:colour"] = "yellow"
             case "fixed":
                 apply_category(Categories.MONITORING_STATION, properties)
             case _:
