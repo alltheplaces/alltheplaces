@@ -23,13 +23,13 @@ class NationalDataBuoyCenterStationsSpider(XMLFeedSpider):
         # The format of the XML document is described at:
         # https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf
         properties = {
-            "ref": node.xpath('./@id').get(),
-            "name": node.xpath('./@name').get(),
-            "lat": node.xpath('./@lat').get(),
-            "lon": node.xpath('./@lon').get(),
-            "operator": node.xpath('./@owner').get(),
+            "ref": node.xpath("./@id").get(),
+            "name": node.xpath("./@name").get(),
+            "lat": node.xpath("./@lat").get(),
+            "lon": node.xpath("./@lon").get(),
+            "operator": node.xpath("./@owner").get(),
         }
-        station_type = node.xpath('./@type').get()
+        station_type = node.xpath("./@type").get()
         match station_type:
             case "buoy" | "dart":
                 apply_category(Categories.MONITORING_STATION, properties)
@@ -48,14 +48,14 @@ class NationalDataBuoyCenterStationsSpider(XMLFeedSpider):
         # intended to monitor. Each run of this spider may therefore generate
         # different results depending on very current (last 8 hours)
         # observation of what a station is currently monitoring.
-        apply_yes_no(MonitoringTypes.WEATHER, properties, node.xpath('./@met').get() == "y")
+        apply_yes_no(MonitoringTypes.WEATHER, properties, node.xpath("./@met").get() == "y")
         # There doesn't appear to be any current monitoring type used by OSM
         # for ocean currents, so the below is made up.
-        apply_yes_no("monitoring:ocean_current", properties, node.xpath('./@currents').get() == "y")
-        apply_yes_no(MonitoringTypes.WATER_QUALITY, properties, node.xpath('./@waterquality').get()  == "y")
+        apply_yes_no("monitoring:ocean_current", properties, node.xpath("./@currents").get() == "y")
+        apply_yes_no(MonitoringTypes.WATER_QUALITY, properties, node.xpath("./@waterquality").get() == "y")
         # monitoring:tsunami is not a documented OSM monitoring type and has
         # very limited use at present. This seems to be closest match to what
         # the source data intends by "DART" monitoring. For more on DART refer
         # to https://www.ndbc.noaa.gov/dart/dart.shtml
-        apply_yes_no("monitoring:tsunami", properties, node.xpath('./@dart').get() == "y")
+        apply_yes_no("monitoring:tsunami", properties, node.xpath("./@dart").get() == "y")
         yield Feature(**properties)
