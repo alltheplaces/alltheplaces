@@ -1,6 +1,6 @@
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 QUERY = """query {
@@ -48,6 +48,6 @@ class QuarterraUSSpider(JSONBlobSpider):
         if cities := [sc for sc in feature["stateAndCity"] if sc["level"] == 2]:
             item["city"] = cities[0]["title"]
 
-        apply_category({"landuse": "residential", "residential": "apartments"}, item)
+        apply_category(Categories.RESIDENTIAL_APARTMENTS, item)
 
         yield item

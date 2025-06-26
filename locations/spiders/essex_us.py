@@ -1,6 +1,6 @@
 import re
 
-from locations.categories import Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -24,6 +24,6 @@ class EssexUSSpider(JSONBlobSpider):
         apply_yes_no(Extras.PETS_ALLOWED, item, "Pet friendly" in amenities)
         apply_yes_no(Extras.SWIMMING_POOL, item, "Swimming pool" in amenities)
 
-        apply_category({"landuse": "residential", "residential": "apartments"}, item)
+        apply_category(Categories.RESIDENTIAL_APARTMENTS, item)
 
         yield item

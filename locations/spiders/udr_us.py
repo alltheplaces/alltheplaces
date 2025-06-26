@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -18,5 +18,5 @@ class UdrUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["image"] = response.xpath("//meta[@property='og:image']/@content").get()
-        apply_category({"landuse": "residential", "residential": "apartments"}, item)
+        apply_category(Categories.RESIDENTIAL_APARTMENTS, item)
         yield item
