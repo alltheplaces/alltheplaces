@@ -25,6 +25,7 @@ class CamilleLaVieSpider(CrawlSpider):
             [item["street_address"], response.xpath('//*[@class="arcticle_description"]//p/span[3]/text()').get()]
         )
         item["website"] = item["ref"] = response.url
+        item["country"] = "US"
         extract_google_position(item, response)
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
