@@ -18,13 +18,15 @@ class EuroArgoEricFloatsSpider(JSONBlobSpider):
     skip_auto_cc_domain = True
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        data = [{
-            "nested": "false",
-            "path": "string",
-            "searchValueType": "Text",
-            "values": ["A"], # A = active floats only
-            "field": "status",
-        }]
+        data = [
+            {
+                "nested": "false",
+                "path": "string",
+                "searchValueType": "Text",
+                "values": ["A"],  # A = active floats only
+                "field": "status",
+            }
+        ]
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
