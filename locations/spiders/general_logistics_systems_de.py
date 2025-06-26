@@ -1,44 +1,29 @@
-import csv
+from typing import Any
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.geo import point_locations
 from locations.hours import OpeningHours
-from locations.searchable_points import open_searchable_points
-
-HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-STORELOCATOR = "https://api.gls-pakete.de/parcelshops?latitude={:0.5}&longitude={:0.5}&distance=40"
 
 
-class GeneralLogisticsSystemsDESpider(scrapy.Spider):
+class GeneralLogisticsSystemsDESpider(Spider):
     name = "general_logistics_systems_de"
     allowed_domains = ["gls-pakete.de"]
-    item_attributes = {"operator": "General Logistics Systems Germany", "operator_wikidata": "Q46495823"}
 
     def start_requests(self):
-        searchable_point_files = [
-            "eu_centroids_40km_radius_country.csv",
-        ]
+        for latitude, longitude in point_locations("eu_centroids_40km_radius_country.csv", ["DE"]):
+            yield JsonRequest(
+                url="https://api.gls-pakete.de/parcelshops?latitude={:0.5}&longitude={:0.5}&distance=40".format(
+                    latitude, longitude
+                ),
+                headers={"X-Requested-With": "XMLHttpRequest"},
+            )
 
-        for point_file in searchable_point_files:
-            with open_searchable_points(point_file) as open_file:
-                results = csv.DictReader(open_file)
-                for result in results:
-                    if result["country"] == "DE":
-                        longitude = float(result["longitude"])
-                        latitude = float(result["latitude"])
-                        request = scrapy.Request(
-                            url=STORELOCATOR.format(latitude, longitude),
-                            headers=HEADERS,
-                            callback=self.parse,
-                        )
-                        yield request
-
-    def parse(self, response):
-        pois = response.json().get("shops")
-
-        for poi in pois:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for poi in response.json()["shops"]:
             item = DictParser.parse(poi)
             address = poi["address"]
             coordinates = address["coordinates"]
@@ -52,7 +37,11 @@ class GeneralLogisticsSystemsDESpider(scrapy.Spider):
                     opening_hours.add_range(day, time_range["from"], time_range["to"])
             item["opening_hours"] = opening_hours
 
-            apply_category(Categories.GENERIC_POI, item)
-            item["extras"]["post_office"] = "post_partner"
+            if "paketstation" in item["name"].lower():
+                apply_category(Categories.PARCEL_LOCKER, item)
+            else:
+                apply_category(Categories.GENERIC_POI, item)
+                item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = "GLS"
 
             yield item
