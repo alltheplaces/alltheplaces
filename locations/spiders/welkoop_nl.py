@@ -17,7 +17,7 @@ class WelkoopNLSpider(SitemapSpider):
         item["branch"] = response.xpath("//h2/text()").get().replace("Welkoop ", "")
         item["lat"] = re.search(r"DealerDetail\.lat.*?(-?\d+\.\d+);", response.text).group(1)
         item["lon"] = re.search(r"DealerDetail\.lng.*?(-?\d+\.\d+);", response.text).group(1)
-        item["addr_full"] = re.search(r"DealerDetail\.destination.*\'(.*)\';", response.text).groups()
+        item["addr_full"] = re.search(r"DealerDetail\.destination.*\'(.*)\';", response.text).group(1)
         item["ref"] = item["website"] = response.url
         item["opening_hours"] = OpeningHours()
         day_time = re.findall(
