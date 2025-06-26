@@ -31,8 +31,6 @@ class CbreSpider(Spider):
         ).getall()
         if cities:
             for city_url in cities:
-                if "mediaassets" in city_url:
-                    continue
                 yield response.follow(url=city_url, callback=self.parse_locations, cb_kwargs=dict(country=country))
         else:
             yield from self.parse_locations(response, country)
