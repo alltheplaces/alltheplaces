@@ -4,7 +4,7 @@ from chompjs import parse_js_object
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.google_url import extract_google_position
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_ES, DAYS_FR, DAYS_PT, DELIMITERS_ES, DELIMITERS_FR, DELIMITERS_PT, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -85,23 +85,24 @@ class ToyotaAfricaSpider(CrawlSpider):
     ]
     no_refs = True
 
+    CATEGORY_SALES_KEYS = ["New vehicles", "Company sales", "Neuves", "Novos"]
+    CATEGORY_SERVICE_KEYS = ["Service", "After sales", "Aftersales", "Após-venda", "Autorised mechanic", "Express Service", "SAV"]
+    CATEGORY_PARTS_KEYS = ["Parts", "Pièces Détachées", "Spare Parts"]
+
+
     def parse(self, response):
         item = Feature()
         item["name"] = response.xpath('.//div[@id="dealership"]/.//h2/text()').get()
-
-        # Drop authorised mechanics
-        if (
-            not item["name"].lower().startswith("toyota")
-            and not item["name"].lower().startswith("cfao")
-            and not item["name"].lower().startswith("glmc")
-        ):
-            return
-
         item["phone"] = response.xpath('.//div[@class="contact-info"]/.//a[contains(@href, "tel")]/@href').get()
         item["addr_full"] = clean_address(response.xpath('.//div[@class="location-info"]/div/text()').getall())
         item["website"] = response.url
 
-        extract_google_position(item, response)
+        link = response.xpath('//a[contains(@href, "maps")]/@href').get()
+        if link:
+            if match := re.search(r'3d(-?\d+\.\d+)!4d(-?\d+\.\d+)', link):
+                item["lat"] = match.group(1)
+                item["lon"] = match.group(2)
+        
         if item.get("lat") is None and item.get("lon") is None:
             item["lat"], item["lon"] = parse_js_object(
                 response.xpath('.//script[contains(text(), "var map_markers")]/text()').get()
@@ -136,4 +137,24 @@ class ToyotaAfricaSpider(CrawlSpider):
             time_string = re.sub(r"(\d{1,2})h(?!\d)", r"\1:00", time_string)
             time_string = time_string.replace(" de ", " ")
             item["opening_hours"].add_ranges_from_string(time_string, days=DAYS_FR, delimiters=DELIMITERS_FR)
+
+        categories = response.xpath('//div[@class="concession-services"]//div[@class="item"]/text()').getall()
+        categories = [text.strip() for text in categories if text.strip()]
+
+        for category in categories:
+            if category in self.CATEGORY_SALES_KEYS:
+                apply_category(Categories.SHOP_CAR, item)
+                apply_yes_no(Extras.CAR_REPAIR, item, any(extra in self.CATEGORY_SERVICE_KEYS for extra in categories))
+                apply_yes_no(Extras.CAR_PARTS, item, any(extra in self.CATEGORY_PARTS_KEYS for extra in categories))
+                break
+            elif category in self.CATEGORY_SERVICE_KEYS:
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+                apply_yes_no(Extras.CAR_PARTS, item, any(extra in self.CATEGORY_PARTS_KEYS for extra in categories))
+                break
+            elif category in self.CATEGORY_PARTS_KEYS:
+                apply_category(Categories.SHOP_CAR_PARTS, item)
+                break
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/unknown_category/{category}/{response.url}")
+        
         yield item
