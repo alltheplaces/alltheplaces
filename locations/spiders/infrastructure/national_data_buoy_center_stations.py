@@ -28,6 +28,7 @@ class NationalDataBuoyCenterStationsSpider(XMLFeedSpider):
             "lat": node.xpath("./@lat").get(),
             "lon": node.xpath("./@lon").get(),
             "operator": node.xpath("./@owner").get(),
+            "website": "https://www.ndbc.noaa.gov/station_page.php?station=" + node.xpath("./@id").get(),
         }
         station_type = node.xpath("./@type").get()
         match station_type:
