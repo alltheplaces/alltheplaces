@@ -1,28 +1,26 @@
 from typing import Any
 
-import scrapy
 from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.google_url import extract_google_position
+from locations.items import Feature
 
 
-class CornerstoneHealthcareGroupUSSpider(scrapy.Spider):
+class CornerstoneHealthcareGroupUSSpider(CrawlSpider):
     name = "cornerstone_healthcare_group_us"
     item_attributes = {"brand": "Cornerstone Healthcare Group"}
-    allowed_domains = ["chghospitals.com"]
-    start_urls = ["https://www.chghospitals.com/wp-json/wp/v2/location?per_page=100"]
+    start_urls = ["https://cornerstonehospitals.com/locations"]
+    rules = [Rule(LinkExtractor(r"https://www.cornerstonehospitals.com/locations/[^/]+/[^/]+$"), callback="parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for facility in response.json():
-            facility.update(facility.pop("acf"))
-            item = DictParser.parse(facility)
-            item["name"] = facility["title"]["rendered"]
-            item["street_address"] = facility["address"]
-            item["ref"] = item["website"] = facility["link"]
-            if "Hospitals" in item["name"]:
-                apply_category(Categories.HOSPITAL, item)
-            else:
-                apply_category(Categories.SOCIAL_FACILITY, item)
-                item["extras"]["social_facility"] = "assisted_living"
-            yield item
+        item = Feature()
+        item["name"] = self.item_attributes["brand"]
+        item["branch"] = response.xpath("//h1//text()").get()
+        item["addr_full"] = response.xpath('//*[@id="text-cf7b8a0952"]//p//text()').get()
+        item["website"] = item["ref"] = response.url
+        extract_google_position(item, response)
+        apply_category(Categories.HOSPITAL, item)
+        yield item
