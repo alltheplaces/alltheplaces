@@ -27,10 +27,12 @@ class CbreSpider(Spider):
 
     def parse_cities(self, response: Response, country: str) -> Any:
         cities = response.xpath(
-            '//a[contains(@href, "offices") and not(contains(@class, "countrySelector"))]/@href'
+            '//a[contains(@href, "offices") and not(contains(@class, "countrySelector")) and not(contains(@href, "mediaasset"))]/@href'
         ).getall()
         if cities:
             for city_url in cities:
+                if "mediaassets" in city_url:
+                    continue
                 yield response.follow(url=city_url, callback=self.parse_locations, cb_kwargs=dict(country=country))
         else:
             yield from self.parse_locations(response, country)
