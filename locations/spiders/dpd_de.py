@@ -11,7 +11,7 @@ from locations.searchable_points import open_searchable_points
 
 class DpdDESpider(scrapy.Spider):
     name = "dpd_de"
-    item_attributes = {"brand": "DPD", "brand_wikidata": "Q541030"}
+    DPD = {"brand": "DPD", "brand_wikidata": "Q541030"}
     start_urls = ["https://my.dpd.de/shopfinder.aspx"]
 
     def parse(self, response):
@@ -93,8 +93,18 @@ class DpdDESpider(scrapy.Spider):
             item["postcode"] = plz
             item["ref"] = lat + lng
             item["housenumber"] = housenumber
-            apply_category(Categories.GENERIC_POI, item)
-            item["extras"]["post_office"] = "post_partner"
+
+            t = shop.css(
+                "input#ContentPlaceHolder1_modShopFinder_repShopList_hidParcelStation_Rep_{}".format(nr)
+            ).attrib["value"]
+            if t == "0":
+                apply_category(Categories.GENERIC_POI, item)
+                item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = self.DPD["brand"]
+            elif t == "2":
+                apply_category(Categories.PARCEL_LOCKER, item)
+            else:
+                self.logger.error("Unknown type: {}".format(t))
 
             formdata = {
                 "ctl00$ctl16": "ctl00$ContentPlaceHolder1$modShopFinder$ctl01|ctl00$ContentPlaceHolder1$modShopFinder$repShopList$ctl0"
