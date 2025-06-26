@@ -35,7 +35,7 @@ class NationalDataBuoyCenterStationsSpider(XMLFeedSpider):
             case "buoy" | "dart":
                 apply_category(Categories.MONITORING_STATION, properties)
                 properties["extras"]["seamark:type"] = "buoy_special_purpose"
-                properties["extras"]["seamark:buoy_special_purpose:category"] = "recording"
+                properties["extras"]["seamark:buoy_special_purpose:category"] = "odas"
                 # Light characteristics are described at:
                 # https://www.ndbc.noaa.gov/marine_notice.shtml
                 # These might not apply to all buoys, perhaps only NOAA
