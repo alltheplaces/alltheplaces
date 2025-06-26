@@ -24,6 +24,6 @@ class VanDerValkSpider(Spider):
             item = DictParser.parse(hotel)
             item["branch"] = name.get("full")
             if item["website"] and "http" not in item["website"]:
-                item["website"] = "https://" + item["website"]
+                item["website"] = "https://" + item["website"].strip()
             apply_category(Categories.HOTEL, item)
             yield item
