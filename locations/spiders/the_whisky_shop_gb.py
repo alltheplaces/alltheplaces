@@ -22,6 +22,7 @@ class TheWhiskyShopGBSpider(Spider):
             item = DictParser.parse(location)
             item["street_address"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])
             item["branch"] = item.pop("name").removeprefix("The Whisky Shop ")
+            item["name"] = "The Whisky Shop"
             oh = OpeningHours()
             for day in DAYS_FULL:
                 myday = location["normal_hours"][day]
