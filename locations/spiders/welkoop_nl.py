@@ -15,8 +15,8 @@ class WelkoopNLSpider(SitemapSpider):
     def parse(self, response, **kwargs):
         item = Feature()
         item["branch"] = response.xpath("//h2/text()").get().replace("Welkoop ", "")
-        item["lat"] = re.search(r"DealerDetail\.lat.*(\d+\.\d+);", response.text).group(1)
-        item["lon"] = re.search(r"DealerDetail\.lng.*(\d+\.\d+);", response.text).group(1)
+        item["lat"] = re.search(r"DealerDetail\.lat.*?(-?\d+\.\d+);", response.text).group(1)
+        item["lon"] = re.search(r"DealerDetail\.lng.*?(-?\d+\.\d+);", response.text).group(1)
         item["addr_full"] = re.search(r"DealerDetail\.destination.*\'(.*)\';", response.text).groups()
         item["ref"] = item["website"] = response.url
         item["opening_hours"] = OpeningHours()
