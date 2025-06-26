@@ -28,7 +28,7 @@ class CavaUSSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature.get("storeNumber")
-        item["branch"] = item.pop("name", "")
+        item["branch"] = item.pop("name")
         item["phone"] = feature.get("telephones", {}).get("primary", {}).get("number")
         item["email"] = feature.get("emailAddresses", {}).get("primary", {}).get("address")
         item["website"] = f'{response.url}/{feature.get("locationRef")}'
