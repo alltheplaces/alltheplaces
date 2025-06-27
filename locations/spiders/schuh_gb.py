@@ -1,10 +1,10 @@
-from scrapy.spiders import SitemapSpider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
+from locations.hours import DAYS_EN, OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
-from locations.items import Feature
-from locations.hours import DAYS_EN, OpeningHours
 
 
 class SchuhGBSpider(SitemapSpider, StructuredDataSpider):
@@ -15,7 +15,6 @@ class SchuhGBSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["ShoeStore"]
     requires_proxy = True
     user_agent = BROWSER_DEFAULT
-
 
     def _get_sitemap_body(self, response):
         if response.url.split("?")[0].endswith(".aspx"):
@@ -37,4 +36,3 @@ class SchuhGBSpider(SitemapSpider, StructuredDataSpider):
                 )
                 item["opening_hours"] = oh
         yield item
-    
