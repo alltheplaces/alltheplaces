@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from typing import Iterable
 
 from scrapy.http import Response
@@ -21,6 +21,7 @@ class OceanopsGdpDriftersSpider(ArcGISFeatureServerSpider):
     AOML for example has drifter metadata published but it is weeks out of
     date and seemingly updated somewhat infrequently.
     """
+
     name = "oceanops_gdp_drifters"
     host = "www.ocean-ops.org"
     context_path = "arcgis"
