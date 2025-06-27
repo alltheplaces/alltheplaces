@@ -26,10 +26,9 @@ class CbreSpider(Spider):
             yield response.follow(url=country_url, callback=self.parse_cities, cb_kwargs=dict(country=country))
 
     def parse_cities(self, response: Response, country: str) -> Any:
-        cities = response.xpath(
+        if cities := response.xpath(
             '//a[contains(@href, "offices") and not(contains(@class, "countrySelector")) and not(contains(@href, "mediaasset"))]/@href'
-        ).getall()
-        if cities:
+        ).getall():
             for city_url in cities:
                 yield response.follow(url=city_url, callback=self.parse_locations, cb_kwargs=dict(country=country))
         else:
@@ -38,10 +37,9 @@ class CbreSpider(Spider):
     def parse_locations(self, response: Response, country: str) -> Any:
         country = self.country_map.get(country, country)
         primary_location = response.xpath('//*[contains(@class,"contactCardWrapper")]')
-        locations = response.xpath(
+        if locations := response.xpath(
             '//*[contains(@class,"listCards--office")]'
-        )  # multiple locations including primary one
-        if locations:
+        ):  # multiple locations including primary one
             for location in locations:
                 item = Feature()
                 # Few duplicate locations from different urls are there, that's why we should make addr_full as ref.
