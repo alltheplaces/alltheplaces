@@ -3,6 +3,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.categories import Categories, apply_category
 
 
 class AtsEuromasterGBSpider(scrapy.Spider):
@@ -32,4 +33,5 @@ class AtsEuromasterGBSpider(scrapy.Spider):
             '//*[@class="model-dealer-infos"]/@data-google-map-place-id'
         ).get()
         item["lat"], item["lon"] = re.search(r"mapInit\('(.*)', '(.*)', true", response.text).groups()
+        apply_category(Categories.SHOP_CAR_REPAIR, item)
         yield item
