@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Iterable
 
 from scrapy import Selector, Spider
@@ -17,7 +17,12 @@ class FdsnSeismicStationsSpider(Spider):
     # The largest "datacenter" is service.iris.edu which takes a few minutes
     # to prepare and download a full list of stations. The total size of the
     # XML document returned is over 32MiB but less then 64MiB.
-    custom_settings = {"RETRY_ENABLED": False, "DOWNLOAD_TIMEOUT": 360, "DOWNLOAD_WARNSIZE": 67108864, "ROBOTSTXT_OBEY": False}
+    custom_settings = {
+        "RETRY_ENABLED": False,
+        "DOWNLOAD_TIMEOUT": 360,
+        "DOWNLOAD_WARNSIZE": 67108864,
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], callback=self.parse_datacenters)
