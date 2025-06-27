@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class WeWorkSpider(SitemapSpider, StructuredDataSpider):
+class WeworkSpider(SitemapSpider, StructuredDataSpider):
     name = "wework"
     item_attributes = {"brand": "WeWork", "brand_wikidata": "Q19995004"}
     sitemap_urls = ["https://www.wework.com/sitemap.xml"]
