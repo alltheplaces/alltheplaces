@@ -21,6 +21,7 @@ class CitiwoodZASpider(SitemapSpider):
     def parse(self, response: Response) -> Iterable[Feature]:
         item = Feature()
         item["ref"] = response.url.split("citiwood-")[-1].strip("/")
+        item["branch"] = item["ref"].title()
         item["website"] = response.url
         item["addr_full"] = clean_address(response.xpath('//*[contains(@class, "address_physical")]//p/text()').get(""))
         apply_category(Categories.SHOP_TRADE, item)
