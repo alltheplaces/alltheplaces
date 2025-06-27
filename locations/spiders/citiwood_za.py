@@ -27,5 +27,7 @@ class CitiwoodZASpider(SitemapSpider):
         item["phone"] = response.xpath(
             '//*[contains(@class, "contact_phone_office")]//a[contains(@href,"tel:")]/@href'
         ).get()
+        email = response.xpath('//meta[@property="og:description"]/@content').get("").split("Email:")[-1].strip()
+        item["email"] = email if "@" in email else None
         apply_category(Categories.SHOP_TRADE, item)
         yield item
