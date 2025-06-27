@@ -20,5 +20,6 @@ class CitgoSpider(SitemapSpider, StructuredDataSpider):
     user_agent = BROWSER_DEFAULT
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item.pop("name")
         apply_category(Categories.FUEL_STATION, item)
         yield item
