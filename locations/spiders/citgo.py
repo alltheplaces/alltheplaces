@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -18,6 +19,10 @@ class CitgoSpider(SitemapSpider, StructuredDataSpider):
         (r"/station-locator/locations/(\d+)", "parse_sd"),
     ]
     user_agent = BROWSER_DEFAULT
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        if opening_hours := ld_data.get("openingHours"):
+            ld_data["openingHours"] = re.sub(r"24:00[-\s]+24:00", "00:00-23:59", opening_hours)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item.pop("name")
