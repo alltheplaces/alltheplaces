@@ -1,8 +1,7 @@
-import json
 import re
+
 import scrapy
 
-from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -29,6 +28,8 @@ class EuromasterFRSpider(scrapy.Spider):
         item["postcode"] = response.xpath('//*[@class="model-dealer-infos"]/@data-postcode').get()
         item["city"] = response.xpath('//*[@class="model-dealer-infos"]/@data-city').get()
         item["state"] = response.xpath('//*[@class="model-dealer-infos"]/@data-region').get()
-        item["extras"]["ref:google:place_id"] = response.xpath('//*[@class="model-dealer-infos"]/@data-google-map-place-id').get()
+        item["extras"]["ref:google:place_id"] = response.xpath(
+            '//*[@class="model-dealer-infos"]/@data-google-map-place-id'
+        ).get()
         item["lat"], item["lon"] = re.search(r"mapInit\('(.*)', '(.*), true", response.text).groups()
         yield item
