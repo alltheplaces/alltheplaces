@@ -24,5 +24,8 @@ class CitiwoodZASpider(SitemapSpider):
         item["branch"] = item["ref"].title()
         item["website"] = response.url
         item["addr_full"] = clean_address(response.xpath('//*[contains(@class, "address_physical")]//p/text()').get(""))
+        item["phone"] = response.xpath(
+            '//*[contains(@class, "contact_phone_office")]//a[contains(@href,"tel:")]/@href'
+        ).get()
         apply_category(Categories.SHOP_TRADE, item)
         yield item
