@@ -55,7 +55,7 @@ class FdsnSeismicStationsSpider(Spider):
                     # continues to be a feature of interest.
                     properties["extras"]["removed:man_made"] = "monitoring_station"
                     properties["extras"]["removed:monitoring_station"] = "seismic_activity"
-                    properties["extras"]["end_date"] = station.xpath("./@endDate").get().split("T", 1)[0]
+                    properties["extras"]["end_date"] = end_date.split("T", 1)[0]
                 else:
                     # Station has no end date and therefore is active and
                     # continues to exist.
