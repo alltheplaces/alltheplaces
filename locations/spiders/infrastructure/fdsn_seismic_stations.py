@@ -58,7 +58,7 @@ class FdsnSeismicStationsSpider(Spider):
                 }
                 station_active = True
                 if end_date_string := station.xpath("./@endDate").get():
-                    end_date = datetime.fromisoformat(f"{end_date_string}+00:00")
+                    end_date = datetime.fromisoformat(end_date_string).replace(tzinfo=UTC)
                     if datetime.now(UTC) > end_date:
                         # Station has an end date in the past and therefore has
                         # been shutdown/removed. Extract the station as a
