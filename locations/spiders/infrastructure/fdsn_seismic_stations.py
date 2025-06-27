@@ -1,3 +1,4 @@
+from datetime import datetime, UTC
 from typing import Iterable
 
 from scrapy import Selector, Spider
@@ -16,7 +17,7 @@ class FdsnSeismicStationsSpider(Spider):
     # The largest "datacenter" is service.iris.edu which takes a few minutes
     # to prepare and download a full list of stations. The total size of the
     # XML document returned is over 32MiB but less then 64MiB.
-    custom_settings = {"RETRY_ENABLED": False, "DOWNLOAD_TIMEOUT": 180, "DOWNLOAD_WARNSIZE": 67108864}
+    custom_settings = {"RETRY_ENABLED": False, "DOWNLOAD_TIMEOUT": 360, "DOWNLOAD_WARNSIZE": 67108864, "ROBOTSTXT_OBEY": False}
 
     def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], callback=self.parse_datacenters)
@@ -27,40 +28,50 @@ class FdsnSeismicStationsSpider(Spider):
                 for service in repository["services"]:
                     if service["name"] == "fdsnws-station-1":
                         station_list_url = service["url"]
+                        query_filter = ""
+                        if "geofon.gfz.de" in station_list_url:
+                            # Server refuses to return all results (too many).
+                            # Set a filter to limit results to stations open
+                            # or most recently closed.
+                            query_filter = "?endafter=2022-01-01T00:00:00"
                         if station_list_url.endswith("/"):
-                            station_list_url = f"{station_list_url}query"
+                            station_list_url = f"{station_list_url}query{query_filter}"
                         else:
-                            station_list_url = f"{station_list_url}/query"
+                            station_list_url = f"{station_list_url}/query{query_filter}"
                         yield Request(url=station_list_url, callback=self.parse_station_list)
 
     def parse_station_list(self, response: Response) -> Iterable[Feature]:
-        document = Selector(response=response, type="xml")
+        document = Selector(text=response.text, type="xml")
         document.register_namespace("s", "http://www.fdsn.org/xml/station/1")
         for network in document.xpath("//s:Network"):
             for station in network.xpath("./s:Station"):
-                if station.xpath("./@endDate").get():
-                    # Station has an end date and therefore no longer exists.
-                    # Ignore historical stations.
-                    continue
                 properties = {
                     "ref": network.xpath("./@code").get() + "-" + station.xpath("./@code").get(),
                     "name": station.xpath("./s:Site/s:Name/text()").get(),
                     "lat": station.xpath("./s:Latitude/text()").get(),
                     "lon": station.xpath("./s:Longitude/text()").get(),
                 }
-                if end_date := station.xpath("./@endDate").get():
-                    # Station has an end date and therefore has been shutdown/
-                    # removed. Extract the point as a historical feature as
-                    # there is historical data at this location which
-                    # continues to be a feature of interest.
-                    properties["extras"]["removed:man_made"] = "monitoring_station"
-                    properties["extras"]["removed:monitoring_station"] = "seismic_activity"
-                    properties["extras"]["end_date"] = end_date.split("T", 1)[0]
-                else:
-                    # Station has no end date and therefore is active and
-                    # continues to exist.
+                station_active = True
+                if end_date_string := station.xpath("./@endDate").get():
+                    end_date = datetime.fromisoformat(f"{end_date_string}+00:00")
+                    if datetime.now(UTC) > end_date:
+                        # Station has an end date in the past and therefore has
+                        # been shutdown/removed. Extract the station as a
+                        # historical feature as there is historical data for
+                        # this location which continues to be a feature of
+                        # interest.
+                        station_active = False
+                if station_active:
+                    # Station has no end date (or has a future end date) and
+                    # therefore is active and continues to exist.
                     apply_category(Categories.MONITORING_STATION, properties)
                     apply_yes_no(MonitoringTypes.SEISMIC_ACTIVITY, properties, True)
+                else:
+                    # Station is shutdown/removed.
+                    properties["extras"] = {}
+                    properties["extras"]["removed:man_made"] = "monitoring_station"
+                    properties["extras"]["removed:monitoring_station"] = "seismic_activity"
+                    properties["extras"]["end_date"] = end_date_string.split("T", 1)[0]
                 properties["extras"]["ref:fdsn:network"] = network.xpath("./@code").get()
                 properties["extras"]["ref:fdsn:station"] = station.xpath("./@code").get()
                 if elevation_m := station.xpath("./s:Elevation/text()").get():
