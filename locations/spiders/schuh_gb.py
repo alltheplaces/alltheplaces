@@ -1,7 +1,9 @@
 from scrapy.spiders import SitemapSpider
+from scrapy.http import Response
 
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
+from locations.items import Feature
 from locations.hours import DAYS_EN, OpeningHours
 
 
