@@ -31,5 +31,5 @@ class AtsEuromasterGBSpider(scrapy.Spider):
         item["extras"]["ref:google:place_id"] = response.xpath(
             '//*[@class="model-dealer-infos"]/@data-google-map-place-id'
         ).get()
-        item["lat"], item["lon"] = re.search(r"mapInit\('(.*)', '(.*), true", response.text).groups()
+        item["lat"], item["lon"] = re.search(r"mapInit\('(.*)', '(.*)', true", response.text).groups()
         yield item
