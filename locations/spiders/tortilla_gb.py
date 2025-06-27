@@ -19,7 +19,7 @@ class TortillaGBSpider(JSONBlobSpider):
         for location in json_data:
             item = DictParser.parse(location["content"])
             item["branch"] = item.pop("name")
-            item["ref"] = item["branch"].replace(" ","")
+            item["ref"] = item["branch"].replace(" ", "")
             if item["phone"]:
                 item["phone"].replace(" ", "")
             item["website"] = "https://www.tortilla.co.uk/" + location["full_slug"]
