@@ -16,3 +16,8 @@ class SchuhGBSpider(SitemapSpider, StructuredDataSpider):
         # somehow this actually seems to work
         "RETRY_HTTP_CODES": [403],
     }
+
+    def _get_sitemap_body(self, response):
+        if response.url.split("?")[0].endswith(".aspx"):
+            return response.body
+        return super()._get_sitemap_body(response)
