@@ -19,6 +19,7 @@ class CitgoSpider(SitemapSpider, StructuredDataSpider):
         (r"/station-locator/locations/(\d+)", "parse_sd"),
     ]
     user_agent = BROWSER_DEFAULT
+    drop_attributes = {"facebook", "twitter"}
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         if opening_hours := ld_data.get("openingHours"):
