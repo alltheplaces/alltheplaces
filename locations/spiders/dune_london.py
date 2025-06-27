@@ -18,7 +18,7 @@ class DuneLondonSpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").removeprefix("Dune ")
+        item["branch"] = item.pop("name").removeprefix("Dune ").removeprefix("DUNE ")
         item["street_address"] = merge_address_lines([feature.get("address1"), feature.get("address2")])
         apply_category(Categories.SHOP_SHOES, item)
         yield item
