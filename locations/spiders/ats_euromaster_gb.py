@@ -5,7 +5,7 @@ import scrapy
 from locations.items import Feature
 
 
-class EuromasterFRSpider(scrapy.Spider):
+class AtsEuromasterGBSpider(scrapy.Spider):
     name = "ats_euromaster_gb"
     start_urls = ["https://www.atseuromaster.co.uk/centres"]
     item_attributes = {"brand": "ATS Euromaster", "brand_wikidata": "Q4654920"}
