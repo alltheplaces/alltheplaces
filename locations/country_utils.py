@@ -74,9 +74,16 @@ class CountryUtils:
 
     def country_code_from_spider_name(self, spider_name):
         if isinstance(spider_name, str):
-            splits = [split for split in spider_name.split("_") if len(split) == 2]
-            if len(splits) == 1:  # Skip multiple countries e.g. homebase_gb_ie
-                return self._convert_to_iso2_country_code(splits)
+            candidates = []
+            all_splits = [split for split in spider_name.split("_")]
+            all_splits.reverse()
+            for split in all_splits:
+                if len(split) == 2:
+                    candidates.append(split)
+                else:
+                    break
+            if len(candidates) == 1:  # Skip multiple countries e.g. homebase_gb_ie
+                return self._convert_to_iso2_country_code(candidates)
         return None
 
     def country_code_from_url(self, url):
