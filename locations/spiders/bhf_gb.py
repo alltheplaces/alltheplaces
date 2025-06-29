@@ -10,9 +10,8 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "British Heart Foundation", "brand_wikidata": "Q4970039"}
     sitemap_urls = ["https://www.bhf.org.uk/sitemap.xml"]
     sitemap_rules = [
-        (r"/find-bhf-near-you/.+-bhf-shop", "parse_sd"),
-        ("-home-store$", "parse_sd"),
-        ("/find-bhf-near-you/.+-furniture-electrical-store", "parse_sd"),
+        (r"/find-bhf-near-you/.+-shop$", "parse_sd"),
+        (r"/find-bhf-near-you/.+-store$", "parse_sd"),
     ]
     wanted_types = ["ClothingStore", "HomeGoodsStore"]
     drop_attributes = {"image"}
