@@ -225,6 +225,7 @@ class Categories(Enum):
     OFFICE_ARCHITECT = {"office": "architect"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_COURIER = {"office": "courier"}
+    OFFICE_COWORKING = {"office": "coworking"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
