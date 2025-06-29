@@ -23,7 +23,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         elif "-home-store" in response.url or "-furniture-electrical-store" in response.url:
             apply_category(Categories.SHOP_FURNITURE, item)
         else:
-            apply_category(Catgeories.SHOP_CHARITY, item)
+            apply_category(Categories.SHOP_CHARITY, item)
 
         extract_google_position(item, response)
 
