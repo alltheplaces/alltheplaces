@@ -31,6 +31,7 @@ class DominosPizzaNLSpider(SitemapSpider):
             "street_address": address_data[0].strip().strip(","),
             "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
             "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
+            "phone": response.xpath('//a[contains(@href, "tel:")]/@href').get(),
             "website": response.url,
         }
         if locality_data:
