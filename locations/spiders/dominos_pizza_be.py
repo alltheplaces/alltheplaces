@@ -1,5 +1,3 @@
-import re
-
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
@@ -11,27 +9,17 @@ class DominosPizzaBESpider(SitemapSpider):
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.be"]
     sitemap_urls = ["https://www.dominos.be/sitemap.aspx"]
-    url_regex = r"https:\/\/www\.dominos\.be/nl/winkel\/([\w]+)-([\w]+)-([\d]+)$"
-    sitemap_rules = [(url_regex, "parse_store")]
-    start_urls = ("https://www.dominos.be/winkels",)
+    sitemap_rules = [(r"/nl/winkel//?[^/]+\d+$", "parse_store")]
     user_agent = BROWSER_DEFAULT
 
     def parse_store(self, response):
-        match = re.match(self.url_regex, response.url)
-        ref = match.group(3)
-        country = match.group(1)
-        address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
-        locality_data = re.search(r"(.*) ([A-Z]{2}) (.*)", address_data[1].strip())
         properties = {
-            "ref": ref.strip("/"),
+            "ref": response.url,
             "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),
-            "street_address": address_data[0].strip().strip(","),
-            "country": country,
+            "street_address": response.xpath('//a[@id="open-map-address"]/text()').get(),
+            "addr_full": response.xpath('//a[@id="open-map-address"]').xpath("normalize-space()").extract(),
             "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
             "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
             "website": response.url,
         }
-        if locality_data:
-            properties["city"] = locality_data.group(1)
-            properties["postcode"] = locality_data.group(3)
         yield Feature(**properties)
