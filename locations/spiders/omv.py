@@ -5,6 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 # List of brands and countries where they operate:
 # https://www.omv.com/en/customers/services/filling-stations
@@ -146,11 +147,35 @@ class OmvSpider(scrapy.Spider):
         item["brand"] = response.meta["brand"]
         item["brand_wikidata"] = response.meta["brand_wikidata"]
         item["country"] = response.meta["country"]
+        # self.parse_hours(item, details.get("opening_hours")) https://github.com/alltheplaces/alltheplaces/pull/13607
         self.parse_attribute(item, data, "siteFeatures", SITE_FEATURES_MAP)
         self.parse_attribute(item, data, "paymentDetails", PAYMENT_METHODS_MAP)
         apply_category(Categories.FUEL_STATION, item)
         # TODO: fuel types are provided as images, parse them somehow. OCR?
         yield item
+
+    def parse_hours(self, item, opening_hours):
+        """
+        Example opening hours string:
+            "dayOfWeek=1,closed=FALSE,from=05:00,to=22:00#dayOfWeek=2,closed=FALSE,from=05:00,to=22:00"
+            "dayOfWeek=1,closed=TRUE#dayOfWeek=2,closed=FALSE,from=05:00,to=22:00"
+        """
+        oh = OpeningHours()
+        try:
+            if opening_hours:
+                for rule_str in opening_hours.split("#"):
+                    rule = {}
+                    for prop in rule_str.split(","):
+                        k, v = prop.split("=")
+                        rule[k] = v
+
+                    if rule.get("closed") == "TRUE":
+                        oh.set_closed(DAYS[int(rule["dayOfWeek"]) - 1])
+                    else:
+                        oh.add_range(DAYS[int(rule["dayOfWeek"]) - 1], rule["from"], rule["to"])
+                item["opening_hours"] = oh
+        except Exception as e:
+            self.logger.error(f"Error parsing hours: {opening_hours}, {e}")
 
     def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict):
         for attribute in data.get(attribute_name, []):
