@@ -13,7 +13,7 @@ class DominosPizzaFRSpider(SitemapSpider):
     sitemap_urls = ["https://www.dominos.fr/sitemap.aspx"]
     sitemap_rules = [
         (
-            r"https:\/\/www\.dominos\.fr\/magasin\/([-\w.]+)_(unknown|[\d]+)$",
+            r"https:\/\/www\.dominos\.fr\/magasin\/\/?([-\w.]+)_(unknown|[\d]+)$",
             "parse_store",
         )
     ]
