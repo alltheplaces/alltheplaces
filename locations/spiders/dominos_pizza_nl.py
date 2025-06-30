@@ -1,5 +1,7 @@
 import re
+from typing import Any, Iterable
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
@@ -11,23 +13,22 @@ class DominosPizzaNLSpider(SitemapSpider):
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.nl"]
     sitemap_urls = ["https://www.dominos.nl/sitemap.aspx"]
-    url_regex = r"https:\/\/www\.dominos\.nl\/winkel\/([\w]+)-([\w]+)-([\d]+)$"
+    url_regex = r"https://www\.dominos\.nl/+winkel/+[\w]+-[\w]+-([\d]+)$"
     sitemap_rules = [(url_regex, "parse_store")]
     user_agent = BROWSER_DEFAULT
 
-    start_urls = ("https://www.dominos.nl/winkels",)
+    def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
+        for entry in entries:
+            entry["loc"] = re.sub(r"(\w)/+", r"\1/", entry["loc"])
+            yield entry
 
-    def parse_store(self, response):
-        match = re.match(self.url_regex, response.url)
-        ref = match.group(3)
-        country = match.group(1)
+    def parse_store(self, response: Response) -> Any:
         address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
         locality_data = re.search(r"(.*) ([A-Z]{2}) (.*)", address_data[1].strip())
         properties = {
-            "ref": ref.strip("/"),
+            "ref": re.match(self.url_regex, response.url).group(1),
             "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),
             "street_address": address_data[0].strip().strip(","),
-            "country": country,
             "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
             "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
             "website": response.url,
