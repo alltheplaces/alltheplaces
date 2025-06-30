@@ -9,14 +9,13 @@ from locations.structured_data_spider import StructuredDataSpider
 class ChicosSpider(CrawlSpider, StructuredDataSpider):
     name = "chicos"
     BRANDS = {
-        "chicos": ("Chico's", "Q5096393"),
-        "chicosofftherack": ("Chico's Off The Rack", "Q5096393"),
-        "whitehouseblackmarket": ("White House Black Market", "Q7994858"),
-        "soma": ("Soma", "Q69882213"),
+        "Chico's": "Q5096393",
+        "Chico's Off The Rack": "Q5096393",
+        "White House Black Market": "Q7994858",
+        "Soma": "Q69882213",
     }
     start_urls = [
         "https://www.chicos.com/locations/locations-list/",
-        "https://www.chicosofftherack.com/locations/locations-list/",
         "https://www.soma.com/locations/locations-list/",
         "https://www.whitehouseblackmarket.com/locations/locations-list/",
     ]
@@ -29,11 +28,14 @@ class ChicosSpider(CrawlSpider, StructuredDataSpider):
         ),
     ]
     time_format = "%H:%M:%S"
-    drop_attributes = {"email"}
+    search_for_email = False
+    search_for_facebook = False
+    search_for_twitter = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        brand = response.url.split(".")[1]
-        if brand_details := self.BRANDS.get(brand):
-            item["brand"], item["brand_wikidata"] = brand_details
+        item["brand"] = item["name"]
+        item["brand_wikidata"] = self.BRANDS.get(item["name"])
+        full_name = response.xpath("//h1/text()").get()
+        item["branch"] = fullname[full_name.casefold().find(" at ") + 4 :]
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
