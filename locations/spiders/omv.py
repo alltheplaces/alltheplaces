@@ -23,14 +23,14 @@ BRANDS_AND_COUNTRIES = {
 # Map country codes used by source data to ISO 3166 alpha-2 country codes used
 # by ATP.
 COUNTRY_CODE_MAP = {
-    "AUT": "AT", # Austria
-    "BGR": "BG", # Bulgaria
-    "CZE": "CZ", # Czech Republic
-    "HUN": "HU", # Hungary
-    "MDA": "MD", # Moldova
-    "ROU": "RO", # Romania
-    "SRB": "RS", # Serbia
-    "SVK": "SK", # Slovakia
+    "AUT": "AT",  # Austria
+    "BGR": "BG",  # Bulgaria
+    "CZE": "CZ",  # Czech Republic
+    "HUN": "HU",  # Hungary
+    "MDA": "MD",  # Moldova
+    "ROU": "RO",  # Romania
+    "SRB": "RS",  # Serbia
+    "SVK": "SK",  # Slovakia
 }
 
 SITE_FEATURES_MAP = {
