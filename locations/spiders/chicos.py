@@ -9,10 +9,10 @@ from locations.structured_data_spider import StructuredDataSpider
 class ChicosSpider(CrawlSpider, StructuredDataSpider):
     name = "chicos"
     BRANDS = {
-        "Chico's": "Q5096393",
-        "Chico's Off The Rack": "Q5096393",
-        "White House Black Market": "Q7994858",
-        "Soma": "Q69882213",
+        "chico's": ("Chico's", "Q5096393"),
+        "chico's off the rack": ("Chico's Off The Rack", "Q5096393"),
+        "white house black market": ("White House Black Market", "Q7994858"),
+        "soma": ("Soma", "Q69882213"),
     }
     start_urls = [
         "https://www.chicos.com/locations/locations-list/",
@@ -33,9 +33,9 @@ class ChicosSpider(CrawlSpider, StructuredDataSpider):
     search_for_twitter = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["brand"] = item["name"]
-        item["brand_wikidata"] = self.BRANDS.get(item["name"])
+        if brand_tags := self.BRANDS.get(item["name"].casefold()):
+            item["brand"], item["brand_wikidata"] = brand_tags
         full_name = response.xpath("//h1/text()").get()
-        item["branch"] = fullname[full_name.casefold().find(" at ") + 4 :]
+        item["branch"] = full_name[full_name.casefold().find(" at ") + 4 :]
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
