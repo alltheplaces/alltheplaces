@@ -16,7 +16,7 @@ class DominosPizzaTWSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["branch"] = response.xpath('//*[@class="storetitle"]/text()').get()
+        item["branch"] = response.xpath('//*[@class="storetitle"]/text()').get().removeprefix("Domino's ")
         item["addr_full"] = response.xpath('//*[@id="store-address-info"]//a').xpath("normalize-space()").get()
         item["lat"] = response.xpath('//*[@name="store-lat"]/@value').get()
         item["lon"] = response.xpath('//*[@name="store-lon"]/@value').get()
