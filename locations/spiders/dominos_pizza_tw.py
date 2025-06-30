@@ -9,7 +9,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class DominosPizzaTWSpider(SitemapSpider):
     name = "dominos_pizza_tw"
-    item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
+    item_attributes = {"brand_wikidata": "Q839466"}
     sitemap_urls = ["https://www.dominos.com.tw/sitemap.aspx"]
     sitemap_rules = [("tw/store/", "parse")]
     user_agent = BROWSER_DEFAULT
