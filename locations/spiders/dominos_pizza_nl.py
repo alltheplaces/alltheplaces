@@ -23,11 +23,11 @@ class DominosPizzaNLSpider(SitemapSpider):
             yield entry
 
     def parse_store(self, response: Response) -> Any:
-        address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
+        address_data = response.xpath('//a[@id="open-map-address"]/text()').getall()
         locality_data = re.search(r"(.*) ([A-Z]{2}) (.*)", address_data[1].strip())
         properties = {
             "ref": re.match(self.url_regex, response.url).group(1),
-            "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),
+            "branch": response.xpath('//*[@class="storetitle"]/text()').get("").removeprefix("Domino's Pizza "),
             "street_address": address_data[0].strip().strip(","),
             "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
             "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
