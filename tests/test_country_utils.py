@@ -41,6 +41,9 @@ def test_country_code_from_spider_name():
     assert "GB" == country_utils.country_code_from_spider_name("spider_UK")
     assert "GB" == country_utils.country_code_from_spider_name("spider_GB")
     assert "GB" == country_utils.country_code_from_spider_name("spider_with_more_words_GB")
+    assert not country_utils.country_code_from_spider_name("homebase_gb_ie")
+    assert not country_utils.country_code_from_spider_name("spider_with_two_letters_in_the_middle")
+    assert "FR" == country_utils.country_code_from_spider_name("le_spider_fr")
 
 
 def test_get_locale():

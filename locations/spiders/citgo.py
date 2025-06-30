@@ -1,83 +1,41 @@
-import json
 import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
-SERVICE_VALUES = {"Yes": True, "No": False, "NR": None}
-TIME_PATTERN = re.compile(r"\d{2}:\d{2}")
 
-
-class CitgoSpider(scrapy.Spider):
+class CitgoSpider(SitemapSpider, StructuredDataSpider):
     name = "citgo"
     item_attributes = {"brand": "Citgo", "brand_wikidata": "Q2974437"}
     allowed_domains = ["citgo.com"]
+    sitemap_urls = ["https://www.citgo.com/sitemap.xml"]
+    sitemap_rules = [
+        (r"/station-locator/locations/(\d+)", "parse_sd"),
+    ]
+    user_agent = BROWSER_DEFAULT
+    drop_attributes = {"facebook", "twitter"}
 
-    start_urls = ["https://citgo.com/locator/store-locators/store-locator"]
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        if opening_hours := ld_data.get("openingHours"):
+            ld_data["openingHours"] = re.sub(r"24:00[-\s]+24:00", "00:00-23:59", opening_hours)
 
-    def parse(self, response):
-        if response.request.method == "GET":
-            # We first need to fetch the page normally and extract some required tokens from the form
-            yield scrapy.FormRequest(
-                self.start_urls[0],
-                method="POST",
-                formdata={
-                    "__CMSCsrfToken": response.css("#__CMSCsrfToken::attr(value)").get(),
-                    "__VIEWSTATE": response.css("#__VIEWSTATE::attr(value)").get(),
-                    "__CALLBACKID": "p$lt$WebPartZone3$PageContent$pageplaceholder$p$lt$WebPartZone3$Widgets$StoreLocator",
-                    "__CALLBACKPARAM": "66952|10000",
-                },
-            )
-        else:
-            # The first character of the response is `s`; after that it's JSON
-            result = json.loads(response.text[1:])
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item.pop("name")
+        apply_category(Categories.FUEL_STATION, item)
 
-            for location in result["Locations"]:
-                opening_hours = OpeningHours()
-                services = location["services"]
+        services = [service.strip() for service in response.xpath('//li[@class="service__item"]/text()').getall()]
 
-                for hours_key in ["sun", "mon", "tues", "wed", "thurs", "fri", "sat"]:
-                    open_time = location[f"hrs{hours_key}start"]
-                    close_time = location[f"hrs{hours_key}start"]
-
-                    if not (TIME_PATTERN.match(open_time) and TIME_PATTERN.match(close_time)):
-                        continue
-
-                    if int(open_time[0:2]) >= 24:
-                        open_time = f"{(int(open_time[0:2]) - 24):02d}{open_time[2:]}"
-
-                    if int(close_time[0:2]) >= 24:
-                        close_time = f"{(int(close_time[0:2]) - 24):02d}{close_time[2:]}"
-
-                    opening_hours.add_range(
-                        day=hours_key[:2].capitalize(),
-                        open_time=open_time,
-                        close_time=close_time,
-                        time_format="%H:%M",
-                    )
-
-                item = Feature(
-                    ref=location["number"],
-                    lon=location["longitude"],
-                    lat=location["latitude"],
-                    name=location["name"],
-                    addr_full=location["address"],
-                    city=location["city"],
-                    state=location["state"],
-                    postcode=location["zip"],
-                    country=location["country"],
-                    phone=location["phone"],
-                    opening_hours=opening_hours,
-                    extras={
-                        "atm": SERVICE_VALUES.get(services["atm"]),
-                        "car_wash": SERVICE_VALUES.get(services["carwash"]),
-                        "fuel:diesel": SERVICE_VALUES.get(services["diesel"]),
-                        "hgv": SERVICE_VALUES.get(services["truckstop"]),
-                        "wheelchair": SERVICE_VALUES.get(services["handicapaccess"]),
-                    },
-                )
-                apply_category(Categories.FUEL_STATION, item)
-                yield item
+        # apply_yes_no(Fuel.OCTANE_87, item, "TOP TIER™ CITGO TriCLEAN® Gasoline" in services)
+        apply_yes_no(Fuel.DIESEL, item, "Diesel" in services)
+        apply_yes_no(Fuel.KEROSENE, item, "Kerosene" in services)
+        apply_yes_no(Fuel.ETHANOL_FREE, item, "Ethanol Free" in services)
+        apply_yes_no(Fuel.E85, item, "E85" in services)
+        apply_yes_no(Access.HGV, item, "Truck Stop" in services)
+        apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in services)
+        yield item
