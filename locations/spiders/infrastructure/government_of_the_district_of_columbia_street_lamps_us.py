@@ -19,15 +19,18 @@ class GovernmentOfTheDistrictOfColumbiaStreetLampsUSSpider(ArcGISFeatureServerSp
     service_id = "DCGIS_DATA/Transportation_Signs_Signals_Lights_WebMercator"
     server_type = "MapServer"
     layer_id = "90"
+    # There is no robots.txt nor use of HTTP 429 however it appears that the
+    # server is configured or behind a network configured to drop connection
+    # attempts if they occur at whatever has been decided to be too fast.
+    download_delay = 30
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["STREETLIGHTID"]
+        item["ref"] = feature["FACILITYID"]
         if feature.get("HOUSENO") != "0":
             item["housenumber"] = feature["HOUSENO"]
         else:
             item.pop("housenumber", None)
         apply_category(Categories.STREET_LAMP, item)
-        item["extras"]["alt_ref"] = feature["FACILITYID"]
         if height_ft := feature.get("POLEHEIGHT_DESC"):
             height_ft = height_ft.removesuffix(" ft")
             item["extras"]["height"] = f"{height_ft}'"
