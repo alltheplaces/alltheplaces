@@ -7,13 +7,14 @@ from locations.dict_parser import DictParser
 class Century21Spider(scrapy.Spider):
     name = "century_21"
     item_attributes = {"brand": "Century 21", "brand_wikidata": "Q1054480"}
-    start_urls = ["https://www.century21global.com/en/countries"]
+    start_urls = ["https://www.century21global.com/api/website-builder/location-profile?size=100&page=0&language=en"]
     total_results = {}
 
     def parse(self, response):
         # Taking text rather than slug from url because at the moment at least
         # "Cyprus Northern Territory" points to the wrong url and returns different results
-        for country in response.xpath('//a[contains(@href, "/en/countries/")]/div/span/text()').getall():
+        for data in response.json()["content"]:
+            country = data["searchParameters"]["country"]
             self.logger.debug(f"Starting requests for {country.strip()}")
             yield self.make_request(country.strip(), 0, True)
 
