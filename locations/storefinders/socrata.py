@@ -71,15 +71,17 @@ class SocrataSpider(Spider):
     def parse_schema(self, response: Response) -> Iterable[JsonRequest]:
         table_attributes = response.json()
 
-        timestamp_of_last_edit = datetime.fromtimestamp(table_attributes["rowsUpdatedAt"], UTC)
-        self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
-        current_timestamp = datetime.now(UTC)
-        if current_timestamp - timestamp_of_last_edit > timedelta(days=365):
-            self.logger.warning(
-                "The requested dataset is possibly outdated as the dataset was last edited over 365 days ago on {}.".format(
-                    timestamp_of_last_edit.isoformat()
+        last_updated_epoch = table_attributes.get("rowsUpdatedAt", table_attributes.get("viewLastModified"))
+        if isinstance(last_updated_epoch, int):
+            timestamp_of_last_edit = datetime.fromtimestamp(last_updated_epoch, UTC)
+            self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
+            current_timestamp = datetime.now(UTC)
+            if current_timestamp - timestamp_of_last_edit > timedelta(days=365):
+                self.logger.warning(
+                    "The requested dataset is possibly outdated as the dataset was last edited over 365 days ago on {}.".format(
+                        timestamp_of_last_edit.isoformat()
+                    )
                 )
-            )
 
         select_clause = "&$select=*"
         if len(self.field_names) > 1:
