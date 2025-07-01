@@ -13,6 +13,7 @@ class DominosPizzaAUSpider(SitemapSpider):
     sitemap_urls = ["https://www.dominos.com.au/sitemap.aspx"]
     sitemap_rules = [(r"/store//[a-z-]+\d+", "parse")]
     user_agent = BROWSER_DEFAULT
+    download_timeout = 180
 
     def parse(self, response):
         properties = {
