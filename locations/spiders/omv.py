@@ -179,7 +179,7 @@ class OmvSpider(scrapy.Spider):
                 # Per https://app.wigeogis.com/kunden/omv/webcomponent/js/app.js
                 # the 8th day of week listed in source data is never used and is
                 # ignored by the client JavaScript that renders opening hours.
-                for rule_str in opening_hours.split("#")[0:6]:
+                for rule_str in opening_hours.split("#")[0:7]:
                     rule = {}
                     for prop in rule_str.split(","):
                         k, v = prop.split("=")
