@@ -11,7 +11,7 @@ class GreystarSpider(JSONBlobSpider):
         "operator_wikidata": "Q60749135",
     }
     start_urls = ["https://www.greystar.com/api/properties/search?Distance=25000&Latitude=0&Longitude=0"]
-    download_timeout = 60
+    download_timeout = 120
     locations_key = "Results"
 
     def post_process_item(self, item, response, location):
