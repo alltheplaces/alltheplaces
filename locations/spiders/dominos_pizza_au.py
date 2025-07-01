@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -11,11 +14,11 @@ class DominosPizzaAUSpider(SitemapSpider):
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["www.dominos.com.au"]
     sitemap_urls = ["https://www.dominos.com.au/sitemap.aspx"]
-    sitemap_rules = [(r"/store//[a-z-]+\d+", "parse")]
+    sitemap_rules = [(r"/store/+[-\w]+\d+", "parse")]
     user_agent = BROWSER_DEFAULT
     download_timeout = 180
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.url.split("-")[-1],
             "branch": response.xpath('//div[@class="storetitle"]/text()').get().removeprefix("Domino's "),
