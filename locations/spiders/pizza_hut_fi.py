@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -25,4 +26,5 @@ class PizzaHutFISpider(SitemapSpider):
         item["email"] = response.xpath('//*[contains(text(),"@pizzahut.fi")]/text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
+        apply_category(Categories.RESTAURANT, item)
         yield item
