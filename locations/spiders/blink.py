@@ -1,5 +1,7 @@
+from typing import Any, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -25,9 +27,10 @@ class BlinkSpider(Spider):
         "operator": "Blink",
         "operator_wikidata": "Q62065645",
     }
+    handle_httpstatus_list = [404]
 
     # First request the map, but it only returns lat/lon/ID for each station
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(
             "https://apigw.blinknetwork.com/nmap/v3/locations/map/pins",
             data={
@@ -39,41 +42,45 @@ class BlinkSpider(Spider):
         )
 
     # For each station, request details, and pass through lat/lon
-    def parse_pins(self, response):
+    def parse_pins(self, response: Response) -> Iterable[JsonRequest]:
         for pin in response.json():
             yield JsonRequest(
                 f"https://apigw.blinknetwork.com/v3/locations/map/{pin['locationId']}",
                 callback=self.parse_station,
-                cb_kwargs={"lat": pin["latitude"], "lon": pin["longitude"]},
+                cb_kwargs={"minimal_item": pin},
             )
 
-    def parse_station(self, response, lat, lon):
-        location = response.json()
-        item = DictParser.parse(location)
+    def parse_station(self, response: Response, minimal_item: dict) -> Any:
+        if response.status in self.handle_httpstatus_list:
+            # Yield a minimal item with coordinates if the station details are not found
+            item = DictParser.parse(minimal_item)
+            apply_category(Categories.CHARGING_STATION, item)
+            yield item
+        else:
+            location = response.json() | minimal_item
+            item = DictParser.parse(location)
 
-        item["lat"] = lat
-        item["lon"] = lon
-        item["branch"] = item.pop("name")
-        apply_category(Categories.CHARGING_STATION, item)
+            item["branch"] = item.pop("name")
+            apply_category(Categories.CHARGING_STATION, item)
 
-        oh = OpeningHours()
-        for line in location["locationSchedule"]["locationScheduleInfoDTO"]:
-            if line["isOpen"]:
-                oh.add_range(line["weekDay"], line["startTime"], line["endTime"])
-            else:
-                oh.set_closed(line["weekDay"])
-        item["opening_hours"] = oh
+            oh = OpeningHours()
+            for line in location["locationSchedule"]["locationScheduleInfoDTO"]:
+                if line["isOpen"]:
+                    oh.add_range(line["weekDay"], line["startTime"], line["endTime"])
+                else:
+                    oh.set_closed(line["weekDay"])
+            item["opening_hours"] = oh
 
-        yield item
+            yield item
 
-        # Additionally request details about the chargers
-        yield JsonRequest(
-            f"https://apigw.blinknetwork.com/v3/locations/{location['locationId']}",
-            callback=self.parse_points,
-            cb_kwargs={"parent": item},
-        )
+            # Additionally request details about the chargers
+            yield JsonRequest(
+                f"https://apigw.blinknetwork.com/v3/locations/{location['locationId']}",
+                callback=self.parse_points,
+                cb_kwargs={"parent": item},
+            )
 
-    def parse_points(self, response, parent):
+    def parse_points(self, response: Response, parent: Feature) -> Iterable[Feature]:
         for level in response.json():
             for charger in level["chargers"]:
                 item = Feature(
