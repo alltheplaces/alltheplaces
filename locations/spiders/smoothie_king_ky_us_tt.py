@@ -13,5 +13,6 @@ class SmoothieKingKYUSTTSpider(Where2GetItSpider):
     download_timeout = 180
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
+        item["name"] = None
         item["lat"], item["lon"] = location["latitude"], location["longitude"]
         yield item
