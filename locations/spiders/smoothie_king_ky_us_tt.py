@@ -9,3 +9,4 @@ class SmoothieKingKYUSTTSpider(Where2GetItSpider):
     }
     api_endpoint = "https://locations.smoothieking.com/rest/getlist"
     api_key = "95B912AA-DEE4-11ED-883E-CDDDD7DDC1D0"
+    download_timeout = 180
