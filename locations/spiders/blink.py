@@ -28,6 +28,7 @@ class BlinkSpider(Spider):
         "operator_wikidata": "Q62065645",
     }
     handle_httpstatus_list = [404]
+    custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 5}
 
     # First request the map, but it only returns lat/lon/ID for each station
     def start_requests(self) -> Iterable[JsonRequest]:
