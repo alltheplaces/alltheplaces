@@ -15,8 +15,9 @@ class NeonetPLSpider(SitemapSpider):
     sitemap_rules = [(r"/polska/.*[0-9]$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = json.loads(
-            html.unescape(response.xpath('//*[@type = "application/ld+json"]').xpath("normalize-space()").get())
-        )
-        item = LinkedDataParser.parse_ld(data["@graph"][1])
-        yield item
+        data = json.loads(html.unescape(response.xpath('//*[@type="application/ld+json"]/text()').get()))
+        for entry in data.get("@graph") or []:
+            if entry.get("@type") == "LocalBusiness":
+                item = LinkedDataParser.parse_ld(entry)
+                yield item
+                return
