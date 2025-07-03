@@ -30,7 +30,7 @@ class RepontHUSpider(scrapy.Spider):
 
     def parse_details(self, response: Response) -> Any:
         item = DictParser.parse(response.json())
-        item["name"] = None
+        item["located_in"] = item.pop("name", None)
         item["street_address"] = item.pop("addr_full")
         apply_category(Categories.VENDING_MACHINE, item)
         add_vending(Vending.BOTTLE_RETURN, item)
