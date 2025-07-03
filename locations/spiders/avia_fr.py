@@ -17,7 +17,7 @@ class AviaFRSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]:
-            if store.get("Station temporarily closed") == "TRUE":
+            if any(store.get(key, "").upper() == "TRUE" for key in ["Station temporarily closed", "Fuel agency"]):
                 continue
             store["lat"], store["lon"] = [store[key].replace(",", ".") for key in ["geo lat", "geo long"]]
             store["postcode"] = store.pop("ZIP Code")
