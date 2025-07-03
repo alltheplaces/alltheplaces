@@ -100,6 +100,6 @@ class UnitedPetroleumAUSpider(Spider):
             apply_yes_no(Extras.TOILETS, item, location["facilitiesAndServices"]["toilets"], False)
             apply_yes_no(Extras.SHOWERS, item, location["facilitiesAndServices"]["showers"], False)
             apply_yes_no(Extras.ATM, item, location["facilitiesAndServices"]["atm"], False)
-            apply_yes_no(Extras.CAR_WASH, item, location["facilitiesAndServices"]["carWash"], False)
+            apply_yes_no(Extras.CAR_WASH, item, location["facilitiesAndServices"].get("carWash"), False)
 
             yield item
