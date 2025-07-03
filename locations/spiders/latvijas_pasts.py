@@ -35,7 +35,7 @@ class LatvijasPastsSpider(Spider):
 
             yield item
 
-    def parse_opening_hours(self,work_hours:dict) -> OpeningHours:
+    def parse_opening_hours(self, work_hours: dict) -> OpeningHours:
         oh = OpeningHours()
         for key, value in work_hours.items():
             day = key
@@ -43,5 +43,5 @@ class LatvijasPastsSpider(Spider):
                 continue
             for time in value.split(";"):
                 open_time, close_time = time.replace(".", ":").split("-")
-            oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
+                oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
         return oh
