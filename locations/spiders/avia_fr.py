@@ -21,7 +21,7 @@ class AviaFRSpider(Spider):
             store["postcode"] = store.pop("ZIP Code")
             item = DictParser.parse(store)
             item["ref"] = store.get("UID")
-            item["name"] = store.get("Additional Company Info")
+            item["name"] = store.get("Company name")
             item["state"] = store.get("Place")
             item["phone"] = store.get("Telephone No.")
             apply_category(Categories.FUEL_STATION, item)
