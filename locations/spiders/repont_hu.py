@@ -25,7 +25,7 @@ class RepontHUSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
         for poi in response.json():
             yield JsonRequest(
-                f"https://map.mohu.hu/api/Map/GetWastePointDetails?id={poi['id']}", callback=self.parse_details
+                f"https://map.mohu.hu/api/Map/GetDrsPointDetails?id={poi['id']}", callback=self.parse_details
             )
 
     def parse_details(self, response: Response) -> Any:
