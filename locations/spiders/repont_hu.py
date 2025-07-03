@@ -15,7 +15,12 @@ class RepontHUSpider(scrapy.Spider):
         "operator": "MOHU MOL Hulladékgazdálkodási Zrt.",
         "operator_wikidata": "Q130207606",
     }
-    start_urls = ["https://map.mohu.hu/api/Map/GetAllPois"]
+    
+    def start_requests(self) -> Iterable[Request]:
+         yield JsonRequest(
+             "https://map.mohu.hu/api/Map/SearchPoisGeneralData",
+             data={"wastePointTypes": ["repont"], "hideDrsPoints": False},
+         )
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
         for poi in response.json():
