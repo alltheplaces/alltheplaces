@@ -19,5 +19,6 @@ class NeonetPLSpider(SitemapSpider):
         for entry in data.get("@graph") or []:
             if entry.get("@type") == "LocalBusiness":
                 item = LinkedDataParser.parse_ld(entry)
+                item["name"] = None
                 yield item
                 return
