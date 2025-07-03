@@ -9,8 +9,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class LatvijasPastsLVSpider(Spider):
-    name = "latvijas_pasts_lv"
+class LatvijasPastsSpider(Spider):
+    name = "latvijas_pasts"
     item_attributes = {"brand": "Latvijas Pasts", "brand_wikidata": "Q1807088"}
 
     def start_requests(self):
