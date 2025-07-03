@@ -12,6 +12,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class AviaFRSpider(Spider):
     name = "avia_fr"
     item_attributes = AVIA_SHARED_ATTRIBUTES
+    AVIA_XPRESS = {"brand": "Avia XPress", "brand_wikidata": "Q124611203"}
     user_agent = BROWSER_DEFAULT
     start_urls = ["https://www.avia-france.fr/wp-admin/admin-ajax.php?action=get_avia_csv"]
 
@@ -34,5 +35,7 @@ class AviaFRSpider(Spider):
                     ],
                 )
             )
+            if store.get("XPRESS", "").upper() == "TRUE":
+                item.update(self.AVIA_XPRESS)
             apply_category(Categories.FUEL_STATION, item)
             yield item
