@@ -16,7 +16,7 @@ class NeonetPLSpider(SitemapSpider):
     def parse(self, response):
         data = json.loads(
             html.unescape(response.xpath('//*[@type = "application/ld+json"]').xpath("normalize-space()").get())
-        )[1]
+        )["@graph"][1]
         item = DictParser.parse(data)
         item["ref"] = data.get("@id")
         item["opening_hours"] = LinkedDataParser.parse_opening_hours(data)
