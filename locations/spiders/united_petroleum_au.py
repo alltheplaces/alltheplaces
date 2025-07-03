@@ -1,7 +1,8 @@
+from typing import Any
 from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -23,25 +24,25 @@ class UnitedPetroleumAUSpider(Spider):
     # is almost always used.
     UNITED = {"brand": "United", "brand_wikidata": "Q28224393"}
     allowed_domains = ["servicestations.unitedpetroleum.com.au"]
-    start_urls = ["https://servicestations.unitedpetroleum.com.au/api/find"]
 
     def start_requests(self):
-        data = {
-            "brand": [],
-            "facilitiesAndServices": [],
-            "foodAndDrinks": [],
-            "fuelCards": [],
-            "fuels": [],
-            "lat": -37.8585540736312,
-            "lon": 145.02824508187487,
-            "range": 20000,
-            "supermarketVouchers": [],
-            "truckFriendly": [],
-        }
-        for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", data=data)
+        yield JsonRequest(
+            url="https://servicestations.unitedpetroleum.com.au/api/find",
+            data={
+                "brand": [],
+                "facilitiesAndServices": [],
+                "foodAndDrinks": [],
+                "fuelCards": [],
+                "fuels": [],
+                "lat": -37.8585540736312,
+                "lon": 145.02824508187487,
+                "range": 20000,
+                "supermarketVouchers": [],
+                "truckFriendly": [],
+            },
+        )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
             item["addr_full"] = ", ".join(
@@ -58,7 +59,8 @@ class UnitedPetroleumAUSpider(Spider):
                         apply_category(cat, tenant)
                         yield tenant
 
-            item.update(self.UNITED)
+            if location["brand"] == "united":
+                item.update(self.UNITED)
             item["website"] = urljoin("https://servicestations.unitedpetroleum.com.au/location/", location["slug"])
             item["phone"] = location["publicPhoneNumber"]
             item["opening_hours"] = OpeningHours()
@@ -100,6 +102,6 @@ class UnitedPetroleumAUSpider(Spider):
             apply_yes_no(Extras.TOILETS, item, location["facilitiesAndServices"]["toilets"], False)
             apply_yes_no(Extras.SHOWERS, item, location["facilitiesAndServices"]["showers"], False)
             apply_yes_no(Extras.ATM, item, location["facilitiesAndServices"]["atm"], False)
-            apply_yes_no(Extras.CAR_WASH, item, location["facilitiesAndServices"].get("carWash"), False)
+            apply_yes_no(Extras.CAR_WASH, item, location["facilitiesAndServices"].get("carWash"))
 
             yield item
