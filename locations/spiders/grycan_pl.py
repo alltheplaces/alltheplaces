@@ -34,9 +34,9 @@ class GrycanPLSpider(WpGoMapsSpider):
             if "Godziny otwarcia w" in key:
                 # Godziny otwarcia we Wtorek or Godziny otwarcia w Poniedziałek
                 day_name = key.split(" ")[3]
-                if " | " in custom_field_data[key]:
-                    opens, closes = custom_field_data[key].split(" | ")
-                    item["opening_hours"].add_range(DAYS_PL[day_name], opens, closes, "%H:%M:%S")
+                if "|" in custom_field_data[key]:
+                    opens, closes = custom_field_data[key].split("|")
+                    item["opening_hours"].add_range(DAYS_PL[day_name], opens.strip(), closes.strip(), "%H:%M:%S")
                 elif "-" in custom_field_data[key]:  # 10-21
                     opens, closes = custom_field_data[key].split("-")
                     item["opening_hours"].add_range(DAYS_PL[day_name], opens, closes, "%H")
