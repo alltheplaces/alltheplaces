@@ -361,16 +361,16 @@ class StructuredDataSpider(Spider):
         if hasattr(self, "rules"):  # Attempt to pull a match from CrawlSpider.rules
             for rule in getattr(self, "rules"):
                 for allow in rule.link_extractor.allow_res:
-                    if match := re.search(allow, url):
+                    if match := re.search(allow, response.url):
                         if len(match.groups()) > 0:
                             return match.group(1)
         elif hasattr(self, "sitemap_rules"):
             # Attempt to pull a match from SitemapSpider.sitemap_rules
             for rule in getattr(self, "sitemap_rules"):
-                if match := re.search(rule[0], url):
+                if match := re.search(rule[0], response.url):
                     if len(match.groups()) > 0:
                         return match.group(1)
-        return url
+        return response.url
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         """Override with any pre-processing on the item."""
