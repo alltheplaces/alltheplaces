@@ -17,6 +17,8 @@ class AviaFRSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]:
+            if store.get("Station temporarily closed") == "TRUE":
+                continue
             store["lat"], store["lon"] = [store[key].replace(",", ".") for key in ["geo lat", "geo long"]]
             store["postcode"] = store.pop("ZIP Code")
             item = DictParser.parse(store)
