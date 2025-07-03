@@ -27,12 +27,21 @@ class LatvijasPastsSpider(Spider):
                 apply_category(Categories.POST_OFFICE, item)
             elif location["type"] in [6, 7]:
                 apply_category(Categories.PARCEL_LOCKER, item)
-            item["opening_hours"] = OpeningHours()
-            for key, value in location["workingHours"].items():
-                day = key
-                if value == "-":
-                    continue
-                for time in value.split(";"):
-                    open_time, close_time = time.replace(".", ":").split("-")
-                item["opening_hours"].add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
+
+            try:
+                item["opening_hours"] = self.parse_opening_hours(location["workingHours"])
+            except:
+                self.logger.error("Error parsing opening hours")
+
             yield item
+
+    def parse_opening_hours(self,work_hours:dict) -> OpeningHours:
+        oh = OpeningHours()
+        for key, value in work_hours.items():
+            day = key
+            if value == "-":
+                continue
+            for time in value.split(";"):
+                open_time, close_time = time.replace(".", ":").split("-")
+            oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
+        return oh
