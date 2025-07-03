@@ -1,14 +1,12 @@
 from typing import Any
 
-import scrapy
-from scrapy import Spider, FormRequest
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 from locations.user_agents import BROWSER_DEFAULT
-import requests
 
 
 class AviaFRSpider(Spider):
@@ -19,8 +17,7 @@ class AviaFRSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]:
-            store["lon"] = store.pop("geo_long")
-            store["lat"] = store.pop("geo_lat")
+            store["lat"], store["lon"] = [store[key].replace(",", ".") for key in ["geo lat", "geo long"]]
             store["postcode"] = store.pop("ZIP Code")
             item = DictParser.parse(store)
             item["ref"] = store.get("UID")
