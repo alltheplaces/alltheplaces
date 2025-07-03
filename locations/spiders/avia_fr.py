@@ -23,6 +23,14 @@ class AviaFRSpider(Spider):
             item["ref"] = store.get("UID")
             item["housenumber"] = store.get("House nb.")
             item["name"] = store.get("Company name")
-            item["phone"] = store.get("Telephone No.")
+            item["phone"] = "; ".join(
+                filter(
+                    None,
+                    [
+                        store.get("Phone No."),
+                        store.get("Mobile"),
+                    ],
+                )
+            )
             apply_category(Categories.FUEL_STATION, item)
             yield item
