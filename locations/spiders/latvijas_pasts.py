@@ -36,8 +36,7 @@ class LatvijasPastsSpider(Spider):
 
     def parse_opening_hours(self, work_hours: dict) -> OpeningHours:
         oh = OpeningHours()
-        for key, value in work_hours.items():
-            day = key
+        for day, value in work_hours.items():
             if value == "-":
                 continue
             for time in value.split(";"):
