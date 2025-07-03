@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from scrapy import Spider
@@ -19,7 +18,7 @@ class LatvijasPastsSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.text):
+        for location in response.json():
             item = DictParser.parse(location)
             item["branch"] = location["label"]
             item["addr_full"] = location["readableAddress"]
