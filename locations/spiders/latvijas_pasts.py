@@ -6,11 +6,12 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.central_england_cooperative import set_operator
 
 
 class LatvijasPastsSpider(Spider):
     name = "latvijas_pasts"
-    item_attributes = {"brand": "Latvijas Pasts", "brand_wikidata": "Q1807088"}
+    LATVIJAS_PASTS = {"brand": "Latvijas Pasts", "brand_wikidata": "Q1807088"}
 
     def start_requests(self):
         yield JsonRequest(
@@ -20,11 +21,17 @@ class LatvijasPastsSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["branch"] = location["label"]
+            item["name"] = location["label"]
             item["addr_full"] = location["readableAddress"]
+            item["extras"]["aa"] = str(location["type"])
             if location["type"] in [1, 2]:
+                set_operator(self.LATVIJAS_PASTS, item)
                 apply_category(Categories.POST_OFFICE, item)
-            elif location["type"] in [6, 7]:
+            elif location["type"] == 6:
+                item["branch"] = item.pop("name")
+                item.update(self.LATVIJAS_PASTS)
+                apply_category(Categories.PARCEL_LOCKER, item)
+            elif location["type"] == 7:
                 apply_category(Categories.PARCEL_LOCKER, item)
 
             try:
