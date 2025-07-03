@@ -1,27 +1,23 @@
+from typing import Any
+
 import scrapy
-from scrapy import Spider
+from scrapy import Spider, FormRequest
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
+from locations.user_agents import BROWSER_DEFAULT
+import requests
 
 
 class AviaFRSpider(Spider):
     name = "avia_fr"
     item_attributes = AVIA_SHARED_ATTRIBUTES
+    user_agent = BROWSER_DEFAULT
+    start_urls = ["https://www.avia-france.fr/wp-admin/admin-ajax.php?action=get_avia_csv"]
 
-    def start_requests(self):
-        url = "https://www.avia-france.fr/wp-admin/admin-ajax.php"
-        payload = "action=get_csv_data&columns%5B%5D=UID&columns%5B%5D=geo_lat&columns%5B%5D=geo_long&columns%5B%5D=Additional+Company+Info&columns%5B%5D=legal+type+of+company&columns%5B%5D=Street&columns%5B%5D=House+number&columns%5B%5D=ZIP+Code&columns%5B%5D=Place&columns%5B%5D=Telephone+No.&columns%5B%5D=mon_from_till&columns%5B%5D=tue_from_till&columns%5B%5D=wed_from_till&columns%5B%5D=thu_from_till&columns%5B%5D=fri_from_till&columns%5B%5D=sat_from_till&columns%5B%5D=sun_from_till&columns%5B%5D=Gonflage&columns%5B%5D=garage&columns%5B%5D=rent_of_cars&columns%5B%5D=truck_station&columns%5B%5D=gantry+car+wash&columns%5B%5D=Jetwash&columns%5B%5D=bistro&columns%5B%5D=Ad+blue+pomp&columns%5B%5D=outdoor_children_games&columns%5B%5D=adblue"
-        yield scrapy.Request(
-            url=url,
-            method="POST",
-            body=payload,
-            headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
-            callback=self.parse,
-        )
-
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]:
             store["lon"] = store.pop("geo_long")
             store["lat"] = store.pop("geo_lat")
