@@ -13,8 +13,11 @@ class ChaseUSSpider(YextSpider):
     api_version = "20240816"
 
     def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Any:
-        item["website"] = item["website"].split("?")[0].replace("locator.chase.com", "www.chase.com/locator/banking/us")
-
+        item[
+            "website"
+        ] = f'https://www.chase.com/locator/banking/us/{item["state"]}/{item["city"]}/{item["street_address"]}'.lower().replace(
+            " ", "-"
+        )
         if item["name"] == "Chase Bank":
             item.pop("name")
             apply_category(Categories.BANK, item)
