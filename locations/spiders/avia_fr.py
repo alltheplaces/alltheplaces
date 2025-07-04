@@ -35,6 +35,7 @@ class AviaFRSpider(Spider):
             item = DictParser.parse(store)
             item["ref"] = store.get("UID")
             item["housenumber"] = store.get("House number")
+            item["state"] = store.get("Place")
             item["name"] = store.get("Additional Company Info")
             item["phone"] = "; ".join(
                 filter(
