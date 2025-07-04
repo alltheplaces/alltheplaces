@@ -52,8 +52,8 @@ class WalmartCASpider(scrapy.Spider):
                     "x-apollo-operation-name": "nearByNodes",
                     "x-o-bu": "WALMART-CA",
                     "x-o-segment": "oaoh",
-                    "Cookie": f'walmart.nearestLatLng="{city["latitude"]},{city["longitude"]}"',
                 },
+                cookies={"walmart.nearestLatLng": f'{city["latitude"]},{city["longitude"]}'},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
