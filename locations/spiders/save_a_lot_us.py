@@ -33,20 +33,19 @@ class SaveALotUSSpider(SitemapSpider):
                 item["phone"] = number["value"]
                 break
 
-        item["opening_hours"] = OpeningHours()
-        for day_time in raw_data["hours"]["weekly"]:
-            day = day_time["day"]
-            if day_time["daily"]["type"] == "CLOSED":
-                item["opening_hours"].set_closed(day_time["day"])
-            elif day_time["daily"]["type"] == "OPEN_24_HOURS":
-                item["opening_hours"].add_range(day_time["day"], "00:00", "24:00")
-            else:
-                open_time = day_time["daily"]["open"]["open"]
-                close_time = day_time["daily"]["open"]["close"]
-                item["opening_hours"].add_range(
-                    day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S"
-                )
+        item["opening_hours"] = self.parse_opening_hours(raw_data["hours"]["weekly"])
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            if rule["daily"]["type"] == "CLOSED":
+                oh.set_closed(rule["day"])
+            elif rule["daily"]["type"] == "OPEN_24_HOURS":
+                oh.add_range(rule["day"], "00:00", "24:00")
+            else:
+                oh.add_range(rule["day"], rule["daily"]["open"]["open"], rule["daily"]["open"]["close"], "%H:%M:%S")
+        return oh
