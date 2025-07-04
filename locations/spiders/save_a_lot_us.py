@@ -7,6 +7,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import SocialMedia, set_social_media
 
 
 class SaveALotUSSpider(SitemapSpider):
@@ -23,6 +24,15 @@ class SaveALotUSSpider(SitemapSpider):
         item = DictParser.parse(raw_data)
         item["branch"] = item.pop("name")
         item["website"] = response.url
+        for link in raw_data["webLinks"]:
+            if link["name"] == "Facebook":
+                set_social_media(item, SocialMedia.FACEBOOK, link["url"])
+                break
+        for number in raw_data["phoneNumbers"]:
+            if number["description"] == "Main":
+                item["phone"] = number["value"]
+                break
+
         item["opening_hours"] = OpeningHours()
         for day_time in raw_data["hours"]["weekly"]:
             day = day_time["day"]
