@@ -28,7 +28,7 @@ class WalmartCASpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[JsonRequest]:
         # Tried raw GraphQL query, but it's blocked, hash appears to be stable and required for successful requests.
-        for city in city_locations("CA", min_population=50000):
+        for city in city_locations("CA", min_population=15000):
             variables = {
                 "input": {
                     "postalCode": "",
