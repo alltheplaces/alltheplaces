@@ -22,7 +22,7 @@ class SaveALotUSSpider(SitemapSpider):
         )["state"]["loaderData"]["routes/stores.$storeId._index"]["storeDetailsV2"]
         raw_data.update(raw_data.pop("location"))
         item = DictParser.parse(raw_data)
-        item["branch"] = item.pop("name")
+        item.pop("name")
         item["website"] = response.url
         for link in raw_data["webLinks"]:
             if link["name"] == "Facebook":
