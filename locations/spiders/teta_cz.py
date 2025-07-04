@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.hours import DAYS_CZ, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -8,23 +9,19 @@ from locations.items import Feature
 class TetaCZSpider(SitemapSpider):
     name = "teta_cz"
     item_attributes = {"brand": "Teta", "brand_wikidata": "Q20860823"}
-    sitemap_urls = ["https://www.tetadrogerie.cz/sitemap"]
+    sitemap_urls = ["https://www.tetadrogerie.cz/sitemap_index.xml"]
     sitemap_rules = [(r"/prodejny/", "parse")]
 
     def parse(self, response, **kwargs):
         result = response
         item = Feature()
-        item["lat"] = result.xpath("//*[@class = 'j-map-center-lat']/@value").get()
-        item["lon"] = result.xpath("//*[@class = 'j-map-center-lng']/@value").get()
-        item["phone"] = result.xpath("//*[@class = 'sx-store-detail-phone']//strong/text()").get()
-        item["email"] = result.xpath("//*[@class = 'sx-store-detail-email']/text()").get()
+        item["addr_full"] = result.xpath("//h1/text()").get().strip()
         item["website"] = item["ref"] = response.url
-        item["addr_full"] = result.xpath("//*[@class = 'CMSBreadCrumbsCurrentItem']/text()").get().strip()
+        extract_google_position(item, response)
         oh = OpeningHours()
-
-        for rule in response.xpath(r'//*[@class = "sx-store-detail-opening-table"]//tr'):
-            day = sanitise_day(rule.xpath(r"./td[1]/text()").get(), DAYS_CZ)
-            time = rule.xpath(r"./td[2]/text()").get()
+        for rule in response.xpath('//*[@class="c-hours c-store-detail__main-opening-times"]//li'):
+            day = sanitise_day(rule.xpath(".//text()").get(), DAYS_CZ)
+            time = rule.xpath(r"./span/text()").get()
 
             if (time == "Zavřeno") or (day is None):
                 continue
