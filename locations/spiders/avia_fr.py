@@ -31,18 +31,17 @@ class AviaFRSpider(Spider):
         for store in response.json()["data"]:
             if any(store.get(key, "") == "TRUE" for key in ["Station temporarily closed", "Fuel agency"]):
                 continue
-            store["lat"], store["lon"] = [store[key].replace(",", ".") for key in ["geo lat", "geo long"]]
             store["postcode"] = store.pop("ZIP Code")
             item = DictParser.parse(store)
             item["ref"] = store.get("UID")
-            item["housenumber"] = store.get("House nb.")
-            item["name"] = store.get("Company name")
+            item["housenumber"] = store.get("House number")
+            item["name"] = store.get("Additional Company Info")
             item["phone"] = "; ".join(
                 filter(
                     None,
                     [
-                        store.get("Phone No."),
-                        store.get("Mobile"),
+                        store.get("Telephone No."),
+                        store.get("N° Portable"),
                     ],
                 )
             )
