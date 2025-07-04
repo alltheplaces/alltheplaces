@@ -4,14 +4,14 @@ import chompjs
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class SaveALotUSSpider(SitemapSpider):
     name = "save_a_lot_us"
-    item_attributes = {"brand": "Save-A-Lot", "brand_wikidata": "Q7427972", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Save-A-Lot", "brand_wikidata": "Q7427972"}
     sitemap_urls = ["https://savealot.com/sitemap.xml"]
     sitemap_rules = [(r"/stores/\d+$", "parse")]
 
@@ -36,4 +36,7 @@ class SaveALotUSSpider(SitemapSpider):
                 item["opening_hours"].add_range(
                     day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S"
                 )
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+
         yield item
