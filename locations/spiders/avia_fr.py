@@ -45,7 +45,7 @@ class AviaFRSpider(Spider):
                     ],
                 )
             )
-            if store.get("XPRESS", "") == "TRUE":
+            if "XPRESS" in item["name"].upper():
                 item.update(self.AVIA_XPRESS)
             apply_category(Categories.FUEL_STATION, item)
 
