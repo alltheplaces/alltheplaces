@@ -28,7 +28,6 @@ class SuperStarCarWashUSSpider(Spider):
             item["branch"] = location["post_title"]
             item["website"] = response.urljoin(location["post_name"])
             item["addr_full"] = location["addr"]
-            item["phone"] = location["phone"]
 
             try:
                 if hours := location.get("hours"):
