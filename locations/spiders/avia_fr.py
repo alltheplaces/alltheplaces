@@ -49,40 +49,36 @@ class AviaFRSpider(Spider):
                 item.update(self.AVIA_XPRESS)
             apply_category(Categories.FUEL_STATION, item)
 
-            self.apply_attribute(Fuel.ADBLUE, item, [store.get("AdBlue pump"), store.get("AdBlue can")])
+            self.apply_attribute(Fuel.ADBLUE, item, [store.get("Ad blue pomp"), store.get("adblue")])
             self.apply_attribute(Fuel.E10, item, store.get("SP95/10"))
             self.apply_attribute(Fuel.E5, item, [store.get("SP95/E5"), store.get("SP98/E5")])
-            self.apply_attribute(Fuel.DIESEL, item, [store.get("Diesel B7"), store.get("Diesel B10")])
-            self.apply_attribute(Fuel.E85, item, store.get("E85"))
+            self.apply_attribute(Fuel.DIESEL, item, [store.get("diesel b7"), store.get("Diesel B10")])
+            self.apply_attribute(Fuel.E85, item, store.get("e85"))
             self.apply_attribute(Fuel.BIODIESEL, item, store.get("HVO"))
-            self.apply_attribute(Fuel.CNG, item, store.get("CNG"))
-            self.apply_attribute(Fuel.LNG, item, store.get("LNG"))
-            self.apply_attribute(Fuel.LPG, item, store.get("LPG"))
+            self.apply_attribute(Fuel.CNG, item, store.get("CNG/GNC"))
+            self.apply_attribute(Fuel.LNG, item, store.get("LNG/GNL"))
+            self.apply_attribute(Fuel.LPG, item, store.get("LPG/GPL"))
             self.apply_attribute(Fuel.LH2, item, store.get("H2"))
-            self.apply_attribute(Fuel.ENGINE_OIL, item, store.get("Lubricant"))
-            self.apply_attribute(Fuel.HEATING_OIL, item, store.get("Heating oil"))
 
-            self.apply_attribute(FuelCards.AVIA, item, store.get("AVIA Carte"))
+            self.apply_attribute(FuelCards.AVIA, item, store.get("AVIA-CARD F"))
             self.apply_attribute(FuelCards.DKV, item, store.get("DKV"))
             self.apply_attribute(FuelCards.UTA, item, store.get("UTA"))
             self.apply_attribute(FuelCards.EUROWAG, item, store.get("EUROWAG"))
             self.apply_attribute(FuelCards.ROUTEX, item, store.get("ROUTEX"))
-            self.apply_attribute(FuelCards.LOGPAY, item, store.get("LOGPAY"))
             self.apply_attribute(FuelCards.MORGAN_FUELS, item, store.get("MORGAN FUELS"))
             self.apply_attribute(FuelCards.E100, item, store.get("E100"))
             self.apply_attribute(FuelCards.ESSO_NATIONAL, item, store.get("ESSO"))
-            self.apply_attribute(FuelCards.SHELL, item, [store.get("SHELL M"), store.get("SHELL S")])
+            self.apply_attribute(FuelCards.SHELL, item, [store.get("Shell M Card"), store.get("Shell S Card")])
 
             self.apply_attribute(PaymentMethods.AMERICAN_EXPRESS, item, store.get("AMEX"))
             self.apply_attribute(PaymentMethods.MASTER_CARD, item, store.get("MASTERCARD"))
             self.apply_attribute(PaymentMethods.VISA, item, store.get("VISA"))
 
-            self.apply_attribute(Access.HGV, item, store.get("Truck station"))
+            self.apply_attribute(Access.HGV, item, store.get("truck_station"))
             self.apply_attribute(
-                Extras.CAR_WASH, item, [store.get("Gantry   wash"), store.get("Jetwash"), store.get("Roller washing")]
+                Extras.CAR_WASH, item, [store.get("gantry car wash"), store.get("Jetwash"), store.get("car wash")]
             )
-            self.apply_attribute(Extras.SHOWERS, item, store.get("Shower"))
-            self.apply_attribute(Extras.TOILETS, item, store.get("Toilettes"))
+            self.apply_attribute(Extras.WIFI, item, store.get("wifi"))
 
             yield item
 
