@@ -26,6 +26,8 @@ class FoussierFRSpider(Spider):
                 [location["adresse"]["adresse1"], location["adresse"]["adresse2"]]
             )
             item["postcode"] = location["adresse"]["codePostal"]
+            item["city"] = location["adresse"]["ville"]
+            item["phone"] = location["adresse"].get("telephoneFixe") or location["adresse"].get("telephoneMobile")
             item["lat"] = location["adresse"]["latitude"]
             item["lon"] = location["adresse"]["longitude"]
 
