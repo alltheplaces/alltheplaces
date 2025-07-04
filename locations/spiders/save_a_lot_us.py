@@ -27,9 +27,9 @@ class SaveALotUSSpider(SitemapSpider):
         for day_time in raw_data["hours"]["weekly"]:
             day = day_time["day"]
             if day_time["daily"]["type"] == "CLOSED":
-                continue
-            if day_time["daily"]["type"] == "OPEN_24_HOURS":
-                item["opening_hours"] = "24/7"
+                item["opening_hours"].set_closed(day_time["day"])
+            elif day_time["daily"]["type"] == "OPEN_24_HOURS":
+                item["opening_hours"].add_range(day_time["day"], "00:00", "24:00")
             else:
                 open_time = day_time["daily"]["open"]["open"]
                 close_time = day_time["daily"]["open"]["close"]
