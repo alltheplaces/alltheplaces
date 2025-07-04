@@ -9,7 +9,7 @@ class AlcampoESSpider(WoosmapSpider):
     origin = "https://www.alcampo.es/"
 
     def parse_item(self, item, feature, **kwargs):
-        item["website"] = "https://alcampo.es" + feature["properties"]["contact"]["website"]
+        item.pop("website")
         if feature["properties"]["user_properties"]["isGAS"]:
             apply_category(Categories.FUEL_STATION, item)
         else:
