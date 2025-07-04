@@ -20,7 +20,6 @@ class SaveALotUSSpider(SitemapSpider):
             response.xpath('//*[contains(text(),"window.__remixContext")]/text()').get()
         )["state"]["loaderData"]["routes/stores.$storeId._index"]["storeDetailsV2"]
         raw_data.update(raw_data.pop("location"))
-        print(raw_data)
         item = DictParser.parse(raw_data)
         item["branch"] = item.pop("name")
         item["website"] = response.url
