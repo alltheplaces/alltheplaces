@@ -66,7 +66,11 @@ class WalmartCASpider(scrapy.Spider):
             )
             item["opening_hours"] = self.parse_hours(location.get("operationalHours", []))
 
-            apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+            if location["name"] == "Walmart":
+                apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+            elif location["name"] == "Walmart Supercenter":
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+
             yield item
 
     def parse_hours(self, hours: list) -> OpeningHours | None:
@@ -76,9 +80,10 @@ class WalmartCASpider(scrapy.Spider):
         try:
             oh = OpeningHours()
             for rule in hours:
-                if rule.get("closed"):
+                if rule.get("closed") is True:
                     oh.set_closed(rule.get("day"))
-                oh.add_range(rule.get("day"), rule.get("start"), rule.get("end"))
+                else:
+                    oh.add_range(rule.get("day"), rule.get("start"), rule.get("end"))
             return oh
         except Exception as e:
             self.logger.error(f"Failed to parse hours: {hours}, {e}")
