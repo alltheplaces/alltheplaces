@@ -18,7 +18,7 @@ class ChaseUSSpider(YextSpider):
         if item["name"] == "Chase Bank":
             item.pop("name")
             apply_category(Categories.BANK, item)
-            apply_yes_no(Extras.ATM, item, any("ATM" in service for service in location["services"]))
+            apply_yes_no(Extras.ATM, item, location.get("c_primaryATM"))
         elif item["name"] == "Chase ATM":
             apply_category(Categories.ATM, item)
 
