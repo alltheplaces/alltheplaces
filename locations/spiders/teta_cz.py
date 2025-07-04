@@ -10,7 +10,7 @@ class TetaCZSpider(SitemapSpider):
     name = "teta_cz"
     item_attributes = {"brand": "Teta", "brand_wikidata": "Q20860823"}
     sitemap_urls = ["https://www.tetadrogerie.cz/sitemap_index.xml"]
-    sitemap_rules = [(r"/prodejny/", "parse")]
+    sitemap_rules = [(r"/prodejny/\d+$", "parse")]
 
     def parse(self, response, **kwargs):
         result = response
