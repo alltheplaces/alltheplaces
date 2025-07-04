@@ -20,7 +20,7 @@ class WalmartCASpider(scrapy.Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 15,
+        "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.ca/orchestra/graphql/nearByNodes"
@@ -60,6 +60,7 @@ class WalmartCASpider(scrapy.Spider):
         location_nodes = response.json().get("data", {}).get("nearByNodes") or {}
         for location in location_nodes.get("nodes", []):
             item = DictParser.parse(location)
+            item["branch"] = location.get("displayName", "").split(",")[0].strip()
             item["street_address"] = merge_address_lines(
                 [location["address"].get("addressLineOne"), location["address"].get("addressLineTwo")]
             )
