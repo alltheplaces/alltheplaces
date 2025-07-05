@@ -1,28 +1,27 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
+from locations.storefinders.yext import YextSpider
 
 
-class ChaseUSSpider(SitemapSpider, StructuredDataSpider):
+class ChaseUSSpider(YextSpider):
     name = "chase_us"
     item_attributes = {"brand": "Chase", "brand_wikidata": "Q524629"}
-    drop_attributes = {"image"}
-    allowed_domains = ["locator.chase.com"]
-    sitemap_urls = ["https://locator.chase.com/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/locator\.chase\.com\/(?!es)[a-z]{2}\/[\w\-]+\/[\w\-]+$", "parse_sd")]
-    search_for_facebook = False
-    search_for_twitter = False
+    drop_attributes = {"twitter"}
+    api_key = "e8996b1ad0e9b3a59e3d1251bbcc0b4b"
+    api_version = "20240816"
 
-    def pre_process_data(self, ld_data, **kwargs):
-        for i in range(0, len(ld_data.get("openingHours", []))):
-            ld_data["openingHours"][i] = ld_data["openingHours"][i].replace("00:00-00:00", "Closed")
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Any:
+        item[
+            "website"
+        ] = f'https://www.chase.com/locator/banking/us/{item["state"]}/{item["city"]}/{item["street_address"]}'.lower().replace(
+            " ", "-"
+        )
         if item["name"] == "Chase Bank":
             item.pop("name")
             apply_category(Categories.BANK, item)
-            apply_yes_no(Extras.ATM, item, "ATM services" in response.text)
+            apply_yes_no(Extras.ATM, item, location.get("c_primaryATM"))
         elif item["name"] == "Chase ATM":
             apply_category(Categories.ATM, item)
 
