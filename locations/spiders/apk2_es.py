@@ -21,4 +21,6 @@ class APK2Spider(CrawlSpider, StructuredDataSpider):
         apply_category(Categories.PARKING, item)
         item["ref"] = response.url
         item["branch"] = item.pop("name")
+        item.pop("phone")
+        item.pop("email")
         yield item
