@@ -5,7 +5,7 @@ import scrapy
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.hours import DAYS, OpeningHours
 
 
 class NaturasiITSpider(scrapy.Spider):
@@ -24,10 +24,13 @@ class NaturasiITSpider(scrapy.Spider):
             item["website"] = urljoin("https://www.naturasi.it/punti-vendita/", location["slug"])
             if location.get("metaData"):
                 item["phone"] = location.get("metaData").get("warehouse_locator").get("PHONE")
-            item["opening_hours"] = OpeningHours()
-            for day_time in location["serviceHours"]["default"]:
-                day = DAYS_FULL[day_time["beginWeekDay"] - 2]
-                open_time = day_time["beginHour"]
-                close_time = day_time["endHour"]
-                item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+
+            item["opening_hours"] = self.parse_opening_hours(location["serviceHours"])
+
             yield item
+
+    def parse_opening_hours(self, service_hours: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in service_hours["default"]:
+            oh.add_range(DAYS[rule["beginWeekDay"] - 2], rule["beginHour"], rule["endHour"])
+        return oh
