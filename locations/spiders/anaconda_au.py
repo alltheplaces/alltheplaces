@@ -3,7 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import extract_phone
@@ -35,19 +35,13 @@ class AnacondaAUSpider(SitemapSpider):
             "opening_hours": OpeningHours(),
         }
         extract_phone(properties, response)
-        hours_raw = (
-            " ".join(
-                response.xpath(
-                    '//div[contains(@class,"store-detail")]/div[2]/div[2]/div/table/tbody/tr/td/text()'
-                ).extract()
-            )
-            .replace("Closed", "0:00am to 0:00am")
-            .replace("to", "")
-            .split()
-        )
-        hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
-        for day in hours_raw:
-            if day[1] == "0:00am" and day[2] == "0:00am":
-                continue
-            properties["opening_hours"].add_range(DAYS_EN[day[0]], day[1].upper(), day[2].upper(), "%I:%M%p")
+
+        for rule in response.xpath('//*[contains(text(),"Opening Hours")]/parent::div//table/tbody/tr'):
+            if day := sanitise_day(rule.xpath("./td[1]/text()").extract_first()):
+                hours = rule.xpath("./td[2]/text()").extract_first()
+                if "Closed" in hours.title():
+                    properties["opening_hours"].set_closed(day)
+                else:
+                    properties["opening_hours"].add_ranges_from_string(f"{day} {hours}")
+
         yield Feature(**properties)
