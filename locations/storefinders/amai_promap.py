@@ -15,6 +15,8 @@ class AmaiPromapSpider(JSONBlobSpider):
     To use this spider, simply specify a store page URL with `start_urls`.
     """
 
+    locators = ["amaicdn", "roseperl"]  # Amai ProMap is same as Roseperl ProMap
+
     def start_requests(self):
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_js)
@@ -23,7 +25,9 @@ class AmaiPromapSpider(JSONBlobSpider):
         urls = parse_js_object(
             response.xpath('.//script[contains(text(), "var urls =")]/text()').get().split("var urls =")[1]
         )
-        js_url = [u for u in urls if "amaicdn.com/storelocator-prod/wtb/" in u]  # should be only one
+        js_url = [
+            u for u in urls if any(f"{locator}.com/storelocator-prod/wtb/" in u for locator in self.locators)
+        ]  # should be only one
         for url in js_url:
             yield JsonRequest(url=url, callback=self.parse)
 
