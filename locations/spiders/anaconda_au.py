@@ -13,7 +13,11 @@ class AnacondaAUSpider(SitemapSpider):
     item_attributes = {"brand": "Anaconda", "brand_wikidata": "Q105981238"}
     sitemap_urls = ["https://www.anacondastores.com/sitemap/store/store-sitemap.xml"]
     sitemap_rules = [(r"/store/[-\w]+/[-\w]+/[-\w]+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        # The server redirects with http 302 and then redirects again back to the original URL, which Scrapy considers as a duplicate request by default.
+        "DUPEFILTER_CLASS": "scrapy.dupefilters.BaseDupeFilter",
+    }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
