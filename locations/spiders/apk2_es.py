@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class APK2Spider(CrawlSpider, StructuredDataSpider):
+class Apk2Spider(CrawlSpider, StructuredDataSpider):
     name = "apk2_es"
     start_urls = ["https://apk2gestion.com/es/buscar"]
     item_attributes = {"brand": "APK2", "brand_wikidata": "Q124151387"}
