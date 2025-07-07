@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -26,6 +27,8 @@ class NaturasiITSpider(scrapy.Spider):
                 item["phone"] = location.get("metaData").get("warehouse_locator").get("PHONE")
 
             item["opening_hours"] = self.parse_opening_hours(location["serviceHours"])
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item
 
