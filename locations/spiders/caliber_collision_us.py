@@ -3,7 +3,6 @@ from datetime import datetime
 
 from scrapy.http import JsonRequest
 
-from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import SocialMedia, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
