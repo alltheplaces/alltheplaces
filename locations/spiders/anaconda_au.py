@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import extract_phone
 
 
@@ -27,10 +28,9 @@ class AnacondaAUSpider(SitemapSpider):
             .removeprefix("Anaconda "),
             "lat": response.xpath('//div[contains(@id, "maps_canvas")]/@data-latitude').extract_first(),
             "lon": response.xpath('//div[contains(@id, "maps_canvas")]/@data-longitude').extract_first(),
-            "addr_full": " ".join(
-                " ".join(response.xpath('//div[contains(@class, "store-detail-desc")]/ul/li/text()').extract()).split()
+            "addr_full": clean_address(
+                response.xpath('//div[contains(@class, "store-detail-desc")]//li/text()').extract()
             ),
-            "country": "AU",
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
