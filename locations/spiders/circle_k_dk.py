@@ -14,6 +14,13 @@ class CircleKDKSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.circlek.dk/stations"]
     rules = [Rule(LinkExtractor(allow="/station/circle"), callback="parse_sd")]
 
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        rules = ld_data.get("openingHours") or []
+        for idx, rule in enumerate(rules):
+            if len(rule) == 2:
+                rules[idx] = "{} 00:00-24:00".format(rule)
+        ld_data["openingHours"] = rules
+
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         extract_google_position(item, response)
         apply_category(Categories.FUEL_STATION, item)
