@@ -2,6 +2,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
@@ -20,4 +21,5 @@ class CircleKDKIESpider(CrawlSpider, StructuredDataSpider):
         if "CIRCLE K " in item["name"]:
             extract_google_position(item, response)
             item["country"] = "DK" if ".dk" in response.url else "IE"
+            apply_category(Categories.FUEL_STATION, item)
             yield item
