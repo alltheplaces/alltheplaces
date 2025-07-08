@@ -23,6 +23,7 @@ class CircleKNOSpider(CrawlSpider, StructuredDataSpider):
             ld_data.pop("openingHours")
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["name"] = self.item_attributes["brand"]
         if not ld_data.get("openingHours"):
             ld_data["openingHours"] = []
             for rule in response.xpath('//*[@itemprop="openingHours"]'):
