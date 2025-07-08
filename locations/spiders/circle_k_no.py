@@ -4,7 +4,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import sanitise_day
 from locations.items import Feature
@@ -33,4 +33,16 @@ class CircleKNOSpider(CrawlSpider, StructuredDataSpider):
 
         extract_google_position(item, response)
         apply_category(Categories.FUEL_STATION, item)
+
+        fuels = [
+            fuel.split("FeatureFuel")[-1]
+            for fuel in response.xpath('//img[contains(@src,"FeatureFuel")]/@src').getall()
+        ]
+        apply_yes_no(Fuel.ADBLUE, item, "AdBlue" in fuels)
+        apply_yes_no(Fuel.OCTANE_95, item, "Miles95" in fuels)
+        apply_yes_no(Fuel.OCTANE_95, item, "MilesPlus95" in fuels)
+        apply_yes_no(Fuel.DIESEL, item, "MilesDiesel" in fuels)
+        apply_yes_no(Fuel.DIESEL, item, "MilesPlusDiesel" in fuels)
+        apply_yes_no(Fuel.UNTAXED_DIESEL, item, "Anleggsdiesel" in fuels)
+        apply_yes_no(Fuel.BIODIESEL, item, "MilesBioHVO100" in fuels)
         yield item
