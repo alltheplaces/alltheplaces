@@ -8,10 +8,13 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class CircleKDKSpider(scrapy.Spider):
-    name = "circle_k_dk"
+class CircleKDKIESpider(scrapy.Spider):
+    name = "circle_k_dk_ie"
     item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
-    start_urls = ["https://www.circlek.dk/station-search"]
+    start_urls = [
+        "https://www.circlek.dk/station-search",
+        "https://www.circlek.ie/station-search",
+    ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for station in json.loads(response.xpath('//*[@type="application/json"]/text()').get())["ck_sim_search"][
@@ -24,6 +27,6 @@ class CircleKDKSpider(scrapy.Spider):
                 item = DictParser.parse(station)
                 item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
                 item["email"] = station["/sites/{siteId}/contact-details"]["emails"]["DN"][0]
-                item["phone"] = station["/sites/{siteId}/contact-details"]["phones"]["WOR"]
+                item["phone"] = station["/sites/{siteId}/contact-details"]["phones"].get("WOR")
                 apply_category(Categories.FUEL_STATION, item)
                 yield item
