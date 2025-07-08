@@ -15,11 +15,10 @@ class CircleKDKIESpider(CrawlSpider, StructuredDataSpider):
         "https://www.circlek.dk/stations",
         "https://www.circlek.ie/stations",
     ]
-    rules = [Rule(LinkExtractor(allow="/station/"), callback="parse_sd")]
+    rules = [Rule(LinkExtractor(allow="/station/circle"), callback="parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        if "CIRCLE K " in item["name"]:
-            extract_google_position(item, response)
-            item["country"] = "DK" if ".dk" in response.url else "IE"
-            apply_category(Categories.FUEL_STATION, item)
-            yield item
+        extract_google_position(item, response)
+        item["country"] = "DK" if ".dk" in response.url else "IE"
+        apply_category(Categories.FUEL_STATION, item)
+        yield item
