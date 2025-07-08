@@ -29,7 +29,11 @@ class CircleKNOSpider(CrawlSpider, StructuredDataSpider):
                 day = rule.xpath("./@content").get()
                 hours = rule.xpath("./text()").get("").replace("Døgnåpent", "00:00-23:59")  # open 24 hours
                 ld_data["openingHours"].append(f"{day} {hours}")
-        item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld_data)
+        try:
+            item["opening_hours"] = LinkedDataParser.parse_opening_hours(ld_data)
+        except:
+            self.logger.error(f'Failed to parse opening hours: {ld_data.get("openingHours")}')
+            item["opening_hours"] = None
 
         extract_google_position(item, response)
         apply_category(Categories.FUEL_STATION, item)
