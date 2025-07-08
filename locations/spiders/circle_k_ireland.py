@@ -15,6 +15,16 @@ class CircleKIrelandSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow="/station/circle"), callback="parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        if item["name"].startswith("CIRCLE K EXPRESS "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLE K EXPRESS ")
+            item["name"] = "Circle K Express"
+        elif item["name"].startswith("CIRCLEK EXPRESS "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLEK EXPRESS")
+        elif item["name"].startswith("CIRCLE K "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
+
         item["lat"], item["lon"] = url_to_coords(response.xpath('//a[@class="google-map"]/@href').get())
+
         apply_category(Categories.FUEL_STATION, item)
+
         yield item
