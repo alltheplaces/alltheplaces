@@ -22,6 +22,16 @@ class CircleKDKSpider(CrawlSpider, StructuredDataSpider):
         ld_data["openingHours"] = rules
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        if item["name"].startswith("CIRCLE K TRUCK "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLE K TRUCK ")
+            item["name"] = "Circle K Truck"
+        elif item["name"].startswith("CIRCLE K MOTORVEJSCENTER "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLE K MOTORVEJSCENTER ")
+            item["name"] = "Circle K Motorvejscenter"
+        elif item["name"].startswith("CIRCLE K "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
+
         extract_google_position(item, response)
+
         apply_category(Categories.FUEL_STATION, item)
         yield item
