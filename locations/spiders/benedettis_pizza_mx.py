@@ -26,5 +26,6 @@ class BenedettisPizzaMXSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["_id"]
         item["branch"] = item.pop("name")
+        item.pop("email")
         apply_category(Categories.FAST_FOOD, item)
         yield item
