@@ -16,7 +16,7 @@ class CircleKNOSpider(CrawlSpider, StructuredDataSpider):
     name = "circle_k_no"
     item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
     start_urls = ["https://www.circlek.no/stations"]
-    rules = [Rule(LinkExtractor(allow=r"/station/[-\w]+/?$"), callback="parse")]
+    rules = [Rule(LinkExtractor(allow=r"/station/circle-k-[-\w]+/?$"), callback="parse")]
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         if any(sanitise_day(rule) for rule in ld_data.get("openingHours", [])):  # day without hours
