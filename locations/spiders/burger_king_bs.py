@@ -17,6 +17,7 @@ class BurgerKingBSSpider(Spider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     host = "https://www.burgerking.bs"
     country_code = "BS"
+    download_timeout = 180
 
     def start_requests(self):
         for city in city_locations(self.country_code):
