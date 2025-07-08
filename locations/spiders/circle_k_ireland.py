@@ -3,22 +3,18 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
+from locations.google_url import url_to_coords
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CircleKDKIESpider(CrawlSpider, StructuredDataSpider):
-    name = "circle_k_dk_ie"
+class CircleKIrelandSpider(CrawlSpider, StructuredDataSpider):
+    name = "circle_k_ireland"
     item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
-    start_urls = [
-        "https://www.circlek.dk/stations",
-        "https://www.circlek.ie/stations",
-    ]
+    start_urls = ["https://www.circlek.ie/stations"]
     rules = [Rule(LinkExtractor(allow="/station/circle"), callback="parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        extract_google_position(item, response)
-        item["country"] = "DK" if ".dk" in response.url else "IE"
+        item["lat"], item["lon"] = url_to_coords(response.xpath('//a[@class="google-map"]/@href').get())
         apply_category(Categories.FUEL_STATION, item)
         yield item
