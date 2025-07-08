@@ -12,7 +12,7 @@ class OcharleysUSSpider(JSONBlobSpider):
         return DictParser.get_nested_key(response.json(), "locations")
 
     def post_process_item(self, item, response, feature):
-        item["branch"] = item.pop("name")
+        item.pop("name")
         item["website"] = f"https://www.ocharleys.com/locations/{feature['path']}"
         item["street_address"] = item.pop("addr_full")
 
