@@ -36,13 +36,16 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
             del item["name"]
 
         oh = OpeningHours()
-        for day in DAYS_FULL:
-            oh.add_range(
-                day,
-                location.get(f"{day.lower()}HoursClose"),
-                location.get(f"{day.lower()}HoursOpen"),
-                time_format="%Y-%m-%d %H:%M:%S.0",
-            )
+        for day in map(str.lower, DAYS_FULL):
+            if location.get(f"{day}HoursClose") == location.get(f"{day}HoursOpen") == "1970-01-01 00:00:00.0":
+                oh.set_closed(day)
+            else:
+                oh.add_range(
+                    day,
+                    location.get(f"{day}HoursClose"),
+                    location.get(f"{day}HoursOpen"),
+                    time_format="%Y-%m-%d %H:%M:%S.0",
+                )
         item["opening_hours"] = oh
 
         if date_str := location.get("openDate"):
