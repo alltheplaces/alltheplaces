@@ -3,8 +3,8 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class BricoSpider(scrapy.Spider):
-    name = "brico"
+class BricoBELUSpider(scrapy.Spider):
+    name = "brico_be_lu"
     item_attributes = {"brand": "Brico", "brand_wikidata": "Q2510786"}
     start_urls = ["https://www.brico.be/nl/store-finder"]
 
