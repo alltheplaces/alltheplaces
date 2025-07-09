@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -32,6 +33,19 @@ class ArgentaBESpider(JSONBlobSpider):
         item["extras"]["website:fr"] = item["website"].replace("/nl/kantoren/", "/fr/agences/")
         item["extras"]["fax"] = feature.get("formattedFax")
 
+        opening_hours = feature.get("officeOpeningHours", {}).get("openingHour", {}).get("normal") or {}
+        try:
+            item["opening_hours"] = self.parse_opening_hours(opening_hours.get("openingDays", {}))
+        except:
+            self.logger.error("Failed to parse opening hours:  {}".format(opening_hours))
+
         apply_category(Categories.BANK, item)
         apply_yes_no(Extras.ATM, item, feature.get("atm"))
         yield item
+
+    def parse_opening_hours(self, opening_hours: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day, hours in opening_hours.items():
+            for shift in hours.get("openingPeriode", {}).get("singleOpeningPeriods", []):
+                oh.add_range(day, shift["begin"].replace(".", ":"), shift["end"].replace(".", ":"))
+        return oh
