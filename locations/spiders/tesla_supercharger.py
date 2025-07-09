@@ -1,19 +1,16 @@
-
-from locations.spiders.tesla import TeslaSpider
-
 import re
 
 import chompjs
 from scrapy_zyte_api.responses import ZyteAPITextResponse
 
 from locations.categories import Categories, apply_category
+from locations.spiders.tesla import TeslaSpider
+
 
 class TeslaSuperchargerSpider(TeslaSpider):
     name = "tesla_supercharger"
     item_attributes = {"brand": "Tesla Supercharger", "brand_wikidata": "Q17089620"}
     categories = ["supercharger"]
-
-
 
     def parse_location(self, response):
         # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
@@ -25,7 +22,9 @@ class TeslaSuperchargerSpider(TeslaSpider):
             return
 
         feature = self.build_item(location_data)
-        feature["website"] = f"https://www.tesla.com/findus/location/supercharger/{location_data.get('location_id')}".replace(" ", "")
+        feature["website"] = (
+            f"https://www.tesla.com/findus/location/supercharger/{location_data.get('location_id')}".replace(" ", "")
+        )
 
         apply_category(Categories.CHARGING_STATION, feature)
         regex = r"(\d+) Superchargers, available 24\/7, up to (\d+kW)(<br />CCS Compatibility)?"
@@ -39,7 +38,5 @@ class TeslaSuperchargerSpider(TeslaSpider):
                 else:
                     feature["extras"]["socket:nacs"] = capacity
                     feature["extras"]["socket:nacs:output"] = output
-        
 
-        
         yield feature
