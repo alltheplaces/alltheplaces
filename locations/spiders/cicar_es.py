@@ -34,6 +34,7 @@ class CicarESSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["addr_full"] = clean_address(item.pop("street_address").replace("<br>", ", "))
         item["branch"] = item.pop("name").removeprefix("CICAR offices ")
+        item.pop("email")
         extract_google_position(item, response)
         apply_category(Categories.CAR_RENTAL, item)
         yield item
