@@ -61,6 +61,14 @@ def test_clean_address_removes_very_short_addresses():
     assert clean_address("NY", 1) == "NY"
 
 
+def test_clean_address_dont_remove_short_valid_cjk():
+    assert not clean_address("NY", 2)
+    assert clean_address("昆明", 2) == "昆明"
+    assert clean_address("昆明", 1) == "昆明"
+    assert clean_address("昆明, ", 2) == "昆明"
+    assert clean_address("昆明, ", 1) == "昆明"
+
+
 def get_objects(feature):
     spider = Spider(name="test")
     spider.crawler = get_crawler()
