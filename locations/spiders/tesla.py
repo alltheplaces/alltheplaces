@@ -1,19 +1,18 @@
-from html import unescape
 import re
+from html import unescape
 from typing import Iterable, List
 
 import chompjs
 from scrapy import Selector, Spider
+from scrapy.http import Request, Response
 from scrapy_zyte_api.responses import ZyteAPITextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
-from scrapy.http import Response, Request
 
 
- 
 class TeslaSpider(Spider):
     name = "tesla"
     TESLA_ATTRIBUTES = {"brand": "Tesla", "brand_wikidata": "Q478214"}
@@ -28,7 +27,7 @@ class TeslaSpider(Spider):
         )
 
     def parse_json_subrequest(self, response: Response) -> Iterable[Request]:
-        json_data = self.extract_json(response) 
+        json_data = self.extract_json(response)
         locations = self.select_locations(json_data)
 
         for location in locations:
@@ -38,7 +37,7 @@ class TeslaSpider(Spider):
             )
 
     def parse_location(self, response: Response) -> Iterable[Feature]:
-        location = self.extract_json(response) 
+        location = self.extract_json(response)
         location_types: List[str] = location.get("location_type", [])
 
         if "store" in location_types:
@@ -50,14 +49,12 @@ class TeslaSpider(Spider):
         if "supercharger" in location_types:
             yield self.build_supercharger(location)
 
-
     def extract_json(self, response: Response) -> dict | List[dict]:
         # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
         response = ZyteAPITextResponse.from_api_response(response.raw_api_response, request=response.request)
         if json_data := chompjs.parse_js_object(response.text):
             return json_data
         return {}
-        
 
     def build_store(self, location: dict) -> Feature:
         item = self.build_item(location)
@@ -69,7 +66,7 @@ class TeslaSpider(Spider):
         item["opening_hours"] = self.parse_hours(location.get("store_hours"))
         apply_category(Categories.SHOP_CAR, item)
         return item
-    
+
     def build_service(self, location: dict) -> Feature:
         item = self.build_item(location)
         item["ref"] = f"{item['ref']}-SERVICE"
@@ -85,11 +82,11 @@ class TeslaSpider(Spider):
             item["phone"] = phone
         else:
             item["phone"] = self.parse_phone("bodyshop", location)
-        
+
         item["opening_hours"] = self.parse_hours(location.get("service_hours"))
         apply_category(Categories.SHOP_CAR_REPAIR, item)
         return item
-    
+
     def build_supercharger(self, location: dict) -> Feature:
         item = self.build_item(location)
         item["ref"] = f"{item['ref']}-SUPERCHARGER"
@@ -122,16 +119,16 @@ class TeslaSpider(Spider):
         if feature_email and isinstance(feature_email, dict) and "value" in feature_email:
             feature["email"] = feature_email["value"]
         return feature
-        
+
     def parse_phone(self, location_type: str, location: dict) -> str | None:
         phones = location.get("sales_phone")
         if not isinstance(phones, list):
             return None
         return next((phone.get("number") for phone in phones if phone.get("type") == location_type), None)
-        
+
     def parse_url(self, location_type: str, location: dict) -> str:
         return f"https://www.tesla.com/findus/location/{location_type}/{location.get('location_id')}".replace(" ", "")
-    
+
     def parse_hours(self, hours: str) -> OpeningHours:
         oh = OpeningHours()
         clean_html = unescape(hours)
