@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -30,13 +30,21 @@ class LocalcoinSpider(JSONBlobSpider):
 
         match feature["country"]:
             case "Australia":
-                item["website"] = "https://localcoinatm.com/en-au/bitcoin-atm/{}/{}/{}/".format(feature["stateSlug"], feature["citySlug"], feature["slug"])
+                item["website"] = "https://localcoinatm.com/en-au/bitcoin-atm/{}/{}/{}/".format(
+                    feature["stateSlug"], feature["citySlug"], feature["slug"]
+                )
             case "Canada":
-                item["website"] = "https://localcoinatm.com/bitcoin-atm/{}/{}/{}/".format(feature["stateSlug"], feature["citySlug"], feature["slug"])
+                item["website"] = "https://localcoinatm.com/bitcoin-atm/{}/{}/{}/".format(
+                    feature["stateSlug"], feature["citySlug"], feature["slug"]
+                )
             case "Hong Kong":
-                item["website"] = "https://localcoinatm.com/en-hk/bitcoin-atm/{}/{}/{}/".format(feature["areaSlug"], feature["districtSlug"], feature["slug"])
+                item["website"] = "https://localcoinatm.com/en-hk/bitcoin-atm/{}/{}/{}/".format(
+                    feature["areaSlug"], feature["districtSlug"], feature["slug"]
+                )
             case "New Zealand":
-                item["website"] = "https://localcoinatm.com/en-nz/bitcoin-atm/{}/{}/{}/".format(feature["stateSlug"], feature["citySlug"], feature["slug"])
+                item["website"] = "https://localcoinatm.com/en-nz/bitcoin-atm/{}/{}/{}/".format(
+                    feature["stateSlug"], feature["citySlug"], feature["slug"]
+                )
 
         item["opening_hours"] = OpeningHours()
         for day_name in DAYS_FULL:
@@ -45,8 +53,12 @@ class LocalcoinSpider(JSONBlobSpider):
             item["opening_hours"].add_range(day_name, feature[open_time_key], feature[close_time_key], "%I:%M %p")
 
         apply_category(Categories.ATM, item)
-        currencies_buyable = [code for code, currency in feature["cryptocurrencyFeatures"].items() if currency["buyAvailable"] is True]
-        currencies_sellable = [code for code, currency in feature["cryptocurrencyFeatures"].items() if currency["sellAvailable"] is True]
+        currencies_buyable = [
+            code for code, currency in feature["cryptocurrencyFeatures"].items() if currency["buyAvailable"] is True
+        ]
+        currencies_sellable = [
+            code for code, currency in feature["cryptocurrencyFeatures"].items() if currency["sellAvailable"] is True
+        ]
         currencies_exchangeable = list(set(currencies_buyable + currencies_sellable))
         item["extras"]["currency:{}".format(feature["currencyCode"])] = "yes"
         apply_yes_no("currency:XBT", item, "btc" in currencies_exchangeable, False)
