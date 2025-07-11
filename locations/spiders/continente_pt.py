@@ -17,6 +17,9 @@ class ContinentePTSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["response"]["locations"]:
+            if location["name"].startswith("MAXMAT "):
+                continue
+
             item = DictParser.parse(location)
 
             item["street_address"] = location["streetAndNumber"]
