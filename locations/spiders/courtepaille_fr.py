@@ -1,4 +1,5 @@
 import json
+
 from scrapy import Selector
 from scrapy.http import Response
 
