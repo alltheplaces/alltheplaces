@@ -35,8 +35,9 @@ class ContinentePTSpider(Spider):
                     break
 
             for brand in self.brands:
-                if brand["brand"].lower() in item["name"].lower():
+                if item["name"].startswith(brand["brand"]):
                     item.update(brand)
+                    item["branch"] = item.pop("name").removeprefix(item["brand"])
                     break
 
             apply_category(Categories.SHOP_SUPERMARKET, item)
