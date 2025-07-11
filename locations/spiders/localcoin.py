@@ -14,12 +14,19 @@ class LocalcoinSpider(JSONBlobSpider):
     allowed_domains = ["localcoinatm.com"]
     start_urls = ["https://localcoinatm.com/api/locations/"]
     locations_key = "body"
-    requires_proxy = True  # Some sort of IP blocking appears to exist for AU/NZ API calls
 
     def start_requests(self) -> Iterable[JsonRequest]:
         for language_code in ["en-ca", "en-au", "en-hk"]:
             # en-nz and en-au return the same features.
             yield JsonRequest(url=self.start_urls[0], headers={"x-lc-locale": language_code}, dont_filter=True)
+
+    def parse(self, response: Response) -> Iterable[Feature]:
+        if response.json().get("status") == 500:
+            # Server is blocking the API call. Continue with the remainder of
+            # API calls as not all regions appear to have API calls blocked.
+            self.logger.error("API call for ATMs in region {} has been blocked by the server. Continuing to attempt API calls for other regions.".format(response.request.headers.get("x-lc-locale").decode("utf-8")))
+            return
+        yield from super().parse(response)
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("location"))
