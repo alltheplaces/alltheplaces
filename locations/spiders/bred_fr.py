@@ -20,7 +20,7 @@ class BredFRSpider(SitemapSpider):
         keys = list(raw_data.keys())
         branch_data = raw_data[keys[0]]["b"]["store"]
         item = DictParser.parse(branch_data)
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").removeprefix("Agence ")
         item["street_address"] = item.pop("addr_full")
         item["phone"] = item["phone"]["text"]
         item["email"] = branch_data["contact"]["mail"]["text"]
