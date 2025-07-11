@@ -30,7 +30,9 @@ class BitcoinDepotSpider(SitemapSpider, StructuredDataSpider):
         item.pop("phone", None)
 
         if response.xpath('//div[@class="row locatedin"]//text()'):
-            item["located_in"] = re.sub(r"\s+", " ", " ".join(response.xpath('//div[@class="row locatedin"]/div/span//text()').getall())).strip()
+            item["located_in"] = re.sub(
+                r"\s+", " ", " ".join(response.xpath('//div[@class="row locatedin"]/div/span//text()').getall())
+            ).strip()
 
         apply_category(Categories.ATM, item)
         item["extras"]["currency:XBT"] = "yes"
