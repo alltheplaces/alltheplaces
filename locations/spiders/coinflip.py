@@ -37,7 +37,11 @@ class CoinflipSpider(YextLocationsSpider):
             case None:
                 pass
             case _:
-                self.logger.warning("ATM is located in country '{}' for which the local currency is undefined by this spider. The spider should be updated to map a currency for this country.".format(item.get("country")))
+                self.logger.warning(
+                    "ATM is located in country '{}' for which the local currency is undefined by this spider. The spider should be updated to map a currency for this country.".format(
+                        item.get("country")
+                    )
+                )
         item["extras"]["cash_in"] = "yes"
         if location.get("c_oneWayTwoWay") == "ONE-WAY_ATM":
             item["extras"]["cash_out"] = "no"

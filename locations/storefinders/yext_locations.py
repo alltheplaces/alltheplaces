@@ -28,7 +28,7 @@ class YextLocationsSpider(Spider):
                         "limit": str(self.page_limit),
                         "pageToken": page_token,
                     }
-                )
+                ),
             )
         )
 
