@@ -27,11 +27,10 @@ class BredFRSpider(SitemapSpider):
         item["postcode"], item["city"] = item["postcode"].split(" ", 1)
         item["website"] = response.url
         apply_category(Categories.BANK, item)
+
         item["opening_hours"] = OpeningHours()
-        for key, val in branch_data["openingHours"].items():
-            day = key
-            for open_close_time in val.values():
-                open_time = open_close_time.get("start")
-                close_time = open_close_time.get("end")
-                item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+        for day, times in branch_data["openingHours"].items():
+            for time in times.values():
+                item["opening_hours"].add_range(day, time.get("start"), time.get("end"))
+
         yield item
