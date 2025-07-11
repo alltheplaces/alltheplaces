@@ -24,7 +24,11 @@ class LocalcoinSpider(JSONBlobSpider):
         if response.json().get("status") == 500:
             # Server is blocking the API call. Continue with the remainder of
             # API calls as not all regions appear to have API calls blocked.
-            self.logger.error("API call for ATMs in region {} has been blocked by the server. Continuing to attempt API calls for other regions.".format(response.request.headers.get("x-lc-locale").decode("utf-8")))
+            self.logger.error(
+                "API call for ATMs in region {} has been blocked by the server. Continuing to attempt API calls for other regions.".format(
+                    response.request.headers.get("x-lc-locale").decode("utf-8")
+                )
+            )
             return
         yield from super().parse(response)
 
