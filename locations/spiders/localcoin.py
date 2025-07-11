@@ -14,6 +14,7 @@ class LocalcoinSpider(JSONBlobSpider):
     allowed_domains = ["localcoinatm.com"]
     start_urls = ["https://localcoinatm.com/api/locations/"]
     locations_key = "body"
+    requires_proxy = True  # Some sort of IP blocking appears to exist for AU/NZ API calls
 
     def start_requests(self) -> Iterable[JsonRequest]:
         for language_code in ["en-ca", "en-au", "en-hk"]:
