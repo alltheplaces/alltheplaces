@@ -30,7 +30,11 @@ class BredFRSpider(SitemapSpider):
 
         item["opening_hours"] = OpeningHours()
         for day, times in branch_data["openingHours"].items():
-            for time in times.values():
-                item["opening_hours"].add_range(day, time.get("start"), time.get("end"))
+            if times["morning"].get("isClosed") is True and times["afternoon"].get("isClosed") is True:
+                item["opening_hours"].set_closed(day)
+            else:
+                for time in times.values():
+                    if time.get("isClosed") is not True:
+                        item["opening_hours"].add_range(day, time["start"], time["end"])
 
         yield item
