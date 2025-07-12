@@ -1,10 +1,11 @@
 from typing import Iterable
 
 from scrapy.http import Response
+
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.json_blob_spider import JSONBlobSpider
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class CentraGBSpider(JSONBlobSpider):
@@ -17,9 +18,14 @@ class CentraGBSpider(JSONBlobSpider):
         apply_category(Categories.SHOP_CONVENIENCE, item)
         item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
-            item["opening_hours"].add_range(day, feature["openingHours"][day.lower()]["open"], feature["openingHours"][day.lower()]["closed"],time_format="%I:%M%p")
+            item["opening_hours"].add_range(
+                day,
+                feature["openingHours"][day.lower()]["open"],
+                feature["openingHours"][day.lower()]["closed"],
+                time_format="%I:%M%p",
+            )
         apply_yes_no("sells:alcohol", item, feature["offlicence"])
-        if feature["forecourt"] == 'Yes':
+        if feature["forecourt"] == "Yes":
             apply_category(Categories.FUEL_STATION, item)
         else:
             apply_category(Categories.SHOP_CONVENIENCE, item)
