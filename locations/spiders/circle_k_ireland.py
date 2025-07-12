@@ -15,8 +15,8 @@ class CircleKIrelandSpider(JSONBlobSpider):
         return json.loads(
             response.xpath('//script[@type="application/json"]/text()')
             .get()
-            .replace("\/sites\/{siteId}\/", "")
-            .replace("\/sites\/{siteId}", "details")
+            .replace("/sites/{siteId}/", "")
+            .replace("/sites/{siteId}", "details")
         )["ck_sim_search"]["station_results"]
 
     def post_process_item(self, item, response, location):
