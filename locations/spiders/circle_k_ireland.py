@@ -19,17 +19,17 @@ class CircleKIrelandSpider(JSONBlobSpider):
         )["ck_sim_search"]["station_results"]
 
     def post_process_item(self, item, response, location):
-    apply_category(Categories.FUEL_STATION, item)
-    item["name"] = location["details"]["name"]
-    item["ref"] = location["details"]["id"]
-    if item["name"].startswith("CIRCLE K EXPRESS "):
+        apply_category(Categories.FUEL_STATION, item)
+        item["name"] = location["details"]["name"]
+        item["ref"] = location["details"]["id"]
+        if item["name"].startswith("CIRCLE K EXPRESS "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K EXPRESS ")
             item["name"] = "Circle K Express"
         elif item["name"].startswith("CIRCLEK EXPRESS "):
             item["branch"] = item.pop("name").removeprefix("CIRCLEK EXPRESS")
         elif item["name"].startswith("CIRCLE K "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
-    yield item
+        yield item
 
     def pre_process_data(self, feature):
         feature["address"] = feature["addresses"]["PHYSICAL"]
