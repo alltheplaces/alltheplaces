@@ -1,20 +1,28 @@
+import json
+
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.google_url import url_to_coords
-from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class CircleKIrelandSpider(CrawlSpider, StructuredDataSpider):
+class CircleKIrelandSpider(JSONBlobSpider):
     name = "circle_k_ireland"
     item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
-    start_urls = ["https://www.circlek.ie/stations"]
-    rules = [Rule(LinkExtractor(allow="/station/circle"), callback="parse_sd")]
+    start_urls = ["https://www.circlek.ie/station-search"]
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def extract_json(self, response: Response) -> dict | list[dict]:
+        return json.loads(
+            response.xpath('//script[@type="application/json"]/text()')
+            .get()
+            .replace("\\/sites\\/{siteId}\\/", "")
+            .replace("\\/sites\\/{siteId}", "details")
+        )["ck_sim_search"]["station_results"]
+
+    def post_process_item(self, item, response, location):
+        apply_category(Categories.FUEL_STATION, item)
+        item["name"] = location["details"]["name"]
+        item["ref"] = location["details"]["id"]
         if item["name"].startswith("CIRCLE K EXPRESS "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K EXPRESS ")
             item["name"] = "Circle K Express"
@@ -22,9 +30,8 @@ class CircleKIrelandSpider(CrawlSpider, StructuredDataSpider):
             item["branch"] = item.pop("name").removeprefix("CIRCLEK EXPRESS")
         elif item["name"].startswith("CIRCLE K "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
-
-        item["lat"], item["lon"] = url_to_coords(response.xpath('//a[@class="google-map"]/@href').get())
-
-        apply_category(Categories.FUEL_STATION, item)
-
         yield item
+
+    def pre_process_data(self, feature):
+        feature["address"] = feature["addresses"]["PHYSICAL"]
+        feature.pop("addresses")
