@@ -15,19 +15,12 @@ class CentraGBSpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        apply_category(Categories.SHOP_CONVENIENCE, item)
+        item["branch"]=item.pop("name")
         item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
-            item["opening_hours"].add_range(
-                day,
-                feature["openingHours"][day.lower()]["open"],
-                feature["openingHours"][day.lower()]["closed"],
-                time_format="%I:%M%p",
-            )
+            item["opening_hours"].add_range(day, feature["openingHours"][day.lower()]["open"], feature["openingHours"][day.lower()]["closed"],time_format="%I:%M%p")
+        apply_category(Categories.SHOP_CONVENIENCE, item)
         apply_yes_no("sells:alcohol", item, feature["offlicence"])
-        if feature["forecourt"] == "Yes":
+        if feature["forecourt"] == 'Yes':
             apply_category(Categories.FUEL_STATION, item)
-        else:
-            apply_category(Categories.SHOP_CONVENIENCE, item)
-
         yield item
