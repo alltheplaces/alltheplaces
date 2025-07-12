@@ -1,12 +1,12 @@
-from chompjs import parse_js_object
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
@@ -22,7 +22,9 @@ class ByteFederalAUSpider(Spider):
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = str(item["ref"])
-            item["website"] = "https://www.bytefederal.au/bitcoin-atm-near-me/{}/{}/{}?country=australia".format(location["state"].lower(), location["city"].lower().replace(" ", "-"), location["id"])
+            item["website"] = "https://www.bytefederal.au/bitcoin-atm-near-me/{}/{}/{}?country=australia".format(
+                location["state"].lower(), location["city"].lower().replace(" ", "-"), location["id"]
+            )
             item["image"] = location["photo_url"]
 
             item["opening_hours"] = OpeningHours()
