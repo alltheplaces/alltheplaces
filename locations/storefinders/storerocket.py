@@ -89,13 +89,17 @@ class StoreRocketSpider(Spider):
                     "A minimum search_radius of 15 (miles) is required to be used for the ISEADGG geographic radius search method."
                 )
             for lat, lon in country_iseadgg_centroids(self.iseadgg_countries_list, iseadgg_radius):
-                yield JsonRequest(url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations?lat={lat}&lng={lon}&radius={self.search_radius}&limit={self.max_results}")
+                yield JsonRequest(
+                    url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations?lat={lat}&lng={lon}&radius={self.search_radius}&limit={self.max_results}"
+                )
         elif len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
             # THIRD PREFERENCE geographic radius search method using a manually
             # specified list of searchable_points_file containing centroids.
             for searchable_points_file in self.searchable_points_files:
                 for lat, lon in point_locations(searchable_points_file):
-                    yield JsonRequest(url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations?lat={lat}&lng={lon}&radius={self.search_radius}&limit={self.max_results}")
+                    yield JsonRequest(
+                        url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations?lat={lat}&lng={lon}&radius={self.search_radius}&limit={self.max_results}"
+                    )
 
     def parse(self, response, **kwargs) -> Iterable[Feature]:
         if not response.json()["success"]:

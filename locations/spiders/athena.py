@@ -38,6 +38,10 @@ class AthenaSpider(StoreRocketSpider):
                     item["country"] = "US"
                     item["extras"]["currency:USD"] = "yes"
             case _:
-                self.logger.warning("ATM is located in country '{}' for which the local currency is undefined by this spider. The spider should be updated to map a currency for this country.".format(item.get("country")))
+                self.logger.warning(
+                    "ATM is located in country '{}' for which the local currency is undefined by this spider. The spider should be updated to map a currency for this country.".format(
+                        item.get("country")
+                    )
+                )
 
         yield item
