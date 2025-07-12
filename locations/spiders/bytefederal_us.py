@@ -10,7 +10,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class ByteFederalUSSpider(SitemapSpider):
+class BytefederalUSSpider(SitemapSpider):
     name = "bytefederal_us"
     item_attributes = {"brand": "ByteFederal", "brand_wikidata": "Q135284888"}
     allowed_domains = ["www.bytefederal.com"]
