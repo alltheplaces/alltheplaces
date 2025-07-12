@@ -91,7 +91,7 @@ tippecanoe --cluster-distance=25 \
            --drop-rate=1 \
            --maximum-zoom=14 \
            --cluster-maxzoom=g \
-           --maximum-tile-bytes=5000000 \
+           --maximum-tile-bytes=10000000 \
            --layer="alltheplaces" \
            --read-parallel \
            --attribution="<a href=\"https://www.alltheplaces.xyz/\">All The Places</a> ${RUN_TIMESTAMP}" \
