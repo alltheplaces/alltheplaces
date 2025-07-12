@@ -1,12 +1,12 @@
-from chompjs import parse_js_object
 from typing import Iterable
 
+from chompjs import parse_js_object
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
@@ -17,11 +17,11 @@ class ByteFederalUSSpider(SitemapSpider):
     sitemap_urls = ["https://www.bytefederal.com/sitemap-0.xml"]
     sitemap_rules = [(r"^https:\/\/www\.bytefederal\.com\/bitcoin-atm-near-me\/[^\/]+\/[^\/]+/\d+$", "parse")]
     download_delay = 2  # robots.txt doesn't specify a crawl delay but
-                        # after many requests at ~1/s, timeouts start to occur
-                        # so try a 2s delay instead.
+    # after many requests at ~1/s, timeouts start to occur
+    # so try a 2s delay instead.
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        locations_js = response.xpath('//mapbox-map/@data-locations').get()
+        locations_js = response.xpath("//mapbox-map/@data-locations").get()
         if not locations_js:
             # Some ATM pages are blank and should be ignored.
             return
