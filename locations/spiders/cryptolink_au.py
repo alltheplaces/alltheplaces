@@ -23,7 +23,7 @@ class CryptolinkAUSpider(Spider):
                 )
                 .get()
                 .removeprefix("/locations/cl"),
-                "name": location.xpath("./@data-location-name").get(),
+                "located_in": location.xpath("./@data-location-name").get(),
                 "lat": location.xpath("./@data-latitude").get(),
                 "lon": location.xpath("./@data-longitude").get(),
                 "street_address": merge_address_lines(
