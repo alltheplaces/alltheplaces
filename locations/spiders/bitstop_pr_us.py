@@ -93,7 +93,7 @@ class BitstopPRUSSpider(JSONBlobSpider):
 
         if hours_array := feature.get("working_hours_24"):
             item["opening_hours"] = OpeningHours()
-            for day_hours in feature["working_hours_24"]:
+            for day_hours in hours_array:
                 for interval in day_hours[1]:
                     # Fix broken intervals
                     interval = interval.replace("060:00", "06:00").replace("00:00-01:00-", "")
