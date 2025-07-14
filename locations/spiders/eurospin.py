@@ -19,5 +19,8 @@ class EurospinSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["street_address"] = re.sub("(?sim)<.+?>", " ", str(item["street_address"]))
         item["branch"] = item.pop("name")
+        item.pop("image")
+        item.pop("phone")
+        item.pop("email")
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
