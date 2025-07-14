@@ -2,8 +2,8 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category, apply_yes_no
-from locations.hours import OpeningHours, DAYS
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.cvs_us import CVS
@@ -13,7 +13,9 @@ class RockitcoinPRUSSpider(JSONBlobSpider):
     name = "rockitcoin_pr_us"
     item_attributes = {"brand": "RockItCoin", "brand_wikidata": "Q125924689"}
     allowed_domains = ["us-central1-rockitcoin-data-development.cloudfunctions.net"]
-    start_urls = ["https://us-central1-rockitcoin-data-development.cloudfunctions.net/rockitcoin-getLocationsHttps?latitude=34.0521&longitude=-118.2436&show2Way=false&showRcGo=true&radiusInM=1000000000000"]
+    start_urls = [
+        "https://us-central1-rockitcoin-data-development.cloudfunctions.net/rockitcoin-getLocationsHttps?latitude=34.0521&longitude=-118.2436&show2Way=false&showRcGo=true&radiusInM=1000000000000"
+    ]
     locations_key = "locations"
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
@@ -48,7 +50,11 @@ class RockitcoinPRUSSpider(JSONBlobSpider):
         }
         for currency in all_currencies:
             if currency not in currencies_map.keys():
-                self.logger.warning("Unknown cryptocurrency '{}'. Cryptocurrency tags ignored. Spider requires update to map to correct OSM currency:* key.".format(currency))
+                self.logger.warning(
+                    "Unknown cryptocurrency '{}'. Cryptocurrency tags ignored. Spider requires update to map to correct OSM currency:* key.".format(
+                        currency
+                    )
+                )
                 continue
             osm_currency_code = currencies_map[currency]
             item["extras"][f"currency:{osm_currency_code}"] = "yes"
