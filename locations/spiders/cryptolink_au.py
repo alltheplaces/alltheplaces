@@ -18,15 +18,27 @@ class CyrptolinkAUSpider(Spider):
     def parse(self, response: Response) -> Iterable[Request]:
         for location in response.xpath('//div[@class="location-div-block"]'):
             properties = {
-                "ref": location.xpath('./div[@class="location-buttons-div-block"]/a[contains(@href, "/locations/cl")]/@href').get().removeprefix("/locations/cl"),
-                "name": location.xpath('./@data-location-name').get(),
-                "lat": location.xpath('./@data-latitude').get(),
-                "lon": location.xpath('./@data-longitude').get(),
-                "street_address": merge_address_lines([location.xpath('./div[@class="address-line-1"]/text()').get(), location.xpath('./div[@class="address-line-2"]/text()').get()]),
+                "ref": location.xpath(
+                    './div[@class="location-buttons-div-block"]/a[contains(@href, "/locations/cl")]/@href'
+                )
+                .get()
+                .removeprefix("/locations/cl"),
+                "name": location.xpath("./@data-location-name").get(),
+                "lat": location.xpath("./@data-latitude").get(),
+                "lon": location.xpath("./@data-longitude").get(),
+                "street_address": merge_address_lines(
+                    [
+                        location.xpath('./div[@class="address-line-1"]/text()').get(),
+                        location.xpath('./div[@class="address-line-2"]/text()').get(),
+                    ]
+                ),
                 "city": location.xpath('./div[@class="suburb-state-postcode-line"]/div[1]/text()').get(),
                 "state": location.xpath('./div[@class="suburb-state-postcode-line"]/div[2]/text()').get(),
                 "postcode": location.xpath('./div[@class="suburb-state-postcode-line"]/div[3]/text()').get(),
-                "website": "https://www.cryptolink.com.au" + location.xpath('./div[@class="location-buttons-div-block"]/a[contains(@href, "/locations/cl")]/@href').get(),
+                "website": "https://www.cryptolink.com.au"
+                + location.xpath(
+                    './div[@class="location-buttons-div-block"]/a[contains(@href, "/locations/cl")]/@href'
+                ).get(),
                 "opening_hours": OpeningHours(),
             }
 
@@ -43,12 +55,29 @@ class CyrptolinkAUSpider(Spider):
             properties["extras"]["currency:TRX"] = "yes"
             properties["extras"]["currency:AUD"] = "yes"
 
-            yield Request(url=properties["website"], meta={"item": Feature(**properties)}, callback=self.parse_additional_fields)
+            yield Request(
+                url=properties["website"], meta={"item": Feature(**properties)}, callback=self.parse_additional_fields
+            )
 
     def parse_additional_fields(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
-        apply_yes_no("cash_in", item, response.xpath('//div[@class="tags-box-location-page"]/div/div[text()="BUY"]/text()').get(), False)
-        apply_yes_no("cash_out", item, response.xpath('//div[@class="tags-box-location-page"]/div/div[text()="SELL"]/text()').get(), False)
-        item["opening_hours"].add_ranges_from_string(" ".join(response.xpath('.//div[@class="opening_hours_text_block w-richtext"]//text()').getall()).upper().replace("24 H", "00:00 - 23:59 ").replace("24H", "00:00 - 23:59 "))
+        apply_yes_no(
+            "cash_in",
+            item,
+            response.xpath('//div[@class="tags-box-location-page"]/div/div[text()="BUY"]/text()').get(),
+            False,
+        )
+        apply_yes_no(
+            "cash_out",
+            item,
+            response.xpath('//div[@class="tags-box-location-page"]/div/div[text()="SELL"]/text()').get(),
+            False,
+        )
+        item["opening_hours"].add_ranges_from_string(
+            " ".join(response.xpath('.//div[@class="opening_hours_text_block w-richtext"]//text()').getall())
+            .upper()
+            .replace("24 H", "00:00 - 23:59 ")
+            .replace("24H", "00:00 - 23:59 ")
+        )
         item["image"] = response.xpath('//img[@class="location-image"]/@src').get()
         yield item
