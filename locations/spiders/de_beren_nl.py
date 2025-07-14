@@ -14,8 +14,7 @@ class DeBerenNLSpider(JSONBlobSpider):
     start_urls = ["https://www.beren.nl/vestigingen"]
 
     def extract_json(self, response: Response) -> dict | list[dict]:
-        json_data = json.loads(response.xpath("//@data-establishments").get())
-        return json_data
+        return json.loads(response.xpath("//@data-establishments").get())
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
