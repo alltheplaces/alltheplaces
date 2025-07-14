@@ -14,10 +14,25 @@ class BitstopPRUSSpider(JSONBlobSpider):
     allowed_domains = ["locus.bitstop.co"]
     start_urls = ["https://locus.bitstop.co:42010/api/current-locations"]
     operators = {
-        "ATM Ops Inc": {"operator": "ATM Ops Inc", "operator_wikidata": "Q135316538", "brand": "Bitstop", "brand_wikidata": "Q135316538"},
-        "CoinGenie": {"operator": "CoinGenie", "operator_wikidata": "Q135317411", "brand": "CoinGenie", "brand_wikidata": "Q135317411"},
+        "ATM Ops Inc": {
+            "operator": "ATM Ops Inc",
+            "operator_wikidata": "Q135316538",
+            "brand": "Bitstop",
+            "brand_wikidata": "Q135316538",
+        },
+        "CoinGenie": {
+            "operator": "CoinGenie",
+            "operator_wikidata": "Q135317411",
+            "brand": "CoinGenie",
+            "brand_wikidata": "Q135317411",
+        },
         "Dynamic Exchange": {"operator": "Dynamic Exchange", "brand": "Dynamic Exchange"},
-        "Express BTM": {"operator": "Express BTM", "operator_wikidata": "Q135316892", "brand": "Express BTM", "brand_wikidata": "Q135316892"},
+        "Express BTM": {
+            "operator": "Express BTM",
+            "operator_wikidata": "Q135316892",
+            "brand": "Express BTM",
+            "brand_wikidata": "Q135316892",
+        },
         "PAI": {"operator": "PAI", "brand": "PAI"},
     }
 
@@ -63,7 +78,11 @@ class BitstopPRUSSpider(JSONBlobSpider):
                 if brand_wikidata := self.operators[operator_name].get("brand_wikidata"):
                     item["brand_wikidata"] = brand_wikidata
             else:
-                self.logger.warning("Unknown partner brand/operator '{}'. Feature still extracted but the spider needs updating with awareness of this partner brand/operator.".format(operator_name))
+                self.logger.warning(
+                    "Unknown partner brand/operator '{}'. Feature still extracted but the spider needs updating with awareness of this partner brand/operator.".format(
+                        operator_name
+                    )
+                )
 
         if photo_list := feature.get("other_photos"):
             photo_urls = photo_list.split(", ")
@@ -82,7 +101,9 @@ class BitstopPRUSSpider(JSONBlobSpider):
                     interval = re.sub(r"^00:00-((?:0[0-9]|11):\d{2})-(\d{2}:\d{2})-24:00$", r"\2-\1", interval)
                     if interval.startswith("00:00-01:00-") and interval.endswith("-24:00"):
                         interval = interval.removeprefix("00:00-01:00-")
-                    item["opening_hours"].add_range(day_hours[0].replace("_hours", ""), *interval.split("-", 1), "%H:%M")
+                    item["opening_hours"].add_range(
+                        day_hours[0].replace("_hours", ""), *interval.split("-", 1), "%H:%M"
+                    )
 
         apply_category(Categories.ATM, item)
         item["extras"]["currency:XBT"] = "yes"
