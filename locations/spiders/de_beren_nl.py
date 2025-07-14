@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -20,6 +20,11 @@ class DeBerenNLSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         item["website"] = urljoin("https://www.beren.nl/vestigingen/", feature["slug"])
+        item["housenumber"] = feature["number"]
 
         apply_category(Categories.RESTAURANT, item)
+
+        apply_yes_no(Extras.WHEELCHAIR, item, "rolstoelvriendelijk" in feature["facilities"])
+        apply_yes_no(Extras.WIFI, item, "gratis_wifi" in feature["facilities"])
+
         yield item
