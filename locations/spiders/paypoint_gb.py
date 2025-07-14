@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class PaypointGBSpider(Spider):
@@ -19,7 +20,7 @@ class PaypointGBSpider(Spider):
                 url="https://www.paypoint.com/umbraco/surface/StoreLocatorSurface/StoreLocator",
                 data={
                     "searchCriteria": f'{city["latitude"]},{city["longitude"]}',
-                    "product": "ATM",
+                    "product": "ATM",  # null values for product/siteServices returns lower count for ATMs
                     "siteServices": "ATM",
                     "searchType": 6,
                 },
@@ -31,7 +32,7 @@ class PaypointGBSpider(Spider):
             for location in locations:
                 item = DictParser.parse(location)
                 item["ref"] = location.get("SiteNumber")
-                item["name"] = "PayPoint"
+                item["name"] = self.item_attributes["brand"]
                 item["located_in"] = location.get("SiteName")
                 item["street_address"] = item.pop("addr_full", "")
                 services = [service.get("ServiceName").strip() for service in location.get("Services")]
@@ -43,4 +44,12 @@ class PaypointGBSpider(Spider):
                     # Not sure about other services whether location can be collected as a PayPoint branded location
                     # https://www.paypoint.com/instore-services
                     continue
+
+                item["opening_hours"] = self.parse_opening_hours(location)
                 yield item
+
+    def parse_opening_hours(self, location: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            oh.add_range(day, location[f"{day}Open"], location[f"{day}Close"], "%H%M")
+        return oh
