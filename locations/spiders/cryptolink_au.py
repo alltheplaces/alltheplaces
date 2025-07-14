@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class CyrptolinkAUSpider(Spider):
+class CryptolinkAUSpider(Spider):
     name = "cryptolink_au"
     item_attributes = {"brand": "Cryptolink", "brand_wikidata": "Q135285381"}
     allowed_domains = ["www.cryptolink.com.au"]
