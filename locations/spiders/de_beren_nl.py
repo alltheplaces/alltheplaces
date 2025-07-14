@@ -1,5 +1,6 @@
 import json
 from typing import Iterable
+from urllib.parse import urljoin
 
 from scrapy.http import Response
 
@@ -18,6 +19,7 @@ class DeBerenNLSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["website"] = "https://www.beren.nl/vestigingen/" + feature["slug"]
+        item["website"] = urljoin("https://www.beren.nl/vestigingen/", feature["slug"])
+
         apply_category(Categories.RESTAURANT, item)
         yield item
