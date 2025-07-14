@@ -1,5 +1,6 @@
 from typing import Iterable
 
+from geonamescache import GeonamesCache
 from scrapy import Request
 from scrapy.http import Response
 
@@ -9,82 +10,6 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MercedesBenzGroupSpider(JSONBlobSpider):
     name = "mercedes_benz_group"
-    available_countries = [
-        "VN",
-        "NO",
-        "BR",
-        "BG",
-        "US",
-        "SK",
-        "CA",
-        "CL",
-        "LU",
-        "FI",
-        "LK",
-        "PL",
-        "BY",
-        "AE",
-        "PT",
-        "DK",
-        "TN",
-        "LT",
-        "HR",
-        "VE",
-        "AL",
-        "MX",
-        "UA",
-        "RO",
-        "TH",
-        "JP",
-        "TW",
-        "AU",
-        "MT",
-        "EG",
-        "CY",
-        "EC",
-        "MY",
-        "PE",
-        "BE",
-        "RS",
-        "GB",
-        "IT",
-        "MA",
-        "ID",
-        "FR",
-        "RU",
-        "IE",
-        "DE",
-        "IN",
-        "LV",
-        "HK",
-        "CN",
-        "SG",
-        "SI",
-        "CO",
-        "CH",
-        "NL",
-        "EE",
-        "HU",
-        "BO",
-        "PY",
-        "AT",
-        "SE",
-        "TR",
-        "AF",
-        "NZ",
-        "PH",
-        "AR",
-        "BN",
-        "BA",
-        "IS",
-        "GR",
-        "CZ",
-        "UY",
-        "ES",
-        "ZA",
-        "KR",
-        "SA",
-    ]
 
     BRAND_MAPPING = {
         "Mercedes-Benz": {"brand": "Mercedes-Benz", "brand_wikidata": "Q36008"},
@@ -103,15 +28,22 @@ class MercedesBenzGroupSpider(JSONBlobSpider):
         return Request(url, meta={"country": country})
 
     def start_requests(self) -> Iterable[Request]:
-        for country in self.available_countries:
+        countries = GeonamesCache().get_countries().keys()
+        for country in countries:
             yield self.make_request(country)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["outletId"]
         item["state"] = feature.get("address", {}).get("region", {}).get("state")
+        country = response.meta["country"]
+        for service in feature.get("offeredServices", []):
+            service_name = service.get("service", {}).get("name")
+            brand = service.get("brand", {}).get("name")
+            product_group = service.get("productGroup", {}).get("name")
+            self.crawler.stats.inc_value(f"{self.name}/services/{country}/{brand}/{service_name}/{product_group}")
         yield item
 
         data = response.json()
         current_page = data["page"]["number"]
         if current_page < data["page"]["totalPages"]:
-            yield self.make_request(response.meta["country"], current_page + 1)
+            yield self.make_request(country, current_page + 1)
