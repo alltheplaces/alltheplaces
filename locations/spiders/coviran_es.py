@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CoviranSpiderES(JSONBlobSpider):
+class CoviranESSpider(JSONBlobSpider):
     name = "coviran_es"
     item_attributes = {"brand": "Covirán", "brand_wikidata": "Q61070539"}
     start_urls = ["https://www.coviran.es/localizador"]
@@ -29,5 +29,7 @@ class CoviranSpiderES(JSONBlobSpider):
         if isinstance(feature.get("phone"), list):
             item["phone"] = "; ".join(filter(None, [phone.get("phone") for phone in feature["phone"]]))
         item["website"] = urljoin("https://tienda.coviran.es/", feature.get("slug"))
+
         apply_category(Categories.SHOP_SUPERMARKET, item)
+
         yield item
