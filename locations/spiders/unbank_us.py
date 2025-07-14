@@ -33,7 +33,11 @@ class UnbankUSSpider(JSONBlobSpider):
         }
         for currency in feature.get("purchase_minimum").keys():
             if currency not in currencies_map.keys():
-                self.logger.warning("Unknown cryptocurrency '{}'. Cryptocurrency tags ignored. Spider requires update to map to correct OSM currency:* key.".format(currency))
+                self.logger.warning(
+                    "Unknown cryptocurrency '{}'. Cryptocurrency tags ignored. Spider requires update to map to correct OSM currency:* key.".format(
+                        currency
+                    )
+                )
                 continue
             osm_currency_code = currencies_map[currency]
             item["extras"][f"currency:{osm_currency_code}"] = "yes"
