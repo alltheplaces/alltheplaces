@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_RU
+from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -19,7 +19,9 @@ class AvroraUASpider(JSONBlobSpider):
         item.pop("name", None)
         item.pop("state", None)
         item["street_address"] = feature["name"]
-        item["website"] = "https://avrora.ua/index.php?dispatch=store_locator.view&store_location_id={}".format(feature["shopNumber"])
+        item["website"] = "https://avrora.ua/index.php?dispatch=store_locator.view&store_location_id={}".format(
+            feature["shopNumber"]
+        )
         item["phone"] = feature.get("pickup_phone")
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(feature.get("pickup_time", ""), days=DAYS_RU)
