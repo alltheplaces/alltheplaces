@@ -50,11 +50,18 @@ class UnicreditBankITSpider(CrawlSpider):
             item["city"] = location.get("TG_LOC_FIL")
             item["state"] = location.get("TG_SGL_PRO")
             item["postcode"] = location.get("TG_CAP_FIL")
-            item["phone"] = (
-                location["TG_TEL_PRN"] + location["TG_TEL_NUM"]
-                if location.get("TG_TEL_PRN")
-                else location.get("TG_TEL_NUM")
-            )
+
+            for contact_type in ["TEL", "FAX"]:
+                contact = (
+                    location[f"TG_{contact_type}_PRN"] + location[f"TG_{contact_type}_NUM"]
+                    if location.get(f"TG_{contact_type}_PRN")
+                    else location.get(f"TG_{contact_type}_NUM")
+                )
+                if contact_type == "TEL":
+                    item["phone"] = contact
+                else:
+                    item["extras"]["fax"] = contact
+
             item["email"] = location.get("TG_IN_MAIL")
             item["website"] = website
             apply_category(Categories.BANK, item)
