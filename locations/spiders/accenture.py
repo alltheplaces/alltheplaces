@@ -4,12 +4,13 @@ import json
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class AccentureSpider(scrapy.Spider):
     name = "accenture"
-    item_attributes = {"brand": "Accenture", "brand_wikidata": "Q29123313"}
+    item_attributes = {"brand": "Accenture", "brand_wikidata": "Q338825"}
     start_urls = ["https://www.accenture.com/us-en/about/location"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
@@ -30,4 +31,5 @@ class AccentureSpider(scrapy.Spider):
             item["street_address"] = item.pop("addr_full")
             item["postcode"] = office.get("postalZipCode", "")
             item["phone"] = office.get("contactTel", "")
+            apply_category(Categories.OFFICE_CONSULTING, item)
             yield item
