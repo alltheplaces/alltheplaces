@@ -41,6 +41,7 @@ class CredemITSpider(scrapy.Spider):
             item["street_address"] = item.pop("addr_full", "")
             item["branch"] = location.get("nomeAgenzia", "")
             item["state"] = location.get("provincia", "")
+            item["name"] = self.item_attributes["brand"]
 
             if location_type == "filiale":
                 apply_category(Categories.BANK, item)
