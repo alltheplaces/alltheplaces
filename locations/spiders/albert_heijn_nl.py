@@ -11,10 +11,10 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AlbertHeijnSpider(Spider):
-    name = "albert_heijn"
-    allowed_domains = ["www.ah.nl", "www.ah.be"]
-    start_urls = ["https://www.ah.nl/winkels", "https://www.ah.be/winkels"]
+class AlbertHeijnNLSpider(Spider):
+    name = "albert_heijn_nl"
+    allowed_domains = ["www.ah.nl"]
+    start_urls = ["https://www.ah.nl/winkels"]
     user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
