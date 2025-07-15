@@ -71,7 +71,7 @@ class UnicreditBankITSpider(CrawlSpider):
             item = Feature()
             item["lat"] = coordinates.get("lat")
             item["lon"] = coordinates.get("lng")
-            item["ref"] = location.get("TG_COD_ATM")
+            item["ref"] = location.get("TG_COD_DIP") + "-" + location.get("TG_COD_ATM")
             item["street_address"] = location.get("TG_INDIRIZZO_ATM")
             item["city"] = location.get("TG_LOCALITA")
             item["state"] = location.get("TG_PROVINCIA")
