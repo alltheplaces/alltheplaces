@@ -20,6 +20,7 @@ class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
             rule["closes"] = (rule.get("closes") or "").strip()
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = item["website"]
         name = item.pop("name")
         if name.startswith("Halfords Autocentre "):
             item["branch"] = name.removeprefix("Halfords Autocentre ")
