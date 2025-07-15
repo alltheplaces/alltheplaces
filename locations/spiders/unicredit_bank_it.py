@@ -8,6 +8,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -64,6 +65,7 @@ class UnicreditBankITSpider(CrawlSpider):
 
             item["email"] = location.get("TG_IN_MAIL")
             item["website"] = website
+            item["opening_hours"] = self.parse_opening_hours(location)
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.ATM, item, location.get("ATM") == "1")
             yield item
@@ -85,3 +87,11 @@ class UnicreditBankITSpider(CrawlSpider):
             item["website"] = website
             apply_category(Categories.ATM, item)
             yield item
+
+    def parse_opening_hours(self, location: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_3_LETTERS:
+            for shift in ["AM", "PM"]:
+                if hours := location.get(f"TG_OPEN_{day.upper()}_{shift}"):
+                    oh.add_range(day, hours[:4], hours[4:], "%H%M")
+        return oh
