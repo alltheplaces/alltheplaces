@@ -24,7 +24,7 @@ class UnicreditBankITSpider(CrawlSpider):
     ]
     url_match = re.compile(r"url[:\s]+\'(.+?)\'")
     user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 180}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         website = response.url
