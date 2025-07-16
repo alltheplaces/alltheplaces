@@ -37,6 +37,7 @@ class FnbcCASpider(Spider):
                         else phone_details["phone"]
                     )
                     item["opening_hours"] = self.parse_opening_hours(location["operationHours"]["regularHours"][0])
+                    item["website"] = f'https://www.fnbc.ca/find-a-location?branchId={location["id"]}'
                     item.update(self.FNBC)
                     apply_category(Categories.BANK, item)
 
