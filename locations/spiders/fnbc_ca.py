@@ -39,6 +39,7 @@ class FnbcCASpider(Spider):
                     item["opening_hours"] = self.parse_opening_hours(location["operationHours"]["regularHours"][0])
                     item["website"] = f'https://www.fnbc.ca/find-a-location?branchId={location["id"]}'
                     item.update(self.FNBC)
+                    item["name"] = item["brand"]
                     apply_category(Categories.BANK, item)
                     apply_yes_no(Extras.ATM, item, "ATM" in location["info"]["service"])
 
