@@ -14,7 +14,7 @@ class BluenotesCASpider(JSONBlobSpider):
     start_urls = ["https://blnts.com/apps/api/v1/stores"]
     locations_key = "stores"
     brands = {
-        "Aeropostale": {"brand": "Aéropostale", "brand_wikidata": "Q794565"},
+        "Aeropostale": {"brand": "Aeropostale", "brand_wikidata": "Q794565"},
         "Bluenotes": {"brand": "Bluenotes", "brand_wikidata": "Q4930395"},
         "Thriftys by Bluenotes": {"brand": "Thrifty's", "brand_wikidata": "Q135390727"},
     }

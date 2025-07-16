@@ -10,7 +10,7 @@ from locations.spiders.urban_planet_ca_pr_us import UrbanPlanetCAPRUSSpider
 
 class West49CASpider(JSONBlobSpider):
     name = "west49_ca"
-    item_attributes = {"brand": "West49", "brand_wikidata": "Q7984218"}
+    item_attributes = {"brand": "West 49", "brand_wikidata": "Q7984218"}
     allowed_domains = ["west49.com"]
     start_urls = ["https://west49.com/apps/api/v1/stores"]
     locations_key = "stores"

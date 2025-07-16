@@ -8,7 +8,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.urban_planet_ca_pr_us import UrbanPlanetCAPRUSSpider
 
 
-class AmensiaCASpider(JSONBlobSpider):
+class AmnesiaCASpider(JSONBlobSpider):
     name = "amnesia_ca"
     item_attributes = {"brand": "Amnesia", "brand_wikidata": "Q135390528"}
     allowed_domains = ["amnesiashop.com"]
