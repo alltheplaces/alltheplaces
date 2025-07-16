@@ -1,10 +1,9 @@
 from typing import Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -39,7 +38,10 @@ class ChickenTreatAUSpider(Spider):
             item["city"] = address_fields["suburb"]["value"]
             item["state"] = address_fields["state"]["value"]
             item["postcode"] = address_fields["postcode"]["value"]
-            item["website"] = "https://www.chickentreat.com.au/locations/" + location["relationships"]["slug"]["data"]["attributes"]["slug"]
+            item["website"] = (
+                "https://www.chickentreat.com.au/locations/"
+                + location["relationships"]["slug"]["data"]["attributes"]["slug"]
+            )
             item["opening_hours"] = OpeningHours()
             for day_hours in location["relationships"]["collection"]["data"]["attributes"]["collectionTimes"]:
                 for time_period in day_hours["collectionTimePeriods"]:
