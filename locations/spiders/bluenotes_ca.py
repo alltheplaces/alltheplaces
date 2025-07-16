@@ -23,7 +23,11 @@ class BluenotesCASpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         brand_name = feature["brand"].strip()
         if brand_name not in self.brands.keys():
-            self.logger.warning("Unknown brand '{}'. Feature extracted without brand_wikidata set. Spider needs updating to map the brand to a Wikidata item.".format(brand_name))
+            self.logger.warning(
+                "Unknown brand '{}'. Feature extracted without brand_wikidata set. Spider needs updating to map the brand to a Wikidata item.".format(
+                    brand_name
+                )
+            )
             item["brand"] = brand_name
         else:
             item["brand"] = self.brands[brand_name]["brand"]

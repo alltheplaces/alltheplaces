@@ -27,7 +27,11 @@ class UrbanPlanetCAPRUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         brand_name = feature["brand"].strip()
         if brand_name not in self.brands.keys():
-            self.logger.warning("Unknown brand '{}'. Feature extracted without brand_wikidata set. Spider needs updating to map the brand to a Wikidata item.".format(brand_name))
+            self.logger.warning(
+                "Unknown brand '{}'. Feature extracted without brand_wikidata set. Spider needs updating to map the brand to a Wikidata item.".format(
+                    brand_name
+                )
+            )
             item["brand"] = brand_name
         else:
             item["brand"] = self.brands[brand_name]["brand"]
@@ -44,7 +48,9 @@ class UrbanPlanetCAPRUSSpider(JSONBlobSpider):
         item["lat"] = feature["address"]["latitude"]
         item["lon"] = feature["address"]["longitude"]
         item["branch"] = feature["address"]["name"]
-        item["street_address"] = merge_address_lines([feature["address"].get("line1"), feature["address"].get("line2"), feature["address"].get("line3")])
+        item["street_address"] = merge_address_lines(
+            [feature["address"].get("line1"), feature["address"].get("line2"), feature["address"].get("line3")]
+        )
         item["opening_hours"] = OpeningHours()
         for day_hours in feature["open_hours"]:
             if "closed" in day_hours.keys():
