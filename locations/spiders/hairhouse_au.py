@@ -5,7 +5,6 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 
@@ -16,7 +15,7 @@ class HairhouseAUSpider(SitemapSpider):
     allowed_domains = ["www.hairhouse.com.au"]
     sitemap_urls = ["https://www.hairhouse.com.au/store/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.hairhouse\.com\.au\/store\/[^\/]+$", "parse")]
-    #wanted_types = ["HealthAndBeautyBusiness"]
+    # wanted_types = ["HealthAndBeautyBusiness"]
 
     def parse(self, response: Response) -> Iterable[Feature]:
         ldjson_blob = response.xpath('//script[@type="application/ld+json"]/text()').get()
