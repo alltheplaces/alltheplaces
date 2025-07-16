@@ -27,6 +27,7 @@ class FnbcCASpider(Spider):
                 item = DictParser.parse(location)
                 item["street_address"] = merge_address_lines(location["address"].get("line"))
                 if location.get("type") == "branch":
+                    item["branch"] = item.pop("name")
                     item.update(self.FNBC)
                     apply_category(Categories.BANK, item)
                 elif location.get("type") == "atm":
