@@ -1,3 +1,5 @@
+import re
+
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -39,5 +41,11 @@ class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
         else:
             # 3, a mix of the above.
             item["name"] = name
+
+        if m := re.search(
+            r"destination=(-?\d+\.\d+),(-?\d+\.\d+)",
+            response.xpath('//a[contains(@href, "www.google.com/maps")][contains(@href, "destination=")]/@href').get(),
+        ):
+            item["lat"], item["lon"] = m.groups()
 
         yield item
