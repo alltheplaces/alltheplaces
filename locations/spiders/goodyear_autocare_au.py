@@ -20,15 +20,23 @@ class GoodyearAutocareAUSpider(SitemapSpider):
     def parse(self, response: Response) -> Iterable[Feature]:
         properties = {
             "ref": response.url,
-            "branch": response.xpath('//h1/text()').get().removeprefix("Goodyear Autocare "),
-            "addr_full": merge_address_lines(response.xpath('//p[contains(@class, "address-container")]//text()').getall()),
+            "branch": response.xpath("//h1/text()").get().removeprefix("Goodyear Autocare "),
+            "addr_full": merge_address_lines(
+                response.xpath('//p[contains(@class, "address-container")]//text()').getall()
+            ),
             "phone": response.xpath('//div[contains(@class, "store-phone-custom")]/a/@href').get().removeprefix("tel:"),
-            "email": response.xpath('//div[contains(@class, "store-email-custom")]/a/@href').get().removeprefix("mailto:"),
+            "email": response.xpath('//div[contains(@class, "store-email-custom")]/a/@href')
+            .get()
+            .removeprefix("mailto:"),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
         extract_google_position(properties, response)
-        hours_text = " ".join(response.xpath('//div[contains(@class, "product-details-block")]//div[contains(@class, "store-day-hours-container")]//text()').getall())
+        hours_text = " ".join(
+            response.xpath(
+                '//div[contains(@class, "product-details-block")]//div[contains(@class, "store-day-hours-container")]//text()'
+            ).getall()
+        )
         properties["opening_hours"].add_ranges_from_string(hours_text)
         apply_category(Categories.SHOP_TYRES, properties)
         yield Feature(**properties)
