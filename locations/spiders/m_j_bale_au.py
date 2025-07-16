@@ -35,7 +35,9 @@ class MJBaleAUSpider(JSONBlobSpider):
 
         if feature.get("data_times"):
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(" ".join([day_hours["title"] for day_hours in feature["data_times"]]))
+            item["opening_hours"].add_ranges_from_string(
+                " ".join([day_hours["title"] for day_hours in feature["data_times"]])
+            )
 
         apply_category(Categories.SHOP_CLOTHES, item)
         item["extras"]["alt_ref"] = str(feature["store_number"])
