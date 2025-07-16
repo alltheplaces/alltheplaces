@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -26,6 +27,7 @@ class FnbcCASpider(Spider):
                 location.update(location.pop("details", {}))
                 item = DictParser.parse(location)
                 item["street_address"] = merge_address_lines(location["address"].get("line"))
+
                 if location.get("type") == "branch":
                     item["branch"] = item.pop("name")
                     phone_details = location["contacts"][0]["phone"]
@@ -34,8 +36,10 @@ class FnbcCASpider(Spider):
                         if phone_details.get("areacode")
                         else phone_details["phone"]
                     )
+                    item["opening_hours"] = self.parse_opening_hours(location["operationHours"]["regularHours"][0])
                     item.update(self.FNBC)
                     apply_category(Categories.BANK, item)
+
                 elif location.get("type") == "atm":
                     if item["name"] == self.FNBC["brand"]:
                         item.update(self.FNBC)
@@ -43,4 +47,15 @@ class FnbcCASpider(Spider):
                         # ATMs of other brands/operators
                         pass
                     apply_category(Categories.ATM, item)
+
                 yield item
+
+    def parse_opening_hours(self, opening_hours: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            if rule := opening_hours.get(day.lower()):
+                if rule.get("isOpen"):
+                    oh.add_range(day, rule["openTime"], rule["closeTime"], "%I:%M %p")
+                else:
+                    oh.set_closed(day)
+        return oh
