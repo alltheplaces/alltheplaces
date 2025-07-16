@@ -35,9 +35,6 @@ class MomentFeedSpider(Spider):
             return
 
         for feature in response.json():
-            if feature["status"] != "open":
-                continue
-
             store_info = feature["store_info"]
             item = DictParser.parse(store_info)
             item["ref"] = store_info["corporate_id"]
