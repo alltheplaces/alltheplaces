@@ -3,7 +3,7 @@ from typing import Any, Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -40,6 +40,7 @@ class FnbcCASpider(Spider):
                     item["website"] = f'https://www.fnbc.ca/find-a-location?branchId={location["id"]}'
                     item.update(self.FNBC)
                     apply_category(Categories.BANK, item)
+                    apply_yes_no(Extras.ATM, item, "ATM" in location["info"]["service"])
 
                 elif location.get("type") == "atm":
                     if item["name"] == self.FNBC["brand"]:
