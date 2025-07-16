@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from typing import Iterable
 
@@ -65,6 +66,20 @@ class MercedesBenzGroupSpider(JSONBlobSpider):
         item["lat"] = feature.get("address", {}).get("coordinates", {}).get("latitude")
         item["lon"] = feature.get("address", {}).get("coordinates", {}).get("longitude")
         country = response.meta["country"]
+        service_products = set([s.get("productGroup", {}).get("name") for s in feature.get("offeredServices", [])])
+
+        if all("Trucks" == sp for sp in service_products):
+            self.crawler.stats.inc_value(f"{self.name}/only/Trucks")
+            self.logger.info(f"Only Trucks for {json.dumps(feature)}")
+        # same as above but for Vans
+        elif all("Vans" == sp for sp in service_products):
+            self.crawler.stats.inc_value(f"{self.name}/only/Vans")
+            self.logger.info(f"Only Vans for {json.dumps(feature)}")
+        # same as above but for Buses
+        elif all("Busses" == sp for sp in service_products):
+            self.crawler.stats.inc_value(f"{self.name}/only/Buses")
+            self.logger.info(f"Only Buses for {json.dumps(feature)}")
+
         for service in feature.get("offeredServices", []):
             if service.get("validity", {}).get("validity") == False:
                 continue
