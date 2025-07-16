@@ -15,7 +15,9 @@ class FootLockerSASpider(JSONBlobSpider):
         "brand_wikidata": "Q63335",
     }
     allowed_domains = ["www.footlocker.com.sa"]
-    start_urls = ["https://www.footlocker.com.sa/rest/sau_en/V1/storeLocator/search?searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bfield%5D=status&searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bvalue%5D=1"]
+    start_urls = [
+        "https://www.footlocker.com.sa/rest/sau_en/V1/storeLocator/search?searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bfield%5D=status&searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bvalue%5D=1"
+    ]
     locations_key = "items"
     needs_json_request = True
 
