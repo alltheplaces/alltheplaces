@@ -28,6 +28,12 @@ class FnbcCASpider(Spider):
                 item["street_address"] = merge_address_lines(location["address"].get("line"))
                 if location.get("type") == "branch":
                     item["branch"] = item.pop("name")
+                    phone_details = location["contacts"][0]["phone"]
+                    item["phone"] = (
+                        str(phone_details["areacode"]) + phone_details["phone"]
+                        if phone_details.get("areacode")
+                        else phone_details["phone"]
+                    )
                     item.update(self.FNBC)
                     apply_category(Categories.BANK, item)
                 elif location.get("type") == "atm":
