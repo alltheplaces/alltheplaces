@@ -14,16 +14,24 @@ class BpsPLSpider(scrapy.Spider):
     start_urls = ["https://www.bankbps.pl/znajdz-placowke"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        token = json.loads(response.xpath('//*[@type="application/json"]/text()').get())["csrf.token"]
+        token_data = response.xpath('//*[@type="application/json"]/text()').get()
+        token = json.loads(token_data).get("csrf.token")
         yield JsonRequest(
-            url=f"https://www.bankbps.pl/znajdz-placowke?view=maps&amp;format=json&amp;task=getpoints&menuitem=145&{token}=1",
+            url=f"https://www.bankbps.pl/znajdz-placowke?view=maps&format=json&task=getpoints&menuitem=145&{token}=1",
             callback=self.parse_details,
         )
 
-    def parse_details(self, response, **kwargs):
-        for location in response.json()["data"]["department"]:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["name"] = self.item_attributes["brand"]
-            apply_category(Categories.BANK, item)
-            yield item
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
+        data = response.json().get("data", {})
+        for location_type, category in [("department", Categories.BANK), ("atm", Categories.ATM)]:
+            for location in data.get(location_type, []):
+                if location_type == "atm" and not location["name"].startswith("Bank Spółdzielczy"):
+                    continue
+                yield self.parse_location(location, category)
+
+    def parse_location(self, location: dict, category: Categories) -> dict:
+        item = DictParser.parse(location)
+        item["branch"] = item.pop("name", None)
+        item["name"] = self.item_attributes["brand"]
+        apply_category(category, item)
+        return item
