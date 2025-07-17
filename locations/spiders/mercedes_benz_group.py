@@ -12,6 +12,10 @@ from locations.json_blob_spider import JSONBlobSpider
 
 
 class MercedesBenzGroupSpider(JSONBlobSpider):
+    """
+    Main site: https://www.mercedes-benz.com/en/
+    API found at https://www.mercedes-benz.dk/passengercars/mercedes-benz-cars/dealer-locator.html
+    """
     name = "mercedes_benz_group"
 
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"x-apikey": "ce7d9916-6a3d-407a-b086-fea4cbae05f6"}}
@@ -126,7 +130,7 @@ class MercedesBenzGroupSpider(JSONBlobSpider):
 
         if service.startswith("OMNIplus"):
             # Handle presence of multiple different OMNIplus services at the same location
-            # assuming deduplication pipeline will remove POIs with the same ref
+            # assuming deduplication pipeline is enabled for the spider.
             service = "OMNIplus"
             brand = "OMNIplus"
 
