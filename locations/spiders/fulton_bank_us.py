@@ -42,7 +42,10 @@ class FultonBankUSSpider(Spider):
             ).getall()
             item["opening_hours"] = self.parse_opening_hours(opening_hours)
 
-            apply_category(Categories.BANK, item)
+            if "ATM Only" in location_details.get(""):
+                apply_category(Categories.ATM, item)
+            else:
+                apply_category(Categories.BANK, item)
             yield item
 
     def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
