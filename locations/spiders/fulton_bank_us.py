@@ -3,7 +3,7 @@ from typing import Any, Iterable
 from scrapy import FormRequest, Selector, Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -42,10 +42,17 @@ class FultonBankUSSpider(Spider):
             ).getall()
             item["opening_hours"] = self.parse_opening_hours(opening_hours)
 
+            services = location_details.xpath(
+                './/*[@class="info-block available-services"]//*[@class="info-text"]/text()'
+            ).get("")
+
             if "ATM Only" in location_details.get(""):
                 apply_category(Categories.ATM, item)
             else:
                 apply_category(Categories.BANK, item)
+                apply_yes_no(Extras.ATM, item, "ATM" in services)
+                apply_yes_no(Extras.CASH_IN, item, "ATM Accepts Deposits" in services)
+                apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru" in services)
             yield item
 
     def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
