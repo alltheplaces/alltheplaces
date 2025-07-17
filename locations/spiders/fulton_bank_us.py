@@ -4,6 +4,7 @@ from scrapy import FormRequest, Selector, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -35,5 +36,20 @@ class FultonBankUSSpider(Spider):
             # Use data-id to extract phone, opening hours etc. from branch_popups
             location_details = branch_popups.xpath(f'.//*[@data-id="{item["ref"]}"]')
             item["phone"] = location_details.xpath('.//a[contains(@href, "tel:")]/@href').get()
+
+            opening_hours = location_details.xpath(
+                './/*[@class="info-title"][contains(text(), "Lobby Hours") or contains(text(), "Window Hours")]//following-sibling::*[@class="hours-extended"]//*[@class="hours-row"]/text()'
+            ).getall()
+            item["opening_hours"] = self.parse_opening_hours(opening_hours)
+
             apply_category(Categories.BANK, item)
             yield item
+
+    def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in opening_hours:
+            if "Closed" in rule.title():
+                oh.set_closed(rule.title().replace("Closed", ""))
+            else:
+                oh.add_ranges_from_string(rule)
+        return oh
