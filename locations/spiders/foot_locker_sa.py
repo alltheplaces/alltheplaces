@@ -22,6 +22,7 @@ class FootLockerSASpider(JSONBlobSpider):
     needs_json_request = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
         item["ref"] = feature["store_code"]
         for address_field in feature["address"]:
             if address_field["code"] == "street":
