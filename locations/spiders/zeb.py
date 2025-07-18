@@ -14,6 +14,7 @@ class ZebSpider(JSONBlobSpider):
     locations_key = "locations"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("ZEB ")
         item["phone"] = feature["address"]["phone"]
         item["lat"] = feature["address"]["latitude"]
         item["lon"] = feature["address"]["longitude"]
