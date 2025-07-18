@@ -10,6 +10,7 @@ from locations.items import Feature
 class BancoMercantilBRSpider(scrapy.Spider):
     name = "banco_mercantil_br"
     item_attributes = {"brand": "Banco Mercantil do Brasil", "brand_wikidata": "Q9645252"}
+    requires_proxy = True
 
     def start_requests(self):
         yield JsonRequest(
