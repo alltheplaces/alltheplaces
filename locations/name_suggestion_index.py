@@ -66,7 +66,7 @@ class NSI(metaclass=Singleton):
         for wikidata_code, org_parameters in self.wikidata_json.items():
             for official_website in org_parameters.get("officialWebsites", []):
                 official_website_domain = urlparse(official_website).netloc
-                if official_website_domain.lstrip("www.") == supplied_url_domain.lstrip("www."):
+                if official_website_domain.removeprefix("www.") == supplied_url_domain.removeprefix("www."):
                     return wikidata_code
         # Last attempt to find a fuzzy match for registered domain (excluding subdomains)
         for wikidata_code, org_parameters in self.wikidata_json.items():
