@@ -17,6 +17,10 @@ class GlobusBaumarktDESpider(CrawlSpider):
 
     def parse(self, response):
         raw_data = response.xpath('//script[@type="application/ld+json"][contains(text(), "Place")]/text()').get()
+
+        if not raw_data:
+            return
+
         # The image field currently breaks the JSON
         data = json.loads(re.sub(r'"image": (\[".+"\],)', "", raw_data))
         item = LinkedDataParser.parse_ld(data)
