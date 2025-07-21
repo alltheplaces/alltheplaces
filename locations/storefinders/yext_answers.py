@@ -112,7 +112,15 @@ class YextAnswersSpider(Spider):
         if len(response.json()["response"]["results"]) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
 
-    def _parse_socials(self, item: Feature, location: dict):
+    @staticmethod
+    def parse_socials(item: Feature, location: dict) -> None:
+        """
+        Parse contact and social media fields of information from the
+        supplied dictionary and add to the supplied item (Feature).
+        :param item: item to add contact and social media information to.
+        :param location: dictionary to parse information from.
+        :returns: None
+        """
         phones = []
         for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
             if phone := location.get(phone_type):
@@ -151,7 +159,15 @@ class YextAnswersSpider(Spider):
             else:
                 item["extras"]["website:menu"] = menu_url_dict.get("url")
 
-    def parse_opening_hours(self, hours: dict, **kwargs: Any) -> str | None:
+    @staticmethod
+    def parse_opening_hours(hours: dict) -> OpeningHours | None:
+        """
+        Parse opening hours from the supplied dictionary and return an
+        OpeningHours object.
+        :param hours: dictionary provided by a Yext API.
+        :returns: OpeningHours object if hours could be parsed, or None if the
+                  supplied hours dictionary cnanot be parsed.
+        """
         if not hours:
             return None
         oh = OpeningHours()
@@ -165,8 +181,7 @@ class YextAnswersSpider(Spider):
                 continue
             for time in rule["openIntervals"]:
                 oh.add_range(day, time["start"], time["end"])
-
-        return oh.as_opening_hours()
+        return oh
 
     def parse_payment_methods(self, location: dict, item: Feature) -> None:
         if payment_methods := location.get("paymentOptions"):
