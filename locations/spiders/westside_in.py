@@ -11,7 +11,6 @@ from locations.items import Feature
 class WestsideSpider(scrapy.Spider):
     name = "westside_in"
     item_attributes = {"brand": "Westside", "brand_wikidata": "Q2336948"}
-    no_refs = True
 
     def start_requests(self):
         yield scrapy.Request(
@@ -26,7 +25,7 @@ class WestsideSpider(scrapy.Spider):
             item["name"] = store.xpath("./h3/text()").get()
             item["addr_full"] = store.xpath(".//p/text()").get()
             item["phone"] = store.xpath(".//p[2]/text()").get()
-            item["website"] = store.xpath(".//a/@href").get()
+            item["ref"] = item["website"] = store.xpath(".//a/@href").get()
             apply_category(Categories.SHOP_CLOTHES, item)
             yield item
 
