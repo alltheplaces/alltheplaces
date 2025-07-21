@@ -1463,7 +1463,7 @@ class OpeningHours:
                 )
                 for time_range in time_ranges:
                     time_start_hour = time_range[0]
-                    if time_start_hour == "00":
+                    if time_start_hour == "00" or time_start_hour == "0":
                         time_start_hour = "12"
                     if time_range[1]:
                         time_start = f"{time_start_hour}:{time_range[1]}"
@@ -1477,7 +1477,7 @@ class OpeningHours:
                     time_start_24h = time.strptime(time_start, "%I:%M%p")
                     time_start_24h = time.strftime("%H:%M", time_start_24h)
                     time_end_hour = time_range[3]
-                    if time_end_hour == "00":
+                    if time_end_hour == "00" or time_end_hour == "0":
                         time_end_hour = "12"
                     if time_range[4]:
                         time_end = f"{time_end_hour}:{time_range[4]}"
