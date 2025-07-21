@@ -18,6 +18,7 @@ class BeymenTRSpider(scrapy.Spider):
             store["city"] = store.pop("cityName")
             store["lat"], store["lon"] = store["coordinate"].strip(",").split(",")
             item = DictParser.parse(store)
+            item.pop("phone")
             item["branch"] = item.pop("name").replace("Beymen ", "")
             apply_category(Categories.SHOP_CLOTHES, item)
             yield item
