@@ -33,21 +33,18 @@ class AviaFRSpider(Spider):
                 continue
             store["postcode"] = store.pop("ZIP Code")
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
+            item["lat"] = store.get("geo lat")
+            item["lon"] = store.get("geo long")
+            if email := item.get("email"):
+                item["email"] = email.split("/")[0].replace(" ", "")
             item["ref"] = store.get("UID")
             item["housenumber"] = store.get("House number")
             item["state"] = store.get("Place")
-            item["name"] = store.get("Additional Company Info")
-            item["phone"] = "; ".join(
-                filter(
-                    None,
-                    [
-                        store.get("Telephone No."),
-                        store.get("N° Portable"),
-                    ],
-                )
-            )
-            if "XPRESS" in item["name"].upper():
-                item.update(self.AVIA_XPRESS)
+            item["phone"] = store.get("Phone No.")
+            if express := store.get("XPRESS"):
+                if express == "TRUE":
+                    item.update(self.AVIA_XPRESS)
             apply_category(Categories.FUEL_STATION, item)
 
             self.apply_attribute(Fuel.ADBLUE, item, [store.get("Ad blue pomp"), store.get("adblue")])
