@@ -1,5 +1,5 @@
 import scrapy
-from scrapy import Selector
+from scrapy import FormRequest, Selector
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -18,17 +18,32 @@ class BeobankBESpider(StructuredDataSpider):
             "Accept": "text/json; charset=utf-8, text/xml; charset=utf-8",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Origin": "https://www.beobank.be",
-            "Referer": "https://www.beobank.be/nl/resultaat-kantoren.html?search=bruges&selectedServicesValues=1&selectedMarketTypeValues=0&selectedOpeningDaysValues=0&selectedPoiTypeValue=2",
+            "Referer": "https://www.beobank.be/nl/resultaat-kantoren.html?search=bruges&amp;selectedServicesValues=1&amp;selectedMarketTypeValues=0&amp;selectedOpeningDaysValues=0&amp;selectedPoiTypeValue=2",
             "x-TargetApplicationBlockId": "C",
         }
+
         for type in ["1", "2"]:
-            payload = f"Data_SelectedPoiTypeValue={type}&Bool%3AData_SearchListOpeningDay_CheckBoxListItemViewModel_Checked=false&Bool%3AData_SearchListOpeningDay_CheckBoxListItemViewModel_2__Checked=false&Bool%3AData_SearchListOpeningDay_CheckBoxListItemViewModel_3__Checked=false&%5Bt%3Axsd%253astring%3B%5DData_Search=bruges&%24CPT=MAA%2FYZJNhqGAA6AQKYL1bMAyvuDg3KTxPkrRi7hPak6kqzQ56QLo0Kgjzw6yHtzlXz5N5f7zINBWfU17IC0tSO%2BbvkK5%2Fm9z9B2sPcFrsC6Z%2BUptmVLiHjf7UYYsT8ChHfFfZ8YJ6m6Sa1JiiDD2Za6%2FRQMVdXihLkbC9lrgfhd2vU6Eox2z%2FHL%2BnNr8RgzffndirqdUkHL6Ck92LY4kxCyTfC%2BPxzSImsLJO9HLaTAQkRFA2kEvxyUiDTyYq1fXI2s2oLyxB7c%2FjleQ%2FWGQ3tpowQUb3abALIODzIVsUrHoMwqXxLe%2Fj7QcIV5NJhEIPLfr%2BZfqq2KdzWUEJ79iyYNU3AtBLkMwiEojN0%2F9TOEDctZRspQ5vNmcgPkwX9GytHf3onZ6j4PSpupsR9423%2BhHv4r%2Bwa9EQ1%2BD07GwP2vVjw%3D%3D&_wxf2_cc=nl-BE%2Fnl-NL&_FID_DoLoadMoreResults=&Data_SearchListOpeningDaySelectedItemsCount=0&Data_CurrentPageIndex=31&Data_SelectedMarket=&Data_IsSearchDone=true&%5Bt%3Axsd%253astring%3B%5DData_SearchInseeCode=&Data_SearchListMarketTypesSelectedItemsCount=0&Data_SearchListServicesSelectedItemsCount=0&Data_SelectedServicesValues=0&Data_SelectedMarketTypeValues=0&Data_SelectedOpeningDaysValues=0&_wxf2_pseq=32&_wxf2_pmode=Normal&_wxf2_ptarget=C%3AP%3Aup"
-            yield scrapy.Request(
+            formdata = {
+                "Data_SelectedPoiTypeValue": type,
+                "Bool:Data_SearchListOpeningDay_CheckBoxListItemViewModel_Checked": "false",
+                "Bool:Data_SearchListOpeningDay_CheckBoxListItemViewModel_2__Checked": "false",
+                "Bool:Data_SearchListOpeningDay_CheckBoxListItemViewModel_3__Checked": "false",
+                "[t:xsd%3astring;]Data_Search": "bruges",
+                "_FID_DoLoadMoreResults": "",
+                "Data_SearchListOpeningDaySelectedItemsCount": "0",
+                "Data_CurrentPageIndex": "31",
+                "Data_IsSearchDone": "true",
+                "_wxf2_pseq": "32",
+                "_wxf2_pmode": "Normal",
+                "_wxf2_ptarget": "C:P:up",
+            }
+
+            yield FormRequest(
                 url="https://www.beobank.be/nl/resultaat-kantoren.html?_tabi=C&_pid=SearchResults&k_search=bruges&k_selectedServicesValues=1&k_selectedMarketTypeValues=0&k_selectedOpeningDaysValues=0&k_selectedPoiTypeValue=2",
-                body=payload,
-                cb_kwargs={"location_type": type},
-                method="POST",
+                formdata=formdata,
                 headers=headers,
+                method="POST",
+                cb_kwargs={"location_type": type},
                 callback=self.parse,
             )
 
