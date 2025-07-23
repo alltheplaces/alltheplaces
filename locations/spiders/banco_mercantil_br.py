@@ -5,11 +5,13 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.user_agents import FIREFOX_LATEST
 
 
 class BancoMercantilBRSpider(scrapy.Spider):
     name = "banco_mercantil_br"
     item_attributes = {"brand": "Banco Mercantil do Brasil", "brand_wikidata": "Q9645252"}
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST, "ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         yield JsonRequest(
@@ -19,7 +21,6 @@ class BancoMercantilBRSpider(scrapy.Spider):
             method="POST",
             headers={
                 "Origin": "https://bancomercantil.com.br",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
             },
         )
 
