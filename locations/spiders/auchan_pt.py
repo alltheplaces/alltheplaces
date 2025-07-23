@@ -11,7 +11,6 @@ from locations.structured_data_spider import StructuredDataSpider
 
 AUCHAN = {"brand": "Auchan", "brand_wikidata": "Q758603"}
 AUCHAN_SUPERMERCADO = {"brand": "Auchan Supermercado", "brand_wikidata": "Q105857776"}
-MY_AUCHAN = {"brand": "My Auchan", "brand_wikidata": "Q115800307"}
 
 
 class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
