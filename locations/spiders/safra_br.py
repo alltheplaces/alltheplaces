@@ -11,9 +11,7 @@ class SafraBRSpider(JSONBlobSpider):
     name = "safra_br"
     item_attributes = {"brand": "Banco Safra", "brand_wikidata": "Q4116096"}
     start_urls = ["https://www.safra.com.br/lumis/api/rest/agencies/lumgetdata/listAgencies"]
-
-    def extract_json(self, response: Response) -> dict | list[dict]:
-        return response.json()["rows"]
+    locations_key = "rows"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
