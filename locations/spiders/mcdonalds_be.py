@@ -7,6 +7,7 @@ from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.mcdonalds import McdonaldsSpider
+from locations.user_agents import FIREFOX_LATEST
 
 
 class McdonaldsBESpider(Spider):
@@ -14,6 +15,7 @@ class McdonaldsBESpider(Spider):
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.be"]
     start_urls = ["https://www.mcdonalds.be/en/restaurants/api/restaurants"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST, "DOWNLOAD_TIMEOUT": 220}
 
     def start_requests(self):
         for url in self.start_urls:
