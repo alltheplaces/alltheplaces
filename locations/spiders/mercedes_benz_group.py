@@ -82,7 +82,7 @@ class MercedesBenzGroupSpider(JSONBlobSpider):
         item["lon"] = feature.get("address", {}).get("coordinates", {}).get("longitude")
         country = response.meta["country"]
         for service in feature.get("offeredServices", []):
-            if service.get("validity", {}).get("validity") == False:
+            if service.get("validity", {}).get("validity") is False:
                 continue
             key = (
                 service.get("brand", {}).get("name"),
