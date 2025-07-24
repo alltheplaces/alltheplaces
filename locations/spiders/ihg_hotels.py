@@ -18,14 +18,14 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
 
     my_brands = {
         "armyhotels": ("Army Hotels", "Q16994722"),
-        "avidhotels": ("Avid Hotels", "Q60749907"),
+        "avidhotels": ("avid Hotel", "Q60749907"),
         "candlewood": ("Candlewood Suites", "Q5032010"),
         "crowneplaza": ("Crowne Plaza", "Q2746220"),
-        "evenhotels": ("Even Hotels", "Q5416522"),
+        "evenhotels": ("EVEN Hotels", "Q5416522"),
         "holidayinn": ("Holiday Inn", "Q2717882"),
-        "holidayinnclubvacations": (None, None),
+        "holidayinnclubvacations": ("Holiday Inn Club Vacations", "Q111485843"),
         "holidayinnexpress": ("Holiday Inn Express", "Q5880423"),
-        "holidayinnresorts": (None, None),
+        "holidayinnresorts": ("Holiday Inn Resort", "Q111485210"),
         "hotelindigo": ("Hotel Indigo", "Q5911596"),
         "intercontinental": ("InterContinental", "Q1825730"),
         "kimptonhotels": ("Kimpton", "Q6410248"),
@@ -49,5 +49,9 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
             item["brand"], item["brand_wikidata"] = self.my_brands.get(hotel_type)
 
         apply_category(Categories.HOTEL, item)
+
+        if item["country"] == r"${hotelInfo.address.country.name}":
+            # Fix bad country values
+            item["country"] = None
 
         yield item
