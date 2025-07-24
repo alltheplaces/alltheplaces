@@ -37,7 +37,6 @@ class ShoeShowMegaUSSpider(JSONBlobSpider):
 
         for prefix, brand in BRANDS.items():
             if item["name"].startswith(prefix):
-                item["branch"] = item.pop("name").replace(prefix, "").lstrip()
                 item.update(brand)
                 break
         else:
