@@ -1397,10 +1397,26 @@ class OpeningHours:
         ranges_string_24h = OpeningHours.replace_named_times(ranges_string, named_times, True)
         ranges_string_12h = OpeningHours.replace_named_times(ranges_string, named_times, False)
 
-        # Execute all three regular expressions.
-        results_24h = re.findall(hours_extraction_regex_24h, ranges_string_24h, re.IGNORECASE)
-        if len(results_24h) == 0:
+        # Execute regular expressions.
+        if re.search(r"\d\s*[AP]\.?M\.?", ranges_string_24h, re.IGNORECASE):
+            # Input string contains AM/PM (or derivatives) and therefore
+            # should be treated as having 12h time format. Execute the regular
+            # expression for 12h time format only.
+            results_24h = []
             results_12h = re.findall(hours_extraction_regex_12h, ranges_string_12h, re.IGNORECASE)
+        else:
+            # Execute the regular expression for 24h time format only. There
+            # is an unlikely chance that the string is actually in 12h time
+            # format and doesn't use AM/PM (or derivatives). Unfortunately
+            # there is no way to disambiguate whether "Mo-Su 7:00-11:00" is a
+            # feature open for 5 hours of the day, or 18 hours of the day. It
+            # is however more likely that a feature is open in the morning and
+            # afternoon, so we guess 24h time format. A spider will have to
+            # provide a hint (such as adding "AM" after instances of ":00") if
+            # this assumption of 24h time format is invalid for a particular
+            # spider.
+            results_24h = re.findall(hours_extraction_regex_24h, ranges_string_24h, re.IGNORECASE)
+            results_12h = []
         results_closed = re.findall(closed_days_extraction_regex, ranges_string_24h, re.IGNORECASE)
 
         # Normalise results to 24h time.
@@ -1447,7 +1463,7 @@ class OpeningHours:
                 )
                 for time_range in time_ranges:
                     time_start_hour = time_range[0]
-                    if time_start_hour == "00":
+                    if time_start_hour == "00" or time_start_hour == "0":
                         time_start_hour = "12"
                     if time_range[1]:
                         time_start = f"{time_start_hour}:{time_range[1]}"
@@ -1461,7 +1477,7 @@ class OpeningHours:
                     time_start_24h = time.strptime(time_start, "%I:%M%p")
                     time_start_24h = time.strftime("%H:%M", time_start_24h)
                     time_end_hour = time_range[3]
-                    if time_end_hour == "00":
+                    if time_end_hour == "00" or time_end_hour == "0":
                         time_end_hour = "12"
                     if time_range[4]:
                         time_end = f"{time_end_hour}:{time_range[4]}"

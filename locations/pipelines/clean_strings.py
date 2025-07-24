@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 def clean_string(val: str) -> str:
-    return html.unescape(val).strip()
+    return html.unescape(val).strip().replace("\u200b", "")
 
 
 class CleanStringsPipeline:
