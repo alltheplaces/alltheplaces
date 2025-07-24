@@ -6,8 +6,9 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class AeropostaleSpider(SitemapSpider, StructuredDataSpider):
-    name = "aeropostale"
+class AeropostaleUSSpider(SitemapSpider, StructuredDataSpider):
+    # See spider `bluenotes_ca` for Canadian stores operated by YM Inc.
+    name = "aeropostale_us"
     item_attributes = {"brand": "Aeropostale", "brand_wikidata": "Q794565"}
     sitemap_urls = ["https://stores.aeropostale.com/robots.txt"]
     sitemap_rules = [(r"^https://stores.aeropostale.com/[^/]+/[^/]+/[^/]+$", "parse_sd")]

@@ -43,9 +43,9 @@ class LibertyTaxUSSpider(SitemapSpider, StructuredDataSpider):
             set_social_media(item, SocialMedia.TWITTER, office_data["socialMedia"]["twitter"])
             set_social_media(item, SocialMedia.YELP, office_data["socialMedia"]["yelp"])
 
-            item["lat"] = office_data["latitude"]
-            item["lon"] = office_data["longitude"]
-            if not item["lon"].startswith("-"):
+            item["lat"] = office_data.get("latitude")
+            item["lon"] = office_data.get("longitude")
+            if item["lon"] and not item["lon"].startswith("-"):
                 item["lon"] = "-" + item["lon"]
 
         yield item
