@@ -1,7 +1,8 @@
 import re
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -15,16 +16,12 @@ class McdonaldsBESpider(Spider):
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.be"]
     start_urls = ["https://www.mcdonalds.be/en/restaurants/api/restaurants"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST, "DOWNLOAD_TIMEOUT": 220}
+    user_agent = FIREFOX_LATEST
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["name"] = re.sub(r"\(\s*(Drive|Mall|In-Store)\s*\)", "", item["name"], re.IGNORECASE).strip()
+            item["branch"] = re.sub(r"\(\s*(Drive|Mall|In-Store)\s*\)", "", item.pop("name"), re.IGNORECASE).strip()
             item["housenumber"] = location.get("nr")
             item["street"] = location.get("street_en")
             item["city"] = location.get("city_en")
