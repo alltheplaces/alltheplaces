@@ -4,7 +4,7 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -75,5 +75,6 @@ class CommerzbankDESpider(CrawlSpider):
                 }
 
                 apply_category(Categories.BANK, properties)
+                apply_yes_no(Extras.ATM, properties, bool(branch.get("geldautomat")))
 
                 yield Feature(**properties)
