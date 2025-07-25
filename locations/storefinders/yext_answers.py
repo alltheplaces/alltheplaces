@@ -94,7 +94,7 @@ class YextAnswersSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = location.get("geomodifier")
 
-            self._parse_socials(item, location)
+            self.parse_socials(item, location)
 
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
             if delivery_hours := location.get("deliveryHours"):
