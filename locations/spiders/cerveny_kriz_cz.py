@@ -1,9 +1,9 @@
 import re
 
-from scrapy.spiders import Rule, CrawlSpider
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import extract_email
 
@@ -18,7 +18,7 @@ class CervenyKrizCZSpider(CrawlSpider):
     def parse(self, response, **kwargs):
         item = Feature()
         item["ref"] = response.url.split("/")[-2]
-        item["name"] = response.xpath('//section//h1/text()').get()
+        item["name"] = response.xpath("//section//h1/text()").get()
         table = response.xpath('//div[@class="pge"]/table/tbody')
         item["phone"] = table.xpath('./tr[./th[contains(text(), "Telefon")]]/td/text()').get()
         item["street_address"] = table.xpath('./tr[./th[contains(text(), "Sídlo")]]/td/text()').getall()[0]
