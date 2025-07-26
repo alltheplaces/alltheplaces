@@ -1,4 +1,3 @@
-
 from locations.spiders.mazda_de import MazdaDESpider
 
 
