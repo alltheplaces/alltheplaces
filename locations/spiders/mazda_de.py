@@ -43,7 +43,16 @@ class MazdaDESpider(Spider):
                     case "Parts Sales":
                         apply_category(Categories.SHOP_CAR_PARTS, item)
                         item["ref"] = feature_group["dealerCode"] + "_Parts"
-                    case "Online Leasing" | "Online Service Booking" | "Motability" | "Mazda Your Way Service" | "Approved Used-car Services" | "Test Drive" | "Courtesy car" | "Collection & Delivery":
+                    case (
+                        "Online Leasing"
+                        | "Online Service Booking"
+                        | "Motability"
+                        | "Mazda Your Way Service"
+                        | "Approved Used-car Services"
+                        | "Test Drive"
+                        | "Courtesy car"
+                        | "Collection & Delivery"
+                    ):
                         continue
                     case _:
                         self.logger.error("Unknown dealer type: {}".format(feature["name"]))
