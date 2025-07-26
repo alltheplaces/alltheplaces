@@ -702,6 +702,18 @@ DAYS_ID = {
     "Ahad": "Su",
 }
 
+DAYS_TH = {
+    "วันจันทร์": "Mo",
+    "จันทร์": "Mo",
+    "วันอังคาร": "Tu",
+    "วันพุธ": "We",
+    "วันพฤหัสบดี": "Th",
+    "วันศุกร์": "Fr",
+    "วันเสาร์": "Sa",
+    "เสาร์": "Sa",
+    "วันอาทิตย์": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
