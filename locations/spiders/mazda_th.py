@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_TH
+from locations.hours import DAYS_TH, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
@@ -20,7 +20,12 @@ class MazdaTHSpider(JSONBlobSpider):
         yield Request(url=self.start_urls[0], callback=self.parse_next_build_id)
 
     def parse_next_build_id(self, response: Response) -> Iterable[Request]:
-        next_build_manifest_url = response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src').get().removeprefix("/_next/static/").removesuffix("/_buildManifest.js")
+        next_build_manifest_url = (
+            response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src')
+            .get()
+            .removeprefix("/_next/static/")
+            .removesuffix("/_buildManifest.js")
+        )
         yield Request(url=f"https://www.mazda.co.th/_next/data/{next_build_manifest_url}/th/dealer.json")
 
     def pre_process_data(self, feature: dict) -> None:
@@ -34,7 +39,12 @@ class MazdaTHSpider(JSONBlobSpider):
             service_item["ref"] = service_item["ref"] + "_Service"
             service_item["phone"] = feature.get("TelephoneService")
             service_item["opening_hours"] = OpeningHours()
-            hours_text = feature["ServicesBusinessHours"].removeprefix("เปิด ").replace("เปิดทุกวัน", "วันจันทร์-วันอาทิตย์").replace(",", "")
+            hours_text = (
+                feature["ServicesBusinessHours"]
+                .removeprefix("เปิด ")
+                .replace("เปิดทุกวัน", "วันจันทร์-วันอาทิตย์")
+                .replace(",", "")
+            )
             if hours_text.startswith("0"):
                 hours_text = "วันจันทร์-วันอาทิตย์: " + hours_text
             service_item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_TH)
@@ -44,7 +54,9 @@ class MazdaTHSpider(JSONBlobSpider):
         item["ref"] = item["ref"] + "_Sales"
         item["phone"] = feature.get("TelephoneSales")
         item["opening_hours"] = OpeningHours()
-        hours_text = feature["SalesBusinessHours"].removeprefix("เปิด ").replace("เปิดทุกวัน", "วันจันทร์-วันอาทิตย์").replace(",", "")
+        hours_text = (
+            feature["SalesBusinessHours"].removeprefix("เปิด ").replace("เปิดทุกวัน", "วันจันทร์-วันอาทิตย์").replace(",", "")
+        )
         if hours_text.startswith("0"):
             hours_text = "วันจันทร์-วันอาทิตย์: " + hours_text
         item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_TH)
