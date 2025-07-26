@@ -24,7 +24,9 @@ class MazdaMYSpider(JSONBlobSpider):
         if item["email"]:
             item["email"] = item["email"].split()[0]
         item["opening_hours"] = OpeningHours()
-        hours_text = " ".join(Selector(text=feature["hours"]).xpath('//text()').getall()).replace("Sunday & Public Holiday", "Sunday")
+        hours_text = " ".join(Selector(text=feature["hours"]).xpath("//text()").getall()).replace(
+            "Sunday & Public Holiday", "Sunday"
+        )
         item["opening_hours"].add_ranges_from_string(hours_text)
         match feature["type"]:
             case "Sales":
@@ -35,5 +37,4 @@ class MazdaMYSpider(JSONBlobSpider):
                 apply_category(Categories.SHOP_CAR_PARTS, item)
             case _:
                 self.logger.error("Unknown location type: {}".format(feature["type"]))
-                pass
         yield item
