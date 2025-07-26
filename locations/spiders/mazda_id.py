@@ -6,7 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_ID
+from locations.hours import DAYS_ID, OpeningHours
 from locations.items import Feature
 from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 
@@ -57,8 +57,8 @@ class MazdaIDSpider(Spider):
         for dealer in dealers.values():
             item = DictParser.parse(dealer)
             item["branch"] = dealer["branch"].removeprefix("Mazda ")
-            hours_sales_text = " ".join(Selector(text=dealer["hours_sales"]).xpath('//text()').getall())
-            hours_service_text = " ".join(Selector(text=dealer["hours_service"]).xpath('//text()').getall())
+            hours_sales_text = " ".join(Selector(text=dealer["hours_sales"]).xpath("//text()").getall())
+            hours_service_text = " ".join(Selector(text=dealer["hours_service"]).xpath("//text()").getall())
             if hours_sales_text:
                 sales_item = item.deepcopy()
                 sales_item["ref"] = sales_item["ref"] + "_Sales"
