@@ -32,4 +32,3 @@ class DominosPizzaNLSpider(scrapy.Spider):
                 elif details["key"] == "postCode":
                     item["postcode"] = details["value"]
             yield item
-
