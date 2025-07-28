@@ -33,19 +33,3 @@ class DominosPizzaNLSpider(scrapy.Spider):
                     item["postcode"] = details["value"]
             yield item
 
-    # def parse_store(self, response: Response) -> Any:
-    #     address_data = response.xpath('//a[@id="open-map-address"]/text()').getall()
-    #     locality_data = re.search(r"(.*) ([A-Z]{2}) (.*)", address_data[1].strip())
-    #     properties = {
-    #         "ref": re.match(self.url_regex, response.url).group(1),
-    #         "branch": response.xpath('//*[@class="storetitle"]/text()').get("").removeprefix("Domino's Pizza "),
-    #         "street_address": address_data[0].strip().strip(","),
-    #         "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
-    #         "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
-    #         "phone": response.xpath('//a[contains(@href, "tel:")]/@href').get(),
-    #         "website": response.url,
-    #     }
-    #     if locality_data:
-    #         properties["city"] = locality_data.group(1)
-    #         properties["postcode"] = locality_data.group(3)
-    #     yield Feature(**properties)
