@@ -15,7 +15,9 @@ class WoolworthDESpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["name"] = None
         item["branch"] = response.xpath("//main/header/h1/text()").get().removeprefix("Woolworth – ")
-
+        item.pop("image")
+        item.pop("phone")
+        item.pop("email")
         item["website"] = item["extras"]["website:de"] = response.url
         item["extras"]["website:en"] = response.xpath('//link[@rel="alternate"][@hreflang="en-GB"]/@href').get()
         apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
