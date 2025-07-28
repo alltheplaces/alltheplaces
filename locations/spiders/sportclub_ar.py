@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class SportClubARSpider(scrapy.Spider):
+class SportclubARSpider(scrapy.Spider):
     name = "sportclub_ar"
     item_attributes = {"brand": "SportClub", "brand_wikidata": "Q118314171"}
     custom_settings = {
