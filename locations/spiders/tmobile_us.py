@@ -16,6 +16,7 @@ class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/stores/[a-z]{2}/t-mobile-", "parse_sd")]
     allowed_domains = ["www.t-mobile.com"]
     drop_attributes = {"facebook", "twitter"}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 3}
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         ld_data["openingHours"] = ld_data.pop("openingHoursSpecification", None)
