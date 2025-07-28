@@ -9,8 +9,5 @@ class Optic2000Spider(UberallSpider):
     key = "cnOakpSgwYPnQbwwv6ZpHtfy0PMjaK"
 
     def post_process_item(self, item: Feature, response, location: dict, **kwargs):
-        item["website"] = "https://www.optic2000.com/magasins/l/{}/{}/{}".format(
-            item["city"], item["street_address"], location["id"]
-        )
         apply_category(Categories.SHOP_OPTICIAN, item)
         yield item
