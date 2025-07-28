@@ -16,7 +16,7 @@ category_mapping = {
 
 class ElysiumHealthcareSpider(scrapy.Spider):
     name = "elysium_healthcare"
-    item_attributes = {"brand": "Elysium Healthcare", "brand_wikidata": "Q39086513"}
+    item_attributes = {"operator": "Elysium Healthcare", "operator_wikidata": "Q39086513"}
     allowed_domains = ["www.elysiumhealthcare.co.uk"]
     start_urls = [
         "https://www.elysiumhealthcare.co.uk/locations/",
