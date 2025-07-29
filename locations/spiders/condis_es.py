@@ -6,7 +6,6 @@ from scrapy.spiders import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_ES, OpeningHours, sanitise_day
-from locations.structured_data_spider import extract_email
 
 
 class CondisESSpider(Spider):
@@ -28,7 +27,6 @@ class CondisESSpider(Spider):
         item["street_address"] = location["calle"]
         item["city"] = location["ciudad"]
         item["postcode"] = location["cp"]
-        extract_email(item, response)
         item["website"] = response.url
 
         item["opening_hours"] = OpeningHours()
