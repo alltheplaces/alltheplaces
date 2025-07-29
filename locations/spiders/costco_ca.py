@@ -7,8 +7,8 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
 from locations.spiders.costco_us import COSTCO_SHARED_ATTRIBUTES
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class CostcoCASpider(Spider):

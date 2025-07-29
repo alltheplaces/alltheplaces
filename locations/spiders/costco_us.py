@@ -7,8 +7,8 @@ from locations.hours import OpeningHours, day_range
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
-
 COSTCO_SHARED_ATTRIBUTES = {"brand": "Costco", "brand_wikidata": "Q715583"}
+
 
 class CostcoUSSpider(SitemapSpider, StructuredDataSpider):
     name = "costco_us"
