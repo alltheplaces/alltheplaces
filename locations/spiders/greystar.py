@@ -1,35 +1,39 @@
-from locations.categories import Categories, apply_category
-from locations.country_utils import CountryUtils
-from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.state_clean_up import STATES
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class GreystarSpider(JSONBlobSpider):
+class GreystarSpider(SitemapSpider, StructuredDataSpider):
     name = "greystar"
     item_attributes = {
         "operator": "Greystar",
         "operator_wikidata": "Q60749135",
     }
-    start_urls = ["https://www.greystar.com/api/properties/search?Distance=25000&Latitude=0&Longitude=0"]
-    download_timeout = 120
-    locations_key = "Results"
+    sitemap_urls = ["https://www.greystar.com/sitemap-pdp.xml"]
+    sitemap_rules = [
+        (r"", "parse"),
+    ]
+    wanted_types = ["LodgingBusiness"]
+    search_for_facebook = False
+    search_for_twitter = False
 
-    def post_process_item(self, item, response, location):
-        # "PropertyId" is a better ref than "Id" but it's not clean/unique
-        item["website"] = response.urljoin(location["Path"])
-        item["street_address"] = item.pop("addr_full")
-
-        if len(location["Images"]) > 0:
-            item["image"] = location["Images"][0]["Src"]
-
-        # Try to guess the country, given just the state.
-        # Sometimes the "State" field is the country.
-        for country, states in STATES.items():
-            if location["State"] in states:
-                item["country"] = country
-        if not item["country"]:
-            item["country"] = CountryUtils().to_iso_alpha2_country_code(location["State"])
-
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["lat"] = ld_data["latitude"]
+        item["lon"] = ld_data["longitude"]
+        item["ref"] = ld_data["identifier"]
+        if len(ld_data["image"]) > 0:
+            item["image"] = ld_data["image"][0]
         apply_category(Categories.RESIDENTIAL_APARTMENTS, item)
-
         yield item
+
+    def extract_amenity_features(self, item, response, ld_item):
+        for amenity_feature in ld_item["amenityFeature"]:
+            if amenity_feature["name"] == "Air Conditioning":
+                apply_yes_no(Extras.AIR_CONDITIONING, item, amenity_feature["value"], False)
+            elif amenity_feature["name"] == "Pet Friendly":
+                apply_yes_no(Extras.PETS_ALLOWED, item, amenity_feature["value"], False)
+            elif amenity_feature["name"] == "Pool":
+                apply_yes_no(Extras.SWIMMING_POOL, item, amenity_feature["value"], False)
+            elif amenity_feature["name"] == "Smoke Free":
+                apply_yes_no(Extras.SMOKING, item, not amenity_feature["value"], False)
