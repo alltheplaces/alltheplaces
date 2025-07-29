@@ -21,5 +21,4 @@ class MartesSportSpider(Spider):
             item["street_address"] = store["location_address"]
             item["postcode"] = store["location_zip"]
             item["city"] = store["location_city"]
-            item["website"] = "https://martessport.com.pl/"
             yield item
