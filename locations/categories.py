@@ -850,6 +850,7 @@ class Vending(Enum):
     KEYS = "key"
     LAUNDRY = "laundry"
     PARKING_TICKETS = "parking_tickets"
+    WATER = "water"
 
 
 def add_vending(vending: Vending | list[Vending], item: Feature):
