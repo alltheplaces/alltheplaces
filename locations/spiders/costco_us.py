@@ -8,9 +8,11 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class CostcoSpider(SitemapSpider, StructuredDataSpider):
-    name = "costco"
-    item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
+COSTCO_SHARED_ATTRIBUTES = {"brand": "Costco", "brand_wikidata": "Q715583"}
+
+class CostcoUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "costco_us"
+    item_attributes = COSTCO_SHARED_ATTRIBUTES
     allowed_domains = ["www.costco.com"]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}

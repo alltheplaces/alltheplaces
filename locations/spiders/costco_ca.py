@@ -8,11 +8,12 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
+from locations.spiders.costco_us import COSTCO_SHARED_ATTRIBUTES
 
 
 class CostcoCASpider(Spider):
     name = "costco_ca"
-    item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
+    item_attributes = COSTCO_SHARED_ATTRIBUTES
     start_urls = ["https://www.costco.ca/AjaxWarehouseBrowseLookupView?countryCode=CA"]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
