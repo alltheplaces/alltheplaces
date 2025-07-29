@@ -43,7 +43,7 @@ class ToyotaCASpider(scrapy.Spider):
             yield shop_item
 
             # I couldn't find a way to distinguish between service and shop locations,
-            # but I after some manual checks it seems that all locations have a service
+            # but after some manual checks, it seems that all locations have a service
             service_item = deepcopy(item)
             service_item["ref"] = f"{item['ref']}-SERVICE"
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
