@@ -98,11 +98,13 @@ class YextAnswersSpider(Spider):
 
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
             if delivery_hours := location.get("deliveryHours"):
-                item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(delivery_hours)
+                item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(delivery_hours).as_opening_hours()
             if happy_hours := location.get("happyHours"):
-                item["extras"]["happy_hours"] = self.parse_opening_hours(happy_hours)
+                item["extras"]["happy_hours"] = self.parse_opening_hours(happy_hours).as_opening_hours()
             if drive_through_hours := location.get("driveThroughHours"):
-                item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(drive_through_hours)
+                item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(
+                    drive_through_hours
+                ).as_opening_hours()
 
             self.parse_payment_methods(location, item)
             self.parse_google_attributes(location, item)
