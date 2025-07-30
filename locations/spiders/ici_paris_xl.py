@@ -1,8 +1,7 @@
 from typing import Iterable
 from urllib.parse import urljoin
 
-import scrapy
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
@@ -20,9 +19,8 @@ class IciParisXlSpider(JSONBlobSpider):
 
     def start_requests(self):
         for country in ["be", "nl", "lu"]:
-            yield scrapy.Request(
-                url=f"https://api.iciparisxl.{country}/api/v2/ici{country}2/stores?pageSize=10000&currentPage=0",
-                headers={"Accept": "application/json, text/plain, */*"},
+            yield JsonRequest(
+                f"https://api.iciparisxl.{country}/api/v2/ici{country}2/stores?pageSize=10000&currentPage=0"
             )
 
     def pre_process_data(self, feature: dict) -> None:
