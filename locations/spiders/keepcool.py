@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class KeepCoolSpider(SitemapSpider):
+class KeepcoolSpider(SitemapSpider):
     name = "keepcool"
     item_attributes = {"brand": "KeepCool", "brand_wikidata": "Q100146251"}
     sitemap_urls = ["https://www.keepcool.fr/sitemap.xml"]
