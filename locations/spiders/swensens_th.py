@@ -23,7 +23,7 @@ class SwensensTHSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["lat"] = feature["Lattitude"]
         item["lon"] = feature["Longtitude"]
-        item["branch"] = item["extras"]["branch:en"] =feature["StoreNameEN"]
+        item["branch"] = item["extras"]["branch:en"] = feature["StoreNameEN"]
         item["extras"]["branch:th"] = feature["StoreNameTH"]
         apply_category(Categories.ICE_CREAM, item)
         yield item
