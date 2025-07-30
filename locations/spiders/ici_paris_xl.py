@@ -15,7 +15,7 @@ from locations.user_agents import FIREFOX_LATEST
 class IciParisXlSpider(JSONBlobSpider):
     name = "ici_paris_xl"
     item_attributes = {"brand": "ICI PARIS XL", "brand_wikidata": "Q769749"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
+    user_agent = FIREFOX_LATEST
     locations_key = "stores"
 
     def start_requests(self):
