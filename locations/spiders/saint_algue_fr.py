@@ -5,6 +5,7 @@ import chompjs
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -32,4 +33,5 @@ class SaintAlgueFRSpider(SitemapSpider):
             hours = location.get("toBeComputed", {}).get("openUntil", {}).get("hours") or []
             for rule in hours:
                 item["opening_hours"].add_range(DAYS[rule["day"] - 1], rule["opening"], rule["closing"])
+            apply_category(Categories.SHOP_HAIRDRESSER, item)
             yield item
