@@ -27,6 +27,7 @@ class IciParisXlSpider(JSONBlobSpider):
         feature.update(feature.pop("address"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item.pop("name")
         item["branch"] = feature.get("displayName")
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
         item["addr_full"] = feature.get("formattedAddress")
