@@ -33,11 +33,14 @@ class IciParisXlSpider(JSONBlobSpider):
         item["website"] = urljoin(f'https://www.iciparisxl.{item["country"].lower()}', feature.get("url"))
         item["opening_hours"] = OpeningHours()
         for rule in feature.get("openingHours", {}).get("weekDayOpeningList", []):
-            if rule.get("closed"):
-                continue
             if day := sanitise_day(rule.get("shortenedWeekDay")):
-                opening_time = rule.get("openingTime", {}).get("formattedHour")
-                closing_time = rule.get("closingTime", {}).get("formattedHour")
-                item["opening_hours"].add_range(day, opening_time, closing_time)
+                if rule.get("closed"):
+                    item["opening_hours"].set_closed(day)
+                else:
+                    item["opening_hours"].add_range(
+                        day,
+                        rule.get("openingTime", {}).get("formattedHour"),
+                        rule.get("closingTime", {}).get("formattedHour"),
+                    )
         apply_category(Categories.SHOP_PERFUMERY, item)
         yield item
