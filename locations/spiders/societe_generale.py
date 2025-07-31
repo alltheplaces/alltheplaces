@@ -15,11 +15,14 @@ class SocieteGeneraleSpider(SitemapSpider, StructuredDataSpider):
     ]
     sitemap_rules = [(r"/.+-id(\d+)$", "parse_sd")]
 
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data.pop("@id", None)
+
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Agence ").title()
-        item["ref"] = response.url
 
         if "distributeur-automate" in response.url:
+            item["ref"] += "_atm"
             apply_category(Categories.ATM, item)
         else:
             apply_category(Categories.BANK, item)
