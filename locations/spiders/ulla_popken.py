@@ -9,6 +9,6 @@ class UllaPopkenSpider(UberallSpider):
     key = "HLXgKC93iNm5hhDLOOgr0r2UigmqQ5"
 
     def post_process_item(self, item: Feature, response, location: dict, **kwargs):
+        item["branch"] = item.pop("name").split("|")[-1].lstrip()
         apply_category(Categories.SHOP_CLOTHES, item)
-        item["branch"] = item["name"].split("|")[-1].lstrip()
         yield item
