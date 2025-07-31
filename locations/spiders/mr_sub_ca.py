@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -20,4 +21,5 @@ class MrSubCASpider(scrapy.Spider):
             item["website"] = store.xpath("./exturl/text()").get()
             item["phone"] = store.xpath("./telephone/text()").get()
             item["postcode"] = store.xpath("./country/text()").get()
+            apply_category(Categories.FAST_FOOD, item)
             yield item
