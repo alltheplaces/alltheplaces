@@ -1,19 +1,21 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import scrapy
+from scrapy.http import Response
 
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
 
 
-class EconofitnessCASpider(CrawlSpider, StructuredDataSpider):
+class EconofitnessCASpider(scrapy.Spider):
     name = "econofitness_ca"
     item_attributes = {"brand": "Éconofitness", "brand_wikidata": "Q123073582"}
-    start_urls = ["https://econofitness.ca/en/results?searchmode=searchall&searchtext=&filters="]
-    rules = [Rule(LinkExtractor(r"/en/gym/[-\w]+/\d+-"), callback="parse_sd")]
-    wanted_types = ["ExerciseGym"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://econofitness.ca/en/gym/"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").removesuffix(" 24/7")
-        item["lat"] = response.xpath("//@data-lat").get()
-        item["lon"] = response.xpath("//@data-lon").get()
-        yield item
+    def parse(self, response: Response, **kwargs):
+        for location in response.xpath('//*[@data-js="location"]'):
+            item = Feature()
+            item["branch"] = location.xpath(".//h4/text()").get().removeprefix("Éconofitness ").removesuffix(" 24/7")
+            item["lat"] = location.xpath("./@data-lat").get()
+            item["lon"] = location.xpath("./@data-lng").get()
+            item["ref"] = location.xpath("./@data-gym-id").get()
+            item["addr_full"] = location.xpath('.//*[@class="address"]//span/text()').get()
+            item["website"] = location.xpath('.//*[contains(@href,"/en/gym/")]/@href').get()
+            yield item
