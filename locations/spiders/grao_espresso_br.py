@@ -17,7 +17,7 @@ class GraoEspressoBRSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs):
         for store in re.findall(r"\['(.+?)', (-?\d+\.\d+)?, (-?\d+\.\d+)?, (\d+)\]", response.text):
             item = Feature()
-            item["name"] = Selector(text=store[0]).xpath("//h4/text()").get()
+            item["branch"] = Selector(text=store[0]).xpath("//h4/text()").get()
             item["addr_full"] = merge_address_lines(Selector(text=store[0]).xpath("//span/text()").getall())
             item["lat"] = store[1]
             item["lon"] = store[2]
