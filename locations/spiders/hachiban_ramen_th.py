@@ -16,7 +16,6 @@ class HachibanRamenTHSpider(scrapy.Spider):
         for restaurant in chompjs.parse_js_object(data):
             item = DictParser.parse(restaurant)
             item["branch"] = restaurant.get("NAME_EN").strip()
-            item["website"] = "https://www.hachiban.co.th/"
             item["ref"] = restaurant.get("CODE")
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(restaurant["OPEN_CLOSE"])
