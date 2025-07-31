@@ -19,6 +19,8 @@ class PitaPitCASpider(SitemapSpider, StructuredDataSpider):
             item["lon"] = lon * -1
 
         item["extras"]["website:en"] = response.url
-        item["extras"]["website:fr"] = response.xpath('//a[@title="FR"]/@href').get()
+        item["extras"]["website:fr"] = response.xpath('//a[@title="Switch to FR"]/@href').get()
+
         apply_category(Categories.FAST_FOOD, item)
+
         yield item
