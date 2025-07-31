@@ -13,5 +13,8 @@ class PetsPlaceNLSpider(UberallSpider):
     key = "FLSFmn17JhB8QiJQD7stjGbDIi9Q56"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Pets Place ")
+
         apply_category(Categories.SHOP_PET, item)
+
         yield item
