@@ -19,5 +19,6 @@ class TerstalNLSpider(Spider):
         for store in response.json():
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
+            item["website"] = urljoin("https://www.terstal.nl/winkels/", store["identifier"])
             apply_category(Categories.SHOP_CLOTHES, item)
             yield item
