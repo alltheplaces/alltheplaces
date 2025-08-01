@@ -18,6 +18,7 @@ class MarksCASpider(Spider):
     item_attributes = {"brand": "Mark's", "brand_wikidata": "Q6766373"}
     start_urls = ["https://www.marks.com/sitemap_Store-en_CA-CAD.xml"]
     user_agent = FIREFOX_LATEST
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for url in iterloc(Sitemap(response.body)):
