@@ -17,6 +17,6 @@ class EssentialEnergyStreetCabinetsAUSpider(ArcGISFeatureServerSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["WACS_ID_A"]
-        apply_category(Categories.STREET_CABINET_TRAFFIC_CONTROL, item)
+        apply_category(Categories.STREET_CABINET_LIGHTING, item)
         item["extras"]["alt_ref"] = feature["W_LABEL_A"]
         yield item
