@@ -21,8 +21,11 @@ class EssentialEnergyTransformersAUSpider(ArcGISFeatureServerSpider):
         apply_category(Categories.TRANSFORMER, item)
         item["extras"]["alt_ref"] = feature["W_LABEL_A"]
         if voltage_kv_str := feature["PRIMARY_VO"]:
-            voltage_v = float(voltage_kv_str.strip().removesuffix("kV").strip()) * 1000
-            item["extras"]["voltage:primary"] = f"{voltage_v}"
+            try:
+                voltage_v = int(float(voltage_kv_str.strip().removesuffix("kV").strip()) * 1000)
+                item["extras"]["voltage:primary"] = f"{voltage_v}"
+            except ValueError:
+                pass
         if rating := feature["KVA"]:
             item["extras"]["rating"] = rating + " kVA"
         yield item
