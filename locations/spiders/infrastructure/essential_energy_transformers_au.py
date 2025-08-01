@@ -20,8 +20,9 @@ class EssentialEnergyTransformersAUSpider(ArcGISFeatureServerSpider):
         item["addr_full"] = feature["VICINITY"]
         apply_category(Categories.TRANSFORMER, item)
         item["extras"]["alt_ref"] = feature["W_LABEL_A"]
-        if voltage := feature["PRIMARY_VO"]:
-            item["extras"]["voltage:primary"] = voltage.replace("kV", "000").replace(" ", "")
+        if voltage_kv_str := feature["PRIMARY_VO"]:
+            voltage_v = float(voltage_kv_str) * 1000
+            item["extras"]["voltage:primary"] = f"{voltage_v}"
         if rating := feature["KVA"]:
             item["extras"]["rating"] = rating + " kVA"
         yield item
