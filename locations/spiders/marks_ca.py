@@ -10,14 +10,14 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import FIREFOX_LATEST
 
 
 class MarksCASpider(Spider):
     name = "marks_ca"
     item_attributes = {"brand": "Mark's", "brand_wikidata": "Q6766373"}
     start_urls = ["https://www.marks.com/sitemap_Store-en_CA-CAD.xml"]
-    user_agent = BROWSER_DEFAULT
+    user_agent = FIREFOX_LATEST
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for url in iterloc(Sitemap(response.body)):
