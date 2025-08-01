@@ -13,20 +13,22 @@ class GoldsmithsGBSpider(Spider):
     item_attributes = {"brand": "Goldsmiths", "brand_wikidata": "Q16993095"}
 
     def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(url="https://www.goldsmiths.co.uk/store-finder?q=&latitude=0&longitude=0&page=0")
+        yield JsonRequest(
+            url="https://api.thewosgroup.com/occ/v2/Goldsmiths_UK/stores?longitude=0&latitude=0&radius=100000&pageSize=10000"
+        )
 
     def parse(self, response, **kwargs):
-        for location in response.json()["results"]:
+        for location in response.json()["stores"]:
             location["ref"] = location.pop("name")
             location["address"]["street_address"] = clean_address(
                 [location["address"].get("line1"), location["address"].get("line2")]
             )
-            location["address"]["country"] = location["address"]["country"]["isocode"]
-            location["phone"] = location["address"]["phone"]
-            location["email"] = location["address"]["email"]
+            location["phone"] = location["address"].get("phone")
+            location["email"] = location["address"].get("email")
 
             item = DictParser.parse(location)
-
+            item["country"] = "GB"
+            item["branch"] = item.pop("name")
             item["website"] = f'https://www.goldsmiths.co.uk/store/{item["ref"]}'
 
             item["opening_hours"] = OpeningHours()
@@ -41,10 +43,3 @@ class GoldsmithsGBSpider(Spider):
                 )
 
             yield item
-
-        current_page = response.json()["pagination"]["currentPage"]
-        pages = response.json()["pagination"]["numberOfPages"]
-        if current_page < pages:
-            yield JsonRequest(
-                url=f"https://www.goldsmiths.co.uk/store-finder?q=&latitude=0&longitude=0&page={current_page + 1}"
-            )
