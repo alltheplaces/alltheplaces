@@ -26,7 +26,7 @@ class MitsubishiJPSpider(CrawlSpider):
         item = Feature()
         item["ref"] = response.url.split("tenpoCD=")[1]
         item["website"] = response.url
-        item["name"] = location_info["kyotenName"]
+        item["branch"] = location_info["kyotenName"]
         item["lat"] = location_info["kyotenIdo"]
         item["lon"] = location_info["kyotenKeido"]
         # location_info["kyoten_addr"] doesn't contain postcode
