@@ -14,7 +14,7 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/hotels/us/en/[-\w]+/[-\w]+/hoteldetail$", "parse")]
     wanted_types = ["Hotel"]
     json_parser = "chompjs"
-    #requires_proxy = True
+    # requires_proxy = True
 
     my_brands = {
         "armyhotels": ("Army Hotels", "Q16994722"),
