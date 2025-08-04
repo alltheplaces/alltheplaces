@@ -1,8 +1,8 @@
-import re
-from typing import Any, Iterable
+from typing import Any
 
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -10,20 +10,16 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DominosPizzaAUSpider(SitemapSpider):
+class DominosPizzaAUSpider(CrawlSpider):
     name = "dominos_pizza_au"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    allowed_domains = ["www.dominos.com.au"]
-    sitemap_urls = ["https://www.dominos.com.au/sitemap.aspx"]
-    sitemap_rules = [(r"/store/+[-\w]+\d+", "parse")]
+    start_urls = ["https://www.dominos.com.au/store-finder/"]
+    rules = [
+        Rule(LinkExtractor(allow=r"/stores//?[-\w]+/?$")),
+        Rule(LinkExtractor(allow=r"/store//?[-\w]+-\d+$"), callback="parse"),
+    ]
     user_agent = BROWSER_DEFAULT
     download_timeout = 180
-
-    def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
-        for entry in entries:
-            # Clean up extra slashes in URL
-            entry["loc"] = re.sub(r"(\w)/+", r"\1/", entry["loc"])
-            yield entry
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
