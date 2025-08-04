@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class HDIskenderTRSpider(Spider):
+class HdIskenderTRSpider(Spider):
     name = "hd_iskender_tr"
     item_attributes = {"brand": "HD İskender", "brand_wikidata": "Q28940587"}
     start_urls = ["https://www.hdiskender.com/restoranlarimiz"]
