@@ -1,25 +1,33 @@
-from typing import Any
+from typing import Iterable
 
-import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class BisquetsObregonMXSpider(scrapy.Spider):
+class BisquetsObregonMXSpider(JSONBlobSpider):
     name = "bisquets_obregon_mx"
-    item_attributes = {"name": "Bisquets Obregon", "brand": "Bisquets Obregon"}
-    start_urls = ["https://bisquetsobregon.com/gps/data.php"]
-    no_refs = True
+    item_attributes = {"brand": "Bisquets Obregón", "brand_wikidata": "Q131450266"}
+    allowed_domains = ["api-stg.bisapp.net"]
+    start_urls = [
+        "https://api-stg.bisapp.net/api/sucursales-page?populate[general_banners][populate]=*&populate[sucursal_items][populate]=*&populate[sucursal_items][filters][branch_type]=restaurante"
+    ]
+    locations_key = ["data", "sucursal_items"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.xpath("//store//item"):
-            item = Feature()
-            item["branch"] = store.xpath("./location/text()").get()
-            item["addr_full"] = store.xpath("./address/text()").get()
-            item["lat"] = store.xpath("./latitude/text()").get()
-            item["lon"] = store.xpath("./longitude/text()").get()
-            item["phone"] = store.xpath("./telephone/text()").get()
-            apply_category(Categories.RESTAURANT, item)
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(feature["id"])
+        item["addr_full"] = feature["branch_address"]
+        item["state"] = feature["branch_region"]
+        item["lat"] = feature["branch_latitude"]
+        item["lon"] = feature["branch_longitude"]
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_days_range(
+            DAYS, feature["opening_time"].split(".", 1)[0], feature["closing_time"].split(".", 1)[0], "%H:%M:%S"
+        )
+        apply_category(Categories.RESTAURANT, item)
+        if description := feature.get("branch_description"):
+            apply_yes_no(Extras.WIFI, item, "WIFI gratis" in description)
+        yield item
