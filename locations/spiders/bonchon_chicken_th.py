@@ -18,5 +18,6 @@ class BonchonChickenTHSpider(Spider):
         data = re.search(r'"pagesModule":(.*?),"homePage"', response.text).group(1) + "}"
         for location in json.loads(data)["stores"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("บอนชอน ")
             apply_category(Categories.RESTAURANT, item)
             yield item
