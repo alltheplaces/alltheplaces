@@ -5,6 +5,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import apply_category, Categories
 from locations.dict_parser import DictParser
 
 
@@ -17,4 +18,5 @@ class BonchonChickenTHSpider(Spider):
         data = re.search(r'"pagesModule":(.*?),"homePage"', response.text).group(1) + "}"
         for location in json.loads(data)["stores"]:
             item = DictParser.parse(location)
+            apply_category(Categories.RESTAURANT, item)
             yield item
