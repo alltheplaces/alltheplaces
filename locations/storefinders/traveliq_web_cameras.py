@@ -56,8 +56,8 @@ class TravelIQWebCamerasSpider(Spider):
             }
             wkt = camera["latLng"]["geography"]["wellKnownText"]
             if m := re.fullmatch(r"POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)", wkt):
-                properties["lat"] = m.group(1)
-                properties["lon"] = m.group(2)
+                properties["lon"] = m.group(1)
+                properties["lat"] = m.group(2)
             apply_category(Categories.SURVEILLANCE_CAMERA, properties)
             properties["extras"]["contact:webcam"] = "https://{}/tooltip/Cameras/{}".format(
                 self.allowed_domains[0], properties["ref"]
