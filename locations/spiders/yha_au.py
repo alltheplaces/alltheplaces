@@ -11,7 +11,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class YhaAUSpider(SitemapSpider, StructuredDataSpider):
     name = "yha_au"
-    item_attributes = {"brand": "YHA", "brand_wikidata": "Q118234608"}
+    item_attributes = {"brand": "Youth Hostels Association", "brand_wikidata": "Q8045885"}
     sitemap_urls = ["https://www.yha.com.au/en/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.yha\.com\.au\/hostels(?:\/[^\/]+){3}\/?$", "parse_sd")]
 
