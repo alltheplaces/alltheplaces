@@ -16,6 +16,8 @@ class YhaAUSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"^https:\/\/www\.yha\.com\.au\/hostels(?:\/[^\/]+){3}\/?$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("YHA ")
+        item.pop("email", None)
         markers = loads(response.xpath("//div/@data-modeldata").get())
         item["lat"] = markers["MapMarkers"][0]["Latitude"]
         item["lon"] = markers["MapMarkers"][0]["Longitude"]
