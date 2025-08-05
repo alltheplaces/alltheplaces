@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import FIREFOX_LATEST
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MensWearhouseSpider(SitemapSpider, StructuredDataSpider):
