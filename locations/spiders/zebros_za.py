@@ -27,9 +27,9 @@ class ZebrosZASpider(Spider):
                 properties["lat"], properties["lon"] = url_to_coords(m.group(1))
             if m := re.search(r"content: '(.+?)',", js_blob_per_store):
                 tooltip = Selector(text=m.group(1))
-                if branch_name := tooltip.xpath('//h3/text()').get().removeprefix("Zebro's").strip():
+                if branch_name := tooltip.xpath("//h3/text()").get().removeprefix("Zebro's").strip():
                     properties["branch"] = branch_name
-                properties["addr_full"] = tooltip.xpath('//p/text()').get()
+                properties["addr_full"] = tooltip.xpath("//p/text()").get()
                 properties["phone"] = tooltip.xpath('//a[contains(@href, "tel:")]/@href').get().removeprefix("tel:")
             apply_category(Categories.FAST_FOOD, properties)
             yield Feature(**properties)
