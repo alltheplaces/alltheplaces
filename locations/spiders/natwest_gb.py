@@ -54,7 +54,9 @@ class NatwestGBSpider(Spider):
                 location["location"] = coordinates
             item = DictParser.parse(location)
             item["website"] = (
-                location["c_listing_URL"].replace("/personal", "") if location.get("c_listing_URL") else None
+                location["c_listing_URL"].replace("/personal", "").replace(" ", "-")
+                if location.get("c_listing_URL")
+                else None
             )
 
             if location.get("c_launch") == "ACTIVE_BRANCH":
