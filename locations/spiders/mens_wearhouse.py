@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import FIREFOX_LATEST
 
 
 class MensWearhouseSpider(SitemapSpider, StructuredDataSpider):
@@ -11,4 +11,5 @@ class MensWearhouseSpider(SitemapSpider, StructuredDataSpider):
         "https://www.menswearhouse.com/sitemap-store-locator.xml",
     ]
     sitemap_rules = [(r"/store-locator/[0-9]+", "parse_sd")]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
+    wanted_types = ["MensClothingStore"]
