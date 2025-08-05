@@ -4,14 +4,14 @@ import scrapy
 import locations
 from locations import settings
 
-FIREFOX_ESR_128 = "Mozilla/5.0 (Linux x86_64; rv:128.6) Gecko/20100101 Firefox/128.6"
-FIREFOX_ESR_LATEST = FIREFOX_ESR_128
+FIREFOX_ESR_140 = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
+FIREFOX_ESR_LATEST = FIREFOX_ESR_140
 
-FIREFOX_136 = "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0"
-FIREFOX_LATEST = FIREFOX_136
+FIREFOX_141 = "Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0"
+FIREFOX_LATEST = FIREFOX_141
 
-CHROME_134 = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
-CHROME_LATEST = CHROME_134
+CHROME_138 = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+CHROME_LATEST = CHROME_138
 
 BROWSER_DEFAULT = FIREFOX_ESR_LATEST
 
