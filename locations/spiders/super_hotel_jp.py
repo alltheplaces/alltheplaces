@@ -27,7 +27,7 @@ class SuperHotelJPSpider(Spider):
         for location in response.json()["items"]:
             item = Feature()
             item["ref"] = location["code"]
-            item["name"] = location["name"]
+            item["branch"] = location["name"]
             item["phone"] = location.get("phone")
             item["street_address"] = location["address_name"]
             # address_code?
