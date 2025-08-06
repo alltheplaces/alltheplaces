@@ -24,10 +24,7 @@ class SuperHotelJPSpider(Spider):
         for location in response.json()["items"]:
             item = Feature()
             item["ref"] = location["code"]
-            if location["name"].startswith("スーパーホテル"):
-                item["branch"] = location["name"].removeprefix("スーパーホテル")
-            else:
-                item["name"] = location["name"]
+            item["branch"] = location["name"].replace("スーパーホテル", "")
             item["phone"] = location.get("phone")
             item["street_address"] = location["address_name"]
             # address_code?
