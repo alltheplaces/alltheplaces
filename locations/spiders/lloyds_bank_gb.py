@@ -1,6 +1,8 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -22,3 +24,11 @@ class LloydsBankGBSpider(SitemapSpider, StructuredDataSpider):
                     if entry["phone"].replace(" ", "").startswith("+443"):
                         entry.pop("phone", None)
                 yield entry
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        location_type = response.xpath('//*[@class="LocationName-brand"]/text()').get("").strip()
+        if any(
+            bank in location_type for bank in ["Halifax", "Bank of Scotland"]
+        ):  # Skip locations already covered by their individual brand spiders
+            return
+        yield item
