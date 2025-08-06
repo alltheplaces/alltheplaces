@@ -7,11 +7,12 @@ from scrapy.http import Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
 class SparIESpider(Spider):
     name = "spar_ie"
-    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
+    item_attributes = SPAR_SHARED_ATTRIBUTES
     start_urls = ["https://www.spar.ie/store-locator/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
