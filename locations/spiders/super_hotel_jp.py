@@ -3,16 +3,13 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class SuperHotelJPSpider(Spider):
     name = "super_hotel_jp"
-    item_attributes = {
-        "brand_wikidata": "Q11313858",
-        "extras": Categories.HOTEL.value,
-    }
+    item_attributes = {"brand_wikidata": "Q11313858"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def make_request(self, offset: int, count: int = 100) -> JsonRequest:
@@ -27,7 +24,10 @@ class SuperHotelJPSpider(Spider):
         for location in response.json()["items"]:
             item = Feature()
             item["ref"] = location["code"]
-            item["branch"] = location["name"]
+            if location["name"].startswith("スーパーホテル"):
+                item["branch"] = location["name"].removeprefix("スーパーホテル")
+            else:
+                item["branch"] = location["name"]
             item["phone"] = location.get("phone")
             item["street_address"] = location["address_name"]
             # address_code?
@@ -39,6 +39,8 @@ class SuperHotelJPSpider(Spider):
             item["extras"]["website:en"] = "https://www.superhoteljapan.com/en/s-hotels/{}/".format(slug)
             item["extras"]["website:kr"] = "https://www.superhoteljapan.com/kr/s-hotels/{}/".format(slug)
             item["extras"]["website:cn"] = "https://www.superhoteljapan.com/cn/s-hotels/{}/".format(slug)
+
+            apply_category(Categories.HOTEL, item)
 
             yield item
 
