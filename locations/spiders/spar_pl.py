@@ -23,6 +23,8 @@ class SparPLSpider(Spider):
 
     def parse(self, response: Response, **kwargs):
         for shop in response.json()["locations"]:
+            if shop["permalink"].endswith("-2/"):
+                continue
             item = DictParser.parse(shop)
             item["postcode"] = shop["kod"]
             item["street_address"] = shop["adres"]
