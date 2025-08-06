@@ -1,6 +1,5 @@
 from typing import Any
 
-# from requests import Response
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -9,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
 
-class KBCBESpider(Spider):
+class KbcBESpider(Spider):
     name = "kbc_be"
     item_attributes = {"brand": "KBC", "brand_wikidata": "Q941020"}
 
