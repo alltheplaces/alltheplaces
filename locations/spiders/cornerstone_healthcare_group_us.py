@@ -13,13 +13,13 @@ class CornerstoneHealthcareGroupUSSpider(CrawlSpider):
     name = "cornerstone_healthcare_group_us"
     item_attributes = {"brand": "Cornerstone Healthcare Group"}
     start_urls = ["https://cornerstonehospitals.com/locations"]
-    rules = [Rule(LinkExtractor(r"https://www.cornerstonehospitals.com/locations/[^/]+/[^/]+$"), callback="parse")]
+    rules = [Rule(LinkExtractor(r"/locations/[^/]+/[^/]+$"), callback="parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["name"] = self.item_attributes["brand"]
         item["branch"] = response.xpath("//h1//text()").get()
-        item["addr_full"] = response.xpath('//*[@id="text-cf7b8a0952"]//p//text()').get()
+        item["addr_full"] = response.xpath('//*[@class="cmp-text"]//p//text()').get().replace("|", "")
         item["website"] = item["ref"] = response.url
         extract_google_position(item, response)
         apply_category(Categories.HOSPITAL, item)
