@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
+from locations.geo import city_locations, point_locations
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -21,6 +21,12 @@ class DominosPizzaAUSpider(Spider):
             # The API does not support a custom radius parameter and returns up to 10 records per request.
             yield JsonRequest(
                 url=f"https://www.dominos.com.au/dynamicstoresearchapi/getstoresfromquery?lon={lon}&lat={lat}",
+            )
+
+        # Also, use city_locations to collect more locations
+        for city in city_locations("AU", min_population=15000):
+            yield JsonRequest(
+                url=f'https://www.dominos.com.au/dynamicstoresearchapi/getstoresfromquery?lon={city["longitude"]}&lat={city["latitude"]}',
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
