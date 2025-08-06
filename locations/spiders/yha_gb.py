@@ -11,7 +11,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 class YhaGBSpider(Spider):
     name = "yha_gb"
-    item_attributes = {"brand": "YHA", "brand_wikidata": "Q118234608"}
+    item_attributes = {"brand": "Youth Hostels Association", "brand_wikidata": "Q8059214"}
     start_urls = ["https://www.yha.org.uk/hostels/all-youth-hostels"]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS

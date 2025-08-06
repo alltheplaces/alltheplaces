@@ -1,18 +1,25 @@
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class AtsEuromasterGBSpider(SitemapSpider, StructuredDataSpider):
+class AtsEuromasterGBSpider(CrawlSpider, StructuredDataSpider):
     name = "ats_euromaster_gb"
     item_attributes = {"brand": "ATS Euromaster", "brand_wikidata": "Q4654920"}
-    sitemap_urls = ["https://www.atseuromaster.co.uk/robots.txt"]
-    sitemap_rules = [(r"/centres/[^/]+/[^/]+/[^/]+$", "parse")]
+    start_urls = ["https://www.atseuromaster.co.uk/centres"]
+    rules = [
+        Rule(LinkExtractor(allow="/centres/[^/]+$")),
+        Rule(LinkExtractor(allow=r"/centres/[^/]+/[^/]+$")),
+        Rule(LinkExtractor(allow=r"/centres/[^/]+/[^/]+/[^/]+$"), callback="parse_sd"),
+    ]
     wanted_types = ["AutoRepair"]
     time_format = "%H:%M:%S"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["facebook"] = None
