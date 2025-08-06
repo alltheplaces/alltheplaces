@@ -24,6 +24,12 @@ class LloydsBankGBSpider(SitemapSpider, StructuredDataSpider):
                         entry.pop("phone", None)
                 yield entry
 
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        opening_hours = []
+        for rule in ld_data.get("openingHours", []):
+            opening_hours.append(rule.replace(".", ":"))
+        ld_data["openingHours"] = opening_hours
+
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         location_type = response.xpath('//*[@class="LocationName-brand"]/text()').get("").strip()
         if any(
