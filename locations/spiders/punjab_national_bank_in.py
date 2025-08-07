@@ -26,7 +26,6 @@ class PunjabNationalBankINSpider(scrapy.Spider):
                 store["lon"] = store.pop("longt")
                 store["address"] = store.pop("location")
                 item = DictParser.parse(store)
-                item["website"] = "https://www.pnbindia.in/"
                 if store["loctType"] == "Branch":
                     apply_category(Categories.BANK, item)
                     item["ref"] = f'{store["IFSC"]}-{index}'
