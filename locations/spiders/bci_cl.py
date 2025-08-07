@@ -8,8 +8,8 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_ES, OpeningHours
 
 
-class BciAQCLSpider(Spider):
-    name = "bci_aq_cl"
+class BciCLSpider(Spider):
+    name = "bci_cl"
     item_attributes = {"brand": "BCI", "brand_wikidata": "Q2882083"}
 
     def make_request(self, location_type: str, page: int, limit: int = 100) -> JsonRequest:
@@ -34,6 +34,7 @@ class BciAQCLSpider(Spider):
             item["phone"] = location.get("Teléfono")
             item["email"] = location.get("Correo")
             item["opening_hours"] = OpeningHours()
+            item["country"] = "CL"
             for day in DAYS_ES:
                 hours = location.get(f"Horario Funcionamiento {day}")
                 if hours in [None, ["Cerrado"]]:
