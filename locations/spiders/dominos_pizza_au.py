@@ -1,50 +1,44 @@
-import re
 from typing import Any, Iterable
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.dict_parser import DictParser
+from locations.geo import city_locations, point_locations
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DominosPizzaAUSpider(SitemapSpider):
+# The CrawlSpider approach was avoided because crawling hundreds of store pages yields only a few unique location entries, with many pages containing duplicate data.
+class DominosPizzaAUSpider(Spider):
     name = "dominos_pizza_au"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    allowed_domains = ["www.dominos.com.au"]
-    sitemap_urls = ["https://www.dominos.com.au/sitemap.aspx"]
-    sitemap_rules = [(r"/store/+[-\w]+\d+", "parse")]
     user_agent = BROWSER_DEFAULT
     download_timeout = 180
 
-    def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
-        for entry in entries:
-            # Clean up extra slashes in URL
-            entry["loc"] = re.sub(r"(\w)/+", r"\1/", entry["loc"])
-            yield entry
+    def start_requests(self) -> Iterable[Request]:
+        for lat, lon in point_locations("au_centroids_20km_radius.csv"):
+            # The API does not support a custom radius parameter and returns up to 10 records per request.
+            yield JsonRequest(
+                url=f"https://www.dominos.com.au/dynamicstoresearchapi/getstoresfromquery?lon={lon}&lat={lat}",
+            )
+
+        # Also, use city_locations to collect more locations
+        for city in city_locations("AU", min_population=15000):
+            yield JsonRequest(
+                url=f'https://www.dominos.com.au/dynamicstoresearchapi/getstoresfromquery?lon={city["longitude"]}&lat={city["latitude"]}',
+            )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        properties = {
-            "ref": response.url.split("-")[-1],
-            "branch": response.xpath('//div[@class="storetitle"]/text()').get().removeprefix("Domino's "),
-            "addr_full": merge_address_lines(
-                filter(None, map(str.strip, response.xpath('//a[@id="open-map-address"]/text()').getall()))
-            ),
-            "lat": float(response.xpath('//input[@id="store-lat"]/@value').get()),
-            "lon": float(response.xpath('//input[@id="store-lon"]/@value').get()),
-            "phone": response.xpath('//div[@id="store-tel"]/a/@href').get("").replace("tel:", ""),
-            "website": response.url,
-            "opening_hours": OpeningHours(),
-        }
-
-        hours_text = " ".join(
-            filter(
-                None,
-                map(str.strip, response.xpath('//span[@class="trading-day" or @class="trading-hour"]/text()').getall()),
+        for location in response.json().get("PickupSearchStore", []):
+            location.update(location.pop("locations")[0])
+            location.update(location["address"].pop("geoLocation"))
+            location["address"].update(
+                {attribute["key"]: attribute["value"] for attribute in location["address"].pop("attributes", [])}
             )
-        )
-        properties["opening_hours"].add_ranges_from_string(hours_text)
-
-        yield Feature(**properties)
+            item = DictParser.parse(location)
+            item["ref"] = location.get("storeNo")
+            item["branch"] = item.pop("name")
+            item["street_address"] = item.pop("street")
+            item["website"] = response.urljoin(location.get("properties", {}).get("storeUrl", ""))
+            yield item
