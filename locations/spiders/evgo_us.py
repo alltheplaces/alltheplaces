@@ -16,7 +16,7 @@ class EvgoUSSpider(CrawlSpider):
     start_urls = [
         "https://evgo.com/find-a-charger/{}/".format(state.lower()) for state in GeonamesCache().get_us_states().keys()
     ]
-    rules = [Rule(LinkExtractor(r"/find-a-charger/\w\w/[^/]+/[^/]+\-(\d+)$"), "parse")]
+    rules = [Rule(LinkExtractor(r"/find-a-charger/\w\w/[^/]+/[^/]+\-(\d+)/?$"), "parse")]
     custom_settings = {"REDIRECT_ENABLED": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
