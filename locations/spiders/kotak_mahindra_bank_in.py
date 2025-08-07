@@ -23,7 +23,6 @@ class KotakMahindraBankINSpider(scrapy.Spider):
             item["postcode"] = str(data["pincodeNumber"])
             item["city"] = data["cityName"]
             item["state"] = data["stateName"]
-            item["phone"] = data["phoneNumber"]
             if "ATM" in data["branchOrATMName"]:
                 apply_category(Categories.ATM, item)
             else:
