@@ -26,9 +26,8 @@ class BankofBarodaINSpider(scrapy.Spider):
             if not store["postal-code"]:
                 store["postal-code"] = store.pop("PIN_CODE", None)
             store["postal-code"] = str(store["postal-code"])
-            store["name"] = store.pop("branch_name", "Bank of Baroda ATM")
             item = DictParser.parse(store)
-            item["website"] = "https://www.bankofbaroda.in"
+            item["branch"] = item.pop("name")
             if "branch_id" in store:
                 item["ref"] = store["branch_id"]
                 apply_category(Categories.BANK, item)
