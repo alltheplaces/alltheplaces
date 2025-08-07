@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class TtbbankTHSpider(Spider):
     name = "ttbbank_th"
-    item_attributes = {"brand": "ธนาคารทหารไทย", "brand_wikidata": " lo"}
+    item_attributes = {"brand": "ธนาคารทหารไทย", "brand_wikidata": "Q1527826"}
 
     def start_requests(self):
         for key in ["location_branch", "location_atm"]:
