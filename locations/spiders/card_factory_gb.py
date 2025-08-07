@@ -29,15 +29,21 @@ class CardFactoryGBSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 if day in store["storeHoursJSON"]:
-                    item["opening_hours"].add_range(
-                        day,
-                        open_time=store["storeHoursJSON"][day]["start"],
-                        close_time=store["storeHoursJSON"][day]["end"],
-                    )
+                    try:
+                        item["opening_hours"].add_range(
+                            day,
+                            open_time=store["storeHoursJSON"][day]["start"],
+                            close_time=store["storeHoursJSON"][day]["end"],
+                        )
+                    except:
+                        print("problem with opening hours")
                 elif day.upper() in store["storeHoursJSON"]:
-                    item["opening_hours"].add_range(
-                        day,
-                        open_time=store["storeHoursJSON"][day.upper()]["start"],
-                        close_time=store["storeHoursJSON"][day.upper()]["end"],
-                    )
+                    try:
+                        item["opening_hours"].add_range(
+                            day,
+                            open_time=store["storeHoursJSON"][day.upper()]["start"],
+                            close_time=store["storeHoursJSON"][day.upper()]["end"],
+                        )
+                    except:
+                        print("problem with opening hours")
             yield item
