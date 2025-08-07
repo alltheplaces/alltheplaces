@@ -36,7 +36,7 @@ class CardFactoryGBSpider(Spider):
                             close_time=store["storeHoursJSON"][day]["end"],
                         )
                     except:
-                        print("problem with opening hours")
+                        self.logger.info(f"Bad format for opening hours {storeHoursJSON}")
                 elif day.upper() in store["storeHoursJSON"]:
                     try:
                         item["opening_hours"].add_range(
@@ -45,5 +45,5 @@ class CardFactoryGBSpider(Spider):
                             close_time=store["storeHoursJSON"][day.upper()]["end"],
                         )
                     except:
-                        print("problem with opening hours")
+                        self.logger.info(f"Bad format for opening hours {storeHoursJSON}")
             yield item
