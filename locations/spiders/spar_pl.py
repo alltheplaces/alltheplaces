@@ -4,12 +4,12 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
 class SparPLSpider(Spider):
     name = "spar_pl"
-    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
-    EUROSPAR = {"brand": "Eurospar", "brand_wikidata": "Q12309283"}
+    item_attributes = SPAR_SHARED_ATTRIBUTES
 
     def start_requests(self):
         yield FormRequest(
@@ -24,6 +24,8 @@ class SparPLSpider(Spider):
 
     def parse(self, response: Response, **kwargs):
         for shop in response.json()["locations"]:
+            if shop["permalink"].endswith("-2/"):
+                continue
             item = DictParser.parse(shop)
             item["postcode"] = shop["kod"]
             item["street_address"] = shop["adres"]
@@ -32,7 +34,7 @@ class SparPLSpider(Spider):
             for day in days:
                 item["opening_hours"].add_ranges_from_string(f"{day} {shop[day]}")
             if shop["format"] == "EUROSPAR":
-                item.update(self.EUROSPAR)
+                item["name"] = "Eurospar"
                 apply_category(Categories.SHOP_SUPERMARKET, item)
             elif shop["format"] == "SPAR EXPRESS":
                 item["name"] = "Spar Express"
