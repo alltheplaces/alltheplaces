@@ -21,7 +21,8 @@ class EvgoUSSpider(CrawlSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["website"] = item["ref"] = response.url
+        item["website"] = response.url
+        item["ref"] = response.url.rsplit("-", 1)[1].strip("/")
         item["branch"] = response.xpath("//h1/text()").get()
         item["street_address"] = response.xpath("//ol/li[last()]//span/text()").get()
         item["state"] = response.xpath("//ol/li[2]//a/text()").get().upper()
