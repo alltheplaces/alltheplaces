@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class BankofBarodaINSpider(scrapy.Spider):
+class BankOfBarodaINSpider(scrapy.Spider):
     name = "bank_of_baroda_in"
     item_attributes = {"brand": "Bank of Baroda", "brand_wikidata": "Q2003797"}
     start_urls = [
