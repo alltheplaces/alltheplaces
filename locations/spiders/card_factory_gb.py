@@ -3,6 +3,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class CardFactoryGBSpider(Spider):
@@ -23,4 +24,13 @@ class CardFactoryGBSpider(Spider):
         for store in response.json()["stores"]["stores"]:
             item = DictParser.parse(store)
             item["country"] = country
+            item["street_address"] = store["address2"]
+            item["branch"] = store.pop("name")
+            item["name"] = "Card Factory"
+            item["opening_hours"] = OpeningHours()
+            for day in DAYS_FULL:
+                if day in store["storeHoursJSON"]:
+                    item["opening_hours"].add_range(day, open_time=store["storeHoursJSON"][day]["start"], close_time=store["storeHoursJSON"][day]["end"])
+                elif day.upper() in store["storeHoursJSON"]:
+                    item["opening_hours"].add_range(day, open_time=store["storeHoursJSON"][day.upper()]["start"],close_time=store["storeHoursJSON"][day.upper()]["end"])
             yield item
