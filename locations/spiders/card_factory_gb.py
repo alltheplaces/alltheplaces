@@ -25,8 +25,7 @@ class CardFactoryGBSpider(Spider):
             item = DictParser.parse(store)
             item["country"] = country
             item["street_address"] = store["address2"]
-            item["branch"] = store.pop("name")
-            item["name"] = "Card Factory"
+            item["branch"] = item.pop("name")
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 if day in store["storeHoursJSON"]:
