@@ -1,5 +1,6 @@
 import json
 import re
+
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
