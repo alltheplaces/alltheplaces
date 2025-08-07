@@ -7,7 +7,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class TTBBankTHSpider(Spider):
+class TtbBankTHSpider(Spider):
     name = "ttbbank_th"
     item_attributes = {"brand": "ธนาคารทหารไทย", "brand_wikidata": " lo"}
 
