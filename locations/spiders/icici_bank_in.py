@@ -1,6 +1,5 @@
 import json
 import re
-
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
@@ -47,5 +46,7 @@ class IciciBankINSpider(Spider):
             item["website"] = f'https://www.icicibank.com{atm["knowMoreUrl"]}'.replace("/en/", "/")
 
             apply_category(Categories.ATM, item)
-
+            if "N/A" in item.get("lat"):
+                item["lat"] = None
+                item["lon"] = None
             yield item
