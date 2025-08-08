@@ -21,10 +21,7 @@ class HellenicBankCYSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["city"] = location["address"]["additions"]["town"]
-            item["email"] = location["additions"]["contactDetailsEmail"]
             item["extras"]["fax"] = location["additions"]["contactDetailsFax"]
-            item["phone"] = location["additions"]["contactDetailsPhone"]
-
             if location["placeType"] == "ATM":
                 apply_category(Categories.ATM, item)
             elif location["placeType"] == "BRANCH":
