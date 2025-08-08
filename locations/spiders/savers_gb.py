@@ -16,13 +16,15 @@ class SaversGBSpider(scrapy.Spider):
     item_attributes = {"brand": "Savers", "brand_wikidata": "Q7428189"}
     start_urls = ["https://api.savers.co.uk/api/v2/sv/stores?country=GB&currentPage=0&pageSize=1000"]
     requires_proxy = True
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in xmltodict.parse(response.text)["storeFinderSearchPage"]["stores"]:
             location.update(location.pop("address"))
             location.update(location.pop("geoPoint"))
             item = DictParser.parse(location)
+            item["ref"] = item.pop("name")
+            item["branch"] = location["displayName"]
             item["street_address"] = merge_address_lines([location.get("line2"), location.get("line1")])
             item["website"] = urljoin("https://www.savers.co.uk", location["url"])
             item["opening_hours"] = OpeningHours()
