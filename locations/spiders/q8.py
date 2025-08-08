@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -48,7 +48,12 @@ class Q8Spider(JSONBlobSpider):
         item["opening_hours"] = self.parse_opening_hours(feature["q8Los"].get("shopOpeningHours"))
 
         fuel_data = (feature.get("fuelingLos") or {}).get("fuels") or []
+        services = feature["q8Los"].get("facilities") or []
         fuels = [fuel["code"].removeprefix("$FP$") for fuel in fuel_data]
+        services = [service["code"].removeprefix("$SF$") for service in services]
+
+        apply_yes_no(Extras.CAR_WASH, item, "CARWASH" in services)
+
         apply_yes_no(Fuel.ADBLUE, item, "ADBLUE" in fuels)
         apply_yes_no(Fuel.CNG, item, "CNG" in fuels)
         apply_yes_no(Fuel.DIESEL, item, "DIESEL" in fuels)
