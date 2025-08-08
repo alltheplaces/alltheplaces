@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import urljoin
 
 import scrapy
 import xmltodict
@@ -23,7 +24,7 @@ class SaversGBSpider(scrapy.Spider):
             location.update(location.pop("geoPoint"))
             item = DictParser.parse(location)
             item["street_address"] = merge_address_lines([location.get("line2"), location.get("line1")])
-            item["website"] = "https://www.savers.co.uk/" + location["url"]
+            item["website"] = urljoin("https://www.savers.co.uk", location["url"])
             item["opening_hours"] = OpeningHours()
             for day_time in location["openingHours"]["weekDayOpeningList"]:
                 day = day_time["weekDay"]
