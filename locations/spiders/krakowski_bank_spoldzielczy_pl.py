@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class BankPocztowyPLSpider(scrapy.Spider):
+class KrakowskiBankSpoldzielczyPLSpider(scrapy.Spider):
     name = "krakowski_bank_spoldzielczy_pl"
     item_attributes = {"brand": "Krakowski Bank Spółdzielczy", "brand_wikidata": "Q11747876"}
     start_urls = ["https://www.kbsbank.com.pl/data/department", "https://www.kbsbank.com.pl/data/atm"]
