@@ -18,14 +18,14 @@ class SaversGBSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in xmltodict.parse(response.text)["StoreFinderSearchPageWsDTO"]["stores"]["stores"]:
+        for location in xmltodict.parse(response.text)["storeFinderSearchPage"]["stores"]:
             location.update(location.pop("address"))
             location.update(location.pop("geoPoint"))
             item = DictParser.parse(location)
-            item["street_address"] = merge_address_lines([location["line2"], location["line1"]])
+            item["street_address"] = merge_address_lines([location.get("line2"), location.get("line1")])
             item["website"] = "https://www.savers.co.uk/" + location["url"]
             item["opening_hours"] = OpeningHours()
-            for day_time in location["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
+            for day_time in location["openingHours"]["weekDayOpeningList"]:
                 day = day_time["weekDay"]
                 open_time = day_time["openingTime"]["formattedHour"]
                 close_time = day_time["closingTime"]["formattedHour"]
