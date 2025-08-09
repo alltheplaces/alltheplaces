@@ -8,19 +8,19 @@ from locations.dict_parser import DictParser
 from locations.user_agents import FIREFOX_LATEST
 
 
-class MatsukiyoSpider(Spider):
-    name = "matsukiyo"
+class MatsukiyoJPSpider(Spider):
+    name = "matsukiyo_jp"
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
-            "Accept-Encoding": "gzip, deflate, br, zstd",
-            "Accept-Language": "ja",
-            "Connection": "keep-alive",
-            "Referer": "https://www.matsukiyococokara-online.com/map/search",
-            "user-agent": FIREFOX_LATEST,
+            #"Accept-Encoding": "gzip, deflate, br, zstd", # may not need these
+            #"Accept-Language": "ja",
+            #"Connection": "keep-alive",
+            #"Referer": "https://www.matsukiyococokara-online.com/map/search",
+            "user-agent": FIREFOX_LATEST, #needed for success
         }
     }
     start_urls = ["https://www.matsukiyococokara-online.com/map/s3/json/stores.json"]
-    allowed_domains = ["www.matsukiyococolara-online.com", "www.matsukiyococokara-online.com"]
+    allowed_domains = ["www.matsukiyococokara-online.com"]
     requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
