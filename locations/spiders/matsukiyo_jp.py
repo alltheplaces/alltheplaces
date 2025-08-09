@@ -12,11 +12,11 @@ class MatsukiyoJPSpider(Spider):
     name = "matsukiyo_jp"
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
-            #"Accept-Encoding": "gzip, deflate, br, zstd", # may not need these
-            #"Accept-Language": "ja",
-            #"Connection": "keep-alive",
-            #"Referer": "https://www.matsukiyococokara-online.com/map/search",
-            "user-agent": FIREFOX_LATEST, #needed for success
+            # "Accept-Encoding": "gzip, deflate, br, zstd", # may not need these
+            # "Accept-Language": "ja",
+            # "Connection": "keep-alive",
+            # "Referer": "https://www.matsukiyococokara-online.com/map/search",
+            "user-agent": FIREFOX_LATEST,  # needed for success
         }
     }
     start_urls = ["https://www.matsukiyococokara-online.com/map/s3/json/stores.json"]
