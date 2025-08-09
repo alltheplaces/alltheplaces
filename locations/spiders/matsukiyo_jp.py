@@ -75,9 +75,9 @@ class MatsukiyoJPSpider(Spider):
                 item["extras"]["dispensing"] = "yes"
             else:
                 apply_category(Categories.SHOP_CHEMIST, item)
-            
+
             apply_yes_no(Sells.TOBACCO, item, store["products"][19] == "1")
-                
+
             item["website"] = f"https://www.matsukiyococokara-online.com/map?kid={store['id']}"
-            
+
             yield item
