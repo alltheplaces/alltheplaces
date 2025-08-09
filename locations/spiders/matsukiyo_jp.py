@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Sells, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.user_agents import FIREFOX_LATEST
 
@@ -22,6 +22,7 @@ class MatsukiyoJPSpider(Spider):
     start_urls = ["https://www.matsukiyococokara-online.com/map/s3/json/stores.json"]
     allowed_domains = ["www.matsukiyococokara-online.com"]
     requires_proxy = True
+    country_code = "JP"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
@@ -69,5 +70,14 @@ class MatsukiyoJPSpider(Spider):
             if store["businesshours"][2] == "1":
                 item["opening_hours"] = "24/7"
 
-            apply_category(Categories.SHOP_CHEMIST, item)
+            if store["services"][4] == "1":
+                apply_category(Categories.PHARMACY, item)
+                item["extras"]["dispensing"] = "yes"
+            else:
+                apply_category(Categories.SHOP_CHEMIST, item)
+            
+            apply_yes_no(Sells.TOBACCO, item, store["products"][19] == "1")
+                
+            item["website"] = f"https://www.matsukiyococokara-online.com/map?kid={store['id']}"
+            
             yield item
