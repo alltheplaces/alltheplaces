@@ -21,6 +21,7 @@ class MatsukiyoSpider(Spider):
     }
     start_urls = ["https://www.matsukiyococokara-online.com/map/s3/json/stores.json"]
     allowed_domains = ["www.matsukiyococolara-online.com", "www.matsukiyococokara-online.com"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
