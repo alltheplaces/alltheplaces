@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Any
 
 from scrapy import Spider
@@ -6,16 +5,24 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
 from locations.user_agents import FIREFOX_LATEST
+
 
 class MatsukiyoSpider(Spider):
     name = "matsukiyo"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept-Encoding": "gzip, deflate, br, zstd", "Accept-Language": "ja", "Connection": "keep-alive", "Referer":
-	"https://www.matsukiyococokara-online.com/map/search", "user-agent": FIREFOX_LATEST}}    
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Accept-Language": "ja",
+            "Connection": "keep-alive",
+            "Referer": "https://www.matsukiyococokara-online.com/map/search",
+            "user-agent": FIREFOX_LATEST,
+        }
+    }
     start_urls = ["https://www.matsukiyococokara-online.com/map/s3/json/stores.json"]
     allowed_domains = ["www.matsukiyococolara-online.com", "www.matsukiyococokara-online.com"]
-    def parse (self, response: Response, **kwargs: Any) -> Any:
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
             match store["icon"]:
@@ -52,14 +59,14 @@ class MatsukiyoSpider(Spider):
                 case 34:
                     item.update({"brand": "ライフォート", "brand_wikidata": "Q11346469"})
                 case 35:
-                    item.update({"brand": "クスリのコダマ", "brand_wikidata":"Q11302198"})
+                    item.update({"brand": "クスリのコダマ", "brand_wikidata": "Q11302198"})
                 case 36:
                     item.update({"brand": "ココカラファインイズミヤ"})
                 case 37:
                     item.update({"brand": "クスリ岩崎チェーン"})
-            
+
             if store["businesshours"][2] == "1":
                 item["opening_hours"] = "24/7"
-                        
-            apply_category(Categories.SHOP_CHEMIST, item)    
+
+            apply_category(Categories.SHOP_CHEMIST, item)
             yield item
