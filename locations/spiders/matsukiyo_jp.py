@@ -12,7 +12,7 @@ class MatsukiyoJPSpider(Spider):
     name = "matsukiyo_jp"
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
-            "Accept-Encoding": "gzip, deflate, br, zstd", 
+            "Accept-Encoding": "gzip, deflate, br, zstd",
             "Accept-Language": "ja",
             "Connection": "keep-alive",
             "Referer": "https://www.matsukiyococokara-online.com/map/search",
