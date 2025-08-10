@@ -1,9 +1,10 @@
 from typing import Any
+import re
 
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, Sells, apply_category, apply_yes_no
+from locations.categories import Categories, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.user_agents import FIREFOX_LATEST
 
@@ -16,7 +17,7 @@ class MatsukiyoJPSpider(Spider):
             "Accept-Language": "ja",
             "Connection": "keep-alive",
             "Referer": "https://www.matsukiyococokara-online.com/map/search",
-            "user-agent": FIREFOX_LATEST,  # needed for success
+            "user-agent": FIREFOX_LATEST,
         }
     }
     start_urls = ["https://www.matsukiyococokara-online.com/map/s3/json/stores.json"]
@@ -26,7 +27,9 @@ class MatsukiyoJPSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
+            
             item = DictParser.parse(store)
+            
             match store["icon"]:
                 case 1:
                     item.update({"brand": "マツモトキヨシ", "brand_wikidata": "Q8014776"})
@@ -67,17 +70,60 @@ class MatsukiyoJPSpider(Spider):
                 case 37:
                     item.update({"brand": "クスリ岩崎チェーン"})
 
-            if store["businesshours"][2] == "1":
-                item["opening_hours"] = "24/7"
+            if store["businesshours"][2] == "1": item["opening_hours"] = "24/7"
 
             if store["services"][4] == "1":
                 apply_category(Categories.PHARMACY, item)
                 item["extras"]["dispensing"] = "yes"
             else:
                 apply_category(Categories.SHOP_CHEMIST, item)
+                item["extras"]["dispensing"] = "no"
 
+            
+            apply_yes_no("sells:baby_goods", item, store["products"][12] == "1")
+            apply_yes_no(Sells.PET_SUPPLIES, item, store["products"][13] == "1")
+            if store["products"][14] == "1": item["extras"]["medical_supply"] = "home_care"
+            apply_yes_no("sells:sweets", item, store["products"][15] == "1")
+            apply_yes_no("sells:food", item, store["products"][16] == "1")
+            apply_yes_no("sells:rice", item, store["products"][17] == "1")
+            apply_yes_no("sells:alcohol", item, store["products"][18] == "1")
             apply_yes_no(Sells.TOBACCO, item, store["products"][19] == "1")
+            
+            apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["payments"][0] == "1")
+            apply_yes_no(PaymentMethods.EDY, item, store["payments"][1] == "1")
+            apply_yes_no(PaymentMethods.ID, item, store["payments"][2] == "1")
+            apply_yes_no(PaymentMethods.QUICPAY, item, store["payments"][3] == "1")
+            apply_yes_no(PaymentMethods.APPLE_PAY, item, store["payments"][4] == "1")
+            apply_yes_no("payment:icsf", item, store["payments"][5] == "1")
+            apply_yes_no("payment:icoca", item, store["payments"][6] == "1")
+            apply_yes_no(PaymentMethods.UNIONPAY, item, store["payments"][7] == "1")
+            apply_yes_no(PaymentMethods.ALIPAY, item, store["payments"][8] == "1")
+            apply_yes_no(PaymentMethods.WECHAT, item, store["payments"][9] == "1")
+            apply_yes_no(PaymentMethods.D_BARAI, item, store["payments"][10] == "1")
+            apply_yes_no("payment:au_pay", item, store["payments"][11] == "1")
+            apply_yes_no(PaymentMethods.WAON, item, store["payments"][12] == "1")
+            apply_yes_no(PaymentMethods.PAYPAY, item, store["payments"][13] == "1")
+            apply_yes_no(PaymentMethods.MERPAY, item, store["payments"][14] == "1")
+            apply_yes_no(PaymentMethods.RAKUTEN_PAY, item, store["payments"][15] == "1")
+            apply_yes_no("payment:quo_pay", item, store["payments"][16] == "1")
 
             item["website"] = f"https://www.matsukiyococokara-online.com/map?kid={store['id']}"
-
+            
+            item["phone"] = f"+81 {store['phone_store']}"
+            
+            if str(''.join(filter(str.isdigit, str(store["parking_count"])))) in ('', '0'):
+                item["extras"]["parking"] = "no"
+            elif "共用" in str(store["parking_count"]):
+                item["extras"]["parking"] = "yes"
+            else:
+                item["extras"]["parking:capacity:standard"] = str(''.join(filter(str.isdigit, str(store["parking_count"]))))            
+            
+            try:
+                item["branch"] = re.search(r'(?:\s)\b\S+$', str(store['name'])).group()
+                del item["name"]
+            except:
+                pass
+            
+            item["extras"]["start_date"] = re.search(r'^\S*', str(store['publish_start'])).group()
+            
             yield item
