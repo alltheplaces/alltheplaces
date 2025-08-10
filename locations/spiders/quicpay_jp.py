@@ -57,5 +57,5 @@ class QuicpayJPSpider(scrapy.Spider):
             item["extras"]["payment:quicpay"] = "yes"
             yield item
 
-        if data["page"] < 2:  # if data["page"] < data["totalCount"]:
+        if data["page"] < data["totalCount"]:
             yield self.get_page(1 + response.meta["page"])
