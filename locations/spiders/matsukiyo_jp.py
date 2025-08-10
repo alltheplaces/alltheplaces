@@ -1,5 +1,5 @@
-from typing import Any
 import re
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -27,9 +27,9 @@ class MatsukiyoJPSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
-            
+
             item = DictParser.parse(store)
-            
+
             match store["icon"]:
                 case 1:
                     item.update({"brand": "マツモトキヨシ", "brand_wikidata": "Q8014776"})
@@ -70,7 +70,8 @@ class MatsukiyoJPSpider(Spider):
                 case 37:
                     item.update({"brand": "クスリ岩崎チェーン"})
 
-            if store["businesshours"][2] == "1": item["opening_hours"] = "24/7"
+            if store["businesshours"][2] == "1":
+                item["opening_hours"] = "24/7"
 
             if store["services"][4] == "1":
                 apply_category(Categories.PHARMACY, item)
@@ -79,16 +80,16 @@ class MatsukiyoJPSpider(Spider):
                 apply_category(Categories.SHOP_CHEMIST, item)
                 item["extras"]["dispensing"] = "no"
 
-            
             apply_yes_no("sells:baby_goods", item, store["products"][12] == "1")
             apply_yes_no(Sells.PET_SUPPLIES, item, store["products"][13] == "1")
-            if store["products"][14] == "1": item["extras"]["medical_supply"] = "home_care"
+            if store["products"][14] == "1":
+                item["extras"]["medical_supply"] = "home_care"
             apply_yes_no("sells:sweets", item, store["products"][15] == "1")
             apply_yes_no("sells:food", item, store["products"][16] == "1")
             apply_yes_no("sells:rice", item, store["products"][17] == "1")
             apply_yes_no("sells:alcohol", item, store["products"][18] == "1")
             apply_yes_no(Sells.TOBACCO, item, store["products"][19] == "1")
-            
+
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["payments"][0] == "1")
             apply_yes_no(PaymentMethods.EDY, item, store["payments"][1] == "1")
             apply_yes_no(PaymentMethods.ID, item, store["payments"][2] == "1")
@@ -108,22 +109,24 @@ class MatsukiyoJPSpider(Spider):
             apply_yes_no("payment:quo_pay", item, store["payments"][16] == "1")
 
             item["website"] = f"https://www.matsukiyococokara-online.com/map?kid={store['id']}"
-            
+
             item["phone"] = f"+81 {store['phone_store']}"
-            
-            if str(''.join(filter(str.isdigit, str(store["parking_count"])))) in ('', '0'):
+
+            if str("".join(filter(str.isdigit, str(store["parking_count"])))) in ("", "0"):
                 item["extras"]["parking"] = "no"
             elif "共用" in str(store["parking_count"]):
                 item["extras"]["parking"] = "yes"
             else:
-                item["extras"]["parking:capacity:standard"] = str(''.join(filter(str.isdigit, str(store["parking_count"]))))            
-            
+                item["extras"]["parking:capacity:standard"] = str(
+                    "".join(filter(str.isdigit, str(store["parking_count"])))
+                )
+
             try:
-                item["branch"] = re.search(r'(?:\s)\b\S+$', str(store['name'])).group()
+                item["branch"] = re.search(r"(?:\s)\b\S+$", str(store["name"])).group()
                 del item["name"]
             except:
                 pass
-            
-            item["extras"]["start_date"] = re.search(r'^\S*', str(store['publish_start'])).group()
-            
+
+            item["extras"]["start_date"] = re.search(r"^\S*", str(store["publish_start"])).group()
+
             yield item
