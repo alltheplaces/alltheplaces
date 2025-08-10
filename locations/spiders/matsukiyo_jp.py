@@ -82,8 +82,7 @@ class MatsukiyoJPSpider(Spider):
 
             apply_yes_no("sells:baby_goods", item, store["products"][12] == "1")
             apply_yes_no(Sells.PET_SUPPLIES, item, store["products"][13] == "1")
-            if store["products"][14] == "1":
-                item["extras"]["medical_supply"] = "home_care"
+            if store["products"][14] == "1": item["extras"]["medical_supply"] = "home_care"
             apply_yes_no("sells:sweets", item, store["products"][15] == "1")
             apply_yes_no("sells:food", item, store["products"][16] == "1")
             apply_yes_no("sells:rice", item, store["products"][17] == "1")
@@ -111,9 +110,11 @@ class MatsukiyoJPSpider(Spider):
             item["website"] = f"https://www.matsukiyococokara-online.com/map?kid={store['id']}"
 
             item["phone"] = f"+81 {store['phone_store']}"
-
+            if store['phone_dispensing'] is not None: item["extras"]["phone:pharmacy"] = f"+81 {store['phone_dispensing']}"
+            if store['fax_dispensing'] is not None: item["extras"]["fax"] = f"+81 {store['fax_dispensing']}"
+            
             if str("".join(filter(str.isdigit, str(store["parking_count"])))) in ("", "0"):
-                item["extras"]["parking"] = "no"
+                pass
             elif "共用" in str(store["parking_count"]):
                 item["extras"]["parking"] = "yes"
             else:
