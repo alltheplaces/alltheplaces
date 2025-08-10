@@ -15,7 +15,7 @@ class QuicpayJPSpider(scrapy.Spider):
         1: Categories.SHOP_CONVENIENCE,
         2: Categories.FUEL_STATION,
         3: Categories.SHOP_SUPERMARKET,
-        4: Categories.SHOP_CHEMIST,
+        4: Categories.PHARMACY,
         5: Categories.RESTAURANT,
         6: Categories.GENERIC_SHOP,
         7: Categories.SHOP_ELECTRONICS,
