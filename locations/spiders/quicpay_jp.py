@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class quicpayJPSpider(scrapy.Spider):
+class QuicpayJPSpider(scrapy.Spider):
     name = "quicpay_jp"
     country_code = "JP"
 
