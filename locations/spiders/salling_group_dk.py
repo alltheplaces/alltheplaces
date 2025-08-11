@@ -11,7 +11,7 @@ from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 BRANDS = {
     "bilka": ({"brand": "Bilka", "brand_wikidata": "Q861880"}, Categories.SHOP_SUPERMARKET),
     "br": ({"brand": "BR", "brand_wikidata": "Q4353228"}, Categories.SHOP_TOYS),
-    "carlsjr": (CarlsJrUSSpider.item_attributes, Categories.SHOP_SUPERMARKET),
+    "carlsjr": (CarlsJrUSSpider.item_attributes, Categories.FAST_FOOD),
     "foetex": ({"brand": "Føtex", "brand_wikidata": "Q1480395"}, Categories.SHOP_SUPERMARKET),
     "netto": ({"brand": "Netto", "brand_wikidata": "Q552652"}, Categories.SHOP_SUPERMARKET),
     "salling": ({"brand": "Salling", "brand_wikidata": "Q68166349"}, Categories.SHOP_DEPARTMENT_STORE),
