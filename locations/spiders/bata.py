@@ -23,6 +23,7 @@ class BataSpider(JSONBlobSpider):
     ]
     user_agent = FIREFOX_LATEST
     locations_key = "stores"
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = None
