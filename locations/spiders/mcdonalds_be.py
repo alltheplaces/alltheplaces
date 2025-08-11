@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.user_agents import FIREFOX_LATEST
 
@@ -16,6 +17,8 @@ class McdonaldsBESpider(Spider):
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.be"]
     start_urls = ["https://www.mcdonalds.be/en/restaurants/api/restaurants"]
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     user_agent = FIREFOX_LATEST
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
