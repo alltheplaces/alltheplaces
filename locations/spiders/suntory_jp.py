@@ -23,7 +23,7 @@ class SuntoryJPSpider(CSVFeedSpider):
         },
     }
 
-    headers = ["pay_id", "lat", "lng"]
+    headers = ["id", "lat", "lon"]
     allowed_domains = ["map.jihan-pi.jp"]
     start_urls = ["https://map.jihan-pi.jp/map.csv"]
 
@@ -33,12 +33,10 @@ class SuntoryJPSpider(CSVFeedSpider):
 
     def parse_row(self, response, row):
         i = Feature()
-        try:
-            i["ref"] = row["pay_id"]
-            i["lat"] = row["lat"]
-            i["lon"] = row["lng"]
+            i["ref"] = row["id"]
+           # i["lat"] = row["lat"]
+           # i["lon"] = row["lng"]
             apply_category(Categories.VENDING_MACHINE, i)
             apply_category(Vending.DRINKS, i)
             return i
-        except:
-            return i
+        
