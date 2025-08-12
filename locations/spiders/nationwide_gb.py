@@ -1,7 +1,8 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -28,3 +29,6 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
             item.pop("phone", None)
 
         yield item
+
+    def extract_amenity_features(self, item, response: Response, ld_item):
+        apply_yes_no(Extras.ATM, item, "Cash machine" in ld_item["amenityFeature"]["name"])
