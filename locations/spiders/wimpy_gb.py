@@ -1,36 +1,18 @@
-from scrapy import Selector
-from scrapy.spiders import SitemapSpider
+import scrapy
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser, get_object
-
-
-# Malformed Microdata
-# root itemscope also an itemprop=brand
-def extract_microdata(doc: Selector):
-    result = {}
-    items = []
-    for item in doc.xpath('//*[@itemscope][not(@itemprop) or @itemprop="brand"]'):
-        items.append(get_object(item.root))
-
-    result["items"] = items
-
-    return result
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class WimpyGBSpider(SitemapSpider):
+class WimpyGBSpider(scrapy.Spider):
     name = "wimpy_gb"
     item_attributes = {"brand": "Wimpy", "brand_wikidata": "Q2811992"}
-    sitemap_urls = ["https://locations.wimpy.uk.com/sitemap.xml"]
-    sitemap_rules = [(r"locations\.wimpy\.uk\.com/[^/]+/[^/]+/[^/]+/[^/]+\.html", "parse")]
+    start_urls = ["https://wimpy.uk.com/api/v2/locations?all=true"]
 
     def parse(self, response, **kwargs):
-        for ld in MicrodataParser.convert_to_graph(extract_microdata(response))["@graph"]:
-            if ld["@type"] == "FastFoodRestaurant":
-                item = LinkedDataParser.parse_ld(ld)
-                item["ref"] = response.url
-                item["image"] = None
-                item["branch"] = item.pop("name").removeprefix("Wimpy ")
-                item["country"] = "GB"
-
-                yield item
+        for location in response.json()["locations"]:
+            item = DictParser.parse(location)
+            if item.get("addr_full"):
+                item.pop("addr_full")
+            item["street_address"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])
+            yield item
