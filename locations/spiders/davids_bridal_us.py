@@ -4,8 +4,8 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
-class DavidsBridalSpider(Spider):
-    name = "davids_bridal"
+class DavidsBridalUSSpider(Spider):
+    name = "davids_bridal_us"
     item_attributes = {"brand": "David's Bridal", "brand_wikidata": "Q5230388"}
     allowed_domains = ["www.davidsbridal.com"]
     start_urls = ["https://www.davidsbridal.com/api/aem/locations"]
