@@ -12,7 +12,7 @@ class WimpyGBSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["locations"]:
             item = DictParser.parse(location)
-            if item.get("addr_full"):
-                item.pop("addr_full")
+            item["branch"] = item.pop("name").removeprefix("Wimpy ")
+            item.pop("addr_full", None)
             item["street_address"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])
             yield item
