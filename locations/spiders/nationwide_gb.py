@@ -2,7 +2,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -11,7 +11,6 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Nationwide",
         "brand_wikidata": "Q846735",
-        "extras": Categories.BANK.value,
     }
     start_urls = ["https://www.nationwide.co.uk/branches/index.html"]
     rules = [Rule(LinkExtractor(allow=r"/branches/"), callback="parse_sd", follow=True)]
@@ -29,6 +28,8 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
             item.pop("phone", None)
 
         item["branch"] = item.pop("name").removeprefix("Nationwide ")
+
+        apply_category(Categories.BANK, item)
 
         yield item
 
