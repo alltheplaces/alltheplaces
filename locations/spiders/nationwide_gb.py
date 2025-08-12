@@ -28,6 +28,8 @@ class NationwideGBSpider(CrawlSpider, StructuredDataSpider):
         if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
             item.pop("phone", None)
 
+        item["branch"] = item.pop("name").removeprefix("Nationwide ")
+
         yield item
 
     def extract_amenity_features(self, item, response: Response, ld_item):
