@@ -30,4 +30,13 @@ class DavidsBridalUSSpider(Spider):
                 f'{item["ref"]}?storeLocation=US'
             )
 
+            metafield = data.get("metafield")
+            if metafield and metafield.get("key") == "store_hours":
+                hours_value = json.loads(metafield.get("value"))
+                item["opening_hours"] = OpeningHours()
+                for day in hours_value.get("regular"):
+                    item["opening_hours"].add_range(
+                        day=day.get("day"), open_time=day.get("open")[:5], close_time=day.get("close")[:5]
+                    )
+
             yield item
