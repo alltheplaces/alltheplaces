@@ -3,6 +3,7 @@ import json
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
