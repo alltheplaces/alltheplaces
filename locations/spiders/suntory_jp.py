@@ -4,6 +4,7 @@ from locations.categories import Categories, Vending, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
+
 class SuntoryJPSpider(CSVFeedSpider):
     name = "suntory_jp"
     custom_settings = {
@@ -19,20 +20,20 @@ class SuntoryJPSpider(CSVFeedSpider):
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "cross-site",
-        },    
+        },
     }
-    
+
     headers = ["pay_id", "lat", "lng"]
     allowed_domains = ["map.jihan-pi.jp"]
     start_urls = ["https://map.jihan-pi.jp/map.csv"]
-    
+
     item_attributes = {
         "brand_wikidata": "Q1345267",
     }
 
     def parse_row(self, response, row):
         i = Feature()
-        try:            
+        try:
             i["ref"] = row["pay_id"]
             i["lat"] = row["lat"]
             i["lon"] = row["lng"]
