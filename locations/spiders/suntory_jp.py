@@ -39,4 +39,3 @@ class SuntoryJPSpider(CSVFeedSpider):
             apply_category(Categories.VENDING_MACHINE, i)
             apply_category(Vending.DRINKS, i)
             return i
-        
