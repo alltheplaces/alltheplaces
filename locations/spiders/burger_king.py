@@ -153,7 +153,7 @@ class BurgerKingSpider(scrapy.Spider):
         us_endpoint = "https://use1-prod-bk.rbictg.com/graphql"
         za_endpoint = "https://www.burgerking.co.za/api/whitelabel"
         ie_endpoint = "https://burgerking.ie/api/whitelabel"
-        ar_endpoint = "https://use2-prod-bk.rbictg.com/graphql"
+        ar_cl_endpoint = "https://use2-prod-bk.rbictg.com/graphql"
 
         # UAE
         for country_code, city_name in [("AE", "Dubai")]:
@@ -191,7 +191,11 @@ class BurgerKingSpider(scrapy.Spider):
 
         # Argentina
         for country_code, city_name in [("AR", "Córdoba")]:
-            yield self.make_city_request(city_name, country_code, 1000000, 20000, ar_endpoint)
+            yield self.make_city_request(city_name, country_code, 1000000, 20000, ar_cl_endpoint)
+
+        # Chile
+        for country_code, city_name in [("CL", "Santiago")]:
+            yield self.make_city_request(city_name, country_code, 1000000, 20000, ar_cl_endpoint)
 
         # USA
         # So many stores in the US that we need to be kind to the BK back end.
@@ -199,12 +203,15 @@ class BurgerKingSpider(scrapy.Spider):
             yield self.make_request(lat, lon, "US", 128000, 20000, us_endpoint)
 
     store_locator_templates = {
+        "AR": "https://burgerking.com.ar/store-locator/store/{}",
         "AT": "https://www.burgerking.at/store-locator/store/{}",
         "CA": "https://www.burgerking.ca/store-locator/store/{}",
         "CH": "https://www.burger-king.ch/store-locator/store/{}",
+        "CL": "https://www.burgerking.cl/en/store-locator/store/{}",
         "CZ": "https://burgerking.cz/store-locator/store/{}",
         "DE": "https://www.burgerking.de/store-locator/store/{}",
         "GB": "https://www.burgerking.co.uk/store-locator/store/{}",
+        "IE": "https://burgerking.ie/store-locator/store/{}",
         "NL": "https://www.burgerking.nl/store-locator/store/{}",
         "NZ": "https://www.burgerking.co.nz/store-locator/store/{}",
         "PL": "https://burgerking.pl/store-locator/store/{}",
@@ -213,8 +220,6 @@ class BurgerKingSpider(scrapy.Spider):
         "SA": "https://www.burgerking.com.sa/ar/store-locator/store/{}",
         "US": "https://www.bk.com/store-locator/store/{}",
         "ZA": "https://www.burgerking.co.za/store-locator/store/{}",
-        "IE": "https://burgerking.ie/store-locator/store/{}",
-        "AR": "https://burgerking.com.ar/store-locator/store/{}",
     }
 
     def parse(self, response, country_code):
