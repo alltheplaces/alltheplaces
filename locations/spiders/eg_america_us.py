@@ -1,5 +1,7 @@
+from typing import Any
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -24,7 +26,7 @@ class EgAmericaUSSpider(Spider):
         14: {"brand": "Turkey Hill", "brand_wikidata": "Q42376970"},
         15: {"brand": "Minit Mart", "brand_wikidata": "Q18154470"},
         16: {"brand": "Fastrac", "brand_wikidata": "Q117324848"},
-        17: {"brand": "Certified Oil", "brand_wikidata": "Q100148356"},
+        17: {"brand": "Certified", "brand_wikidata": "Q100148356"},
         18: {"brand": "Kwik Shop", "brand_wikidata": "Q6450417"},
         19: {"brand": "Loaf 'N Jug", "brand_wikidata": "Q6663398"},
         20: {"brand": "Sprint", "brand_wikidata": "Q123012447"},
@@ -33,7 +35,7 @@ class EgAmericaUSSpider(Spider):
     def start_requests(self):
         yield JsonRequest(url=self.start_urls[0], callback=self.parse)
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["value"]["mapResults"]:
             item = DictParser.parse(location)
             item.update(self.brands[location["bannerId"]])

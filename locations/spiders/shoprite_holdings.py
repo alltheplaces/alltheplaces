@@ -16,7 +16,7 @@ SHOPRITE_BRANDS = {
         "extras": Categories.SHOP_SUPERMARKET.value,
     },
     "Checkers LiquorShop": {
-        "brand": "LiquorShop Checkers",
+        "brand": "Checkers",
         "brand_wikidata": "Q5089126",
         "extras": Categories.SHOP_ALCOHOL.value,
     },

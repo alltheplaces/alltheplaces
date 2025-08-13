@@ -43,7 +43,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "EB": ["Edition Hotels", "Q91218404"],
         "EL": ["Element", "Q91948072"],
         "ER": ["Marriott Executive Apartments", "Q72636824"],
-        "FI": ["Fairfield by Marriott", "Q5430314"],
+        "FI": ["Fairfield Inn", "Q5430314"],
         "FP": ["Four Points by Sheraton", "Q1439966"],
         "GE": ["Gaylord Hotels", "Q3099664"],
         "JW": ["JW Marriott Hotels", "Q1067636"],
@@ -57,7 +57,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "SI": ["Sheraton", "Q634831"],
         "SH": ["SpringHill Suites", "Q7580351"],
         "TX": "ignore",  # Tribute Portfolio
-        "XR": ["St. Regis Hotels & Resorts", "Q30715430"],
+        "XR": ["St. Regis", "Q30715430"],
         "TS": ["TownePlace Suites", "Q7830092"],
         "WH": ["W Hotels", "Q7958488"],
         "WI": ["Westin Hotels & Resorts", "Q1969162"],

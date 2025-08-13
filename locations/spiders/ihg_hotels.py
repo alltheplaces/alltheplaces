@@ -33,7 +33,7 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
         "spnd": (None, None),
         "staybridge": ("Staybridge Suites", "Q7605116"),
         "vignettecollection": (None, None),
-        "voco": ("Voco Hotels", "Q60750454"),
+        "voco": ("voco", "Q60750454"),
     }
 
     def parse(self, response, **kwargs):
