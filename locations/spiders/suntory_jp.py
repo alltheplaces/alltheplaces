@@ -35,8 +35,8 @@ class SuntoryJPSpider(CSVFeedSpider):
         i = Feature()
         try:
             i["ref"] = row["id"]
-            # i["lat"] = row["lat"]
-            # i["lon"] = row["lon"]
+            i["lat"] = row["lat"]
+            i["lon"] = row["lon"]
             apply_category(Categories.VENDING_MACHINE, i)
             apply_category(Vending.DRINKS, i)
             return i
