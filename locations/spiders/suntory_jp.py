@@ -33,9 +33,9 @@ class SuntoryJPSpider(CSVFeedSpider):
 
     def parse_row(self, response, row):
         i = Feature()
-            i["ref"] = row["id"]
-           # i["lat"] = row["lat"]
-           # i["lon"] = row["lng"]
-            apply_category(Categories.VENDING_MACHINE, i)
-            apply_category(Vending.DRINKS, i)
-            return i
+        i["ref"] = row["id"]
+        # i["lat"] = row["lat"]
+        # i["lon"] = row["lng"]
+        apply_category(Categories.VENDING_MACHINE, i)
+        apply_category(Vending.DRINKS, i)
+        return i
