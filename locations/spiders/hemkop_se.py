@@ -14,6 +14,8 @@ class HemkopSESpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if not item["street_address"]:  # Not enough location data
+            return
         item["branch"] = (item.pop("name", "") or "").removeprefix("Hemköp ")
         item["phone"] = feature["address"].get("phone")
         item["website"] = "https://www.hemkop.se/butik/{}".format(item["ref"])
