@@ -13,7 +13,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TGJonesGBSpider(SitemapSpider):
+class TgjonesGBSpider(SitemapSpider):
     name = "tgjones_gb"
     item_attributes = {"brand": "TGJones", "brand_wikidata": "Q133575797"}
     allowed_domains = ["tgjonesonline.co.uk"]
