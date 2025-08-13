@@ -41,4 +41,4 @@ class SuntoryJPSpider(CSVFeedSpider):
             apply_category(Vending.DRINKS, i)
             return i
         except:
-            pass
+            return i
