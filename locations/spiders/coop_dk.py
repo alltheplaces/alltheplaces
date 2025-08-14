@@ -12,7 +12,7 @@ class CoopDKSpider(scrapy.Spider):
     name = "coop_dk"
     BRANDS = {
         "Brugsen": {"brand_wikidata": "Q48772252"},
-        "Coop365": {"brand_wikidata": "Q104671354"},
+        "Coop365": {"brand": "365discount", "brand_wikidata": "Q104671354"},
         "Dagli'Brugsen": {"brand_wikidata": "Q12307017"},
         "FK": {},
         "Irma": {"brand_wikidata": "Q797150"},
