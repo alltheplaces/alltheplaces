@@ -12,8 +12,8 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TGJonesGBSpider(SitemapSpider):
-    name = "tgjones"
+class TgjonesGBSpider(SitemapSpider):
+    name = "tgjones_gb"
     item_attributes = {"brand": "TGJones", "brand_wikidata": "Q133575797"}
     allowed_domains = ["tgjonesonline.co.uk"]
     sitemap_urls = ["https://www.tgjonesonline.co.uk/SiteMap/sitemap-pages.xml"]
