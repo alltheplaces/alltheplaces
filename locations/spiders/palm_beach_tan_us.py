@@ -10,10 +10,9 @@ from locations.user_agents import BROWSER_DEFAULT
 class PalmBeachTanUSSpider(SitemapSpider):
     name = "palm_beach_tan_us"
     item_attributes = {"brand": "Palm Beach Tan", "brand_wikidata": "Q64027086"}
-    # allowed_domains = ["palmbeachtan.com"]
     sitemap_urls = ["https://palmbeachtan.com/sitemap-locations.xml"]
     sitemap_rules = [(r"https://palmbeachtan.com/locations/[^/]+/[a-z0-9-]+", "parse")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         properties = {
