@@ -27,7 +27,6 @@ class TgjonesGBSpider(SitemapSpider):
     skip_auto_cc_domain = True
     requires_proxy = True
 
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = item["website"] = response.url
