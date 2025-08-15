@@ -1,5 +1,7 @@
 import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_EN, OpeningHours
@@ -14,10 +16,10 @@ class PalmBeachTanUSSpider(SitemapSpider):
     sitemap_rules = [(r"https://palmbeachtan.com/locations/[^/]+/[a-z0-9-]+", "parse")]
     user_agent = BROWSER_DEFAULT
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.url,
-            "name": " ".join(response.xpath("//main/section[1]/div[1]/h1/text()[2]").get().split())
+            "branch": " ".join(response.xpath("//main/section[1]/div[1]/h1/text()[2]").get().split())
             .replace(" - NOW HIRING!", "")
             .replace(" - Now Hiring!", "")
             .replace(" - NOW OPEN!", "")
