@@ -17,7 +17,7 @@ class AviaEUSpider(Spider):
         "Avia": AVIA_SHARED_ATTRIBUTES,
         "Esso Express": {"brand": "Esso Express", "brand_wikidata": "Q2350336"},
         "Esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "Tamoil Express": {"brand": "Tamoil express", "brand_wikidata": "Q124658477"},
+        "Tamoil Express": {"brand": "Tamoil Express", "brand_wikidata": "Q124658477"},
         "Tamoil": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
         "Tankeasy": {"brand": "TankEasy", "brand_wikidata": "Q124608381"},
         "Truckeasy": {"brand": "TruckEasy", "brand_wikidata": "Q124608382"},
