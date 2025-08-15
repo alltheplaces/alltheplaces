@@ -20,10 +20,7 @@ class TgjonesGBSpider(SitemapSpider):
     sitemap_urls = ["https://www.tgjonesonline.co.uk/SiteMap/sitemap-pages.xml"]
     sitemap_rules = [(r"/stores/[-\w]+", "parse")]
     user_agent = BROWSER_DEFAULT
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "ROBOTSTXT_OBEY": False,
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False,"DEFAULT_REQUEST_HEADERS": {"Host": "www.tgjonesonline.co.uk","Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","Accept-Language": "en-GB,en-US;q=0.7,en;q=0.3","Accept-Encoding": "gzip, deflate, br, zstd","DNT": "1","Sec-GPC": "1","Alt-Used": "www.tgjonesonline.co.uk"}}
     coordinates_pattern = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)")
     skip_auto_cc_domain = True
 
