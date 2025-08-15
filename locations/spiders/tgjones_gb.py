@@ -9,7 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -20,7 +19,10 @@ class TGJonesGBSpider(SitemapSpider):
     sitemap_urls = ["https://www.tgjonesonline.co.uk/SiteMap/sitemap-pages.xml"]
     sitemap_rules = [(r"/stores/[-\w]+", "parse")]
     user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False,"DEFAULT_REQUEST_HEADERS": {"Host": "www.tgjonesonline.co.uk","Alt-Used": "www.tgjonesonline.co.uk"}}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DEFAULT_REQUEST_HEADERS": {"Host": "www.tgjonesonline.co.uk", "Alt-Used": "www.tgjonesonline.co.uk"},
+    }
     coordinates_pattern = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)")
     skip_auto_cc_domain = True
 
