@@ -8,11 +8,11 @@ from locations.dict_parser import DictParser
 
 class PudostationJPSpider(Spider):
     name = "pudostation_jp"
-    
+
     start_urls = ["https://map.pudo.jp/api/points/xn7"]
     allowed_domains = ["map.pudo.jp"]
     country_code = "JP"
-    
+
     item_attributes = {
         "brand_wikidata": "Q86738066",
     }
@@ -29,5 +29,5 @@ class PudostationJPSpider(Spider):
                     item["opening_hours"] = "24/7"
             except:
                 pass
-            
+
             yield item
