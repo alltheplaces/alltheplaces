@@ -17,10 +17,10 @@ class AifulJPSpider(Spider):
         "brand_wikidata": "Q4696808",
         "brand": "アイフル",
         "extras": {
-        "brand:en": "Aiful",
-        "shop": "money_lender",
-        # TODO: add to NSI
-        }
+            "brand:en": "Aiful",
+            "shop": "money_lender",
+            # TODO: add to NSI
+        },
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -28,6 +28,6 @@ class AifulJPSpider(Spider):
 
             item = DictParser.parse(store)
             item["ref"] = store["key"]
-            item["website"] = f"https://shop.aiful.co.jp/map/{store['key']}"          
-            
+            item["website"] = f"https://shop.aiful.co.jp/map/{store['key']}"
+
             yield item
