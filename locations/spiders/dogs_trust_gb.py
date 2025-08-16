@@ -27,7 +27,7 @@ class DogsTrustGBSpider(JSONBlobSpider):
         item.pop("email", None)
         item.pop("facebook", None)
         item.pop("twitter", None)
-        item["street_address"] = merge_address_lines([feature["address_line_one"], location["address_line_two"]])
+        item["street_address"] = merge_address_lines([feature["address_line_one"], feature["address_line_two"]])
         if feature["opening_times_text"]:
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(ranges_string=feature["opening_times_text"])
