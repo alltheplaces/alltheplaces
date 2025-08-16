@@ -1,11 +1,14 @@
 from typing import Any
+
 from scrapy import Spider
 from scrapy.http import Response
+
 from locations.dict_parser import DictParser
+
 
 class FujiserviceJPSpider(Spider):
     name = "fujiservice_jp"
-    
+
     start_urls = ["https://fuji-service-cl.co.jp/wp-json/wpgmza/v1/features/"]
     allowed_domains = ["fuji-service-cl.co.jp"]
     country_code = "JP"
