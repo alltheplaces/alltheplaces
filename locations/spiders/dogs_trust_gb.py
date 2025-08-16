@@ -21,7 +21,6 @@ class DogsTrustGBSpider(JSONBlobSpider):
         feature.update({k.replace("field_", ""): v for k, v in feature.items()})
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        print(feature)
         item["branch"] = item.pop("name")
         item["website"] = "https://www.dogstrust.org.uk" + feature["path"]["alias"]
         item.pop("email", None)
