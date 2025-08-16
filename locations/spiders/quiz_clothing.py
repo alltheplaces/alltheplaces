@@ -7,5 +7,5 @@ class QuizClothingSpider(JSONBlobSpider):
         "brand_wikidata": "Q29995941",
         "brand": "Quiz",
     }
-    start_urls = ['https://www.quizclothing.co.uk/api/inventory/inventoryGetStoreFilter?countryId=0&cityId=0&cityId=0']
+    start_urls = ["https://www.quizclothing.co.uk/api/inventory/inventoryGetStoreFilter?countryId=0&cityId=0&cityId=0"]
     locations_key = "data"
