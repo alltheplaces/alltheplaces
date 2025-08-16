@@ -3,8 +3,8 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
 class SalomonJPSpider(Spider):
@@ -13,7 +13,6 @@ class SalomonJPSpider(Spider):
     start_urls = ["https://store.amersports.jp/api/points/xn7"]
     allowed_domains = ["store.amersports.jp"]
     country_code = "JP"
-
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:
@@ -40,7 +39,7 @@ class SalomonJPSpider(Spider):
                 apply_category(Categories.SHOP_SPORTS, item)
                 if len(sport) == 1:
                     item["extras"]["sport"] = sport[0]
-                else:    
+                else:
                     item["extras"]["sport"] = ";".join(sport)
-            
+
             yield item
