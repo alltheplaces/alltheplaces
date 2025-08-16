@@ -23,4 +23,6 @@ class FujiserviceJPSpider(Spider):
             item["operator"] = "フジサービス"
             item["extras"]["operator:en"] = "Fuji Service"
             item["image"] = store["pic"]
+            if "24時間" in store["description"]:
+                item["opening_hours"] = "24/7"
             yield item
