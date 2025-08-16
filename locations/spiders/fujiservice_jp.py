@@ -1,3 +1,5 @@
+import re
+
 from typing import Any
 
 from scrapy import Spider
@@ -18,7 +20,7 @@ class FujiserviceJPSpider(Spider):
         for store in response.json()["markers"]:
 
             item = DictParser.parse(store)
-            item["ref"] = store["id"]
+            item["ref"] = re.search(r"^\S-\d{4}", str(store["title"])).group()
             item["extras"]["amenity"] = "luggage_locker"
             item["operator"] = "フジサービス"
             item["extras"]["operator:en"] = "Fuji Service"
