@@ -1,11 +1,11 @@
 from typing import Iterable
 
-from scrapy.http import Request, Response
+from scrapy.http import Response
 
-from locations.json_blob_spider import JSONBlobSpider
-from locations.hours import OpeningHours, DAYS_FULL
-from locations.items import Feature
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class QuizClothingSpider(JSONBlobSpider):
