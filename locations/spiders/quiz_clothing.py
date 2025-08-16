@@ -1,9 +1,11 @@
 from typing import Iterable
 
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
-from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.hours import OpeningHours, DAYS_FULL
+from locations.items import Feature
+from locations.categories import Categories, apply_category
 
 
 class QuizClothingSpider(JSONBlobSpider):
@@ -19,4 +21,8 @@ class QuizClothingSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         item["lat"] = feature["latitude"]
         item["lon"] = feature["longtitude"]
+        if feature["workingHours"]:
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(ranges_string=feature["workingHours"])
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item
