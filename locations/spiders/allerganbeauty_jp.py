@@ -3,8 +3,8 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 
 
 class AllerganbeautyJPSpider(Spider):
@@ -13,7 +13,7 @@ class AllerganbeautyJPSpider(Spider):
     start_urls = ["https://clinics.allerganbeauty.jp/api/all_point"]
     allowed_domains = ["clinics.allerganbeauty.jp"]
     country_code = "JP"
-    
+
     TYPES = {
         "皮": "dermatology",
         "アレルギー": "allergology",
@@ -35,14 +35,14 @@ class AllerganbeautyJPSpider(Spider):
         "美容歯": "implantology",
         "肛門": "proctology",
     }
-    
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["shop_list"]:
 
             item = DictParser.parse(store)
             item["ref"] = store["key"]
             try:
-                item["website"] = store['施設URL']
+                item["website"] = store["施設URL"]
             except:
                 pass
             try:
@@ -53,14 +53,14 @@ class AllerganbeautyJPSpider(Spider):
             speciality = []
             for jaspec, enspec in self.TYPES.items():
                 try:
-                    if jaspec in store['診療科目']:
+                    if jaspec in store["診療科目"]:
                         speciality.append(enspec)
                 except:
                     pass
             if speciality:
                 if len(speciality) == 1:
                     item["extras"]["healthcare:speciality"] = speciality[0]
-                else:    
+                else:
                     item["extras"]["healthcare:speciality"] = ";".join(speciality)
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["クレジットカード利用可"] == "1")
             if store["完全予約制"] == 1:
@@ -70,6 +70,6 @@ class AllerganbeautyJPSpider(Spider):
             if store["駐車場あり"] == 1:
                 apply_category({"parking": "yes"}, item)
             if store["オンライン予約可"] == 1:
-                item["extras"]["website:booking"] = store['予約URL']
-                
+                item["extras"]["website:booking"] = store["予約URL"]
+
             yield item
