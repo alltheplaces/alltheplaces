@@ -28,6 +28,7 @@ class OtsukaJPSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             if any(i in store["name"] for i in self.SKIP_BRANDS):
+                item = {}
                 yield item
             item = DictParser.parse(store)
             item["ref"] = store["key"]
