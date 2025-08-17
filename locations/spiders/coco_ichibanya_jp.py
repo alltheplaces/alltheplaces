@@ -50,5 +50,5 @@ class CocoIchibanyaJPSpider(Spider):
                 item["extras"]["baby"] = "yes"
             item["extras"]["website:orders"] = store["extra_fields"]["モバイルオーダー"]
             item["name"] = None
-            
+
             yield item
