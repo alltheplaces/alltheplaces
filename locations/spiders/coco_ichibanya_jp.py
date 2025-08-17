@@ -7,7 +7,7 @@ from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class CocoichibanyaJPSpider(Spider):
+class CocoIchibanyaJPSpider(Spider):
     name = "coco_ichibanya_jp"
 
     start_urls = ["https://tenpo.ichibanya.co.jp/api/point/xn/"]
