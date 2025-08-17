@@ -6,6 +6,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
+
 class OtsukaJPSpider(Spider):
     name = "otsuka_jp"
 
@@ -13,7 +14,15 @@ class OtsukaJPSpider(Spider):
     allowed_domains = ["shop-eql.otsuka.co.jp"]
     country_code = "JP"
     SKIP_BRANDS = [
-        "マツモトキヨシ", "ぱぱす", "ファミリードラッグ", "くすりのラブ", "ココカラファイン", "セガミ", "ジップ", "ライフォート", "コダマ",
+        "マツモトキヨシ",
+        "ぱぱす",
+        "ファミリードラッグ",
+        "くすりのラブ",
+        "ココカラファイン",
+        "セガミ",
+        "ジップ",
+        "ライフォート",
+        "コダマ",
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
