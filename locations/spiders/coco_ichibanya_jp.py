@@ -49,5 +49,6 @@ class CocoIchibanyaJPSpider(Spider):
             if store["extra_fields"]["ベビーフード"] == "1":
                 item["extras"]["baby"] = "yes"
             item["extras"]["website:orders"] = store["extra_fields"]["モバイルオーダー"]
-
+            item["name"] = None
+            
             yield item
