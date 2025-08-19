@@ -3,6 +3,7 @@ import re
 import scrapy
 from scrapy import Selector
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -39,4 +40,5 @@ class TiendasNetoMXSpider(scrapy.Spider):
                     item["postcode"] = m.group(1)
                 elif m := re.search(r"Dirección: (.*)", line):
                     item["addr_full"] = m.group(1)
+            apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item
