@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-def decode_phones(data_item):
+def decode_phones(data_item: dict) -> list[str]:
     phones = []
     no_store_number = "ไม่มีเบอร์ร้าน"
     for key in ["mobile", "tel"]:
