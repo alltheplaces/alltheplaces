@@ -22,7 +22,6 @@ class MpsITSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for bank in response.json()["listaFiliali"]:
             item = Feature()
-            item["name"] = "MPS"
             item["street_address"] = bank["indirizzo"]
             item["postcode"] = bank["cap"]
             item["city"] = bank["comune"]
