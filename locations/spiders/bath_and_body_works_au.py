@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy import Selector
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -28,4 +29,5 @@ class BathAndBodyWorksAUSpider(JSONBlobSpider):
         hours_text = " ".join(hours_html.xpath('//span[@class="sl-weekday" or @class="sl-time"]/text()').getall())
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text)
+        apply_category(Categories.SHOP_COSMETICS, item)
         yield item
