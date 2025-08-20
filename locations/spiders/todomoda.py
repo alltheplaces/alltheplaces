@@ -24,5 +24,6 @@ class TodomodaSpider(scrapy.Spider):
             location["country_code"] = location.pop("country_id")
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
+            item.pop("phone")
             apply_category(Categories.SHOP_CLOTHES, item)
             yield item
