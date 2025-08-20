@@ -152,6 +152,6 @@ class SkylarkJPSpider(Spider):
             apply_yes_no("takeaway", item, store["extra_fields"]["持ち帰りフラグ"] == "1")
             apply_yes_no("elevator", item, store["extra_fields"]["エレベーターフラグ"] == "1")
             apply_yes_no("changing_table", item, store["extra_fields"]["おむつ替え台フラグ"] == "1")
-            del item["name"]
+            item["name"] = None
 
             yield item
