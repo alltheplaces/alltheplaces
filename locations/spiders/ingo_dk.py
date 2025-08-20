@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class IngoDKSpider(SitemapSpider, StructuredDataSpider):
     name = "ingo_dk"
     item_attributes = {"brand": "Ingo", "brand_wikidata": "Q17048617"}
-    sitemap_urls = ["https://www.ingo.dk/stations/sitemap.xml"]
+    sitemap_urls = ["https://www.ingo.dk/sitemaps/stations/sitemap.xml"]
     wanted_types = ["GasStation"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
