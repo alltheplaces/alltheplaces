@@ -23,6 +23,9 @@ class DeutscheBankDESpider(Spider):
             yield JsonRequest(f"{base_url}&branches=PBCxATM%7CSPADxxBW".format(searchBy=city["name"], type="ATM"))
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        if "errorpage" in response.url:
+            return
+
         for location in response.json()["Items"]:
             location["location"] = location.pop("LatLng")
             location["Address"] = location["Item"]["BasicData"].pop("Address")
