@@ -18,7 +18,7 @@ class DeutscheBankDESpider(Spider):
     def start_requests(self) -> Iterable[JsonRequest]:
         base_url = "https://www.deutsche-bank.de/cip/rest/api/url/pfb/content/gdata/Presentation/DbFinder/Home/IndexJson?label={type}&searchTerm={searchBy}&country=D"
 
-        for city in city_locations("DE", 25000):
+        for city in city_locations("DE", 15000):
             yield JsonRequest(base_url.format(searchBy=city["name"], type="BRANCH"))
             yield JsonRequest(f"{base_url}&branches=PBCxATM%7CSPADxxBW".format(searchBy=city["name"], type="ATM"))
 
