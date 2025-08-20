@@ -27,6 +27,7 @@ class ArmandThierySpider(CrawlSpider, StructuredDataSpider):
         ld_data["openingHours"] = formatted_rules
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image")
         apply_category(Categories.SHOP_CLOTHES, item)
         store_type, item["branch"] = item.pop("name").split(" - ", 1)
         clothes = set()
