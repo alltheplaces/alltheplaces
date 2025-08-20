@@ -10,7 +10,7 @@ from locations.dict_parser import DictParser
 
 class SkylarkJPSpider(Spider):
     name = "skylark_jp"
-    
+
     start_urls = ["https://store-info.skylark.co.jp/api/point/xn7/"]
     allowed_domains = ["store-info.skylark.co.jp"]
     country_code = "JP"
@@ -19,7 +19,7 @@ class SkylarkJPSpider(Spider):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
-            
+
             match store["marker"]["ja"]["name"]:
                 case "ガスト":
                     item.update({"brand_wikidata": "Q87724117"})
@@ -125,7 +125,7 @@ class SkylarkJPSpider(Spider):
                 case _:
                     item = {}
                     yield item
-                    
+
             item["branch"] = re.search(r"\S+$", str(store["name"])).group()
 
             if store["extra_fields"]["全日２４時間フラグ"] == "1":
@@ -136,7 +136,9 @@ class SkylarkJPSpider(Spider):
             item["website"] = f"https://store-info.skylark.co.jp/skylark/map/{store['id']}"
             item["phone"] = f"+81 {store['extra_fields']['電話番号']}"
             apply_yes_no("parking", item, store["extra_fields"]["駐車場（有無）フラグ"] == "有")
-            item["extras"]["start_date"] = re.search(r"\d{4}-\d{2}-\d{2}", str(store["extra_fields"]["オープン日"])).group()
+            item["extras"]["start_date"] = re.search(
+                r"\d{4}-\d{2}-\d{2}", str(store["extra_fields"]["オープン日"])
+            ).group()
             apply_yes_no("wheelchair", item, store["extra_fields"]["車椅子対応フラグ"] == "1")
             apply_yes_no("reservation", item, store["extra_fields"]["予約フラグ"] == "1")
             if store["extra_fields"]["コンセント席フラグ"] == "1":
@@ -151,5 +153,5 @@ class SkylarkJPSpider(Spider):
             apply_yes_no("elevator", item, store["extra_fields"]["エレベーターフラグ"] == "1")
             apply_yes_no("changing_table", item, store["extra_fields"]["おむつ替え台フラグ"] == "1")
             del item["name"]
-            
+
             yield item
