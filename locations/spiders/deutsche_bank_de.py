@@ -12,6 +12,7 @@ from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 class DeutscheBankDESpider(Spider):
     name = "deutsche_bank_de"
     item_attributes = {"brand": "Deutsche Bank", "brand_wikidata": "Q66048"}
+    SPARDA_BANK = {"brand": "Sparda-Bank", "brand_wikidata": "Q2307136"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self) -> Iterable[JsonRequest]:
@@ -39,9 +40,9 @@ class DeutscheBankDESpider(Spider):
 
             item["country"] = "DE"
 
-            item["extras"]["type"] = location["CurrentBranch"]["BranchType"]
+            item["extras"]["type"] = location_type = location["CurrentBranch"]["BranchType"]
 
-            if location["CurrentBranch"]["BranchType"] in ["PBCxFIN", "PBCxINV", "PBCxPRIBC", "PBCxSEL"]:
+            if location_type in ["PBCxFIN", "PBCxINV", "PBCxPRIBC", "PBCxSEL"]:
                 apply_category(Categories.BANK, item)
                 oh_item_key = "Item1"
 
@@ -52,9 +53,12 @@ class DeutscheBankDESpider(Spider):
                     apply_yes_no(Extras.CASH_IN, item, has_cash_in, False)
                     apply_yes_no(Extras.CASH_OUT, item, has_cash_out, False)
 
-            elif location["CurrentBranch"]["BranchType"] in ["PBCxATM", "SPADxxBW"]:
+            elif location_type in ["PBCxATM", "SPADxxBW"]:
                 apply_category(Categories.ATM, item)
                 oh_item_key = "Item2"
+
+                if location_type == "SPADxxBW":
+                    item.update(self.SPARDA_BANK)
 
             else:
                 continue
