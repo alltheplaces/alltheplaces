@@ -9,6 +9,7 @@ from locations.storefinders import arcgis_feature_server
 def join_non_null(*values, sep=""):
     return sep.join(str(v) for v in values if v is not None)
 
+
 class UsMnHennepinAddressesUSSpider(arcgis_feature_server.ArcGISFeatureServerSpider):
     name = "us_mn_hennepin_addresses_us"
     # https://gis.hennepin.us/arcgis/rest/services/HennepinData/LAND_PROPERTY/MapServer/0
@@ -21,7 +22,7 @@ class UsMnHennepinAddressesUSSpider(arcgis_feature_server.ArcGISFeatureServerSpi
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["housenumber"] = join_non_null(feature.get("ANUMBER"), feature.get("ANUMBERSUF"))
         item["street"] = join_non_null(
-    feature.get("ST_PRE_MOD"),
+            feature.get("ST_PRE_MOD"),
             feature.get("ST_PRE_DIR"),
             feature.get("ST_PRE_TYP"),
             feature.get("ST_NAME"),
@@ -31,9 +32,9 @@ class UsMnHennepinAddressesUSSpider(arcgis_feature_server.ArcGISFeatureServerSpi
             sep=" ",
         )
         item["postcode"] = join_non_null(feature.get("ZIP"), feature.get("ZIP4"), sep="-")
-        item["extras"]["addr:unit"] = join_non_null(
-            feature.get("SUB_AD_TYP"), feature.get("SUB_AD_ID"), sep=" "
-        ) or None
+        item["extras"]["addr:unit"] = (
+            join_non_null(feature.get("SUB_AD_TYP"), feature.get("SUB_AD_ID"), sep=" ") or None
+        )
         item["state"] = "MN"
         item["city"] = feature.get("MUNI_NAME")
         yield item
