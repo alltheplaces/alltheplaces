@@ -1,7 +1,9 @@
-from scrapy.http import JsonRequest
+from typing import Any, Iterable
+
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_DE, OpeningHours, sanitise_day
@@ -12,13 +14,14 @@ class DeutscheBankDESpider(Spider):
     item_attributes = {"brand": "Deutsche Bank", "brand_wikidata": "Q66048"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         base_url = "https://www.deutsche-bank.de/cip/rest/api/url/pfb/content/gdata/Presentation/DbFinder/Home/IndexJson?label={type}&searchTerm={searchBy}&country=D"
 
         for city in city_locations("DE", 25000):
             yield JsonRequest(base_url.format(searchBy=city["name"], type="BRANCH"))
+            yield JsonRequest(f"{base_url}&branches=PBCxATM%7CSPADxxBW".format(searchBy=city["name"], type="ATM"))
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Items"]:
             location["location"] = location.pop("LatLng")
             location["Address"] = location["Item"]["BasicData"].pop("Address")
@@ -41,9 +44,18 @@ class DeutscheBankDESpider(Spider):
             if location["CurrentBranch"]["BranchType"] in ["PBCxFIN", "PBCxINV", "PBCxPRIBC", "PBCxSEL"]:
                 apply_category(Categories.BANK, item)
                 oh_item_key = "Item1"
-            elif location["CurrentBranch"]["BranchType"] in ["CGGA" "CGSH" "EHSB" "PBCxATM"]:
+
+                if self_services := location.get("SelfServices"):
+                    has_cash_out = "Bargeldauszahlung" in self_services
+                    has_cash_in = "Bargeldeinzahlung" in self_services
+                    apply_yes_no(Extras.ATM, item, has_cash_out or has_cash_in)
+                    apply_yes_no(Extras.CASH_IN, item, has_cash_in, False)
+                    apply_yes_no(Extras.CASH_OUT, item, has_cash_out, False)
+
+            elif location["CurrentBranch"]["BranchType"] in ["PBCxATM", "SPADxxBW"]:
                 apply_category(Categories.ATM, item)
                 oh_item_key = "Item2"
+
             else:
                 continue
 
