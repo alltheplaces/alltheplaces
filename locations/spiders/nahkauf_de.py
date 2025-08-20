@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -31,6 +32,7 @@ class NahkaufDESpider(scrapy.Spider):
                 item["branch"] = store["market_name"]
                 item["street_address"] = store["street_with_house_number"]
                 item["website"] = "".join(["https://www.nahkauf.de/", store.get("content_site_slug_name", "")])
+                apply_category(Categories.SHOP_SUPERMARKET, item)
                 item["opening_hours"] = OpeningHours()
                 for day_time in store["opening_hours"]:
                     day = DAYS[int(day_time["day_of_week"]) - 1]
