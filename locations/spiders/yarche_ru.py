@@ -23,7 +23,9 @@ class YarcheRUSpider(scrapy.Spider):
             item["street_address"] = poi.xpath("./text()").get(default="").strip()
             if coords := poi.xpath("./@data-coords").get():
                 try:
-                    item["lat"], item["lon"] = [c.strip() for c in coords.split(",")]
+                    location = coords.split(",")
+                    if len(location) == 2:
+                        item["lat"], item["lon"] = [c.strip() for c in location]
                 except ValueError as e:
                     self.logger.error(f"Failed to parse coords {coords}: {e}")
             yield item
