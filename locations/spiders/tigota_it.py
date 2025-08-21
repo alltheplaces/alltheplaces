@@ -26,7 +26,6 @@ class TigotaITSpider(Spider):
             for k in list(location.keys()):
                 location[k.removeprefix("shop_")] = location.pop(k)
             item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full")
             item["addr_full"] = location.get("marketing_address")
             item["website"] = "https://www.tigota.it/negozi/{}".format(item["ref"])
             item["extras"]["start_date"] = location["opening_date"]
