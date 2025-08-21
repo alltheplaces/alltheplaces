@@ -32,7 +32,7 @@ class TgjonesGBSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["name"] = response.xpath("//h1/text()").get(default="").split(",")[0]
         if not item["name"]:
-            continue
+            return
         item["addr_full"] = clean_address(response.xpath('//*[@class="shop-styling__address"]/p/text()').getall())
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
