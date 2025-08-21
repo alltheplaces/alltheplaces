@@ -13,7 +13,6 @@ class SkylarkJPSpider(Spider):
 
     start_urls = ["https://store-info.skylark.co.jp/api/point/xn7/"]
     allowed_domains = ["store-info.skylark.co.jp"]
-    country_code = "JP"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:
