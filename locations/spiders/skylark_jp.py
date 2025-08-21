@@ -23,20 +23,28 @@ class SkylarkJPSpider(Spider):
             match store["marker"]["ja"]["name"]:
                 case "ガスト":
                     item.update({"brand_wikidata": "Q87724117"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "バーミヤン":
                     item.update({"brand_wikidata": "Q11328598"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "しゃぶ葉":
                     item.update({"brand_wikidata": "Q67710247"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "夢庵":
                     item.update({"brand_wikidata": "Q11253593"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "ジョナサン":
                     item.update({"brand_wikidata": "Q11310628"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "ステーキガスト":
                     item.update({"brand_wikidata": "Q92599119"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "むさしの森珈琲":
                     item.update({"brand_wikidata": "Q116758676"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "から好し（単独店）":
                     item.update({"brand_wikidata": "Q115008407"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "藍屋":
                     item["brand"] = store["marker"]["ja"]["name"]
                     apply_category(Categories.RESTAURANT, item)
@@ -112,6 +120,7 @@ class SkylarkJPSpider(Spider):
                     apply_category(Categories.SHOP_CONFECTIONERY, item)
                 case "トマト＆オニオン":
                     item.update({"brand_wikidata": "Q11321395"})
+                    apply_category(Categories.RESTAURANT, item)
                 case "じゅうじゅうカルビ":
                     item["brand"] = store["marker"]["ja"]["name"]
                     item.update({"brand_wikidata": "Q98798383"})
@@ -123,8 +132,7 @@ class SkylarkJPSpider(Spider):
                     apply_category(Categories.RESTAURANT, item)
                     item["extras"]["cuisine"] = "udon"
                 case _:
-                    item = {}
-                    yield item
+                    apply_category(Categories.RESTAURANT, item)
 
             item["branch"] = re.search(r"\S+$", str(store["name"])).group()
 
