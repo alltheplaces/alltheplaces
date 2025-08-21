@@ -40,7 +40,7 @@ class SkylarkJPSpider(Spider):
                     apply_category(Categories.RESTAURANT, item)
                 case "むさしの森珈琲":
                     item.update({"brand_wikidata": "Q116758676"})
-                    apply_category(Categories.RESTAURANT, item)
+                    apply_category(Categories.CAFE, item)
                 case "から好し（単独店）":
                     item.update({"brand_wikidata": "Q115008407"})
                     apply_category(Categories.RESTAURANT, item)
