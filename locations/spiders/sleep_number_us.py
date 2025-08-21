@@ -47,6 +47,8 @@ class SleepNumberUSSpider(Spider):
     def parse_opening_hours(self, hours: dict) -> OpeningHours:
         oh = OpeningHours()
         for day_name, day_hours in hours.items():
+            if "holiday" in day_name:
+                continue
             if not day_hours:
                 continue
             if day_hours.get("isClosed"):
