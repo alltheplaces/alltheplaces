@@ -45,7 +45,7 @@ class AllerganbeautyJPSpider(Spider):
                 item["website"] = store["施設URL"]
             except:
                 pass
-            try:
+            item["website"] = store.get("施設URL")
                 item["phone"] = f"+81 {store['tel']}"
             except:
                 pass
