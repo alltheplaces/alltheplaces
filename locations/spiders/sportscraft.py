@@ -19,6 +19,7 @@ class SportscraftSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+            item.pop("email")
             item["ref"] = location["key"]
             item["name"] = item["name"].split("(", 1)[0].strip()
             item["street_address"] = clean_address([location["address1"].strip(), location["address2"].strip()])
