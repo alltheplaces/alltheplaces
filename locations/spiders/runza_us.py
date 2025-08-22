@@ -29,7 +29,7 @@ class RunzaUSSpider(JSONBlobSpider):
             oh = OpeningHours()
             for day in range(0, 7):
                 day_hours = location["field_dining_room_hours"][day]
-                
+
                 if not day_hours:
                     continue
 
@@ -39,7 +39,7 @@ class RunzaUSSpider(JSONBlobSpider):
                     continue
                 if not close_time:
                     continue
-                
+
                 oh.add_range(
                     day=DAYS[day],
                     open_time=f"{open_time}",
