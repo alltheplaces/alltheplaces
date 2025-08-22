@@ -12,8 +12,8 @@ class RocketUSSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["stations"]:
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
+            item["branch"] = item.pop("name", None)
             item["street_address"] = location["address"]
-            item.pop("addr_full")
+            item.pop("addr_full", None)
             apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item
