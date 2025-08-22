@@ -17,6 +17,6 @@ class HagebauATDESpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["lat"], item["lon"] = re.search(r"lat.*:(\d+.\d+).*lon.*:(\d+.\d+)", response.text).groups()
+        item["lat"], item["lon"] = re.search(r"lat&quot;:(\d+.\d+),&quot;lon&quot;:(\d+.\d+)}", response.text).groups()
         apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item
