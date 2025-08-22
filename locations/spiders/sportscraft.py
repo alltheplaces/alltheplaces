@@ -22,7 +22,8 @@ class SportscraftSpider(Spider):
             item["ref"] = location["key"]
             item["name"] = item["name"].split("(", 1)[0].strip()
             item["street_address"] = clean_address([location["address1"].strip(), location["address2"].strip()])
-            item["city"] = item["city"].strip()
+            if city := item.get("city"):
+                item["city"] = city.strip()
             item["website"] = "https://www.sportscraft.com.au/store-locator/store-details?id=" + location["key"]
             item["opening_hours"] = OpeningHours()
             hours_string = ""
