@@ -30,12 +30,14 @@ class RunzaUSSpider(JSONBlobSpider):
             for day in range(0, 7):
                 day_hours = location["field_dining_room_hours"][day]
                 if day_hours:
-                    oh.add_range(
-                        day=DAYS[day],
-                        open_time=f"{day_hours['starthours']}",
-                        close_time=f"{day_hours['endhours']}",
-                        time_format="%H%M",
-                    )
+                    if open_time := day_hours.get("starthours"):
+                        if close_time := day_hours.get("endhours"):
+                            oh.add_range(
+                                day=DAYS[day],
+                                open_time=f"{open_time}",
+                                close_time=f"{close_time}",
+                                time_format="%H%M",
+                            )
             item["opening_hours"] = oh
 
         if location["field_hide_drive_thru_hours"][0]["value"] is False:
@@ -43,12 +45,14 @@ class RunzaUSSpider(JSONBlobSpider):
             for day in range(0, 7):
                 day_hours = location["field_drive_thru_hours"][day]
                 if day_hours:
-                    oh.add_range(
-                        day=DAYS[day],
-                        open_time=f"{day_hours['starthours']}",
-                        close_time=f"{day_hours['endhours']}",
-                        time_format="%H%M",
-                    )
+                    if open_time := day_hours.get("starthours"):
+                        if close_time := day_hours.get("endhours"):
+                            oh.add_range(
+                                day=DAYS[day],
+                                open_time=f"{open_time}",
+                                close_time=f"{close_time}",
+                                time_format="%H%M",
+                            )
             item["extras"]["opening_hours:drive_through"] = oh.as_opening_hours()
 
         yield item
