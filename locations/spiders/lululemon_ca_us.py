@@ -6,8 +6,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class LululemonSpider(SitemapSpider):
-    name = "lululemon"
+class LululemonCAUSSpider(SitemapSpider):
+    name = "lululemon_ca_us"
     item_attributes = {"brand": "Lululemon", "brand_wikidata": "Q6702957"}
     sitemap_urls = ("https://shop.lululemon.com/sitemap.xml",)
     sitemap_rules = [
