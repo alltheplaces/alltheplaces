@@ -41,11 +41,8 @@ class AllerganbeautyJPSpider(Spider):
 
             item = DictParser.parse(store)
             item["ref"] = store["key"]
-            try:
-                item["website"] = store["施設URL"]
-            except:
-                pass
             item["website"] = store.get("施設URL")
+            try:    
                 item["phone"] = f"+81 {store['tel']}"
             except:
                 pass
