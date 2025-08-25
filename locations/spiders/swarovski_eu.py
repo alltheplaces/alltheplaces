@@ -14,5 +14,4 @@ class SwarovskiEUSpider(SwarovskiUSSpider):
         for lat, lon in point_locations(point_files):
             yield Request(
                 url=f"https://www.swarovski.com/en-LU/store-finder/stores/?geoPoint.latitude={lat}&geoPoint.longitude={lon}&provider=GOOGLE&allBaseStores=true&radius=120&clientTimeZoneOffset=-60",
-                headers=self.headers,
             )
