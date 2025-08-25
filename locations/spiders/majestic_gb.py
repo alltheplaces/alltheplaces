@@ -2,6 +2,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
+from locations.categories import Categories, apply_category
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -32,7 +33,9 @@ class MajesticGBSpider(CrawlSpider):
             item["lat"] = location.xpath(".//@data-lat").get()
             item["lon"] = location.xpath(".//@data-long").get()
             item["name"] = location.xpath(".//@data-name").get()
+            item["branch"] = item.pop("name").removeprefix("Majestic ")
             item["phone"] = location.xpath(".//@data-phone").get()
             item["image"] = location.xpath('./span[@class="store-list-image"]/img/@src').get()
+            apply_category(Categories.SHOP_WINE, item)
 
             yield item
