@@ -1,25 +1,32 @@
 import re
+from typing import Any, Iterable
 
-import scrapy
+from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.geo import point_locations
 from locations.linked_data_parser import LinkedDataParser
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import FIREFOX_LATEST
 
 
-class SwarovskiUSSpider(scrapy.Spider):
+class SwarovskiUSSpider(Spider):
     name = "swarovski_us"
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     allowed_domains = ["swarovski.com"]
     headers = {"User-Agent": FIREFOX_LATEST}
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         point_files = "us_centroids_100mile_radius_state.csv"
         for lat, lon in point_locations(point_files):
-            url = f"https://www.swarovski.com/en-LU/store-finder/stores/?geoPoint.latitude={lat}&geoPoint.longitude={lon}&provider=GOOGLE&allBaseStores=true&radius=120&clientTimeZoneOffset=-60"
-            yield scrapy.Request(url=url, headers=self.headers)
+            yield Request(
+                url=f"https://www.swarovski.com/en-LU/store-finder/stores/?geoPoint.latitude={lat}&geoPoint.longitude={lon}&provider=GOOGLE&allBaseStores=true&radius=120&clientTimeZoneOffset=-60",
+                headers=self.headers,
+            )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         if response.xpath('//div[contains(text(), "stores")]/text()').get():
             stores = response.xpath(
                 '//div[@id="swa-store-locator__tab-list"]/div[contains(@class,"swa-store-view__store")]'
@@ -27,14 +34,14 @@ class SwarovskiUSSpider(scrapy.Spider):
             for store in stores:
                 coords = {"lat": store.xpath("./@data-latitude").get(), "lon": store.xpath("./@data-longitude").get()}
                 url = store.xpath('.//a[contains(@href, "store")]/@href').get()
-                yield scrapy.Request(
+                yield Request(
                     url=f"https://www.{self.allowed_domains[0]}{url}",
                     headers=self.headers,
                     callback=self.parse_store,
                     cb_kwargs={"coords": coords},
                 )
 
-    def parse_store(self, response, coords):
+    def parse_store(self, response: Response, coords: dict) -> Any:
         type_store = response.xpath('//span[@class="swa-headlines__subheadline swa-label-sans--medium"]/text()').get()
         if not type_store:
             item = LinkedDataParser.parse(response, "Store")
