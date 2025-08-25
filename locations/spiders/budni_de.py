@@ -23,10 +23,13 @@ class BudniDESpider(Spider):
         data = dict(parse_rsc(rsc))
         # Look for a list consisting only of '$123' references. This is the list of stores.
         store_list = []
-        for key, value in data.items():
-            if isinstance(value, list):
-                if all(isinstance(i, str) and i.startswith("$") for i in value):
-                    store_list = value
+        for value in data.values():
+            if (
+                isinstance(value, list)
+                and len(value) > 0
+                and all(isinstance(i, str) and i.startswith("$") for i in value)
+            ):
+                store_list = value
         for store_reference in store_list:
             # Sub-objects are '$123' references and need to be fetched from 'data'
             reference = int(store_reference.removeprefix("$"), 16)
