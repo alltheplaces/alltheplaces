@@ -1,8 +1,8 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.items import Feature
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
