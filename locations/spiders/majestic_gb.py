@@ -1,7 +1,9 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MajesticGBSpider(CrawlSpider):
@@ -9,6 +11,20 @@ class MajesticGBSpider(CrawlSpider):
     item_attributes = {"brand": "Majestic", "brand_wikidata": "Q6737725"}
     start_urls = ["https://www.majestic.co.uk/stores"]
     rules = [Rule(LinkExtractor(allow="/stores/"), callback="parse")]
+    allowed_domains = ["www.majestic.co.uk"]
+    user_agent = BROWSER_DEFAULT
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DEFAULT_REQUEST_HEADERS": {
+            "Host": "www.majestic.co.uk",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-GB,en-US;q=0.7,en;q=0.3",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "DNT": "1",
+            "Sec-GPC": "1",
+        },
+    }
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.xpath('//li[contains(@class, "store-item")]'):
@@ -17,7 +33,9 @@ class MajesticGBSpider(CrawlSpider):
             item["lat"] = location.xpath(".//@data-lat").get()
             item["lon"] = location.xpath(".//@data-long").get()
             item["name"] = location.xpath(".//@data-name").get()
+            item["branch"] = item.pop("name").removeprefix("Majestic ")
             item["phone"] = location.xpath(".//@data-phone").get()
             item["image"] = location.xpath('./span[@class="store-list-image"]/img/@src').get()
+            apply_category(Categories.SHOP_WINE, item)
 
             yield item
