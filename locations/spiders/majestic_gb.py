@@ -11,8 +11,17 @@ class MajesticGBSpider(CrawlSpider):
     rules = [Rule(LinkExtractor(allow="/stores/"), callback="parse")]
     allowed_domains = ["www.majestic.co.uk"]
     user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False,"DEFAULT_REQUEST_HEADERS": {"Host": "www.majestic.co.uk","Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","Accept-Language": "en-GB,en-US;q=0.7,en;q=0.3","Accept-Encoding": "gzip, deflate, br, zstd","DNT": "1","Sec-GPC": "1"}}
-
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DEFAULT_REQUEST_HEADERS": {
+            "Host": "www.majestic.co.uk",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-GB,en-US;q=0.7,en;q=0.3",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "DNT": "1",
+            "Sec-GPC": "1",
+        },
+    }
 
     def parse(self, response, **kwargs):
         for location in response.xpath('//li[contains(@class, "store-item")]'):
