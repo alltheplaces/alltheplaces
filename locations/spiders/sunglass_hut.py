@@ -45,6 +45,7 @@ class SunglassHutSpider(YextSpider):
     def parse_item(self, item, location):
         item.pop("twitter", None)
         item.pop("instagram", None)
+        item.pop("email", None)
         if item["website"] is not None and "?" in item["website"]:
             item["website"] = item["website"].split("?")[0]  # strip yext tracking
         if brand := location.get("c_pagesSubscription"):
