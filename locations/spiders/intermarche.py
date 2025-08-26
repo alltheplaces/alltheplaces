@@ -33,6 +33,13 @@ class IntermarcheSpider(scrapy.Spider):
         "brand": "Intermarché Hyper",
         "brand_wikidata": "Q98278022",
     }
+    LA_POSTE_RELAIS = {
+        "brand": "Pickup Station",
+        "brand_wikidata": "Q110748562",
+        "operator": "La Poste",
+        "operator_wikidata": "Q373724",
+    }
+
     item_attributes = {"country": "FR"}
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
@@ -102,14 +109,20 @@ class IntermarcheSpider(scrapy.Spider):
                 item.update(self.INTERMARCHE_SUPER)
             elif place.get("modelLabel") == "CONTACT":
                 item.update(self.INTERMARCHE_CONTACT)
-            elif place.get("modelLabel") == "EXPRESS":
+            elif place.get("modelLabel") == "EXPRESS" or place.get("modelLabel") == "Intermarché Express":
                 item.update(self.INTERMARCHE_EXPRESS)
             elif place.get("modelLabel") == "HYPER":
                 item.update(self.INTERMARCHE_HYPER)
             elif place.get("modelLabel") == "Réservé Soignants":
                 continue  # Drive through stores reserved for medical workers
             elif place.get("modelLabel") == "Retrait La Poste":
-                continue  # Something to do with post offices
+                item.update(self.LA_POSTE_RELAIS)
+                apply_category(Categories.PARCEL_LOCKER, item)
+                item["located_in"], item["located_in_wikidata"] = self.INTERMARCHE.values()
+            elif place.get("modelLabel") == "Pro & Assos":
+                # independent vape shop located in intermarche
+                apply_category(Categories.SHOP_E_CIGARETTE, item)
+                item["located_in"], item["located_in_wikidata"] = self.INTERMARCHE.values()
 
             if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
                 fuel = item.deepcopy()
