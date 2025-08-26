@@ -1,12 +1,12 @@
 from typing import Iterable
 
+from scrapy.http import Request, Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
-from scrapy.http import Response, Request
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.categories import Categories, apply_category
 from locations.user_agents import BROWSER_DEFAULT
 
 
