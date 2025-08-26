@@ -17,6 +17,9 @@ class EdekaDESpider(scrapy.Spider):
 
     NAH_UND_GUT = {"name": "nah und gut", "brand": "Edeka", "brand_wikidata": "Q701755"}
     AKTIV_MARKT = {"name": "Edeka aktiv markt", "brand": "Edeka", "brand_wikidata": "Q701755"}
+    FRISCHEMARKT = {"name": "EDEKA Frischemarkt", "brand": "Edeka", "brand_wikidata": "Q701755"}
+    TRINKGUT = {"name": "trinkgut", "brand": "trinkgut", "brand_wikidata": "Q2453627"}
+    SCHECK_IN = {"name": "EDEKA Scheck-in Center", "brand": "Edeka", "brand_wikidata": "Q701755"}
     XPRESS = {"name": "Edeka xpress", "brand": "Edeka", "brand_wikidata": "Q701755"}
     DISKA = {"brand": "diska", "brand_wikidata": "Q62390177"}
     EDEKA = {"name": "Edeka", "brand": "Edeka", "brand_wikidata": "Q701755"}
@@ -108,5 +111,17 @@ class EdekaDESpider(scrapy.Spider):
                 item["branch"] = m.group(1)
             item.update(self.ELLI)
             apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif "frischemarkt" in name:
+            item["branch"] = item.pop("name").removeprefix("Frischemarkt ")
+            item.update(self.FRISCHEMARKT)
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif "scheckin" in name:
+            item["branch"] = item.pop("name").removeprefix("Scheck-in Center ")
+            item.update(self.SCHECK_IN)
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif "trinkgut" in name:
+            item["branch"] = item.pop("name").removeprefix("trinkgut ")
+            item.update(self.TRINKGUT)
+            apply_category(Categories.SHOP_BEVERAGES, item)
         else:
             self.logger.info(f"Unknown store: {item['name']}")
