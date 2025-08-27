@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
