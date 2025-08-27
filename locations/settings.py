@@ -180,7 +180,13 @@ DEFAULT_CAMOUFOX_SETTINGS = {
 DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS | {
     # Cloudflare Turnstile makes script, xhr, fetch and image requests to
     # challenges.cloudflare.com.
-    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document" and not (request.resource_type in ["document", "script", "xhr", "fetch", "image"] and ("/cdn-cgi/challenge-platform/" in request.url or request.url.startswith("https://challenges.cloudflare.com"))),
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not (
+        request.resource_type in ["document", "script", "xhr", "fetch", "image"]
+        and (
+            "/cdn-cgi/challenge-platform/" in request.url or request.url.startswith("https://challenges.cloudflare.com")
+        )
+    ),
     "CAMOUFOX_LAUNCH_OPTIONS": {
         "config": {
             # Required for playwright_captcha.
@@ -191,7 +197,7 @@ DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS |
         "headless": True,
         # Required for playwright_captcha.
         "i_know_what_im_doing": True,
-    }
+    },
 }
 
 REQUESTS_CACHE_ENABLED = True

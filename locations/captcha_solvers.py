@@ -1,10 +1,10 @@
 import asyncio
 
+from playwright.async_api import Page
+from playwright_captcha import CaptchaType, ClickSolver, FrameworkType
 from scrapy import Spider
 from scrapy.http import Request
 
-from playwright.async_api import Page
-from playwright_captcha import CaptchaType, ClickSolver, FrameworkType
 
 async def click_solver(page: Page, request: Request, spider: Spider) -> None:
     """
@@ -43,7 +43,11 @@ async def click_solver(page: Page, request: Request, spider: Spider) -> None:
             # has been successfully loaded by checking text of a h1 heading
             # is the website's name.
             #  captcha_selector_indicating_success = '//h1[text()="ACME Inc"]'
-            await solver.solve_captcha(captcha_container=page, captcha_type=CaptchaType.CLOUDFLARE_TURNSTILE, expected_content_selector=spider.captcha_selector_indicating_success)
+            await solver.solve_captcha(
+                captcha_container=page,
+                captcha_type=CaptchaType.CLOUDFLARE_TURNSTILE,
+                expected_content_selector=spider.captcha_selector_indicating_success,
+            )
         else:
             # Fallback (default) mechanism where playwright_captcha tries to
             # find a signal from the page after clicking that the captcha is

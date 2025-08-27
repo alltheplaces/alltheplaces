@@ -1,8 +1,6 @@
-import json
 from typing import Any
 from urllib.parse import urljoin
 
-from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser

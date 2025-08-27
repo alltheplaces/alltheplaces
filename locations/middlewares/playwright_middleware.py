@@ -3,8 +3,6 @@ from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider, XMLFeedSpider
 from scrapy_camoufox.page import PageMethod
 
-from playwright.async_api import Response as PlaywrightResponse, Page
-
 from locations.camoufox_spider import CamoufoxSpider
 from locations.captcha_solvers import click_solver
 from locations.playwright_spider import PlaywrightSpider
@@ -22,7 +20,9 @@ class PlaywrightMiddleware:
             if captcha_type := getattr(spider, "captcha_type", None):
                 match captcha_type:
                     case "cloudflare_turnstile":
-                        request.meta["camoufox_page_methods"].append(PageMethod(click_solver, request=request, spider=spider))
+                        request.meta["camoufox_page_methods"].append(
+                            PageMethod(click_solver, request=request, spider=spider)
+                        )
         elif issubclass(type(spider), PlaywrightSpider) or getattr(spider, "is_playwright_spider", False):
             # TODO: remove "is_playwright_spider" check once fully deprecated
             # and removed from all ATP spiders.
@@ -55,12 +55,20 @@ class PlaywrightMiddleware:
             # render) the XML document.
             spider._last_scrapy_request_url = request.url
             if issubclass(type(spider), CamoufoxSpider):
-                request.meta["camoufox_page_event_handlers"]["response"] = "detect_xml_document_from_playwright_response"
+                request.meta["camoufox_page_event_handlers"][
+                    "response"
+                ] = "detect_xml_document_from_playwright_response"
             elif issubclass(type(spider), PlaywrightSpider):
-                request.meta["playwright_page_event_handlers"]["response"] = "detect_xml_document_from_playwright_response"
+                request.meta["playwright_page_event_handlers"][
+                    "response"
+                ] = "detect_xml_document_from_playwright_response"
 
     def process_response(self, request: Request, response: Response, spider: Spider) -> Response:
-        if not issubclass(type(spider), CamoufoxSpider) and not issubclass(type(spider), PlaywrightSpider) and not getattr(spider, "is_playwright_spider", False):
+        if (
+            not issubclass(type(spider), CamoufoxSpider)
+            and not issubclass(type(spider), PlaywrightSpider)
+            and not getattr(spider, "is_playwright_spider", False)
+        ):
             # TODO: remove "is_playwright_spider" check once fully deprecated
             # and removed from all ATP spiders.
             # Spider does not want Camoufox/Playwright to be used. Skip this
@@ -79,7 +87,7 @@ class PlaywrightMiddleware:
         # be expanded to accomodate different browsers.
         if response.xpath('//link[@href="resource://content-accessible/plaintext.css"]').get():
             # Rendering by Firefox-based web browsers
-            plaintext = response.xpath('//body/pre/text()').get()
+            plaintext = response.xpath("//body/pre/text()").get()
             return response.replace(body=plaintext.encode("utf-8"))
 
         # If a Playwright or Camoufox request is for a XML document (for ATP,
@@ -109,9 +117,9 @@ class PlaywrightMiddleware:
         # file which has been downloaded by the browser (for example, ZIP
         # archive) and both HTML and binary files should be returned as-is
         # without modification.
-        #print(response.text)
+        # print(response.text)
         return response
 
-    #async def force_download_of_xml_document(self, page: Page, request: Request, spider: Spider) -> None:
+    # async def force_download_of_xml_document(self, page: Page, request: Request, spider: Spider) -> None:
     #    await page.set_content('<html><body><a id="download" href="" download>Download</a></body></html>'.format(quote_plus(page.url)))
     #    await page.locator("#download").click()

@@ -26,7 +26,7 @@ class TgjonesSpider(SitemapSpider, CamoufoxSpider):
     def parse(self, response: Response) -> Iterable[Feature]:
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["branch"] = response.xpath('//h1/text()').get().removeprefix("TGJones, ")
+        item["branch"] = response.xpath("//h1/text()").get().removeprefix("TGJones, ")
         item["addr_full"] = merge_address_lines(response.xpath('//*[@class="shop-styling__address"]/p/text()').getall())
         item["phone"] = response.xpath('//*[@class="shop-styling__number"]/p/text()').get()
         if coordinates := re.search(self.coordinates_pattern, response.text):

@@ -23,7 +23,11 @@ class LaserawayUSSpider(SitemapSpider, StructuredDataSpider, CamoufoxSpider):
     captcha_selector_indicating_success = '//table[@id="sitemap"]'
     # Allow "other" resource types which includes XSL stylesheets. Firefox
     # returns an exception if a XSL stylesheet cannot be loaded.
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {"CAMOUFOX_ABORT_REQUEST": lambda request: not (request.resource_type in ["document", "script", "xhr", "fetch", "image", "other"])}
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {
+        "CAMOUFOX_ABORT_REQUEST": lambda request: not (
+            request.resource_type in ["document", "script", "xhr", "fetch", "image", "other"]
+        )
+    }
     handle_httpstatus_list = [403]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

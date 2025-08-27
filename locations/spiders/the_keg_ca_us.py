@@ -1,6 +1,6 @@
 import re
 
-from scrapy import Request, Selector, Spider
+from scrapy import Request, Selector
 
 from locations.categories import Extras, apply_yes_no
 from locations.google_url import extract_google_position

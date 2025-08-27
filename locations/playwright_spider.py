@@ -1,5 +1,4 @@
 from playwright.async_api import Response as PlaywrightResponse
-
 from scrapy import Spider
 
 
