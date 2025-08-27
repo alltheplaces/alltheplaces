@@ -1,9 +1,8 @@
 from scrapy.spiders import SitemapSpider
-from scrapy.http import Request
 
-from locations.items import Feature
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -12,8 +11,8 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "British Heart Foundation", "brand_wikidata": "Q4970039"}
     sitemap_urls = ["https://www.bhf.org.uk/sitemap.xml"]
     sitemap_rules = [
-#        (r"/find-bhf-near-you/.+-shop$", "parse_sd"),
-#        (r"/find-bhf-near-you/.+-store$", "parse_sd"),
+        #        (r"/find-bhf-near-you/.+-shop$", "parse_sd"),
+        #        (r"/find-bhf-near-you/.+-store$", "parse_sd"),
         (r"/find-bhf-near-you/.+-shop$", "parse"),
         (r"/find-bhf-near-you/.+-store$", "parse"),
     ]
@@ -33,8 +32,8 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         else:
             item = Feature()
             item["ref"] = response.url
-            item["name"] = 'British Heart Foundation'
-            item["branch"] = response.xpath('//h1/text()').get()
+            item["name"] = "British Heart Foundation"
+            item["branch"] = response.xpath("//h1/text()").get()
         if "-bhf-shop" in response.url:
             apply_category(Categories.SHOP_CHARITY, item)
         elif "-home-store" in response.url or "-furniture-electrical-store" in response.url:
