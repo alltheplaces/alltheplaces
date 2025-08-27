@@ -9,8 +9,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class GraetersSpider(SitemapSpider):
-    name = "graeters"
+class GraetersUSSpider(SitemapSpider):
+    name = "graeters_us"
     item_attributes = {"brand": "Graeter's", "brand_wikidata": "Q5592430"}
     allowed_domains = ["www.graeters.com"]
     sitemap_urls = ["https://www.graeters.com/sitemap.xml"]
