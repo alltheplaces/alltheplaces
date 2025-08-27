@@ -14,6 +14,7 @@ class SainsburysSpider(Spider):
     name = "sainsburys"
     SAINSBURYS = {"brand": "Sainsbury's", "brand_wikidata": "Q152096"}
     SAINSBURYS_LOCAL = {"brand": "Sainsbury's Local", "brand_wikidata": "Q13218434"}
+    SAINSBURYS_BANK = {"brand": "Sainsbury's Bank", "brand_wikidata": "Q7400525"}
     item_attributes = SAINSBURYS
     allowed_domains = ["stores.sainsburys.co.uk"]
     start_urls = ["https://api.stores.sainsburys.co.uk/v1/stores/?api_client_id=slfe"]
@@ -96,6 +97,7 @@ class SainsburysSpider(Spider):
         elif store["store_type"] == "pharmacy":
             return None  # LloydsPharmacyGBSpider
         elif store["store_type"] == "tm":
+            item.update(self.SAINSBURYS_BANK)
             item["branch"] = item.pop("name").removesuffix(" Travel Money")
             apply_category(Categories.BUREAU_DE_CHANGE, item)
         elif store["store_type"] == "specsavers":
