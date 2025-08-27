@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.google_url import url_to_coords
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -18,27 +18,42 @@ class GraetersSpider(SitemapSpider):
     sitemap_rules = [(r"retail-stores/", "parse")]
 
     def parse(self, response):
-        map_url = response.xpath('//a/@href[contains(.,"maps/dir")]').get()
-        (lat, lon) = url_to_coords(map_url)
-        hours = self.parse_hours(response.xpath('//*[starts-with(text(),"Mon ")]/..'))
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["branch"] = response.xpath('//h1[@class="heading h1"]/text()').get().replace("Graeter's ", "")
+        item["addr_full"] = response.xpath(
+            '//*[@class="store-info__contact-label" and text()="Address"]/following-sibling::span[@class="store-info__contact-value"]/text()'
+        ).getall()
 
-        item = {
-            "ref": response.url,
-            "website": response.url,
-            "lat": lat,
-            "lon": lon,
-            "addr_full": response.css("address::text").get(),
-            "phone": response.css("a.location-phone::text").get(),
-            "opening_hours": hours,
-        }
-        yield Feature(**item)
+        item["phone"] = response.xpath(
+            '//*[@class="store-info__contact-label" and text()="Phone"]/following-sibling::span[@class="store-info__contact-value"]/text()'
+        ).get()
 
-    def parse_hours(self, ul):
+        item["email"] = response.xpath(
+            '//*[@class="store-info__contact-label" and text()="Email"]/following-sibling::span[@class="store-info__contact-value"]/text()'
+        ).get()
+
+        hours = response.xpath('//*[contains(@class, "store-info__hours-row")]')
+        opening_hours = [
+            {
+                "day": row.xpath('.//*[@class="store-info__day"]/text()').get(),
+                "time": row.xpath('.//*[@class="store-info__time"]/text()').get(),
+            }
+            for row in hours
+        ]
+        item["opening_hours"] = self.parse_hours(opening_hours)
+        apply_category(Categories.ICE_CREAM, item)
+        amenities = response.xpath('//*[@class="store-info__amenity-item"]/span[2]/text()').extract()
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru Hours" in amenities)
+        apply_yes_no(Extras.KIDS_AREA, item, "Play Area" in amenities)
+        yield item
+
+    def parse_hours(self, opening_data):
         opening_hours = OpeningHours()
-        for txt in ul.xpath(".//li/text()").extract():
-            day, interval = txt.split(" ", 1)
-            if interval == "CLOSED":
-                continue
-            open_time, close_time = re.split(" ?- ?", interval, 1)
-            opening_hours.add_range(day[:2], open_time, close_time, "%I:%M%p")
-        return opening_hours.as_opening_hours()
+        for day, time in ((interval["day"], interval["time"]) for interval in opening_data):
+            if time.upper() == "CLOSED":
+                opening_hours.set_closed(day)
+            else:
+                if match := re.findall(r"\d{1,2}:\d{2}(?:am|pm)", time):
+                    opening_hours.add_range(day, *match, "%I:%M%p")
+        return opening_hours
