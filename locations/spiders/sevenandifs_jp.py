@@ -1,10 +1,9 @@
-import re
 from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -41,5 +40,5 @@ class SevenandifsJPSpider(Spider):
             if store["extra_fields"]["全席禁煙"] == "1":
                 item["extras"]["smoking"] = "no"
             item["postcode"] = store["extra_fields"]["郵便番号"]
-            
+
             yield item
