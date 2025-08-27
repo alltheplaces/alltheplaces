@@ -55,7 +55,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
             item.pop("phone", None)
         if "book-bank" in response.url:
             apply_category(Categories.RECYCLING, item)
-            item["extras"]["recycling_type"] = "books"
+            apply_yes_no("recycling:books", item, True)
         elif "-bhf-shop" in response.url:
             apply_category(Categories.SHOP_CHARITY, item)
         elif "-home-store" in response.url or "-furniture-electrical-store" in response.url:
