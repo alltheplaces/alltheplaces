@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import OpeningHours
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
@@ -11,8 +12,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "British Heart Foundation", "brand_wikidata": "Q4970039"}
     sitemap_urls = ["https://www.bhf.org.uk/sitemap.xml"]
     sitemap_rules = [
-        #        (r"/find-bhf-near-you/.+-shop$", "parse_sd"),
-        #        (r"/find-bhf-near-you/.+-store$", "parse_sd"),
+        (r"/find-bhf-near-you/.*book-bank.*$", "parse"),
         (r"/find-bhf-near-you/.+-shop$", "parse"),
         (r"/find-bhf-near-you/.+-store$", "parse"),
     ]
@@ -32,9 +32,19 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         else:
             item = Feature()
             item["ref"] = response.url
-            item["name"] = "British Heart Foundation"
-            item["branch"] = response.xpath("//h1/text()").get()
-        if "-bhf-shop" in response.url:
+            item["name"] = 'British Heart Foundation'
+            item["branch"] = response.xpath('//h1/text()').get()
+            item["addr_full"] = response.xpath('//p[@class="highlighted-info-block__description"]/text()').get()
+            item["lat"],item["lon"] = response.xpath('//a[contains (@href,"www.google.com/maps/place/")]/@href').get().replace("https://www.google.com/maps/place/","").split(",")
+            item["opening_hours"] = OpeningHours()
+            hours_string = " ".join(response.xpath('//div[@class="opening-hours__days"]//text()').getall()).replace('<p class="opening-hours__description">','').replace("</p>",";")
+            item["opening_hours"].add_ranges_from_string(hours_string)
+            item["phone"] = response.xpath('//div[@class="opening-hours__contact-us"]/p[@class="opening-hours__description"]/text()').get()
+        if "permanently closed" in item["branch"]:
+            return
+        if "book-bank" in response.url:
+            apply_category(Categories.RECYCLING, item)
+        elif "-bhf-shop" in response.url:
             apply_category(Categories.SHOP_CHARITY, item)
         elif "-home-store" in response.url or "-furniture-electrical-store" in response.url:
             apply_category(Categories.SHOP_FURNITURE, item)
