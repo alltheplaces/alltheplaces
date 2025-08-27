@@ -125,6 +125,7 @@ class Categories(Enum):
     SHOP_DOITYOURSELF = {"shop": "doityourself"}
     SHOP_DOORS = {"shop": "doors"}
     SHOP_DRY_CLEANING = {"shop": "dry_cleaning"}
+    SHOP_E_CIGARETTE = {"shop": "e-cigarette"}
     SHOP_ELECTRICAL = {"shop": "electrical"}
     SHOP_ELECTRONICS = {"shop": "electronics"}
     SHOP_EROTIC = {"shop": "erotic"}
