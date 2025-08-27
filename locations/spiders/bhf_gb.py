@@ -26,8 +26,6 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         if "ld+json" in response.text:
             for item in self.parse_sd(response):
                 extract_google_position(item, response)
-                if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
-                    item.pop("phone", None)
                 item["branch"] = item.pop("name")
         else:
             item = Feature()
@@ -53,8 +51,11 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
             ).get()
         if "permanently closed" in item["branch"]:
             return
+        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
+            item.pop("phone", None)
         if "book-bank" in response.url:
             apply_category(Categories.RECYCLING, item)
+            item["extras"]["recycling_type"] = "books"
         elif "-bhf-shop" in response.url:
             apply_category(Categories.SHOP_CHARITY, item)
         elif "-home-store" in response.url or "-furniture-electrical-store" in response.url:
