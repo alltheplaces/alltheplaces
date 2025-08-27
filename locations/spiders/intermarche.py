@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 
 import scrapy
 from scrapy import FormRequest
@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -124,22 +125,25 @@ class IntermarcheSpider(scrapy.Spider):
                 apply_category(Categories.SHOP_E_CIGARETTE, item)
                 item["located_in"], item["located_in_wikidata"] = self.INTERMARCHE.values()
 
-            if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
-                fuel = item.deepcopy()
-                fuel["ref"] += "_fuel"
-                fuel.update(self.INTERMARCHE)
-
-                apply_category(Categories.FUEL_STATION, fuel)
-
-                yield fuel
-
-            if any(s["code"] == "lav" for s in place["ecommerce"]["services"]):
-                car_wash = item.deepcopy()
-                car_wash["ref"] += "_carwash"
-                car_wash.update(self.INTERMARCHE)
-
-                apply_category(Categories.CAR_WASH, car_wash)
-
-                yield car_wash
+            yield from self.parse_accessory_units(place, item)
 
             yield item
+
+    def parse_accessory_units(self, place: dict, item: Feature) -> Iterable[Feature]:
+        if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
+            fuel = item.deepcopy()
+            fuel["ref"] += "_fuel"
+            fuel.update(self.INTERMARCHE)
+
+            apply_category(Categories.FUEL_STATION, fuel)
+
+            yield fuel
+
+        if any(s["code"] == "lav" for s in place["ecommerce"]["services"]):
+            car_wash = item.deepcopy()
+            car_wash["ref"] += "_carwash"
+            car_wash.update(self.INTERMARCHE)
+
+            apply_category(Categories.CAR_WASH, car_wash)
+
+            yield car_wash
