@@ -117,9 +117,4 @@ class PlaywrightMiddleware:
         # file which has been downloaded by the browser (for example, ZIP
         # archive) and both HTML and binary files should be returned as-is
         # without modification.
-        # print(response.text)
         return response
-
-    # async def force_download_of_xml_document(self, page: Page, request: Request, spider: Spider) -> None:
-    #    await page.set_content('<html><body><a id="download" href="" download>Download</a></body></html>'.format(quote_plus(page.url)))
-    #    await page.locator("#download").click()
