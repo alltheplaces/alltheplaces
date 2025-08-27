@@ -7,11 +7,12 @@ from scrapy.http import Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
 
 
 class CostcoGlobalSpider(Spider):
     name = "costco_global"
-    item_attributes = {"brand_wikidata": "Q715583"}
+    item_attributes = COSTCO_SHARED_ATTRIBUTES
     start_urls = [
         "https://www.costco.co.uk/store-finder/search?q=",
         "https://www.costco.com.au/store-finder/search?q=",

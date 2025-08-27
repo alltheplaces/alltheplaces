@@ -6,7 +6,7 @@ from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
 from locations.spiders.chevron_us import ChevronUSSpider
 from locations.spiders.circle_k import CircleKSpider
-from locations.spiders.costco import CostcoSpider
+from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
 from locations.spiders.food_city_southeast_us import FoodCitySoutheastUSSpider
@@ -95,8 +95,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand_wikidata"]
             elif item["name"] == "Costco":
-                item["located_in"] = CostcoSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = CostcoSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = COSTCO_SHARED_ATTRIBUTES["brand"]
+                item["located_in_wikidata"] = COSTCO_SHARED_ATTRIBUTES["brand_wikidata"]
             elif item["name"] == "CVS":
                 item["located_in"] = CVS_BRANDS["CVS Pharmacy"]["brand"]
                 item["located_in_wikidata"] = CVS_BRANDS["CVS Pharmacy"]["brand_wikidata"]
