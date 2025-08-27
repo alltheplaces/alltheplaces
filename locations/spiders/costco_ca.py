@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import FIREFOX_LATEST
 
 
 class CostcoCASpider(Spider):
@@ -14,10 +15,7 @@ class CostcoCASpider(Spider):
     item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
     start_urls = ["https://www.costco.ca/AjaxWarehouseBrowseLookupView?countryCode=CA"]
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
-    }
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
 
     def start_requests(self) -> Iterable[Request]:
         yield Request(
@@ -45,7 +43,7 @@ class CostcoCASpider(Spider):
             apply_category(Categories.SHOP_WHOLESALE, item)
 
             if store["hasBusinessDepartment"] is True:
-                item["name"] = "Costco Business Center"
+                item["name"] = "Costco Business Centre"
             else:
                 item["name"] = "Costco"
 
