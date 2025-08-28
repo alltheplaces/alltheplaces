@@ -15,6 +15,7 @@ class SunglassHutGBSpider(SitemapSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item, response, location):
+        item.pop("image", None)
         if m := re.search(r'"geocodedCoordinate":{"latitude":(-?\d+\.\d+),"longitude":(-?\d+\.\d+)}', response.text):
             item["lat"], item["lon"] = m.groups()
         elif m := re.search(
