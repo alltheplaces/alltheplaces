@@ -160,7 +160,7 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
 }
 
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type in ["document", "script"],
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script"],
 }
 
 DEFAULT_CAMOUFOX_SETTINGS = {
