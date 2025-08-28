@@ -61,21 +61,10 @@ class BmoSpider(Where2GetItSpider):
         if location["country"] == "CA":
             item["state"] = location["province"]
 
-        hours_text = ""
-        for day_name in DAYS_FULL:
-            open_time = location.get("{}open".format(day_name.lower()))
-            close_time = location.get("{}close".format(day_name.lower()))
-            if (
-                open_time
-                and open_time != "closed"
-                and open_time != "N/A"
-                and close_time
-                and close_time != "closed"
-                and close_time != "N/A"
-            ):
-                hours_text = "{} {}: {} - {}".format(hours_text, day_name, open_time, close_time)
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_text)
+        try:
+            item["opening_hours"] = self.parse_opening_hours(location)
+        except:
+            self.logger.error("Failed to parse opening hours")
 
         if location["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
             apply_category(Categories.BANK, item)
@@ -234,3 +223,12 @@ class BmoSpider(Where2GetItSpider):
             self.logger.error("Unknown location type: %s", location["grouptype"])
 
         yield item
+
+    def parse_opening_hours(self, location: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            open_time = location.get(f"{day.lower()}_open")
+            close_time = location.get(f"{day.lower()}_close")
+            if open_time and close_time:
+                oh.add_range(day, open_time, close_time)
+        return oh
