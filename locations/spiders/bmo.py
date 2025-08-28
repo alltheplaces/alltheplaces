@@ -58,8 +58,17 @@ class BmoSpider(Where2GetItSpider):
         item["lon"] = location.get("longitude")
         item["ref"] = location["clientkey"]
         item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
+
+        base_url = ""
         if location["country"] == "CA":
             item["state"] = location["province"]
+            base_url = "https://branches.bmo.com"
+        elif location["country"] == "US":
+            base_url = "https://usbranches.bmo.com"
+
+        item["website"] = f'{base_url}/{item["state"]}/{item["city"]}/{location["clientkey"]}/'.lower().replace(
+            " ", "-"
+        )
 
         try:
             item["opening_hours"] = self.parse_opening_hours(location)
