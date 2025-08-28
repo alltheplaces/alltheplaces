@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -44,11 +46,14 @@ class BmoSpider(Where2GetItSpider):
     name = "bmo"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
     api_endpoint = "https://branchlocator.bmo.com/rest/getlist"
-    api_key = "343095D0-C235-11E6-93AB-1BF70C70A832"
+    api_key = [
+        "343095D0-C235-11E6-93AB-1BF70C70A832",  # CA
+        "D07C1CB0-80A3-11ED-BCB3-F57F326043C3",  # US
+    ]
     api_filter_admin_level = 2
 
     # flake8: noqa: C901
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = location["clientkey"]
         item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
         if location["country"] == "CA":
