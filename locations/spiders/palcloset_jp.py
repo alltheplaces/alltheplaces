@@ -30,7 +30,6 @@ class PalclosetJPSpider(Spider):
             item["website"] = (
                 f"https://www.palcloset.jp/addons/pal/shoplist/detail/?brandshop_no={store['key']}&b={store['extra_fields']['代表ブランドコード']}"
             )
-            item["extras"]["start_date"] = re.search(r"\d{4}-\d{2}-\d{2}", str(store["pub_start"])).group()
             item["postcode"] = store["extra_fields"]["郵便番号"]
             if store["extra_fields"]["電話番号"] != "-":
                 item["phone"] = f"+81 {store['extra_fields']['電話番号']}"
