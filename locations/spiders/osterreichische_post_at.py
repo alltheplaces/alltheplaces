@@ -7,10 +7,11 @@ from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_AT, OpeningHours, sanitise_day
 
+POST_AT = {"operator": "Österreichische Post AG", "operator_wikidata": "Q1763505"}
+
 
 class OsterreichischePostATSpider(Spider):
     name = "osterreichische_post_at"
-    item_attributes = {"operator": "Österreichische Post AG", "operator_wikidata": "Q1763505"}
     download_timeout = 180
 
     def start_requests(self) -> Iterable[Request]:
@@ -71,18 +72,22 @@ class OsterreichischePostATSpider(Spider):
 
             if location["type"] == "BRIEFKASTEN":
                 item["name"] = None
+                item.update(POST_AT)
                 apply_category(Categories.POST_BOX, item)
             elif location["type"] == "POSTPARTNER":
                 if ", " in location["longname"]:
                     item["name"] = location["longname"].split(", ", 1)[1]
                 else:
                     item["name"] = None
+                item["extras"]["post_office:brand"] = "Österreichische Post"
                 apply_category(Categories.GENERIC_POI, item)
                 apply_yes_no("post_office=post_partner", item, True)
             elif location["type"] == "FILIALE":
+                item.update(POST_AT)
                 apply_category(Categories.POST_OFFICE, item)
             elif location["type"] == "ABHOLSTATION":
                 item["name"] = None
+                item.update(POST_AT)
                 apply_category(Categories.PARCEL_LOCKER, item)
             elif location["type"] in ("PAKET_PUNKT", "HERMES"):
                 continue
