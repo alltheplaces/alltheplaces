@@ -26,7 +26,12 @@ class PlanetFitnessUSSpider(CrawlSpider, StructuredDataSpider, CamoufoxSpider):
     ]
     # Rate limiting is additionally applied. Using a single Camoufox context
     # slows the crawl, as does DOWNLOAD_DELAY. RETRY_TIMES is a further help.
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"CAMOUFOX_MAX_PAGES_PER_CONTEXT": 1, "CAMOUFOX_MAX_CONTEXTS": 1, "DOWNLOAD_DELAY": 5, "RETRY_TIMES": 5}
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {
+        "CAMOUFOX_MAX_PAGES_PER_CONTEXT": 1,
+        "CAMOUFOX_MAX_CONTEXTS": 1,
+        "DOWNLOAD_DELAY": 5,
+        "RETRY_TIMES": 5,
+    }
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["opening_hours"] = OpeningHours()
