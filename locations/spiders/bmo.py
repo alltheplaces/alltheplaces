@@ -54,6 +54,8 @@ class BmoSpider(Where2GetItSpider):
 
     # flake8: noqa: C901
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
+        item["lat"] = location.get("latitude")
+        item["lon"] = location.get("longitude")
         item["ref"] = location["clientkey"]
         item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
         if location["country"] == "CA":
