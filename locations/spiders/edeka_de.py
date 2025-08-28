@@ -82,7 +82,7 @@ class EdekaDESpider(scrapy.Spider):
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
         if brand_set:
-            branch = item.pop("name")
+            branch = item.get("name")
 
             pattern = None
             if "nah&gut" in branch:
