@@ -13,8 +13,13 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.bhf.org.uk/sitemap.xml"]
     sitemap_rules = [
         (r"/find-bhf-near-you/.*book-bank.*$", "parse"),
-        (r"/find-bhf-near-you/.+-shop$", "parse"),
-        (r"/find-bhf-near-you/.+-store$", "parse"),
+        (r"/find-bhf-near-you/.*clothing-bank.*$", "parse"),
+        (r"/find-bhf-near-you/.+-shop.*", "parse"),
+        (r"/find-bhf-near-you/.+-store.*", "parse"),
+        (r"/find-bhf-near-you/.+-fashion-.*$", "parse"),
+        (r"/find-bhf-near-you/.+-furniture-.*$", "parse"),
+        (r"/find-bhf-near-you/stockbridge$", "parse"),
+        (r"/find-bhf-near-you/pontefract$", "parse"),
     ]
     wanted_types = ["ClothingStore", "HomeGoodsStore"]
     drop_attributes = {"image"}
@@ -23,6 +28,8 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
 
     def parse(self, response):
+        if "office" in response.url:
+            return
         if "ld+json" in response.text:
             for item in self.parse_sd(response):
                 extract_google_position(item, response)
@@ -56,9 +63,12 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         if "book-bank" in response.url:
             apply_category(Categories.RECYCLING, item)
             apply_yes_no("recycling:books", item, True)
+        elif "clothing-bank" in response.url:
+            apply_category(Categories.RECYCLING, item)
+            apply_yes_no("recycling:clothes", item, True)
         elif "-bhf-shop" in response.url:
             apply_category(Categories.SHOP_CHARITY, item)
-        elif "-home-store" in response.url or "-furniture-electrical-store" in response.url:
+        elif "-home-" in response.url or "-furniture-" in response.url:
             apply_category(Categories.SHOP_FURNITURE, item)
         else:
             apply_category(Categories.SHOP_CHARITY, item)
