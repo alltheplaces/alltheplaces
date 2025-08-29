@@ -40,7 +40,6 @@ class RenaultSpider(Spider):
             item["country"] = location.get("country")
             item["phone"] = location["telephone"].get("value")
 
-            
             activities = [activity["birId"] for activity in location["dealerActivities"]]
 
             apply_yes_no("second_hand", item, "03" in activities)
@@ -73,7 +72,6 @@ class RenaultSpider(Spider):
             # location["type"]
             # location["dealerNature"]
 
-
             for key, brand in self.BRANDS.items():
                 if location.get(key) and not location[key]["blacklisted"]:
                     is_dealer = "01" in activities
@@ -86,7 +84,7 @@ class RenaultSpider(Spider):
         if response.json()["currentPage"] < response.json()["totalPages"]:
             yield self.make_request(response.url, response.json()["currentPage"] + 1)
 
-    def create_shop_item(self, item: Feature, key:str, brand:dict, has_service: bool) -> Feature:
+    def create_shop_item(self, item: Feature, key: str, brand: dict, has_service: bool) -> Feature:
         shop = item.deepcopy()
         shop["ref"] = "{}-{}".format(item["ref"], key)
         shop.update(brand)
@@ -94,12 +92,9 @@ class RenaultSpider(Spider):
         apply_yes_no(Extras.CAR_REPAIR, shop, has_service)
         return shop
 
-    def create_service_item(self, item: Feature, key:str, brand:dict) -> Feature:
+    def create_service_item(self, item: Feature, key: str, brand: dict) -> Feature:
         service = item.deepcopy()
         service["ref"] = "{}-{}_service".format(item["ref"], key)
         service.update(brand)
         apply_category(Categories.SHOP_CAR_REPAIR, service)
         return service
-    
-
-
