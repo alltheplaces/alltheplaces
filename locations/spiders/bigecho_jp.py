@@ -1,4 +1,3 @@
-import re
 from typing import Any
 
 from scrapy import Spider
@@ -20,9 +19,9 @@ class BigechoJPSpider(Spider):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
-            
+
             item["extras"]["amenity"] = "karaoke_box"
             item["website"] = f"https://reserve.big-echo.jp/r/{store['key']}"
             item["ref"] = store["key"]
-            
+
             yield item
