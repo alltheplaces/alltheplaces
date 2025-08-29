@@ -26,9 +26,9 @@ class SeimsJPSpider(Spider):
             item["extras"]["addr:province"] = store["extra_fields"]["都道府県"]
             item["extras"]["branch:ja-Hira"] = store["extra_fields"]["店名かな"]
 
-            if store["extra_fields"]["電話番号"] != None:
+            if store["extra_fields"]["電話番号"] is not None:
                 item["phone"] = f"+81 {store['extra_fields']['電話番号']}"
-                if store["extra_fields"]["調剤電話番号"] != None:
+                if store["extra_fields"]["調剤電話番号"] is not None:
                     item["extras"]["phone:pharmacy"] = f"+81 {store['extra_fields']['調剤電話番号']}"
             else:
                 item["phone"] = f"+81 {store['extra_fields']['調剤電話番号']}"
