@@ -75,28 +75,32 @@ class DbeGovSchoolsZASpider(Spider):
             item["ref"] = location["NatEmis"]
             item["extras"]["ref:ZA:emis"] = location["NatEmis"]
 
-            item["lat"] = location["GIS_Latitude"]
-            item["lon"] = location["GIS_Longitude"]
+            if location["Province"] in ["GP"]:
+                item["lat"] = location["Latitude"]
+                item["lon"] = location["Longitude"]
+            else:        
+                item["lat"] = location["GIS_Latitude"]
+                item["lon"] = location["GIS_Longitude"]
 
             if location["Province"] in ["EC", "NC"]:
                 item["lat"], item["lon"] = item["lon"], item["lat"]
 
-            if location.get("Town_City") is not None:
+            if location.get("Town_City") not in [None, "99"]:
                 item["city"] = location.get("Town_City").title().replace("'S", "'s")
 
             item["state"] = ZA_PROVINCES.get(location["Province"])
 
-            if location.get("StreetAddress") is not None:
+            if location.get("StreetAddress") not in [None, "99"]:
                 item["addr_full"] = (
                     clean_address(location.get("StreetAddress")).title().replace("'S", "'s").replace("`S", "'s")
                 )
 
-            if location.get("PostalAddress") is not None:
+            if location.get("PostalAddress") not in [None, "99"]:
                 item["extras"]["addr:postal"] = (
                     clean_address(location.get("PostalAddress")).title().replace("'S", "'s").replace("`S", "'s")
                 )
 
-            if match := re.match(r"^.*\s(\d\d\d\d)$", item["addr_full"]):
+            if "addr_full" in item and match := re.match(r"^.*\s(\d\d\d\d)$", item["addr_full"]):
                 item["postcode"] = match[1]
 
             item["name"] = (
