@@ -86,7 +86,12 @@ class DbeGovSchoolsZASpider(Spider):
                 item["lon"] = location.get("GIS_Longitude")
 
                 # Coordinates are reversed in the data for most locations
-                if location["Province"] in ["EC"] and item.get("lon") is not None and item.get("lat") is not None and str(item["lon"])[0] == "-":
+                if (
+                    location["Province"] in ["EC"]
+                    and item.get("lon") is not None
+                    and item.get("lat") is not None
+                    and str(item["lon"])[0] == "-"
+                ):
                     item["lat"], item["lon"] = item["lon"], item["lat"]
 
                 # Coordinates are stored without decimal point and reversed
