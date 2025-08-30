@@ -100,8 +100,9 @@ class DbeGovSchoolsZASpider(Spider):
                     clean_address(location.get("PostalAddress")).title().replace("'S", "'s").replace("`S", "'s")
                 )
 
-            if "addr_full" in item and match := re.match(r"^.*\s(\d\d\d\d)$", item["addr_full"]):
-                item["postcode"] = match[1]
+            if "addr_full" in item:
+                if match := re.match(r"^.*\s(\d\d\d\d)$", item["addr_full"]):
+                    item["postcode"] = match[1]
 
             item["name"] = (
                 location.get("Official_Institution_Name")
