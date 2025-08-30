@@ -75,7 +75,7 @@ class DbeGovSchoolsZASpider(Spider):
             item["ref"] = location["NatEmis"]
             item["extras"]["ref:ZA:emis"] = location["NatEmis"]
 
-            if location["Province"] in ["GP"]:
+            if location["Province"] in ["GT"]:
                 item["lat"] = location["Latitude"]
                 item["lon"] = location["Longitude"]
             else:
@@ -85,17 +85,17 @@ class DbeGovSchoolsZASpider(Spider):
             if location["Province"] in ["EC", "NC"]:
                 item["lat"], item["lon"] = item["lon"], item["lat"]
 
-            if location.get("Town_City") not in [None, "99"]:
+            if location.get("Town_City") not in [None, 99]:
                 item["city"] = location.get("Town_City").title().replace("'S", "'s")
 
             item["state"] = ZA_PROVINCES.get(location["Province"])
 
-            if location.get("StreetAddress") not in [None, "99"]:
+            if location.get("StreetAddress") not in [None, 99]:
                 item["addr_full"] = (
                     clean_address(location.get("StreetAddress")).title().replace("'S", "'s").replace("`S", "'s")
                 )
 
-            if location.get("PostalAddress") not in [None, "99"]:
+            if location.get("PostalAddress") not in [None, 99]:
                 item["extras"]["addr:postal"] = (
                     clean_address(location.get("PostalAddress")).title().replace("'S", "'s").replace("`S", "'s")
                 )
