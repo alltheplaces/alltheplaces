@@ -75,15 +75,15 @@ class DbeGovSchoolsZASpider(Spider):
             item["ref"] = location["NatEmis"]
             item["extras"]["ref:ZA:emis"] = location["NatEmis"]
 
-            if location["Province"] in ["GT"]:
-                item["lat"] = location["Latitude"]
-                item["lon"] = location["Longitude"]
-            else:
-                item["lat"] = location["GIS_Latitude"]
-                item["lon"] = location["GIS_Longitude"]
+            if location.get("Type_DoE") == "ORDINARY SCHOOL":
+                # Normalise column names
+                if location["Province"] in ["GT"]:
+                    location["GIS_Latitude"] = location["Latitude"]
+                    location["GIS_Longitude"] = location["Longitude"]
+                    location.get("Official_Institution_Name") = location.get("Institution_Name")
 
-            if location["Province"] in ["EC", "NC"]:
-                item["lat"], item["lon"] = item["lon"], item["lat"]
+                if location["Province"] in ["EC", "NC"]:
+                    item["lat"], item["lon"] = item["lon"], item["lat"]
 
             if location.get("Town_City") not in [None, 99]:
                 item["city"] = location.get("Town_City").title().replace("'S", "'s")
