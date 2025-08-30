@@ -125,6 +125,7 @@ class Categories(Enum):
     SHOP_DOITYOURSELF = {"shop": "doityourself"}
     SHOP_DOORS = {"shop": "doors"}
     SHOP_DRY_CLEANING = {"shop": "dry_cleaning"}
+    SHOP_E_CIGARETTE = {"shop": "e-cigarette"}
     SHOP_ELECTRICAL = {"shop": "electrical"}
     SHOP_ELECTRONICS = {"shop": "electronics"}
     SHOP_EROTIC = {"shop": "erotic"}
@@ -576,6 +577,7 @@ class Extras(Enum):
     BAR = "bar"
     BARBECUES = "bbq"
     BREAKFAST = "breakfast"
+    BRUNCH = "brunch"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
     CAR_PARTS = "service:vehicle:car_parts"
@@ -601,6 +603,7 @@ class Extras(Enum):
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
     LIVE_MUSIC = "live_music"
+    LUNCH = "lunch"
     MALE = "male"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
