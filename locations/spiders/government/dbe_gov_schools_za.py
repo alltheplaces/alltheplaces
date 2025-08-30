@@ -78,7 +78,7 @@ class DbeGovSchoolsZASpider(Spider):
             if location["Province"] in ["GP"]:
                 item["lat"] = location["Latitude"]
                 item["lon"] = location["Longitude"]
-            else:        
+            else:
                 item["lat"] = location["GIS_Latitude"]
                 item["lon"] = location["GIS_Longitude"]
 
