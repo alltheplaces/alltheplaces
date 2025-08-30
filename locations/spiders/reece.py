@@ -7,10 +7,11 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class ReeceSpider(SitemapSpider):
+class ReeceSpider(SitemapSpider, PlaywrightSpider):
     name = "reece"
     item_attributes = {"brand_wikidata": "Q29025524"}
     allowed_domains = [
