@@ -82,18 +82,18 @@ class DbeGovSchoolsZASpider(Spider):
                     location["GIS_Longitude"] = location.get("Longitude")
                     location["Official_Institution_Name"] = location.get("Institution_Name")
 
-                item["lat"] = location["GIS_Latitude"]
-                item["lon"] = location["GIS_Longitude"]
+                item["lat"] = location.get("GIS_Latitude")
+                item["lon"] = location.get("GIS_Longitude")
 
                 # Coordinates are reversed in the data for most locations
-                if location["Province"] in ["EC"] and "lon" in item and "lat" in item and item["lon"][0] == "-":
+                if location["Province"] in ["EC"] and item.get("lon") is not None and item.get("lat") is not None and str(item["lon"])[0] == "-":
                     item["lat"], item["lon"] = item["lon"], item["lat"]
 
                 # Coordinates are stored without decimal point and reversed
-                if location["Province"] in ["NC"] and "lon" in item and "lat" in item:
+                if location["Province"] in ["NC"] and item.get("lon") is not None and item.get("lat") is not None:
                     item["lat"], item["lon"] = item["lon"], item["lat"]
-                    item["lat"] = item["lat"][:3] + "." + item["lat"][3:]
-                    item["lon"] = item["lon"][:3] + "." + item["lon"][3:]
+                    item["lat"] = str(item["lat"])[:3] + "." + str(item["lat"])[3:]
+                    item["lon"] = str(item["lon"])[:3] + "." + str(item["lon"])[3:]
 
             if location.get("Town_City") not in [None, 99]:
                 item["city"] = location.get("Town_City").title().replace("'S", "'s")
