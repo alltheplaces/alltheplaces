@@ -45,7 +45,7 @@ class CostcoCASpider(Spider):
             apply_category(Categories.SHOP_WHOLESALE, item)
 
             if store["hasBusinessDepartment"] is True:
-                item["name"] = "Costco Business Center"
+                item["name"] = "Costco Business Centre"
             else:
                 item["name"] = "Costco"
 
