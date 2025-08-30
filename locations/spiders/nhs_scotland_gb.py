@@ -46,7 +46,6 @@ class NhsScotlandGBSpider(Spider):
         "opticians": Categories.SHOP_OPTICIAN,
         "pharmacies": Categories.PHARMACY,
     }
-    download_delay = 0.2
     requires_proxy = True
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
