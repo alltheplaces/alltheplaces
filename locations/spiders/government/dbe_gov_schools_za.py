@@ -84,7 +84,7 @@ class DbeGovSchoolsZASpider(Spider):
 
                 item["lat"] = location["GIS_Latitude"]
                 item["lon"] = location["GIS_Longitude"]
-                
+
                 # Coordinates are reversed in the data for most locations
                 if location["Province"] in ["EC"] and "lon" in item and "lat" in item and item["lon"][0] == "-":
                     item["lat"], item["lon"] = item["lon"], item["lat"]
