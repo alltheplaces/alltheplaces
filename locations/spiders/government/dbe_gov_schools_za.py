@@ -40,8 +40,16 @@ class DbeGovSchoolsZASpider(Spider):
     # Links obtained from https://www.education.gov.za/Programmes/EMIS/EMISDownloads.aspx
     # It doesn't look like they can be reliably fetched if the page updates with newer data, so require manually updating
     start_urls = [
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=O2qbsfuGFC4%3d&tabid=466&portalid=0&mid=12484",  # National list
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=OtSySF85mAQ%3d&tabid=466&portalid=0&mid=12484",  # Special Needs Educatiom
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=QtU12HAAgYs%3d&tabid=466&portalid=0&mid=13863", # Eastern Cape
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=q5e0rgNbUts%3d&tabid=466&portalid=0&mid=13863", # Free State
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=Y9-BKLYjVw8%3d&tabid=466&portalid=0&mid=13863", # Gauteng
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=riJ7nu90xvc%3d&tabid=466&portalid=0&mid=13863", # KwaZulu-Natal
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=7usFT-ftgEE%3d&tabid=466&portalid=0&mid=13863", # Limpopo
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=7TNi-DL2R5I%3d&tabid=466&portalid=0&mid=13863", # Mpumalanga
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=ueZPh5vTaPY%3d&tabid=466&portalid=0&mid=13863", # North West
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=XTSyAV7-aeM%3d&tabid=466&portalid=0&mid=13863", # Northern Cape
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=nYA_9hgidqc%3d&tabid=466&portalid=0&mid=13863", # Western Cape
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=A5xNnnbCgas%3d&tabid=466&portalid=0&mid=13863", # Special Needs Educatiom
     ]
 
     def parse(self, response):
@@ -104,7 +112,7 @@ class DbeGovSchoolsZASpider(Spider):
 
             item["phone"] = location["Telephone"]
 
-            apply_yes_no(Extras.FEE, item, location["NoFeeSchool"] == "NO", False)
+            apply_yes_no(Extras.FEE, item, location["NoFeeSchool"] in ["Fee Charging"], True)
 
             if location["Sector"].lower() == "public":
                 item.update(ZA_EDUCATION_DEPARTMENTS.get(location["Province"]))
