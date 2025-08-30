@@ -78,12 +78,19 @@ class DbeGovSchoolsZASpider(Spider):
             if location.get("Type_DoE") == "ORDINARY SCHOOL":
                 # Normalise column names
                 if location["Province"] in ["GT"]:
-                    location["GIS_Latitude"] = location["Latitude"]
-                    location["GIS_Longitude"] = location["Longitude"]
-                    location.get("Official_Institution_Name") = location.get("Institution_Name")
+                    location["GIS_Latitude"] = location.get("Latitude")
+                    location["GIS_Longitude"] = location.get("Longitude")
+                    location["Official_Institution_Name"] = location.get("Institution_Name")
 
-                if location["Province"] in ["EC", "NC"]:
+                # Coordinates are reversed in the data for most locations
+                if location["Province"] in ["EC"] and item["lon"][0] == "-":
                     item["lat"], item["lon"] = item["lon"], item["lat"]
+
+                # Coordinates are stored without decimal point and reversed
+                if location["Province"] in ["NC"]:
+                    item["lat"], item["lon"] = item["lon"], item["lat"]
+                    item["lat"] = item["lat"][:3] + "." + item["lat"][3:]
+                    item["lon"] = item["lon"][:3] + "." + item["lon"][3:]
 
             if location.get("Town_City") not in [None, 99]:
                 item["city"] = location.get("Town_City").title().replace("'S", "'s")
