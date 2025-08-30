@@ -1,8 +1,13 @@
+from typing import Any
+
+import chompjs
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.user_agents import FIREFOX_LATEST
 
@@ -19,11 +24,12 @@ class KfcDESpider(Spider):
     name = "kfc_de"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.de/find-a-kfc/allrestaurant"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = FIREFOX_LATEST
+    is_playwright_spider = True
+    custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response, **kwargs):
-        for location in response.json():
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in chompjs.parse_js_object(response.text):
             if location["name"].endswith(" - COMING SOON"):
                 continue
             location["street_address"] = location.pop("address")
