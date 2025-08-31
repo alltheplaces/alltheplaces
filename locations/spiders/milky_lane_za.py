@@ -1,30 +1,47 @@
-from locations.categories import Extras, apply_yes_no
-from locations.storefinders.yext_search import YextSearchSpider
+from typing import Iterable
+
+from scrapy.http import Request, Response
+
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
+from locations.storefinders.go_review_api import GoReviewApiSpider
 
 
-class MilkyLaneZASpider(YextSearchSpider):
+class MilkyLaneZASpider(GoReviewApiSpider):
     name = "milky_lane_za"
     item_attributes = {"brand": "Milky Lane", "brand_wikidata": "Q128223693"}
-    host = "https://location.milkylane.co.za"
 
-    def parse_item(self, location, item):
-        apply_yes_no(Extras.DELIVERY, item, location["profile"].get("c_delivery"), False)
+    domain = "locations.milkylane.co.za"
 
-        if item["website"] is None or item["website"] in ["https://www.milkylane.co.za"]:
-            item["website"] = location["profile"].get("c_pagesURL")
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
+        yield Request(
+            url=item["website"],
+            meta={"item": item, "attributes": feature.get("attributes")},
+            callback=self.parse_location_ld,
+        )
 
-        if item["extras"].get("website:orders") in ["https://app.milkylane.co.za/", "https://www.milkylane.co.za"]:
-            item["extras"].pop("website:orders")
+    def parse_location_ld(self, response) -> Iterable[Feature]:
+        ld_item = LinkedDataParser.parse(response, "Restaurant")
 
-        if item["email"] in ["info@milkylane.co.za"]:
-            item.pop("email")
+        ld_item["ref"] = response.meta["item"]["ref"]
+        ld_item["branch"] = ld_item.pop("name").removeprefix("Milky Lane ")
 
-        try:
-            if " " in item["street_address"]:
-                int(item["street_address"].split(" ", 1)[0])
-                item["housenumber"] = item["street_address"].split(" ", 1)[0]
-                item["street"] = item["street_address"].split(" ", 1)[1]
-        except ValueError:
-            pass
+        if response.meta["attributes"] is not None:
+            attributes = [attribute["value"] for attribute in response.meta["attributes"]]
 
-        yield item
+            apply_yes_no(Extras.DELIVERY, ld_item, "Delivery" in attributes)
+            apply_yes_no(PaymentMethods.CARDS, ld_item, "Card" in attributes)
+            apply_yes_no(PaymentMethods.DEBIT_CARDS, ld_item, "Debit cards" in attributes)
+            apply_yes_no(PaymentMethods.CREDIT_CARDS, ld_item, "Credit cards" in attributes)
+            apply_yes_no(Extras.DRIVE_THROUGH, ld_item, "Drive-through" in attributes)
+            apply_yes_no(Extras.DRIVE_THROUGH, ld_item, "Drive Thru" in attributes)
+            apply_yes_no(Extras.BREAKFAST, ld_item, "Breakfast" in attributes)
+            apply_yes_no(Extras.BRUNCH, ld_item, "Brunch" in attributes)
+
+            for attribute in attributes:
+                self.crawler.stats.inc_value(f"atp/{self.name}/attribute/{attribute}")
+
+        apply_category(Categories.FAST_FOOD, ld_item)
+
+        yield ld_item
