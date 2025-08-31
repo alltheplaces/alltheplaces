@@ -27,6 +27,8 @@ class SteersZASpider(GoReviewApiSpider):
         ld_item["ref"] = response.meta["item"]["ref"]
         ld_item["branch"] = ld_item.pop("name").removeprefix("Steers ")
 
+        ld_item.pop("image")
+
         if response.meta["attributes"] is not None:
             attributes = [attribute["value"] for attribute in response.meta["attributes"]]
 
