@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 
 class AcomJPSpider(scrapy.Spider):
     name = "acom_jp"
-    
+
     item_attributes = {
         "brand": "アコム",
         "brand_wikidata": "Q4674469",
