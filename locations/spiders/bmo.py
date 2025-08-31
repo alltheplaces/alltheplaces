@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -44,31 +46,34 @@ class BmoSpider(Where2GetItSpider):
     name = "bmo"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
     api_endpoint = "https://branchlocator.bmo.com/rest/getlist"
-    api_key = "343095D0-C235-11E6-93AB-1BF70C70A832"
+    api_key = [
+        "343095D0-C235-11E6-93AB-1BF70C70A832",  # CA
+        "D07C1CB0-80A3-11ED-BCB3-F57F326043C3",  # US
+    ]
     api_filter_admin_level = 2
 
     # flake8: noqa: C901
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
+        item["lat"] = location.get("latitude")
+        item["lon"] = location.get("longitude")
         item["ref"] = location["clientkey"]
         item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
+
+        base_url = ""
         if location["country"] == "CA":
             item["state"] = location["province"]
+            base_url = "https://branches.bmo.com"
+        elif location["country"] == "US":
+            base_url = "https://usbranches.bmo.com"
 
-        hours_text = ""
-        for day_name in DAYS_FULL:
-            open_time = location.get("{}open".format(day_name.lower()))
-            close_time = location.get("{}close".format(day_name.lower()))
-            if (
-                open_time
-                and open_time != "closed"
-                and open_time != "N/A"
-                and close_time
-                and close_time != "closed"
-                and close_time != "N/A"
-            ):
-                hours_text = "{} {}: {} - {}".format(hours_text, day_name, open_time, close_time)
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_text)
+        item["website"] = f'{base_url}/{item["state"]}/{item["city"]}/{location["clientkey"]}/'.lower().replace(
+            " ", "-"
+        )
+
+        try:
+            item["opening_hours"] = self.parse_opening_hours(location)
+        except:
+            self.logger.error("Failed to parse opening hours")
 
         if location["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
             apply_category(Categories.BANK, item)
@@ -227,3 +232,12 @@ class BmoSpider(Where2GetItSpider):
             self.logger.error("Unknown location type: %s", location["grouptype"])
 
         yield item
+
+    def parse_opening_hours(self, location: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            open_time = location.get(f"{day.lower()}_open")
+            close_time = location.get(f"{day.lower()}_close")
+            if open_time and close_time:
+                oh.add_range(day, open_time, close_time)
+        return oh

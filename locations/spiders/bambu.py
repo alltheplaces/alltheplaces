@@ -15,6 +15,7 @@ class BambuSpider(Spider):
 
     # Start by acquiring a session cookie
     start_urls = ["https://www.drinkbambu.com/_api/v1/access-tokens"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         # Now that we have a session cookie, send the actual request
