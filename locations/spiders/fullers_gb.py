@@ -1,17 +1,16 @@
-import json
-
-from typing import Iterable, Any
+from typing import Iterable
 
 from scrapy.http import FormRequest, Response
 from scrapy.spiders import Request
 
+from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
-class FullersGBSpider(JSONBlobSpider,StructuredDataSpider):
+
+class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
     name = "fullers_gb"
     item_attributes = {
         "brand": "Fullers",
@@ -22,21 +21,21 @@ class FullersGBSpider(JSONBlobSpider,StructuredDataSpider):
         "COOKIES_ENABLED": True,
         "USER_AGENT": BROWSER_DEFAULT,
     }
-    locations_key = ['items']
-    wanted_types = ['restaurant']
+    locations_key = ["items"]
+    wanted_types = ["restaurant"]
 
     def make_request(self, page: int) -> FormRequest:
         return FormRequest(
-            url = "https://www.fullers.co.uk/api/main/pubs/feed",
-            formdata = {
-                "pageNumber":str(page),
-                "latitude":"0",
-                "longitude":"0",
-                "categories":[],
-                "area":""#D61B5F3C29994C99A3C93FA4144315A9"
+            url="https://www.fullers.co.uk/api/main/pubs/feed",
+            formdata={
+                "pageNumber": str(page),
+                "latitude": "0",
+                "longitude": "0",
+                "categories": [],
+                "area": "",  # D61B5F3C29994C99A3C93FA4144315A9"
             },
             method="POST",
-            headers = {
+            headers={
                 "Host": "www.fullers.co.uk",
                 "Accept": "application/json",
             },
