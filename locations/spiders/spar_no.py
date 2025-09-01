@@ -8,7 +8,7 @@ from locations.storefinders.sylinder import SylinderSpider
 
 class SparNOSpider(SylinderSpider):
     name = "spar_no"
-    aitem_attributes = SPAR_SHARED_ATTRIBUTES
+    item_attributes = SPAR_SHARED_ATTRIBUTES
     app_key = "1210"
     base_url = "https://spar.no/Finn-butikk/"
 
