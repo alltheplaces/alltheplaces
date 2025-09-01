@@ -13,7 +13,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
     name = "fullers_gb"
     item_attributes = {
-        "brand": "Fullers",
+        "brand": "Fuller's",
         "brand_wikidata": "Q5253950",
     }
 
