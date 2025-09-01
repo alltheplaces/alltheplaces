@@ -66,6 +66,9 @@ class WalmartUSSpider(Spider):
             item["street_address"] = merge_address_lines(
                 [location["address"].get("addressLineOne"), location["address"].get("addressLineTwo")]
             )
+            item["website"] = f'https://www.walmart.com/store/{item["ref"]}-{item["city"]}-{item["state"]}'.replace(
+                " ", "-"
+            )
             item["opening_hours"] = self.parse_hours(location.get("operationalHours", []))
 
             if location["name"] == "Walmart":
