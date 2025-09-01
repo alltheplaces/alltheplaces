@@ -21,7 +21,6 @@ class FullersGBSpider(JSONBlobSpider):
     locations_key = ["items"]
     requires_proxy = True
 
-
     def make_request(self, page: int) -> FormRequest:
         return FormRequest(
             url="https://www.fullers.co.uk/api/main/pubs/feed",
