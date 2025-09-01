@@ -10,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class FullersGBSpider(JSONBlobSpider):
     name = "fullers_gb"
     item_attributes = {
-        "brand": "Fullers",
+        "brand": "Fuller's",
         "brand_wikidata": "Q5253950",
     }
 
@@ -19,6 +19,8 @@ class FullersGBSpider(JSONBlobSpider):
         "USER_AGENT": BROWSER_DEFAULT,
     }
     locations_key = ["items"]
+    requires_proxy = True
+
 
     def make_request(self, page: int) -> FormRequest:
         return FormRequest(
