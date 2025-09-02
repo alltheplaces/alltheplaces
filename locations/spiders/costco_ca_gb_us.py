@@ -11,7 +11,9 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
-COSTCO_SHARED_ATTRIBUTES = {"brand": "Costco", "brand_wikidata": "Q715583"}
+# Don't specify a brand name so that NSI matching will pick the correct
+# localised brand name.
+COSTCO_SHARED_ATTRIBUTES = {"brand_wikidata": "Q715583"}
 
 
 class CostcoCAGBUSSpider(JSONBlobSpider, CamoufoxSpider):
