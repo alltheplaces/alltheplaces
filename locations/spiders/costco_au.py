@@ -5,7 +5,7 @@ from scrapy import Selector
 from scrapy.http import Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
-from locations.hours import OpeningHours, CLOSED_EN, DAYS_EN, DELIMITERS_EN
+from locations.hours import CLOSED_EN, DAYS_EN, DELIMITERS_EN, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -48,7 +48,7 @@ class CostcoAUSpider(JSONBlobSpider):
                 continue
             fuel_station = item.deepcopy()
             fuel_station["ref"] = fuel_station["ref"] + "_FUEL"
-            hours_text = " ".join(Selector(text=service["openingHours"]).xpath('//text()').getall())
+            hours_text = " ".join(Selector(text=service["openingHours"]).xpath("//text()").getall())
             fuel_station["opening_hours"] = self.parse_hours_string(hours_text)
             if "gasTypes" in service.keys():
                 fuel_types = [fuel["name"] for fuel in service["gasTypes"]]
@@ -56,10 +56,21 @@ class CostcoAUSpider(JSONBlobSpider):
                 apply_yes_no(Fuel.OCTANE_89, fuel_station, "レギュラー" in fuel_types)
                 apply_yes_no(Fuel.OCTANE_91, fuel_station, "Unleaded 91" in fuel_types)
                 apply_yes_no(Fuel.OCTANE_93, fuel_station, "Premium" in fuel_types)
-                apply_yes_no(Fuel.OCTANE_95, fuel_station, "Premium 95" in fuel_types or "Blyfri" in fuel_types or "95無鉛" in fuel_types)
+                apply_yes_no(
+                    Fuel.OCTANE_95,
+                    fuel_station,
+                    "Premium 95" in fuel_types or "Blyfri" in fuel_types or "95無鉛" in fuel_types,
+                )
                 apply_yes_no(Fuel.OCTANE_96, fuel_station, "ハイオク" in fuel_types)
                 apply_yes_no(Fuel.OCTANE_98, fuel_station, "Premium 98" in fuel_types or "98無鉛" in fuel_types)
-                apply_yes_no(Fuel.DIESEL, fuel_station, "Diesel" in fuel_types or "Premium Diesel" in fuel_types or "柴油" in fuel_types or "ディーゼル" in fuel_types)
+                apply_yes_no(
+                    Fuel.DIESEL,
+                    fuel_station,
+                    "Diesel" in fuel_types
+                    or "Premium Diesel" in fuel_types
+                    or "柴油" in fuel_types
+                    or "ディーゼル" in fuel_types,
+                )
                 apply_yes_no(Fuel.BIODIESEL, fuel_station, "HVO 100" in fuel_types)
                 apply_yes_no(Fuel.KEROSENE, fuel_station, "灯油" in fuel_types)
             apply_category(Categories.FUEL_STATION, fuel_station)
@@ -68,5 +79,7 @@ class CostcoAUSpider(JSONBlobSpider):
 
     def parse_hours_string(self, hours_string: str) -> OpeningHours:
         oh = OpeningHours()
-        oh.add_ranges_from_string(hours_string, days=self.day_labels, delimiters=self.delimiters, closed=self.closed_labels)
+        oh.add_ranges_from_string(
+            hours_string, days=self.day_labels, delimiters=self.delimiters, closed=self.closed_labels
+        )
         return oh

@@ -1,6 +1,6 @@
 import re
 
-from locations.hours import OpeningHours, DAYS_CN
+from locations.hours import DAYS_CN, OpeningHours
 from locations.spiders.costco_au import CostcoAUSpider
 
 
@@ -11,5 +11,9 @@ class CostcoTWSpider(CostcoAUSpider):
     day_labels = DAYS_CN
 
     def parse_hours_string(self, hours_string: str) -> OpeningHours:
-        hours_string = re.sub(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", r"\1AM - \2PM", hours_string.replace("上午", "").replace("下午", "").replace("~", " - "))
+        hours_string = re.sub(
+            r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})",
+            r"\1AM - \2PM",
+            hours_string.replace("上午", "").replace("下午", "").replace("~", " - "),
+        )
         return super().parse_hours_string(hours_string)

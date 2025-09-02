@@ -1,6 +1,5 @@
-import re
 
-from locations.hours import OpeningHours, CLOSED_ES, DAYS_ES, DELIMITERS_ES
+from locations.hours import CLOSED_ES, DAYS_ES, DELIMITERS_ES, OpeningHours
 from locations.spiders.costco_au import CostcoAUSpider
 
 
