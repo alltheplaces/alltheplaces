@@ -2,7 +2,9 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class AuchanFRSpider(CrawlSpider, StructuredDataSpider):
@@ -18,6 +20,9 @@ class AuchanFRSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=["/drive/"]), callback="parse_sd"),
         Rule(LinkExtractor(allow=["/supermarche/"]), callback="parse_sd"),
     ]
+    user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = item["name"].replace("Supermarché Supermarché", "Supermarché")
