@@ -148,20 +148,56 @@ LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 DEFAULT_PLAYWRIGHT_SETTINGS = {
-    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
-    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
     "DOWNLOAD_HANDLERS": {
         "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
         "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
     },
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
+    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
+    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
 }
 
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document"
-    and not request.resource_type == "script",
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script"],
+}
+
+DEFAULT_CAMOUFOX_SETTINGS = {
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "CAMOUFOX_LAUNCH_OPTIONS": {
+        "headless": True,
+    },
+    "DOWNLOAD_HANDLERS": {
+        "http": "scrapy_camoufox.handler.ScrapyCamoufoxDownloadHandler",
+        "https": "scrapy_camoufox.handler.ScrapyCamoufoxDownloadHandler",
+    },
+    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+    "ROBOTSTXT_OBEY": False,
+    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
+}
+
+DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS | {
+    # Cloudflare Turnstile makes script, xhr, fetch and image requests to
+    # challenges.cloudflare.com.
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not (
+        request.resource_type in ["document", "script", "xhr", "fetch", "image"]
+        and (
+            "/cdn-cgi/challenge-platform/" in request.url or request.url.startswith("https://challenges.cloudflare.com")
+        )
+    ),
+    "CAMOUFOX_LAUNCH_OPTIONS": {
+        "config": {
+            # Required for playwright_captcha.
+            "forceScopeAccess": True,
+        },
+        # Required for playwright_captcha.
+        "disable_coop": True,
+        "headless": True,
+        # Required for playwright_captcha.
+        "i_know_what_im_doing": True,
+    },
 }
 
 REQUESTS_CACHE_ENABLED = True
