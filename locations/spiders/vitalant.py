@@ -22,6 +22,5 @@ class VitalantSpider(SitemapSpider):
                 if "877" not in line_2:
                     address = address + line_2
             item["addr_full"] = clean_address(address)
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
         extract_google_position(item, response)
         yield item
