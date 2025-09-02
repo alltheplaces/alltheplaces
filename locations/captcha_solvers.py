@@ -56,6 +56,7 @@ async def cloudflare_turnstile_solver(page: Page, request: Request, spider: Spid
         # for a click-solver captcha.
         await solver.solve_captcha(captcha_container=page, captcha_type=CaptchaType.CLOUDFLARE_TURNSTILE)
 
+
 async def cloudflare_interstitial_solver(page: Page, request: Request, spider: Spider) -> None:
     """
     Click-solver for Cloudflare Interstitial.
