@@ -15,7 +15,9 @@ class DeutscheBankUSSpider(Spider):
     no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for poi in response.xpath(r"//tbody/tr"):
+        locations = response.xpath(r"//tbody/tr")
+        locations.pop(0)
+        for poi in locations:
             item = Feature()
             item["street_address"] = poi.xpath("./td[2]/text()").get()
             item["city"] = poi.xpath("./td[3]/text()").get()
