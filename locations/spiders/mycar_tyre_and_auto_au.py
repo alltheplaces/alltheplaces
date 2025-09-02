@@ -2,8 +2,8 @@ from scrapy.spiders import SitemapSpider
 
 from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
-from locations.structured_data_spider import StructuredDataSpider
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class MycarTyreAndAutoAUSpider(SitemapSpider, StructuredDataSpider, CamoufoxSpider):
