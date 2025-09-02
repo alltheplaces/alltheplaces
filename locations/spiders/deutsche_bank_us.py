@@ -1,16 +1,20 @@
-import scrapy
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class DeutscheBankUSSpider(scrapy.Spider):
+class DeutscheBankUSSpider(Spider):
     name = "deutsche_bank_us"
     item_attributes = {"brand": "Deutsche Bank", "brand_wikidata": "Q66048"}
     start_urls = ["https://country.db.com/usa/contact"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for poi in response.xpath(r"//tbody/tr"):
             item = Feature()
             item["street_address"] = poi.xpath("./td[2]/text()").get()
