@@ -17,13 +17,15 @@ class DeutscheBankUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         locations = response.xpath(r"//tbody/tr")
         locations.pop(0)
+        state = ""
         for poi in locations:
+            if s := poi.xpath("./td[1]/text()").get():
+                state = s
             item = Feature()
             item["street_address"] = poi.xpath("./td[2]/text()").get()
             item["city"] = poi.xpath("./td[3]/text()").get()
             item["postcode"] = poi.xpath("./td[4]/text()").get()
-            item["state"] = poi.xpath("./td[1]/text()").get()
-            item["website"] = response.url
+            item["state"] = state
             apply_category(Categories.BANK, item)
 
             yield item
