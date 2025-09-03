@@ -16,14 +16,15 @@ class MoyaPLSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Elements"]:
-            if not (1 in location["types"] or 2 in location["types"]):
+            if not any(t in location["types"] for t in [1, 2, 3]):
                 continue
 
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full")
 
-            if location["time"] == "24h":
+            if location.get("time", "").lower() == "24h":
                 item["opening_hours"] = "24/7"
+            # TODO: other hours available
 
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.OCTANE_95, item, 11 in location["attributes"])
