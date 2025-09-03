@@ -1,7 +1,9 @@
 import json
 
 import scrapy
+from scrapy.http import Response
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,3 +22,10 @@ class Mitre10AUSpider(StructuredDataSpider):
         stores = data_json["*"]["Magento_Ui/js/core/app"]["components"]["store-locator-search"]["markers"]
         for store in stores:
             yield scrapy.Request(store["url"], self.parse_sd)
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item.pop("facebook")
+        item.pop("image")
+        item["branch"] = item.pop("name").removesuffix("Mitre 10")
+        item["addr_full"] = response.xpath('//*[@class="address"]').xpath("normalize-space()").get()
+        yield item
