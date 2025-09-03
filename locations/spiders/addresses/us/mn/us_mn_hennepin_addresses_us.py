@@ -2,8 +2,8 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.address_spider import AddressSpider
 from locations.items import Feature
-from locations.spiders.addresses.address_spider import AddressSpider
 from locations.storefinders import arcgis_feature_server
 
 
