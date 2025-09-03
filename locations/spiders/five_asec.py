@@ -16,11 +16,7 @@ class FiveAsecSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = item["website"] = response.url
-
         item["addr_full"] = response.xpath('string(//a[@class="address"]/span)').get().strip()
-        item["phone"] = response.xpath('//*[contains(@href, "tel:")]/text()').get()
-
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
-
         yield item
