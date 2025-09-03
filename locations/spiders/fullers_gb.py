@@ -25,7 +25,7 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
     locations_key = ["items"]
     wanted_types = ["restaurant"]
     requires_proxy = True
-    
+
     def make_request(self, page: int) -> FormRequest:
         return FormRequest(
             url="https://www.fullers.co.uk/api/main/pubs/feed",
@@ -34,7 +34,7 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
                 "latitude": "0",
                 "longitude": "0",
                 "categories": [],
-                "area": "", 
+                "area": "",
             },
             method="POST",
             headers={
