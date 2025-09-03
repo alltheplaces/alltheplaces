@@ -1,18 +1,17 @@
-import json
 import re
+from typing import Iterable
 
-from typing import Iterable, Any
-
-from scrapy.http import FormRequest, Response, JsonRequest
+from scrapy.http import FormRequest, JsonRequest, Response
 from scrapy.spiders import Request
 
+from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
-class FullersGBSpider(JSONBlobSpider,StructuredDataSpider):
+
+class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
     name = "fullers_gb"
     item_attributes = {
         "brand": "Fuller's",
@@ -23,21 +22,21 @@ class FullersGBSpider(JSONBlobSpider,StructuredDataSpider):
         "COOKIES_ENABLED": True,
         "USER_AGENT": BROWSER_DEFAULT,
     }
-    locations_key = ['items']
-    wanted_types = ['restaurant']
+    locations_key = ["items"]
+    wanted_types = ["restaurant"]
 
     def make_request(self, page: int) -> FormRequest:
         return FormRequest(
-            url = "https://www.fullers.co.uk/api/main/pubs/feed",
-            formdata = {
-                "pageNumber":str(page),
-                "latitude":"0",
-                "longitude":"0",
-                "categories":[],
-                "area":""#D61B5F3C29994C99A3C93FA4144315A9"
+            url="https://www.fullers.co.uk/api/main/pubs/feed",
+            formdata={
+                "pageNumber": str(page),
+                "latitude": "0",
+                "longitude": "0",
+                "categories": [],
+                "area": "",  # D61B5F3C29994C99A3C93FA4144315A9"
             },
             method="POST",
-            headers = {
+            headers={
                 "Host": "www.fullers.co.uk",
                 "Accept": "application/json",
             },
@@ -60,7 +59,17 @@ class FullersGBSpider(JSONBlobSpider,StructuredDataSpider):
                     item["addr_full"] = feature["subTitle"]
                 if feature["link"]:
                     item["website"] = feature["link"]
-                yield JsonRequest(url="https://www.fullers.co.uk/api/main/pubs/information?pubId="+feature["pubId"], cb_kwargs={"item":item}, headers={"Host": "www.fullers.co.uk","Accept": "application/json","Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0"}, callback=self.post_process_item_json)
+                yield JsonRequest(
+                    url="https://www.fullers.co.uk/api/main/pubs/information?pubId=" + feature["pubId"],
+                    cb_kwargs={"item": item},
+                    headers={
+                        "Host": "www.fullers.co.uk",
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0",
+                    },
+                    callback=self.post_process_item_json,
+                )
 
         if response.json()["totalPages"] > response.json()["currentPage"]:
             yield self.make_request(int(response.json()["currentPage"]) + 1)
