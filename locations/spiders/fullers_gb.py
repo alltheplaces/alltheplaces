@@ -75,7 +75,10 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
             yield self.make_request(int(response.json()["currentPage"]) + 1)
 
     def post_process_item_json(self, response, item):
-        item["geometry"] = response.json()["googleMaps"]["coords"]
+        item["lat"] = response.json()["googleMaps"]["coords"]["lat"]
+        item["lon"] = response.json()["googleMaps"]["coords"]["lng"]
+        item["phone"] = response.json()["socials"]["phoneNumber"]["value"]
+        item["email"] = response.json()["socials"]["email"]["value"]
         yield item
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
