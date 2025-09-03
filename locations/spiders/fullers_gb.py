@@ -40,7 +40,6 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
             headers={
                 "Host": "www.fullers.co.uk",
                 "Accept": "application/json",
-                "Content-Type": "application/json",
             },
         )
 
