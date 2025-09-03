@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.items import Feature
+from locations.spiders.addresses.address_spider import AddressSpider
 from locations.storefinders import arcgis_feature_server
 
 
@@ -10,7 +11,7 @@ def join_non_null(*values, sep=""):
     return sep.join(str(v) for v in values if v is not None)
 
 
-class UsMnHennepinAddressesUSSpider(arcgis_feature_server.ArcGISFeatureServerSpider):
+class UsMnHennepinAddressesUSSpider(arcgis_feature_server.ArcGISFeatureServerSpider, AddressSpider):
     name = "us_mn_hennepin_addresses_us"
     # https://gis.hennepin.us/arcgis/rest/services/HennepinData/LAND_PROPERTY/MapServer/0
     host = "gis.hennepin.us"
