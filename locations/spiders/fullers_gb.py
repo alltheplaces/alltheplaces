@@ -50,7 +50,7 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
         features = self.extract_json(response)
         for feature in features:
             if feature["link"]:
-                yield Request(url=feature["link"], callback=self.parse_sd)
+                yield Request(url=feature["link"], meta={"ref":feature["pubId"]},callback=self.parse_sd)
             else:
                 if feature is None:
                     continue
@@ -86,4 +86,5 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
         if "data-marker-lat" in response.text:
             item["lat"] = re.search(r'data-marker-lat="(-?\d+\.\d+)"', response.text).group(1)
             item["lon"] = re.search(r'data-marker-lng="(-?\d+\.\d+)"', response.text).group(1)
+        item["ref"] = response.meta["ref"]
         yield item
