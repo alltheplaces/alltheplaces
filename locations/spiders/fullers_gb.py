@@ -50,7 +50,7 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
         features = self.extract_json(response)
         for feature in features:
             if feature["link"]:
-                yield Request(url=feature["link"], meta={"ref":feature["pubId"]},callback=self.parse_sd)
+                yield Request(url=feature["link"], meta={"ref": feature["pubId"]}, callback=self.parse_sd)
             else:
                 if feature is None:
                     continue
