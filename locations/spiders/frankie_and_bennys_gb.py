@@ -21,7 +21,7 @@ class FrankieAndBennysGBSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["addr_full"] = response.xpath('//*[@class="address"]/text()').get()
         item["phone"] = response.xpath('//*[contains(@href, "tel:")]/@href').get()
-        item["email"] = decode_email(response.xpath("//@data-cfemail").get())
+        item["email"] = decode_email(response.xpath("//@data-cfemail").get(""))
         item["opening_hours"] = OpeningHours()
         for rule in response.xpath('//*[@class="opening-hours-day"]'):
             if day := rule.xpath("./span[1]/text()").get():
