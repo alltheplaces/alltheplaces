@@ -1,5 +1,5 @@
-from locations.pipelines.address_clean_up import merge_address_lines
 from locations.categories import Categories, apply_category
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.stockist import StockistSpider
 
 
