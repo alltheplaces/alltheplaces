@@ -3,6 +3,7 @@ from typing import Any, Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Extras, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -31,4 +32,9 @@ class FrankieAndBennysGBSpider(SitemapSpider):
 
     def parse_item(self, item: Feature, response: Response, **kwargs) -> Iterable[Feature]:
         item["branch"] = response.xpath('//*[@class="d-block gamay-extra-bold"]/text()').get()
+        facilities = response.xpath('//*[@class="facility-name"]/text()').getall()
+        apply_yes_no(Extras.WHEELCHAIR, item, "Wheelchair Access" in facilities)
+        apply_yes_no(Extras.OUTDOOR_SEATING, item, "Outdoor Seating" in facilities)
+        apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "Baby Changing" in facilities)
+        apply_yes_no(Extras.WIFI, item, "Wi-Fi" in facilities)
         yield item
