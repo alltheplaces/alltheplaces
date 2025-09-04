@@ -3,7 +3,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.stockist import StockistSpider
 
 
-class CastleFineArtGbSpider(StockistSpider):
+class CastleFineArtGBSpider(StockistSpider):
     name = "castle_fine_art_gb"
     item_attributes = {"brand": "Castle Fine Art", "brand_wikidata": "Q136092887"}
     key = "map_p3x4ry63"
