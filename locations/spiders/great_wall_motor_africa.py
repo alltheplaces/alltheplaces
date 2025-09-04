@@ -3,8 +3,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.great_wall_motor_au_nz import GREAT_WALL_MOTOR_SHARED_ATTRIBBUTES
 
 
-class GreatWallMotorSpider(JSONBlobSpider):
-    name = "great_wall_motor"
+class GreatWallMotorAfricaSpider(JSONBlobSpider):
+    name = "great_wall_motor_africa"
     item_attributes = GREAT_WALL_MOTOR_SHARED_ATTRIBBUTES
     start_urls = ["https://www.gwm.co.za/graphql/execute.json/gwm/za-dealer-list"]
     locations_key = ["data", "zaDealerList", "items"]
