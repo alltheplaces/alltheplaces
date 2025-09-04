@@ -8,7 +8,6 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-
 class BenchmarxGBSpider(Spider):
     name = "benchmarx_gb"
     item_attributes = {"brand": "Benchmarx", "brand_wikidata": "Q102181127"}
