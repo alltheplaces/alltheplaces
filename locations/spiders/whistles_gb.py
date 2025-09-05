@@ -15,12 +15,17 @@ class WhistlesGBSpider(JSONBlobSpider):
     locations_key = "stores"
 
     def start_requests(self) -> Iterable[Request]:
-        list = country_iseadgg_centroids(["gb"], 94)
-        list.append((float(51.458325), float(-0.165807)))
-        for lat, lon in list:
+        for lat, lon in country_iseadgg_centroids(["gb"], 94):
             yield Request(
-                f"https://www.whistles.com/on/demandware.store/Sites-WH-UK-Site/en/Stores-FindStores?standaloneStore=on&concession=on&lat={lat}&long={lon}&outlet=on&dwfrm_address_country=GB"
+                f"https://www.whistles.com/on/demandware.store/Sites-WH-UK-Site/en/Stores-FindStores?standaloneStore=on&lat={lat}&long={lon}&dwfrm_address_country=GB"
             )
+            yield Request(
+                f"https://www.whistles.com/on/demandware.store/Sites-WH-UK-Site/en/Stores-FindStores?concession=on&lat={lat}&long={lon}&dwfrm_address_country=GB"
+            )
+            yield Request(
+                f"https://www.whistles.com/on/demandware.store/Sites-WH-UK-Site/en/Stores-FindStores?lat={lat}&long={lon}&outlet=on&dwfrm_address_country=GB"
+            )
+
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
@@ -34,7 +39,7 @@ class WhistlesGBSpider(JSONBlobSpider):
         for day in location["workTimes"]:
             if "closed" in day["value"].lower():
                 continue
-            start, end = day["value"].replace(" ", "").replace(".", ":").split("-")
+            start, end = day["value"].replace(" ", "").resplace("-:","-").replace(".", ":").split("-")
             oh.add_range(day["weekDay"], start, end)
         item["opening_hours"] = oh
         yield item
