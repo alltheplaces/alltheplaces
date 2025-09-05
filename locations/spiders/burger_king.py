@@ -15,10 +15,9 @@ BURGER_KING_SHARED_ATTRIBUTES = {
 
 
 class BurgerKingSpider(scrapy.Spider):
-    download_timeout = 30
     name = "burger_king"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "DOWNLOAD_TIMEOUT": 30}
 
     def make_request(self, lat, lon, country_code, search_radius, result_limit, url):
         body = [

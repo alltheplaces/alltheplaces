@@ -1,16 +1,16 @@
 import pycountry
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class LegoSpider(JSONBlobSpider):
     name = "lego"
-    item_attributes = {"brand": "Lego", "brand_wikidata": "Q1063455", "extras": Categories.SHOP_TOYS.value}
+    item_attributes = {"brand": "Lego", "brand_wikidata": "Q1063455"}
     # locations_key = ["data", "storeSearch", "stores"]
-    download_timeout = 30
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
     def start_requests(self):
         for country in pycountry.countries:
@@ -39,5 +39,7 @@ class LegoSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         for day in location["openingTimes"]:
             item["opening_hours"].add_ranges_from_string(day["day"] + " " + day["timeRange"])
+
+        apply_category(Categories.SHOP_TOYS, item)
 
         yield item
