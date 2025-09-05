@@ -14,7 +14,7 @@ class DominosPizzaAUSpider(Spider):
     name = "dominos_pizza_au"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     user_agent = BROWSER_DEFAULT
-    download_timeout = 180
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
     def start_requests(self) -> Iterable[Request]:
         for lat, lon in point_locations("au_centroids_20km_radius.csv"):

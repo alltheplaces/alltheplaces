@@ -8,5 +8,4 @@ class PetcoSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Petco", "brand_wikidata": "Q7171798"}
     sitemap_urls = ["https://stores.petco.com/sitemap.xml"]
     sitemap_rules = [(r"pet-supplies-(.+).html$", "parse_sd")]
-    download_delay = 0.5
     drop_attributes = {"image"}

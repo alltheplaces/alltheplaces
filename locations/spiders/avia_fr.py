@@ -24,7 +24,7 @@ class AviaFRSpider(Spider):
     name = "avia_fr"
     item_attributes = AVIA_SHARED_ATTRIBUTES
     AVIA_XPRESS = {"brand": "Avia XPress", "brand_wikidata": "Q124611203"}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     start_urls = ["https://www.avia-france.fr/wp-admin/admin-ajax.php?action=get_avia_csv"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

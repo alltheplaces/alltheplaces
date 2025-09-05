@@ -12,7 +12,7 @@ POST_AT = {"operator": "Österreichische Post AG", "operator_wikidata": "Q176350
 
 class OsterreichischePostATSpider(Spider):
     name = "osterreichische_post_at"
-    download_timeout = 180
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(

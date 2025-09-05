@@ -11,7 +11,6 @@ class DeloitteSpider(scrapy.Spider):
     name = "deloitte"
     item_attributes = {"brand": "Deloitte", "brand_wikidata": "Q491748"}
     allowed_domains = ["deloitte.com"]
-    download_delay = 0.2
 
     def start_requests(self):
         start_urls = (

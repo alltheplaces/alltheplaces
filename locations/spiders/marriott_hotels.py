@@ -24,8 +24,7 @@ from locations.dict_parser import DictParser
 # 'https://fairfield.marriott.com/locations/'
 class MarriottHotelsSpider(scrapy.Spider):
     name = "marriott_hotels"
-    custom_settings = {"REDIRECT_ENABLED": False}
-    download_delay = 2.0
+    custom_settings = {"REDIRECT_ENABLED": False, "DOWNLOAD_DELAY": 2}
     drop_attributes = {"image"}
 
     # Continue policy of ignoring collection hotels for now.

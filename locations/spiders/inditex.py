@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -18,11 +21,10 @@ class InditexSpider(scrapy.Spider):
     }
     # Each site has the same multi-brand catalogue JSON, could have picked any site!
     start_urls = ["https://www.massimodutti.com/itxrest/2/web/seo/config?appId=1"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2}
     user_agent = BROWSER_DEFAULT
-    download_delay = 2.0
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         config = response.json()["seoParamMap"]
         for store_id, country in config["storeId"].items():
             # First character of the store_id is the index into the brand table.

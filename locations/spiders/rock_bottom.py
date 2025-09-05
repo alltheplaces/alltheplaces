@@ -3,15 +3,14 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class RockBottomSpider(CrawlSpider):
     name = "rock_bottom"
-    item_attributes = {"brand": "Rock Bottom", "brand_wikidata": "Q73504866", "extras": Categories.RESTAURANT.value}
+    item_attributes = {"brand": "Rock Bottom", "brand_wikidata": "Q73504866"}
     allowed_domains = ["rockbottom.com"]
-    download_delay = 0.5
     start_urls = ["https://www.rockbottom.com/locations"]
     rules = [Rule(LinkExtractor(allow=r"/locations/[a-z-]+"), callback="parse")]
 
@@ -24,4 +23,5 @@ class RockBottomSpider(CrawlSpider):
             if match := re.search(r"\(?(-?[0-9]+.[0-9]+)\,([0-9]+.[0-9]+)\/", location):
                 item["lon"] = match.group(1)
                 item["lat"] = match.group(2)
+        apply_category(Categories.RESTAURANT, item)
         yield item

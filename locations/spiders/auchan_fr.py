@@ -22,9 +22,8 @@ class AuchanFRSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow="/drive/"), callback="parse_sd"),
         Rule(LinkExtractor(allow="/supermarche/"), callback="parse_sd"),
     ]
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["name"] = item["name"].replace("Supermarché Supermarché", "Supermarché")

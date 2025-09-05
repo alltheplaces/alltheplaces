@@ -12,10 +12,10 @@ LEXUS_SHARED_ATTRIBUTES = {"brand": "Lexus", "brand_wikidata": "Q35919"}
 
 
 class ToyotaEUSpider(JSONBlobSpider):
-    download_timeout = 60
     name = "toyota_eu"
     BRAND_MAPPING = {"Lexus": LEXUS_SHARED_ATTRIBUTES, "Toyota": TOYOTA_SHARED_ATTRIBUTES}
     locations_key = "dealers"
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     all_countries = [country.alpha_2.lower() for country in pycountry.countries]
     exclude_countries = [

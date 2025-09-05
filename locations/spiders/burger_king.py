@@ -1,7 +1,7 @@
 import geonamescache
 import scrapy
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations, country_iseadgg_centroids
 from locations.hours import DAYS_EN, OpeningHours
@@ -15,11 +15,9 @@ BURGER_KING_SHARED_ATTRIBUTES = {
 
 
 class BurgerKingSpider(scrapy.Spider):
-    download_timeout = 30
     name = "burger_king"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    download_delay = 2.0
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "DOWNLOAD_TIMEOUT": 30}
 
     def make_request(self, lat, lon, country_code, search_radius, result_limit, url):
         body = [
@@ -261,6 +259,8 @@ class BurgerKingSpider(scrapy.Spider):
             if location.get("hasDelivery"):
                 if drive_through_hours := self.parse_opening_hours(location.get("deliveryHours")).as_opening_hours():
                     item["extras"]["opening_hours:delivery"] = drive_through_hours
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
 

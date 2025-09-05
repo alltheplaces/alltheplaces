@@ -11,7 +11,7 @@ class WalgreensSpider(SitemapSpider, StructuredDataSpider):
     DUANE_READE = {"brand": "Duane Reade", "brand_wikidata": "Q5310380"}
     sitemap_urls = ["https://www.walgreens.com/sitemap-storedetails.xml"]
     sitemap_rules = [("", "parse_sd")]
-    download_delay = 2.0
+    custom_settings = {"DOWNLOAD_DELAY": 2}
 
     def pre_process_data(self, ld_data, **kwargs):
         # Tue Jan 10 -> Tu

@@ -14,8 +14,7 @@ class AlbertHeijnNLSpider(PlaywrightSpider):
     name = "albert_heijn_nl"
     allowed_domains = ["www.ah.nl"]
     start_urls = ["https://www.ah.nl/winkels"]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     brand_map = {
         "REGULAR": {"brand": "Albert Heijn", "brand_wikidata": "Q1653985"},

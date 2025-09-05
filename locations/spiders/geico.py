@@ -14,7 +14,7 @@ class GeicoSpider(scrapy.Spider):
     item_attributes = {"brand": "GEICO", "brand_wikidata": "Q1498689"}
     allowed_domains = ["www.geico.com"]
     start_urls = ["https://www.geico.com/sitemap.xml"]
-    download_delay = 1.5
+    custom_settings = {"DOWNLOAD_DELAY": 1.5}
 
     def parse(self, response):
         response.selector.remove_namespaces()

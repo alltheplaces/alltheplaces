@@ -12,14 +12,11 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class AbbottsFrozenCustardUSSpider(SitemapSpider):
     name = "abbotts_frozen_custard_us"
-    item_attributes = {
-        "brand": "Abbott's Frozen Custard",
-        "brand_wikidata": "Q4664334",
-    }
+    item_attributes = {"brand": "Abbott's Frozen Custard", "brand_wikidata": "Q4664334"}
     allowed_domains = ["abbottscustard.com"]
     sitemap_urls = ["https://www.abbottscustard.com/wpsl_stores-sitemap.xml"]
     sitemap_rules = [(r"/location/", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     # State centroids for Abbott's locations
     # Based on states mentioned in get_state_abbrev

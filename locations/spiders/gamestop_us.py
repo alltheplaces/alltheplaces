@@ -1,9 +1,10 @@
 import json
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import FormRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
@@ -26,7 +27,6 @@ class GamestopUSSpider(Spider):
     ]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.2
 
     def start_requests(self):
         headers = {
@@ -87,7 +87,7 @@ class GamestopUSSpider(Spider):
                     formdata={"postalCode": str(postcode), "radius": "200", "csrf_token": "0"},
                 )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["name"] = item["name"].replace(" - GameStop", "")
@@ -98,4 +98,7 @@ class GamestopUSSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day_hours in json.loads(location.get("storeOperationHours")):
                 item["opening_hours"].add_range(day_hours["day"], day_hours["open"], day_hours["close"], "%H%M")
+
+            apply_category(Categories.SHOP_VIDEO_GAMES, item)
+
             yield item

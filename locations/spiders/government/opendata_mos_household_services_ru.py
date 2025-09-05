@@ -70,7 +70,7 @@ class OpendataMosSpider(scrapy.Spider):
 
     allowed_domains = ["apidata.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
-    download_delay = 0.25
+    custom_settings = {"DOWNLOAD_DELAY": 0.25}
     requires_proxy = True
     dataset_attributes = {
         "attribution": "required",

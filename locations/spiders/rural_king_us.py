@@ -18,12 +18,8 @@ class RuralKingUSSpider(scrapy.Spider):
     """
 
     name = "rural_king_us"
-    item_attributes = {
-        "brand": "Rural King",
-        "brand_wikidata": "Q7380525",
-    }
+    item_attributes = {"brand": "Rural King", "brand_wikidata": "Q7380525"}
     allowed_domains = ["ruralking.com"]
-    download_delay = 0.5  # Reasonable delay to avoid overloading servers
 
     def start_requests(self):
         # Check if a specific URL was passed for testing

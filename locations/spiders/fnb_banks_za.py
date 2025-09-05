@@ -1,16 +1,17 @@
 import string
+from typing import Any
 
 from scrapy import Request, Spider
+from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
 class FnbBanksZASpider(Spider):
-    # download_delay = 0.2
     name = "fnb_banks_za"
-    item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956", "extras": Categories.BANK.value}
+    item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956"}
 
     def start_requests(self):
         # Search claims to accept search by province, in practice this returns barely any results
@@ -24,7 +25,7 @@ class FnbBanksZASpider(Spider):
                 method="POST",
             )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         onclicks = response.xpath('.//a[@class="link fontTurq searchResult       "]/@onclick').getall()
         links = [onclick.split("(event,'")[1].split("');")[0] for onclick in onclicks]
 
@@ -70,6 +71,8 @@ class FnbBanksZASpider(Spider):
                 oh.set_closed(day)
             else:
                 oh.add_ranges_from_string(f"{day} {times}")
-        properties["opening_hours"] = oh.as_opening_hours()
+        properties["opening_hours"] = oh
+
+        apply_category(Categories.BANK, properties)
 
         yield Feature(**properties)

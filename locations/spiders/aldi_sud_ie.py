@@ -11,7 +11,7 @@ class AldiSudIESpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["aldi.ie"]
     sitemap_urls = ["https://stores.aldi.ie/sitemap.xml"]
     sitemap_rules = [(r"https://stores\.aldi\.ie/[^/]+/[^/]+/[^/]+$", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("ALDI ")

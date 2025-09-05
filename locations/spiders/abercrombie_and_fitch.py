@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
@@ -8,10 +11,7 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
     name = "abercrombie_and_fitch"
     item_attributes = {"brand": "Abercrombie & Fitch", "brand_wikidata": "Q319344"}
     allowed_domains = ["abercrombie.com"]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-    }
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
     start_urls = [
@@ -36,7 +36,7 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
     # "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=EU",
     # "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=AM",
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
 
         if data["physicalStores"] is None:

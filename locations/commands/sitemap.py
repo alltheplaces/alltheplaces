@@ -12,10 +12,8 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class MySitemapSpider(scrapy.spiders.SitemapSpider):
     name = "my_sitemap_spider"
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 0.5, "USER_AGENT": BROWSER_DEFAULT}
     pages = False
-    download_delay = 0.5
     requires_proxy = False
     # Generated from the codebase, see https://github.com/alltheplaces/alltheplaces/issues/7723
     common_sitemap_patterns = [

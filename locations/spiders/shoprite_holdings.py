@@ -67,7 +67,6 @@ COUNTRY_IDS = {
 
 
 class ShopriteHoldingsSpider(Spider):
-    # download_delay = 0.2
     name = "shoprite_holdings"
     brand_filters = [
         "Medirite",  # Gets Checkers, Checkers Hyper, Checkers LiquorShop, MediRite, MediRite Plus

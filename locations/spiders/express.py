@@ -11,7 +11,6 @@ class ExpressSpider(scrapy.Spider):
     name = "express"
     item_attributes = {"brand": "Express", "brand_wikidata": "Q1384784"}
     allowed_domains = ["stores.express.com", "stores.expressfactoryoutlet.com"]
-    download_delay = 0.1
     start_urls = (
         "https://stores.express.com/us",
         "https://stores.express.com/cr",

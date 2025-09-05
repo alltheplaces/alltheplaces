@@ -10,7 +10,7 @@ class CitiSpider(scrapy.Spider):
     name = "citi"
     item_attributes = {"brand": "Citibank", "brand_wikidata": "Q857063"}
     allowed_domains = ["citi.com"]
-    download_delay = 1.5
+    custom_settings = {"DOWNLOAD_DELAY": 1.5}
 
     headers = {"client_id": "4a51fb19-a1a7-4247-bc7e-18aa56dd1c40"}
 

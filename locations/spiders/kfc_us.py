@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -12,7 +12,6 @@ class KfcUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = KFC_SHARED_ATTRIBUTES
     sitemap_urls = ["https://locations.kfc.com/sitemap.xml"]
     sitemap_rules = [(r"com/\w\w/[^/]+/[^/]+$", "parse")]
-    download_delay = 0.5
     wanted_types = ["FoodEstablishment"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
@@ -27,5 +26,7 @@ class KfcUSSpider(SitemapSpider, StructuredDataSpider):
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in services)
         # apply_yes_no(, item, "Gift Cards" in services)
         apply_yes_no(Extras.WIFI, item, "WiFi" in services)
+
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item

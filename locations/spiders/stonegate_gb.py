@@ -19,7 +19,6 @@ def html_decode_dict(obj: dict):
 
 class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
     name = "stonegate_gb"
-    download_delay = 0.2
     STONEGATE = {"brand": "Stonegate", "brand_wikidata": "Q7619176"}
     start_urls = ["https://www.stonegategroup.co.uk/find-your-local/page/1/"]
     rules = [

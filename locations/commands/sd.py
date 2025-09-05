@@ -5,8 +5,10 @@ import pprint
 
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -16,18 +18,17 @@ class MySpider(StructuredDataSpider):
     name = "my_spider"
     start_urls = None
     item_attributes = {}
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs):
         items = MicrodataParser.extract_microdata(response)
         self.logger.debug("Microdata %s", json.dumps(items, indent=2))
         yield from self.parse_sd(response)
 
-    def pre_process_data(self, ld_data, **kwargs):
+    def pre_process_data(self, ld_data: dict, **kwargs):
         self.logger.debug("JSON-LD %s", json.dumps(ld_data, indent=2))
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if isinstance(item.get("opening_hours"), OpeningHours):
             item["opening_hours"] = item["opening_hours"].as_opening_hours()
 

@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class FarmersInsuranceUSSpider(SitemapSpider):
-    download_delay = 0.2
     name = "farmers_insurance_us"
     item_attributes = {"brand": "Farmers Insurance", "brand_wikidata": "Q1396863"}
     allowed_domains = ["agents.farmers.com"]

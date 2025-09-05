@@ -8,7 +8,6 @@ from locations.structured_data_spider import StructuredDataSpider
 class FreseniusKidneyCareUSSpider(SitemapSpider, StructuredDataSpider):
     name = "fresenius_kidney_care_us"
     item_attributes = {"operator": "Fresenius Kidney Care", "operator_wikidata": "Q650259"}
-    download_delay = 0.2
     sitemap_urls = ["https://www.freseniuskidneycare.com/robots.txt"]
     sitemap_follow = ["center"]
     sitemap_rules = [(r"/dialysis-centers/[-\w]+/\w+$", "parse_sd")]
