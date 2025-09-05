@@ -15,7 +15,7 @@ class WhistlesGBSpider(JSONBlobSpider):
     locations_key = "stores"
 
     def start_requests(self) -> Iterable[Request]:
-        for lat, lon in country_iseadgg_centroids(["gb"], 158):
+        for lat, lon in country_iseadgg_centroids(["gb"], 94):
             yield Request(
                 f"https://www.whistles.com/on/demandware.store/Sites-WH-UK-Site/en/Stores-FindStores?standaloneStore=on&concession=on&lat={lat}&long={lon}&outlet=on&dwfrm_address_country=GB"
             )
