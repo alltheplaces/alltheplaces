@@ -26,7 +26,6 @@ class WhistlesGBSpider(JSONBlobSpider):
                 f"https://www.whistles.com/on/demandware.store/Sites-WH-UK-Site/en/Stores-FindStores?lat={lat}&long={lon}&outlet=on&dwfrm_address_country=GB"
             )
 
-
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name")
         item["website"] = "https://www.whistles.com" + item["website"]
@@ -39,7 +38,7 @@ class WhistlesGBSpider(JSONBlobSpider):
         for day in location["workTimes"]:
             if "closed" in day["value"].lower():
                 continue
-            start, end = day["value"].replace(" ", "").resplace("-:","-").replace(".", ":").split("-")
+            start, end = day["value"].replace(" ", "").resplace("-:", "-").replace(".", ":").split("-")
             oh.add_range(day["weekDay"], start, end)
         item["opening_hours"] = oh
         yield item
