@@ -2,11 +2,11 @@ from typing import Iterable
 
 from scrapy import Request
 
+from locations.categories import Categories, apply_category
+from locations.geo import country_iseadgg_centroids
+from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
-from locations.geo import country_iseadgg_centroids
 
 
 class WhistlesGBSpider(JSONBlobSpider):
@@ -30,7 +30,7 @@ class WhistlesGBSpider(JSONBlobSpider):
 
         oh = OpeningHours()
         for day in location["workTimes"]:
-            start,end=day["value"].replace(" ","").split("-")
-            oh.add_range(day["weekDay"],start,end)
-        item["opening_hours"]=oh
+            start, end = day["value"].replace(" ", "").split("-")
+            oh.add_range(day["weekDay"], start, end)
+        item["opening_hours"] = oh
         yield item
