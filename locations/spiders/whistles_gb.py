@@ -15,7 +15,7 @@ class WhistlesGBSpider(JSONBlobSpider):
     locations_key = "stores"
 
     def start_requests(self) -> Iterable[Request]:
-        list=country_iseadgg_centroids(["gb"], 94)
+        list = country_iseadgg_centroids(["gb"], 94)
         list.append((float(51.458325), float(-0.165807)))
         for lat, lon in list:
             yield Request(
