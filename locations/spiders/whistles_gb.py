@@ -30,6 +30,8 @@ class WhistlesGBSpider(JSONBlobSpider):
 
         oh = OpeningHours()
         for day in location["workTimes"]:
+            if "closed" in day["value"].lower():
+                continue
             start, end = day["value"].replace(" ", "").split("-")
             oh.add_range(day["weekDay"], start, end)
         item["opening_hours"] = oh
