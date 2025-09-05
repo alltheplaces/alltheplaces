@@ -11,6 +11,6 @@ class CostcoJPSpider(CostcoAUSpider):
     day_labels = DAYS_JP | DAYS_EN
 
     def parse_hours_string(self, hours_string: str) -> OpeningHours:
-        if re.match("^\s*\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}(?!\d)", hours_string):
+        if re.match(r"^\s*\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}(?!\d)", hours_string):
             hours_string = f"月曜日 - 日曜日: {hours_string}"
         return super().parse_hours_string(hours_string)
