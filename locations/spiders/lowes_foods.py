@@ -10,7 +10,6 @@ class LowesFoodsSpider(SitemapSpider):
     name = "lowes_foods"
     item_attributes = {"brand": "Lowes Foods", "brand_wikidata": "Q6693991"}
     allowed_domains = ["lowesfoods.com"]
-    download_delay = 0.2
     sitemap_urls = ["https://www.lowesfoods.com/sitemap.xml"]
     sitemap_rules = [(r".*store-locator/store-\d+$", "parse_store")]
 

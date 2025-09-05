@@ -15,7 +15,6 @@ class Motel6Spider(scrapy.Spider):
     name = "motel6"
     item_attributes = {"brand": "Motel 6", "brand_wikidata": "Q2188884"}
     start_urls = ["https://www.motel6.com/content/g6-cache/property-summary.1.json"]
-    download_delay = 0.5
     user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS

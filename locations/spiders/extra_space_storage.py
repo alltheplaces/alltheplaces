@@ -14,7 +14,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
     allowed_domains = ["www.extraspace.com"]
 
     # Seems to be sufficient to allow the site to include correct ldjson
-    download_delay = 1.6
+    custom_settings = {"DOWNLOAD_DELAY": 1.6}
 
     sitemap_urls = ["https://www.extraspace.com/facility-sitemap.xml"]
     sitemap_rules = [(r"/facilities/", "parse")]

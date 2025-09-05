@@ -39,7 +39,6 @@ class DinosolESSpider(Spider):
             {"brand": "SuperDino", "brand_wikidata": "Q105955304", "extras": Categories.SHOP_SUPERMARKET.value},
         ),
     ]
-    download_delay = 0.2
 
     def parse(self, response: Response):
         for island_id in response.xpath('//select[@name="island"]/option/@value').getall():
