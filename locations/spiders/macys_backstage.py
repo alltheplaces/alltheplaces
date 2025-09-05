@@ -15,7 +15,8 @@ class MacysBackstageSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(r"/stores/backstage/\w\w/[^/]+/[^/]+\_(\d+b).html$"), "parse"),
     ]
     wanted_types = ["store"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
