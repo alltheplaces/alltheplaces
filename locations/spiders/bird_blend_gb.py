@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -18,4 +19,7 @@ class BirdBlendGBSpider(JSONBlobSpider):
         if "Bird & Blend" in item["name"]:
             item["branch"] = item["name"].replace("Bird & Blend Tea Co. - ", "")
         apply_category(Categories.SHOP_TEA, item)
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(feature["custom_field_1"])
+        item.pop("email", None)
         yield item
