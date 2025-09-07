@@ -16,6 +16,6 @@ class BirdBlendGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if "Bird & Blend" in item["name"]:
-            item["branch"] = item["name"].replace("Bird & Blend Tea Co. - ","")
+            item["branch"] = item["name"].replace("Bird & Blend Tea Co. - ", "")
         apply_category(Categories.SHOP_TEA, item)
         yield item
