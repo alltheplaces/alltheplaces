@@ -43,7 +43,7 @@ class MaxMaraFashionGroupSpider(YextSpider):
                     r"^(\s*" + re.escape(item["brand"]) + r")\s*", "", branch_name, flags=re.IGNORECASE
                 )
             else:
-                item["branch"] = brand_name
+                item["branch"] = branch_name
         if website_url := location.get("c_pagesURL"):
             item["website"] = website_url.split("?", 1)[0]
         else:
