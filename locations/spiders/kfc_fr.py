@@ -1,5 +1,4 @@
 import chompjs
-from scrapy.spiders import Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
