@@ -27,7 +27,9 @@ class MaxMaraFashionGroupSpider(YextSpider):
     def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Any:
         if brand_id := location.get("c_brand"):
             if brand_id not in self.brands.keys():
-                self.logger.error("Unknown brand code '{}' with name '{}'.".format(brand_id, location.get("c_internalName")))
+                self.logger.error(
+                    "Unknown brand code '{}' with name '{}'.".format(brand_id, location.get("c_internalName"))
+                )
             else:
                 item["brand"] = self.brands[location["c_brand"]]["brand"]
                 item["brand_wikidata"] = self.brands[location["c_brand"]]["brand_wikidata"]
@@ -37,7 +39,9 @@ class MaxMaraFashionGroupSpider(YextSpider):
             return
         if branch_name := location.get("c_internalName"):
             if item["brand"]:
-                item["branch"] = re.sub(r"^(\s*" + re.escape(item["brand"]) + r")\s*", "", branch_name, flags=re.IGNORECASE)
+                item["branch"] = re.sub(
+                    r"^(\s*" + re.escape(item["brand"]) + r")\s*", "", branch_name, flags=re.IGNORECASE
+                )
             else:
                 item["branch"] = brand_name
         if website_url := location.get("c_pagesURL"):
