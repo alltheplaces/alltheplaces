@@ -7,7 +7,6 @@ from scrapy.http import Response
 from locations.camoufox_spider import CamoufoxSpider
 from locations.dict_parser import DictParser
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
 
 BRANDS = {"MS": "Motel 6", "SS": "Studio 6", "HS": "Hotel 6"}
 
@@ -44,6 +43,8 @@ class Motel6Spider(CamoufoxSpider):
             data["city"].lower().replace(" ", "-"),
             data["property_id"],
         )
-        item["image"] = "https://www.motel6.com/bin/g6/image.g6PropertyDetailSlider.jpg" + data["lead_image_path"].replace(" ", "%20")
+        item["image"] = "https://www.motel6.com/bin/g6/image.g6PropertyDetailSlider.jpg" + data[
+            "lead_image_path"
+        ].replace(" ", "%20")
         item["brand"] = BRANDS[data["brand_id"]]
         yield item
