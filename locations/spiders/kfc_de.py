@@ -1,7 +1,6 @@
 from typing import Any
 
 import chompjs
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
