@@ -2,21 +2,19 @@ from hashlib import sha1
 
 from chompjs import parse_js_object
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_ES, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
 
-class SupercorESSpider(JSONBlobSpider):
+class SupercorESSpider(JSONBlobSpider, CamoufoxSpider):
     name = "supercor_es"
     item_attributes = {"brand": "Supercor", "brand_wikidata": "Q6135841"}
     allowed_domains = ["www.supercor.es"]
     start_urls = ["https://www.supercor.es/tiendas/"]
-    user_agent = BROWSER_DEFAULT
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
 
     def extract_json(self, response):
         js_blob = response.xpath('//script[contains(text(), "var tiendas = `")]/text()').get()
