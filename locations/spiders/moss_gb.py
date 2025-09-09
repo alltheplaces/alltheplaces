@@ -1,24 +1,21 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class MossGBSpider(CrawlSpider, StructuredDataSpider):
     name = "moss_gb"
-    item_attributes = {
-        "brand": "Moss Bros",
-        "brand_wikidata": "Q6916538",
-        "country": "GB",
-    }
-
+    item_attributes = {"brand": "Moss", "brand_wikidata": "Q6916538"}
     start_urls = ["https://www.moss.co.uk/store/finder"]
     rules = [Rule(LinkExtractor(allow=r"/store/([^/]+)$", deny="/store/finder", unique=1), callback="parse_sd")]
     wanted_types = ["Store"]
     drop_attributes = {"facebook"}
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if response.xpath('//a[contains(@href,"maps.google.com")]'):
             coords = (
                 response.xpath('//a[contains(@href,"maps.google.com/maps")]/@href')
@@ -34,8 +31,7 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
         if item["name"]:
             if item["name"].startswith("Moss "):
                 item["branch"] = item.pop("name").removeprefix("Moss ")
-            else:
-                item["branch"] = item.pop("name")
+
         oh = OpeningHours()
         hours = response.xpath('//p[contains(@class,"store-opening-hours-text")]//text()').getall()
         for dayrange in hours:
