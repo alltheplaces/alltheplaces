@@ -10,7 +10,7 @@ class AlphaBankGRSpider(Spider):
     item_attributes = {"brand": "Alpha Bank", "brand_wikidata": "Q747394"}
 
     def start_requests(self):
-        yield Request(url="https://www.alpha.gr/api/maps/MapLocations?bringPrivates=False&httproute=True")
+        yield Request(url="https://www.alpha.gr/api/maps/MapLocations?bringPrivates=False&httproute=True&lang=el")
 
     def parse(self, response):
         data = response.json()

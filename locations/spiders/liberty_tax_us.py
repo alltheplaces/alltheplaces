@@ -45,7 +45,7 @@ class LibertyTaxUSSpider(SitemapSpider, StructuredDataSpider):
 
             item["lat"] = office_data.get("latitude")
             item["lon"] = office_data.get("longitude")
-            if item["lon"] and not item["lon"].startswith("-"):
-                item["lon"] = "-" + item["lon"]
+            if isinstance(item["lon"], float) and item["lon"] >= 0:
+                item["lon"] = -item["lon"]
 
         yield item

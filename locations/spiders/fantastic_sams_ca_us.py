@@ -11,7 +11,7 @@ class FantasticSamsCAUSSpider(SitemapSpider, OpenGraphSpider):
     }
     sitemap_urls = ["https://www.fantasticsams.com/sitemap.xml"]
     sitemap_rules = [
-        (r"^http://www.fantasticsams.com/salons/fantastic-sams-[\w-]+$", "parse"),
+        (r"/salons/fantastic-sams-[\w-]+$", "parse"),
     ]
     wanted_types = ["website"]
     drop_attributes = {"name"}
