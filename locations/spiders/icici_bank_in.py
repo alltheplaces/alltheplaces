@@ -6,12 +6,14 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class IciciBankINSpider(Spider):
     name = "icici_bank_in"
     item_attributes = {"brand": "ICICI Bank", "brand_wikidata": "Q1653258"}
     start_urls = ["https://maps.icicibank.com/content/icicibank/in/en.microsite.json"]
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response, **kwargs):
         for branch in json.loads(response.text)["branch"]:
