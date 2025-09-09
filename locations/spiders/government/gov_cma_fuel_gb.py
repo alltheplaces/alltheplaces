@@ -20,9 +20,8 @@ class GovCmaFuelGBSpider(Spider):
     start_urls = ["https://www.gov.uk/guidance/access-fuel-price-data"]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,  # Asda, Shell!
+        "USER_AGENT": BROWSER_DEFAULT,  # TESCO!
     }
-
-    user_agent = BROWSER_DEFAULT  # TESCO!
 
     brand_map = {
         "asda": {"brand": "Asda", "brand_wikidata": "Q297410"},

@@ -13,7 +13,7 @@ class SprinterSpider(JSONBlobSpider):
     SPRINTER = {"brand": "Sprinter", "brand_wikidata": "Q6133465"}
     SPORT_ZONE = {"brand": "Sport Zone", "brand_wikidata": "Q18485899"}
     locations_key = "stores"
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
 
     def start_requests(self) -> Iterable[JsonRequest | Request]:
         yield JsonRequest(

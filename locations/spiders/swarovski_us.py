@@ -14,9 +14,8 @@ class SwarovskiUSSpider(Spider):
     name = "swarovski_us"
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     allowed_domains = ["swarovski.com"]
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self) -> Iterable[Request]:
         point_files = "us_centroids_100mile_radius_state.csv"

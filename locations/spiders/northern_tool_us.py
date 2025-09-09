@@ -9,7 +9,7 @@ class NorthernToolUSSpider(Spider):
     name = "northern_tool_us"
     item_attributes = {"brand": "Northern Tool + Equipment", "brand_wikidata": "Q43379813"}
     requires_proxy = True  # cloudflare
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         yield FormRequest(

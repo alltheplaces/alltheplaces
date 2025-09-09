@@ -1,7 +1,9 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import url_to_coords
+from locations.items import Feature
 from locations.spiders.pets_at_home_gb import PetsAtHomeGBSpider
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -20,19 +22,15 @@ def set_located_in(item, location):
 
 class Vets4petsGBSpider(CrawlSpider, StructuredDataSpider):
     name = "vets4pets_gb"
-    item_attributes = {
-        "brand": "Vets4Pets",
-        "brand_wikidata": "Q16960196",
-    }
+    item_attributes = {"brand": "Vets4Pets", "brand_wikidata": "Q16960196"}
     start_urls = ["https://www.vets4pets.com/practices/"]
     rules = [Rule(LinkExtractor(allow="/practices/"), callback="parse_sd", follow=True)]
     allowed_domains = ["vets4pets.com"]
-    download_delay = 0.2
     drop_attributes = {"image"}
     wanted_types = ["VeterinaryCare"]
     time_format = "%H:%M:%S"
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         extract_google_position(item, response)
         if "petsathome" in item["street_address"].lower().replace(" ", ""):
             set_located_in(item, PetsAtHomeGBSpider.item_attributes)

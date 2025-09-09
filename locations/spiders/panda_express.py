@@ -9,8 +9,7 @@ class PandaExpressSpider(NomNomSpider):
     name = "panda_express"
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     domain = "pandaexpress.com"
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     use_calendar = False
 
     def start_requests(self):
