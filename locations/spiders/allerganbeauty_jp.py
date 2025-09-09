@@ -42,17 +42,15 @@ class AllerganbeautyJPSpider(Spider):
             item = DictParser.parse(store)
             item["ref"] = store["key"]
             item["website"] = store.get("施設URL")
-            try:
-                item["phone"] = f"+81 {store['tel']}"
-            except:
-                pass
+            item["phone"] = f"+81 {store.get('tel')}"
+            
             apply_category(Categories.CLINIC, item)
             speciality = []
             for jaspec, enspec in self.TYPES.items():
                 try:
-                    if jaspec in store["診療科目"]:
+                    if jaspec in store.get("診療科目"):
                         speciality.append(enspec)
-                except:
+                except TypeError:
                     pass
             if speciality:
                 if len(speciality) == 1:
