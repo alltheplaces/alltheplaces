@@ -46,6 +46,6 @@ class SupercorESSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_ES)
 
-        apply_category(Categories.SHOP_SUPERMARKET, item)
+        apply_category(Categories.SHOP_CONVENIENCE, item)
 
         yield item
