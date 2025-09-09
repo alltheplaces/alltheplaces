@@ -8,11 +8,17 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.storefinders.go_review_api import GoReviewApiSpider
 
 
-class WimpyZASpider(GoReviewApiSpider):
-    name = "wimpy_za"
-    item_attributes = {"brand": "Wimpy", "brand_wikidata": "Q2811992"}
+class MuggAndBeanSpider(GoReviewApiSpider):
+    name = "mugg_and_bean"
+    item_attributes = {"brand": "Mugg & Bean", "brand_wikidata": "Q6932113"}
 
-    domain = "locations.wimpy.co.za"
+    domain_list = [
+        "locations.muggandbean.co.za",
+        # "kenyalocations.muggandbean.africa", # website exists but has no stores listed as of 2025-08-31
+        "malawilocations.muggandbean.africa",
+        "mauritiuslocations.muggandbean.africa",
+        # Namibia and Zambia also have locations but websites just have a basic list
+    ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
         yield Request(
@@ -25,9 +31,13 @@ class WimpyZASpider(GoReviewApiSpider):
         ld_item = LinkedDataParser.parse(response, "Restaurant")
 
         ld_item["ref"] = response.meta["item"]["ref"]
-        ld_item["branch"] = ld_item.pop("name").removeprefix("Wimpy ")
+        ld_item["branch"] = ld_item.pop("name").removeprefix("Mugg & Bean ")
 
-        ld_item.pop("image")
+        if ld_item.get("postcode") is not None and int(ld_item.get("postcode")) == 0:
+            ld_item.pop("postcode")
+
+        if "image" in ld_item:
+            ld_item.pop("image")
 
         if response.meta["attributes"] is not None:
             attributes = [attribute["value"] for attribute in response.meta["attributes"]]

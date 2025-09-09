@@ -284,14 +284,16 @@ def antimeridian_safe_longitude_sum(longitude: float, summand: float, precision:
     """
     Adds or subtracts a decimal degree value from a longitude, factoring in
     the antimeridian at a longitude of -180.0 or 180.0. For example, if
-    `longitude` is -179.9 and `summand` is 0.2, the result will be 179.9. As
+    `longitude` is -179.9 and `summand` is -0.2, the result will be 179.9. As
     a further example, if `longitude` is 179.9 and `summand` is 0.2, the
     result will be -179.9.
     :param longitude: Longitude as a floating point decimal degrees number
                        within range [-180.0, 180.0].
     :param summand: Floating point decimal degrees number. This function will
                     handle large summands (such as 720.0) by clamping the
-                    returned longitude to range [-179.999..., 180.0].
+                    returned longitude to range [-179.999..., 180.0]. A
+                    positive summand moves anticlockwise, a negative summand
+                    moves clockwise.
     :param precision: The number of decimal places to round latitudes and
                       longitudes to. Default is 9 decimal places.
     :return: Result of the sum of `longitude` and `summand` as a floating

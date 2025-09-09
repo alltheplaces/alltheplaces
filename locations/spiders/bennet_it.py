@@ -13,6 +13,7 @@ class BennetITSpider(JSONBlobSpider):
     item_attributes = {"brand": "Bennet", "brand_wikidata": "Q3638281"}
     start_urls = ["https://www.bennet.com/storefinder/nearestList?latitude=0&longitude=0&numberOfPos=1000"]
     custom_settings = {"USER_AGENT": FIREFOX_LATEST}
+    requires_proxy = True
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))

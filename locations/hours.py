@@ -306,12 +306,19 @@ DAYS_IL = {
 
 DAYS_KR = {
     "월요일": "Mo",
+    "월": "Mo",
     "화요일": "Tu",
+    "화": "Tu",
     "수요일": "We",
+    "수": "We",
     "목요일": "Th",
+    "목": "Th",
     "금요일": "Fr",
+    "금": "Fr",
     "토요일": "Sa",
+    "토": "Sa",
     "일요일": "Su",
+    "일": "Su",
 }
 
 DAYS_LT = {
@@ -337,18 +344,25 @@ DAYS_LT = {
 DAYS_SE = {
     "Måndag": "Mo",
     "Mån": "Mo",
+    "Må": "Mo",
     "Tisdag": "Tu",
     "Tis": "Tu",
+    "Ti": "Tu",
     "Onsdag": "We",
     "Ons": "We",
+    "On": "We",
     "Torsdag": "Th",
     "Tors": "Th",
+    "To": "Th",
     "Fredag": "Fr",
     "Fre": "Fr",
+    "Fr": "Fr",
     "Lördag": "Sa",
     "Lör": "Sa",
+    "Lö": "Sa",
     "Söndag": "Su",
     "Sön": "Su",
+    "Sö": "Su",
 }
 DAYS_SI = {
     "Po": "Mo",
@@ -424,6 +438,13 @@ DAYS_FR = {
     "Ve": "Fr",
     "Sa": "Sa",
     "Di": "Su",
+    "Lun": "Mo",
+    "Mar": "Tu",
+    "Mer": "We",
+    "Jeu": "Th",
+    "Ven": "Fr",
+    "Sam": "Sa",
+    "Dim": "Su",
     "Lundi": "Mo",
     "Mardi": "Tu",
     "Mercredi": "We",
@@ -714,6 +735,23 @@ DAYS_TH = {
     "วันอาทิตย์": "Su",
 }
 
+DAYS_JP = {
+    "月曜日": "Mo",
+    "月": "Mo",
+    "火曜日": "Tu",
+    "火": "Tu",
+    "水曜日": "We",
+    "水": "We",
+    "木曜日": "Th",
+    "木": "Th",
+    "金曜日": "Fr",
+    "金": "Fr",
+    "土曜日": "Sa",
+    "土": "Sa",
+    "日曜日": "Su",
+    "日": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
@@ -722,7 +760,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_ES,
     DAYS_DE,
     DAYS_RU,
-    # Japanese missing
+    DAYS_JP,
     DAYS_FR,
     DAYS_PT,
     DAYS_IT,
@@ -894,6 +932,12 @@ CLOSED_IT = ["chiuso", "chiusi", "siamo chiusi"]
 CLOSED_NL = ["gesloten"]
 
 CLOSED_TH = ["ปิดทำการ"]
+
+CLOSED_ES = ["cerrado"]
+
+CLOSED_SE = ["stängd", "stangd"]
+
+CLOSED_FR = ["fermée", "fermé", "fermee", "ferme"]
 
 logger = logging.getLogger(__name__)
 

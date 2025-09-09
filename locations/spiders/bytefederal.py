@@ -9,12 +9,12 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class BytefederalUSSpider(SitemapSpider):
-    name = "bytefederal_us"
+class BytefederalSpider(SitemapSpider):
+    name = "bytefederal"
     item_attributes = {"brand": "ByteFederal", "brand_wikidata": "Q135284888"}
     allowed_domains = ["www.bytefederal.com"]
     sitemap_urls = ["https://www.bytefederal.com/sitemap-0.xml"]
-    sitemap_rules = [(r"^https:\/\/www\.bytefederal\.com\/bitcoin-atm-near-me\/[^\/]+\/[^\/]+/\d+$", "parse")]
+    sitemap_rules = [(r"^https:\/\/www\.bytefederal\.com\/bitcoin-atm-near-me\/[^\/]+\/[^\/]+/[^\/]+$", "parse")]
     custom_settings = {"DOWNLOAD_DELAY": 2}  # robots.txt doesn't specify a crawl delay but
     # after many requests at ~1/s, timeouts start to occur
     # so try a 2s delay instead.
@@ -28,8 +28,7 @@ class BytefederalUSSpider(SitemapSpider):
 
         for location in locations:
             item = DictParser.parse(location)
-            item["ref"] = str(item["ref"])
-            item["website"] = response.url
+            item["website"] = item["ref"] = response.url
 
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_days_range(DAYS, location["open_hour"], location["close_hour"], "%H:%M:%S")
