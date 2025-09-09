@@ -12,13 +12,13 @@ class AddressSpider(Spider):
         spider.settings.set(
             "ITEM_PIPELINES",
             {
-                "locations.pipelines.duplicates.DuplicatesPipeline": 200,
+                "locations.pipelines.duplicates.DuplicatesPipeline": None,
                 "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
                 "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
                 "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
                 "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
-                "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
-                "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
+                "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": None,
+                "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": None,
                 "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
                 "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": None,
                 "locations.pipelines.email_clean_up.EmailCleanUpPipeline": None,
