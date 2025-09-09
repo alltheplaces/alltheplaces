@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class HabitBurgerSpider(SitemapSpider, StructuredDataSpider):
     name = "habit_burger"
-    item_attributes = {"brand": "Habit Burger Grill", "brand_wikidata": "Q18158741"}
+    item_attributes = {"brand": "Habit Burger & Grill", "brand_wikidata": "Q18158741"}
     allowed_domains = ["habitburger.com"]
     sitemap_urls = ["https://www.habitburger.com/locations-sitemap.xml"]
     wanted_types = ["Restaurant"]

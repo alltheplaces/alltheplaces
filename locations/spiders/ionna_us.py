@@ -28,7 +28,7 @@ def extract_text_between(text: str, from_string: str, to_string: str):
 
 class IonnaUSSpider(scrapy.Spider):
     name = "ionna_us"
-    item_attributes = {"brand": "Ionna US", "brand_wikidata": "Q124528707"}
+    item_attributes = {"brand": "IONNA", "brand_wikidata": "Q124528707"}
     start_urls = ["https://www.ionna.com/rechargeries/find-a-rechargery/"]
 
     def parse(self, response):
