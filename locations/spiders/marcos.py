@@ -1,7 +1,7 @@
 import json
 import time
 
-from scrapy import Request, Spider
+from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
@@ -18,19 +18,9 @@ class MarcosSpider(Spider):
         "brand": "Marco's Pizza",
         "brand_wikidata": "Q6757382",
     }
-    # First get country info
-    start_urls = ["https://momspublicstorage.blob.core.windows.net/content/moms/online3/online-brand-data-LPHP3Y.json"]
+    start_urls = ["https://www.marcos.com/api/v1.0/locations/stores/A5985C38-D485-4240-8C01-931F7186D567"]
 
-    def parse(self, response):
-        countries = {country["CountryID"]: country for country in response.json()["COUNTRIES"]}
-        # Then fetch locations
-        yield Request(
-            "https://order.marcos.com/api/v1.0/locations/stores/A5985C38-D485-4240-8C01-931F7186D567",
-            callback=self.parse_locations,
-            cb_kwargs={"countries": countries},
-        )
-
-    def parse_locations(self, response, countries):
+    def parse(self, response, **kwargs):
         for location in json.loads(response.json()["result"]):
             item = DictParser.parse(location)
             item["ref"] = location["SCODE"] or location["SID"]
@@ -38,11 +28,6 @@ class MarcosSpider(Spider):
                 [location["ADD1"], location["ADD2"], location["ADD3"], location["ADD4"], location["ADD5"]]
             )
             item["state"] = location["STA"]
-            item["country"] = countries[location["CID"]]["IsoCode"]
-            item["phone"] = (
-                None if location["PHN"] == "1111111111" else countries[location["CID"]]["CountryCode"] + location["PHN"]
-            )
-
             oh = OpeningHours()
             for day in location["HRs"]:
                 oh.add_range(
