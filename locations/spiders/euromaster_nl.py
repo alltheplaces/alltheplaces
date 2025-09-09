@@ -27,6 +27,7 @@ class EuromasterNLSpider(StructuredDataSpider):
             yield scrapy.Request(url=shop, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Euromaster ")
         item["website"] = response.url
         oh = OpeningHours()
         days = response.xpath('//*[@class="tableHoraires"]/tr/th/text()').getall()
