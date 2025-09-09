@@ -14,7 +14,6 @@ from locations.user_agents import BROWSER_DEFAULT
 # TODO: modernize spider to use https://www.tesco.sk/obchody/directory pages + structured data
 class TescoEUSpider(scrapy.Spider):
     name = "tesco_eu"
-    user_agent = BROWSER_DEFAULT
     COUNTRY_WEBSITE_MAP = {
         "cz": "https://www.itesco.cz/prodejny/",
         "hu": "https://www.tesco.hu/aruhazak/",
@@ -22,6 +21,7 @@ class TescoEUSpider(scrapy.Spider):
     }
     BRANDING_WORDS = ["tesco", "expres", "extra", "expressz"]  # lowercase
     requires_proxy = "CZ"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         for country, website in self.COUNTRY_WEBSITE_MAP.items():

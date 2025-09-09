@@ -21,8 +21,7 @@ class InditexSpider(scrapy.Spider):
     }
     # Each site has the same multi-brand catalogue JSON, could have picked any site!
     start_urls = ["https://www.massimodutti.com/itxrest/2/web/seo/config?appId=1"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         config = response.json()["seoParamMap"]

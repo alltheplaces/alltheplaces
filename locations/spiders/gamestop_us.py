@@ -25,8 +25,7 @@ class GamestopUSSpider(Spider):
     start_urls = [
         "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?hasCondition=false&hasVariantsAvailableForLookup=false&hasVariantsAvailableForPickup=false&source=plp&showMap=false&products=undefined:1"
     ]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         headers = {

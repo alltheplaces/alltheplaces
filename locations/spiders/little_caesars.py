@@ -29,7 +29,7 @@ class LittleCaesarsSpider(scrapy.Spider):
         "country": "US",
     }
     allowed_domains = ["littlecaesars.com"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         for record in postal_regions("US"):

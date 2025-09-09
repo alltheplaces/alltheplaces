@@ -14,7 +14,7 @@ class HomesenseUSSpider(CrawlSpider):
     item_attributes = {"brand": "HomeSense", "brand_wikidata": "Q16844433"}
     start_urls = ["https://us.homesense.com/all-stores"]
     rules = [Rule(LinkExtractor(allow="/store-details/"), callback="parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
