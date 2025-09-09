@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
@@ -12,10 +15,9 @@ class DhlExpressGBSpider(scrapy.Spider):
     allowed_domains = ["dhlparcel.co.uk"]
 
     def start_requests(self):
-        url = "https://track.dhlparcel.co.uk/UKMail/Handlers/DepotData"
-        yield scrapy.Request(url=url, method="POST")
+        yield JsonRequest(url="https://track.dhlparcel.co.uk/UKMail/Handlers/DepotData", method="POST")
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for data in response.json():
             item = Feature()
             item["ref"] = data.get("DepotNumber")
@@ -27,12 +29,14 @@ class DhlExpressGBSpider(scrapy.Spider):
             item["lat"] = data.get("Latitude")
             item["lon"] = data.get("Longitude")
             item["phone"] = data.get("Telephone")
+
             oh = OpeningHours()
             for day in data.get("OpeningTimes"):
                 oh.add_range(
                     day=DAYS[day.get("Day") - 1], open_time=day.get("OpenTime"), close_time=day.get("CloseTime")
                 )
-            item["opening_hours"] = oh.as_opening_hours()
-            apply_category(Categories.POST_OFFICE, item)
+            item["opening_hours"] = oh
+
+            apply_category(Categories.POST_DEPOT, item)
 
             yield item

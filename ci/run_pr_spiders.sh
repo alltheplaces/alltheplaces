@@ -142,10 +142,15 @@ if [ "${spider_count}" -eq 0 ]; then
     fi
 fi
 
-if grep PLAYWRIGHT -q -m 1 $spiders; then
-    echo "Playwright detected. Installing requirements."
+if grep PlaywrightSpider -q -m 1 $spiders; then
+    echo "Playwright spider detected. Installing requirements."
     uv run playwright install-deps
     uv run playwright install firefox
+fi
+
+if grep CamoufoxSpider -q -m 1 $spiders; then
+    echo "Camoufox spider detected. Installing requirements."
+    uv run camoufox fetch
 fi
 
 RUN_DIR="/tmp/output"

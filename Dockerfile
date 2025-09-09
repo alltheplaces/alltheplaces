@@ -29,6 +29,8 @@ RUN uv sync --frozen
 RUN uv run playwright install-deps \
  && uv run playwright install firefox
 
+RUN uv run camoufox fetch
+
 COPY . .
 
 ARG GIT_COMMIT

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 
 import scrapy
 from scrapy import FormRequest
@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -33,6 +34,13 @@ class IntermarcheSpider(scrapy.Spider):
         "brand": "Intermarché Hyper",
         "brand_wikidata": "Q98278022",
     }
+    LA_POSTE_RELAIS = {
+        "brand": "Pickup Station",
+        "brand_wikidata": "Q110748562",
+        "operator": "La Poste",
+        "operator_wikidata": "Q373724",
+    }
+
     item_attributes = {"country": "FR"}
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
@@ -102,31 +110,40 @@ class IntermarcheSpider(scrapy.Spider):
                 item.update(self.INTERMARCHE_SUPER)
             elif place.get("modelLabel") == "CONTACT":
                 item.update(self.INTERMARCHE_CONTACT)
-            elif place.get("modelLabel") == "EXPRESS":
+            elif place.get("modelLabel") == "EXPRESS" or place.get("modelLabel") == "Intermarché Express":
                 item.update(self.INTERMARCHE_EXPRESS)
             elif place.get("modelLabel") == "HYPER":
                 item.update(self.INTERMARCHE_HYPER)
             elif place.get("modelLabel") == "Réservé Soignants":
                 continue  # Drive through stores reserved for medical workers
             elif place.get("modelLabel") == "Retrait La Poste":
-                continue  # Something to do with post offices
+                item.update(self.LA_POSTE_RELAIS)
+                apply_category(Categories.PARCEL_LOCKER, item)
+                item["located_in"], item["located_in_wikidata"] = self.INTERMARCHE.values()
+            elif place.get("modelLabel") == "Pro & Assos":
+                # independent vape shop located in intermarche
+                apply_category(Categories.SHOP_E_CIGARETTE, item)
+                item["located_in"], item["located_in_wikidata"] = self.INTERMARCHE.values()
 
-            if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
-                fuel = item.deepcopy()
-                fuel["ref"] += "_fuel"
-                fuel.update(self.INTERMARCHE)
-
-                apply_category(Categories.FUEL_STATION, fuel)
-
-                yield fuel
-
-            if any(s["code"] == "lav" for s in place["ecommerce"]["services"]):
-                car_wash = item.deepcopy()
-                car_wash["ref"] += "_carwash"
-                car_wash.update(self.INTERMARCHE)
-
-                apply_category(Categories.CAR_WASH, car_wash)
-
-                yield car_wash
+            yield from self.parse_accessory_units(place, item)
 
             yield item
+
+    def parse_accessory_units(self, place: dict, item: Feature) -> Iterable[Feature]:
+        if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
+            fuel = item.deepcopy()
+            fuel["ref"] += "_fuel"
+            fuel.update(self.INTERMARCHE)
+
+            apply_category(Categories.FUEL_STATION, fuel)
+
+            yield fuel
+
+        if any(s["code"] == "lav" for s in place["ecommerce"]["services"]):
+            car_wash = item.deepcopy()
+            car_wash["ref"] += "_carwash"
+            car_wash.update(self.INTERMARCHE)
+
+            apply_category(Categories.CAR_WASH, car_wash)
+
+            yield car_wash

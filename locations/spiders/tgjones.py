@@ -1,36 +1,34 @@
 import re
-from typing import Any
+from typing import Iterable
 
 import reverse_geocoder
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
 
-class WhsmithSpider(SitemapSpider):
-    name = "whsmith"
-    item_attributes = {"brand": "WHSmith", "brand_wikidata": "Q1548712"}
-    allowed_domains = ["whsmith.co.uk"]
-    sitemap_urls = ["https://www.whsmith.co.uk/SiteMap/sitemap-pages.xml"]
-    sitemap_rules = [(r"/stores/[-\w]+", "parse")]
-    user_agent = BROWSER_DEFAULT
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "ROBOTSTXT_OBEY": False,
-    }
+class TgjonesSpider(SitemapSpider, CamoufoxSpider):
+    name = "tgjones"
+    item_attributes = {"brand": "TGJones", "brand_wikidata": "Q133575797"}
+    allowed_domains = ["www.tgjonesonline.co.uk"]
+    sitemap_urls = ["https://www.tgjonesonline.co.uk/SiteMap/sitemap-pages.xml"]
+    sitemap_rules = [(r"/stores/[\w\-]+", "parse")]
     coordinates_pattern = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)")
     skip_auto_cc_domain = True
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: Response) -> Iterable[Feature]:
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["addr_full"] = clean_address(response.xpath('//*[@class="shop-styling__address"]/p/text()').getall())
+        item["branch"] = response.xpath("//h1/text()").get().removeprefix("TGJones, ")
+        item["addr_full"] = merge_address_lines(response.xpath('//*[@class="shop-styling__address"]/p/text()').getall())
+        item["phone"] = response.xpath('//*[@class="shop-styling__number"]/p/text()').get()
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
         # Some stores have wildly incorrect coordinates for
