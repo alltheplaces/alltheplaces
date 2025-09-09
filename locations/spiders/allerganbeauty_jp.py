@@ -43,7 +43,7 @@ class AllerganbeautyJPSpider(Spider):
             item["ref"] = store["key"]
             item["website"] = store.get("施設URL")
             item["phone"] = f"+81 {store.get('tel')}"
-            
+
             apply_category(Categories.CLINIC, item)
             speciality = []
             for jaspec, enspec in self.TYPES.items():
