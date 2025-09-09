@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import scrapy
 from scrapy.http import JsonRequest
 
@@ -87,6 +89,18 @@ class MitsubishiAUSpider(scrapy.Spider):
             """,
         }
 
+    def apply_sales_category(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def apply_service_category(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
     def parse(self, response, **kwargs):
         pois = response.json()["data"].get("stockists", {}).get("locations", [])
 
@@ -97,14 +111,19 @@ class MitsubishiAUSpider(scrapy.Spider):
             item["ref"] = "-".join([str(poi["identifier"]) + str(poi["stockist_id"])])
 
             services = [s.lower() for s in poi.get("services", [])]
-            if "sales" in services:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no("service:vehicle:car_repair", item, "service" in services, True)
-            elif "service" in services:
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            else:
+            sales_available = "sales" in services
+            service_available = "service" in services
+
+            if sales_available:
+                sales_item = self.apply_sales_category(item)
+                apply_yes_no("service:vehicle:car_repair", sales_item, service_available, True)
+                yield sales_item
+
+            if service_available:
+                service_item = self.apply_service_category(item)
+                yield service_item
+
+            if not sales_available and not service_available:
                 self.logger.error(f"Unknown services: {services}, {item['ref']}")
 
             # TODO: opening hours
-
-            yield item

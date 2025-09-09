@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import scrapy
 from geonamescache import GeonamesCache
 from scrapy.http import JsonRequest
@@ -152,21 +154,38 @@ class MitsubishiSpider(scrapy.Spider):
                 item["website"] = poi.get("url")
                 yield from self.get_details(country, language, poi.get("id"), item)
 
+    def apply_sales_category(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def apply_service_category(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
     def parse_details(self, response):
         item = response.meta["item"]
         details = response.json()["data"].get("getDealerDetail")
         department_codes = [d.get("code") for d in details.get("dealerDepartments", [])]
         # TODO: opening hours are available in dealerDepartments
 
-        if "sales" in department_codes:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no("service:vehicle:car_repair", item, "services" in department_codes, True)
-        elif "services" in department_codes:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        else:
+        sales_available = "sales" in department_codes
+        service_available = "services" in department_codes
+
+        if sales_available:
+            sales_item = self.apply_sales_category(item)
+            apply_yes_no("service:vehicle:car_repair", sales_item, service_available, True)
+            yield sales_item
+
+        if service_available:
+            service_item = self.apply_service_category(item)
+            yield service_item
+
+        if not sales_available and not service_available:
             self.logger.error(f"Unknown department codes: {department_codes}, {item['ref']}")
 
         for code in department_codes:
             self.crawler.stats.inc_value(f"atp/{self.name}/department_codes/{code}")
-
-        yield item
