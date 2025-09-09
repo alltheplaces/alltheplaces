@@ -35,18 +35,18 @@ class ToyotaAUSpider(JSONBlobSpider, PlaywrightSpider):
             if not feature[location_type]:
                 continue
 
-        item["ref"] = feature["branchCode"] + "_" + location_type
-        item["lat"] = feature["refY"]
-        item["lon"] = feature["refX"]
-        item["state"] = feature["state"]
-        item["street_address"] = item.pop("addr_full", None)
-        item["website"] = feature["webSite"]
+            item["ref"] = feature["branchCode"] + "_" + location_type
+            item["lat"] = feature["refY"]
+            item["lon"] = feature["refX"]
+            item["state"] = feature["state"]
+            item["street_address"] = item.pop("addr_full", None)
+            item["website"] = feature["webSite"]
 
-        if location_type == "sales":
-            apply_category(Categories.SHOP_CAR, item)
-        elif location_type == "service":
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        elif location_type == "parts":
-            apply_category(Categories.SHOP_CAR_PARTS, item)
+            if location_type == "sales":
+                apply_category(Categories.SHOP_CAR, item)
+            elif location_type == "service":
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            elif location_type == "parts":
+                apply_category(Categories.SHOP_CAR_PARTS, item)
 
-        yield item
+            yield item
