@@ -1,4 +1,5 @@
 from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
@@ -6,7 +7,7 @@ from locations.pipelines.drop_attributes import DropAttributesPipeline
 
 
 def get_objects() -> (Spider, DropAttributesPipeline, Feature):
-    spider = Spider(name="test")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return spider, DropAttributesPipeline(), Feature()
 
