@@ -15,6 +15,7 @@ class JulesSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow="/magasins/"), callback="parse", follow=True)]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = response.url
         item["branch"] = item.pop("name").replace("BRICE - ", "").replace("JULES - ", "")
         apply_clothes([Clothes.MEN], item)
         yield item
