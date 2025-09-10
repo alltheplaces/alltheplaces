@@ -12,8 +12,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class McdonaldsESSpider(scrapy.Spider):
     name = "mcdonalds_es"
     item_attributes = McdonaldsSpider.item_attributes
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     start_urls = ["https://mcdonalds.es/api/restaurants?lat=36.721261&lng=-4.4212655&radius=500000000000&limit=10000"]
 
     def parse(self, response, **kwargs):

@@ -1,6 +1,8 @@
 import json
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -15,10 +17,10 @@ class BigWAUSpider(Spider):
     start_urls = ["https://www.bigw.com.au/store/0145/BIG-W-Warringah-Mall"]
     # An alltheplaces user agent gets delayed in the hope of causing bots to time out
     # whereas a user agent having the appearance of a user is not delayed.
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data_raw = response.xpath('//script[@id="__NEXT_DATA__" and @type="application/json"]/text()').get()
         stores = json.loads(data_raw)["props"]["pageProps"]["serializedData"]["store"]
         for store in stores:

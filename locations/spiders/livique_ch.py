@@ -20,7 +20,7 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://www\.[Ll]ivique\.ch/de/standorte/", "parse_sd")]
     wanted_types = ["Store"]
     search_for_phone = False
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True  # Data centre IP ranges appear to be blocked.
 
     def post_process_item(self, item, response, ld_data, **kwargs):

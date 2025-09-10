@@ -15,10 +15,8 @@ class Motel6Spider(scrapy.Spider):
     name = "motel6"
     item_attributes = {"brand": "Motel 6", "brand_wikidata": "Q2188884"}
     start_urls = ["https://www.motel6.com/content/g6-cache/property-summary.1.json"]
-    download_delay = 0.5
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for hotel_id in chompjs.parse_js_object(response.text).keys():  # JSON embedded within HTML

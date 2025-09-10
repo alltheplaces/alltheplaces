@@ -6,7 +6,6 @@ from locations.dict_parser import DictParser
 class BootsTHSpider(scrapy.Spider):
     name = "boots_th"
     item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
-    download_delay = 0.5
 
     def start_requests(self):
         yield self.get_page(1)

@@ -14,7 +14,7 @@ class SchuhGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/stores/[^/]+/$", "parse")]
     wanted_types = ["ShoeStore"]
     requires_proxy = True
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def _get_sitemap_body(self, response):
         if response.url.split("?")[0].endswith(".aspx"):

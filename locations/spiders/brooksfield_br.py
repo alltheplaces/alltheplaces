@@ -12,7 +12,7 @@ class BrooksfieldBRSpider(JSONBlobSpider):
     name = "brooksfield_br"
     item_attributes = {"brand": "Brooksfield", "brand_wikidata": "Q3645372"}
     start_urls = ["https://www.brooksfield.com.br/onde-encontrar"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def extract_json(self, response: Response) -> dict | list[dict]:
         json_data = json.loads(

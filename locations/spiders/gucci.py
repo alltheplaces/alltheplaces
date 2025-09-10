@@ -12,9 +12,8 @@ from locations.user_agents import FIREFOX_LATEST
 class GucciSpider(Spider):
     name = "gucci"
     item_attributes = {"brand": "Gucci", "brand_wikidata": "Q178516"}
-    user_agent = FIREFOX_LATEST
     is_playwright_spider = True
-    custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def start_requests(self):
         yield Request(

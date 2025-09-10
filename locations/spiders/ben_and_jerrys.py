@@ -1,18 +1,21 @@
+from typing import Iterable
+
 from chompjs import parse_js_object
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
 class BenAndJerrysSpider(Where2GetItSpider):
-    download_timeout = 60
     name = "ben_and_jerrys"
     item_attributes = {"brand": "Ben & Jerry's", "brand_wikidata": "Q816412"}
     api_key = "3D71930E-EC80-11E6-A0AE-8347407E493E"
     api_filter = {"icon": {"in": "default,SHOP"}}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
-    def parse_item(self, item, location):
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         # Appears to be an indicator for suppliers (not actual shops), even after api_filter above
         if location.get("jsonshopinfo") is None:  # May be equivalent to "jsonshop"
             return

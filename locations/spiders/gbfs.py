@@ -348,8 +348,7 @@ BRAND_MAPPING = {
 class GbfsSpider(CSVFeedSpider):
     name = "gbfs"
     start_urls = ["https://github.com/MobilityData/gbfs/raw/master/systems.csv"]
-    download_delay = 2
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2}
 
     def parse_row(self, response, row):
         url = row["Auto-Discovery URL"]

@@ -7,7 +7,6 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class DanMurphysAUSpider(JSONBlobSpider):
@@ -16,7 +15,6 @@ class DanMurphysAUSpider(JSONBlobSpider):
     allowed_domains = ["api.danmurphys.com.au"]
     start_urls = ["https://api.danmurphys.com.au/apis/ui/StoreLocator/Stores/danmurphys"]
     locations_key = "Stores"
-    user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt cannot be parsed
     requires_proxy = "AU"
 

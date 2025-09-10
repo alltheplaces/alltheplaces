@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
@@ -10,9 +13,9 @@ class DominosPizzaBESpider(SitemapSpider):
     allowed_domains = ["dominos.be"]
     sitemap_urls = ["https://www.dominos.be/sitemap.aspx"]
     sitemap_rules = [(r"/nl/winkel//?[^/]+\d+$", "parse_store")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse_store(self, response):
+    def parse_store(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.url,
             "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),

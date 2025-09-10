@@ -11,8 +11,8 @@ DAY_MAPPING = {"Lunes": "Mo", "Sábados": "Sa", "Domingos": "Su"}
 class LagenovesaSpider(scrapy.Spider):
     name = "lagenovesa"
     item_attributes = {"brand": "La Genovesa"}
+    custom_settings = {"DOWNLOAD_DELAY": 1.5}
     allowed_domains = ["lagenovesasuper.com.ar"]
-    download_delay = 1.5
     start_urls = ("http://lagenovesasuper.com.ar/index.php/empresa/sucursales",)
 
     def parse_day(self, day):

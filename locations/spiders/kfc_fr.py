@@ -14,9 +14,8 @@ class KfcFRSpider(Spider):
     name = "kfc_fr"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.fr/stores/allStores"]
-    user_agent = FIREFOX_LATEST
     is_playwright_spider = True
-    custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response, **kwargs):
         for location in chompjs.parse_js_object(response.text):
