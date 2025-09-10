@@ -12,7 +12,7 @@ class DominosPizzaTWSpider(SitemapSpider):
     item_attributes = {"brand_wikidata": "Q839466"}
     sitemap_urls = ["https://www.dominos.com.tw/sitemap.aspx"]
     sitemap_rules = [("tw/store/", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()

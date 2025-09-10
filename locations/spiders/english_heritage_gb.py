@@ -9,7 +9,7 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
     start_urls = ["https://www.english-heritage.org.uk/api/PropertySearch/GetAll"]
     no_refs = True
     locations_key = "Results"
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, location):
         item["website"] = response.urljoin(location["Path"])

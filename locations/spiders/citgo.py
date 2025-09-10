@@ -15,10 +15,8 @@ class CitgoSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Citgo", "brand_wikidata": "Q2974437"}
     allowed_domains = ["citgo.com"]
     sitemap_urls = ["https://www.citgo.com/sitemap.xml"]
-    sitemap_rules = [
-        (r"/station-locator/locations/(\d+)", "parse_sd"),
-    ]
-    user_agent = BROWSER_DEFAULT
+    sitemap_rules = [(r"/station-locator/locations/(\d+)", "parse_sd")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     drop_attributes = {"facebook", "twitter"}
 
     def pre_process_data(self, ld_data: dict, **kwargs):

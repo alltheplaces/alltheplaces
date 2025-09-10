@@ -13,7 +13,6 @@ class PizzaHutAESASpider(scrapy.Spider):
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
-    user_agent = None
 
     def start_requests(self) -> Iterable[JsonRequest]:
         for key, value in {"uae": "uae", "saudi": "ksa"}.items():

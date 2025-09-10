@@ -14,9 +14,8 @@ class SupercorESSpider(JSONBlobSpider):
     item_attributes = {"brand": "Supercor", "brand_wikidata": "Q6135841"}
     allowed_domains = ["www.supercor.es"]
     start_urls = ["https://www.supercor.es/tiendas/"]
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def extract_json(self, response):
         js_blob = response.xpath('//script[contains(text(), "var tiendas = `")]/text()').get()

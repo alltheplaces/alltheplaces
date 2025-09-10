@@ -19,7 +19,7 @@ class PizzaHutVNSpider(scrapy.Spider):
     name = "pizza_hut_vn"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     api_url = "https://rwapi.pizzahut.vn/api/store/GetAllStoreList"
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         timestamp = int(time.time() * 1000)
