@@ -42,11 +42,7 @@ class IntermarcheSpider(scrapy.Spider):
     }
 
     item_attributes = {"country": "FR"}
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DOWNLOAD_TIMEOUT": 180,
-    }
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 180, "USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         # Fetch cookies to get rid of DataDome captcha blockage

@@ -10,8 +10,8 @@ from locations.user_agents import BROWSER_DEFAULT
 class CisalfaSportITSpider(JSONBlobSpider):
     name = "cisalfa_sport_it"
     item_attributes = {"brand": "Cisalfa Sport", "brand_wikidata": "Q113535511"}
-    user_agent = BROWSER_DEFAULT
     locations_key = "stores"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         yield JsonRequest(

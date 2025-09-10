@@ -10,7 +10,7 @@ class RotanaHotelsSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Rotana Hotels", "brand_wikidata": "Q7370229"}
     sitemap_urls = ["https://www.rotana.com/sitemap.xml"]
     sitemap_rules = [(r"^https://www.rotana.com/rotanahotelandresorts/\w+/\w+/\w+$", "parse_sd")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.HOTEL, item)

@@ -3,6 +3,7 @@ import pathlib
 
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
+from scrapy.http import Response
 
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -116,11 +117,10 @@ class MySpider(StructuredDataSpider):
     name = "my_spider"
     start_urls = None
     item_attributes = {}
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     matching_links = []
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs):
         for label in LABELS:
             # XPath 2 supports matches(), but we don't have access to it
             # print(response.xpath('//a[matches(text(), "' + label + '", "i")]').get())

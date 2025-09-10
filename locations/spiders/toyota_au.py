@@ -26,8 +26,7 @@ class ToyotaAUSpider(JSONBlobSpider, PlaywrightSpider):
         "https://www.toyota.com.au/main/api/v1/toyotaforms/info/dealersbystate/VIC?dealerOptIn=false",
         "https://www.toyota.com.au/main/api/v1/toyotaforms/info/dealersbystate/WA?dealerOptIn=false",
     ]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS | {"USER_AGENT": BROWSER_DEFAULT}
     locations_key = "results"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

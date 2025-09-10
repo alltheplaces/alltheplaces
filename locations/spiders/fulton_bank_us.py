@@ -18,8 +18,8 @@ class FultonBankUSSpider(Spider):
             url="https://www.fultonbank.com/api/Branches/Search",
             formdata={
                 "QueryModel.SearchTerm": "kansas",
-                "QueryModel.Radius": "5000",
-            },  # center location with search radius
+                "QueryModel.MaxResults": "1000",
+            },  # center location
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

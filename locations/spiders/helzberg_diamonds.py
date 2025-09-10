@@ -1,5 +1,7 @@
 import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -13,9 +15,9 @@ class HelzbergDiamondsSpider(SitemapSpider):
     allowed_domains = ["helzberg.com"]
     sitemap_urls = ["https://www.helzberg.com/sitemap_stores.xml"]
     sitemap_rules = [("", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         address = response.xpath('//p[contains(@class,"address")]/text()').extract()
         item["ref"] = re.findall("[0-9]+", response.url)[0]

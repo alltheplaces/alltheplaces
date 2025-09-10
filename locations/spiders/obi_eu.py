@@ -28,7 +28,6 @@ class ObiEUSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow="https://www.obi.hu/aruhaz/.+", deny="#list"), callback="parse_sd"),
         Rule(LinkExtractor(allow="https://www.obi.pl/stores/.+", deny="#list"), callback="parse_sd"),
     ]
-    download_delay = 0.5
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item, response, ld_data, **kwargs):

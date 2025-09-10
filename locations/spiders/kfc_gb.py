@@ -15,8 +15,7 @@ class KfcGBSpider(Spider):
     name = "kfc_gb"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://uk.kfc-cms.com/api/data/restaurants_all?countrycode=GB"]
-    user_agent = FIREFOX_LATEST
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
     def parse(self, response, **kwargs):

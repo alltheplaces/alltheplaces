@@ -22,7 +22,7 @@ ZA_PROVINCES = {
 
 class DbeGovEcdZASpider(Spider):
     name = "dbe_gov_ecd_za"
-    download_timeout = 60
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     # Link obtained from https://www.education.gov.za/Programmes/EMIS/EMISDownloads.aspx
     # It doesn't look like it can be reliably fetched if the page updates with newer data, so requires manually updating

@@ -16,7 +16,7 @@ class AccentureSpider(scrapy.Spider):
     no_refs = True
 
     def parse(self, response, **kwargs):
-        for country in response.xpath('//li[@class="rad-link-list__list-item"]/a/text()').getall():
+        for country in response.xpath('//a[contains(@class, "cmp-text__link")]/text()').getall():
             yield JsonRequest(
                 url=f"https://www.accenture.com/us-en/about/locations/office-details/jcr:content/root/container_main/locationhero_copy.result.html?query={country}&from=0&size=1500",
                 callback=self.parse_country,

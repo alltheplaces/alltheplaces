@@ -17,7 +17,7 @@ class SocieteGeneraleSpider(SitemapSpider, StructuredDataSpider):
         "distributeur-automate/sitemap_pois",
     ]
     sitemap_rules = [(r"/.+-id(\d+)$", "parse_sd")]
-    download_timeout = 300
+    custom_settings = {"DOWNLOAD_TIMEOUT": 300}
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         ld_data.pop("@id", None)

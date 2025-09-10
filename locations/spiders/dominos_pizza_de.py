@@ -16,8 +16,7 @@ class DominosPizzaDESpider(SitemapSpider):
     sitemap_urls = ["https://www.dominos.de/sitemap.aspx"]
     url_regex = r"https://www\.dominos\.de/+filiale/+[\w]+-[\w]+-([\d]+)$"
     sitemap_rules = [(url_regex, "parse_store")]
-    user_agent = BROWSER_DEFAULT
-    download_timeout = 180
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180, "USER_AGENT": BROWSER_DEFAULT}
 
     def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
         for entry in entries:
