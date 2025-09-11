@@ -59,15 +59,15 @@ class AudiSpider(JSONBlobSpider):
         departments = hours.get("departments", []) if hours else []
         for department in departments:
             if department.get("id") in department_ids:
-                for day in department.get("openingHours", []):
-                    if day["open"]:
-                        open_time = day["timeRanges"][0]["openTime"]
-                        close_time = day["timeRanges"][0]["closeTime"]
-                        try:
+                try:
+                    for day in department.get("openingHours", []):
+                        if day["open"]:
+                            open_time = day["timeRanges"][0]["openTime"]
+                            close_time = day["timeRanges"][0]["closeTime"]
                             oh.add_range(day["id"], open_time, close_time, "%H:%M:%S")
-                        except Exception as e:
-                            self.logger.warning(f"Failed parse hours: {e}")
-                    else:
-                        oh.set_closed(day["id"])
+                        else:
+                            oh.set_closed(day["id"])
+                except Exception as e:
+                    self.logger.warning(f"Failed parse hours: {e}")
 
         return oh
