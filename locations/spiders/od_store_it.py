@@ -6,6 +6,7 @@ class OdStoreITSpider(JSONBlobSpider):
     name = "od_store_it"
     item_attributes = {"brand": "ODStore", "brand_wikidata": "Q130492509"}
     start_urls = ["https://odstore.it/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1&layout=1"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item, response, location):
         item["extras"]["addr:province"] = item.pop("state")
