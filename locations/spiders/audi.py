@@ -43,14 +43,20 @@ class AudiSpider(JSONBlobSpider):
         if "sales" in feature["services"] or "usedcars" in feature["services"]:
             shop_item = deepcopy(item)
             shop_item["ref"] = f"{item['ref']}-SHOP"
-            shop_item["opening_hours"] = self.parse_hours(feature.get("openingHours"), ["sales", "0"])
+            try:
+                shop_item["opening_hours"] = self.parse_hours(feature.get("openingHours"), ["sales", "0"])
+            except Exception as e:
+                self.logger.warning("Error parsing {} {}".format(feature.get("openingHours"), e))
             apply_category(Categories.SHOP_CAR, shop_item)
             yield shop_item
 
         if "service" in feature["services"]:
             service_item = deepcopy(item)
             service_item["ref"] = f"{item['ref']}-SERVICE"
-            service_item["opening_hours"] = self.parse_hours(feature.get("openingHours"), ["service", "1"])
+            try:
+                service_item["opening_hours"] = self.parse_hours(feature.get("openingHours"), ["service", "1"])
+            except Exception as e:
+                self.logger.warning("Error parsing {} {}".format(feature.get("openingHours"), e))
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
             yield service_item
 
@@ -59,15 +65,11 @@ class AudiSpider(JSONBlobSpider):
         departments = hours.get("departments", []) if hours else []
         for department in departments:
             if department.get("id") in department_ids:
-                try:
-                    for day in department.get("openingHours", []):
-                        if day["open"]:
-                            open_time = day["timeRanges"][0]["openTime"]
-                            close_time = day["timeRanges"][0]["closeTime"]
-                            oh.add_range(day["id"], open_time, close_time, "%H:%M:%S")
-                        else:
-                            oh.set_closed(day["id"])
-                except Exception as e:
-                    self.logger.warning(f"Failed parse hours: {e}")
-
+                for day in department.get("openingHours", []):
+                    if day["open"]:
+                        open_time = day["timeRanges"][0]["openTime"]
+                        close_time = day["timeRanges"][0]["closeTime"]
+                        oh.add_range(day["id"], open_time, close_time, "%H:%M:%S")
+                    else:
+                        oh.set_closed(day["id"])
         return oh
