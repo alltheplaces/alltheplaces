@@ -14,7 +14,6 @@ class RottenRobbieUSSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs):
         for store in chompjs.parse_js_object(response.xpath('//*[@type="application/ld+json"]/text()').get())["@graph"]:
             item = DictParser.parse(store)
-            item["ref"] = store["@id"]
-            item["branch"] = item.pop("name")
+            item["branch"], item["ref"] = item.pop("name").split(" - Store #")
             apply_category(Categories.FUEL_STATION, item)
             yield item
