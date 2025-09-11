@@ -1,25 +1,20 @@
+from typing import Any
+
 from chompjs import parse_js_object
 from scrapy import Request, Spider
+from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class FamilymartTWSpider(Spider):
     name = "familymart_tw"
-    item_attributes = {
-        "brand_wikidata": "Q10891564",
-        "extras": Categories.SHOP_CONVENIENCE.value,
-    }
+    item_attributes = {"brand_wikidata": "Q10891564"}
     allowed_domains = ["www.family.com.tw", "api.map.com.tw"]
     start_urls = ["https://www.family.com.tw/Marketing/storemap/?v=1"]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,  # HTTP 404 error page returned
-    }
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for admin_area_onclick in response.xpath('//a[contains(@onclick, "showAdminArea(")]/@onclick').getall():
             admin_area = admin_area_onclick.split("'", 2)[1]
             yield Request(
@@ -49,4 +44,7 @@ class FamilymartTWSpider(Spider):
             item["city"] = response.meta["city"]
             item["state"] = response.meta["state"]
             item["postcode"] = location["post"]
+
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+
             yield item

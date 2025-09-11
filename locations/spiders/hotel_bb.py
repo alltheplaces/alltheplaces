@@ -1,8 +1,10 @@
 import re
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -12,10 +14,9 @@ class HotelBbSpider(SitemapSpider, StructuredDataSpider):
     BB_HOTELS = {"brand": "B&B Hotels", "brand_wikidata": "Q794939"}
     sitemap_urls = ["https://www.hotel-bb.com/sitemap.xml"]
     sitemap_rules = [("/en/hotel/", "parse_sd")]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if item["name"].upper().startswith("B&B HOTEL"):
             item["branch"] = re.sub("B&B HOTELS?", "", item.pop("name"), re.IGNORECASE).strip()
             item.update(self.BB_HOTELS)

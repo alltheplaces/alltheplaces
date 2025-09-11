@@ -20,6 +20,7 @@ class CarrefourPLSpider(Spider):
     name = "carrefour_pl"
     # Taken from mobile app
     start_urls = ["https://c4webservice.carrefour.pl:8080/MobileWebService/v3/Bootstrap.svc/App/Bootstrap"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     brands = {
         "Express (Zielony)": CARREFOUR_EXPRESS,
@@ -28,7 +29,6 @@ class CarrefourPLSpider(Spider):
         "Market": CARREFOUR_MARKET,
         "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE},
     }
-    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
         yield scrapy.Request(

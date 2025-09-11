@@ -22,7 +22,7 @@ class GovernmentOfTheDistrictOfColumbiaStreetLampsUSSpider(ArcGISFeatureServerSp
     # There is no robots.txt nor use of HTTP 429 however it appears that the
     # server is configured or behind a network configured to drop connection
     # attempts if they occur at whatever has been decided to be too fast.
-    download_delay = 30
+    custom_settings = {"DOWNLOAD_DELAY": 30}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["FACILITYID"]

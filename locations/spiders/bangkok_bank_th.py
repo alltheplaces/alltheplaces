@@ -12,13 +12,13 @@ class BangkokBankTHSpider(scrapy.Spider):
     name = "bangkok_bank_th"
     allowed_domains = ["www.bangkokbank.com"]
     item_attributes = {"brand_wikidata": "Q806483"}
-    user_agent = CHROME_LATEST
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
             "Ocp-Apim-Subscription-Key": "7d1b09abe2ea413cbf95b2d99782ed37",
             "X-Requested-With": "XMLHttpRequest",
         },
         "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": CHROME_LATEST,
     }
     base_url = "https://www.bangkokbank.com/api/locationsearchservice/"
 

@@ -11,7 +11,7 @@ class BurgerKingILSpider(JSONBlobSpider):
     name = "burger_king_il"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://www.burgerking.co.il/branch/"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
     def start_requests(self):

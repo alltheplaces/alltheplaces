@@ -13,7 +13,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
     name = "sherwin_williams"
     item_attributes = {"brand": "Sherwin-Williams", "brand_wikidata": "Q48881"}
     allowed_domains = ["www.sherwin-williams.com"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     #  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius - (from regis spider)
     lats = [

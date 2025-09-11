@@ -17,7 +17,7 @@ class BootBarnUSSpider(JSONBlobSpider):
         "https://www.bootbarn.com/on/demandware.store/Sites-bootbarn_us-Site/default/LocationSearch-GetStoresForGeolocationPositionAjax"
     ]
     locations_key = ["InquiryResult", "data"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self) -> Iterable[JsonRequest]:
         data = {

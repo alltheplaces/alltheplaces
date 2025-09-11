@@ -12,7 +12,7 @@ class PaknsaveNZSpider(Spider):
     name = "paknsave_nz"
     start_urls = ["https://www.paknsave.co.nz/BrandsApi/BrandsStore/GetBrandStores"]
     item_attributes = {"brand": "PAK'nSAVE", "brand_wikidata": "Q7125339"}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
