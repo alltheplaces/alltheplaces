@@ -10,9 +10,9 @@ from locations.dict_parser import DictParser
 class AllpointSpider(Spider):
     name = "allpoint"
     item_attributes = {"brand": "Allpoint", "brand_wikidata": "Q4733264"}
-    download_timeout = 180
     total_count = 0
     page_size = 0
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
     def make_request(self, page: int) -> Request:
         return JsonRequest(
