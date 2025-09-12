@@ -19,7 +19,7 @@ class DuplicatesPipeline:
         ref = (spider.name, item["ref"])
         if ref in self.ids_seen:
             spider.crawler.stats.inc_value("atp/duplicate_count")
-            raise DropItem(str(item["ref"]))
+            raise DropItem("Duplicate item: {}".format(item["ref"]))
         else:
             self.ids_seen.add(ref)
             return item
