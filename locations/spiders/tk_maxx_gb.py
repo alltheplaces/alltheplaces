@@ -7,4 +7,4 @@ class TkMaxxGBSpider(YextAnswersSpider):
     api_key = "ce8e33e14f7f6706a1a86e05e440d1a0"
     experience_key = "tk-maxx-search-experience"
     endpoint = "https://prod-cdn.us.yextapis.com/v2/accounts/me/search/vertical/query"
-    locale="en-GB"
+    locale = "en-GB"
