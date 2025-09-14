@@ -15,8 +15,7 @@ class GraingerUSSpider(CrawlSpider):
     start_urls = ["https://www.grainger.com/content/find-branch-location"]
     rules = [Rule(LinkExtractor("/branch/"), callback="parse")]
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    user_agent = BROWSER_DEFAULT
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response, **kwargs):
         item = Feature()

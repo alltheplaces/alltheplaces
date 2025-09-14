@@ -12,8 +12,7 @@ class Zoloto585RUSpider(SitemapSpider):
     item_attributes = {"brand_wikidata": "Q125730875"}
     sitemap_urls = ["https://zoloto585.ru/robots.txt"]
     sitemap_rules = [(r"/about/address/[^/]+/[^/]+/$", "parse")]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()

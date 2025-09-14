@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
@@ -10,9 +13,9 @@ class ErbertAndGerbertsSpider(SitemapSpider):
     allowed_domains = ["erbertandgerberts.com"]
     sitemap_urls = ["https://www.erbertandgerberts.com/store-sitemap.xml"]
     sitemap_rules = [(r"/locations/", "parse_store")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse_store(self, response):
+    def parse_store(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "name": response.xpath('//h1[@class="ph__title text-cursive mb0"]/text()').extract_first(),
             "ref": response.xpath('//h1[@class="ph__title text-cursive mb0"]/text()').extract_first(),

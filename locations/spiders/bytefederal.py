@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any
 
 from chompjs import parse_js_object
 from scrapy.http import Response
@@ -7,20 +7,19 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 
 
-class BytefederalUSSpider(SitemapSpider):
-    name = "bytefederal_us"
+class BytefederalSpider(SitemapSpider):
+    name = "bytefederal"
     item_attributes = {"brand": "ByteFederal", "brand_wikidata": "Q135284888"}
     allowed_domains = ["www.bytefederal.com"]
     sitemap_urls = ["https://www.bytefederal.com/sitemap-0.xml"]
-    sitemap_rules = [(r"^https:\/\/www\.bytefederal\.com\/bitcoin-atm-near-me\/[^\/]+\/[^\/]+/\d+$", "parse")]
-    download_delay = 2  # robots.txt doesn't specify a crawl delay but
+    sitemap_rules = [(r"^https:\/\/www\.bytefederal\.com\/bitcoin-atm-near-me\/[^\/]+\/[^\/]+/[^\/]+$", "parse")]
+    custom_settings = {"DOWNLOAD_DELAY": 2}  # robots.txt doesn't specify a crawl delay but
     # after many requests at ~1/s, timeouts start to occur
     # so try a 2s delay instead.
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         locations_js = response.xpath("//mapbox-map/@data-locations").get()
         if not locations_js:
             # Some ATM pages are blank and should be ignored.
@@ -29,8 +28,7 @@ class BytefederalUSSpider(SitemapSpider):
 
         for location in locations:
             item = DictParser.parse(location)
-            item["ref"] = str(item["ref"])
-            item["website"] = response.url
+            item["website"] = item["ref"] = response.url
 
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_days_range(DAYS, location["open_hour"], location["close_hour"], "%H:%M:%S")

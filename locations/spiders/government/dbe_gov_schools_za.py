@@ -1,8 +1,10 @@
 import io
 import re
+from typing import Any
 
 from openpyxl import load_workbook
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
@@ -35,7 +37,7 @@ ZA_PROVINCES = {
 
 class DbeGovSchoolsZASpider(Spider):
     name = "dbe_gov_schools_za"
-    download_timeout = 60
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     # Links obtained from https://www.education.gov.za/Programmes/EMIS/EMISDownloads.aspx
     # It doesn't look like they can be reliably fetched if the page updates with newer data, so require manually updating
@@ -52,7 +54,7 @@ class DbeGovSchoolsZASpider(Spider):
         "https://www.education.gov.za/LinkClick.aspx?fileticket=A5xNnnbCgas%3d&tabid=466&portalid=0&mid=13863",  # Special Needs Educatiom
     ]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         excel_file = response.body
 
         excel_data = io.BytesIO(excel_file)

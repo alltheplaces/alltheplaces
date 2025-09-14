@@ -1,5 +1,7 @@
+from typing import Any
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -11,13 +13,9 @@ class NewWorldNZSpider(Spider):
     item_attributes = {"brand": "New World", "brand_wikidata": "Q7012488"}
     allowed_domains = ["www.newworld.co.nz"]
     start_urls = ["https://www.newworld.co.nz/BrandsApi/BrandsStore/GetBrandStores"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
             item["website"] = "https://www.newworld.co.nz" + location["url"]

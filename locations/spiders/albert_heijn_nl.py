@@ -1,23 +1,20 @@
-import json
 from typing import Any
 from urllib.parse import urljoin
 
-from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AlbertHeijnNLSpider(Spider):
+class AlbertHeijnNLSpider(PlaywrightSpider):
     name = "albert_heijn_nl"
     allowed_domains = ["www.ah.nl"]
     start_urls = ["https://www.ah.nl/winkels"]
-    user_agent = BROWSER_DEFAULT
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     brand_map = {
         "REGULAR": {"brand": "Albert Heijn", "brand_wikidata": "Q1653985"},
@@ -67,7 +64,7 @@ class AlbertHeijnNLSpider(Spider):
         )
 
     def parse_api(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("/html/body/pre/text()").get())["data"]["storesSearch"]["result"]:
+        for location in response.json()["data"]["storesSearch"]["result"]:
             item = DictParser.parse(location)
             self.parse_hours(item, location)
             item.update(self.brand_map.get(location["storeType"]))
