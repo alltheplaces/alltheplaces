@@ -39,9 +39,6 @@ class FishawaysZASpider(GoReviewApiSpider):
             apply_yes_no(Extras.BREAKFAST, ld_item, "Breakfast" in attributes)
             apply_yes_no(Extras.BRUNCH, ld_item, "Brunch" in attributes)
 
-            for attribute in attributes:
-                self.crawler.stats.inc_value(f"atp/{self.name}/attribute/{attribute}")
-
         apply_category(Categories.FAST_FOOD, ld_item)
 
         yield ld_item
