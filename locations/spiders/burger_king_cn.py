@@ -1,4 +1,5 @@
-from typing import Iterable
+import re
+from typing import Any, Iterable
 
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request, Response
@@ -12,17 +13,15 @@ from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 class BurgerKingCNSpider(JSONBlobSpider):
     name = "burger_king_cn"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    start_urls = ["https://www.bkchina.cn/website/new/js/area.js"]
     locations_key = ["data", "data"]
 
-    def start_requests(self):
-        yield Request(url=self.start_urls[0], callback=self.parse_regions)
+    def start_requests(self) -> Iterable[Request]:
+        yield Request(url="https://www.bkchina.cn/website/new/js/area.js", callback=self.parse_regions)
 
-    def parse_regions(self, response):
+    def parse_regions(self, response: Response) -> Any:
         provinces_list = []
         provinces = {}
-        for line in [line for line in response.text.split("\n") if "dsy.add(" in line]:
-            code = line.split('add("')[1].split('",')[0]
+        for code, line in re.findall(r"dsy\.add\(\"(\w+)\",(\[.+?])\)", response.text, re.DOTALL):
             areas = parse_js_object(line)
             if "_" not in code and provinces == {}:
                 provinces_list = areas
@@ -33,7 +32,7 @@ class BurgerKingCNSpider(JSONBlobSpider):
             for city in cities:
                 yield from self.request_page(province, city, 1)
 
-    def request_page(self, province, city, page):
+    def request_page(self, province: str, city: str, page: int) -> Iterable[JsonRequest]:
         yield JsonRequest(
             url=f"https://www.bkchina.cn/restaurant/getMapsListAjax?page={page}&storeProvince={province}&storeCity={city}&localSelect=&search=",
             meta={
@@ -59,9 +58,9 @@ class BurgerKingCNSpider(JSONBlobSpider):
         feature["latitude"] = feature.pop("storeLongitude")
         feature["longitude"] = feature.pop("storeLatitude")
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["state"] = response.meta["province"]
-        apply_yes_no(Extras.BREAKFAST, item, location["hasBreakfast"] == "1", False)
+        item["state"] = feature["storeProvince"]
+        apply_yes_no(Extras.BREAKFAST, item, feature["hasBreakfast"] == "1", False)
         item["brand"] = "汉堡王"
         yield item
