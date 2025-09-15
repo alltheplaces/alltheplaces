@@ -4,15 +4,14 @@ from typing import Any, Iterable
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingCNSpider(JSONBlobSpider):
     name = "burger_king_cn"
-    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
+    item_attributes = {"brand_wikidata": "Q177054"}
     locations_key = ["data", "data"]
 
     def start_requests(self) -> Iterable[Request]:
@@ -30,10 +29,10 @@ class BurgerKingCNSpider(JSONBlobSpider):
                 provinces[provinces_list[int(code.split("_")[1])]] = areas
         for province, cities in provinces.items():
             for city in cities:
-                yield from self.request_page(province, city, 1)
+                yield self.request_page(province, city, 1)
 
-    def request_page(self, province: str, city: str, page: int) -> Iterable[JsonRequest]:
-        yield JsonRequest(
+    def request_page(self, province: str, city: str, page: int) -> JsonRequest:
+        return JsonRequest(
             url=f"https://www.bkchina.cn/restaurant/getMapsListAjax?page={page}&storeProvince={province}&storeCity={city}&localSelect=&search=",
             meta={
                 "province": province,
@@ -51,7 +50,7 @@ class BurgerKingCNSpider(JSONBlobSpider):
         features = self.extract_json(response)
         yield from self.parse_feature_array(response, features) or []
         if int(response.json()["data"]["total"]) > 5 * response.meta["page"]:
-            yield from self.request_page(response.meta["province"], response.meta["city"], response.meta["page"] + 1)
+            yield self.request_page(response.meta["province"], response.meta["city"], response.meta["page"] + 1)
 
     def pre_process_data(self, feature: dict) -> None:
         # Lat and long are the wrong way round
@@ -62,5 +61,7 @@ class BurgerKingCNSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         item["state"] = feature["storeProvince"]
         apply_yes_no(Extras.BREAKFAST, item, feature["hasBreakfast"] == "1", False)
-        item["brand"] = "汉堡王"
+
+        apply_category(Categories.FAST_FOOD, item)
+
         yield item
