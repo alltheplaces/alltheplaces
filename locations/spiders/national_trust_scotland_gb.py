@@ -6,7 +6,7 @@ from locations.categories import apply_category
 from locations.dict_parser import DictParser
 
 
-class NationalTrustScotlandSpider(Spider):
+class NationalTrustScotlandGBSpider(Spider):
     name = "national_trust_scotland_gb"
     item_attributes = {"operator": "National Trust for Scotland", "operator_wikidata": "Q599997", "nsi_id": "N/A"}
     allowed_domains = ["www.nts.org.uk"]
