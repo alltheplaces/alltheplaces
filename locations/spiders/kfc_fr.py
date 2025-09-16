@@ -1,16 +1,16 @@
 import chompjs
-from scrapy.spiders import Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.user_agents import FIREFOX_LATEST
 
 
-class KfcFRSpider(Spider):
+class KfcFRSpider(PlaywrightSpider):
     name = "kfc_fr"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.fr/stores/allStores"]
