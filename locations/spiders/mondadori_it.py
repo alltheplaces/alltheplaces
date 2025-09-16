@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_IT, OpeningHours, sanitise_day
@@ -15,12 +15,10 @@ class MondadoriITSpider(JSONBlobSpider):
         "Rizzoli": ("Rizzoli", "Q1327389"),
         "Mondolibri": ("Mondolibri", "Q119942453"),
     }
+    start_urls = [
+        "https://www.mondadoristore.it/occ/v2/mondadorisite-b2c/stores?pageSize=1000&currentPage=0&province=&latitude=45.4642&longitude=9.19&fields=FULL&lang=it&curr=EUR"
+    ]
     locations_key = "results"
-
-    def start_requests(self):
-        yield JsonRequest(
-            url="https://www.mondadoristore.it/occ/v2/mondadorisite-b2c/stores?pageSize=1000&currentPage=0&province=&latitude=45.4642&longitude=9.19&fields=FULL&lang=it&curr=EUR"
-        )
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
