@@ -11,7 +11,7 @@ class DiscoArgentinaSpider(Spider):
     start_urls = [
         "https://www.disco.com.ar/api/dataentities/NT/search?_fields=name,grouping,image_maps,geocoordinates,SellerName,id,country,city,neighborhood,number,postalCode,state,street,schedule,services,paymentMethods,opening,hasPickup,hasDelivery,address,url_image,phone"
     ]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         yield Request(url=self.start_urls[0], headers={"Accept": "application/json", "Rest-Range": "resources=0-999"})

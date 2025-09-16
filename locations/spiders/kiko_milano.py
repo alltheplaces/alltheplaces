@@ -7,7 +7,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class KikoMilanoSpider(JSONBlobSpider):
     name = "kiko_milano"
     item_attributes = {"brand": "KIKO Milano", "brand_wikidata": "Q3812045"}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         yield JsonRequest(

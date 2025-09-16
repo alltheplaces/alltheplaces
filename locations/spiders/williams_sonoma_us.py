@@ -19,7 +19,7 @@ class WilliamsSonomaUSSpider(JSONBlobSpider):
         "WS": {"brand": "Williams-Sonoma", "brand_wikidata": "Q2581220"},
         "PB": {"brand": "Pottery Barn", "brand_wikidata": "Q3400126"},
     }
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     locations_key = ["storeListResponse", "stores"]
 
     def pre_process_data(self, feature: dict) -> None:

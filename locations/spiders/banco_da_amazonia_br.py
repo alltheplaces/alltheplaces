@@ -13,9 +13,8 @@ class BancoDaAmazoniaBRSpider(Spider):
     name = "banco_da_amazonia_br"
     item_attributes = {"brand": "Banco da Amazônia", "brand_wikidata": "Q16496429"}
     start_urls = ["https://www.bancoamazonia.com.br/o-banco/agencias"]
-    download_timeout = 300
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 300}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for state, city_locations in chompjs.parse_js_object(

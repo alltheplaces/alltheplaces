@@ -1,6 +1,5 @@
 from locations.categories import Categories
 from locations.spiders.winn_dixie_us import WinnDixieUSSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class HarveysSupermarketsUSSpider(WinnDixieUSSpider):
@@ -20,4 +19,3 @@ class HarveysSupermarketsUSSpider(WinnDixieUSSpider):
     start_urls = [
         "https://www.harveyssupermarkets.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter="
     ]
-    user_agent = BROWSER_DEFAULT

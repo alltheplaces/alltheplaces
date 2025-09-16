@@ -14,7 +14,7 @@ class PalmBeachTanUSSpider(SitemapSpider):
     item_attributes = {"brand": "Palm Beach Tan", "brand_wikidata": "Q64027086"}
     sitemap_urls = ["https://palmbeachtan.com/sitemap-locations.xml"]
     sitemap_rules = [(r"https://palmbeachtan.com/locations/[^/]+/[a-z0-9-]+", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {

@@ -1,8 +1,8 @@
 from typing import Any
 from urllib.parse import urljoin
 
-import scrapy
 import xmltodict
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
@@ -11,12 +11,12 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SaversGBSpider(scrapy.Spider):
+class SaversGBSpider(Spider):
     name = "savers_gb"
     item_attributes = {"brand": "Savers", "brand_wikidata": "Q7428189"}
     start_urls = ["https://api.savers.co.uk/api/v2/sv/stores?country=GB&currentPage=0&pageSize=1000"]
     requires_proxy = True
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in xmltodict.parse(response.text)["storeFinderSearchPage"]["stores"]:

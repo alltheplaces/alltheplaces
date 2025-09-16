@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.items import Feature, get_lat_lon
@@ -6,7 +6,7 @@ from locations.pipelines.check_item_properties import CheckItemPropertiesPipelin
 
 
 def get_objects(lat, lon):
-    spider = Spider("test")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return (
         [
