@@ -9,8 +9,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class ChilisKWSpider(Spider):
     name = "chilis_kw"
     item_attributes = {"brand": "Chili's", "brand_wikidata": "Q1072948"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "HTTPERROR_ALLOWED_CODES": [500]}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "HTTPERROR_ALLOWED_CODES": [500], "USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         gql_query = """

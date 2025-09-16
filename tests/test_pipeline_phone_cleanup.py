@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
@@ -6,7 +6,7 @@ from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
 
 
 def get_objects(phone, country):
-    spider = Spider(name="test")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return (
         Feature(phone=phone, country=country),

@@ -14,7 +14,7 @@ class SupercorESSpider(JSONBlobSpider, CamoufoxSpider):
     item_attributes = {"brand": "Supercor", "brand_wikidata": "Q6135841"}
     allowed_domains = ["www.supercor.es"]
     start_urls = ["https://www.supercor.es/tiendas/"]
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def extract_json(self, response):
         js_blob = response.xpath('//script[contains(text(), "var tiendas = `")]/text()').get()
@@ -44,6 +44,6 @@ class SupercorESSpider(JSONBlobSpider, CamoufoxSpider):
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_ES)
 
-        apply_category(Categories.SHOP_SUPERMARKET, item)
+        apply_category(Categories.SHOP_CONVENIENCE, item)
 
         yield item

@@ -23,8 +23,7 @@ class UnicreditBankITSpider(CrawlSpider):
         Rule(LinkExtractor(allow=r"/contatti-e-agenzie/lista-agenzie/[a-z]{2}/[-\w]+/[-\w]+\.html$"), callback="parse"),
     ]
     url_match = re.compile(r"url[:\s]+\'(.+?)\'")
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 180}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 180, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         website = response.url

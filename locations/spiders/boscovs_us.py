@@ -8,10 +8,7 @@ class BoscovsUSSpider(KiboSpider):
     name = "boscovs_us"
     item_attributes = {"brand": "Boscov's", "brand_wikidata": "Q4947190"}
     start_urls = ["https://www.boscovs.com/api/commerce/storefront/locationUsageTypes/SP/locations"]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {
-        "COOKIES_ENABLED": True,
-    }
+    custom_settings = {"COOKIES_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
 
     # A session cookie needs to be obtained prior to the Kibo Storefront API being used
     def start_requests(self):

@@ -21,8 +21,8 @@ class OutdoorSupplyHardwareUSSpider(Spider):
         "ROBOTSTXT_OBEY": False,
         "RETRY_HTTP_CODES": [403],  # Sometimes server blocks and sometimes allows
         "RETRY_TIMES": 5,
+        "USER_AGENT": BROWSER_DEFAULT,
     }
-    user_agent = BROWSER_DEFAULT
     requires_proxy = True
 
     def start_requests(self) -> Iterable[Request]:

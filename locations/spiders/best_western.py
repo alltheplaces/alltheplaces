@@ -42,8 +42,7 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
 
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels-details.xml"]
     sitemap_rules = [(r"/en_US/book/[-\w]+/[-\w]+/propertyCode\.\d+\.html$", "parse_hotel")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
-    download_delay = 4
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 4}
     requires_proxy = True
 
     def parse_hotel(self, response):

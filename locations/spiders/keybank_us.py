@@ -12,9 +12,8 @@ class KeybankUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.key.com/about/seo.sitemap-locator.xml"]
     sitemap_rules = [(r"locations/.*/.*/.*/.*", "parse_sd")]
     time_format = "%H:%M:%S"
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = response.css("h1.address__title::text").get()

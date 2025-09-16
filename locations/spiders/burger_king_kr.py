@@ -10,10 +10,10 @@ from locations.json_blob_spider import JSONBlobSpider
 
 
 class BurgerKingKRSpider(JSONBlobSpider):
-    download_timeout = 60
     name = "burger_king_kr"
     item_attributes = {"brand_wikidata": "Q177054"}
     locations_key = ["body", "storInfo"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def start_requests(self) -> Iterable[JsonRequest | Request]:
         yield FormRequest(
