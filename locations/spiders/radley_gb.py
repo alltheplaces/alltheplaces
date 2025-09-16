@@ -10,15 +10,11 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class RadleyGBSpider(CrawlSpider, StructuredDataSpider):
     name = "radley_gb"
-    item_attributes = {
-        "brand": "Radley London",
-        "brand_wikidata": "Q7281436"
-    }
+    item_attributes = {"brand": "Radley London", "brand_wikidata": "Q7281436"}
     start_urls = ["https://www.radley.co.uk/pages/stores"]
     rules = [
         Rule(
-            LinkExtractor(allow=r"https?://www\.radley\.co\.uk/pages/radley-[a-zA-Z0-9-]+-store"),
-            callback="parse_sd"
+            LinkExtractor(allow=r"https?://www\.radley\.co\.uk/pages/radley-[a-zA-Z0-9-]+-store"), callback="parse_sd"
         ),
     ]
 
