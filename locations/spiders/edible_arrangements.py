@@ -57,8 +57,8 @@ class EdibleArrangementsSpider(scrapy.Spider):
                 )
 
                 from_time, to_time = h["Timing"].split("-")
-                from_t = datetime.strptime(from_time, "%I:%M %p").strftime("%H:%M")
-                to_t = datetime.strptime(to_time, "%I:%M %p").strftime("%H:%M")
+                from_t = datetime.strptime(from_time.strip(), "%I:%M %p").strftime("%H:%M")
+                to_t = datetime.strptime(to_time.strip(), "%I:%M %p").strftime("%H:%M")
 
                 oh.append(f"{days} {from_t}-{to_t}")
 
