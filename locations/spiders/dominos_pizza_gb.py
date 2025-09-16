@@ -10,5 +10,5 @@ class DominosPizzaGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.dominos.co.uk/pizza-near-me/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.dominos\.co\.uk\/pizza-near-me\/[-.\w]+\/([-.\w\/]+)$", "parse_sd")]
     drop_attributes = ["image"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True

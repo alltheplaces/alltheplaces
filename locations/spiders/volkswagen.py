@@ -16,11 +16,11 @@ VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES = {
 
 
 class VolkswagenSpider(JSONBlobSpider):
-    download_timeout = 30
     name = "volkswagen"
     locations_key = "dealers"
     start_urls = ["https://www.vw.com/en.global-config.json"]
     no_refs = True
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
     BRAND_MAPPING = {"V": VOLKSWAGEN_SHARED_ATTRIBUTES, "N": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES}
 

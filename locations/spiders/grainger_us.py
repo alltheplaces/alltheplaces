@@ -14,8 +14,7 @@ class GraingerUSSpider(SitemapSpider, PlaywrightSpider):
     item_attributes = {"brand": "Grainger", "brand_wikidata": "Q1627894"}
     sitemap_urls = ["https://www.grainger.com/branch-location-sitemap.xml"]
     sitemap_rules = [(r"^https://www.grainger.com/branch/[\w\-]+$", "parse")]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    user_agent = BROWSER_DEFAULT
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response, **kwargs):
         item = Feature()

@@ -16,9 +16,8 @@ class MaxmaraSpider(scrapy.Spider):
     name = "maxmara"
     item_attributes = {"brand": "Max Mara", "brand_wikidata": "Q1151774"}
     gc = GeonamesCache()
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self) -> Iterable[JsonRequest]:
         for country_code in self.gc.get_countries().keys():

@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -11,9 +14,8 @@ class UscSpider(CrawlSpider):
     allowed_domains = ["www.usc.co.uk"]
     start_urls = ["https://www.usc.co.uk/stores/all"]
     rules = [Rule(LinkExtractor(allow=".*-store-.*"), callback="parse", follow=False)]
-    download_delay = 0.5
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         MicrodataParser.convert_to_json_ld(response)
         if item := LinkedDataParser.parse(response, "LocalBusiness"):
             item["name"] = "USC"

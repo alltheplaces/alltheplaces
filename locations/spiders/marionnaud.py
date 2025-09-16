@@ -18,7 +18,7 @@ class MarionnaudSpider(JSONBlobSpider):
         "https://api.marionnaud.fr/api/v2/mfr/stores?radius=10000&pageSize=100000&fields=FULL",
     ]
     locations_key = "stores"
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
     needs_json_request = True
 

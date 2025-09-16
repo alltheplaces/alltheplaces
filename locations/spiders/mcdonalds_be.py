@@ -16,7 +16,7 @@ class McdonaldsBESpider(Spider):
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.be"]
     start_urls = ["https://www.mcdonalds.be/en/restaurants/api/restaurants"]
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
