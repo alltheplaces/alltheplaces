@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_ES, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SupercorESSpider(JSONBlobSpider, CamoufoxSpider):
