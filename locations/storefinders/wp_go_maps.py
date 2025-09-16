@@ -32,8 +32,6 @@ from locations.items import Feature
 
 class WpGoMapsSpider(Spider):
     map_id: int = None
-    length: int = 10000
-    start: int = 0
 
     start_urls = []
     allowed_domains = []
