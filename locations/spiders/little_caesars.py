@@ -1,6 +1,8 @@
 import json
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
@@ -27,15 +29,14 @@ class LittleCaesarsSpider(scrapy.Spider):
         "country": "US",
     }
     allowed_domains = ["littlecaesars.com"]
-    download_delay = 0.1
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         for record in postal_regions("US"):
             url = "https://api.cloud.littlecaesars.com/bff/api/stores?zip=" + record["postal_region"]
             yield scrapy.http.Request(url, self.parse, method="GET")
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         body = response.text
         if not body:
             return

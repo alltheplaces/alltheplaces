@@ -103,7 +103,6 @@ PAYMENT_METHODS_MAP = {
 class OmvSpider(scrapy.Spider):
     name = "omv"
     start_urls = ["https://app.wigeogis.com/kunden/omv/data/getconfig.php"]
-    download_delay = 0.10
     api_url = "https://app.wigeogis.com/kunden/omv/data/getresults.php"
     details_url = "https://app.wigeogis.com/kunden/omv/data/details.php"
     hash = ""

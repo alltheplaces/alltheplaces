@@ -9,8 +9,7 @@ class UltraLiquorsZASpider(scrapy.Spider):
     name = "ultra_liquors_za"
     item_attributes = {"brand": "Ultra Liquors", "brand_wikidata": "Q116620602"}
     allowed_domains = ["greenpoint.ultraliquors.co.za"]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         yield scrapy.FormRequest(

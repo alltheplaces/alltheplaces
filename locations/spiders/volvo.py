@@ -1,7 +1,9 @@
 import json
 import re
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -24,11 +26,10 @@ class VolvoSpider(scrapy.Spider):
         "https://www.volvocars.com/uk/dealers/car-retailers",
         "https://www.volvocars.com/nl/dealers/autodealers",
     ]
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         country = re.search(r"(\w\w)/dealers", response.url).group(1)
 
         data_raw = response.xpath('//script[@id="__NEXT_DATA__" and @type="application/json"]/text()').get()

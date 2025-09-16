@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Iterable
 
 from scrapy.http import Request, Response
 from scrapy.linkextractors import LinkExtractor
@@ -16,17 +16,17 @@ class MajesticGBSpider(CrawlSpider):
     start_urls = ["https://www.majestic.co.uk/stores"]
     rules = [Rule(LinkExtractor(allow="/stores/"), callback="parse")]
     allowed_domains = ["www.majestic.co.uk"]
-    user_agent = BROWSER_DEFAULT
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.majestic.co.uk",
             "DNT": "1",
         },
+        "USER_AGENT": BROWSER_DEFAULT,
     }
     requires_proxy = True
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//li[contains(@class, "store-item")]'):
             item = Feature()
             item["ref"] = item["website"] = response.urljoin(location.xpath(".//@data-id").get())

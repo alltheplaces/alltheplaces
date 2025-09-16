@@ -32,7 +32,6 @@ class GoodwillSpider(scrapy.Spider):
     }
     allowed_domains = ["www.goodwill.org"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.2
 
     def start_requests(self) -> Iterable[JsonRequest]:
         with open_searchable_points("us_centroids_25mile_radius.csv") as points:

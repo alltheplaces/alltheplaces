@@ -1,13 +1,9 @@
-from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.storefinders.uberall import UberallSpider
+from locations.spiders.safeway_ca import SitemapSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class Optic2000Spider(UberallSpider):
+class Optic2000Spider(SitemapSpider, StructuredDataSpider):
     name = "optic2000"
     item_attributes = {"brand": "Optic 2000", "brand_wikidata": "Q3354445"}
-    key = "cnOakpSgwYPnQbwwv6ZpHtfy0PMjaK"
-
-    def post_process_item(self, item: Feature, response, location: dict, **kwargs):
-        apply_category(Categories.SHOP_OPTICIAN, item)
-        yield item
+    sitemap_urls = ["https://opticien.optic2000.com/sitemap.xml"]
+    sitemap_rules = [(r"https://opticien.optic2000.com/[^/]+/[^/]+/[^/]+/[^/]+$", "parse_sd")]
