@@ -47,11 +47,8 @@ class AllerganbeautyJPSpider(Spider):
             apply_category(Categories.CLINIC, item)
             speciality = []
             for jaspec, enspec in self.TYPES.items():
-                try:
-                    if jaspec in store.get("診療科目"):
-                        speciality.append(enspec)
-                except TypeError:
-                    pass
+                if jaspec in (store.get("診療科目") or ""):
+                    speciality.append(enspec)
             if speciality:
                 if len(speciality) == 1:
                     item["extras"]["healthcare:speciality"] = speciality[0]
