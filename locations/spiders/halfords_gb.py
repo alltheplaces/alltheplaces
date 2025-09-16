@@ -10,7 +10,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
     name = "halfords_gb"
     start_urls = ["https://www.halfords.com/locations"]
-    rules = [Rule(LinkExtractor(r"/locations/([^/]+)/$"), "parse")]
+    rules = [Rule(LinkExtractor(r"/locations/([^/]+)$"), "parse_sd")]
     wanted_types = ["AutomotiveBusiness", "LocalBusiness"]
     search_for_facebook = False
     search_for_twitter = False
