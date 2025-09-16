@@ -32,7 +32,7 @@ class PizzaHutGBSpider(Spider):
                 item.update(PIZZA_HUT_DELIVERY)
                 apply_category(Categories.FAST_FOOD, item)
 
-            apply_yes_no(Extras.DELIVERY, item, location["allowedDisposition"]["delivery"])
-            apply_yes_no(Extras.TAKEAWAY, item, location["allowedDisposition"]["collection"])
+            apply_yes_no(Extras.DELIVERY, item, location.get("allowedDisposition", {}).get("delivery"))
+            apply_yes_no(Extras.TAKEAWAY, item, location.get("allowedDisposition", {}).get("collection"))
 
             yield item
