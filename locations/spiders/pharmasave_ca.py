@@ -18,7 +18,7 @@ class PharmasaveCASpider(scrapy.Spider):
             chompjs.parse_js_objects(response.xpath('//*[@id="storelocator-script-js-before"]/text()').get())
         )[2]:
             item = DictParser.parse(store)
-            item["street_address"] = item.pop("addr_full")
+            item["street_address"] = store["address"]
             item["addr_full"] = store["store_full_address"]
             yield scrapy.Request(url=item["website"], callback=self.parse_opening_hours, meta={"item": item})
 
