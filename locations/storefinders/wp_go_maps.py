@@ -1,7 +1,7 @@
 import base64
 import json
 import zlib
-from typing import Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import Response
@@ -36,9 +36,9 @@ class WpGoMapsSpider(Spider):
     start_urls = []
     allowed_domains = []
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Any]:
         urls = self.start_urls
-        if len(self.start_urls) == 0:
+        if len(urls) == 0:
             if self.map_id is not None:
                 urls.append(self.features_url_for(self.map_id))
             else:
@@ -47,7 +47,7 @@ class WpGoMapsSpider(Spider):
         for url in urls:
             yield Request(url=url, callback=self.parse)
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         yield from self.parse_stores(response)
 
     def features_url_for(self, map_id: int) -> str:
