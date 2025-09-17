@@ -14,6 +14,7 @@ class CavaUSSpider(JSONBlobSpider):
     name = "cava_us"
     item_attributes = {"brand": "CAVA", "brand_wikidata": "Q85751038"}
     start_urls = ["https://cava.com/locations"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def extract_json(self, response: Response) -> list[dict]:
         return DictParser.get_nested_key(
