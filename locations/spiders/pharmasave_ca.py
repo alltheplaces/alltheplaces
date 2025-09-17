@@ -19,7 +19,7 @@ class PharmasaveCASpider(scrapy.Spider):
         )[2]:
             item = DictParser.parse(store)
             item["street_address"] = store["address"]
-            item["addr_full"] = store["store_full_address"]
+            item["addr_full"] = store.get("store_full_address")
             yield scrapy.Request(url=item["website"], callback=self.parse_opening_hours, meta={"item": item})
 
     def parse_opening_hours(self, response, **kwargs):
