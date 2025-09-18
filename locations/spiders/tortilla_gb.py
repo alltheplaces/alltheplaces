@@ -22,7 +22,7 @@ class TortillaGBSpider(JSONBlobSpider):
             item["ref"] = item["branch"].replace(" ", "")
             if item["phone"]:
                 item["phone"].replace(" ", "")
-            item["website"] = "https://www.tortilla.co.uk/" + location["full_slug"]
+            item["website"] = "https://www.tortilla.co.uk/" + location["full_slug"].removeprefix('uk/')
 
             apply_category(Categories.FAST_FOOD, item)
 
