@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TruistUSSpider(SitemapSpider, StructuredDataSpider):
@@ -23,6 +24,7 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["FinancialService", "AutomatedTeller"]
     search_for_twitter = False
     drop_attributes = {"facebook"}
+    custom_settings = {"user_agent": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         path = urlparse(response.url).path
