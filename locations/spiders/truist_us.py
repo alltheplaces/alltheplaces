@@ -24,7 +24,7 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["FinancialService", "AutomatedTeller"]
     search_for_twitter = False
     drop_attributes = {"facebook"}
-    custom_settings = {"user_agent": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         path = urlparse(response.url).path
