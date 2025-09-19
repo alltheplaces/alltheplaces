@@ -22,13 +22,13 @@ class MitsubishiFRSpider(XMLFeedSpider):
     iterator = "xml"
     itertag = "marker"
 
-    def apply_sales_category(self, item):
+    def build_sales_item(self, item):
         sales_item = deepcopy(item)
         sales_item["ref"] = f"{item['ref']}-sales"
         apply_category(Categories.SHOP_CAR, sales_item)
         return sales_item
 
-    def apply_service_category(self, item):
+    def build_service_item(self, item):
         service_item = deepcopy(item)
         service_item["ref"] = f"{item['ref']}-service"
         apply_category(Categories.SHOP_CAR_REPAIR, service_item)
@@ -59,12 +59,12 @@ class MitsubishiFRSpider(XMLFeedSpider):
         service_available = "Après-vente" in services
 
         if sales_available:
-            sales_item = self.apply_sales_category(item)
+            sales_item = self.build_sales_item(item)
             apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
             yield sales_item
 
         if service_available:
-            service_item = self.apply_service_category(item)
+            service_item = self.build_service_item(item)
             yield service_item
 
         if not sales_available and not service_available:
