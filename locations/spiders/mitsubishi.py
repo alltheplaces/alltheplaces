@@ -4,7 +4,7 @@ import scrapy
 from geonamescache import GeonamesCache
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.country_utils import get_locale
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
@@ -177,7 +177,7 @@ class MitsubishiSpider(scrapy.Spider):
 
         if sales_available:
             sales_item = self.build_sales_item(item)
-            apply_yes_no("service:vehicle:car_repair", sales_item, service_available, True)
+            apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
             yield sales_item
 
         if service_available:

@@ -16,7 +16,7 @@ SERVICES_MAPPING = {
     "restroom": Extras.TOILETS,
     "propane": Fuel.PROPANE,
     "r99": Fuel.BIODIESEL,
-    "servicebay": "service:vehicle:car_repair",
+    "servicebay": Extras.CAR_REPAIR,
     "truckstop": Access.HGV,
     # TODO: other services
     # "deliver"

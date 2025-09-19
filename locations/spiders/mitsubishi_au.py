@@ -3,7 +3,7 @@ from copy import deepcopy
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -116,7 +116,7 @@ class MitsubishiAUSpider(scrapy.Spider):
 
             if sales_available:
                 sales_item = self.build_sales_item(item)
-                apply_yes_no("service:vehicle:car_repair", sales_item, service_available, True)
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
                 yield sales_item
 
             if service_available:
