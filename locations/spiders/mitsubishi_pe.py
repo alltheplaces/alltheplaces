@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any
 
 import scrapy
@@ -21,6 +22,18 @@ class MitsubishiPESpider(scrapy.Spider):
                 callback=self.parse_details,
             )
 
+    def build_sales_item(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def build_service_item(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
     def parse_details(self, response, **kwargs):
         for location in response.xpath('//*[@class="block-concesionario"]'):
             item = Feature()
@@ -29,14 +42,26 @@ class MitsubishiPESpider(scrapy.Spider):
             item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/text()').get()
             extract_google_position(item, location)
             location_type = location.xpath(".//ul//li").xpath("normalize-space()").getall()
-            if "Concesionario" not in location_type:
-                if "Taller" in location_type:
-                    apply_category(Categories.SHOP_CAR_REPAIR, item)
-                    apply_yes_no(Extras.CAR_PARTS, item, "Repuestos" in location_type)
-                else:
+
+            sales_available = "Concesionario" in location_type
+            service_available = "Taller" in location_type
+            parts_available = "Repuestos" in location_type
+
+            if sales_available:
+                sales_item = self.build_sales_item(item)
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
+                apply_yes_no(Extras.CAR_PARTS, sales_item, parts_available)
+                yield sales_item
+
+            if service_available:
+                service_item = self.build_service_item(item)
+                apply_yes_no(Extras.CAR_PARTS, service_item, parts_available)
+                yield service_item
+
+            if not sales_available and not service_available:
+                # Parts-only location
+                if parts_available:
                     apply_category(Categories.SHOP_CAR_PARTS, item)
-            else:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, "Taller" in location_type)
-                apply_yes_no(Extras.CAR_PARTS, item, "Repuestos" in location_type)
-            yield item
+                    yield item
+                else:
+                    self.logger.error(f"Unknown location type: {location_type}, {item['branch']}")
