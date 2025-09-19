@@ -157,8 +157,7 @@ CARDS_MAPPING = {
 # along with other brands, but not all POIs on this page have fuel types and services.
 class MolSpider(scrapy.Spider):
     name = "mol"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_timeout = 90
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 90}
 
     def start_requests(self) -> Iterable[Request]:
         for country in COUNTRIES.values():

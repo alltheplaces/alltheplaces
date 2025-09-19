@@ -14,7 +14,7 @@ class SamsClubSpider(SitemapSpider):
     name = "sams_club"
     item_attributes = {"brand": "Sam's Club", "brand_wikidata": "Q1972120"}
     sitemap_urls = ["https://www.samsclub.com/sitemap_locators.xml"]
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         if response.xpath("//h1/text()").get():

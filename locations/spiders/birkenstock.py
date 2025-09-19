@@ -10,6 +10,7 @@ class BirkenstockSpider(scrapy.Spider):
         "brand_wikidata": "Q648458",
     }
     allowed_domains = ["birkenstock.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         countries = {

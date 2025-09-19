@@ -34,7 +34,7 @@ class PrimarkSpider(SitemapSpider, StructuredDataSpider):
         (r"/sk-sk/stores/[^/]+/[^/]+$", "parse"),
         (r"/en-us/stores/[^/]+/[^/]+$", "parse"),
     ]
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):

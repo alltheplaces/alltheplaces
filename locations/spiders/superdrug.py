@@ -15,8 +15,10 @@ from locations.user_agents import FIREFOX_LATEST
 class SuperdrugSpider(Spider):
     name = "superdrug"
     item_attributes = {"brand": "Superdrug", "brand_wikidata": "Q7643261"}
-    user_agent = FIREFOX_LATEST
-    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
+    custom_settings = {
+        "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
+        "USER_AGENT": FIREFOX_LATEST,
+    }
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(

@@ -18,10 +18,10 @@ class TgjonesGBSpider(SitemapSpider):
     allowed_domains = ["tgjonesonline.co.uk"]
     sitemap_urls = ["https://www.tgjonesonline.co.uk/SiteMap/sitemap-pages.xml"]
     sitemap_rules = [(r"/stores/[-\w]+", "parse")]
-    user_agent = BROWSER_DEFAULT
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {"Host": "www.tgjonesonline.co.uk", "Alt-Used": "www.tgjonesonline.co.uk"},
+        "USER_AGENT": BROWSER_DEFAULT,
     }
     coordinates_pattern = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)")
     skip_auto_cc_domain = True

@@ -13,7 +13,7 @@ class TomWahlsUSSpider(scrapy.Spider):
     item_attributes = {"name": "Tom Wahl's", "brand": "Tom Wahl's", "brand_wikidata": "Q7817965"}
     allowed_domains = ["tomwahls.com"]
     start_urls = ["https://www.tomwahls.com/"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Tom Wahl's has all locations in JSON-LD structured data on the homepage

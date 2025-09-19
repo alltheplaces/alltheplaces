@@ -237,6 +237,23 @@ DAYS_CZ = {
     "Ne": "Su",
 }
 
+DAYS_EE = {
+    "Esmaspäev": "Mo",
+    "Es": "Mo",
+    "Teisipäev": "Tu",
+    "Te": "Tu",
+    "Kolmapäev": "We",
+    "Ko": "We",
+    "Neljapäev": "Th",
+    "Ne": "Th",
+    "Reede": "Fr",
+    "Re": "Fr",
+    "Laupäev": "Sa",
+    "La": "Sa",
+    "Pühapäev": "Su",
+    "Pü": "Su",
+}
+
 DAYS_GR = {
     "Δε": "Mo",
     "Δευτέρα": "Mo",

@@ -14,7 +14,7 @@ class SantanderBRSpider(Spider):
     name = "santander_br"
     item_attributes = {"brand": "Banco Santander", "brand_wikidata": "Q2882087"}
     start_urls = ["https://www.santander.com.br/agencias"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         app_key = chompjs.parse_js_object(
