@@ -22,7 +22,6 @@ class RobertDyasGBSpider(Spider):
     }
     requires_proxy = True
 
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         scripttext = response.xpath('//script[contains(text(), "Astound_StoreLocator")]').get()
         data = re.search(r'(?<="data" : ).*(?=,\s+"template")', scripttext).group(0)
