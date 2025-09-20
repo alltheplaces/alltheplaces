@@ -34,5 +34,5 @@ class RobertDyasGBSpider(Spider):
             item["email"] = location["cs_email"]
             item["opening_hours"] = location["hours"].replace(", ", ";")
             item["branch"] = item.pop("name")
-            apply_category(Categories.SHOP_VARIETY_STORE, item)
+            apply_category(Categories.SHOP_HARDWARE, item)
             yield item
