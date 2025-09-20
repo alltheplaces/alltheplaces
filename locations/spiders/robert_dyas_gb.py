@@ -7,6 +7,7 @@ from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
+from locations.categories import Categories, apply_category
 
 
 class RobertDyasGBSpider(Spider):
@@ -33,4 +34,5 @@ class RobertDyasGBSpider(Spider):
             item["email"] = location["cs_email"]
             item["opening_hours"] = location["hours"].replace(", ", ";")
             item["branch"] = item.pop("name")
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
             yield item
