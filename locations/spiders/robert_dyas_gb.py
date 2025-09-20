@@ -6,6 +6,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class RobertDyasGBSpider(Spider):
@@ -14,9 +15,9 @@ class RobertDyasGBSpider(Spider):
     start_urls = ["https://www.robertdyas.co.uk/storefinder"]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
+        "user_agent": BROWSER_DEFAULT,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.robertdyas.co.uk",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0",
             "DNT": "1",
         },
     }
@@ -31,5 +32,5 @@ class RobertDyasGBSpider(Spider):
             item["street_address"] = item.pop("addr_full")
             item["email"] = location["cs_email"]
             item["opening_hours"] = location["hours"].replace(", ", ";")
-            item["branch"] = item["name"]
+            item["branch"] = item.pop("name")
             yield item
