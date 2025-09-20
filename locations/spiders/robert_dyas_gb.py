@@ -20,6 +20,8 @@ class RobertDyasGBSpider(Spider):
             "DNT": "1",
         },
     }
+    requires_proxy = True
+
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         scripttext = response.xpath('//script[contains(text(), "Astound_StoreLocator")]').get()
