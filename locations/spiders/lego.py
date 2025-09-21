@@ -32,7 +32,7 @@ class LegoSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace("LEGO® Store ", "")
-        #if item["website"] == "store.default.url":# I think this works for all stores
+        # if item["website"] == "store.default.url":# I think this works for all stores
         item["website"] = "https://www.lego.com/stores/store/" + location["urlKey"]
         item["ref"] = location["urlKey"]  # stores have "storeId" field, but it is not unique
 
