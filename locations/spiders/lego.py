@@ -34,7 +34,7 @@ class LegoSpider(JSONBlobSpider):
         item["branch"] = item.pop("name").replace("LEGO® Store ", "")
         if item["website"] == "store.default.url":
             item["website"] = "https://www.lego.com/stores/store/" + location["urlKey"]
-        item["ref"] = item["website"]  # stores have "storeId" field, but it is not unique
+        item["ref"] = location["urlKey"]  # stores have "storeId" field, but it is not unique
 
         item["opening_hours"] = OpeningHours()
         for day in location["openingTimes"]:
