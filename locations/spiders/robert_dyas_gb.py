@@ -14,6 +14,7 @@ class RobertDyasGBSpider(Spider):
     item_attributes = {"brand": "Robert Dyas", "brand_wikidata": "Q7343720"}
     start_urls = ["https://www.robertdyas.co.uk/storefinder"]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Host": "www.robertdyas.co.uk"}}
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         scripttext = response.xpath('//script[contains(text(), "Astound_StoreLocator")]').get()
