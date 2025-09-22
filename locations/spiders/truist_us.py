@@ -1,4 +1,4 @@
-from urllib.parse import urlparse
+import json
 
 from scrapy.spiders import SitemapSpider
 
@@ -27,12 +27,6 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        path = urlparse(response.url).path
-        if path.startswith("/branch/"):
-            apply_category(Categories.BANK, item)
-        elif path.startswith("/atm/"):
-            apply_category(Categories.ATM, item)
-
         # Name is formatted something like:
         # "Truist Somewhere Branch in City, XY, 00000"
         # or
@@ -44,6 +38,20 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
         if i != -1:
             branch = branch[:i]
         item["branch"] = branch
+
+        location_info = json.loads(response.xpath("//@data-location-info").get())
+        item["ref"] = location_info.get("locationKey")
+        if location_info.get("locationType").upper() == "BRANCH":
+            if atm_detail := location_info.get("atmDetail"):
+                atm = item.deepcopy()
+                atm["ref"] = atm_detail[0].get("atmId")
+                atm["phone"] = None
+                atm["opening_hours"] = "24/7"
+                apply_category(Categories.ATM, atm)
+                yield atm
+            apply_category(Categories.BANK, item)
+        elif location_info.get("locationType").upper() == "ATM":
+            apply_category(Categories.ATM, item)
 
         if ld_data["openingHours"] == "24 Hours":
             item["opening_hours"] = "24/7"
