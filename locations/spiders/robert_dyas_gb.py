@@ -7,6 +7,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class RobertDyasGBSpider(Spider):
@@ -19,12 +20,18 @@ class RobertDyasGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         scripttext = response.xpath('//script[contains(text(), "Astound_StoreLocator")]').get()
         data = re.search(r'(?<="data" : ).*(?=,\s+"template")', scripttext).group(0)
-        jsondata = json.loads(data)
-        for location in jsondata["locations"]:
+        pattern = re.compile(r"^(\w\w) (\d\d:\d\d)-(\d\d:\d\d)$")
+        for location in json.loads(data)["locations"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["street_address"] = item.pop("addr_full")
             item["email"] = location["cs_email"]
-            item["opening_hours"] = location["hours"].replace(", ", ";")
-            item["branch"] = item.pop("name")
+
+            item["opening_hours"] = OpeningHours()
+            for rule in location["hours"].split(", "):
+                if m := pattern.match(rule):
+                    item["opening_hours"].add_range(*m.groups())
+
             apply_category(Categories.SHOP_HARDWARE, item)
+
             yield item
