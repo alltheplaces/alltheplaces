@@ -1,11 +1,12 @@
+import re
 from typing import Any
 
-import scrapy
+from scrapy import Selector
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import CLOSED_DE, DAYS_DE, OpeningHours
+from locations.hours import CLOSED_DE, DAYS_DE, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.mcdonalds import McdonaldsSpider
 
@@ -35,17 +36,15 @@ class McdonaldsATSpider(SitemapSpider):
             apply_category(Categories.CAFE, mccafe)
             yield mccafe
 
-        oh = OpeningHours()
+        item["opening_hours"] = OpeningHours()
 
-        selector = scrapy.Selector(text=response.xpath('//div[@id="restaurants"]').get())
+        hours_selector = Selector(text=response.xpath('//div[@id="restaurants"]').get())
 
-        for p in selector.xpath(".//p[string-length(text()) > 0]"):
-            if day := p.xpath("./span/text()").get():
-                day = day.title()
-                if day := DAYS_DE.get(day):
-                    open, close = (p.xpath("text()[1]").get()).split(" - ")
-                    oh.add_range(day, open, close, closed=CLOSED_DE)
-        item["opening_hours"] = oh
+        for rule in hours_selector.xpath(".//p[string-length(text()) > 0]"):
+            day = rule.xpath("./span/text()").get()
+            if day := sanitise_day(day, DAYS_DE):
+                if match := re.search(r"(\d+:\d+).+?(\d+:\d+)", rule.xpath("text()[1]").get("")):
+                    item["opening_hours"].add_range(day, *match.groups(), closed=CLOSED_DE)
 
         apply_yes_no(Extras.DELIVERY, item, "McDelivery Icon" in services)
         apply_yes_no(Extras.DRIVE_THROUGH, item, "McDrive Icon" in services)
