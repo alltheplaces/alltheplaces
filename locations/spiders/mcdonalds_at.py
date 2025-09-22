@@ -19,7 +19,8 @@ class McdonaldsATSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["website"] = item["ref"] = response.url
+        item["website"] = response.url
+        item["ref"] = response.xpath("//@data-id").get()
         item["lat"] = response.xpath("//@data-marker-icon-lat").get()
         item["lon"] = response.xpath("//@data-marker-icon-lng").get()
         item["addr_full"] = response.xpath('//meta[@property="og:title"]/@content').get().removesuffix(" - McDonald’s")
