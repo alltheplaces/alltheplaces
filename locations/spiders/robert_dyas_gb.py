@@ -7,22 +7,13 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class RobertDyasGBSpider(Spider):
     name = "robert_dyas_gb"
     item_attributes = {"brand": "Robert Dyas", "brand_wikidata": "Q7343720"}
     start_urls = ["https://www.robertdyas.co.uk/storefinder"]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "user_agent": BROWSER_DEFAULT,
-        "DEFAULT_REQUEST_HEADERS": {
-            "Host": "www.robertdyas.co.uk",
-            "DNT": "1",
-        },
-    }
-    requires_proxy = True
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Host": "www.robertdyas.co.uk"}}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         scripttext = response.xpath('//script[contains(text(), "Astound_StoreLocator")]').get()
