@@ -64,6 +64,7 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
                 oh.add_ranges_from_string(line)
             item["opening_hours"] = oh
 
+        item["extras"]["fax"] = location_info.get("fax")
         yield item
 
     def extract_amenity_features(self, item, response, ld_item):
