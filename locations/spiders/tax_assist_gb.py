@@ -1,7 +1,9 @@
 from scrapy.linkextractors import LinkExtractor
+from scrapy.http import Response
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
 
 
 class TaxAssistGBSpider(CrawlSpider, StructuredDataSpider):
@@ -15,3 +17,7 @@ class TaxAssistGBSpider(CrawlSpider, StructuredDataSpider):
         for rule in ld_data.get("openingHoursSpecification", []):
             if rule["opens"] == "00:00" and rule["closes"] == "00:00":
                 rule.pop("opens")
+                
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name")
+        yield item
