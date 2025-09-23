@@ -20,7 +20,7 @@ class WalmartUSSpider(Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 5,
+        "DOWNLOAD_DELAY": 7,
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.com/orchestra/home/graphql/nearByNodes"
