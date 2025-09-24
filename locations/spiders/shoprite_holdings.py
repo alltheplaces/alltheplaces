@@ -16,7 +16,7 @@ SHOPRITE_BRANDS = {
         "extras": Categories.SHOP_SUPERMARKET.value,
     },
     "Checkers LiquorShop": {
-        "brand": "Checkers",
+        "brand": "LiquorShop Checkers",
         "brand_wikidata": "Q5089126",
         "extras": Categories.SHOP_ALCOHOL.value,
     },
@@ -63,6 +63,18 @@ COUNTRY_IDS = {
     "205": "SZ",
     "198": "ZA",
     "239": "ZM",
+}
+
+SHOPRITE_STORE_WEBSITES = {
+    "Angola": "https://www.shoprite.co.ao/pt/localizador-de-loja.html?u=",
+    "Botswana": "https://www.shoprite.co.bw/store-locator.html?u=",
+    "Swaziland": "https://www.shoprite.co.sz/store-locator.html?u=",
+    "Ghana": "https://www.shoprite.com.gh/store-locator.html?u=",
+    "Lesotho": "https://www.shoprite.co.ls/store-locator.html?u=",
+    "Malawi": "https://www.shoprite.mw/store-locator.html?u=",
+    "Mozambique": "https://www.shoprite.co.mz/localizador-de-loja.html?u=",
+    "Namibia": "https://www.shoprite.com.na/store-locator.html?u=",
+    "Zambia": "https://www.shoprite.co.zm/store-locator.html?u=",
 }
 
 
@@ -114,6 +126,8 @@ class ShopriteHoldingsSpider(Spider):
                 [location.get("physicalAdd1"), location.get("physicalAdd2"), location.get("physicalAdd3")]
             )
             location["province"] = location.get("physicalProvince")
+            if location.get("province") in ["Swaziland"]:
+                location.pop("province")
 
             # Placeholder postcodes (9000 is used for many NA locations, but is not a valid postcode in NA)
             if location.get("postalCode") in ["0000", "00000", "9000"]:
@@ -156,13 +170,34 @@ class ShopriteHoldingsSpider(Spider):
         yield item
 
     def get_website(self, item):
-        # Checkers/Shoprite ZA redirect to fuller urls, but this seems simpler
+        # Shoprite ZA redirect to fuller urls, but this seems simpler
         # e.g. https://www.shoprite.co.za/Western-Cape/Cape-Town/Durbanville/Shoprite-Durbanville/store-details/1894
         # i.e. /province/city/suburb/brand-branch/ref
-        if item.get("brand") == "Checkers" and item.get("country") == "South Africa":
-            return "https://www.checkers.co.za/store-details/" + item["ref"]
-        if item.get("brand") == "Shoprite" and item.get("country") == "South Africa":
+
+        # LiquorShop Checkers and Shoprite do not have websites in ZA
+        if item.get("brand") in ["Checkers", "Checkers Hyper"] and item.get("country") == "South Africa":
+            return "https://www.checkers.co.za/store-directory-and-leaflets/store-details/" + item["ref"]
+
+        if (
+            item.get("brand") in ["Shoprite", "Shoprite Mini", "Shoprite Hyper"]
+            and item.get("country") == "South Africa"
+        ):
             return "https://www.shoprite.co.za/store-details/" + item["ref"]
-        if item.get("brand") == "Shoprite" and item.get("country") == "Namibia":
-            return f"https://www.shoprite.com.na/store-locator.html?u={item['ref']}&b=Shoprite&c=149"
+
+        if (
+            item.get("brand") in ["Checkers", "Checkers Hyper", "LiquorShop Checkers"]
+            and item.get("country") == "Namibia"
+        ):
+            return "https://www.checkers.com.na/find-a-store.html?u=" + item["ref"]
+
+        if (
+            item.get("brand") in ["Shoprite", "Shoprite Mini", "Shoprite Hyper", "LiquorShop Shoprite"]
+            and item.get("country") in SHOPRITE_STORE_WEBSITES
+        ):
+            return SHOPRITE_STORE_WEBSITES.get(item.get("country")) + item["ref"]
+
+        # Seems to work for all countries, other countries do not have their own websites
+        if item.get("brand") in ["Usave", "Super Usave"]:
+            return "https://www.usave.co.za/store-locator.html?u=" + item["ref"]
+
         return None
