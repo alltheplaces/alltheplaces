@@ -3,7 +3,6 @@ from geonamescache import GeonamesCache
 
 from locations.items import get_lat_lon
 
-
 US_TERRITORIES = {
     "AS": {"code": "AS", "name": "American Samoa"},
     "FM": {"code": "FM", "name": "Micronesia"},

@@ -1,9 +1,9 @@
 import scrapy
 from geonamescache import GeonamesCache
 
-from locations.pipelines.state_clean_up import US_TERRITORIES
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature, set_closed
+from locations.pipelines.state_clean_up import US_TERRITORIES
 
 
 class XfinitySpider(scrapy.Spider):
