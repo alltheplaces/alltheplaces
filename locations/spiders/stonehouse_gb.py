@@ -14,3 +14,4 @@ class StonehouseGBSpider(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["Restaurant"]
+    requires_proxy = True
