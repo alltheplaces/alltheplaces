@@ -1,10 +1,11 @@
-from urllib.parse import urlparse
+import json
 
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TruistUSSpider(SitemapSpider, StructuredDataSpider):
@@ -23,14 +24,9 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["FinancialService", "AutomatedTeller"]
     search_for_twitter = False
     drop_attributes = {"facebook"}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        path = urlparse(response.url).path
-        if path.startswith("/branch/"):
-            apply_category(Categories.BANK, item)
-        elif path.startswith("/atm/"):
-            apply_category(Categories.ATM, item)
-
         # Name is formatted something like:
         # "Truist Somewhere Branch in City, XY, 00000"
         # or
@@ -43,6 +39,20 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
             branch = branch[:i]
         item["branch"] = branch
 
+        location_info = json.loads(response.xpath("//@data-location-info").get())
+        item["ref"] = location_info.get("locationKey")
+        if location_info.get("locationType").upper() == "BRANCH":
+            if atm_detail := location_info.get("atmDetail"):
+                atm = item.deepcopy()
+                atm["ref"] = atm_detail[0].get("atmId")
+                atm["phone"] = None
+                atm["opening_hours"] = "24/7"
+                apply_category(Categories.ATM, atm)
+                yield atm
+            apply_category(Categories.BANK, item)
+        elif location_info.get("locationType").upper() == "ATM":
+            apply_category(Categories.ATM, item)
+
         if ld_data["openingHours"] == "24 Hours":
             item["opening_hours"] = "24/7"
         else:
@@ -54,6 +64,7 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
                 oh.add_ranges_from_string(line)
             item["opening_hours"] = oh
 
+        item["extras"]["fax"] = location_info.get("fax")
         yield item
 
     def extract_amenity_features(self, item, response, ld_item):
