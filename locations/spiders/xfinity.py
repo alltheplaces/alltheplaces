@@ -1,19 +1,9 @@
 import scrapy
 from geonamescache import GeonamesCache
 
+from locations.pipelines.state_clean_up import US_TERRITORIES
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature, set_closed
-
-US_TERRITORIES = {
-    "AS": {"code": "AS", "name": "American Samoa"},
-    "FM": {"code": "FM", "name": "Micronesia"},
-    "GU": {"code": "GU", "name": "Guam"},
-    "MH": {"code": "MH", "name": "Marshall Islands"},
-    "MP": {"code": "MP", "name": "Northern Mariana Islands"},
-    "PW": {"code": "PW", "name": "Palau"},
-    "PR": {"code": "PR", "name": "Puerto Rico"},
-    "VI": {"code": "VI", "name": "U.S. Virgin Islands"},
-}
 
 
 class XfinitySpider(scrapy.Spider):
