@@ -11,14 +11,11 @@ class A1MKSpider(Spider):
 
     def parse(self, response):
         for location in response.json():
-            if not location.get("isOpen"):
-                continue
-            item = DictParser.parse(location)
-            item["branch"] = location["nameMK"]
-
             if location["shopType"]["shopGroup"]["metadata"] != "centers":
                 # Ignore partner stores.
                 continue
+            item = DictParser.parse(location)
+            item["branch"] = location["nameMK"]
             if location.get("code"):
                 item["ref"] = location["code"]
             item["name"] = location.get("nameMK")
