@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -12,30 +12,28 @@ from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 class BurgerKingEGSpider(JSONBlobSpider):
     name = "burger_king_eg"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    start_urls = ["https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0"]
     locations_key = "data"
     stored_items = {}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(
-                url=url,
-                headers={
-                    "solo-concept": "cQhyxA8MVeI",
-                    "accept-language": "en-us",
-                },
-                meta={"language": "en"},
-                dont_filter=True,
-            )
-            yield JsonRequest(
-                url=url,
-                headers={
-                    "solo-concept": "cQhyxA8MVeI",
-                    "accept-language": "ar-sa",
-                },
-                meta={"language": "ar"},
-                dont_filter=True,
-            )
+    async def start(self) -> AsyncIterator[Any]:
+        yield JsonRequest(
+            url="https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0",
+            headers={
+                "solo-concept": "cQhyxA8MVeI",
+                "accept-language": "en-us",
+            },
+            meta={"language": "en"},
+            dont_filter=True,
+        )
+        yield JsonRequest(
+            url="https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0",
+            headers={
+                "solo-concept": "cQhyxA8MVeI",
+                "accept-language": "ar-sa",
+            },
+            meta={"language": "ar"},
+            dont_filter=True,
+        )
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         item["branch"] = location["attributes"]["name"]
