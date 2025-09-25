@@ -36,7 +36,7 @@ class BurgerKingEGSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
-        item["branch"] = location["attributes"]["name"]
+        item["branch"] = location["attributes"]["name"].removeprefix("Burger King").replace("برجر كينج", "").strip(" -")
         item["lat"] = location["attributes"]["lat"]
         item["lon"] = location["attributes"]["long"]
         item["phone"] = location["attributes"]["telephone"]
