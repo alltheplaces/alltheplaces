@@ -21,6 +21,7 @@ class EastOfEnglandCoopSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
+        item["name"] = self.item_attributes["brand"]
         item["branch"] = response.xpath("//h2/text()").get()
         item["street_address"] = response.xpath('//*[@class="flex flex-col gap-1"]/span/text()').get()
         item["city"] = response.xpath('//*[@class="flex flex-col gap-1"]/span[2]/text()').get()
@@ -29,7 +30,15 @@ class EastOfEnglandCoopSpider(SitemapSpider):
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
-        apply_category(Categories.SHOP_SUPERMARKET, item)
+        if "post-office" in response.url:
+            apply_category(Categories.POST_OFFICE, item)
+        elif "food" in response.url:
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif "travel" in response.url:
+            apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+        elif "funerals" in response.url:
+            apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
+
         oh = OpeningHours()
         for day_time in response.xpath('//*[@class="flex flex-col items-center gap-1.5"]//li'):
             day = day_time.xpath(".//span[1]/text()").get()
