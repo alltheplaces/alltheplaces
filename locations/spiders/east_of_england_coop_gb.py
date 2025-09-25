@@ -9,8 +9,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class EastOfEnglandCoopSpider(SitemapSpider):
-    name = "east_of_england_coop"
+class EastOfEnglandCoopGBSpider(SitemapSpider):
+    name = "east_of_england_coop_gb"
     EAST_OF_ENGLAND_COOP = {"brand": "East of England CO-OP", "brand_wikidata": "Q5329759"}
     COOP_DAILY = {"brand": "Co-op Daily", "brand_wikidata": "Q107589681"}
     sitemap_urls = ["https://www.eastofengland.coop/sitemap.xml"]
@@ -22,8 +22,7 @@ class EastOfEnglandCoopSpider(SitemapSpider):
         item["street_address"] = response.xpath('//*[@class="flex flex-col gap-1"]/span/text()').get()
         item["city"] = response.xpath('//*[@class="flex flex-col gap-1"]/span[2]/text()').get()
         item["postcode"] = response.xpath('//*[@class="flex flex-col gap-1"]/span[3]/text()').get()
-        item["addr_full"] = ",".join([item["street_address"], item["city"], item["postcode"]])
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        item["phone"] = response.xpath('//*[contains(@href, "tel:")]/text()').get()
         item["ref"] = item["website"] = response.url
 
         extract_google_position(item, response)
