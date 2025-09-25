@@ -1,8 +1,10 @@
-from scrapy.http import JsonRequest
+from typing import Iterable
+
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS, OpeningHours
-from locations.items import get_merged_item
+from locations.items import Feature, get_merged_item
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -14,7 +16,7 @@ class BurgerKingEGSpider(JSONBlobSpider):
     locations_key = "data"
     stored_items = {}
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,
@@ -35,7 +37,7 @@ class BurgerKingEGSpider(JSONBlobSpider):
                 dont_filter=True,
             )
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         item["branch"] = location["attributes"]["name"]
         item["lat"] = location["attributes"]["lat"]
         item["lon"] = location["attributes"]["long"]
@@ -47,12 +49,10 @@ class BurgerKingEGSpider(JSONBlobSpider):
         apply_yes_no(Extras.DELIVERY, item, location["attributes"]["delivery-enabled"] == 1, False)
         apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"]["is-drive-thru-enabled"], False)
 
-        item["opening_hours"] = OpeningHours()
-        if location["attributes"]["open-24-hours"]:
-            item["opening_hours"] = "Mo-Su 00:00-24:00"
-        elif location["attributes"]["opening-hours"] is not None:
-            for day in location["attributes"]["opening-hours"]:
-                item["opening_hours"].add_range(DAYS[day["day"]], day["open"], day["closed"])
+        try:
+            item["opening_hours"] = self.parse_opening_hours(location)
+        except:
+            self.logger.error("Failed to parse opening hours {}".format(location["attributes"].get("opening-hours")))
 
         if item["ref"] in self.stored_items:
             other_item = self.stored_items.pop(item["ref"])
@@ -62,3 +62,12 @@ class BurgerKingEGSpider(JSONBlobSpider):
                 yield get_merged_item({"en": other_item, "ar": item}, "ar")
         else:
             self.stored_items[item["ref"]] = item
+
+    def parse_opening_hours(self, location: dict) -> OpeningHours:
+        oh = OpeningHours()
+        if location["attributes"]["open-24-hours"]:
+            oh = "Mo-Su 00:00-24:00"
+        elif location["attributes"]["opening-hours"] is not None:
+            for rule in location["attributes"]["opening-hours"]:
+                oh.add_range(DAYS[int(rule["day"])], rule["open"], rule["closed"])
+        return oh
