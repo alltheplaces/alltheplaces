@@ -1,5 +1,6 @@
 import json
 from typing import Any
+from urllib.parse import urljoin
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -20,7 +21,8 @@ class FlightCentreAUSpider(Spider):
             if location.get("geo_location"):
                 location.update(location.pop("geo_location"))
             item = DictParser.parse(location)
-            item["website"] = "https://www.flightcentre.com.au/stores/" + location["slug"]
+            item["branch"] = item.pop("name").removeprefix("Flight Centre ")
+            item["website"] = urljoin("https://www.flightcentre.com.au/stores/", location["slug"])
             oh = OpeningHours()
             for day_time in location["opening_hours"]:
                 if day_time["closed"]:
