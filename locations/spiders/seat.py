@@ -89,9 +89,10 @@ class SeatSpider(scrapy.Spider):
             item["state"] = store.get("federalState")
             offers = store.get("contracts", {})
             # Locations in ME have country property equal to RS
-            if result := reverse_geocoder.get((item.get("lat"), item.get("lon")), mode=1, verbose=False):
-                if item["country"] != result["cc"] and item["country"] == "RS":
-                    item["country"] = result["cc"]
+            if item.get("lat") and item.get("lon"):
+                if result := reverse_geocoder.get((item["lat"], item["lon"]), mode=1, verbose=False):
+                    if item["country"] != result["cc"] and item["country"] == "RS":
+                        item["country"] = result["cc"]
             if offers.get("sales"):
                 yield self.build_categorized_item(item, Categories.SHOP_CAR)
             if offers.get("service"):
