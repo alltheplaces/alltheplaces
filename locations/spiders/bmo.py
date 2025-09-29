@@ -100,7 +100,7 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand_wikidata"]
             elif item["name"] == "Costco":
-                item["located_in"] = COSTCO_SHARED_ATTRIBUTES["brand"]
+                item["located_in"] = "Costco"
                 item["located_in_wikidata"] = COSTCO_SHARED_ATTRIBUTES["brand_wikidata"]
             elif item["name"] == "CVS":
                 item["located_in"] = CVS_BRANDS["CVS Pharmacy"]["brand"]
