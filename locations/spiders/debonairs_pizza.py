@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Request, Response
@@ -24,6 +25,7 @@ class DebonairsPizzaSpider(GoReviewApiSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
+        item["addr_full"] = re.sub(r",\s*0+\s*,", ",", item["addr_full"])  # Clean invalid postcodes e.g. 00000
         item["branch"] = item.pop("name").removeprefix("Debonairs Pizza ")
         attributes = [attribute["value"] for attribute in feature["attributes"]]
 
