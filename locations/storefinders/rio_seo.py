@@ -31,8 +31,11 @@ class RioSeoSpider(Spider):
     radius: int = 20038
     template: str = "domain"
 
-    def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(f"{self.end_point}/api/getAutocompleteData", callback=self.parse_autocomplete)
+    async def start(self) -> Iterable[Request]:
+        yield JsonRequest(
+            f"{self.end_point}/api/getAutocompleteData?template={self.template}&level={self.template}",
+            callback=self.parse_autocomplete,
+        )
 
     def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
         yield JsonRequest(
