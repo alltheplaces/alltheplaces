@@ -13,6 +13,7 @@ class ArmaguardAUSpider(scrapy.Spider):
     start_urls = [
         "https://app.ehoundplatform.com/api/1.3/proximity_search?output=json&lat=-33.867139&lon=151.207114&count=5000&priority_distance=undefined&priority_filters=undefined&priority_logic=undefined&log_type=web&create_log=true&api_key=a34dcb3a0c98793&custom_logic=undefined&user_selection=undefined&ch=7203"
     ]
+    download_timeout = 120
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for atm in response.json()["record_set"]:
