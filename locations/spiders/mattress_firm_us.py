@@ -11,6 +11,9 @@ class MattressFirmUSSpider(Where2GetItSpider):
     drop_attributes = {"email"}
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
+    def pre_process_data(self, location):
+        location.pop("location")
+
     def parse_item(self, item, location, **kwargs):
         # Apply basic information common to each brand
         apply_category(Categories.SHOP_BED, item)
