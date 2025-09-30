@@ -11,6 +11,7 @@ class ValeroSpider(scrapy.Spider):
     usa_bbox = [-125, 24, -65, 51]
     xstep = 5
     ystep = 3
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def make_search(self, xmin, ymin, xmax, ymax):
         return scrapy.FormRequest(
