@@ -77,6 +77,7 @@ class WPStoreLocatorSpider(Spider):
     days: dict = None
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
+    area_field_filter: list[str] = None
     search_radius: int = 0
     max_results: int = 0
     possible_days: list[dict] = DAYS_BY_FREQUENCY
@@ -145,7 +146,7 @@ class WPStoreLocatorSpider(Spider):
         specifying centroids.
         """
         for searchable_points_file in self.searchable_points_files:
-            for lat, lon in point_locations(searchable_points_file):
+            for lat, lon in point_locations(searchable_points_file, self.area_field_filter):
                 if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
                     for domain in self.allowed_domains:
                         yield JsonRequest(
@@ -173,7 +174,7 @@ class WPStoreLocatorSpider(Spider):
             self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
 
             if len(features) >= self.max_results:
-                raise RuntimeError(
+                self.logger.error(
                     "Locations have probably been truncated due to max_results (or more) features being returned by a single geographic radius search. Use a smaller search_radius."
                 )
 

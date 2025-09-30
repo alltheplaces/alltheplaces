@@ -1,24 +1,19 @@
-from typing import Any
-
-import scrapy
-from scrapy.http import Response
-
-from locations.dict_parser import DictParser
+from locations.hours import DAYS_EN
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class CookoutUSSpider(scrapy.Spider):
+class CookoutUSSpider(WPStoreLocatorSpider):
     name = "cookout_us"
     item_attributes = {"brand": "Cook Out", "brand_wikidata": "Q5166992"}
-    start_urls = [
-        "https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat=40.71278&lng=-74.00597&max_results=500&search_radius=1000"
-    ]
+    allowed_domains = ["cookout.com"]
+    searchable_points_files = ["us_centroids_50mile_radius_state.csv"]
+    area_field_filter = ["AL", "GA", "KY", "MD", "MS", "NC", "SC", "TN", "VA", "WV"]
+    search_radius = 50
+    max_results = 50
+    days = DAYS_EN
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json():
-            if store.get("coming_soon"):
-                continue
-            item = DictParser.parse(store)
-            item["street_address"] = item.pop("addr_full")
-            item["branch"] = store.get("store")
-            item["website"] = "https://cookout.com/locations/"
-            yield item
+    def post_process_item(self, item, response, store):
+        if store.get("coming_soon"):
+            return
+        item["branch"] = item.pop("name")
+        yield item
