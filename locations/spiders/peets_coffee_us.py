@@ -43,7 +43,7 @@ class PeetsCoffeeUSSpider(StockistSpider):
 
         features = {feature["name"] for feature in location["filters"]}
         apply_yes_no(PaymentMethods.CONTACTLESS, item, "Contactless Payments" in features)
-        apply_yes_no("payment:gift_card", item, "Accepts Peet's Cards" in features)
+        apply_yes_no(PaymentMethods.GIFT_CARD, item, "Accepts Peet's Cards" in features)
         apply_yes_no(Extras.BREAKFAST, item, "Warm Breakfast" in features)
         apply_yes_no(Extras.WIFI, item, "Free Wi-Fi" in features)
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in features)

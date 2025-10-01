@@ -5,7 +5,7 @@ from typing import Any, Iterable
 import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -30,9 +30,9 @@ class CoffeeFellowsSpider(scrapy.Spider):
             item["opening_hours"] = self.format_opening_hours(location)
             if opening_date := location.get("openingDate"):
                 item["extras"]["start_date"] = opening_date.replace("T00:00:00.000Z", "")
-            apply_yes_no("payment:credit_cards", item, location["hasCreditCard"])
-            apply_yes_no("outdoor_seating", item, location["hasSeatsOutside"])
-            apply_yes_no("wheelchair", item, location["isAccessible"])
+            apply_yes_no(PaymentMethods.CREDIT_CARDS, item, location["hasCreditCard"])
+            apply_yes_no(Extras.OUTDOOR_SEATING, item, location["hasSeatsOutside"])
+            apply_yes_no(Extras.WHEELCHAIR, item, location["isAccessible"])
 
             apply_category(Categories.CAFE, item)
 
