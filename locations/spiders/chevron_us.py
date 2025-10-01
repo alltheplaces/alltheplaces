@@ -22,7 +22,7 @@ BRANDS = {
 BOTH_SERVICES_MAPPING = {
     # 'emgood'
     "restroom": Extras.TOILETS,
-    "giftcard": "payment:gift_card",
+    "giftcard": PaymentMethods.GIFT_CARD,
     "mobilepmt": PaymentMethods.CONTACTLESS,
     "amznlocker": "post_office:parcel_pickup",
     "deliver": Extras.DELIVERY,
