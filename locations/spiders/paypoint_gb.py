@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
+from locations.geo import postal_regions
 from locations.hours import DAYS_FULL, OpeningHours
 
 
@@ -15,13 +15,13 @@ class PaypointGBSpider(Spider):
     custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_TIMEOUT": 120}
 
     def start_requests(self) -> Iterable[JsonRequest]:
-        for city in city_locations("GB", 15000):
+        for city in postal_regions("GB"):
             yield JsonRequest(
                 url="https://www.paypoint.com/umbraco/surface/StoreLocatorSurface/StoreLocator",
                 data={
                     "searchCriteria": f'{city["latitude"]},{city["longitude"]}',
-                    "product": "ATM",  # null values for product/siteServices returns lower count for ATMs
-                    "siteServices": "ATM",
+                    "product": "null",  # null values for product/siteServices returns lower count for ATMs
+                    "siteServices": "null",
                     "searchType": 6,
                 },
                 callback=self.parse_locations,
