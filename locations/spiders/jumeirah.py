@@ -18,7 +18,7 @@ class JumeirahSpider(StructuredDataSpider):
                 if hotels := item.get("fields", {}).get("items", []):
                     for hotel in hotels:
                         yield Request(
-                            url=response.urljoin(hotel.get("Hotel CTA Link").replace("\u002F", "/")),
+                            url=response.urljoin(hotel.get("Hotel CTA Link").replace("\u002f", "/")),
                             callback=self.parse_sd,
                         )
 
