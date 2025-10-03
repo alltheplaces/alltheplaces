@@ -7,7 +7,6 @@ from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class MilkyLaneZASpider(SitemapSpider):
