@@ -15,7 +15,6 @@ class MilkyLaneZASpider(SitemapSpider):
     item_attributes = {"brand": "Milky Lane", "brand_wikidata": "Q128223693"}
     sitemap_urls = ["https://locations.milkylane.co.za/site-map.xml"]
     sitemap_rules = [("https://locations.milkylane.co.za/restaurants-", "parse")]
-    user_agent = BROWSER_DEFAULT
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
