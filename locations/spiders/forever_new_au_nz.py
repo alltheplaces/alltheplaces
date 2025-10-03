@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 FOREVER_NEW_SHARED_ATTRIBUTES = {"brand": "Forever New", "brand_wikidata": "Q119221929"}
 
@@ -15,12 +16,21 @@ class ForeverNewAUNZSpider(JSONBlobSpider):
         "https://www.forevernew.com.au/locator/index/search/?longitude=0&latitude=0&radius=100000&type=all",
         "https://www.forevernew.co.nz/locator/index/search/?longitude=0&latitude=0&radius=100000&type=all",
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+    }
     locations_key = ["results", "results"]
+    requires_proxy = True
 
     def start_requests(self):
         for url in self.start_urls:
-            yield JsonRequest(url=url)
+            yield JsonRequest(
+                url=url,
+                headers={
+                    "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+                    "user-agent": BROWSER_DEFAULT,
+                },
+            )
 
     def post_process_item(self, item, response, location):
         # Ignore locations which are embedded within a Myer department store.
