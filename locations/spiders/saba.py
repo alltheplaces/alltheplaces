@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from h11 import Response
+from scrapy.http import Response
 
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.items import Feature
