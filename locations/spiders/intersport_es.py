@@ -22,7 +22,10 @@ class IntersportESSpider(scrapy.Spider):
             store["website"] = "https://www.intersport.es/tiendas?idStore=" + str(store["ref"])
             item = DictParser.parse(store)
             if "business_hours" in store and store["business_hours"] is not None:
-                item["opening_hours"] = self.parse_opening_hours(store["business_hours"])
+                try:
+                    item["opening_hours"] = self.parse_opening_hours(store["business_hours"])
+                except:
+                    self.logger.error("Failed to parse opening hours: {}".format(store["business_hours"]))
             yield item
 
     def parse_opening_hours(self, hours_definition):
