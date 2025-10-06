@@ -19,28 +19,7 @@ class BeSTBruAddressesBESpider(BeSTAddressesBESpider):
     ]
 
     def post_process_item(self, item: Feature, row: dict) -> Feature:
-        # Brussels has `<fr> - <nl>` convention for naming:
-        # https://wiki.openstreetmap.org/wiki/WikiProject_Belgium/Conventions/Street_names
-
-        fr_city = row.get("municipality_name_fr")
-        nl_city = row.get("municipality_name_nl")
-        if fr_city and nl_city:
-            item["city"] = f"{fr_city} - {nl_city}"
-        else:
-            item["city"] = fr_city or nl_city
-
-        fr_street = row.get("streetname_fr")
-        nl_street = row.get("streetname_nl")
-        if fr_street and nl_street:
-            item["street"] = f"{fr_street} - {nl_street}"
-        else:
-            item["street"] = fr_street or nl_street
-
-        fr_postname = row.get("postname_fr")
-        nl_postname = row.get("postname_nl")
-        if fr_postname and nl_postname:
-            item["extras"]["addr:district"] = f"{fr_postname} - {nl_postname}"
-        else:
-            item["extras"]["addr:district"] = fr_postname or nl_postname
-
+        item["city"] = row.get("municipality_name_fr") or row.get("municipality_name_nl")
+        item["street"] = row.get("streetname_fr") or row.get("streetname_nl")
+        item["extras"]["addr:district"] = row.get("postname_fr") or row.get("postname_nl")
         return item
