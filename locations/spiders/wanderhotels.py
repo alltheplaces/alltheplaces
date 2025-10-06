@@ -13,13 +13,13 @@ class WanderhotelsSpider(SitemapSpider):
 
     def parse(self, response, **kwargs):
         item = Feature()
-        item["ref"] = item["website"] = response.url
+        item["ref"] = item["extras"]["brand:website"] = response.url
         item["branch"] = response.xpath("//@data-hotelname").get().replace("Wanderhotel ", "")
         item["addr_full"] = merge_address_lines(response.xpath('//*[@class="singleHotel__street"]/text()').getall())
         item["country"] = response.xpath('//*[@class="singleHotel__region"]/span[1]/text()').get()
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/text()').get()
         item["email"] = response.xpath('//a[contains(@href, "mailto")]/text()').get()
         item["extras"]["fax"] = merge_address_lines(response.xpath('//*[contains(@class, "fax")]/text()').getall())
-        item["extras"]["website_2"] = response.xpath('//a[contains(@id, "hotelWebsite")]/@href').get()
+        item["website"] = response.xpath('//a[contains(@id, "hotelWebsite")]/@href').get()
         apply_category(Categories.HOTEL, item)
         yield item
