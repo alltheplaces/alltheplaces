@@ -30,9 +30,7 @@ class BoRentNLSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_tool_rental_locations",
         ),
         Rule(
-            LinkExtractor(
-                allow="//self-storage/filialen/[^/]+$", restrict_xpaths='//*[@class="col-xs-6 singlemarker"]'
-            ),
+            LinkExtractor(allow="/self-storage/filialen/", restrict_xpaths='//*[@class="stretched-link"]'),
             callback="parse_self_storage_locations",
         ),
     ]
@@ -44,6 +42,8 @@ class BoRentNLSpider(CrawlSpider, StructuredDataSpider):
         item["lon"] = re.search(
             r"lon\s*=\s*(\d+\.\d+),", response.xpath('//*[contains(text(),"markersArray")]/text()').get()
         ).group(1)
+        # TODO: remove below line when category is added to NSI for this brand
+        item["nsi_id"] = "N/A"
         apply_category(Categories.CAR_RENTAL, item)
         yield item
 
