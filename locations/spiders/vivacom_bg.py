@@ -24,6 +24,7 @@ class VivacomBGSpider(Spider):
                 continue
 
             item = DictParser.parse(store)
+            item["name"] = None
             item["lat"] = store["latitude"]
             item["lon"] = store["longitude"]
 
