@@ -1,10 +1,9 @@
-from copy import deepcopy
 from typing import Any
 
 import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
@@ -13,7 +12,6 @@ class MitsubishiPESpider(scrapy.Spider):
     name = "mitsubishi_pe"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
     start_urls = ["https://www.mitsubishi-motors.com.pe/concesionarios"]
-    no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for value in response.xpath('//*[@id="dep"]//option//@value').getall():
@@ -21,18 +19,6 @@ class MitsubishiPESpider(scrapy.Spider):
                 url="https://www.mitsubishi-motors.com.pe/concesionarios?tipo=todos&dep={}".format(value),
                 callback=self.parse_details,
             )
-
-    def build_sales_item(self, item):
-        sales_item = deepcopy(item)
-        sales_item["ref"] = f"{item['ref']}-sales"
-        apply_category(Categories.SHOP_CAR, sales_item)
-        return sales_item
-
-    def build_service_item(self, item):
-        service_item = deepcopy(item)
-        service_item["ref"] = f"{item['ref']}-service"
-        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-        return service_item
 
     def parse_details(self, response, **kwargs):
         for location in response.xpath('//*[@class="block-concesionario"]'):
@@ -43,25 +29,19 @@ class MitsubishiPESpider(scrapy.Spider):
             extract_google_position(item, location)
             location_type = location.xpath(".//ul//li").xpath("normalize-space()").getall()
 
-            sales_available = "Concesionario" in location_type
-            service_available = "Taller" in location_type
-            parts_available = "Repuestos" in location_type
-
-            if sales_available:
-                sales_item = self.build_sales_item(item)
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
-                apply_yes_no(Extras.CAR_PARTS, sales_item, parts_available)
-                yield sales_item
-
-            if service_available:
-                service_item = self.build_service_item(item)
-                apply_yes_no(Extras.CAR_PARTS, service_item, parts_available)
-                yield service_item
-
-            if not sales_available and not service_available:
-                # Parts-only location
-                if parts_available:
-                    apply_category(Categories.SHOP_CAR_PARTS, item)
-                    yield item
-                else:
-                    self.logger.error(f"Unknown location type: {location_type}, {item['branch']}")
+            for dept in location_type:
+                if dept == "Concesionario":
+                    sales_item = item.deepcopy()
+                    sales_item["ref"] = sales_item["branch"] + "-SALES"
+                    apply_category(Categories.SHOP_CAR, sales_item)
+                    yield sales_item
+                elif dept == "Taller":
+                    service_item = item.deepcopy()
+                    service_item["ref"] = service_item["branch"] + "-SERVICE"
+                    apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                    yield service_item
+                elif dept == "Repuestos":
+                    spare_parts_item = item.deepcopy()
+                    spare_parts_item["ref"] = spare_parts_item["branch"] + "-SPARE_PARTS"
+                    apply_category(Categories.SHOP_CAR_PARTS, spare_parts_item)
+                    yield spare_parts_item
