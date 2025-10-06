@@ -11,7 +11,7 @@ class AesopSpider(CrawlSpider, StructuredDataSpider):
     name = "aesop"
     item_attributes = {"brand": "Aesop", "brand_wikidata": "Q4688560"}
     start_urls = ["https://www.aesop.com/stores/all"]
-    rules = [Rule(LinkExtractor(allow=r"/stores/"), callback="parse_sd", follow=True)]
+    rules = [Rule(LinkExtractor(allow="/stores/"), callback="parse_sd", follow=True)]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
