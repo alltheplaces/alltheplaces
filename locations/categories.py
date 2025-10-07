@@ -578,6 +578,7 @@ class Extras(Enum):
     BARBECUES = "bbq"
     BREAKFAST = "breakfast"
     BRUNCH = "brunch"
+    BODY_REPAIR = "service:vehicle:body_repair"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
     CAR_PARTS = "service:vehicle:car_parts"
