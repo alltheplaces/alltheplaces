@@ -30,19 +30,21 @@ class MaseratiSpider(scrapy.Spider):
             item["email"] = row["emailAddr"]
             item["name"] = row["dealername"]
 
-            if row.get("sales"):
+            is_service = row.get("assistance") == "true" or row.get("autoBodyShop") == "true"
+
+            if row.get("sales") == "true":
                 sales_item = item.deepcopy()
                 sales_item["ref"] = f"{item['ref']}-sales"
                 apply_category(Categories.SHOP_CAR, sales_item)
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, row.get("assistance") or row.get("autoBodyShop"))
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, is_service)
                 self.parse_hours(sales_item, row.get("opening_hours", []))
                 yield sales_item
 
-            if row.get("assistance"):
+            if is_service:
                 service_item = item.deepcopy()
                 service_item["ref"] = f"{item['ref']}-service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                apply_yes_no(Extras.BODY_REPAIR, service_item, row.get("autoBodyShop"))
+                apply_yes_no(Extras.BODY_REPAIR, service_item, row.get("autoBodyShop") == "true")
                 self.parse_hours(service_item, row.get("service_opening_hours", []))
                 yield service_item
 
