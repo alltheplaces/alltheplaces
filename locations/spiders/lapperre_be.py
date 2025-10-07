@@ -30,5 +30,6 @@ class LapperreBESpider(SitemapSpider, StructuredDataSpider):
         ld_data["openingHours"] = rules
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image")
         apply_category(Categories.SHOP_HEARING_AIDS, item)
         yield item
