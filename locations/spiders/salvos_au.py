@@ -13,7 +13,9 @@ class SalvosAUSpider(SitemapSpider):
     sitemap_rules = [("/stores/", "parse")]
 
     def parse(self, response):
-        store_data = json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())["props"]["pageProps"].get("store")
+        store_data = json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())["props"]["pageProps"].get(
+            "store"
+        )
         if store_data.get("StoreID"):
             item = DictParser.parse(store_data)
             item["website"] = response.url
