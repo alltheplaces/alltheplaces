@@ -1,4 +1,5 @@
 import json
+import re
 
 from scrapy import Request, Spider
 
@@ -19,6 +20,9 @@ class YogurtlandSpider(Spider):
     def start_requests(self):
         yield self._make_request()
 
+    def repair_times(self, time_str):
+        return re.sub(r"(\d{2})(\d{2})", r"\1:\2", time_str)
+
     def parse(self, response):
         for location in response.json()["locations"]:
             item = DictParser.parse(location["Location"])
@@ -32,7 +36,9 @@ class YogurtlandSpider(Spider):
             for day, times in zip(DAYS_3_LETTERS_FROM_SUNDAY, hours):
                 if times["isActive"]:
                     try:
-                        oh.add_range(day, times["timeFrom"], times["timeTill"])
+                        time_from = self.repair_times(times["timeFrom"])
+                        time_till = self.repair_times(times["timeTill"])
+                        oh.add_range(day, time_from, time_till)
                     except ValueError as e:
                         self.logger.exception(e)
                         oh = None

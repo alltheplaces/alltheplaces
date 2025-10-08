@@ -10,7 +10,7 @@ from locations.dict_parser import DictParser
 
 class ConcentraUSSpider(Spider):
     name = "concentra_us"
-    item_attributes = {"brand": "Concentra", "brand_wikidata": "Q5158304"}
+    item_attributes = {"operator": "Concentra", "operator_wikidata": "Q5158304"}
     allowed_domains = ["concentra.com"]
     start_urls = [
         "https://www.concentra.com/sxa/search/results/?s={449ED3CA-26F3-4E6A-BF21-9808B60D936F}&itemid={739CBD3C-A3B6-4CA2-8004-BF6005BB28E9}&v={D907A7FD-050F-4644-92DC-267C1FDE200C}&g=&p=250&e="

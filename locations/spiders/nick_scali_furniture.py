@@ -10,7 +10,7 @@ from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 class NickScaliFurnitureSpider(AmastyStoreLocatorSpider):
     name = "nick_scali_furniture"
-    item_attributes = {"brand": "Nick Scali Furniture", "brand_wikidata": "Q17053453"}
+    item_attributes = {"brand": "Nick Scali", "brand_wikidata": "Q17053453"}
     allowed_domains = ["www.nickscali.com.au", "www.nickscali.co.nz"]
 
     def start_requests(self) -> Iterable[Request]:

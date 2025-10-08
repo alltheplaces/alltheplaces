@@ -1,4 +1,5 @@
 from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -12,10 +13,19 @@ class LAndLHawaiianBarbecueUSSpider(Spider):
         "brand_wikidata": "Q6455441",
         "extras": Categories.FAST_FOOD.value | {"cuisine": "hawaiian", Extras.TAKEAWAY.value: "yes"},
     }
-    start_urls = ["https://www.hawaiianbarbecue.com/page-data/sq/d/1339288897.json"]
+    start_urls = ["https://www.hawaiianbarbecue.com/page-data/locations/page-data.json"]
 
     def parse(self, response):
-        for location in response.json()["data"]["allPrismicLocation"]["nodes"]:
+        for q in response.json()["staticQueryHashes"]:
+            yield JsonRequest(
+                f"https://www.hawaiianbarbecue.com/page-data/sq/d/{q}.json", callback=self.parse_locations
+            )
+
+    def parse_locations(self, response):
+        for location in response.json().get("data", {}).get("allPrismicLocation", {}).get("nodes", []):
+            if "uid" not in location:
+                continue
+
             item = DictParser.parse(
                 {
                     k: list(v.values())[0] if isinstance(v, dict) and len(v) == 1 else v

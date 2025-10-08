@@ -7,11 +7,11 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class AldiSudIESpider(SitemapSpider, StructuredDataSpider):
     name = "aldi_sud_ie"
-    item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171672", "country": "IE"}
+    item_attributes = {"brand": "Aldi", "brand_wikidata": "Q41171672", "country": "IE"}
     allowed_domains = ["aldi.ie"]
     sitemap_urls = ["https://stores.aldi.ie/sitemap.xml"]
     sitemap_rules = [(r"https://stores\.aldi\.ie/[^/]+/[^/]+/[^/]+$", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("ALDI ")

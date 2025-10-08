@@ -6,9 +6,10 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class RebelArchitetteSpider(JSONBlobSpider):
     name = "rebel_architette"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 200}
     start_urls = ["https://www.rebelarchitette.it/"]
     no_refs = True
+    requires_proxy = True
 
     def extract_json(self, response):
         cdata = response.xpath('//script[contains(text(), "var eltdMultipleMapVars = ")]/text()').get()

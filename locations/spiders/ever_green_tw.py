@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class EverGreenTWSpider(Spider):
     name = "ever_green_tw"
-    item_attributes = {"brand": "Ever Green", "brand_wikidata": "Q126369781"}
+    item_attributes = {"brand_wikidata": "Q126369781"}
     start_urls = ["https://www.ai-drugstore.com/store-locations"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

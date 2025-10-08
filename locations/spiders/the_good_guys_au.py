@@ -1,7 +1,7 @@
 import chompjs
 import scrapy
 
-from locations.hours import DAYS_FULL
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -9,36 +9,22 @@ class TheGoodGuysAUSpider(StructuredDataSpider):
     name = "the_good_guys_au"
     item_attributes = {"brand": "The Good Guys", "brand_wikidata": "Q7737217"}
     allowed_domains = ["www.thegoodguys.com.au"]
-    start_urls = ["https://www.thegoodguys.com.au/store-locator"]
-    time_format = "%I:%M%p"
+    start_urls = ["https://www.thegoodguys.com.au/stores"]
 
     def parse(self, response):
-        data_json = chompjs.parse_js_object(response.xpath('//div[@id="allStoreJson"]/text()').extract_first())
-        for store in data_json["locations"]:
-            yield scrapy.Request(store["url"], self.parse_sd)
-
-    def pre_process_data(self, ld_data, **kwargs):
-        # Linked data on the page deviates from specifications and
-        # therefore needs correcting prior to being parsed.
-        coordinates = "".join(ld_data.pop("geo").split())
-        ld_data["geo"] = {
-            "@type": "GeoCoordinates",
-            "latitude": coordinates.split(",")[0],
-            "longitude": coordinates.split(",")[1],
-        }
-        oh_spec = ld_data.pop("OpeningHoursSpecification", [])
-        days_to_find = DAYS_FULL.copy()
-        for day in oh_spec:
-            day_name = day["dayOfWeek"].replace("http://schema.org/", "")
-            if day_name in DAYS_FULL:
-                days_to_find.remove(day_name)
-        for day in oh_spec:
-            if day["dayOfWeek"].replace("http://schema.org/", "") == "Today":
-                day["dayOfWeek"] = "http://schema.org/" + days_to_find[0]
-        ld_data["openingHoursSpecification"] = oh_spec
+        data_json = chompjs.parse_js_object(
+            response.xpath('//*[contains(text(),"allStoresData")]/text()').extract_first()
+        )
+        for store in data_json["state"]["loaderData"]["routes/stores._index"]["allStoresData"]["stores"]:
+            yield scrapy.Request(
+                url="https://www.thegoodguys.com.au/stores/" + store["storeUrl"], callback=self.parse_sd
+            )
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item.pop("facebook")
-        item.pop("image")
-
+        item["opening_hours"] = OpeningHours()
+        for day_time in ld_data["openingHoursSpecification"]:
+            day = day_time["dayOfWeek"].replace("http://schema.org/", "")
+            open_time = day_time["opens"]
+            close_time = day_time["closes"]
+            item["opening_hours"].add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
         yield item

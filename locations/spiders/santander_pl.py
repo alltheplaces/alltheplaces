@@ -10,9 +10,7 @@ from locations.items import Feature
 class SantanderPLSpider(Spider):
     name = "santander_pl"
     item_attributes = {"brand": "Santander", "brand_wikidata": "Q806653"}
-    # The "20000000000000" needs to be a valid date time, but it seems it's just there to stop the page being cached by
-    # the CDN. We always get the same data.
-    start_urls = ["https://www.santander.pl/_js_places/time20000000000000/places.js"]
+    start_urls = ["https://www.santander.pl/_js_places/places.js"]
 
     def parse(self, response, **kwargs):
         data = chompjs.parse_js_object(response.text)

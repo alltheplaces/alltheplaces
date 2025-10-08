@@ -59,7 +59,7 @@ POSTALS = [
 
 class DishSpider(scrapy.Spider):
     name = "dish"
-    item_attributes = {"brand": "Dish", "brand_wikidata": "Q1199757"}
+    item_attributes = {"brand": "DISH", "brand_wikidata": "Q1199757"}
     allowed_domains = ["webapps.dish.com"]
 
     def start_requests(self):

@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class MilliesGBSpider(Spider):
     name = "millies_gb"
-    item_attributes = {"brand": "Millie's", "brand_wikidata": "Q1935533"}
+    item_attributes = {"brand": "Millie's Cookies", "brand_wikidata": "Q1935533"}
     allowed_domains = ["www.milliescookies.com"]
     start_urls = [
         "https://www.milliescookies.com/api/n/bundle?requests=[{%22type%22:%22store%22,%22filter%22:{},%22verbosity%22:1,%22action%22:%22find%22,%22children%22:[{%22_reqId%22:0}]}]"

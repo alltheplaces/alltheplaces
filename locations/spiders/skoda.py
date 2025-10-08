@@ -4,7 +4,7 @@ import reverse_geocoder
 import scrapy
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -94,7 +94,7 @@ class SkodaSpider(scrapy.Spider):
 
             if store.get("HasSales"):
                 apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no("service:vehicle:car_repair", item, store.get("HasServices"), True)
+                apply_yes_no(Extras.CAR_REPAIR, item, store.get("HasServices"), True)
                 apply_yes_no("second_hand", item, "UsedCarSales" in store["Sales"], True)
             elif store.get("HasServices"):
                 apply_category(Categories.SHOP_CAR_REPAIR, item)

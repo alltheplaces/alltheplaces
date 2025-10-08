@@ -10,6 +10,7 @@ class MoneygramSpider(Where2GetItSpider):
     api_brand_name = "moneygram"
     api_key = "46493320-D5C3-11E1-A25A-4A6F97B4DA77"
     api_filter_admin_level = 1
+    api_limit = 60000
     custom_settings = {
         "DOWNLOAD_WARNSIZE": 134217728,  # 128 MiB needed as some results are ~ 90 MiB
         "DOWNLOAD_TIMEOUT": 60,  # Some countries have large result sets and responses are slow

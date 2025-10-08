@@ -10,10 +10,7 @@ from locations.items import Feature
 
 class EasyfitnessDESpider(scrapy.Spider):
     name = "easyfitness_de"
-    item_attributes = {
-        "brand": "EasyFitness",
-        "brand_wikidata": "Q106166703",
-    }
+    item_attributes = {"brand": "EasyFitness", "brand_wikidata": "Q106166703"}
 
     def start_requests(self):
         point_files = "eu_centroids_20km_radius_country.csv"
@@ -31,6 +28,7 @@ class EasyfitnessDESpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
         for data in response.json()["list"]:
             item = DictParser.parse(data)
+            item["branch"] = item.pop("name").removeprefix("EASYFITNESS ")
             item["ref"] = data["link"].rstrip("/").split("/")[-1]
             item["postcode"], item["city"] = data.get("city").split(" ", maxsplit=1)
             item["street_address"] = item.pop("street")

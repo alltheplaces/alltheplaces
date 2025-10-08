@@ -10,6 +10,7 @@ class ParisBaguetteCASpider(StatSpider):
     start_urls = ["https://parisbaguette.ca/stat/api/locations/search?limit=20000&fields=displayname_displaynameline1"]
 
     def post_process_item(self, item, response, store):
-        item["ref"] = re.search(r"\((\d+C)\)", item["ref"]).group(1)
+        if match := re.search(r"\((\d+C)\)", item["ref"]):
+            item["ref"] = match.group(1)
         item["branch"] = store["displayFields"]["displayname_displaynameline1"]
         yield item

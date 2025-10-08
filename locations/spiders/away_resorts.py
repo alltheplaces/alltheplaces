@@ -1,36 +1,21 @@
-import re
-
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.linked_data_parser import LinkedDataParser
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class AwayResortsSpider(CrawlSpider):
+class AwayResortsSpider(CrawlSpider, StructuredDataSpider):
     name = "away_resorts"
-    item_attributes = {
-        "brand": "Away Resorts",
-        "brand_wikidata": "Q108045050",
-    }
+    item_attributes = {"brand": "Away Resorts", "brand_wikidata": "Q108045050"}
     start_urls = ["https://www.awayresorts.co.uk/parks/"]
-    url_regex = r"https:\/\/www\.awayresorts\.co\.uk\/parks\/([-\w]+)\/([-\w]+)\/$"
-    rules = [
-        Rule(
-            link_extractor=LinkExtractor(
-                allow=url_regex,
-            ),
-            callback="parse_item",
-        ),
-    ]
+    rules = [Rule(LinkExtractor(r"parks/[^/]+/([^/]+)/$"), callback="parse")]
+    wanted_types = ["Resort"]
 
-    def parse_item(self, response):
-        item = LinkedDataParser.parse(response, "Resort")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["addr_full"] = item.pop("street_address")
 
-        if item:
-            item["ref"] = re.match(self.url_regex, item["website"]).group(2)
-
-            item["addr_full"] = item["street_address"].replace("\r\n", ", ")
-            item["street_address"] = None
-            apply_category(Categories.LEISURE_RESORT, item)
-            return item
+        apply_category(Categories.LEISURE_RESORT, item)
+        yield item

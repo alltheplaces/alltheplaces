@@ -11,7 +11,7 @@ class Mitre10NZSpider(Spider):
     item_attributes = {"brand": "Mitre 10", "brand_wikidata": "Q6882394"}
     allowed_domains = ["ccapi.mitre10.co.nz"]
     start_urls = [
-        "https://ccapi.mitre10.co.nz/mitre10webservices/v2/mitre10/geolocation/store-locator?fields=FULL&page=0&pageSize=1000&storeCode=28&lang=en&curr=NZD"
+        "https://ccapi.mitre10.co.nz/occ/v2/mitre10/geolocation/store-locator?fields=FULL&page=0&pageSize=1000&storeCode=28&lang=en&curr=NZD"
     ]
     requires_proxy = "NZ"
 

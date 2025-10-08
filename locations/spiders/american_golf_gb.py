@@ -1,38 +1,33 @@
-from typing import Any
+import json
+import re
+from typing import Any, Iterable
 
 from scrapy.http import Response
-from scrapy.spiders import Spider
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AmericanGolfGBSpider(Spider):
+class AmericanGolfGBSpider(JSONBlobSpider):
     name = "american_golf_gb"
     item_attributes = {"brand": "American Golf", "brand_wikidata": "Q62657494"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [
-        "https://www.americangolf.co.uk/on/demandware.store/Sites-AmericanGolf-GB-Site/en_GB/Stores-GetAllStores"
+        "https://www.americangolf.co.uk/en/find-stores/",
     ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["stores"]:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
-            item["website"] = response.urljoin(location["detailsLink"])
+    def extract_json(self, response: Response, **kwargs: Any) -> Any:
+        raw_data = json.loads(
+            re.search(
+                r"channel\":(\[.*\])}},\"content",
+                response.xpath('//*[contains(text(),"address1")]/text()').get().replace("\\", ""),
+            ).group(1)
+        )
+        return raw_data
 
-            if location.get("storeHours"):
-                item["opening_hours"] = OpeningHours()
-                for day in map(str.lower, DAYS_FULL):
-                    try:
-                        day_hours = location["storeHours"][day].strip()
-                        if "CLOSED" in day_hours.upper():
-                            item["opening_hours"].set_closed(day)
-                        else:
-                            item["opening_hours"].add_range(day, *day_hours.split(" - "))
-                    except:
-                        continue
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["addr_full"] = feature["listAddress"]
+        item["street_address"] = merge_address_lines([feature["address1"], feature["address2"]])
+        yield item

@@ -1,8 +1,9 @@
 from scrapy import Request, Spider
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 
 
 class CadillacUSSpider(Spider):
@@ -43,19 +44,12 @@ class CadillacUSSpider(Spider):
         self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
 
         for data in locations:
-            item = Feature()
+            data.update(data.pop("address"))
+            item = DictParser.parse(data)
             item["ref"] = data.get("dealerCode")
             item["name"] = data.get("dealerName")
             item["website"] = data.get("dealerUrl")
             item["phone"] = data.get("generalContact", {}).get("phone1")
-            item["street_address"] = data.get("address", {}).get("addressLine1")
-            item["lat"] = data.get("geolocation", {}).get("latitude")
-            item["lon"] = data.get("geolocation", {}).get("longitude")
-            item["postcode"] = data.get("address", {}).get("postalCode")
-            item["city"] = data.get("address", {}).get("cityName")
-            item["state"] = data.get("address", {}).get("countrySubdivisionCode")
-            item["country"] = data.get("address", {}).get("countryIso")
-
             oh = OpeningHours()
             for value in data.get("generalOpeningHour"):
                 for day in value.get("dayOfWeek"):
@@ -67,4 +61,8 @@ class CadillacUSSpider(Spider):
                     )
             item["opening_hours"] = oh.as_opening_hours()
 
+            apply_category(Categories.SHOP_CAR, item)
+            departments = [dept.get("name") for dept in data.get("departments", [])]
+            apply_yes_no(Extras.CAR_PARTS, item, "Parts" in departments)
+            apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments)
             yield item

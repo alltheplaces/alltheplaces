@@ -25,18 +25,15 @@ class TagHeuerSpider(AlgoliaSpider):
         item["website"] = f"https://www.tagheuer.com/{slug}"
 
         oh = OpeningHours()
-        if feature["openingHours"]:
+        if hours_data := feature.get("openingHours"):
             for j in range(7):
                 if j == 6:
                     i = 0
                 else:
                     i = j + 1
-                try:
-                    oh.add_range(
-                        DAYS[j], feature["openingHours"][str(i)][0]["start"], feature["openingHours"][str(i)][0]["end"]
-                    )
-                except:
-                    self.logger.error("No opening hour on day")
+                if times_data := hours_data.get(str(i)):
+                    oh.add_range(DAYS[j], times_data[0]["start"], times_data[0]["end"])
             item["opening_hours"] = oh
 
+        item["street_address"] = item.pop("addr_full", None)
         yield item

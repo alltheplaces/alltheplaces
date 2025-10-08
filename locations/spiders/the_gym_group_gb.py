@@ -10,7 +10,7 @@ from locations.items import Feature
 class TheGymGroupGBSpider(Spider):
     name = "the_gym_group_gb"
     item_attributes = {
-        "brand": "The Gym Group",
+        "brand": "The Gym",
         "brand_wikidata": "Q48815022",
         "country": "GB",
     }

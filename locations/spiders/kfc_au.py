@@ -6,6 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class KfcAUSpider(scrapy.Spider):
@@ -15,6 +16,7 @@ class KfcAUSpider(scrapy.Spider):
     tenant_id = "afd3813afa364270bfd33f0a8d77252d"
     web_root = "https://www.kfc.com.au/restaurants/"
     requires_proxy = True  # Requires AU proxy, possibly residential IPs only.
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         yield JsonRequest(

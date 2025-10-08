@@ -16,7 +16,7 @@ wochentag = {
 
 class AdegSpider(scrapy.Spider):
     name = "adeg"
-    item_attributes = {"brand": "ADEG Österreich", "brand_wikidata": "Q290211"}
+    item_attributes = {"brand": "ADEG", "brand_wikidata": "Q290211"}
     allowed_domains = ["adeg.at"]
 
     def start_requests(self):

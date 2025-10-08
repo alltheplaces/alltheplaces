@@ -1,9 +1,11 @@
 import locale
 import re
+from typing import Any, Iterable
 
 import scrapy
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.country_utils import CountryUtils
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -12,32 +14,38 @@ from locations.hours import DAYS, OpeningHours
 # Although API url appears to be covering EU only, but actually scrapes multiple non EU countries as well.
 class NissanSpider(scrapy.Spider):
     name = "nissan"
-    item_attributes = {"brand": "Nissan", "brand_wikidata": "Q20165", "extras": Categories.SHOP_CAR.value}
+    BRANDS = {
+        "nissan": {"brand": "Nissan", "brand_wikidata": "Q20165"},
+        "infiniti": {"brand": "Infiniti", "brand_wikidata": "Q29714"},
+    }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._countries = CountryUtils().gc.get_countries_by_names()
 
-    def start_requests(self):
-        for loc in locale.locale_alias.keys():
-            if not re.fullmatch("[a-z]{2}_[a-z]{2}", loc):
-                continue
-            loc = loc[:3] + loc[3:].upper()
-            yield scrapy.Request(
-                url=f"https://eu.nissan-api.net/v2/publicAccessToken?locale={loc}&scope=READ&proxy=*&brand=nissan&environment=prod",
-                headers={"origin": "https://www.nissan-global.com"},
-                callback=self.parse_token,
-            )
+    def start_requests(self) -> Iterable[JsonRequest]:
+        for brand in self.BRANDS:
+            for loc in locale.locale_alias.keys():
+                if not re.fullmatch("[a-z]{2}_[a-z]{2}", loc):
+                    continue
+                loc = loc[:3] + loc[3:].upper()
+                yield JsonRequest(
+                    url=f"https://eu.nissan-api.net/v2/publicAccessToken?locale={loc}&scope=READ&proxy=*&brand={brand}&environment=prod",
+                    headers={"origin": "https://www.nissan-global.com"},
+                    callback=self.parse_token,
+                    cb_kwargs={"brand": brand},
+                )
 
-    def parse_token(self, response, **kwargs):
+    def parse_token(self, response: Response, brand: str) -> Any:
         token = response.json()["access_token"]
-        yield scrapy.Request(
+        yield JsonRequest(
             url="https://eu.nissan-api.net/v2/dealers?size=-1&include=openingHours",
             headers={"accesstoken": f"Bearer {token}"},
             callback=self.parse_dealers,
+            cb_kwargs={"brand": brand},
             dont_filter=True,
         )
 
-    def parse_dealers(self, response, **kwargs):
+    def parse_dealers(self, response: Response, brand: str) -> Any:
         for dealer in response.json()["dealers"]:
             dealer["id"] = dealer.pop("dealerId")
             item = DictParser.parse(dealer)
@@ -46,6 +54,7 @@ class NissanSpider(scrapy.Spider):
             for w in dealer["contact"].get("websites", []):
                 item["website"] = w.get("url")
                 break
+
             oh = OpeningHours()
             for day in dealer.get("openingHours", {}).get("regularOpeningHours", []):
                 for interval in day.get("openIntervals", []):
@@ -57,6 +66,9 @@ class NissanSpider(scrapy.Spider):
                         time_format="%H:%M",
                     )
             item["opening_hours"] = oh
+
+            item.update(self.BRANDS[brand])
+            apply_category(Categories.SHOP_CAR, item)
             yield item
 
     @staticmethod

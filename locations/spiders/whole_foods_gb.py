@@ -15,7 +15,7 @@ class WholeFoodsGBSpider(Spider):
     no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("//@data-block-json").getall():
+        for location in response.xpath("//@data-context").getall():
             location = json.loads(location)["location"]
             item = Feature()
             item["lat"] = location["markerLat"]

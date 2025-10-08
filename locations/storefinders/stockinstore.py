@@ -28,10 +28,10 @@ from locations.items import Feature
 
 class StockInStoreSpider(Spider):
     dataset_attributes = {"source": "api", "api": "stockinstore.com"}
-    api_site_id: str = None
-    api_widget_id: str = None
-    api_widget_type: str = None
-    api_origin: str = None
+    api_site_id: str = ""
+    api_widget_id: str = ""
+    api_widget_type: str = ""
+    api_origin: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):

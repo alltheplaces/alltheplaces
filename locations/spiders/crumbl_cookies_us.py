@@ -15,11 +15,12 @@ class CrumblCookiesUSSpider(Spider):
 
     def parse(self, response):
         next_build_id = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
+
         url = f"https://crumblcookies.com/_next/data/{next_build_id}/en-US/stores.json"
         yield JsonRequest(url=url, callback=self.parse_api)
 
     def parse_api(self, response, **kwargs):
-        for location in response.json()["pageProps"]["stores"]:
+        for location in response.json()["pageProps"]["allActiveStores"]:
             item = DictParser.parse(location)
             item["website"] = urljoin("https://crumblcookies.com/", location["slug"])
             item["opening_hours"] = OpeningHours()

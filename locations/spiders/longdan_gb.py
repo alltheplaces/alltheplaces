@@ -14,8 +14,10 @@ class LongdanGBSpider(StoreLocatorWidgetsSpider):
         item["name"] = re.sub(r"\s+", " ", html.unescape(item["name"]))
         if "Longdan" not in location["filters"]:
             return
-        hours_raw = re.sub(r"\s+", " ", location["data"]["description"]).replace("Daily", "Mon - Sun")
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_raw)
+
+        if opening_times := location["data"].get("description"):
+            hours_raw = re.sub(r"\s+", " ", opening_times).replace("Daily", "Mon - Sun")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_raw)
         item.pop("website")
         yield item

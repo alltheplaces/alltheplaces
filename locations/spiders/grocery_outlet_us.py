@@ -17,8 +17,8 @@ class GroceryOutletUSSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["street_address"] = item.pop("addr_full")
+            item["branch"] = item.pop("name", None)
+            item["street_address"] = item.pop("addr_full", None)
             item["ref"] = location["store_number"]
             item["extras"]["start_date"] = location["open_date"]
             item["facebook"] = location["fb_url"]

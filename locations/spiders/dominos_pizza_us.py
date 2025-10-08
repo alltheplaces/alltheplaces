@@ -1,31 +1,18 @@
-import json
-import re
-from urllib.parse import unquote
-
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class DominosPizzaUSSpider(SitemapSpider, StructuredDataSpider):
+class DominosPizzaUSSpider(YextAnswersSpider):
     name = "dominos_pizza_us"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    allowed_domains = ["dominos.com"]
-    sitemap_urls = ["https://pizza.dominos.com/robots.txt"]
-    sitemap_rules = [(r"com/[^/]+/[^/]+/[^/]+$", "parse")]
-    wanted_types = ["FoodEstablishment"]
+    endpoint = "https://prod-cdn.us.yextapis.com/v2/accounts/me/search/vertical/query"
+    experience_key = "locator"
+    api_key = "db579cbf33dcf239cfae2d4466f5ce59"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if response.url == "https://pizza.dominos.com/new-york/new-york/61-ninth-avenue":
+    def parse_item(self, location, item):
+        item["website"] = location["c_pagesURL"]
+        if item["website"] == "https://pizza.dominos.com/new-york/new-york/61-ninth-avenue":
             return  # "Test Location"
 
-        item["image"] = None
-
-        if m := re.search(r"decodeURIComponent\(\"(.+)\"\)", response.text):
-            data = json.loads(unquote(m.group(1)))
-            item["ref"] = str(data["document"]["id"])
-            item["extras"]["ref:google"] = data["document"].get("googlePlaceId")
-            item["lat"] = data["document"]["yextDisplayCoordinate"]["latitude"]
-            item["lon"] = data["document"]["yextDisplayCoordinate"]["longitude"]
+        item["extras"].pop("website:menu", None)
 
         yield item

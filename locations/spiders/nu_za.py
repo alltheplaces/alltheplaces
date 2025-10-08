@@ -6,10 +6,7 @@ from locations.storefinders.go_review import GoReviewSpider
 
 class NuZASpider(GoReviewSpider):
     name = "nu_za"
-    item_attributes = {
-        "brand": "Nü",
-        "brand_wikidata": "Q130400175",
-    }
+    item_attributes = {"brand": "Nü Health Food", "brand_wikidata": "Q130400175"}
     start_urls = ["https://nu.goreview.co.za/store-locator/"]
 
     def start_requests(self):

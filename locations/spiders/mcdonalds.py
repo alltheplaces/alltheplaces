@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_FULL, OpeningHours
@@ -95,6 +95,13 @@ class McdonaldsSpider(scrapy.Spider):
                 store_url = "https://www.mcdonalds.com/"
 
             item = DictParser.parse(properties)
+            item["branch"] = (
+                (item.pop("name") or "")
+                .removeprefix("MCDONALD'S RESTAURANT -")
+                .removeprefix("McDonald's")
+                .removeprefix("Mcdonalds")
+                .strip()
+            )
             item["ref"] = store_identifier
             item["website"] = store_url
             item["street_address"] = clean_address([properties.get("addressLine1"), properties.get("addressLine2")])
@@ -110,8 +117,18 @@ class McdonaldsSpider(scrapy.Spider):
             apply_yes_no(Extras.WIFI, item, "WIFI" in filter_type)
             apply_yes_no(Extras.DELIVERY, item, "MCDELIVERYSERVICE" in filter_type)
 
+            if "MCCAFE" in filter_type:
+                mccafe = item.deepcopy()
+                mccafe["ref"] = "{}-mccafe".format(item["ref"])
+                mccafe["brand"] = "McCafé"
+                mccafe["brand_wikidata"] = "Q3114287"
+                apply_category(Categories.CAFE, mccafe)
+                yield mccafe
+
             if hours := self.store_hours(properties.get("restauranthours")):
                 item["opening_hours"] = hours
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
 

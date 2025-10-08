@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 
 class KristOilUSSpider(Spider):
     name = "krist_oil_us"
-    item_attributes = {"brand": "Krist Oil", "brand_wikidata": "Q77885501"}
+    item_attributes = {"brand": "Krist", "brand_wikidata": "Q77885501"}
     allowed_domains = ["kristoil.com"]
     start_urls = ["https://kristoil.com/wp-content/themes/krist-2020-jan13v2/ajax/map.php"]
 

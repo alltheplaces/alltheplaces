@@ -2,14 +2,21 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+
+AVALON_BRANDS = {
+    "AVA": "Q134707069",
+    "Avalon": "Q64665938",
+    "Kanso": "Q64665938",
+    "eaves": "Q134707069",
+}
 
 
 class AvalonUSSpider(SitemapSpider):
     name = "avalon_us"
-    item_attributes = {"brand": "Avalon", "brand_wikidata": "Q64665938"}
+    item_attributes = {"operator": "AvalonBay", "operator_wikidata": "Q4827537"}
     sitemap_urls = [
         "https://www.avaloncommunities.com/arc/outboundfeeds/avb-sitemap/?outputType=xml&_website=avalon-communities"
     ]
@@ -22,15 +29,15 @@ class AvalonUSSpider(SitemapSpider):
         location = json.loads(script[start:end])
         item = DictParser.parse(location)
         item["ref"] = location["communityId"]
-        item["brand"] = location["classification"]
+        item["brand"] = location.get("classification")
+        item["brand_wikidata"] = AVALON_BRANDS.get(item["brand"], "Q64665938")
         item["image"] = response.css("img.communitybanner-img::attr(src)").get()
 
-        oh = OpeningHours()
-        for line in location["officeHours"]:
-            oh.add_ranges_from_string(line)
-        item["extras"]["opening_hours:office"] = oh.as_opening_hours()
-
-        features = {f["icon"].removesuffix(".svg") for f in location["features"]}
+        features = {}
+        for f in location["features"]:
+            if f.get("icon"):
+                icon = f["icon"].removesuffix(".svg")
+                features[icon] = icon
         apply_yes_no(Extras.AIR_CONDITIONING, item, "/attribute-icons/airconditioning" in features)
         apply_yes_no(Extras.AIR_CONDITIONING, item, "airconditioning" in features)
         apply_yes_no(Extras.WHEELCHAIR, item, "adaaccessible" in features)
@@ -41,5 +48,13 @@ class AvalonUSSpider(SitemapSpider):
         apply_yes_no(Extras.SWIMMING_POOL, item, "pool" in features)
         if "smokefree" in features:
             apply_yes_no(Extras.SMOKING, item, False, False)
+
+        oh = OpeningHours()
+        if opening_data := location.get("officeHours"):
+            for line in opening_data:
+                oh.add_ranges_from_string(line)
+            item["extras"]["opening_hours:office"] = oh.as_opening_hours()
+
+        apply_category(Categories.RESIDENTIAL_APARTMENTS, item)
 
         yield item

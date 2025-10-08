@@ -19,7 +19,7 @@ class IsmashGBSpider(Spider):
             item["addr_full"] = location["address"]
             item["email"] = location["contact_email"]
             item["phone"] = location["contact_phone"]
-            item["extras"]["ref:google"] = location["googleID"]
+            item["extras"]["ref:google:place_id"] = location["googleID"]
             item["ref"] = location["id"]
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]

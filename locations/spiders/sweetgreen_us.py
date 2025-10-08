@@ -55,5 +55,6 @@ class SweetgreenUSSpider(Spider):
                 item["image"] = location["location"]["imageUrl"]
             item["website"] = "https://order.sweetgreen.com/" + location["location"]["slug"] + "/"
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(location["location"]["storeHours"])
+            if opening_times := location["location"]["storeHours"]:
+                item["opening_hours"].add_ranges_from_string(opening_times)
             yield item

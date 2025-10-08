@@ -9,11 +9,11 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class RonaSpider(SitemapSpider):
     name = "rona"
-    item_attributes = {"brand": "RONA", "brand_wikidata": "Q3415283"}
+    item_attributes = {"brand": "Rona", "brand_wikidata": "Q3415283"}
     allowed_domains = ["www.rona.ca"]
     sitemap_urls = ["https://www.rona.ca/sitemap-stores-en.xml"]
     sitemap_rules = [("/store/", "parse_store")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
     def parse_hours(self, hours):

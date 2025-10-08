@@ -1,5 +1,7 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -7,19 +9,13 @@ from locations.user_agents import BROWSER_DEFAULT
 class SixtSpider(SitemapSpider, StructuredDataSpider):
     name = "sixt"
     item_attributes = {"brand": "SIXT", "brand_wikidata": "Q705664"}
-    sitemap_urls = ["https://www.sixt.co.uk/xml-sitemaps/branch.xml"]
+    sitemap_urls = ["https://www.sixt.co.uk/sitemap_index.xml"]
     sitemap_rules = [(r"\/car-hire\/[-\w]+\/[-\w]+\/[-\w]+\/$", "parse_sd")]
-    user_agent = BROWSER_DEFAULT
-    drop_attributes = {"image"}
-    search_for_twitter = False
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    sitemap_follow = ["/car-hire/"]
+    skip_auto_cc_domain = True
 
-    def pre_process_data(self, ld_data, **kwargs):
-        if not ld_data["address"].get("addressCountry"):
-            ld_data["address"]["addressCountry"] = ld_data["address"].pop("addressRegion")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["country"] = item.pop("state")
 
-    def post_process_item(self, item, response, ld_data):
-        if "|" in item["name"]:
-            item["branch"] = item.pop("name").split("|")[0].replace("Car Hire", "").strip()
-        else:
-            item["branch"] = item.pop("name")
         yield item

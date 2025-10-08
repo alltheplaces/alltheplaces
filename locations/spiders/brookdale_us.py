@@ -7,7 +7,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class BrookdaleUSSpider(Spider):
     name = "brookdale_us"
-    item_attributes = {"brand": "Brookdale", "brand_wikidata": "Q4974387"}
+    item_attributes = {"operator": "Brookdale Senior Living", "operator_wikidata": "Q4974387"}
     allowed_domains = ["www.brookdale.com"]
     start_urls = [
         "https://www.brookdale.com/bin/brookdale/search/global?fq=(contentCategory%3Alocations)&bq=(contentType%3Acommunity^0.025)&pt=43.0389025%2C-87.9064736&d=100000&rows=10000"

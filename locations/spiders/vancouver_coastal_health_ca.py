@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 
 class VancouverCoastalHealthCASpider(Spider):
     name = "vancouver_coastal_health_ca"
-    item_attributes = {"brand": "Vancouver Coastal Health", "brand_wikidata": "Q7914144"}
+    item_attributes = {"operator": "Vancouver Coastal Health", "operator_wikidata": "Q7914144"}
     start_urls = ["https://www.vch.ca/en/find-location"]
 
     CATEGORIES = {

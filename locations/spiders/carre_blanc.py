@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class CarreBlancSpider(CrawlSpider, StructuredDataSpider):
     name = "carre_blanc"
-    item_attributes = {"brand": "Carré blanc", "brand_wikidata": "Q55596025"}
+    item_attributes = {"brand": "Carré Blanc", "brand_wikidata": "Q55596025"}
     start_urls = ["http://boutiques.carreblanc.com/"]
     rules = [
         # Example: https://boutiques.carreblanc.com/linge-de-maison/montlucon/MON

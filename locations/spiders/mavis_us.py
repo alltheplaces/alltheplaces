@@ -33,8 +33,8 @@ class MavisUSSpider(JSONBlobSpider):
     def extract_json(self, response: Response) -> list:
         stores = []
         for state_wise_stores_list in chompjs.parse_js_object(
-            (chompjs.parse_js_object(response.xpath('//script[contains(text(),"fullAddress")]/text()').get())[-1])
-        )[-1]["children"][-1]["stores"].values():
+            chompjs.parse_js_object(response.xpath('//script[contains(text(),"fullAddress")]/text()').get())[-1]
+        )[-1][-1]["children"][-1]["stores"].values():
             stores.extend(state_wise_stores_list)
         return stores
 

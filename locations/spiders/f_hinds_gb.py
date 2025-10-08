@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class FHindsGBSpider(StructuredDataSpider):
     name = "f_hinds_gb"
-    item_attributes = {"brand": "F Hinds", "brand_wikidata": "Q5423915"}
+    item_attributes = {"brand": "F.Hinds", "brand_wikidata": "Q5423915"}
     start_urls = [
         "https://www.fhinds.co.uk/store-locator?view_all=true",
     ]

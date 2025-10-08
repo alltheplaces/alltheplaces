@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.audi import AudiSpider
 from locations.spiders.seat import SeatSpider
@@ -31,7 +31,8 @@ class VolkswagenBESpider(Spider):
             brand = location.get("BRAND")
             item["ref"] = item["ref"] + brand  # update ref to avoid dropping same location for different brands
             if brand_info := self.BRANDS.get(brand):
-                item.update(brand_info)
+                item["brand"] = brand_info["brand"]
+                item["brand_wikidata"] = brand_info["brand_wikidata"]
             item["lat"] = location.get("GPSLAT")
             item["lon"] = location.get("GPSLONG")
             item["street_address"] = item.pop("addr_full")
@@ -42,5 +43,5 @@ class VolkswagenBESpider(Spider):
                 apply_yes_no("second_hand", item, item["brand"] == "My Way")
             else:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
-            apply_yes_no("service:vehicle:car_repair", item, location.get("APRESVENTE"))  # After Sale
+            apply_yes_no(Extras.CAR_REPAIR, item, location.get("APRESVENTE"))  # After Sale
             yield item

@@ -66,14 +66,15 @@ class BuildersSpider(Spider):
             item.pop("website", None)
 
             item["opening_hours"] = OpeningHours()
-            for day_hours in location["openingHours"]["weekDayOpeningList"]:
-                if day_hours["closed"]:
-                    continue
-                item["opening_hours"].add_range(
-                    day_hours["weekDay"],
-                    day_hours["openingTime"]["formattedHour"],
-                    day_hours["closingTime"]["formattedHour"],
-                    "%I:%M %p",
-                )
+            if location_hours := location.get("openingHours"):
+                for day_hours in location_hours.get("weekDayOpeningList"):
+                    if day_hours["closed"]:
+                        continue
+                    item["opening_hours"].add_range(
+                        day_hours["weekDay"],
+                        day_hours["openingTime"]["formattedHour"],
+                        day_hours["closingTime"]["formattedHour"],
+                        "%I:%M %p",
+                    )
 
             yield item

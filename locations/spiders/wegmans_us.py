@@ -1,56 +1,37 @@
-import re
+from typing import Iterable
 
-from scrapy import Request, Spider
+from scrapy.http import Request, Response
 
-from locations.categories import Categories, Extras, apply_yes_no
-from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class WegmansUSSpider(Spider):
+class WegmansUSSpider(JSONBlobSpider):
     name = "wegmans_us"
-    item_attributes = {"brand": "Wegmans", "brand_wikidata": "Q11288478", "extras": Categories.SHOP_SUPERMARKET.value}
-    allowed_domains = ["shop.wegmans.com", "www.wegmans.com"]
-    start_urls = ["https://shop.wegmans.com/api/v2/stores"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    item_attributes = {"brand": "Wegmans", "brand_wikidata": "Q11288478"}
+    allowed_domains = ["www.wegmans.com"]
+    start_urls = ["https://www.wegmans.com/api/stores"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # Non-existent robots.txt results in HTML page that cannot be parsed
 
-    def parse(self, response):
-        for location in response.json()["items"]:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name", None)
-            item["street_address"] = clean_address(
-                [
-                    location["address"].get("address1"),
-                    location["address"].get("address2"),
-                    location["address"].get("address3"),
-                ]
-            )
-            if location.get("amenities"):
-                apply_yes_no(Extras.WIFI, item, "Wi-Fi Internet Access" in location["amenities"], False)
-            apply_yes_no(Extras.DELIVERY, item, location.get("has_delivery") is True, False)
-            if location.get("external_url"):
-                item["website"] = location["external_url"]
-                if item["website"][-1] != "/":
-                    item["website"] = item["website"] + "/"
-                yield Request(url=item["website"], meta={"item": item}, callback=self.parse_opening_hours)
-            else:
-                yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
+        if feature["openState"] != "Open":
+            return
+        item["ref"] = str(feature["storeNumber"])
+        item["branch"] = item.pop("name", None)
+        item["website"] = "https://www.wegmans.com/stores/" + feature["slug"]
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+        item["extras"]["start_date"] = feature["openingDate"].split("T", 1)[0]
+        yield Request(url=item["website"], meta={"item": item}, callback=self.parse_opening_hours)
 
-    def parse_opening_hours(self, response):
+    def parse_opening_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
-        hours_string = response.xpath('//div[@id="storeHoursID"]/text()').get("").strip().replace("Midnight", "11:59PM")
-        if m := re.match(
-            r"Open (\d{1,2}(?:\:\d{2})?\s*AM) to (\d{1,2}(?:\:\d{2})?\s*PM)\s*,\s*7 Days a Week",
-            hours_string,
-            flags=re.IGNORECASE,
-        ):
+        hours_string = response.xpath('//div[contains(@class, "content-block-hours")]/p/text()').get()
+        if hours_string:
+            hours_string = hours_string.upper().removeprefix("OPEN").strip()
+            if hours_string.endswith(", 7 DAYS A WEEK"):
+                hours_string = "Mon-Sun: " + hours_string.split(", 7 DAYS A WEEK", 1)[0]
             item["opening_hours"] = OpeningHours()
-            open_time = re.sub(r"\s+", "", m.group(1))
-            if ":" not in open_time:
-                open_time = open_time.replace("AM", ":00AM").replace("PM", ":00PM")
-            close_time = re.sub(r"\s+", "", m.group(2))
-            if ":" not in close_time:
-                close_time = close_time.replace("AM", ":00AM").replace("PM", ":00PM")
-            item["opening_hours"].add_days_range(DAYS, open_time, close_time, "%I:%M%p")
+            item["opening_hours"].add_ranges_from_string(hours_string)
         yield item

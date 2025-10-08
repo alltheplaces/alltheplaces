@@ -54,7 +54,7 @@ class StockistSpider(Spider):
         if failure.check(HttpError):
             if failure.value.response.status == 400:
                 if "error" in failure.value.response.json().keys():
-                    if failure.value.response.json()["error"] == "Method unavailable.":
+                    if failure.value.response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
                         yield Request(
                             url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
                         )

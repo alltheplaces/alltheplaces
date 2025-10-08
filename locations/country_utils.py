@@ -28,6 +28,7 @@ class CountryUtils:
         "luxemburg (groothertogdom)": "LU",
         "belgie": "BE",
         "u s a": "US",
+        "deutschland": "DE",
     }
 
     def to_iso_alpha2_country_code(self, country_str):
@@ -62,7 +63,7 @@ class CountryUtils:
         # Finally let's go digging in the random country string collection!
         return self.UNHANDLED_COUNTRY_MAPPINGS.get(country_name)
 
-    def _convert_to_iso2_country_code(self, splits):
+    def _convert_to_iso2_country_code(self, splits: list[str]) -> str | None:
         if len(splits) > 0 and len(splits[-1]) == 2:
             candidate = splits[-1].upper()
             if self.gc.get_countries().get(candidate):
@@ -71,11 +72,17 @@ class CountryUtils:
                 return "GB"
         return None
 
-    def country_code_from_spider_name(self, spider_name):
+    def country_code_from_spider_name(self, spider_name: str) -> str | None:
         if isinstance(spider_name, str):
-            splits = [split for split in spider_name.split("_") if len(split) == 2]
-            if len(splits) == 1:  # Skip multiple countries e.g. homebase_gb_ie
-                return self._convert_to_iso2_country_code(splits)
+            candidates = []
+            all_splits = spider_name.split("_")
+            for split in reversed(all_splits):  # Only take suffixes into account
+                if len(split) == 2:
+                    candidates.append(split)
+                else:
+                    break
+            if len(candidates) == 1:  # Skip multiple countries e.g. homebase_gb_ie
+                return self._convert_to_iso2_country_code(candidates)
         return None
 
     def country_code_from_url(self, url):

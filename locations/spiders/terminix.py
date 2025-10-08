@@ -2,19 +2,16 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TerminixSpider(SitemapSpider, StructuredDataSpider):
     name = "terminix"
-    item_attributes = {
-        "brand": "Terminix",
-        "brand_wikidata": "Q7702831",
-    }
-    sitemap_urls = ["https://www.terminix.com/sitemap.xml"]
-    sitemap_rules = [
-        (r"/exterminators/\w+/[\w\-]+-(\d+)/$", "parse_sd"),
-    ]
+    item_attributes = {"brand": "Terminix", "brand_wikidata": "Q7702831"}
+    sitemap_urls = ["https://www.terminix.com/sitemap_index.xml"]
+    sitemap_rules = [(r"/exterminators/\w+/[\w\-]+-(\d+)/$", "parse_sd")]
     requires_proxy = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data.pop("image", None)

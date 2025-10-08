@@ -9,7 +9,7 @@ class RexelSpider(Spider):
     """
     Rexel (https://www.wikidata.org/wiki/Q962489) is a large multinational company.
 
-    This spider is for all common functionality across subsidary brands.
+    This spider is for all common functionality across subsidiary brands.
 
     To use, specify a `base_url`, `search_lat` and `search_lon`
     """

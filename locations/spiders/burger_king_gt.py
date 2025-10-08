@@ -25,6 +25,8 @@ class BurgerKingGTSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         if result := response.json().get("data"):
             location = result.get("restaurant")
+            if not location:
+                return
             item = DictParser.parse(location)
             item["geometry"] = location.get("point")
             item["branch"] = item.pop("name").removeprefix("BK ").removeprefix("Burger King ")

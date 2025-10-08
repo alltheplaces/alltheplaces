@@ -35,6 +35,5 @@ class ChiquinhoSorvetesBRSpider(Spider):
             item["name"] = location["nome"]
             item["street_address"] = merge_address_lines([location.get("complemento"), location["endereco"]])
             item["postcode"] = location["cep"]
-            item["phone"] = location["telefone"]
-
+            item["phone"] = location.get("telefone")
             yield item

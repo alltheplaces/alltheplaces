@@ -25,6 +25,6 @@ class DebraGBSpider(SitemapSpider):
         item["lon"] = response.xpath("//@data-lng").get()
         item["ref"] = item["website"] = response.url
         item["opening_hours"] = OpeningHours()
-        day_time_string = response.xpath('//*[@class="single-shop__details-opening-times"]/text()').get()
-        item["opening_hours"].add_ranges_from_string(day_time_string)
+        if day_time_string := response.xpath('//*[@class="single-shop__details-opening-times"]/text()').get():
+            item["opening_hours"].add_ranges_from_string(day_time_string)
         yield item

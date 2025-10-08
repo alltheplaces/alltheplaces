@@ -8,7 +8,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class E5BESpider(Spider):
     name = "e5_be"
-    item_attributes = {"brand": "e5 Mode", "brand_wikidata": "Q85313633"}
+    item_attributes = {"brand": "E5 Mode", "brand_wikidata": "Q85313633"}
     start_urls = ["https://www.e5.be/nl/kledingwinkels"]
 
     def parse(self, response, **kwargs):

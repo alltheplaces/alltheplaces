@@ -7,7 +7,7 @@ import scrapy
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import set_closed
@@ -33,6 +33,8 @@ class DrMaxSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
+            if location["pharmacyVisibility"]["pharmacyList"] is False:
+                continue
             location.update(location.pop("location"))
             item = DictParser.parse(location)
             item["ref"] = location["urlKey"]  # id is not unique globally
@@ -48,7 +50,6 @@ class DrMaxSpider(scrapy.Spider):
             item["extras"]["start_date"] = location["openingDate"]
             if location["closureDate"]:
                 set_closed(item, datetime.fromisoformat(location["closureDate"]))
-                return
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]:
@@ -67,6 +68,8 @@ class DrMaxSpider(scrapy.Spider):
                             close_time = self.calculate_local_time(opening_hours["to"], country)
                             if open_time and close_time:
                                 item["opening_hours"].add_range(weekday, open_time, close_time)
+
+            apply_category(Categories.PHARMACY, item)
 
             yield item
 

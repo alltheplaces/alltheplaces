@@ -15,7 +15,11 @@ class TmobileCZSpider(JSONBlobSpider):
     def extract_json(self, response):
         p = re.compile(r"new AO\(([a-z0-9., ';-]+{[^}]+})\)")
         for m in p.finditer(response.text):
-            item_str = "[" + m.group(1).replace("'", '"') + "]"
+            item_str = (
+                "["
+                + m.group(1).replace("'", '"').replace('<BR><div class="siebui-emr-greeting">&nbsp;</div>', "")
+                + "]"
+            )
             item_json = json.loads(item_str)
             _shape, _coords, _x, _y, id, _descr, _pos, data = item_json
             data["id"] = id

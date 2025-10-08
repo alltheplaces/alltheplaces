@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class VallartaUSSpider(SitemapSpider):
     name = "vallarta_us"
-    item_attributes = {"brand": "Vallarta Supermarkets", "brand_wikidata": "Q7911833"}
+    item_attributes = {"brand": "Vallarta", "brand_wikidata": "Q7911833"}
     allowed_domains = ["vallartasupermarkets.com"]
     sitemap_urls = ("https://vallartasupermarkets.com/store-sitemap.xml",)
     sitemap_rules = [(r"https://vallartasupermarkets.com/store-locations/[\w-]+/", "parse_store")]

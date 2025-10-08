@@ -31,7 +31,8 @@ class SeasaltSpider(scrapy.Spider):
             )
             location["name"] = result.group(1)
             location["address"] = result.group(2)
-            location["url"] = re.search(r'<a href="([^"]+)"', temp).group(1)
+            if found := re.search(r'<a href="([^"]+)"', temp):
+                location["url"] = found.group(1)
             item = DictParser.parse(location)
 
             yield item

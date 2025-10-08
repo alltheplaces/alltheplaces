@@ -3,6 +3,7 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -34,4 +35,6 @@ class PolitixAUSpider(Spider):
                 item["opening_hours"].add_ranges_from_string(hours_string)
                 if " (" in item["name"]:
                     item["name"] = item["name"].split(" (")[0]
+                apply_category(Categories.SHOP_CLOTHES, item)
+                apply_category({"clothes": "men"}, item)
                 yield item

@@ -11,8 +11,8 @@ from locations.items import Feature
 
 class GulfPRUSSpider(Spider):
     name = "gulf_pr_us"
-    item_attributes = {"brand": "Gulf Oil", "brand_wikidata": "Q5617505"}
-    allowed_domains = ["www.gulfoil.com"]
+    item_attributes = {"brand": "Gulf", "brand_wikidata": "Q5617505"}
+    allowed_domains = ["www.gulfinc.com"]
 
     @staticmethod
     def make_request(page: int) -> FormRequest:
@@ -25,7 +25,7 @@ class GulfPRUSSpider(Spider):
             "view_display_id": "block_2",
         }
         return FormRequest(
-            url="https://www.gulfoil.com/views/ajax?_wrapper_format=drupal_ajax",
+            url="https://www.gulfinc.com/views/ajax?_wrapper_format=drupal_ajax",
             formdata=formdata,
             method="POST",
             meta={"page": page},
@@ -46,7 +46,7 @@ class GulfPRUSSpider(Spider):
             return
 
         for result in results.xpath('//section[@role="article"]'):
-            url = "https://www.gulfoil.com" + result.xpath("./@about").get()
+            url = "https://www.gulfinc.com" + result.xpath("./@about").get()
             meta = {
                 "atm": result.xpath('.//li[contains(text(), "ATM")]/text()').get() is not None,
                 "convenience_store": result.xpath('.//li[contains(text(), "Convenience Store")]/text()').get()

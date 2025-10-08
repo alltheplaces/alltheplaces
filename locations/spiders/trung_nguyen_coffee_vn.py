@@ -1,4 +1,5 @@
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TrungNguyenCoffeeVNSpider(SuperStoreFinderSpider):
@@ -10,3 +11,4 @@ class TrungNguyenCoffeeVNSpider(SuperStoreFinderSpider):
     allowed_domains = [
         "trungnguyenlegend.com",
     ]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}

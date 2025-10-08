@@ -1,53 +1,55 @@
-import re
-from datetime import date
+from typing import Any, Iterable
 
-from scrapy.spiders import SitemapSpider
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
 
-from locations.structured_data_spider import StructuredDataSpider
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 
 
-class DennerCHSpider(SitemapSpider, StructuredDataSpider):
+class DennerCHSpider(Spider):
     name = "denner_ch"
     item_attributes = {"brand": "Denner", "brand_wikidata": "Q379911"}
-    allowed_domains = ["www.denner.ch"]
-    sitemap_urls = ["https://www.denner.ch/sitemap.xml"]
-    sitemap_follow = ["denner_stores"]
-    sitemap_rules = [(r"/de/filialen/", "parse")]
-    wanted_types = ["LocalBusiness"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = "Denner"
-        item["lat"], item["lon"] = self.parse_lat_lon(response)
-        item["country"] = "LI" if 9485 <= int(item.get("postcode", 0)) <= 9499 else "CH"
-        item["phone"] = self.parse_phone(response)
-        item.setdefault("extras", {}).update(self.parse_opening_date(response))
-        item["extras"]["website:de"] = response.xpath('//link[@rel="alternate"][@hreflang="de"]/@href').get()
-        item["extras"]["website:fr"] = response.xpath('//link[@rel="alternate"][@hreflang="fr"]/@href').get()
-        item["extras"]["website:it"] = response.xpath('//link[@rel="alternate"][@hreflang="it"]/@href').get()
-
-        yield item
-
-    @staticmethod
-    def parse_lat_lon(response):
-        return (
-            float(response.xpath('//input[@id="storeLatitude"]/@value').get()),
-            float(response.xpath('//input[@id="storeLongitude"]/@value').get()),
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://www.denner.ch/api/store/list?page={page}",
+            cb_kwargs={"current_page": page},
         )
 
-    @staticmethod
-    def parse_opening_date(response):
-        if opening := response.xpath('//div[normalize-space(text())="Neueröffnung"]/..').get():
-            if match := re.search(r"Ab (\d+)\.(\d+)\.(2\d{3})", opening):
-                day, month, year = [int(x) for x in match.groups()]
-                if date(year, month, day) > date.today():
-                    tag = "opening_date"
-                else:
-                    tag = "start_date"
-                return {tag: "%04d-%02d-%02d" % (year, month, day)}
-        return {}
+    def start_requests(self) -> Iterable[JsonRequest]:
+        yield self.make_request(1)
 
-    @staticmethod
-    def parse_phone(response):
-        if match := re.search(r"Tel\. ([\d\s]+)", response.text):
-            return match.group(1).strip()
-        return None
+    def parse(self, response: Response, current_page: int) -> Any:
+        results = response.json()["data"]
+
+        for location in results.get("hits", []):
+            location.update(location.pop("_geo"))
+            location["street-number"] = location.pop("number")
+            location["street"] = location.pop("address")
+            item = DictParser.parse(location)
+            item.pop("name")
+            item["website"] = response.urljoin(location["link"])
+            opening_hours = (location.get("openingTimes") or {}).get("weeklyOpeningTimes", [])
+            try:
+                item["opening_hours"] = self.parse_opening_hours(opening_hours)
+            except:
+                self.logger.error(f"Failed to parse opening hours: {opening_hours}")
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+            yield item
+
+        if current_page < results["totalPages"]:
+            yield self.make_request(current_page + 1)
+
+    def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in opening_hours:
+            if day := sanitise_day(rule.get("weekday"), DAYS_DE):
+                hours_info = rule.get("statements")
+                if hours_info[0]["info"] and hours_info[0]["info"][0].get("name") == "geschlossen":
+                    oh.set_closed(day)
+                else:
+                    for shift in hours_info:
+                        oh.add_range(day, shift["openFrom"], shift["openTo"])
+        return oh

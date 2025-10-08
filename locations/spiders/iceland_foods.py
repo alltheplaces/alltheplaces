@@ -1,51 +1,66 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any, Iterable
 
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class IcelandFoodsSpider(SitemapSpider, StructuredDataSpider):
+class IcelandFoodsSpider(Spider):
     name = "iceland_foods"
     item_attributes = {"brand": "Iceland", "brand_wikidata": "Q721810"}
-    allowed_domains = ["www.iceland.co.uk"]
-    sitemap_urls = ["https://www.iceland.co.uk/sitemap-store-site-map.xml"]
-    sitemap_rules = [
-        (
-            r"https://www\.iceland\.co\.uk/store-finder/store\?StoreID=(\d+)&StoreName=",
-            "parse_sd",
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    access_token = ""
+
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(
+            url="https://www.iceland.co.uk/mobify/proxy/ocapi/on/demandware.store/Sites-icelandfoodsuk-Site/default/Account-GetAccessToken",
+            data={},
         )
-    ]
-    wanted_types = ["LocalBusiness"]
-    search_for_phone = False
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["extras"]["branch"] = response.xpath("/html/head/title/text()").get()
-        item["name"] = None
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        self.access_token = response.json()["access_token"]
+        yield JsonRequest(
+            url="https://prd.cc-iceland.co.uk/s/icelandfoodsuk/dw/shop/v22_6/stores?count=200&start=0&distance_unit=mi&max_distance=500&latitude=51.5072178&longitude=-0.1275862",
+            headers={"authorization": f"Bearer {self.access_token}"},
+            callback=self.parse_stores,
+        )
 
-        if "FWH" in item["extras"]["branch"] or "Food Ware" in item["extras"]["branch"]:
-            # The Food Warehouse, obtained via its own spider
-            # The name usually ends with FWH or has Food Warehouse, sometime truncated.
-            return
+    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["data"]:
+            item = DictParser.parse(store)
 
-        item["opening_hours"] = OpeningHours()
-        for rule in response.xpath("//store-hours/div"):
-            day = rule.xpath("./text()").get()
-            times = rule.xpath('.//div[@class="store-opening-hours"]/text()').getall()
-            if times == ["Closed"]:
+            item["branch"] = item.pop("name")
+            if "FWH" in item["branch"] or "Food Ware" in item["branch"]:
+                # The Food Warehouse, obtained via its own spider
+                # The name usually ends with FWH or has Food Warehouse, sometime truncated.
                 continue
-            item["opening_hours"].add_range(day, times[0].strip(), times[1].strip(), time_format="%I:%M%p")
 
-        if item["opening_hours"].as_opening_hours() == "24/7":
-            # Closed stores, but with the website left up :(
-            # eg https://www.iceland.co.uk/store-finder/store?StoreID=88&StoreName=BATH%20HAM%20GDNS
-            return
+            item["street_address"] = merge_address_lines([store.get("address1"), store.get("address2")])
+            item["state"] = store.get("c_storeRegion")
 
-        if "IRELAND" in item["extras"]["branch"]:
-            item["country"] = "IE"
-        else:
-            item["country"] = "GB"
+            if "IRELAND" in item["branch"]:
+                item["country"] = "IE"
+            else:
+                item["country"] = "GB"
 
-        if phone := response.xpath('//div[@class="phone"]/text()').get():
-            item["phone"] = phone.strip()
+            item["opening_hours"] = OpeningHours()
+            for rule in store.get("c_storeHoursJson", []):
+                if rule["open"].upper() == "CLOSED":
+                    item["opening_hours"].set_closed(rule["day"])
+                else:
+                    item["opening_hours"].add_range(rule["day"], rule["open"], rule["close"], "%I:%M%p")
 
-        yield item
+            item["website"] = (
+                f'https://www.iceland.co.uk/store-finder/store?StoreID={item["ref"]}&StoreName={item["branch"].replace(" ", "-")}'
+            )
+
+            yield item
+
+        if next_page := response.json().get("next"):
+            yield JsonRequest(
+                url=next_page, headers={"authorization": f"Bearer {self.access_token}"}, callback=self.parse_stores
+            )

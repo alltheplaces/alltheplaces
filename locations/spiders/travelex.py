@@ -34,6 +34,11 @@ class TravelexSpider(scrapy.Spider):
         "za",
     ]
 
+    website_map = {
+        "au": "https://www.travelex.com.au/stores/{}",
+        "gb": "https://www.travelex.co.uk/stores/{}",
+    }
+
     # API documentation
     # https://api.travelex.net/docs/api/index.html#api-store-getStoreAll
     #
@@ -55,12 +60,17 @@ class TravelexSpider(scrapy.Spider):
             stores = category.get("stores")
             for row in stores:
                 item = DictParser.parse(row)
+                item["branch"] = item.pop("name")
                 item["addr_full"] = row.get("formattedAddress")
                 item["extras"] = {
                     "directions": row.get("directions"),
                     "notes": row.get("notes"),
                     "terminal": row.get("terminal"),
                 }
-                if response.meta.get("country") == "nl":
-                    item["brand"] = "GWK Travelex"
+
+                if url_format := self.website_map.get(response.meta["country"]):
+                    item["website"] = url_format.format(row["storeUrl"])
+                else:
+                    item["website"] = None
+
                 yield item

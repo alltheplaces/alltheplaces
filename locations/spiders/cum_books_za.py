@@ -26,7 +26,7 @@ class CumBooksZASpider(Spider):
                 "lon": location["coords"]["lng"],
                 "street_address": location["address1"],
                 "addr_full": clean_address([location["address1"], location["address2"]]),
-                "extras": {"ref:google": location.get("placeId")},
+                "extras": {"ref:google:place_id": location.get("placeId")},
             }
 
             yield Feature(**properties)

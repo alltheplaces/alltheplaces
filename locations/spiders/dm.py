@@ -38,7 +38,8 @@ class DmSpider(scrapy.Spider):
             else:
                 item["website"] = f'https://www.dm.{location["countryCode"].lower()}/store{location["storeUrlPath"]}'
             item["extras"]["check_date"] = location["updateTimeStamp"]
-            item["opening_hours"] = self.parse_hours(location["openingHours"])
+            if location.get("openingHours"):
+                item["opening_hours"] = self.parse_hours(location.get("openingHours"))
 
             apply_category(Categories.SHOP_CHEMIST, item)
 

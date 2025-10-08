@@ -71,12 +71,12 @@ def get_lat_lon(item: Feature) -> (float, float):
 def set_lat_lon(item: Feature, lat: float, lon: float):
     item.pop("lat", None)
     item.pop("lon", None)
-    if lat and lon:
+    try:
         item["geometry"] = {
             "type": "Point",
-            "coordinates": [lon, lat],
+            "coordinates": [float(lon), float(lat)],
         }
-    else:
+    except (TypeError, ValueError):
         item["geometry"] = None
 
 

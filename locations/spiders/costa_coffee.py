@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.country_utils import CountryUtils
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
@@ -9,17 +9,9 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class CostaCoffeeSpider(Spider):
     name = "costa_coffee"
-    COSTA = {"brand": "Costa Coffee", "brand_wikidata": "Q608845", "extras": Categories.COFFEE_SHOP.value}
-    COSTA_EXPRESS = {
-        "brand": "Costa Express",
-        "brand_wikidata": "Q113556385",
-        "extras": Categories.VENDING_MACHINE_COFFEE.value,
-    }
-    SMART_CAFE = {
-        "brand": "Smart Café",
-        "brand_wikidata": "Q117448428",
-        "extras": Categories.VENDING_MACHINE_COFFEE.value,
-    }
+    COSTA = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
+    COSTA_EXPRESS = {"brand": "Costa Express", "brand_wikidata": "Q113556385"}
+    SMART_CAFE = {"brand": "Smart Café", "brand_wikidata": "Q117448428"}
     start_urls = [
         # "https://bg.costacoffee.com/",
         "https://www.costa-coffee.be/api/cf/?content_type=storeLocatorStore",
@@ -56,21 +48,21 @@ class CostaCoffeeSpider(Spider):
 
     # Unfortunately each country has their own "types"
     store_types = {
-        "Airport": COSTA,
+        "Airport": (COSTA, Categories.COFFEE_SHOP),
         "Briggo": None,  # Unknown, only 1
-        "COFFEEMAKER": {"brand": "Costa Coffee", "extras": Categories.VENDING_MACHINE_COFFEE.value},
-        "COSTA EXPRESS": COSTA_EXPRESS,
+        "COFFEEMAKER": ({"brand": "Costa Coffee"}, Categories.VENDING_MACHINE),
+        "COSTA EXPRESS": (COSTA_EXPRESS, Categories.VENDING_MACHINE),
         "COSTA PARTNER": None,  # Third party
-        "COSTA STORE": COSTA,
-        "City": COSTA,
-        "Corporate": COSTA,
+        "COSTA STORE": (COSTA, Categories.COFFEE_SHOP),
+        "City": (COSTA, Categories.COFFEE_SHOP),
+        "Corporate": (COSTA, Categories.COFFEE_SHOP),
         "Costa Proud to Serve": None,  # Third party
-        "Hospital": COSTA,
-        "Mall": COSTA,
-        "Marlow": COSTA,
+        "Hospital": (COSTA, Categories.COFFEE_SHOP),
+        "Mall": (COSTA, Categories.COFFEE_SHOP),
+        "Marlow": (COSTA, Categories.COFFEE_SHOP),
         "Proud to Serve": None,  # Third party
-        "Smart Café": SMART_CAFE,
-        "Store": COSTA,
+        "Smart Café": (SMART_CAFE, Categories.VENDING_MACHINE),
+        "Store": (COSTA, Categories.COFFEE_SHOP),
     }
 
     def __init__(self):
@@ -109,7 +101,8 @@ class CostaCoffeeSpider(Spider):
             store_type = entries[location["fields"]["storeType"]["sys"]["id"]]
 
             if brand := self.store_types.get(store_type):
-                item.update(brand)
+                item.update(brand[0])
+                apply_category(brand[1], item)
                 yield item  # Only return know types
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/{store_type}/")

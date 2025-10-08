@@ -1,6 +1,6 @@
 from scrapy.http import FormRequest
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Sells, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -69,11 +69,11 @@ class CoopCentroItaliaITSpider(JSONBlobSpider):
 
     known_departments = {
         "coop salute": dict(dispensing="no", **Categories.PHARMACY.value),
-        "coop ottica": Categories.SHOP_OPTICIAN,
-        "pet store": Categories.SHOP_PET,
-        "pet food sfuso": Categories.SHOP_PET,
-        "abbigliamento": Categories.SHOP_CLOTHES,
-        "edicola": Categories.SHOP_NEWSAGENT,
+        "abbigliamento": {Sells.CLOTHES.value: "yes"},
+        "coop ottica": {Sells.EYEGLASSES.value: "yes", Sells.CONTACT_LENSES.value: "yes"},
+        "pet store": {Sells.PET_SUPPLIES.value: "yes"},
+        "pet food sfuso": {Sells.PET_SUPPLIES.value: "yes"},
+        "edicola": {Sells.NEWSPAPERS.value: "yes"},
     }
 
     def apply_departments(self, item, response, location):

@@ -11,7 +11,7 @@ from locations.structured_data_spider import extract_email
 
 class VapestoreGBSpider(SitemapSpider):
     name = "vapestore_gb"
-    item_attributes = {"brand": "vapestore", "brand_wikidata": "Q116710778"}
+    item_attributes = {"brand": "VapeStore", "brand_wikidata": "Q116710778"}
     sitemap_urls = ["https://www.vapestore.co.uk/pub/sitemap/vapestore_sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.vapestore\.co\.uk\/vapestore-([-\w]+)", "parse")]
     is_playwright_spider = True

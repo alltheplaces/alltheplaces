@@ -9,7 +9,7 @@ from locations.dict_parser import DictParser
 
 class EsbEnergyGBSpider(Spider):
     name = "esb_energy_gb"
-    item_attributes = {"brand": "ESB Energy", "brand_wikidata": "Q118261834"}
+    item_attributes = {"operator": "ESB Energy", "operator_wikidata": "Q118261834"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):

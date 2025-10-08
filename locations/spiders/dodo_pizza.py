@@ -1,14 +1,14 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no
+from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class DodoPizzaSpider(Spider):
     name = "dodo_pizza"
-    item_attributes = {"brand": "Dodo Pizza", "brand_wikidata": "Q61949318"}
+    item_attributes = {"brand_wikidata": "Q61949318"}
     allowed_domains = ["publicapi.dodois.io"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     # TODO: update list of countries in 2024
@@ -47,8 +47,8 @@ class DodoPizzaSpider(Spider):
                 )
                 item["housenumber"] = address_details.get("HouseNumber")
 
-            apply_yes_no("delivery", item, poi.get("DeliveryEnabled"))
-            apply_yes_no("payment:cards", item, poi.get("CardPaymentPickup"))
+            apply_yes_no(Extras.DELIVERY, item, poi.get("DeliveryEnabled"))
+            apply_yes_no(PaymentMethods.CARDS, item, poi.get("CardPaymentPickup"))
             self.parse_hours(item, poi)
             yield item
 

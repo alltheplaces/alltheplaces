@@ -10,7 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class SpendlessAUSpider(Spider):
     name = "spendless_au"
-    item_attributes = {"brand": "Spendless", "brand_wikidata": "Q120668938"}
+    item_attributes = {"brand": "Spendless Shoes", "brand_wikidata": "Q120668938"}
     allowed_domains = ["www.spendless.com.au"]
     start_urls = ["https://www.spendless.com.au/stockists/index/search/"]
 

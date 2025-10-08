@@ -1,50 +1,38 @@
 from json import loads
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 
-from locations.categories import Categories
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class LiquorLegendsAUSpider(Spider):
+class LiquorLegendsAUSpider(JSONBlobSpider):
     name = "liquor_legends_au"
-    item_attributes = {
-        "brand": "Liquor Legends",
-        "brand_wikidata": "Q126175687",
-        "extras": Categories.SHOP_ALCOHOL.value,
-    }
+    item_attributes = {"brand": "Liquor Legends", "brand_wikidata": "Q126175687"}
     allowed_domains = ["rewardsapi.liquorlegends.com.au"]
     start_urls = ["https://rewardsapi.liquorlegends.com.au/api/v1/venue/geo-json"]
+    locations_key = "features"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("properties"))
+        feature.update(loads(feature.pop("location_data"))["store_details"])
 
-    def parse(self, response):
-        for location in response.json()["features"]:
-            location_details = loads(location["properties"]["location_data"])["store_details"]
-
-            properties = {
-                "ref": str(location_details["outlet_id"]),
-                "name": location_details["store_name"],
-                "geometry": location["geometry"],
-                "street_address": location_details["location_details"]["street_address"],
-                "city": location_details["location_details"]["suburb"],
-                "state": location_details["location_details"]["state"],
-                "postcode": location_details["location_details"]["postcode"],
-                "phone": location_details["contact_details"]["phone"],
-                "email": location_details["contact_details"]["email"],
-                "opening_hours": OpeningHours(),
-            }
-
-            if properties["name"].startswith("Liquor Legends "):
-                properties["branch"] = properties["name"].replace("Liquor Legends ", "")
-
-            hours_json = loads(location["properties"]["opening_hours"])
-            for day_name in DAYS_FULL:
-                if day_hours := hours_json.get(day_name):
-                    properties["opening_hours"].add_range(day_name, day_hours["open"], day_hours["close"], "%I:%M%p")
-
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(item["ref"])
+        item["branch"] = item.pop("name").removeprefix("Liquor Legends ")
+        item["street_address"] = item.pop("addr_full", None)
+        item["website"] = "https://liquorlegends.com.au/?outlet={}".format(item["ref"])
+        item["opening_hours"] = OpeningHours()
+        for day_name, day_hours in loads(feature["opening_hours"]).items():
+            if day_name not in DAYS_FULL:
+                continue
+            if not day_hours["open"] or not day_hours["close"]:
+                item["opening_hours"].set_closed(day_name)
+                continue
+            item["opening_hours"].add_range(DAYS_EN[day_name], day_hours["open"], day_hours["close"], "%I:%M%p")
+        apply_category(Categories.SHOP_ALCOHOL, item)
+        yield item

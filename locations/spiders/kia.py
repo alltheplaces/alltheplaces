@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -60,5 +60,5 @@ class KiaSpider(scrapy.Spider):
                 apply_category(Categories.SHOP_CAR, item)
             else:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
-            apply_yes_no("service:vehicle:car_repair", item, "service" in dealer_type)
+            apply_yes_no(Extras.CAR_REPAIR, item, "service" in dealer_type)
             yield item

@@ -1,6 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -24,4 +25,5 @@ class CastoramaPLSpider(CrawlSpider, StructuredDataSpider):
             item["name"] = item["brand"]
         else:
             item["name"] = "Castorama"
+        apply_category(Categories.SHOP_HARDWARE, item)
         yield item

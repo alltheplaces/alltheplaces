@@ -9,6 +9,6 @@ class EuronicsDESpider(WoosmapSpider):
 
     def parse_item(self, item, feature, **kwargs):
         if "mediaathome" in feature["properties"]["contact"]["website"]:
-            item["brand"] = "media@Home"
+            item["brand"] = "media@home"
             item["brand_wikidata"] = "Q117707176"
         yield item

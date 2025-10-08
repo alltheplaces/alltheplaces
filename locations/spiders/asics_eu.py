@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 
 class AsicsEUSpider(scrapy.Spider):
     name = "asics_eu"
-    item_attributes = {"brand": "asics", "brand_wikidata": "Q327247"}
+    item_attributes = {"brand": "ASICS", "brand_wikidata": "Q327247"}
     allowed_domains = ["www.asics.com"]
     start_urls = ["https://cdn.crobox.io/content/ujf067/stores.json"]
 

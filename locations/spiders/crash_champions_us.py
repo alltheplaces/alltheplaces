@@ -19,6 +19,8 @@ class CrashChampionsUSSpider(SitemapSpider):
     sitemap_rules = [(r"/locations/", "parse_store")]
 
     def parse_store(self, response):
+        if "crashchampions" not in response.url:
+            return
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
             "name": response.xpath("//*[@class='about-center__center']/text()").extract_first(),

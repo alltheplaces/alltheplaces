@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class CintasSpider(Spider):
     name = "cintas"
-    item_attributes = {"brand": "Cintas", "brand_wikidata": "Q1092571"}
+    item_attributes = {"brand_wikidata": "Q1092571"}
     allowed_domains = ["cintas.com"]
     start_urls = ["https://www.cintas.com/location-finder/GetLocationsByGeoCoordinates"]
 

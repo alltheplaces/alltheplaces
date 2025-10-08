@@ -1,6 +1,8 @@
-import base64
+from typing import Any
 
+from chompjs import chompjs
 from scrapy import FormRequest, Spider
+from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -12,33 +14,35 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class OneStopGBSpider(Spider):
     name = "one_stop_gb"
     item_attributes = {"brand": "One Stop", "brand_wikidata": "Q65954217"}
+    start_urls = ["https://www.onestop.co.uk/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        token = chompjs.parse_js_object(response.xpath('//script[@id="ajax-script-js-extra"]/text()').get())["security"]
         # 100000 431
         # 50000  698
         # 10000  957
         for city in city_locations("GB", 10000):
             yield FormRequest(
                 url="https://www.onestop.co.uk/wp-admin/admin-ajax.php",
-                formdata={
-                    "action": "findstockists",
-                    "searchfor": base64.b64encode(city["name"].encode("utf-8")),
-                },
+                formdata={"action": "storefinder_ajax", "search": city["name"], "security": token},
+                callback=self.parse_data,
             )
 
-    def parse(self, response, **kwargs):
-        if not response.json():
+    def parse_data(self, response: Response, **kwargs: Any) -> Any:
+        data = chompjs.parse_js_object(response.text)
+        if not data:
             return
-        for location in response.json()["message"]["locations"]:
-            location["location"]["address"] = location["location"]["address"].pop("details")
-            location["location"]["address"]["street_address"] = merge_address_lines(
-                location["location"]["address"]["lines"]
-            )
+        for location in data["message"]["locations"]:
+            if location.get("location").get("address").get("details"):
+                location["location"]["address"] = location.get("location").get("address").pop("details")
+                location["location"]["address"]["street_address"] = merge_address_lines(
+                    location["location"]["address"]["lines"]
+                )
             location["location"]["contact"]["phone"] = location["location"]["contact"]["phoneNumbers"]["main"]
 
             item = DictParser.parse(location["location"])
-            item["website"] = f'https://www.onestop.co.uk/store/?store={item["ref"]}'
+            item["branch"] = item.pop("name").removeprefix("One Stop").strip(", ")
 
             if isinstance(location["location"]["openingHours"], dict):
                 item["opening_hours"] = OpeningHours()

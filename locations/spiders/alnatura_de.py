@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -12,7 +12,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class AlnaturaDESpider(Spider):
     name = "alnatura_de"
-    item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811"}
     allowed_domains = ["www.alnatura.de"]
     start_urls = [
         "https://www.alnatura.de/api/sitecore/stores/FindStoresforMap?ElementsPerPage=10000&lat=49.878708&lng=8.646927&radius=10000&Tradepartner=1"
@@ -43,4 +43,7 @@ class AlnaturaDESpider(Spider):
             item["website"] = "https://www.alnatura.de" + feature["StoreDetailPage"]
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(feature.get("OpeningTime", ""))
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+
         yield item

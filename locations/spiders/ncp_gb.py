@@ -7,6 +7,7 @@ from locations.categories import Categories, Extras, PaymentMethods, apply_categ
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.central_england_cooperative import set_operator
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -25,8 +26,12 @@ class NcpGBSpider(SitemapSpider):
     name = "ncp_gb"
     sitemap_urls = ["https://www.ncp.co.uk/uploads/sitemap.xml"]
     sitemap_rules = [("/find-a-car-park/car-parks/", "parse_pois")]
-    user_agent = BROWSER_DEFAULT
-    download_delay = 2.0
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_DELAY": 2,
+    }
 
     def parse_pois(self, response):
         if poi_match := re.search(r"'carparks'      : (\[.+}\]),", response.text):

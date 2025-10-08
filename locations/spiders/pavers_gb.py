@@ -10,11 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class PaversGBSpider(Spider):
     name = "pavers_gb"
-    item_attributes = {
-        "brand": "Pavers",
-        "brand_wikidata": "Q7155843",
-        "country": "GB",
-    }
+    item_attributes = {"brand_wikidata": "Q7155843"}
     allowed_domains = ["pavers.co.uk"]
 
     def make_request(self, page: int) -> JsonRequest:

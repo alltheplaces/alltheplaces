@@ -1,18 +1,13 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class CrownDecoratingCentresGBSpider(Spider):
     name = "crown_decorating_centres_gb"
-    item_attributes = {
-        "brand": "Crown Decorating Centres",
-        "brand_wikidata": "Q122839963",
-        "extras": Categories.SHOP_PAINT.value,
-    }
+    item_attributes = {"brand": "Crown", "brand_wikidata": "Q122839963"}
     allowed_domains = ["www.crowndecoratingcentres.co.uk"]
     start_urls = ["https://www.crowndecoratingcentres.co.uk/api/sitecore/crowndecorating/stores/search"]
 
@@ -25,7 +20,7 @@ class CrownDecoratingCentresGBSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["StoreCode"]
             item.pop("name", None)
-            item["addr_full"] = ", ".join(
+            item["street_address"] = ", ".join(
                 filter(None, map(str.strip, [location.get("Address1"), location.get("Address2")]))
             )
             item["website"] = "https://www.crowndecoratingcentres.co.uk" + location["Url"]

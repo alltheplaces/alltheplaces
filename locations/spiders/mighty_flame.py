@@ -5,13 +5,14 @@ from urllib.parse import parse_qs, urlsplit
 import chompjs
 import scrapy
 
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 
 class MightyFlameSpider(scrapy.Spider):
     name = "mighty_flame"
-    item_attributes = {"brand": "Mighty Flame", "extras": {"shop": "fuel", "fuel": "propane"}}
+    item_attributes = {"brand": "Mighty Flame"}
     allowed_domains = ["secure.gotwww.com"]
 
     def start_requests(self):
@@ -56,4 +57,6 @@ class MightyFlameSpider(scrapy.Spider):
                 "state": state,
                 "postcode": postcode,
             }
+            apply_category(Categories.SHOP_GAS, properties)
+            apply_yes_no(Fuel.LPG, properties, True)
             yield Feature(**properties)

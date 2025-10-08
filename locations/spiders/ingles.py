@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -21,7 +21,6 @@ class InglesSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Ingles",
         "brand_wikidata": "Q6032595",
-        "extras": Categories.SHOP_SUPERMARKET.value,
     }
     allowed_domains = ["www.ingles-markets.com"]
 
@@ -39,8 +38,8 @@ class InglesSpider(scrapy.Spider):
                 open_time, close_time = hours.split("to")
                 opening_hours.add_range(
                     day=day,
-                    open_time=("".join(open_time).strip()),
-                    close_time=("".join(close_time).strip()),
+                    open_time=("".join(open_time).replace(" ", "")),
+                    close_time=("".join(close_time).replace(" ", "")),
                     time_format="%I:%M%p",
                 )
 
@@ -67,7 +66,10 @@ class InglesSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+
+        yield item
 
     def parse(self, response):
         for store in response.xpath("//markers/marker"):

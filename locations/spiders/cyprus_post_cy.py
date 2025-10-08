@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class CyprusPostCYSpider(Spider):
     name = "cyprus_post_cy"
-    item_attributes = {"brand": "Cyprus Post", "brand_wikidata": "Q5200484"}
+    item_attributes = {"operator": "Cyprus Post", "operator_wikidata": "Q5200484"}
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(

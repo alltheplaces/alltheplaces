@@ -1,11 +1,12 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class CaesarsSpider(scrapy.Spider):
     name = "caesars"
-    item_attributes = {"brand": "Caesars Entertainment", "brand_wikidata": "Q18636524", "extras": {"amenity": "casino"}}
+    item_attributes = {"brand": "Caesars Entertainment", "brand_wikidata": "Q18636524"}
     start_urls = ["https://www.caesars.com/api/v1/properties"]
 
     def parse(self, response):
@@ -25,5 +26,7 @@ class CaesarsSpider(scrapy.Spider):
                 "website": store.get("url"),
                 "extras": {"type": store["brand"]},
             }
+
+            apply_category(Categories.CASINO, properties)
 
             yield Feature(**properties)

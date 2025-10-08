@@ -12,7 +12,7 @@ from locations.pipelines.address_clean_up import clean_address
 class TerryWhiteChemmartAUSpider(scrapy.Spider):
     name = "terry_white_chemmart_au"
     item_attributes = {
-        "brand": "Terry White Chemmart",
+        "brand": "TerryWhite Chemmart",
         "brand_wikidata": "Q24089773",
         "country": "AU",
     }

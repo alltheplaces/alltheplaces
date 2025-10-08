@@ -2,14 +2,14 @@ from typing import Iterable
 
 from scrapy.http import JsonRequest, Request
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class AlbertCZSpider(JSONBlobSpider):
     name = "albert_cz"
-    item_attributes = {"brand": "Albert", "brand_wikidata": "Q9144241", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Albert", "brand_wikidata": "Q9144241"}
     start_urls = ["https://www.albert.cz/api/v1/"]
 
     def start_requests(self) -> Iterable[Request]:
@@ -70,5 +70,8 @@ class AlbertCZSpider(JSONBlobSpider):
                 else:
                     oh.add_range(hours["weekDay"], hours["openingTime"], hours["closingTime"], "%d/%m/%Y %H:%M:%S")
                 processedDays.add(hours["weekDay"])
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+
         yield item

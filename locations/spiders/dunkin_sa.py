@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 
 class DunkinSASpider(Spider):
     name = "dunkin_sa"
-    item_attributes = {"brand": "Dunkin'", "brand_wikidata": "Q847743"}
+    item_attributes = {"brand_wikidata": "Q847743"}
 
     def start_requests(self):
         yield JsonRequest(
@@ -19,5 +19,6 @@ class DunkinSASpider(Spider):
     def parse(self, response, **kwargs):
         for store in json.loads(response.json()["d"]):
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
             item["addr_full"] = store.get("fullAddress")
             yield item

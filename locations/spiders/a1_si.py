@@ -8,7 +8,7 @@ from locations.hours import DAYS_SI, OpeningHours
 
 class A1SISpider(Spider):
     name = "a1_si"
-    item_attributes = {"brand": "A1", "brand_wikidata": "Q68755"}
+    item_attributes = {"brand": "A1", "brand_wikidata": "Q688755"}
     allowed_domains = ["www.a1.si"]
     start_urls = ["https://www.a1.si/pomoc-in-informacije/prodajna-mesta"]
 

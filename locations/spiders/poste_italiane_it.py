@@ -107,7 +107,8 @@ class PosteItalianeITSpider(JSONBlobSpider):
 
     def post_process_punto_poste(self, item, location):
         item["ref"] = location["frazionario"]
-        apply_category(Categories.POST_PARTNER, item)
+        apply_category(Categories.GENERIC_POI, item)
+        item["extras"]["post_office"] = "post_partner"
         item["extras"].update(self.PUNTO_POSTE_BRAND)
         item["extras"]["ref:poste_italiane"] = item["ref"]
         self.apply_hours(item, location.get("orariPuntoPoste"))

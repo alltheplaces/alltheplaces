@@ -48,11 +48,6 @@ class EcontBGSpider(Spider):
                     saturday_end_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursTo"])
                     item["opening_hours"].add_range("Sa", saturday_start_time, saturday_end_time)
 
-                if location["sundayBusinessHoursFrom"] is not None:
-                    sunday_start_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursFrom"])
-                    sunday_end_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursTo"])
-                    item["opening_hours"].add_range("Su", sunday_start_time, sunday_end_time)
-
             name_or_branch = location["name"]
             if location["isAPS"]:
                 item["name"] = name_or_branch

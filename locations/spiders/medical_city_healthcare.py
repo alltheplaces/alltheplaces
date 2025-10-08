@@ -18,17 +18,28 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
         ("PHYSICIAN PRACTICE", Categories.HOSPITAL),
         ("HOSPITAL - GENERAL", Categories.HOSPITAL),
         ("HOSPITAL - CHILDRENS", Categories.HOSPITAL),
+        ("HOSPITAL - OTHER", Categories.HOSPITAL),
         ("BEHAVIORAL DEPARTMENT", {"healthcare": "psychotherapist", "healthcare:speciality": "behavior"}),
         ("HOSPITAL - PSYCHIATRIC", {"healthcare": "psychotherapist", "healthcare:speciality": "behavior"}),
         (
             "IMAGING CENTER",
             {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "diagnostic_radiology"},
         ),
+        (
+            "IMAGING DEPARTMENT",
+            {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "diagnostic_radiology"},
+        ),
         ("SURGERY CENTER", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
+        (
+            "AMBULATORY SURGERY CENTER",
+            {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"},
+        ),
         ("HOSPITAL - REHABILITATION", {"healthcare": "rehabilitation"}),
         ("URGENT CARE CENTER", Categories.CLINIC_URGENT),
+        ("FREE STANDING EMERGENCY ROOM", Categories.CLINIC_URGENT),
         ("CANCER CENTER", {"healthcare": "centre", "healthcare:speciality": "oncology"}),
         ("HEALTH CENTER", {"healthcare": "centre"}),
+        ("HEALTH CENTER DEPARTMENT", {"healthcare": "centre"}),
     ]
 
     def parse(self, response):

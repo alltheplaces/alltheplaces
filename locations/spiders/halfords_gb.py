@@ -1,3 +1,5 @@
+import re
+
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -8,7 +10,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
     name = "halfords_gb"
     start_urls = ["https://www.halfords.com/locations"]
-    rules = [Rule(LinkExtractor(r"/locations/([^/]+)/$"), "parse")]
+    rules = [Rule(LinkExtractor(r"/locations/([^/]+)$"), "parse_sd")]
     wanted_types = ["AutomotiveBusiness", "LocalBusiness"]
     search_for_facebook = False
     search_for_twitter = False
@@ -20,6 +22,7 @@ class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
             rule["closes"] = (rule.get("closes") or "").strip()
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = item["website"]
         name = item.pop("name")
         if name.startswith("Halfords Autocentre "):
             item["branch"] = name.removeprefix("Halfords Autocentre ")
@@ -38,5 +41,11 @@ class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
         else:
             # 3, a mix of the above.
             item["name"] = name
+
+        if m := re.search(
+            r"destination=(-?\d+\.\d+),(-?\d+\.\d+)",
+            response.xpath('//a[contains(@href, "www.google.com/maps")][contains(@href, "destination=")]/@href').get(),
+        ):
+            item["lat"], item["lon"] = m.groups()
 
         yield item

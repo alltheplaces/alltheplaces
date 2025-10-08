@@ -120,7 +120,6 @@ PROPERTIES = {
 
 class LukoilSpider(scrapy.Spider):
     name = "lukoil"
-    download_delay = 0.10
     custom_settings = {"ROBOTSTXT_OBEY": False}
     handle_httpstatus_list = [403]
 

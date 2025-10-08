@@ -1,27 +1,20 @@
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.pipelines.address_clean_up import merge_address_lines
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
+from locations.spiders.pizza_hut_gb import PizzaHutGBSpider
 
 
-class PizzaHutFRSpider(SitemapSpider, StructuredDataSpider):
+class PizzaHutFRSpider(PizzaHutGBSpider):
     name = "pizza_hut_fr"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    PIZZA_HUT_DELIVERY = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q107293079"}
-    sitemap_urls = ["https://www.pizzahut.fr/sitemap.xml"]
-    sitemap_rules = [(r"https:\/\/www\.pizzahut\.fr\/huts\/[-\w]+\/([-.\w]+)\/$", "parse_sd")]
+    start_urls = ["https://api.pizzahut.io/v1/huts/?sector=fr-1"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["street_address"] = merge_address_lines(item["street_address"])
-
-        if item["website"].startswith("https://www.pizzahut.fr/huts/"):
-            item.update(self.PIZZA_HUT_DELIVERY)
-            apply_category(Categories.FAST_FOOD, item)
-        else:
+    def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs) -> Iterable[Feature]:
+        if location["type"] == "restaurant":
             apply_category(Categories.RESTAURANT, item)
-
-        if not item["opening_hours"]:
-            return
-
+        elif location["type"] == "delivery":
+            apply_category(Categories.FAST_FOOD, item)
         yield item

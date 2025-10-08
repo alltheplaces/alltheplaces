@@ -22,6 +22,8 @@ class MidasAUSpider(Spider):
     def parse(self, response):
         results = Selector(text=response.json()["result_listing"])
         for location in results.xpath('//div[@class = "result-list"]'):
+            if phone := location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href').get():
+                phone = phone.strip().replace("tel:", "")
             properties = {
                 "ref": location.xpath(".//h4/@data-index").get().strip(),
                 "name": location.xpath(".//h4/text()").get().strip(),
@@ -29,10 +31,7 @@ class MidasAUSpider(Spider):
                 "lon": location.xpath(".//h4/@data-lng").get().strip(),
                 "addr_full": re.sub(r"\s{2,}", " ", " ".join(location.xpath(".//div/p[1]/text()").getall())).strip(),
                 "website": location.xpath('.//div/p[1]/a[contains(@href, "/stores/")]/@href').get().strip(),
-                "phone": location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href')
-                .get()
-                .strip()
-                .replace("tel:", ""),
+                "phone": phone,
                 "email": unquote(
                     location.xpath('.//div/p[2]/a[contains(@href, "admin_email=")]/@href')
                     .get()

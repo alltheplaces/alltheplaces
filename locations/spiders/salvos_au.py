@@ -1,32 +1,38 @@
-import re
+import json
 
-from scrapy import Spider
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class SalvosAUSpider(Spider):
+class SalvosAUSpider(SitemapSpider):
     name = "salvos_au"
     item_attributes = {"brand": "Salvos", "brand_wikidata": "Q120646407"}
-    allowed_domains = ["www.salvosstores.com.au"]
-    start_urls = ["https://www.salvosstores.com.au/api/uplister/store-list"]
+    sitemap_urls = ["https://www.salvosstores.com.au/sitemap.xml"]
+    sitemap_rules = [("/stores/", "parse")]
 
     def parse(self, response):
-        for location in response.json().values():
-            if location.get("isPermanentlyClosed") or location.get("isOpeningSoon"):
-                continue
-            item = DictParser.parse(location)
-            item["addr_full"] = re.sub(r"\s+", " ", location["FullAddress"].replace("<br>", ", ")).strip()
-            item["housenumber"] = location["Number"]
-            item["street"] = " ".join(filter(None, [location["StreetName"], location["StreetType"]]))
-            item["city"] = location["SuburbName"]
-            item["website"] = location["URL"].replace("uplister.com.au", "www.salvosstores.com.au/stores")
-            item["opening_hours"] = OpeningHours()
-            for day_name, day_hours in location["OpeningHours"].items():
-                if day_hours == "Close":
-                    continue
-                item["opening_hours"].add_range(day_name, day_hours["Opening"], day_hours["Closing"], "%H:%M:%S")
-            apply_category(Categories.SHOP_CHARITY, item)
-            yield item
+        next_data = response.xpath('//*[@id="__NEXT_DATA__"]/text()').get() or ""
+        json_data = json.loads(next_data)
+        store_data = json_data.get("props", {}).get("pageProps", {}).get("store", {})
+
+        if not store_data.get("StoreID"):
+            return
+
+        item = DictParser.parse(store_data)
+        item["website"] = response.url
+        item["branch"] = item.pop("name")
+
+        oh = OpeningHours()
+        for day, time in store_data["OpeningHours"].items():
+            day = day
+            if time == "Close":
+                oh.set_closed(day)
+            else:
+                open_time = time["Opening"]
+                close_time = time["Closing"]
+                oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
+        item["opening_hours"] = oh
+
+        yield item
