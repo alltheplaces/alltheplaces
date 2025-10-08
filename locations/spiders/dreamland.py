@@ -8,15 +8,17 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class DreamlandNLSpider(Spider):
-    name = "dreamland_nl"
+class DreamlandSpider(Spider):
+    name = "dreamland"
     item_attributes = {"brand_wikidata": "Q13574205"}
-    start_urls = ["https://www.dreamland.nl/vestigingen"]
+    start_urls = ["https://www.dreamland.nl/vestigingen", "https://www.dreamland.be/nl/winkels"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//*[@class="overview-store"]'):
             item = Feature()
-            item["ref"] = location.xpath("@data-store-id").get()
+            item["ref"] = "{}-{}".format(
+                response.url.split("/")[2].split(".")[2], location.xpath("@data-store-id").get()
+            )
             item["lat"] = location.xpath("@data-latitude").get()
             item["lon"] = location.xpath("@data-longitude").get()
             item["branch"] = (
