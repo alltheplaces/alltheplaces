@@ -673,6 +673,7 @@ class PaymentMethods(Enum):
     DISCOVER_CARD = "payment:discover_card"
     EDY = "payment:edy"
     GCASH = "payment:gcash"
+    GIFT_CARD = "payment:gift_card"
     GOOGLE_PAY = "payment:google_pay"
     GIROCARD = "payment:girocard"
     HUAWEI_PAY = "payment:huawei_pay"
