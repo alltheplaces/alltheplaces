@@ -14,9 +14,6 @@ class MetroUSSpider(CrawlSpider, StructuredDataSpider):
     ]
     wanted_types = ["Store"]
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["openingHours"] = ld_data.pop("openingHoursSpecification")
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Metro by T-Mobile ")
         item["street_address"] = (
