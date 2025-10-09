@@ -10,6 +10,7 @@ class MattressFirmUSSpider(Where2GetItSpider):
     api_key = "88FD3C6E-2B22-11EE-86CD-EF1E9DC6E625"
     drop_attributes = {"email"}
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
+    requires_proxy = True
 
     def pre_process_data(self, location):
         location.pop("location")
