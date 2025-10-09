@@ -1,47 +1,37 @@
-import re
 from typing import Any
-from urllib.parse import urljoin
 
+import chompjs
+import scrapy
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, sanitise_day
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class PharmasaveCASpider(SitemapSpider):
+class PharmasaveCASpider(scrapy.Spider):
     name = "pharmasave_ca"
     item_attributes = {"brand": "Pharmasave", "brand_wikidata": "Q17093822"}
-    sitemap_urls = ["https://pharmasave.com/sitemap_index.xml"]
-    sitemap_follow = [r"https://pharmasave.com/[-\w]+/page-sitemap"]
-    sitemap_rules = [(r"https://pharmasave.com/[-\w]+/location/$", "parse_website")]
-    coordinates_pattern = re.compile(r"var lat = ([-.\d]+);.+?var lon = ([-.\d]+);", re.DOTALL)
+    start_urls = ["https://pharmasave.com/store-finder/"]
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if not entry["loc"].endswith(".xml"):
-                entry["loc"] = urljoin(entry["loc"], "location/")
-            yield entry
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in list(
+            chompjs.parse_js_objects(response.xpath('//*[@id="storelocator-script-js-before"]/text()').get())
+        )[2]:
+            item = DictParser.parse(store)
+            item["street_address"] = store["address"]
+            item["addr_full"] = store.get("store_full_address")
+            yield scrapy.Request(url=item["website"], callback=self.parse_opening_hours, meta={"item": item})
 
-    def parse_website(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["ref"] = item["website"] = response.url
-        item["branch"] = response.xpath('//meta[@property="og:title"]/@content').get().replace("Pharmasave ", "")
-        if match := re.search(self.coordinates_pattern, response.text):
-            item["lat"], item["lon"] = match.groups()
-        item["addr_full"] = clean_address(response.xpath('//*[contains(@class, "store-info-address")]/text()').get())
-        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get()
-        item["opening_hours"] = OpeningHours()
-        for timing in response.xpath('//*[contains(text(),"Store Hours")]/parent::span/following-sibling::ul[1]/li'):
-            if day := sanitise_day(timing.xpath("./text()").get()):
-                hours = timing.xpath("./span/text()").get("")
-                for start_time, start_am_pm, end_time, end_am_pm in re.findall(
-                    r"(\d+:\d+)\s*(am|pm)?[-\s]+(\d+:\d+)\s*(am|pm)?", hours.lower()
-                ):
-                    start_time = f"{start_time} {start_am_pm}"
-                    end_time = f"{end_time} {end_am_pm}"
-                    item["opening_hours"].add_range(day, start_time, end_time, time_format="%I:%M %p")
-        apply_category(Categories.PHARMACY, item)
+    def parse_opening_hours(self, response, **kwargs):
+        item = response.meta["item"]
+        oh = OpeningHours()
+        for day_time in response.xpath('//*[@class="store-hours-row"]'):
+            day = day_time.xpath('.//*[@class="store-hours-day"]/text()').get()
+            time = day_time.xpath('.//*[@class="store-hours-time"]/text()').get()
+            if time == "Closed":
+                oh.set_closed(day)
+            else:
+                open_time, close_time = day_time.xpath('.//*[@class="store-hours-time"]/text()').get().split(" - ")
+                oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p")
+        item["opening_hours"] = oh
         yield item

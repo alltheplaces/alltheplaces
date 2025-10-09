@@ -1,5 +1,4 @@
-import json
-
+import chompjs
 from scrapy import Spider
 
 from locations.categories import Categories
@@ -20,8 +19,7 @@ class PayomaticUSSpider(Spider):
         searchstr = "var stores_data = "
         script = response.xpath(f"//script[contains(text(), '{searchstr}')]/text()").get()
         start = script.find(searchstr) + len(searchstr)
-        end = script.find(";\r\n", start)
-        geojson = json.loads(script[start:end])
+        geojson = chompjs.parse_js_object(script[start:])
         for feature in geojson["features"]:
             item = DictParser.parse(feature["properties"])
             item["geometry"] = feature["geometry"]

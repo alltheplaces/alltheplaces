@@ -1,3 +1,4 @@
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.categories import Categories, apply_category
@@ -6,10 +7,7 @@ from locations.pipelines.count_categories import CountCategoriesPipeline
 
 
 def get_objects():
-    class Spider(object):
-        pass
-
-    spider = Spider()
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return Feature(), CountCategoriesPipeline(), spider
 

@@ -1,20 +1,33 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import json
+from typing import Any
 
-from locations.structured_data_spider import StructuredDataSpider
+import scrapy
+from scrapy.http import Response
+
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class BeaverbrooksGBSpider(CrawlSpider, StructuredDataSpider):
+class BeaverbrooksGBSpider(scrapy.Spider):
     name = "beaverbrooks_gb"
     item_attributes = {"brand": "Beaverbrooks", "brand_wikidata": "Q4878226"}
     start_urls = [
         "https://www.beaverbrooks.co.uk/stores",
     ]
-    rules = [
-        Rule(LinkExtractor(r"https://www.beaverbrooks.co.uk/stores/([-\w]+)$"), "parse"),
-    ]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["lat"] = response.xpath('//div[@id="map_canvas"]/@data-lat').get()
-        item["lon"] = response.xpath('//div[@id="map_canvas"]/@data-long').get()
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for stores in json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())["props"]["pageProps"][
+            "allStores"
+        ]:
+            item = DictParser.parse(stores)
+            item["website"] = "https://www.beaverbrooks.co.uk/stores/" + stores["channelUrlCode"]
+            item["addr_full"] = stores["formattedAddress"]
+            item["branch"] = item.pop("name")
+            oh = OpeningHours()
+            for day_time in stores["openingHours"]:
+                day = day_time["dayOfWeek"]
+                open_time = day_time["openingTime"]
+                close_time = day_time["closingTime"]
+                oh.add_range(day=day, open_time=open_time, close_time=close_time)
+            item["opening_hours"] = oh
+            yield item

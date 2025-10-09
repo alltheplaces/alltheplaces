@@ -83,7 +83,6 @@ if os.environ.get("ZYTE_API_KEY"):
         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
     }
     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
-    TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
 DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
@@ -156,7 +155,6 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
     "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
     "PLAYWRIGHT_BROWSER_TYPE": "firefox",
     "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
 }
 
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
@@ -174,7 +172,6 @@ DEFAULT_CAMOUFOX_SETTINGS = {
     },
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
     "ROBOTSTXT_OBEY": False,
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
 }
 
 DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS | {

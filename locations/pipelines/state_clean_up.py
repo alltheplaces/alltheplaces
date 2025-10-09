@@ -2,7 +2,17 @@ import reverse_geocoder
 from geonamescache import GeonamesCache
 
 from locations.items import get_lat_lon
-from locations.spiders.xfinity import US_TERRITORIES
+
+US_TERRITORIES = {
+    "AS": {"code": "AS", "name": "American Samoa"},
+    "FM": {"code": "FM", "name": "Micronesia"},
+    "GU": {"code": "GU", "name": "Guam"},
+    "MH": {"code": "MH", "name": "Marshall Islands"},
+    "MP": {"code": "MP", "name": "Northern Mariana Islands"},
+    "PW": {"code": "PW", "name": "Palau"},
+    "PR": {"code": "PR", "name": "Puerto Rico"},
+    "VI": {"code": "VI", "name": "U.S. Virgin Islands"},
+}
 
 STATES = {
     "CA": {

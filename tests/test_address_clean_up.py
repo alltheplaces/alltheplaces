@@ -1,5 +1,4 @@
-from scrapy import Spider
-from scrapy.utils.test import get_crawler
+from scrapy.utils.spider import DefaultSpider
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import AddressCleanUpPipeline, clean_address, merge_address_lines
@@ -70,8 +69,7 @@ def test_clean_address_dont_remove_short_valid_cjk():
 
 
 def get_objects(feature):
-    spider = Spider(name="test")
-    spider.crawler = get_crawler()
+    spider = DefaultSpider()
     return (
         feature,
         AddressCleanUpPipeline(),

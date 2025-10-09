@@ -1,17 +1,20 @@
 import json
 import re
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.json_blob_spider import JSONBlobSpider
 
 
-class TortillaGBSpider(JSONBlobSpider):
+class TortillaGBSpider(Spider):
     name = "tortilla_gb"
     item_attributes = {"brand": "Tortilla", "brand_wikidata": "Q21006828"}
     start_urls = ["https://www.tortilla.co.uk/restaurants"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         match = re.search(r'\\"restaurants\\"\:([^\n]+)\}\],false\]\}\],\[\\"\$\\",', response.text)
         data = match.group(1).replace('\\"', '"')
 
@@ -22,7 +25,7 @@ class TortillaGBSpider(JSONBlobSpider):
             item["ref"] = item["branch"].replace(" ", "")
             if item["phone"]:
                 item["phone"].replace(" ", "")
-            item["website"] = "https://www.tortilla.co.uk/" + location["full_slug"]
+            item["website"] = response.urljoin(location["full_slug"].removeprefix("uk/"))
 
             apply_category(Categories.FAST_FOOD, item)
 

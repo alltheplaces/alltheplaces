@@ -237,6 +237,23 @@ DAYS_CZ = {
     "Ne": "Su",
 }
 
+DAYS_EE = {
+    "Esmaspäev": "Mo",
+    "Es": "Mo",
+    "Teisipäev": "Tu",
+    "Te": "Tu",
+    "Kolmapäev": "We",
+    "Ko": "We",
+    "Neljapäev": "Th",
+    "Ne": "Th",
+    "Reede": "Fr",
+    "Re": "Fr",
+    "Laupäev": "Sa",
+    "La": "Sa",
+    "Pühapäev": "Su",
+    "Pü": "Su",
+}
+
 DAYS_GR = {
     "Δε": "Mo",
     "Δευτέρα": "Mo",
@@ -271,6 +288,7 @@ DAYS_HR = {
 
 DAYS_HU = {
     "Hétfő": "Mo",
+    "Hetfo": "Mo",
     "Hé": "Mo",
     "H": "Mo",
     "Kedd": "Tu",
@@ -280,9 +298,11 @@ DAYS_HU = {
     "Sze": "We",
     # "Sz": "We",
     "Csütörtök": "Th",
+    "Csutortok": "Th",
     "Csü": "Th",
     "Cs": "Th",
     "Péntek": "Fr",
+    "Pentek": "Fr",
     "Pé": "Fr",
     "P": "Fr",
     "Szombat": "Sa",
@@ -291,6 +311,7 @@ DAYS_HU = {
     "Va": "Sa",
     "V": "Su",
     "Vasárnap": "Su",
+    "Vasarnap": "Su",
     "Vas": "Su",
 }
 

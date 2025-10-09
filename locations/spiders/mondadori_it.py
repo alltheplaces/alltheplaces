@@ -19,6 +19,7 @@ class MondadoriITSpider(JSONBlobSpider):
         "https://www.mondadoristore.it/occ/v2/mondadorisite-b2c/stores?pageSize=1000&currentPage=0&province=&latitude=45.4642&longitude=9.19&fields=FULL&lang=it&curr=EUR"
     ]
     locations_key = "results"
+    needs_json_request = True
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
