@@ -26,6 +26,8 @@ class MotrioSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street")
+            if website := item.get("website"):
+                item["website"] = self.repair_website(website)
             item["image"] = store.get("bannerPictureUrl")
             item["facebook"] = store.get("facebookUrl")
             if lat_lon := store.get("location"):
@@ -44,3 +46,13 @@ class MotrioSpider(scrapy.Spider):
             yield item
         if not data["last"]:
             yield self.make_request(data["number"] + 1, data["size"])
+
+    def repair_website(self, website):
+        if "http://" in website:
+            return website.replace("http://", "https://")
+        elif website.lower().startswith("www."):
+            return website.replace("www.", "https://www.").replace("WWW.", "https://WWW.")
+        if any(keyword in website for keyword in ["maps.", "bing.com", "google", "|"]):
+            return None
+        else:
+            return website
