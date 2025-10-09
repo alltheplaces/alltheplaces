@@ -288,6 +288,7 @@ DAYS_HR = {
 
 DAYS_HU = {
     "Hétfő": "Mo",
+    "Hetfo": "Mo",
     "Hé": "Mo",
     "H": "Mo",
     "Kedd": "Tu",
@@ -297,9 +298,11 @@ DAYS_HU = {
     "Sze": "We",
     # "Sz": "We",
     "Csütörtök": "Th",
+    "Csutortok": "Th",
     "Csü": "Th",
     "Cs": "Th",
     "Péntek": "Fr",
+    "Pentek": "Fr",
     "Pé": "Fr",
     "P": "Fr",
     "Szombat": "Sa",
@@ -308,6 +311,7 @@ DAYS_HU = {
     "Va": "Sa",
     "V": "Su",
     "Vasárnap": "Su",
+    "Vasarnap": "Su",
     "Vas": "Su",
 }
 
