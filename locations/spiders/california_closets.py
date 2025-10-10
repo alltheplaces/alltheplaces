@@ -24,7 +24,10 @@ class CaliforniaClosetsSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["ref"] = ld_data.get("url") or response.url
+        website = ld_data.get("url")
+        if website and website != response.url:  # Skip nearby locations to avoid duplicates
+            return
+        item["ref"] = website or response.url
         item["branch"] = (
             item.pop("name")
             .replace("California Closets", "")
