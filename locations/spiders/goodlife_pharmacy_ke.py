@@ -10,3 +10,4 @@ class GoodlifePharmacyKESpider(AgileStoreLocatorSpider):
         "extras": Categories.PHARMACY.value,
     }
     allowed_domains = ["www.goodlife.co.ke"]
+    requires_proxy = True
