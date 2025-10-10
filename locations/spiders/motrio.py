@@ -48,7 +48,7 @@ class MotrioSpider(scrapy.Spider):
             yield self.make_request(data["number"] + 1, data["size"])
 
     def repair_website(self, website):
-        if any(keyword in website for keyword in ["maps.", "bing.com", "google", "|"]):
+        if any(keyword in website for keyword in ["maps.", "bing.com", "google", "|", "@"]):
             return None
 
         if website.lower().startswith("http://"):
