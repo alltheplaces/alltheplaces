@@ -11,7 +11,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class DominosPizzaTWSpider(scrapy.Spider):
     name = "dominos_pizza_tw"
     item_attributes = {"brand_wikidata": "Q839466"}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT" : BROWSER_DEFAULT}
 
     def start_requests(self):
         for city in city_locations("TW", 16000):
