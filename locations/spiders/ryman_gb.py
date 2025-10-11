@@ -14,6 +14,7 @@ class RymanGBSpider(Spider):
     item_attributes = {"brand": "Ryman", "brand_wikidata": "Q7385188"}
     start_urls = ["https://www.ryman.co.uk/storefinder/"]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Host": "www.ryman.co.uk"}}
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         scripts = response.xpath('//script[@type="text/x-magento-init"]//text()').getall()
