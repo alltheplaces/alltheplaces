@@ -1,12 +1,10 @@
 import json
 from typing import Any
 
-import scrapy
 from scrapy.http import Response
 
-from locations.json_blob_spider import JSONBlobSpider
 from locations.dict_parser import DictParser
-from locations.linked_data_parser import LinkedDataParser
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class RymanGBSpider(JSONBlobSpider):
