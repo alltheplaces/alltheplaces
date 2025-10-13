@@ -12,7 +12,7 @@ class ZaraSpider(JSONBlobSpider):
     name = "zara"
     item_attributes = {"brand": "Zara", "brand_wikidata": "Q147662"}
     start_urls = [
-        "https://www.zara.com/uk/en/stores-locator/extended/search?lat=51.5072178&lng=-0.1275862&isDonationOnly=false&showOnlyPickup=false&showStoresCapacity=false&radius=500&ajax=true"
+        "https://www.zara.com/uk/en/stores-locator/extended/search?lat=53.5072178&lng=-1.1275862&isDonationOnly=false&showOnlyPickup=false&showStoresCapacity=false&radius=1000&ajax=true"
     ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
