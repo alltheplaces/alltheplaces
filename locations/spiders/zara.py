@@ -23,7 +23,7 @@ class ZaraSpider(JSONBlobSpider):
             "Connection": "keep-alive",
         },
     }
-    #    requires_proxy = True
+    requires_proxy = True
     drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
