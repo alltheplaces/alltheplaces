@@ -8,7 +8,7 @@ from locations.google_url import url_to_coords
 from locations.items import Feature, SocialMedia, set_social_media
 
 
-class CasadoConstrutorBRSpider(SitemapSpider):
+class CasaDoConstrutorBRSpider(SitemapSpider):
     name = "casa_do_construtor_br"
     item_attributes = {"brand": "Casa do Construtor", "brand_wikidata": "Q118672258"}
     sitemap_urls = ["https://casadoconstrutor.com.br/sitemap.xml"]
@@ -22,10 +22,14 @@ class CasadoConstrutorBRSpider(SitemapSpider):
         item["branch"] = response.xpath('//*[@id="store-cookie-title"]/text()').get()
         item["phone"] = response.xpath('//*[@id="store-cookie-phone"]/text()').get()
         item["email"] = response.xpath('//*[@id="store-cookie-email"]/text()').get()
+
         if whatsapp := response.xpath('//*[@id="store-cookie-whatsapp"]/text()').get():
             set_social_media(item, SocialMedia.WHATSAPP, whatsapp)
+
         # coordinates are not available for all locations
         if map_url := response.xpath("//@data-maps-url").get():
             item["lat"], item["lon"] = url_to_coords(map_url)
+
         apply_category(Categories.SHOP_TOOL_HIRE, item)
+
         yield item
