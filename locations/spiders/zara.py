@@ -12,7 +12,7 @@ class ZaraSpider(JSONBlobSpider):
     name = "zara"
     item_attributes = {"brand": "Zara", "brand_wikidata": "Q147662"}
     start_urls = [
-        "https://www.zara.com/uk/en/stores-locator/extended/search?lat=51.5072178&lng=-0.1275862&isDonationOnly=false&showOnlyPickup=false&showStoresCapacity=false&radius=3000&ajax=true"
+        "https://www.zara.com/uk/en/stores-locator/extended/search?lat=51.5072178&lng=-0.1275862&isDonationOnly=false&showOnlyPickup=false&showStoresCapacity=false&radius=500&ajax=true"
     ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
@@ -23,7 +23,7 @@ class ZaraSpider(JSONBlobSpider):
             "Connection": "keep-alive",
         },
     }
-    requires_proxy = True
+    #requires_proxy = True
     drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
