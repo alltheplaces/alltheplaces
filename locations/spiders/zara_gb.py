@@ -23,7 +23,6 @@ class ZaraGBSpider(JSONBlobSpider):
             "Connection": "keep-alive",
         },
     }
-    # requires_proxy = True
     drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
@@ -37,7 +36,7 @@ class ZaraGBSpider(JSONBlobSpider):
             apply_clothes([Clothes.CHILDREN], item)
         item["street_address"] = " ".join(feature["addressLines"])
         item["opening_hours"] = OpeningHours()
-        if "openTime" in feature:
+        if len(feature["openingHours"]) > 0:
             for i in range(7):
                 item["opening_hours"].add_range(
                     DAYS[i],
