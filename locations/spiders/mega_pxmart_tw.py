@@ -1,4 +1,5 @@
 from typing import Iterable
+
 import scrapy
 from scrapy.http import JsonRequest, Response
 
@@ -14,7 +15,6 @@ class MegaPxmartTWSpider(scrapy.Spider):
     def start_requests(self):
         yield JsonRequest(url="https://www.pxmart.com.tw/mega/api/stores", method="POST")
 
-
     def parse(self, response: Response) -> Iterable[Feature]:
         for location in response.json()["data"]:
             location.update(location.pop("attributes", {}))
@@ -22,4 +22,3 @@ class MegaPxmartTWSpider(scrapy.Spider):
             item["addr_full"] = item.pop("street")
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
-
