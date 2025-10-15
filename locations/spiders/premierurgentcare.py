@@ -14,7 +14,6 @@ class PremierurgentcareSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.premier.care/sitemap.xml"]
     # Example:     # https://www.premier.care/locations/thumbs-up-temple/
     sitemap_rules = [(r"/locations/[\w-]+/$", "parse_sd")]
-    wanted_types = ["MedicalOrganization"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.CLINIC, item)
