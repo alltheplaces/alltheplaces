@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 
 class LaAnonimaARSpider(Spider):
     name = "la_anonima_ar"
-    start_urls = ["https://www.laanonima.com.ar/contents/themes/evolucionamos/bin/get_all_sucursales.php"]
+    start_urls = ["https://www.laanonima.com.ar/empresa/contents/themes/evolucionamos/bin/get_all_sucursales.php"]
     item_attributes = {"brand_wikidata": "Q6135985"}
 
     def parse(self, response):
