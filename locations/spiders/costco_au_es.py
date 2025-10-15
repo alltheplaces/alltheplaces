@@ -14,12 +14,14 @@ from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
 class CostcoAUSpider(JSONBlobSpider):
     name = "costco_au"
     item_attributes = COSTCO_SHARED_ATTRIBUTES
-    allowed_domains = ["www.costco.com.au"]
     locations_key = "stores"
 
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(
             url="https://www.costco.com.au/rest/v2/australia/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.es/rest/v2/spain/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999"
         )
 
     def pre_process_data(self, feature: dict) -> None:
