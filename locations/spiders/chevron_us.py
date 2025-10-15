@@ -73,7 +73,7 @@ class ChevronUSSpider(JSONBlobSpider):
         elif location["hours"]:
             oh = OpeningHours()
             oh.add_ranges_from_string(location["hours"])
-            base_item["opening_hours"] = "oh"
+            base_item["opening_hours"] = oh
 
         station = copy.deepcopy(base_item)
 
