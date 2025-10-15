@@ -1,14 +1,10 @@
-from copy import deepcopy
-from typing import Any
-
-import reverse_geocoder
 import scrapy
 import xmltodict
-from scrapy.http import Request, Response
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
+from locations.spiders.volkswagen import VolkswagenSpider
 
 
 class SeatSpider(scrapy.Spider):
@@ -62,7 +58,8 @@ class SeatSpider(scrapy.Spider):
         for country in self.available_countries_porsche_api:
             yield Request(
                 url=f"https://groupcms-services-api.porsche-holding.com/v3/dealers/{country}/S",
-                callback=self.parse_porsche_api,
+                callback=VolkswagenSpider.parse_porsche_api,
+                meta={"brand": self.item_attributes, "country": country, "crawler": self.crawler},
             )
 
     def parse(self, response):
@@ -80,29 +77,6 @@ class SeatSpider(scrapy.Spider):
             elif store["types"]["type"] == "S":
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             yield item
-
-    def parse_porsche_api(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json().get("data"):
-            item = DictParser.parse(store)
-            item["street_address"] = item.pop("street")
-            item["ref"] = store["bnr"]
-            item["state"] = store.get("federalState")
-            offers = store.get("contracts", {})
-            # Locations in ME have country property equal to RS
-            if item.get("lat") and item.get("lon"):
-                if result := reverse_geocoder.get((item["lat"], item["lon"]), mode=1, verbose=False):
-                    if item["country"] != result["cc"] and item["country"] == "RS":
-                        item["country"] = result["cc"]
-            if offers.get("sales"):
-                yield self.build_categorized_item(item, Categories.SHOP_CAR)
-            if offers.get("service"):
-                yield self.build_categorized_item(item, Categories.SHOP_CAR_REPAIR)
-
-    def build_categorized_item(self, item: Feature, category: Categories) -> Feature:
-        c_item = deepcopy(item)
-        c_item["ref"] = f"{item['ref']}-{category}"
-        apply_category(category, c_item)
-        return c_item
 
     def repair_website(self, item):
         if website := item["website"]:
