@@ -7,8 +7,8 @@ from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 from locations.spiders.volkswagen import VolkswagenSpider
+
 
 class SkodaSpider(scrapy.Spider):
     name = "skoda"
@@ -80,7 +80,6 @@ class SkodaSpider(scrapy.Spider):
                 url=f"https://groupcms-services-api.porsche-holding.com/v3/dealers/{country}/C",
                 callback=VolkswagenSpider.parse_porsche_api,
                 meta={"brand": self.item_attributes, "country": country, "crawler": self.crawler},
-
             )
 
     def parse_skoda_api(self, response: Response, **kwargs: Any) -> Any:
@@ -100,13 +99,12 @@ class SkodaSpider(scrapy.Spider):
                 elif item["country"] != result["cc"] and item["country"] == "RS":
                     item["country"] = result["cc"]
             if store.get("HasSales"):
-                yield self.build_categorized_item(item, Categories.SHOP_CAR)
+                shop_item = deepcopy(item)
+                shop_item["ref"] = f"{item['ref']}-SHOP"
+                apply_category(Categories.SHOP_CAR, shop_item)
+                yield shop_item
             if store.get("HasServices"):
-                yield self.build_categorized_item(item, Categories.SHOP_CAR_REPAIR)
-
-
-    def build_categorized_item(self, item: Feature, category: Categories) -> Feature:
-        c_item = deepcopy(item)
-        c_item["ref"] = f"{item['ref']}-{category}"
-        apply_category(category, c_item)
-        return c_item
+                service_item = deepcopy(item)
+                service_item["ref"] = f"{item['ref']}-SERVICE"
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item
