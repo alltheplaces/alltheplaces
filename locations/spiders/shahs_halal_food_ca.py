@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -19,6 +20,7 @@ class ShahsHalalFoodCASpider(JSONBlobSpider):
         item["street_address"] = item.pop("street")
         item["branch"] = item.pop("name").split(",")[0]
         item["opening_hours"] = self.parse_opening_hours(json.loads(feature["open_hours"]))
+        apply_category(Categories.FAST_FOOD, item)
         yield item
 
     def parse_opening_hours(self, opening_hours: dict) -> OpeningHours:
