@@ -17,6 +17,7 @@ class ShahsHalalFoodCASpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("street")
+        item["branch"] = item.pop("name").split(",")[0]
         item["opening_hours"] = self.parse_opening_hours(json.loads(feature["open_hours"]))
         yield item
 
