@@ -36,7 +36,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
                 item["branch"] = item.pop("name")
                 if "permanently closed" in item["branch"]:
                     return
-        if not "item" in locals():
+        if "item" not in locals():
             item = Feature()
             item["ref"] = response.url
             item["name"] = "British Heart Foundation"
