@@ -8,3 +8,4 @@ class EmberInnsGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Ember Inns", "brand_wikidata": "Q116272278"}
     sitemap_urls = ["https://www.emberinns.co.uk/robots.txt"]
     sitemap_rules = [(r"/nationalsearch/\w+/[-\w]+$", "parse_sd")]
+    requires_proxy = True
