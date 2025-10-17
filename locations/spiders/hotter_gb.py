@@ -1,3 +1,9 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -17,3 +23,8 @@ class HotterGBSpider(JSONBlobSpider):
         },
     }
     requires_proxy = True
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = feature["store"]
+        apply_category(Categories.SHOP_SHOES, item)
+        yield item
