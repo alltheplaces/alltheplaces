@@ -74,7 +74,6 @@ class ToyotaEUSpider(JSONBlobSpider):
         feature["email"] = feature.pop("eMail")
 
     def post_process_item(self, item, response, location):
-        item["branch"] = item.pop("name")
         if match := self.BRAND_MAPPING.get(location["brand"]):
             item["brand"] = match["brand"]
             item["brand_wikidata"] = match["brand_wikidata"]
