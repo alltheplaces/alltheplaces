@@ -11,6 +11,7 @@ class LaAnonimaARSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+            item["name"] = None
             item["phone"] = location["telefono"]
             item["addr_full"] = location["direccion"]
             item["extras"]["ref:branch"], item["branch"] = location["nombre"].split(" - ", 1)
