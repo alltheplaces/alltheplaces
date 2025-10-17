@@ -10,10 +10,9 @@ class ColumbiaBankUSSpider(YextAnswersSpider):
     }
     api_key = "c13432212bdffaaf25baa76819280ae4"
     experience_key = "umpqua-bank-locator"
-    drop_attributes = {"facebook"}
+    drop_attributes = {"facebook", "branch", "contact:instagram"}
 
     def parse_item(self, location, item):
-        item["extras"].pop("contact:instagram", None)
         if item["name"] == "ATM - Columbia Bank":
             del item["name"]
             item.pop("website", None)  # ATM website is always the homepage
