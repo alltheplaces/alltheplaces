@@ -34,11 +34,15 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
             for item in self.parse_sd(response):
                 extract_google_position(item, response)
                 item["branch"] = item.pop("name")
-        else:
+                if "permanently closed" in item["branch"]:
+                    return
+        if "item" not in locals():
             item = Feature()
             item["ref"] = response.url
             item["name"] = "British Heart Foundation"
             item["branch"] = response.xpath("//h1/text()").get()
+            if "permanently closed" in item["branch"]:
+                return
             item["addr_full"] = response.xpath('//p[@class="highlighted-info-block__description"]/text()').get()
             item["lat"], item["lon"] = (
                 response.xpath('//a[contains (@href,"www.google.com/maps/place/")]/@href')
@@ -56,8 +60,6 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
             item["phone"] = response.xpath(
                 '//div[@class="opening-hours__contact-us"]/p[@class="opening-hours__description"]/text()'
             ).get()
-        if "permanently closed" in item["branch"]:
-            return
         if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
             item.pop("phone", None)
         if "book-bank" in response.url:
