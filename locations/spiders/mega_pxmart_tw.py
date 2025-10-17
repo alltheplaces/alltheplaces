@@ -19,6 +19,7 @@ class MegaPxmartTWSpider(scrapy.Spider):
         for location in response.json()["data"]:
             location.update(location.pop("attributes", {}))
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["addr_full"] = item.pop("street")
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
