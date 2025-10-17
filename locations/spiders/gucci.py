@@ -1,17 +1,19 @@
 from typing import Any
 
+import chompjs
 from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import FIREFOX_LATEST
 
 
 class GucciSpider(Spider):
     name = "gucci"
     item_attributes = {"brand": "Gucci", "brand_wikidata": "Q178516"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = FIREFOX_LATEST
+    is_playwright_spider = True
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def start_requests(self):
         yield Request(
@@ -20,7 +22,7 @@ class GucciSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["features"]:
+        for location in chompjs.parse_js_object(response.text)["features"]:
             if location["properties"]["active"] is not True:
                 continue
             item = DictParser.parse(location["properties"])

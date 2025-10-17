@@ -10,7 +10,7 @@ class AvedaSpider(scrapy.Spider):
         "brand": "Aveda",
         "brand_wikidata": "Q4827965",
     }
-    allowed_domains = ["aveda.com"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 100}
 
     def start_requests(self):
         url = "https://www.aveda.com/rpc/jsonrpc.tmpl?dbgmethod=locator.doorsandevents"

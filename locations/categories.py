@@ -92,6 +92,9 @@ class Categories(Enum):
     SHOP_BOOKMAKER = {"shop": "bookmaker"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_BUTCHER = {"shop": "butcher"}
+    SHOP_BUS = {"shop": "bus"}
+    SHOP_BUS_REPAIR = {"shop": "bus_repair"}
+    SHOP_BUS_PARTS = {"shop": "bus_parts"}
     SHOP_CAMERA = {"shop": "camera"}
     SHOP_CANDLES = {"shop": "candles"}
     SHOP_CANNABIS = {"shop": "cannabis"}
@@ -122,6 +125,7 @@ class Categories(Enum):
     SHOP_DOITYOURSELF = {"shop": "doityourself"}
     SHOP_DOORS = {"shop": "doors"}
     SHOP_DRY_CLEANING = {"shop": "dry_cleaning"}
+    SHOP_E_CIGARETTE = {"shop": "e-cigarette"}
     SHOP_ELECTRICAL = {"shop": "electrical"}
     SHOP_ELECTRONICS = {"shop": "electronics"}
     SHOP_EROTIC = {"shop": "erotic"}
@@ -224,7 +228,9 @@ class Categories(Enum):
 
     OFFICE_ARCHITECT = {"office": "architect"}
     OFFICE_COMPANY = {"office": "company"}
+    OFFICE_CONSULTING = {"office": "consulting"}
     OFFICE_COURIER = {"office": "courier"}
+    OFFICE_COWORKING = {"office": "coworking"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
@@ -571,6 +577,8 @@ class Extras(Enum):
     BAR = "bar"
     BARBECUES = "bbq"
     BREAKFAST = "breakfast"
+    BRUNCH = "brunch"
+    BODY_REPAIR = "service:vehicle:body_repair"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
     CAR_PARTS = "service:vehicle:car_parts"
@@ -596,6 +604,7 @@ class Extras(Enum):
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
     LIVE_MUSIC = "live_music"
+    LUNCH = "lunch"
     MALE = "male"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
@@ -664,6 +673,7 @@ class PaymentMethods(Enum):
     DISCOVER_CARD = "payment:discover_card"
     EDY = "payment:edy"
     GCASH = "payment:gcash"
+    GIFT_CARD = "payment:gift_card"
     GOOGLE_PAY = "payment:google_pay"
     GIROCARD = "payment:girocard"
     HUAWEI_PAY = "payment:huawei_pay"
@@ -845,6 +855,7 @@ class Vending(Enum):
     KEYS = "key"
     LAUNDRY = "laundry"
     PARKING_TICKETS = "parking_tickets"
+    WATER = "water"
 
 
 def add_vending(vending: Vending | list[Vending], item: Feature):

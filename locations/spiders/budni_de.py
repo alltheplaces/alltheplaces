@@ -21,20 +21,18 @@ class BudniDESpider(Spider):
         objs = [chompjs.parse_js_object(s) for s in scripts]
         rsc = "".join([s for n, s in objs]).encode()
         data = dict(parse_rsc(rsc))
-        # Look for a list consisting only of '$123' references. This is the list of stores.
-        store_list = []
-        for key, value in data.items():
-            if isinstance(value, list):
-                if all(isinstance(i, str) and i.startswith("$") for i in value):
-                    store_list = value
-        for store_reference in store_list:
-            # Sub-objects are '$123' references and need to be fetched from 'data'
-            reference = int(store_reference.removeprefix("$"), 16)
-            store = data[reference]
+
+        def resolve_reference(obj):
+            if isinstance(obj, str) and obj.startswith("$"):
+                reference = int(store.removeprefix("$"), 16)
+                return data[reference]
+            else:
+                return obj
+
+        for store in resolve_reference(DictParser.get_nested_key(data, "markets")):
+            store = resolve_reference(store)
             for key, value in store.items():
-                if isinstance(value, str) and value.startswith("$"):
-                    value_ref = int(value.removeprefix("$"), 16)
-                    store[key] = data[value_ref]
+                store[key] = resolve_reference(value)
             # Rename keys to help DictParser find the content
             store["address"] = store.pop("contact")
             store["address"]["street_address"] = store["address"].pop("streetAndNumber")
@@ -43,8 +41,7 @@ class BudniDESpider(Spider):
             item = DictParser.parse(store)
             item["website"] = "https://www.budni.de/filialen/{}".format(item["ref"])
             if item["name"].startswith("budni - "):
-                item["branch"] = item["name"].removeprefix("budni - ")
-                item["name"] = "Budni"
+                item["branch"] = item.pop("name").removeprefix("budni - ")
             hours = OpeningHours()
             hours.add_ranges_from_string(store["workingDaysSummary"], DAYS_DE)
             item["opening_hours"] = hours

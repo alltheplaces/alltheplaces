@@ -11,6 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 COUNTRY_TO_LANGUAGE = {
     "AE": "en",
     "AR": "es",
+    "AZ": "az",
     "BE": "fr",
     "BR": "pt",
     "CH": "en",
@@ -69,9 +70,12 @@ class LePainQuotidienSpider(Spider):
             item["geometry"] = location["latlng"]
             item["street_address"] = merge_address_lines(location["addressLines"])
             # Note: Doesn't work for Mexico (slug missing)
-            item["website"] = (
-                f"https://www.lepainquotidien.com/{location['regionCode'].lower()}/{COUNTRY_TO_LANGUAGE[location['regionCode']]}/locations/{quote(location['slug'])}/{quote(location['addressLines'][0].replace(' ', '-'))}"
-            )
+            if location["regionCode"] in COUNTRY_TO_LANGUAGE:
+                item["website"] = (
+                    f"https://www.lepainquotidien.com/{location['regionCode'].lower()}/{COUNTRY_TO_LANGUAGE[location['regionCode']]}/locations/{quote(location['slug'])}/{quote(location['addressLines'][0].replace(' ', '-'))}"
+                )
+            else:
+                self.logger.error(f"Unknown language for country={location['regionCode']}")
 
             oh = OpeningHours()
             if location.get("regularHours"):

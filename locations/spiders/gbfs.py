@@ -26,7 +26,7 @@ BRAND_MAPPING = {
         "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q17402113",
     },
-    "Bicing": {
+    "bicing": {
         "names": ["Bicing"],
         "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q1833385",
@@ -52,7 +52,7 @@ BRAND_MAPPING = {
         "category": Categories.KICK_SCOOTER_RENTAL,
         "wikidata": "",
     },
-    "Biki": {
+    "Bixi": {
         "names": ["BIXI Montr\u00e9al"],
         "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q386",
@@ -213,7 +213,7 @@ BRAND_MAPPING = {
         "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q123507620",
     },
-    "Mevo": {
+    "MEVO": {
         "names": ["MEVO"],
         "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q60860236",
@@ -223,7 +223,7 @@ BRAND_MAPPING = {
         "category": Categories.KICK_SCOOTER_RENTAL,
         "wikidata": "",
     },
-    "Nextbike": {
+    "nextbike": {
         "names": [
             "nextbike Bene\u0161ov",
             "nextbike Bergamo",
@@ -327,7 +327,7 @@ BRAND_MAPPING = {
         "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q63386916",
     },
-    "V\u00e9lib' Metropole": {
+    "Vélib' Métropole": {
         "names": ["V\u00e9lib' Metropole"],
         "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q1120762",
@@ -348,8 +348,7 @@ BRAND_MAPPING = {
 class GbfsSpider(CSVFeedSpider):
     name = "gbfs"
     start_urls = ["https://github.com/MobilityData/gbfs/raw/master/systems.csv"]
-    download_delay = 2
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2}
 
     def parse_row(self, response, row):
         url = row["Auto-Discovery URL"]

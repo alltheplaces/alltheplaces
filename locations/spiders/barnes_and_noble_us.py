@@ -55,10 +55,16 @@ class BarnesAndNobleUSSpider(Spider):
     def parse_opening_hours(self, hours: list) -> OpeningHours:
         oh = OpeningHours()
         for rule in hours:
-            oh.add_range(
-                rule["dayName"],
-                rule["openTime"] + " AM",
-                rule["closeTime"] + " PM",
-                time_format="%I:%M %p",
-            )
+            day = rule["dayName"]
+            if open := rule.get("openTime"):
+                if close := rule.get("closeTime"):
+                    if "Closed" in open:
+                        oh.set_closed(day)
+                    else:
+                        oh.add_range(
+                            day,
+                            open + " AM",
+                            close + " PM",
+                            time_format="%I:%M %p",
+                        )
         return oh

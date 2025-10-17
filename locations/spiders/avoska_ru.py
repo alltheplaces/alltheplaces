@@ -17,7 +17,7 @@ class AvoskaRUSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         # Coords are in the wrong order
-        item["geometry"]["coordinates"] = location["geometry"]["coordinates"][::-1]
+        item["lat"], item["lon"] = location["geometry"]["coordinates"][::-1]
         item["street_address"] = location["properties"]["hintContent"]
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

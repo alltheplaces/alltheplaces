@@ -1,4 +1,4 @@
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -14,4 +14,5 @@ class BancaSellaITSpider(JSONBlobSpider):
         item["city"] = location.get("citta")
         item["postcode"] = location.get("cap")
         apply_category(Categories.BANK, item)
+        apply_yes_no(Extras.ATM, item, bool(location["atm"]))
         yield item

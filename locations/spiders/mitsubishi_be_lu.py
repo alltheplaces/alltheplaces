@@ -13,7 +13,7 @@ from locations.spiders.mitsubishi import MitsubishiSpider
 class MitsubishiBELUSpider(JSONBlobSpider):
     name = "mitsubishi_be_lu"
     item_attributes = MitsubishiSpider.item_attributes
-    start_urls = ["https://mitsubishi-motors.be/dealers.json"]
+    start_urls = ["https://service.mitsubishi-motors.be/dealers.json"]
     locations_key = "dealers"
     skip_auto_cc_spider_name = True
 

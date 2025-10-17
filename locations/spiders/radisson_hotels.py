@@ -17,10 +17,10 @@ class RadissonHotelsSpider(scrapy.Spider):
     brand_mapping = {
         "rdb": ["Radisson Blu", "Q7281341"],
         "rco": ["Radisson Collection", "Q60716706"],
-        "pii": ["Park Inn by Radisson", "Q60711675"],
+        "pii": ["Park Inn", "Q60711675"],
         "rdr": ["Radisson RED", "Q28233721"],
         "cis": ["Country Inn & Suites by Radisson", "Q5177332"],
-        "pph": ["Park Plaza Hotels & Resorts", "Q2052550"],
+        "pph": ["Park Plaza", "Q2052550"],
         "art": ["Art’otel", "Q14516231"],
         "rad": ["Radisson", "Q1751979"],
         # I did not find the sub-brand wikidata so I put None.

@@ -16,7 +16,7 @@ class BellafloraATSpider(Spider):
     item_attributes = {"brand": "Bellaflora", "brand_wikidata": "Q815787"}
     allowed_domains = ["www.bellaflora.at"]
     start_urls = ["https://www.bellaflora.at/filialfinder"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self) -> Iterable[FormRequest]:
         headers = {

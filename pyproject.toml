@@ -17,6 +17,7 @@ dependencies = [
     "pdfplumber",
     "phonenumbers",
     "phpserialize",
+    "playwright_captcha",
     "pyarrow",
     "pycountry",
     "pygeohash<4",
@@ -27,6 +28,7 @@ dependencies = [
     "requests-cache",
     "reverse-geocoder",
     "scrapy",
+    "scrapy-camoufox",
     "scrapy-playwright",
     "scrapy-zyte-api",
     "shapely",
@@ -36,18 +38,6 @@ dependencies = [
     "xmltodict",
 ]
 
-[tool.uv]
-dev-dependencies = [ "autoflake8",
-    "awscli",
-    "black",
-    "boto3",
-    "flake8",
-    "isort",
-    "pep8-naming",
-    "pre-commit",
-    "pylint",
-    "pytest",
-]
 
 [[tool.uv.index]]
 name = "pypi"
@@ -58,3 +48,16 @@ url = "https://pypi.python.org/simple"
 [tool.black]
 line-length = 120
 target-version = ['py311']
+
+[dependency-groups]
+dev = [
+    "autoflake8",
+    "awscli",
+    "black",
+    "flake8",
+    "isort",
+    "pep8-naming",
+    "pre-commit",
+    "pylint",
+    "pytest",
+]

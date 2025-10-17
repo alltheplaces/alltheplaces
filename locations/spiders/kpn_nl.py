@@ -25,5 +25,8 @@ class KpnNLSpider(SitemapSpider, StructuredDataSpider):
             item["name"] = "KPN"
         elif item["name"].startswith("KPN Experience Store"):
             item["name"] = "KPN Experience Store"
-        apply_category(Categories.SHOP_MOBILE_PHONE, item)
+        item["image"] = None
+
+        apply_category(Categories.SHOP_TELECOMMUNICATION, item)
+
         yield item

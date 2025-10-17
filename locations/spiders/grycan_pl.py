@@ -28,18 +28,26 @@ class GrycanPLSpider(WpGoMapsSpider):
         if "Województwo" in custom_field_data.keys():
             item["state"] = custom_field_data["Województwo"]
 
-        item["opening_hours"] = OpeningHours()
+        try:
+            item["opening_hours"] = self.parse_opening_hours(custom_field_data)
+        except:
+            self.logger.error("Error parsing opening hours")
+
+        item.pop("name", None)
+        return item
+
+    def parse_opening_hours(self, custom_field_data) -> OpeningHours:
+        oh = OpeningHours()
 
         for key in custom_field_data.keys():
             if "Godziny otwarcia w" in key:
                 # Godziny otwarcia we Wtorek or Godziny otwarcia w Poniedziałek
                 day_name = key.split(" ")[3]
-                if " | " in custom_field_data[key]:
-                    opens, closes = custom_field_data[key].split(" | ")
-                    item["opening_hours"].add_range(DAYS_PL[day_name], opens, closes, "%H:%M:%S")
+                if "|" in custom_field_data[key]:
+                    opens, closes = custom_field_data[key].split("|")
+                    oh.add_range(DAYS_PL[day_name], opens.strip(), closes.strip(), "%H:%M:%S")
                 elif "-" in custom_field_data[key]:  # 10-21
                     opens, closes = custom_field_data[key].split("-")
-                    item["opening_hours"].add_range(DAYS_PL[day_name], opens, closes, "%H")
+                    oh.add_range(DAYS_PL[day_name], opens, closes, "%H")
 
-        item.pop("name", None)
-        return item
+        return oh

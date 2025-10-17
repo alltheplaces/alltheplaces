@@ -1,14 +1,18 @@
+import json
+from typing import Any, Iterable
+from urllib.parse import urlencode
+
 import scrapy
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
-# On the date of writing (2023-12-20) the website blocks the spider with a captcha
-# after ~150 requests with current settings, so we are not getting all POIs.
 class WalmartCASpider(scrapy.Spider):
     name = "walmart_ca"
     allowed_domains = ["www.walmart.ca"]
@@ -16,44 +20,70 @@ class WalmartCASpider(scrapy.Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 15,
+        "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
     }
+    base_url = "https://www.walmart.ca/orchestra/graphql/nearByNodes"
+    hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
 
-    def start_requests(self):
-        url_template = "https://www.walmart.ca/en/stores-near-me/api/searchStores?singleLineAddr={city}"
-        for city in city_locations("CA"):
-            yield scrapy.Request(url_template.format(city=city["name"]))
+    def start_requests(self) -> Iterable[JsonRequest]:
+        # Tried raw GraphQL query, but it's blocked, hash appears to be stable and required for successful requests.
+        for city in city_locations("CA", min_population=15000):
+            variables = {
+                "input": {
+                    "postalCode": "",
+                    "accessTypes": ["PICKUP_INSTORE", "PICKUP_CURBSIDE"],
+                    "nodeTypes": ["STORE", "PICKUP_SPOKE", "PICKUP_POPUP"],
+                    "latitude": city["latitude"],
+                    "longitude": city["longitude"],
+                    "radius": 100,
+                },
+                "checkItemAvailability": False,
+                "checkWeeklyReservation": False,
+                "enableStoreSelectorMarketplacePickup": False,
+                "enableVisionStoreSelector": False,
+                "enableStorePagesAndFinderPhase2": False,
+                "enableStoreBrandFormat": False,
+                "disableNodeAddressPostalCode": False,
+            }
+            yield JsonRequest(
+                url=f"{self.base_url}/{self.hash}?{urlencode({'variables': json.dumps(variables)})}",
+                headers={
+                    "x-apollo-operation-name": "nearByNodes",
+                    "x-o-bu": "WALMART-CA",
+                    "x-o-segment": "oaoh",
+                },
+                cookies={"walmart.nearestLatLng": f'{city["latitude"]},{city["longitude"]}'},
+            )
 
-    def parse(self, response):
-        if "blocked" in response.url:
-            self.logger.error(f"Blocked by Walmart {response.url}")
-            raise scrapy.exceptions.CloseSpider("blocked")
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        location_nodes = response.json().get("data", {}).get("nearByNodes") or {}
+        for location in location_nodes.get("nodes", []):
+            item = DictParser.parse(location)
+            item["branch"] = location.get("displayName", "").split(",")[0].strip()
+            item["street_address"] = merge_address_lines(
+                [location["address"].get("addressLineOne"), location["address"].get("addressLineTwo")]
+            )
+            item["opening_hours"] = self.parse_hours(location.get("operationalHours", []))
 
-        self.logger.info(f"Parsing {response.url}")
-        self.logger.info(f"GOT POIs: {len(response.json()['payload']['stores'])}")
-        for poi in response.json()["payload"]["stores"]:
-            if poi.get("deleted"):
-                self.crawler.stats.inc_value("atp/poi/closed")
-                continue
-
-            item = DictParser.parse(poi)
-
-            item["opening_hours"] = self.parse_hours(poi.get("regularHours"))
-
-            # TODO: parse more categories under 'servicesMap' key
-            apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+            if location["name"] == "Walmart":
+                apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+            elif location["name"] == "Walmart Supercenter":
+                apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item
 
-    def parse_hours(self, hours):
+    def parse_hours(self, hours: list) -> OpeningHours | None:
         if not hours:
             return None
 
         try:
             oh = OpeningHours()
-            for hour in hours:
-                oh.add_range(hour.get("day"), hour.get("start"), hour.get("end"))
+            for rule in hours:
+                if rule.get("closed") is True:
+                    oh.set_closed(rule.get("day"))
+                else:
+                    oh.add_range(rule.get("day"), rule.get("start"), rule.get("end"))
             return oh
         except Exception as e:
             self.logger.error(f"Failed to parse hours: {hours}, {e}")

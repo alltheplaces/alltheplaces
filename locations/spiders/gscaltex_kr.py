@@ -10,7 +10,7 @@ from locations.items import Feature
 class GscaltexKRSpider(Spider):
     name = "gscaltex_kr"
     item_attributes = {"brand_wikidata": "Q624012"}
-    start_urls = ["https://www.gscenergyplus.com/data/station/map.json"]
+    start_urls = ["https://www.gscenergyplus.com/static/epweb/map.json"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["siteList"]:

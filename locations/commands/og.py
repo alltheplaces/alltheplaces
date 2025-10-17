@@ -13,8 +13,7 @@ class MySpider(OpenGraphSpider):
     name = "my_spider"
     start_urls = None
     item_attributes = {}
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, **kwargs):
         print(item)

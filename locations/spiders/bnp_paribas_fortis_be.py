@@ -3,7 +3,7 @@ import re
 import scrapy
 from chompjs import chompjs
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 
@@ -45,4 +45,5 @@ class BnpParibasFortisBESpider(scrapy.Spider):
                 oh.add_range(day, open_time.strip(), close_time.strip())
                 item["opening_hours"] = oh
             apply_category(Categories.BANK, item)
+            apply_yes_no(Extras.ATM, item, "ATM" in store["text2"])
             yield item

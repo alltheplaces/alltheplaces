@@ -31,10 +31,21 @@ class BonmarcheGBSpider(JSONBlobSpider):
         item.pop("street_address", None)
         item.pop("website", None)
 
-        item["opening_hours"] = OpeningHours()
-        hours = loads(re.sub(r"\s+", "", feature["storeHours"]).replace(".", ":"))
-        for day_name, day_hours in hours.items():
-            item["opening_hours"].add_range(day_name.title(), *day_hours.split("-", 1), "%I:%M%p")
-
+        try:
+            item["opening_hours"] = OpeningHours()
+            hours = loads(re.sub(r"\s+", "", feature["storeHours"]).replace(".", ":"))
+            for day_name, day_hours in hours.items():
+                if "CLOSED" in day_hours.upper():
+                    item["opening_hours"].set_closed(day_name)
+                else:
+                    start_time, end_time = day_hours.split("-", 1)
+                    end_time = end_time.replace("17:30pm", "5:30pm").replace("16:00pm", "4:00pm").replace("om", "pm")
+                    if "AM" in start_time.upper() or "PM" in start_time.upper():
+                        time_format = "%I:%M%p"
+                    else:
+                        time_format = "%H:%M"
+                    item["opening_hours"].add_range(day_name.title(), start_time, end_time, time_format=time_format)
+        except Exception as e:
+            self.logger.warning(f"Failed to parse opening hours: {e}")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item

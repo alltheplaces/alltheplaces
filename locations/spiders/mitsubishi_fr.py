@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from urllib.parse import urlparse
 
 from scrapy import Selector
@@ -21,6 +22,18 @@ class MitsubishiFRSpider(XMLFeedSpider):
     iterator = "xml"
     itertag = "marker"
 
+    def build_sales_item(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def build_service_item(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
     def parse_node(self, response: Response, node: Selector):
         item = Feature()
         item["ref"] = node.xpath("./@concessionnaire_id").get()
@@ -42,14 +55,19 @@ class MitsubishiFRSpider(XMLFeedSpider):
         services = json.loads(node.xpath("./@services").get())
         services = [service["name"] for service in services]
 
-        if "Vente" in services:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, "Après-vente" in services)
-        elif "Après-vente" in services:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        else:
+        sales_available = "Vente" in services
+        service_available = "Après-vente" in services
+
+        if sales_available:
+            sales_item = self.build_sales_item(item)
+            apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
+            yield sales_item
+
+        if service_available:
+            service_item = self.build_service_item(item)
+            yield service_item
+
+        if not sales_available and not service_available:
             self.logger.error(f"Unknown type: {services}, {item['name']}, {item['ref']}")
 
         # TODO: hours
-
-        yield item

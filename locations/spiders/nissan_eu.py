@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -59,7 +59,7 @@ class NissanEUSpider(scrapy.Spider):
             if "car" in services:
                 apply_category(Categories.SHOP_CAR, item)
                 if "configure" in services:
-                    apply_yes_no("service:vehicle:car_repair", item, True)
+                    apply_yes_no(Extras.CAR_REPAIR, item, True)
             elif "configure" in services:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             else:

@@ -241,6 +241,7 @@ class DictParser:
         "yext-display-lng",
         "map-longitude",
         "geo-lng",
+        "geo-long",
         "GPSLong",
         "geographicCoordinatesLongitude",
         # ES
