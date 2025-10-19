@@ -55,14 +55,15 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
             ).strip()
             item["name"] = "Bargain Booze in The Food Warehouse"
         elif (
-            "INSIDE A COSTCUTTER" in name.upper()
-            or "INSIDE COSTCUTTER" in name.upper()
-            or "COSTCUTTER" in name.upper()
+            "INSIDE A COSTCUTTER" in name.upper() or "INSIDE COSTCUTTER" in name.upper() or "COSTCUTTER" in name.upper()
         ):
             item["located_in"] = CostcutterGBSpider.item_attributes["brand"]
             item["located_in_wikidata"] = CostcutterGBSpider.item_attributes["brand_wikidata"]
             item["branch"] = re.sub(
-                r"\s*(?:Inside a Costcutter|Inside Costcutter|Costcutter|Featuring Bargain Booze)\s*", " ", name, flags=re.IGNORECASE
+                r"\s*(?:Inside a Costcutter|Inside Costcutter|Costcutter|Featuring Bargain Booze)\s*",
+                " ",
+                name,
+                flags=re.IGNORECASE,
             ).strip()
             item["name"] = "Bargain Booze in Costcutter"
         item.pop("facebook")
