@@ -19,7 +19,7 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data):
         if "CLOSED" in item["name"].upper() or "COMING SOON" in item["name"].upper():
             return
-        name=item["name"]
+        name = item["name"]
         item["city"] = item.pop("state", None)
         item["branch"] = re.sub(
             r"\s*(?:Bargain Booze(?: Plus)?|-?\s*Under New Management|-?\s*Sole Trader|-?\s*Now Open|\.{2,})\s*",
