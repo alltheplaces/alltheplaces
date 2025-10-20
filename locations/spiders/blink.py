@@ -93,7 +93,7 @@ class BlinkSpider(Spider):
                     state=parent.get("state"),
                     street_address=parent.get("street_address"),
                 )
-                apply_category({"man_made": "charge_point"}, item)
+                apply_category(Categories.CHARGE_POINT, item)
                 item["name"] = charger["portName"]
                 # For OSM tagging, "ref" is probably better, but ref needs to be globally unique in ATP
                 item["extras"]["ref:serial"] = charger["serialNumber"]

@@ -36,6 +36,6 @@ class ChargePlaceScotlandGBSpider(Spider):
                 )
             # TODO: connectors available location["properties"]["connectorGroups"]
 
-            apply_category({"man_made": "charge_point"}, item)
+            apply_category(Categories.CHARGE_POINT, item)
 
             yield item
