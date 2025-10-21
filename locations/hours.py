@@ -972,7 +972,7 @@ def day_range(start_day, end_day):
         return DAYS[start_ix:] + DAYS[: end_ix + 1]
 
 
-def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
+def sanitise_day(day: str, days: dict[str, str] = DAYS_EN) -> str | None:
     if day is None:
         return None
 
@@ -994,7 +994,7 @@ class OpeningHours:
     def __bool__(self):
         return bool(self.day_hours or self.days_closed)
 
-    def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
+    def add_days_range(self, days: list[str], open_time: str | time.struct_time, close_time: str | time.struct_time, time_format: str = "%H:%M"):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
 
@@ -1029,7 +1029,7 @@ class OpeningHours:
             self.day_hours.pop(day, None)
             self.days_closed.add(day)
 
-    def add_range(self, day, open_time, close_time, time_format="%H:%M", closed=CLOSED_EN):
+    def add_range(self, day, open_time: str | time.struct_time, close_time: str | time.struct_time, time_format: str = "%H:%M", closed: list[str] = CLOSED_EN):
         day = sanitise_day(day)
 
         if day not in DAYS:
@@ -1169,7 +1169,7 @@ class OpeningHours:
         return delimiter_regex
 
     @staticmethod
-    def single_days_regex(days: dict = DAYS_EN) -> str:
+    def single_days_regex(days: dict[str, str] = DAYS_EN) -> str:
         """
         Creates a regular expression for capturing single day names
         within a string containing time information. For example, in the
@@ -1183,7 +1183,7 @@ class OpeningHours:
         return single_days_regex
 
     @staticmethod
-    def day_ranges_regex(days: dict = DAYS_EN, delimiters: list[str] = DELIMITERS_EN) -> list[str]:
+    def day_ranges_regex(days: dict[str, str] = DAYS_EN, delimiters: list[str] = DELIMITERS_EN) -> list[str]:
         """
         Creates a list of regular expressions for capturing all
         combinations of day ranges, with wrap-around for ranges
@@ -1228,7 +1228,7 @@ class OpeningHours:
         return days_regex_parts
 
     @staticmethod
-    def named_day_ranges_regex(named_day_ranges: dict = NAMED_DAY_RANGES_EN) -> str:
+    def named_day_ranges_regex(named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN) -> str:
         """
         Creates a regular expression for capturing named day ranges
         within a string containing time information. For example, in
@@ -1244,8 +1244,8 @@ class OpeningHours:
 
     @staticmethod
     def any_day_extraction_regex(
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
         delimiters: list[str] = DELIMITERS_EN,
     ) -> str:
         """
@@ -1279,7 +1279,7 @@ class OpeningHours:
         return days_regex
 
     @staticmethod
-    def replace_named_times(hours_string: str, named_times: dict = NAMED_TIMES_EN, time_24h: bool = True) -> str:
+    def replace_named_times(hours_string: str, named_times: dict[str, list[str]] = NAMED_TIMES_EN, time_24h: bool = True) -> str:
         """
         Replaces named times (e.g. Midnight) in a string with their
         12h equivalent (e.g. 12:00AM) or 24h equivalent (e.g 00:00).
@@ -1335,8 +1335,8 @@ class OpeningHours:
     @staticmethod
     def hours_extraction_regex(
         time_24h: bool = True,
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
         delimiters: list[str] = DELIMITERS_EN,
     ) -> str:
         """
@@ -1374,8 +1374,8 @@ class OpeningHours:
 
     @staticmethod
     def closed_days_extraction_regex(
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
         delimiters: list[str] = DELIMITERS_EN,
         closed: list[str] = CLOSED_EN,
     ) -> str:
@@ -1406,7 +1406,7 @@ class OpeningHours:
 
     @staticmethod
     def days_in_day_range(
-        day_range: list[str], days: dict = DAYS_EN, named_day_ranges: dict = NAMED_DAY_RANGES_EN
+        day_range: list[str], days: dict[str, str] = DAYS_EN, named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN
     ) -> list[str]:
         """ """
         day_list = []
@@ -1427,9 +1427,9 @@ class OpeningHours:
     @staticmethod
     def extract_hours_from_string(
         ranges_string: str,
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
-        named_times: dict = NAMED_TIMES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
+        named_times: dict[str, list[str]] = NAMED_TIMES_EN,
         delimiters: list[str] = DELIMITERS_EN,
         closed: list[str] = CLOSED_EN,
     ) -> list[tuple]:
@@ -1581,9 +1581,9 @@ class OpeningHours:
     def add_ranges_from_string(
         self,
         ranges_string: str,
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
-        named_times: dict = NAMED_TIMES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
+        named_times: dict[str, list[str]] = NAMED_TIMES_EN,
         delimiters: list[str] = DELIMITERS_EN,
         closed: list[str] = CLOSED_EN,
     ) -> None:

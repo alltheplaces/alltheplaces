@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -16,13 +18,13 @@ class AmrestEUSpider(Spider):
     This spider is specifically for the common functionality across all child brands.
     """
 
-    api_brand_key: str = None
-    api_brand_country_key: str = None
-    api_source: str = None
-    api_auth_source: str = None
-    api_channel: str = None
+    api_brand_key: str
+    api_brand_country_key: str
+    api_source: str | None = None
+    api_auth_source: str
+    api_channel: str | None = None
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         headers = {
             "Brand": self.api_brand_key,
         }
@@ -40,7 +42,7 @@ class AmrestEUSpider(Spider):
             callback=self.parse_auth_token,
         )
 
-    def parse_auth_token(self, response):
+    def parse_auth_token(self, response: TextResponse) -> Iterable[JsonRequest]:
         auth_token = response.json()["token"]
         headers = {
             "Authorization": f"Bearer {auth_token}",
@@ -54,9 +56,13 @@ class AmrestEUSpider(Spider):
             callback=self.parse_restaurants_list,
         )
 
-    def parse_restaurants_list(self, response):
+    def parse_restaurants_list(self, response: TextResponse) -> Iterable[JsonRequest]:
+        request = response.request
+        if not request:
+            raise RuntimeError("Response object did not have a corresponding Request object to parse an authorization header from.")
+            return
         headers = {
-            "Authorization": response.request.headers.get("Authorization"),
+            "Authorization": request.headers.get("Authorization"),
             "Brand": self.api_brand_key,
         }
         if self.api_source:
@@ -76,7 +82,7 @@ class AmrestEUSpider(Spider):
                     callback=self.parse_restaurant_details,
                 )
 
-    def parse_restaurant_details(self, response):
+    def parse_restaurant_details(self, response: TextResponse) -> Iterable[Feature]:
         location = response.json()["details"]
         item = DictParser.parse(location)
         item["ref"] = str(location["id"])
@@ -96,7 +102,7 @@ class AmrestEUSpider(Spider):
 
         yield from self.post_process_item(item, response, location)
 
-    def post_process_item(self, item: Feature, response: Response, location: dict):
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         yield item
 
     @staticmethod

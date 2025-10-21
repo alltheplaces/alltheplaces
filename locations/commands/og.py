@@ -1,10 +1,14 @@
+import argparse
 import os
 import pathlib
 import pprint
+from typing import Iterable
 
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
+from scrapy.http import Response
 
+from locations.items import Feature
 from locations.open_graph_spider import OpenGraphSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -15,7 +19,7 @@ class MySpider(OpenGraphSpider):
     item_attributes = {}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def post_process_item(self, item, response, **kwargs):
+    def post_process_item(self, item, response: Response, **kwargs) -> Iterable[Feature]:
         print(item)
         yield item
 
@@ -25,13 +29,13 @@ class OgCommand(BaseRunSpiderCommand):
     requires_project = True
     default_settings = {"LOG_LEVEL": "WARNING"}
 
-    def syntax(self):
+    def syntax(self) -> str:
         return "[options] <file or URL to decode>"
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Decode a web page or file for opengraph with ATP scrapy library code"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         super().add_options(parser)
         parser.add_argument(
             "--wanted-types",
@@ -54,7 +58,7 @@ class OgCommand(BaseRunSpiderCommand):
             help="show crawl counters",
         )
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         if len(args) != 1:
             raise UsageError("Please specify single file or URL to load")
 

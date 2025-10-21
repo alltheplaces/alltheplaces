@@ -1,8 +1,8 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import unquote
 
-import chompjs
-from scrapy.http import JsonRequest, Request, Response
+from chompjs import parse_js_object
+from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -24,11 +24,11 @@ class ElfsightSpider(JSONBlobSpider):
     #     ),
     # }
 
-    host = None
+    host: str
     shop: str | None = None
-    api_key: str = ""
+    api_key: str
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[JsonRequest | Request]:
         if self.host == "core.service.elfsight.com":
             yield JsonRequest(f"https://{self.host}/p/boot/?w={self.api_key}")
         elif self.host == "shy.elfsight.com":
@@ -37,19 +37,20 @@ class ElfsightSpider(JSONBlobSpider):
             for url in self.start_urls:
                 yield Request(url)
 
-    def extract_json(self, response: Response) -> list:
+    def extract_json(self, response: TextResponse) -> list[dict]:
         if self.host == "core.service.elfsight.com" or self.host == "shy.elfsight.com":
-            data = chompjs.parse_js_object(response.text)
+            data = parse_js_object(response.text)
             return data["data"]["widgets"][self.api_key]["data"]["settings"]["markers"]
         else:
-            return chompjs.parse_js_object(unquote(response.xpath("//@data-elfsight-google-maps-options").get()))[
+            return parse_js_object(unquote(response.xpath("//@data-elfsight-google-maps-options").get()))[
                 "markers"
             ]
 
-    def pre_process_data(self, location: dict):
-        if "infoTitle" in location:
-            location["name"] = location.pop("infoTitle")
-        location["addr"] = location.pop("infoAddress")
-        location["phone"] = location.pop("infoPhone")
-        location["email"] = location.pop("infoEmail")
-        location["lat"], location["lon"] = location.get("coordinates").split(", ", 1)
+    def pre_process_data(self, feature: dict) -> None:
+        if "infoTitle" in feature:
+            feature["name"] = feature.pop("infoTitle")
+        feature["addr"] = feature.pop("infoAddress")
+        feature["phone"] = feature.pop("infoPhone")
+        feature["email"] = feature.pop("infoEmail")
+        if coordinates := feature.get("coordinates"):
+            feature["lat"], feature["lon"] = str(coordinates).split(", ", 1)

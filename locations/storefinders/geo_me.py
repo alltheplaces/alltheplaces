@@ -1,8 +1,10 @@
 import random
 import re
 
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 from scrapy.signals import spider_idle
 
 from locations.dict_parser import DictParser
@@ -38,7 +40,7 @@ from locations.items import Feature
 
 
 class GeoMeSpider(Spider):
-    api_key: str = ""
+    api_key: str
     api_version: str = "2"
     url_within_bounds_template: str = (
         "https://{}.geoapp.me/api/v{}/locations/within_bounds?sw[]={}&sw[]={}&ne[]={}&ne[]={}"
@@ -46,14 +48,14 @@ class GeoMeSpider(Spider):
     url_nearest_to_template: str = "https://{}.geoapp.me/api/v{}/locations/nearest_to?lat={}&lng={}&limit=50"
     _locations_found: dict = {}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         self.crawler.signals.connect(self.start_location_requests, signal=spider_idle)
         yield JsonRequest(
             url=self.url_within_bounds_template.format(self.api_key, self.api_version, -90, -180, 90, 180),
             callback=self.parse_bounding_box,
         )
 
-    def parse_bounding_box(self, response):
+    def parse_bounding_box(self, response: TextResponse) -> Iterable[JsonRequest]:
         for cluster in response.json().get("clusters", []):
             if b := cluster.get("bounds"):
                 yield JsonRequest(
@@ -65,11 +67,11 @@ class GeoMeSpider(Spider):
         for location in response.json().get("locations", []):
             self._locations_found[location["id"]] = (float(location["lat"]), float(location["lng"]))
 
-    def start_location_requests(self):
+    def start_location_requests(self) -> None:
         self.crawler.signals.disconnect(self.start_location_requests, signal=spider_idle)
         self.crawler.engine.crawl(self.get_next_location())
 
-    def parse_locations(self, response):
+    def parse_locations(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["locations"]:
             # Remove found location from the list of locations which
             # are still waiting to be found.
@@ -87,7 +89,7 @@ class GeoMeSpider(Spider):
         # Get the next location to do a "nearest to" search from.
         yield self.get_next_location()
 
-    def get_next_location(self) -> JsonRequest:
+    def get_next_location(self) -> JsonRequest | None:
         if len(self._locations_found) == 0:
             return
         next_search_location_id = random.choice(list(self._locations_found))
@@ -102,7 +104,7 @@ class GeoMeSpider(Spider):
         )
 
     @staticmethod
-    def extract_hours(item: Feature, location: dict):
+    def extract_hours(item: Feature, location: dict) -> None:
         item["opening_hours"] = OpeningHours()
         if location.get("open_status") == "twenty_four_hour":
             item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
@@ -125,5 +127,5 @@ class GeoMeSpider(Spider):
                     hours_string = f"{hours_string} {day}: {start_time} - {end_time}"
         item["opening_hours"].add_ranges_from_string(hours_string)
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

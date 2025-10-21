@@ -2,6 +2,7 @@ import csv
 import gzip
 import json
 import math
+from io import TextIOWrapper
 from itertools import groupby
 from typing import Iterable
 
@@ -103,7 +104,7 @@ def country_iseadgg_centroids(country_codes: list[str] | str, radius: int) -> li
     return unique_points
 
 
-def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) -> Iterable[tuple[float, float]]:
+def point_locations(areas_csv_file: list[str] | str, area_field_filter: list[str] | str = []) -> Iterable[tuple[float, float]]:
     """
     Get WGS84 point locations from requested *_centroids_*.csv file.
 
@@ -112,8 +113,8 @@ def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) ->
         point_locations("eu_centroids_40km_radius_country.csv", ["GB", "IE"])
         point_locations("us_centroids_50mile_radius_state.csv", "NY")
 
-    :param areas_csv_file: CSV file with lat/lon points
-    :param area_field_filter: optional list of area names to filter on
+    :param areas_csv_file: single CSV file or list of CSV files with lat/lon points
+    :param area_field_filter: optional area name or list of area names to filter on
     :return: iterable point locations being a a tuple consisting of latitude
              then longitude WGS84 coordinates.
 
@@ -125,9 +126,9 @@ def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) ->
                 return row[key]
         return None
 
-    if type(areas_csv_file) is not list:
+    if isinstance(areas_csv_file, str):
         areas_csv_file = [areas_csv_file]
-    if area_field_filter and type(area_field_filter) is not list:
+    if area_field_filter and isinstance(area_field_filter, str):
         area_field_filter = [area_field_filter]
     for csv_file in areas_csv_file:
         with open_searchable_points("{}".format(csv_file)) as file:
@@ -219,7 +220,7 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
 
             postcode_data = filter(
                 lambda x: not (x["population"].isnumeric() and int(x["population"]) < min_population),
-                csv.DictReader(points),
+                csv.DictReader(TextIOWrapper(points)),
             )
             if consolidate_cities:
                 postcode_data = sorted(postcode_data, key=lambda x: (x["state_name"], x["county_name"], x["city"]))
@@ -236,7 +237,7 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
         # French postal code database from https://datanova.legroupe.laposte.fr
 
         with gzip.open(get_searchable_points_path("postcodes/frzips.csv.gz"), mode="rt") as points:
-            for row in csv.DictReader(points):
+            for row in csv.DictReader(TextIOWrapper(points)):
                 yield {
                     "postal_region": row["Code_postal"],
                     "latitude": row["lat"],
@@ -405,7 +406,7 @@ def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float,
     return False
 
 
-def bbox_to_geojson(bounds: tuple[float, float]) -> dict:
+def bbox_to_geojson(bounds: tuple[float, float, float, float]) -> dict:
     """
     Convert a bounding box tuple into a Polygon GeoJSON geometry dict. Useful for debugging.
 
@@ -521,7 +522,7 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
     return None
 
 
-def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict:  # noqa: C901
+def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
     """
     Convert GJ2008 Point geometry with a projection other than EPSG:4326
     (WGS84) to RFC7946 Point geometry which must always have a projection of

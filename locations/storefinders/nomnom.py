@@ -1,10 +1,10 @@
 import re
 from datetime import date, timedelta
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib import parse as urlparse
 
 from scrapy import Spider
-from scrapy.http import JsonResponse, Request, Response
+from scrapy.http import JsonResponse, Request, JsonResponse
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -25,10 +25,10 @@ class NomNomSpider(Spider):
     domain: str | None = None
     use_calendar: bool = True
 
-    def _append_calendar_param(self, url):
+    def _append_calendar_param(self, url: str) -> str:
         if self.use_calendar:
             parsed = urlparse.urlparse(url)
-            params = urlparse.parse_qs(parsed.query)
+            params = dict(urlparse.parse_qs(parsed.query))
             today = date.today()
             params["nomnom"] = "calendars"
             params["nomnom_calendars_from"] = [today.strftime("%Y%m%d")]
@@ -38,7 +38,7 @@ class NomNomSpider(Spider):
         else:
             return url
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         if self.start_urls:
             for url in self.start_urls:
                 yield Request(self._append_calendar_param(url), dont_filter=True)
@@ -60,7 +60,7 @@ class NomNomSpider(Spider):
         "dispatch": "opening_hours:delivery",
     }
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: JsonResponse) -> Iterable[Feature]:
         if not isinstance(response, JsonResponse):
             self.logger.error(
                 f"Unexpected response type {type(response)} (content-type {response.headers.get(b'Content-Type')})"
@@ -90,6 +90,6 @@ class NomNomSpider(Spider):
 
             yield from self.post_process_item(item, response, location)
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: JsonResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

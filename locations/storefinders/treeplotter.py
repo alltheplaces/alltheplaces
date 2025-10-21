@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import FormRequest, Request, Response
+from scrapy.http import FormRequest, Request, Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -32,8 +32,8 @@ class TreePlotterSpider(Spider):
     """
 
     host: str = "pg-cloud.com"
-    folder: str = ""
-    layer_name: str = ""
+    folder: str
+    layer_name: str
 
     _species: dict = {}
 
@@ -41,7 +41,7 @@ class TreePlotterSpider(Spider):
     # robots.txt does not exist and returns a 404 HTML error page.
     custom_settings = {"COOKIES_ENABLED": True, "ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=f"https://{self.host}/{self.folder}/", callback=self.parse_cookie)
 
     def parse_cookie(self, response: Response) -> Iterable[FormRequest]:
@@ -62,7 +62,7 @@ class TreePlotterSpider(Spider):
             callback=self.parse_species_list,
         )
 
-    def parse_species_list(self, response: Response) -> Iterable[FormRequest]:
+    def parse_species_list(self, response: TextResponse) -> Iterable[FormRequest]:
         for species_id, species_details in response.json()["results"].items():
             self._species[species_id] = {}
             if latin_name := species_details.get("latin_name"):
@@ -101,7 +101,7 @@ class TreePlotterSpider(Spider):
             callback=self.parse_tree_ids,
         )
 
-    def parse_tree_ids(self, response: Response) -> Iterable[FormRequest]:
+    def parse_tree_ids(self, response: TextResponse) -> Iterable[FormRequest]:
         tree_ids = response.json()["results"]["pids"]
         if len(tree_ids) != response.json()["results"]["total"]["count"]:
             raise RuntimeError(
@@ -132,13 +132,12 @@ class TreePlotterSpider(Spider):
             callback=self.parse_tree_details,
         )
 
-    def parse_tree_details(self, response: Response) -> Iterable[Feature]:
+    def parse_tree_details(self, response: TextResponse) -> Iterable[Feature]:
         for tree in response.json()["results"][self.layer_name]["geojson"]["features"]:
-            properties = {
-                "ref": str(tree["properties"]["pid"]),
-                "geometry": tree["geometry"],
-            }
-            apply_category(Categories.NATURAL_TREE, properties)
+            item = Feature()
+            item["ref"] = str(tree["properties"]["pid"])
+            item["geometry"] = tree["geometry"]
+            apply_category(Categories.NATURAL_TREE, item)
             if not tree["properties"].get("species_common"):
                 if not tree["properties"].get("species_latin"):
                     # Generally a lack of species code means low quality data,
@@ -156,14 +155,14 @@ class TreePlotterSpider(Spider):
                     "Tree with PID={} has unknown species {}.".format(tree["properties"]["pid"], species_id)
                 )
             else:
-                properties["extras"].update(self._species[species_id])
+                item["extras"].update(self._species[species_id])
             if dbh_cm := tree["properties"].get("dbh_cm"):
-                properties["extras"]["diameter"] = f"{dbh_cm} cm"
+                item["extras"]["diameter"] = f"{dbh_cm} cm"
             elif dbh_dm := tree["properties"].get("dbh"):
                 dbh_cm = dbh_dm * 10
-                properties["extras"]["diameter"] = f"{dbh_cm} cm"
-            yield from self.post_process_item(Feature(**properties), response, tree)
+                item["extras"]["diameter"] = f"{dbh_cm} cm"
+            yield from self.post_process_item(item, response, tree)
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

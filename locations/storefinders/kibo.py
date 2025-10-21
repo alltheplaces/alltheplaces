@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
@@ -14,15 +16,15 @@ from locations.items import Feature
 
 class KiboSpider(Spider):
     page_size: int = 1000
-    api_filter: str = None
+    api_filter: str | None = None
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if self.api_filter:
             yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&filter={self.api_filter}")
         else:
             yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         for location in response.json()["items"]:
             self.pre_process_data(location)
             item = DictParser.parse(location)
@@ -58,8 +60,8 @@ class KiboSpider(Spider):
                 next_start_index = response.json()["startIndex"] + self.page_size
                 yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&startIndex={next_start_index}")
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item
 
-    def pre_process_data(self, location, **kwargs):
+    def pre_process_data(self, location: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""

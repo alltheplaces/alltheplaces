@@ -47,7 +47,7 @@ class NSI(metaclass=Singleton):
             self.nsi_json = self._request_file("dist/nsi.min.json")["nsi"]
             self.loaded = True
 
-    def get_wikidata_code_from_url(self, url: str = None) -> str | None:
+    def get_wikidata_code_from_url(self, url: str) -> str | None:
         """
         Attempt to return a single Wikidata code corresponding to
         the brand or operator of the supplied URL.
@@ -77,7 +77,7 @@ class NSI(metaclass=Singleton):
                     return wikidata_code
         return None
 
-    def lookup_wikidata(self, wikidata_code: str = None, include_dissolved=False) -> dict | None:
+    def lookup_wikidata(self, wikidata_code: str, include_dissolved: bool = False) -> dict | None:
         """
         Lookup wikidata code in the NSI.
         :param wikidata_code: wikidata code to lookup in the NSI
@@ -97,7 +97,7 @@ class NSI(metaclass=Singleton):
 
         return None
 
-    def iter_wikidata(self, label_to_find: str = None) -> Iterable[tuple[str, dict]]:
+    def iter_wikidata(self, label_to_find: str | None = None) -> Iterable[tuple[str, dict]]:
         """
         Lookup by fuzzy label match in the NSI.
         :param label_to_find: string to fuzzy match
@@ -115,7 +115,7 @@ class NSI(metaclass=Singleton):
                     if label_to_find_fuzzy in nsi_label_fuzzy:
                         yield (k, v)
 
-    def iter_country(self, location_code: str = None) -> Iterable[dict]:
+    def iter_country(self, location_code: str | None = None) -> Iterable[dict]:
         """
         Lookup by country code match in the NSI.
         :param location_code: country code or NSI location to search for
@@ -129,7 +129,7 @@ class NSI(metaclass=Singleton):
                 elif location_code.lower() in item["locationSet"].get("include"):
                     yield item
 
-    def iter_nsi(self, wikidata_code: str = None) -> Iterable[dict]:
+    def iter_nsi(self, wikidata_code: str | None = None) -> Iterable[dict]:
         """
         Iterate NSI for all items in nsi.json with a matching wikidata code
         :param wikidata_code: wikidata code to match, if None then all entries
