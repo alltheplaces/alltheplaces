@@ -180,7 +180,7 @@ class InsightsCommand(ScrapyCommand):
         self.show_counter("SPIDERS WITH NO BRAND DATA:", spider_empty_counter)
         self.show_counter("NSI MISSING WIKIDATA CODE:", spider_nsi_missing_counter)
 
-    def analyze_atp_nsi_osm(self, args: list[str], opts: argparse.Namespace) -> None: # noqa: C901
+    def analyze_atp_nsi_osm(self, args: list[str], opts: argparse.Namespace) -> None:  # noqa: C901
         """
         Trawl ATP, NSI and OSM for per wikidata code information.
         :param args: ATP output GeoJSON files / directories to load
