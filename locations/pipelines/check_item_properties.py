@@ -9,7 +9,9 @@ from locations.hours import OpeningHours
 from locations.items import Feature, get_lat_lon, set_lat_lon
 
 
-def check_field(item: Feature, spider: Spider, param: str, allowed_types: type | tuple[type], match_regex: Pattern | None = None) -> None:
+def check_field(
+    item: Feature, spider: Spider, param: str, allowed_types: type | tuple[type], match_regex: Pattern | None = None
+) -> None:
     if val := item.get(param):
         if not isinstance(val, allowed_types):
             spider.logger.error(

@@ -2,9 +2,8 @@ from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
-from locations.dict_parser import DictParser
-from locations.json_blob_spider import JSONBlobSpider
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 # To use this spider, specify api_brand_name as the brand name key existing
 # in calls to the Easy Locator API at https://easylocator.net/ajax/...

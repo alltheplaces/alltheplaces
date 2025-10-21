@@ -1,5 +1,5 @@
-from json import loads
 import re
+from json import loads
 from typing import AsyncIterator, Iterable
 
 from scrapy import Request, Selector, Spider
@@ -57,7 +57,9 @@ class AmastyStoreLocatorSpider(Spider):
     def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
         json_blob = re.search(r"items\":(\[.*\]),\"", response.text)
         if not json_blob or len(json_blob.groups()) != 1:
-            raise RuntimeError("Could not locate JSON blob to parse. Perhaps this storefinder is no longer using Amasty Store Locator?")
+            raise RuntimeError(
+                "Could not locate JSON blob to parse. Perhaps this storefinder is no longer using Amasty Store Locator?"
+            )
             return
         yield from self.parse_features(loads(json_blob.group(1)))
 

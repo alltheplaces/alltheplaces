@@ -19,9 +19,9 @@ class WordpressHeronFoodsSpider(Spider):
     radius: int = 600
     lat: float
     lon: float
-    #detected_rules = (
+    # detected_rules = (
     #    []
-    #)  # DetectionRequestRule(https://{self.domain}/wp-admin/admin-ajax.php, but its a POST and has get_stores), or DetectionResponseRule(jsblob with na zp lng lon ID)
+    # )  # DetectionRequestRule(https://{self.domain}/wp-admin/admin-ajax.php, but its a POST and has get_stores), or DetectionResponseRule(jsblob with na zp lng lon ID)
 
     def make_request(self, lat: float, lon: float, radius: int) -> FormRequest:
         return FormRequest(

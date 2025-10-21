@@ -87,7 +87,9 @@ class Where2GetItSpider(Spider):
     api_filter_admin_level: int = 0
     api_limit: int = 10000
 
-    def make_request(self, country_code: str | None = None, state_code: str | None = None, province_code: str | None = None) -> Iterable[JsonRequest]:
+    def make_request(
+        self, country_code: str | None = None, state_code: str | None = None, province_code: str | None = None
+    ) -> Iterable[JsonRequest]:
         where_clause = {}
         location_clause = {}
         if country_code:

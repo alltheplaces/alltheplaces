@@ -1,5 +1,5 @@
-from json import loads
 import re
+from json import loads
 from typing import AsyncIterator, Iterable
 
 from scrapy import Request, Spider

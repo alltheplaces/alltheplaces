@@ -2,7 +2,6 @@ import json
 from typing import Any, AsyncIterator, Iterable
 from urllib.parse import urlencode
 
-from scrapy import Request
 from scrapy.http import JsonRequest, TextResponse
 from scrapy.spiders import Spider
 

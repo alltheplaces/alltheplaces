@@ -31,12 +31,16 @@ class TrackSourcesMiddleware:
             spider.logger.error("Failed to parse @source_uri: {}".format(item["extras"]["@source_uri"]))
             spider.crawler.stats.inc_value("atp/parse_error/@source_uri")
 
-    def process_spider_output(self, response: Response, result: Iterable[Request | Item], spider: Spider) -> Iterable[Item]:
+    def process_spider_output(
+        self, response: Response, result: Iterable[Request | Item], spider: Spider
+    ) -> Iterable[Item]:
         for item in result:
             self._process_item(response, item, spider)
             yield item
 
-    async def process_spider_output_async(self, response: Response, result: AsyncIterator[Request | Item], spider: Spider) -> AsyncIterator[Item]:
+    async def process_spider_output_async(
+        self, response: Response, result: AsyncIterator[Request | Item], spider: Spider
+    ) -> AsyncIterator[Item]:
         async for item in result:
             self._process_item(response, item, spider)
             yield item

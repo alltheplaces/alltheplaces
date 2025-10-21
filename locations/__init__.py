@@ -15,6 +15,6 @@ try:
         session_factory = settings.pop("session_factory", None)
         # TODO: perhaps allow override of session_factory if a use case for
         # such is identified in the future. CachedSession is the default.
-        requests_cache.install_cache(cache_name, backend, session_factory = CachedSession, **settings)
+        requests_cache.install_cache(cache_name, backend, session_factory=CachedSession, **settings)
 except Exception as e:
     logging.warning(f"requests_cache install failed: {e}")

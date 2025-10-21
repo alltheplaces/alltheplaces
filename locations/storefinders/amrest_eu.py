@@ -59,7 +59,9 @@ class AmrestEUSpider(Spider):
     def parse_restaurants_list(self, response: TextResponse) -> Iterable[JsonRequest]:
         request = response.request
         if not request:
-            raise RuntimeError("Response object did not have a corresponding Request object to parse an authorization header from.")
+            raise RuntimeError(
+                "Response object did not have a corresponding Request object to parse an authorization header from."
+            )
             return
         headers = {
             "Authorization": request.headers.get("Authorization"),

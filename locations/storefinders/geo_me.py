@@ -1,6 +1,5 @@
 import random
 import re
-
 from typing import AsyncIterator, Iterable
 
 from scrapy import Spider

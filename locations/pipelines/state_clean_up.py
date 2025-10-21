@@ -1,6 +1,5 @@
 import reverse_geocoder
 from geonamescache import GeonamesCache
-
 from scrapy import Spider
 
 from locations.items import Feature, get_lat_lon

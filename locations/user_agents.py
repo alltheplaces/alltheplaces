@@ -1,5 +1,4 @@
 from requests import __version__ as REQUESTS_VERSION
-
 from scrapy import __version__ as SCRAPY_VERSION
 
 from locations import __version__ as ATP_VERSION

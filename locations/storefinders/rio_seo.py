@@ -1,7 +1,7 @@
-from json import loads, JSONDecodeError
+from json import JSONDecodeError, loads
 from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser

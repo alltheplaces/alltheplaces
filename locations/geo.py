@@ -104,7 +104,9 @@ def country_iseadgg_centroids(country_codes: list[str] | str, radius: int) -> li
     return unique_points
 
 
-def point_locations(areas_csv_file: list[str] | str, area_field_filter: list[str] | str = []) -> Iterable[tuple[float, float]]:
+def point_locations(
+    areas_csv_file: list[str] | str, area_field_filter: list[str] | str = []
+) -> Iterable[tuple[float, float]]:
     """
     Get WGS84 point locations from requested *_centroids_*.csv file.
 

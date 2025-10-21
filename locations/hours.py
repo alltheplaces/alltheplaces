@@ -994,7 +994,13 @@ class OpeningHours:
     def __bool__(self):
         return bool(self.day_hours or self.days_closed)
 
-    def add_days_range(self, days: list[str], open_time: str | time.struct_time, close_time: str | time.struct_time, time_format: str = "%H:%M"):
+    def add_days_range(
+        self,
+        days: list[str],
+        open_time: str | time.struct_time,
+        close_time: str | time.struct_time,
+        time_format: str = "%H:%M",
+    ):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
 
@@ -1029,7 +1035,14 @@ class OpeningHours:
             self.day_hours.pop(day, None)
             self.days_closed.add(day)
 
-    def add_range(self, day, open_time: str | time.struct_time, close_time: str | time.struct_time, time_format: str = "%H:%M", closed: list[str] = CLOSED_EN):
+    def add_range(
+        self,
+        day,
+        open_time: str | time.struct_time,
+        close_time: str | time.struct_time,
+        time_format: str = "%H:%M",
+        closed: list[str] = CLOSED_EN,
+    ):
         day = sanitise_day(day)
 
         if day not in DAYS:
@@ -1279,7 +1292,9 @@ class OpeningHours:
         return days_regex
 
     @staticmethod
-    def replace_named_times(hours_string: str, named_times: dict[str, list[str]] = NAMED_TIMES_EN, time_24h: bool = True) -> str:
+    def replace_named_times(
+        hours_string: str, named_times: dict[str, list[str]] = NAMED_TIMES_EN, time_24h: bool = True
+    ) -> str:
         """
         Replaces named times (e.g. Midnight) in a string with their
         12h equivalent (e.g. 12:00AM) or 24h equivalent (e.g 00:00).
@@ -1406,7 +1421,9 @@ class OpeningHours:
 
     @staticmethod
     def days_in_day_range(
-        day_range: list[str], days: dict[str, str] = DAYS_EN, named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN
+        day_range: list[str],
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
     ) -> list[str]:
         """ """
         day_list = []

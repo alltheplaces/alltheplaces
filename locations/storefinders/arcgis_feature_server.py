@@ -184,7 +184,9 @@ class ArcGISFeatureServerSpider(Spider):
         if "&resultRecordCount=" in response.url:
             request = response.request
             if not request:
-                raise RuntimeError("Response object did not have a corresponding Request object to parse URL parameters from.")
+                raise RuntimeError(
+                    "Response object did not have a corresponding Request object to parse URL parameters from."
+                )
                 return
             max_record_count = int(request.url.split("&resultRecordCount=", 1)[1].split("&", 1)[0])
             if len(features) == max_record_count:

@@ -1033,7 +1033,9 @@ class HealthcareSpecialities(Enum):
     WOUND_TREATMENT = "wound_treatment"
 
 
-def apply_healthcare_specialities(speciality: HealthcareSpecialities | list[HealthcareSpecialities], item: Feature | dict) -> None:
+def apply_healthcare_specialities(
+    speciality: HealthcareSpecialities | list[HealthcareSpecialities], item: Feature | dict
+) -> None:
     """
     Apply healthcare speciality tags to a feature. If the feature already has
     healthcare speciality tags defined, this function will append to the list of
@@ -1151,7 +1153,9 @@ class Sells(Enum):
 
 
 # TODO: something similar for fuel types
-def map_payment(item: Feature | dict, source_payment_method_name: str, enum: type[PaymentMethods] | type[FuelCards]) -> bool:
+def map_payment(
+    item: Feature | dict, source_payment_method_name: str, enum: type[PaymentMethods] | type[FuelCards]
+) -> bool:
     """
     Apply appropriate payment method tag to an item if given string is found
     in an enum.

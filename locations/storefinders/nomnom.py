@@ -4,7 +4,7 @@ from typing import AsyncIterator, Iterable
 from urllib import parse as urlparse
 
 from scrapy import Spider
-from scrapy.http import JsonResponse, Request, JsonResponse
+from scrapy.http import JsonResponse, Request
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser

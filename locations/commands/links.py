@@ -3,7 +3,6 @@ import os
 import pathlib
 from typing import Iterable
 
-
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 from scrapy.http import Response

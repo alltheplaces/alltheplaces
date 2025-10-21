@@ -1,10 +1,10 @@
 import base64
 import datetime
 import hashlib
-from io import BytesIO, StringIO
 import json
 import logging
 import uuid
+from io import BytesIO, StringIO
 from typing import Any, Generator, Type
 
 from scrapy import Item, Spider
@@ -178,7 +178,9 @@ class GeoJsonExporter(JsonItemExporter):
 
         super().export_item(item)
 
-    def _get_serialized_fields(self, item: Item, default_value: Any = None, include_empty: bool | None = None) -> list[tuple]:
+    def _get_serialized_fields(
+        self, item: Item, default_value: Any = None, include_empty: bool | None = None
+    ) -> list[tuple]:
         feature = [
             ("type", "Feature"),
             ("id", compute_hash(item)),

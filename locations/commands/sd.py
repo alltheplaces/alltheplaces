@@ -8,7 +8,6 @@ from typing import Iterable
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 from scrapy.http import TextResponse
-from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import Feature
