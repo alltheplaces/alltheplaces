@@ -14,9 +14,9 @@ class HotterGBSpider(JSONBlobSpider):
     start_urls = [
         "https://storelocator.hotter.com/wp-admin/admin-ajax.php?action=store_search&lat=53.53054&lng=-2.75425&max_results=250&search_radius=25&filter=4&autoload=1"
     ]
-    user_agent = BROWSER_DEFAULT
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "storelocator.hotter.com",
             "Alt-Used": "storelocator.hotter.com",
