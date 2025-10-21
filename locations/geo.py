@@ -189,8 +189,8 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
     :return: post code regions with possible extras
     """
     if country_code == "GB":
-        with gzip.open(get_searchable_points_path("postcodes/outward_gb.json.gz")) as points:
-            for outward_code in json.load(points):
+        with gzip.open(get_searchable_points_path("postcodes/outward_gb.json.gz"), mode="rb") as points:
+            for outward_code in json.load(TextIOWrapper(points)):
                 yield {
                     "postal_region": outward_code["postcode"],
                     "city": outward_code["town"],
@@ -209,7 +209,7 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
         # easily found though links on the root domain. The link must be clearly visible to the human eye.
         # The backlink must be placed before the Customer uses the Database in production.
         #
-        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt") as points:
+        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rb") as points:
 
             def create_postcode_output_dict(postcode: dict) -> dict:
                 return {
@@ -238,7 +238,7 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
     elif country_code == "FR":
         # French postal code database from https://datanova.legroupe.laposte.fr
 
-        with gzip.open(get_searchable_points_path("postcodes/frzips.csv.gz"), mode="rt") as points:
+        with gzip.open(get_searchable_points_path("postcodes/frzips.csv.gz"), mode="rb") as points:
             for row in csv.DictReader(TextIOWrapper(points)):
                 yield {
                     "postal_region": row["Code_postal"],

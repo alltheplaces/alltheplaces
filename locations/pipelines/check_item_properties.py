@@ -105,6 +105,10 @@ class CheckItemPropertiesPipeline:
 
             if lat and lon:
                 set_lat_lon(item, lat, lon)
+            else:
+                item.pop("lat", None)
+                item.pop("lon", None)
+                item.pop("geometry", None)
 
         if not (item.get("geometry") or get_lat_lon(item)):
             if spider.crawler.stats:

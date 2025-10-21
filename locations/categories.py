@@ -848,7 +848,9 @@ def apply_clothes(clothes: type[Clothes] | list[type[Clothes]], item: Feature | 
             current.append(v.value)
             apply_yes_no(f"clothes:{v.value}", item, True)
 
-    item["extras"]["clothes"] = ";".join(current)
+    current.sort()
+    if current:
+        item["extras"]["clothes"] = ";".join(current)
 
 
 class Vending(Enum):
@@ -889,7 +891,9 @@ def add_vending(vending: type[Vending] | list[type[Vending]], item: Feature | di
         if v.value not in current:
             current.append(v.value)
 
-    item["extras"]["vending"] = ";".join(current)
+    current.sort()
+    if current:
+        item["extras"]["vending"] = ";".join(current)
 
 
 class Sport(Enum):
@@ -929,7 +933,9 @@ def add_sport(sport: Sport | list[type[Sport]], item: Feature | dict) -> None:
         if v.value not in current:
             current.append(v.value)
 
-    item["extras"]["sport"] = ";".join(current)
+    current.sort()
+    if current:
+        item["extras"]["sport"] = ";".join(current)
 
 
 class HealthcareSpecialities(Enum):
@@ -1057,7 +1063,9 @@ def apply_healthcare_specialities(
         if v.value not in current:
             current.append(v.value)
 
-    item["extras"]["healthcare:speciality"] = ";".join(current)
+    current.sort()
+    if current:
+        item["extras"]["healthcare:speciality"] = ";".join(current)
 
 
 class MonitoringTypes(Enum):
