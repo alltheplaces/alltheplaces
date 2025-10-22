@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Request
 
@@ -12,7 +12,7 @@ class AlbertCZSpider(JSONBlobSpider):
     item_attributes = {"brand": "Albert", "brand_wikidata": "Q9144241"}
     start_urls = ["https://www.albert.cz/api/v1/"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(
                 url,

@@ -1,5 +1,7 @@
-import scrapy
-from scrapy import FormRequest, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest, Request
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -16,10 +18,10 @@ class ArcelikGlobalTRSpider(Spider):
     no_refs = True
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for brand in BRANDS.keys():
             url = f"https://www.{brand}.com.tr/{brand}-bayileri"
-            yield scrapy.Request(url, cb_kwargs={"brand": brand})
+            yield Request(url, cb_kwargs={"brand": brand})
 
     def parse(self, response, **kwargs):
         brand = kwargs["brand"]

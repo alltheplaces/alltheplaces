@@ -1,15 +1,17 @@
 import json
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 
 
-class AgataMeblePLSpider(scrapy.Spider):
+class AgataMeblePLSpider(Spider):
     name = "agata_meble_pl"
     item_attributes = {"brand": "Agata Meble", "brand_wikidata": "Q9141928"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.agatameble.pl/graphql"
         query = """
         query PickupLocations($deviceType: Int!) {
@@ -55,7 +57,7 @@ class AgataMeblePLSpider(scrapy.Spider):
 
         headers = {"Content-Type": "application/json"}
 
-        yield scrapy.Request(url=url, method="POST", body=json.dumps(payload), headers=headers, callback=self.parse)
+        yield Request(url=url, method="POST", body=json.dumps(payload), headers=headers, callback=self.parse)
 
     def parse(self, response):
         for location in response.json()["data"]["pickupLocations"]["items"]:

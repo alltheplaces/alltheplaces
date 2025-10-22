@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
@@ -12,7 +12,7 @@ class AsterPharmacyAESpider(Spider):
     item_attributes = {"brand": "Aster Pharmacy", "brand_wikidata": "Q124453575"}
     no_refs = True
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://www.asterpharmacy.ae/aster-api/REST/getStore", data={})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
