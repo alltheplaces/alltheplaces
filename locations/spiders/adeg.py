@@ -1,6 +1,6 @@
 from typing import AsyncIterator
 
-from scrapy import Spider
+from scrapy import Selector, Spider
 from scrapy.http import Request
 
 from locations.hours import OpeningHours
@@ -25,7 +25,7 @@ class AdegSpider(Spider):
     async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(1)
 
-    def get_page(self, n):
+    def get_page(self, n: int) -> Request:
         return Request(
             f"https://www.adeg.at/services/maerkte-oeffnungszeiten?tx_solr[page]={n}&type=7382&distance=1000",
             meta={"page": n},
@@ -41,7 +41,7 @@ class AdegSpider(Spider):
             lat, lon = store["coordinates"].split(",")
 
             oh = OpeningHours()
-            for row in scrapy.Selector(text=store["openingHours"]).xpath(".//dt"):
+            for row in Selector(text=store["openingHours"]).xpath(".//dt"):
                 day = wochentag[row.xpath("normalize-space()").get().removesuffix(":")]
                 for interval in row.xpath("./following-sibling::dd[position()=1]/span/text()").extract():
                     open_time, close_time = interval.strip(",").split(" \u2013 ")
