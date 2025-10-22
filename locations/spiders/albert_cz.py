@@ -1,6 +1,6 @@
-from typing import AsyncIterator, Iterable
+from typing import AsyncIterator
 
-from scrapy.http import JsonRequest, Request
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours

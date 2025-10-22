@@ -1,5 +1,5 @@
 import json
-from typing import Any, AsyncIterator, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Spider

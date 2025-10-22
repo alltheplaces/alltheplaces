@@ -1,6 +1,6 @@
 from typing import AsyncIterator, Iterable
 
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature, set_closed
