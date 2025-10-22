@@ -59,9 +59,9 @@ class BeSTAddressesBESpider(AddressSpider):
 
             item["extras"] = {
                 # IDs
-                "municipality_id": row.get("municipality_id"),
-                "street_id": row.get("street_id"),
-                "box_number": row.get("box_number"),
+                "ref:municipality": row.get("municipality_id"),
+                "ref:street": row.get("street_id"),
+                "addr:unit": row.get("box_number"),
                 # Multilingual fields
                 "addr:city:nl": row.get("municipality_name_nl"),
                 "addr:city:fr": row.get("municipality_name_fr"),
