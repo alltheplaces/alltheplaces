@@ -14,7 +14,6 @@ class BancoSabadellESSpider(Spider):
     item_attributes = {"brand": "Banco Sabadell", "brand_wikidata": "Q762330"}
 
     async def start(self) -> AsyncIterator[Request]:
-    def start_requests(self):
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", "ES"):
             for type in ["oficinas", "cajeros"]:
                 yield Request(
