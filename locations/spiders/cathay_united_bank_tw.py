@@ -12,7 +12,7 @@ class CathayUnitedBankTWSpider(Spider):
     item_attributes = {"brand": "國泰世華商業銀行", "brand_wikidata": "Q702656"}
 
     async def start(self) -> AsyncIterator[Request]:
-        yield scrapy.Request(
+        yield Request(
             url="https://www.cathaybk.com.tw/CathayBK/service/Locations/LocationsGetEnData.ashx", callback=self.parse
         )
 
