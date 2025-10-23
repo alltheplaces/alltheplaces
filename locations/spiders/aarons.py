@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
@@ -18,7 +18,7 @@ class AaronsSpider(Spider):
             cb_kwargs=dict(offset=offset, limit=limit),
         )
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

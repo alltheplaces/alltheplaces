@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
@@ -14,7 +14,7 @@ class ArbysCASpider(Spider):
     name = "arbys_ca"
     item_attributes = ArbysUSSpider.item_attributes
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://arbys.ca/asmx/WebMethods.asmx/getMapStoresList",
             data={
