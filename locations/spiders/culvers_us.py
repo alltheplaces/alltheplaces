@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, Iterable
 
 import scrapy
+from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -11,7 +12,7 @@ class CulversUSSpider(scrapy.Spider):
     name = "culvers_us"
     item_attributes = {"brand": "Culver's", "brand_wikidata": "Q1143589"}
 
-    def start_requests(self):
+    async def start(self) -> Iterable[Request]:
         for city in city_locations("US", 100000):
             yield JsonRequest(
                 url=f'https://www.culvers.com/api/locator/getLocations?lat={city["latitude"]}&long={city["longitude"]}&radius=600000&limit=10000'
