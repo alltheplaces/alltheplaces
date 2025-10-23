@@ -1,7 +1,7 @@
 import json
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -13,7 +13,7 @@ class BurgerKingTWSpider(Spider):
     name = "burger_king_tw"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.burgerking.com.tw/AJhandler/frontierHandler.ashx",
             data={"what": "getDeliveryInfo", "args": 520000, "list": {"type": 20, "view": 1}, "args2": ""},

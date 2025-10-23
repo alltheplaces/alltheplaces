@@ -1,6 +1,6 @@
 import re
 from html import unescape
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
@@ -18,7 +18,7 @@ class BellafloraATSpider(Spider):
     start_urls = ["https://www.bellaflora.at/filialfinder"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
             "X-Requested-With": "XMLHttpRequest",
         }

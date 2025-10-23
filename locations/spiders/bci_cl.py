@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -18,7 +18,7 @@ class BciCLSpider(Spider):
             cb_kwargs=dict(location_type=location_type, page=page),
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for location_type in ["sucursal", "cajero", "centros-empresarios", "centros-nace"]:
             yield self.make_request(location_type, 1)
 

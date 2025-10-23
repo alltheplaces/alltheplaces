@@ -1,8 +1,9 @@
 from copy import deepcopy
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
 from geonamescache import GeonamesCache
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -28,7 +29,7 @@ from locations.items import Feature
 """
 
 
-class BmwGroupSpider(scrapy.Spider):
+class BmwGroupSpider(Spider):
     name = "bmw_group"
     BMW_MOTORBIKE = "BMW_MOTORBIKE"
     BRAND_MAPPING = {
@@ -40,10 +41,10 @@ class BmwGroupSpider(scrapy.Spider):
         BMW_MOTORBIKE: {"brand": "BMW Motorrad", "brand_wikidata": "Q249173"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country in GeonamesCache().get_countries().keys():
             url = f"https://c2b-services.bmw.com/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/-/pois?cached=off&language=en&lat=0&lng=0&maxResults=10000&unit=km&showAll=true&country={country}"
-            yield scrapy.Request(
+            yield Request(
                 url=url, callback=self.parse, headers={"Accept": "application/json", "Content-Type": "application/json"}
             )
 
