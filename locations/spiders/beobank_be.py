@@ -1,6 +1,7 @@
-import scrapy
-from scrapy import FormRequest, Selector
-from scrapy.http import Response
+from typing import AsyncIterator
+
+from scrapy import Selector
+from scrapy.http import FormRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -13,7 +14,7 @@ class BeobankBESpider(StructuredDataSpider):
     item_attributes = {"brand": "Beobank", "brand_wikidata": "Q14911971"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
             "Accept": "text/json; charset=utf-8, text/xml; charset=utf-8",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -64,7 +65,7 @@ class BeobankBESpider(StructuredDataSpider):
         if kwargs["location_type"] == "1":
             for location in raw_data.xpath("//ul//li"):
                 link = location.xpath(".//@href").get()
-                yield scrapy.Request(url=link, callback=self.parse_sd)
+                yield Request(url=link, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.BANK, item)

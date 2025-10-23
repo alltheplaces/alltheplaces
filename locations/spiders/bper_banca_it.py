@@ -1,6 +1,6 @@
-from typing import Any, Iterable, Optional
+from typing import Any, AsyncIterator, Optional
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -17,7 +17,7 @@ class BperBancaITSpider(Spider):
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.bper.it/o/bper-api/subsidiary/search/categories",
             data={"abiCode": "", "groupId": "2084926082", "categoryIds": []},

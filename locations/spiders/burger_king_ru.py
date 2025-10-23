@@ -1,9 +1,9 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
@@ -19,7 +19,7 @@ class BurgerKingRUSpider(Spider):
     api_url = "https://orderapp.burgerkingrus.ru/api/v3/restaurant/list"
     custom_settings = {"USER_AGENT": CHROME_LATEST}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.api_url)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

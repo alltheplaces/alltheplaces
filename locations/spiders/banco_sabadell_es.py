@@ -1,19 +1,23 @@
-import scrapy
+from typing import AsyncIterator
+
 import xmltodict
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.geo import point_locations
 from locations.items import Feature
 
 
-class BancoSabadellESSpider(scrapy.Spider):
+class BancoSabadellESSpider(Spider):
     name = "banco_sabadell_es"
     item_attributes = {"brand": "Banco Sabadell", "brand_wikidata": "Q762330"}
 
+    async def start(self) -> AsyncIterator[Request]:
     def start_requests(self):
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", "ES"):
             for type in ["oficinas", "cajeros"]:
-                yield scrapy.Request(
+                yield Request(
                     f"https://www.bancsabadell.com/cs/Satellite?pagename=GrupoBS/GBS_Gmaps/servicioGMaps&long={lon}&lat={lat}&{type}=true",
                     cb_kwargs={"type": type},
                 )
