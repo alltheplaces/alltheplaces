@@ -128,13 +128,15 @@ class RosettaAPRSpider(Spider):
                 obfuscated_js_array = js_blob_candidate[m.start(0) :].split("[", 1)[1].split("];", 1)[0]
                 obfuscated_js_array = list(obfuscated_js_array.split(","))
                 obfuscated_js_array = list(map(lambda x: x.strip('"'), obfuscated_js_array))
-                obfuscated_js_array = list(map(lambda x: re.sub(r'\\u([0-9a-f]{2})([0-9a-f]{2})', r'\\x\1\\x\2', x), obfuscated_js_array))
+                obfuscated_js_array = list(
+                    map(lambda x: re.sub(r"\\u([0-9a-f]{2})([0-9a-f]{2})", r"\\x\1\\x\2", x), obfuscated_js_array)
+                )
                 obfuscated_js_array = list(
                     map(
                         lambda x: bytes.fromhex(x.strip('"').replace("\\x", " ")).decode(
                             "utf-8", errors="backslashreplace"
                         ),
-                        obfuscated_js_array
+                        obfuscated_js_array,
                     )
                 )
                 for pair in pairwise(obfuscated_js_array):
