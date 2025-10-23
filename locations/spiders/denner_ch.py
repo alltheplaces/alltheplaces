@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
@@ -18,7 +18,7 @@ class DennerCHSpider(Spider):
             cb_kwargs={"current_page": page},
         )
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, current_page: int) -> Any:
