@@ -1,14 +1,17 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class CathayUnitedBankTWSpider(scrapy.Spider):
+class CathayUnitedBankTWSpider(Spider):
     name = "cathay_united_bank_tw"
     item_attributes = {"brand": "國泰世華商業銀行", "brand_wikidata": "Q702656"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield scrapy.Request(
             url="https://www.cathaybk.com.tw/CathayBK/service/Locations/LocationsGetEnData.ashx", callback=self.parse
         )
