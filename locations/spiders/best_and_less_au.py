@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterable
+from typing import AsyncIterator
 from urllib.parse import quote
 
 from scrapy import Spider

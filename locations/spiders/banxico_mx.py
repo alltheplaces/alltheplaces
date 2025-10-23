@@ -1,6 +1,6 @@
 import io
 import zipfile
-from typing import Any, AsyncIterator, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import FormRequest, JsonRequest, Request, Response
