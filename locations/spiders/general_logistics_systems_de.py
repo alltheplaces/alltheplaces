@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -13,7 +13,7 @@ class GeneralLogisticsSystemsDESpider(Spider):
     name = "general_logistics_systems_de"
     allowed_domains = ["gls-pakete.de"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for latitude, longitude in point_locations("eu_centroids_40km_radius_country.csv", ["DE"]):
             yield JsonRequest(
                 url="https://api.gls-pakete.de/parcelshops?latitude={:0.5}&longitude={:0.5}&distance=40".format(
