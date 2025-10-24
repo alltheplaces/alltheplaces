@@ -19,6 +19,10 @@ class NissanCZSpider(JSONBlobSpider):
         item["ref"] = str(feature.get("code"))
         item["lat"] = feature.get("lattitude")
         item["street_address"] = item.pop("addr_full", None)
+        if item.get("phone"):
+            item["phone"] = item["phone"].replace("Telefon:", "").replace("Mobil:", "").replace("\n", ";")
+        service_phone = feature.get("phone2")
+
         if feature.get("Service #PV#"):
             car_sales = item.deepcopy()
             car_sales["ref"] += "_car_sales"
@@ -27,6 +31,8 @@ class NissanCZSpider(JSONBlobSpider):
         if feature.get("Service #SC#"):
             car_service = item.deepcopy()
             car_service["ref"] += "_car_service"
+            if service_phone:
+                car_service["phone"] = service_phone
             apply_category(Categories.SHOP_CAR_REPAIR, car_service)
             yield car_service
         if feature.get("Service #TR#"):
@@ -37,5 +43,7 @@ class NissanCZSpider(JSONBlobSpider):
         if feature.get("Service #TAS#"):
             truck_service = item.deepcopy()
             truck_service["ref"] += "_truck_service"
+            if service_phone:
+                truck_service["phone"] = service_phone
             apply_category(Categories.SHOP_TRUCK_REPAIR, truck_service)
             yield truck_service
