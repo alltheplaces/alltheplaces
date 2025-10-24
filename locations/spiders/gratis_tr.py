@@ -1,5 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
 from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -13,8 +15,8 @@ class GratisTRSpider(Spider):
     ]
     item_attributes = {"brand": "Gratis", "brand_wikidata": "Q28605813"}
 
-    def start_requests(self):
-        yield scrapy.Request(headers={"Accept": "application/json"}, url=self.start_urls[0], callback=self.parse)
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(url=self.start_urls[0])
 
     def parse(self, response):
         for store in response.json()["storeList"]:

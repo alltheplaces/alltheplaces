@@ -1,8 +1,8 @@
 import string
-from typing import Any
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
@@ -13,7 +13,7 @@ class FnbBanksZASpider(Spider):
     name = "fnb_banks_za"
     item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         # Search claims to accept search by province, in practice this returns barely any results
         # Single letter searches return no results, so doing this instead
         letter_pairs = [i + j for i in string.ascii_lowercase for j in string.ascii_lowercase]

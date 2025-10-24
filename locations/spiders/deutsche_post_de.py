@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -31,7 +33,7 @@ class DeutschePostDESpider(Spider):
         "POSTSTATION": None,
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in point_locations("germany_grid_15km.csv"):
             yield JsonRequest(
                 f"https://www.deutschepost.de/int-postfinder/webservice/rest/v1/nearbySearch?address={lat},{lon}",

@@ -1,9 +1,8 @@
 import json
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import FormRequest, Request
-from scrapy.http import Response
+from scrapy.http import FormRequest, Response
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
@@ -14,7 +13,7 @@ class GoOutdoorsGBSpider(Spider):
     name = "go_outdoors_gb"
     item_attributes = {"brand": "Go Outdoors", "brand_wikidata": "Q75293941"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.gooutdoors.co.uk/google/store-locator",
             formdata={"ac_store_limit": "300"},

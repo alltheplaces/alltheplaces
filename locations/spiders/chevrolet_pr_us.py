@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -19,7 +19,7 @@ class ChevroletPRUSSpider(Spider):
     allowed_domains = ["chevrolet.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         headers = {
             "clientapplicationid": "quantum",
             "locale": "en-US",

@@ -1,6 +1,6 @@
 from html import unescape
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Request, Response
@@ -51,7 +51,7 @@ class CottonOnGroupSpider(Spider):
         "ZA": ("-30.559482", "22.937506"),
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://cottonon.com/AU/store-finder/", callback=self.parse_csrf_token)
 
     def parse_csrf_token(self, response: Response) -> Iterable[FormRequest]:

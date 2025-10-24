@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import FormRequest
 
 from locations.categories import Categories, Sells, apply_category
@@ -11,7 +13,7 @@ class CoopCentroItaliaITSpider(JSONBlobSpider):
     BRAND_COOP = {"brand": "Coop Centro Italia", "brand_wikidata": "Q3689971"}
     BRAND_SUPERCONTI = {"brand": "Superconti", "brand_wikidata": "Q69381940"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         data = {"grant_type": "client_credentials", "client_id": "fatt0r!a", "client_secret": "fattM4tt!922"}
         yield FormRequest(f"{self.api_domain}/api/get-token", formdata=data, callback=self.after_token)
 
