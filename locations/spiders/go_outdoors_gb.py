@@ -41,4 +41,11 @@ class GoOutdoorsGBSpider(Spider):
                 DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
                 item["opening_hours"].add_range(DAYS_FROM_SUNDAY[day], open, close)
 
+            if item["name"].startswith("GO Express "):
+                item["branch"] = item.pop("name").removeprefix("GO Express ")
+                item["name"] = "Go Outdoors Express"
+            else:
+                item["branch"] = item.pop("name").removeprefix("GO Outdoors ")
+                item["name"] = "Go Outdoors"
+
             yield item
