@@ -22,6 +22,7 @@ class NissanCZSpider(JSONBlobSpider):
         if item.get("phone"):
             item["phone"] = item["phone"].replace("Telefon:", "").replace("Mobil:", "").replace("\n", ";")
         service_phone = feature.get("phone2")
+        item["extras"]["fax"] = feature.get("fax")
 
         if feature.get("Service #PV#"):
             car_sales = item.deepcopy()
