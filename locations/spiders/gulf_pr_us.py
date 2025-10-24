@@ -1,9 +1,10 @@
 import re
 from html import unescape
+from typing import AsyncIterator
 
 from chompjs import parse_js_object
-from scrapy import Request, Selector, Spider
-from scrapy.http import FormRequest
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest, Request
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
@@ -31,7 +32,7 @@ class GulfPRUSSpider(Spider):
             meta={"page": page},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(1)
 
     def parse(self, response):
