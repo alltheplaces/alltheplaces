@@ -12,7 +12,9 @@ class FineWineGoodSpiritsSpider(Spider):
         "brand": "Fine Wine & Good Spirits",
         "brand_wikidata": "Q64514776",
     }
-    start_urls = ["https://www.finewineandgoodspirits.com/webapp/wcs/stores/servlet/FindStoreView?storeId=10051&langId=-1&catalogId=10051&pageNum=1&listSize=1000&category=&city=&zip_code=&county=All+Stores&storeNO="]
+    start_urls = [
+        "https://www.finewineandgoodspirits.com/webapp/wcs/stores/servlet/FindStoreView?storeId=10051&langId=-1&catalogId=10051&pageNum=1&listSize=1000&category=&city=&zip_code=&county=All+Stores&storeNO="
+    ]
     allowed_domains = ["www.finewineandgoodspirits.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
