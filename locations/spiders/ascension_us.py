@@ -12,7 +12,6 @@ class AscensionUSSpider(Spider):
     name = "ascension_us"
     item_attributes = {"brand": "Ascension", "brand_wikidata": "Q96372437", "nsi_id": "N/A"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
 
     categories = {
         "Cancer Care": {"amenity": "clinic", "healthcare": "clinic", "healthcare:speciality": "oncology"},
