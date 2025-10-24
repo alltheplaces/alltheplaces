@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -8,12 +8,12 @@ from locations.geo import city_locations
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DominosPizzaTWSpider(scrapy.Spider):
+class DominosPizzaTWSpider(Spider):
     name = "dominos_pizza_tw"
     item_attributes = {"brand_wikidata": "Q839466"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("TW", 16000):
             yield JsonRequest(
                 url=f"https://www.dominos.com.tw/dynamicstoresearchapi/getstoresfromquery?lon={city['longitude']}&lat={city['latitude']}&count=100000"
