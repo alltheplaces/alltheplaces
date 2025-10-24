@@ -27,6 +27,7 @@ class VolvoSpider(scrapy.Spider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response, **kwargs):
+        country = re.search(r"(\w\w)/dealers", response.url).group(1)
         raw_data = json.loads(
             re.search(
                 r"retailers\":(\[.*\]),\"preview",
@@ -34,7 +35,6 @@ class VolvoSpider(scrapy.Spider):
             ).group(1)
         )
         for location in raw_data:
-            country = re.search(r"(\w\w)/dealers", response.url).group(1)
             item = DictParser.parse(location)
             item["ref"] = location.get("partnerId")
             item["country"] = location.get("country") or country
