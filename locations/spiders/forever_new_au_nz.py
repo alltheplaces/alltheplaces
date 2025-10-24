@@ -1,7 +1,5 @@
 import json
 
-from scrapy.http import JsonRequest
-
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -17,10 +15,7 @@ class ForeverNewAUNZSpider(JSONBlobSpider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     locations_key = ["results", "results"]
-
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    needs_json_request = True
 
     def post_process_item(self, item, response, location):
         # Ignore locations which are embedded within a Myer department store.

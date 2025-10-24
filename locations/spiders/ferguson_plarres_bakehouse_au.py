@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -13,7 +14,7 @@ class FergusonPlarresBakehouseAUSpider(Spider):
     allowed_domains = ["www.fergusonplarre.com.au"]
     start_urls = ["https://www.fergusonplarre.com.au/rest/e/get/locations"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         query = {"sort": [{"position": {"order": "asc"}}], "size": 100, "query": {"term": {"status": 1}}}
         for url in self.start_urls:
             yield JsonRequest(url=url, data=query, method="POST")
