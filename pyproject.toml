@@ -9,6 +9,7 @@ dependencies = [
     "brotli",
     "chompjs",
     "cryptography",
+    "duckdb>=1.4.1",
     "geonamescache",
     "geopandas",
     "ijson",
