@@ -41,15 +41,15 @@ class GeoparquetExporter(BaseItemExporter):
         if isinstance(self.file, str):
             # It's a file path string, use gdf.to_parquet directly
             gdf.to_parquet(self.file)
-        elif hasattr(self.file, 'name') and isinstance(self.file.name, str):
+        elif hasattr(self.file, "name") and isinstance(self.file.name, str):
             # It's a real file handle with a .name attribute (opened by Scrapy)
             # Use the file path instead of the file handle to avoid issues with geopandas.to_parquet()
             gdf.to_parquet(self.file.name)
         else:
             # It's a file-like object (BytesIO), convert geometry to WKB and use pyarrow directly
             gdf_copy = gdf.copy()
-            if 'geometry' in gdf_copy.columns:
-                gdf_copy['geometry'] = gdf_copy['geometry'].to_wkb()
+            if "geometry" in gdf_copy.columns:
+                gdf_copy["geometry"] = gdf_copy["geometry"].to_wkb()
 
             table = pa.Table.from_pandas(gdf_copy, preserve_index=False)
             pyarrow.parquet.write_table(table, self.file)
