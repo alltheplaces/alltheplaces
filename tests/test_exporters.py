@@ -5,7 +5,11 @@ import tempfile
 from locations.exporters.geojson import GeoJsonExporter, item_to_properties
 from locations.exporters.geoparquet import GeoparquetExporter
 from locations.exporters.ld_geojson import LineDelimitedGeoJsonExporter
+from locations.exporters.geoparquet import GeoparquetExporter
 from locations.items import Feature, add_social_media
+import tempfile
+import os
+import io
 
 
 def test_item_to_properties():
