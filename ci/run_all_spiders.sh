@@ -108,7 +108,7 @@ fi
 
 uv run python ci/concatenate_parquet.py \
     --output "${SPIDER_RUN_DIR}/output.parquet" \
-    "${SPIDER_RUN_DIR}"/output/*.parquet
+    "${SPIDER_RUN_DIR}/output/*.parquet"
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't concatenate parquet files, won't include in output")
