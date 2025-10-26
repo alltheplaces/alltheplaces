@@ -12,7 +12,6 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
     item_attributes = {"brand": "Abercrombie & Fitch", "brand_wikidata": "Q319344"}
     allowed_domains = ["abercrombie.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
 
     start_urls = [
         "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=AE",
