@@ -4,7 +4,6 @@ Script to remove requires_proxy from random spiders.
 This helps test if the proxy is actually needed for those spiders.
 """
 
-import os
 import random
 import re
 import subprocess
@@ -49,12 +48,12 @@ def remove_requires_proxy_from_spider(spider_file):
         f.writelines(new_lines)
 
 
-def create_pull_request(spiders_to_update):
+def create_pull_request(spider_to_update):
     """Create a pull request with the changes."""
     # Generate a unique branch name with random suffix
     random_suffix = "".join(random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=8))
     branch_name = f"remove-requires-proxy-test-{random_suffix}"
-    spider_names = [spider.stem for spider in spiders_to_update]
+    spider_name = spider_to_update.stem
 
     # Create a new branch
     subprocess.run(
@@ -63,21 +62,18 @@ def create_pull_request(spiders_to_update):
     )
 
     # Stage the changes
-    for spider in spiders_to_update:
-        subprocess.run(["git", "add", str(spider)], check=True)
+    subprocess.run(["git", "add", str(spider_to_update)], check=True)
 
     # Create the commit
-    spider_list = ", ".join(spider_names)
-    commit_message = f"Test removing requires_proxy from: {spider_list}"
+    commit_message = f"Test removing requires_proxy from {spider_name}"
     subprocess.run(["git", "commit", "-m", commit_message], check=True)
 
     # Push the branch
     subprocess.run(["git", "push", "-u", "origin", branch_name], check=True)
 
     # Create pull request using GitHub CLI
-    pr_title = f"Test removing requires_proxy from {len(spiders_to_update)} spiders"
-    pr_body = f"""This PR tests whether the proxy is actually needed for these spiders:
-- {chr(10).join(spider_names)}
+    pr_title = f"Test removing requires_proxy from `{spider_name}`"
+    pr_body = f"""This PR tests whether the proxy is actually needed for the spider {spider_name}.
 
 The existing CI will run these spiders to check if they still work without the proxy.
 If they do, we can merge this PR to save on proxy costs.
@@ -120,12 +116,6 @@ Created by remove_requires_proxy.py"""
 
 
 def main():
-    # Get configuration from environment variables (set by GitHub Actions inputs)
-    try:
-        num_to_select = int(os.getenv("NUM_SPIDERS", "2"))
-    except ValueError:
-        num_to_select = 2
-
     # Find spiders with requires_proxy
     spiders = find_spiders_with_requires_proxy()
 
@@ -135,21 +125,15 @@ def main():
 
     print(f"Found {len(spiders)} spiders with requires_proxy")
 
-    # Pick random spiders
-    num_to_select = min(num_to_select, len(spiders))
-    selected_spiders = random.sample(spiders, num_to_select)
+    # Pick 1 random spider
+    selected_spider = random.choice(spiders)
 
-    print(f"Selected {num_to_select} random spiders:")
-    for spider in selected_spiders:
-        print(f"  - {spider.name}")
-
-    # Remove requires_proxy from selected spiders
-    for spider in selected_spiders:
-        print(f"Removing requires_proxy from {spider.name}...")
-        remove_requires_proxy_from_spider(spider)
+    # Remove requires_proxy from selected spider
+    print(f"Removing requires_proxy from {selected_spider.name}...")
+    remove_requires_proxy_from_spider(selected_spider)
 
     # Create pull request
-    if create_pull_request(selected_spiders):
+    if create_pull_request(selected_spider):
         print("Successfully created pull request")
         return 0
     else:
