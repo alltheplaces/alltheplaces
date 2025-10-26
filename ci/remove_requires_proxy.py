@@ -52,7 +52,7 @@ def remove_requires_proxy_from_spider(spider_file):
 def create_pull_request(spiders_to_update):
     """Create a pull request with the changes."""
     # Generate a unique branch name with random suffix
-    random_suffix = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
+    random_suffix = "".join(random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=8))
     branch_name = f"remove-requires-proxy-test-{random_suffix}"
     spider_names = [spider.stem for spider in spiders_to_update]
 
@@ -122,7 +122,7 @@ Created by remove_requires_proxy.py"""
 def main():
     # Get configuration from environment variables (set by GitHub Actions inputs)
     try:
-        num_to_select = int(os.getenv('NUM_SPIDERS', '2'))
+        num_to_select = int(os.getenv("NUM_SPIDERS", "2"))
     except ValueError:
         num_to_select = 2
 
