@@ -13,7 +13,6 @@ class LacosteSpider(JSONBlobSpider):
     item_attributes = {"brand": "Lacoste", "brand_wikidata": "Q309031"}
     start_urls = ["https://www.lacoste.com/us/stores?country=&city=&json=true"]
     custom_settings = {"USER_AGENT": FIREFOX_LATEST}
-    requires_proxy = True
 
     def extract_json(self, response: Response) -> list:
         return response.json()["stores"]
