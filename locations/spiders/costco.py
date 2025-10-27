@@ -58,7 +58,6 @@ class CostcoSpider(JSONBlobSpider):
             item["state"] = item.get("state")["name"]
         item.pop("name", None)
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
-        item["website"] = f'https://www.costco.com.au/store-finder/{quote(item["branch"])}'
 
         warehouse = item.deepcopy()
 
