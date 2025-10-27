@@ -1,5 +1,4 @@
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import quote
 
 from scrapy.http import JsonRequest, Response
 
