@@ -22,3 +22,4 @@ class BeSTWalAddressesBESpider(BeSTAddressesBESpider):
         item["street"] = row.get("streetname_fr")
         item["extras"]["addr:district"] = row.get("postname_fr")
         return item
+

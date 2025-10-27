@@ -23,3 +23,4 @@ class BeSTBruAddressesBESpider(BeSTAddressesBESpider):
         item["street"] = row.get("streetname_fr") or row.get("streetname_nl")
         item["extras"]["addr:district"] = row.get("postname_fr") or row.get("postname_nl")
         return item
+
