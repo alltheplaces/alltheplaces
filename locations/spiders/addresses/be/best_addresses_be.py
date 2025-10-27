@@ -1,5 +1,7 @@
 import csv
 import shutil
+import signal
+import sys
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -19,9 +21,15 @@ class BeSTAddressesBESpider(AddressSpider):
     item_attributes = {"country": "BE"}
     start_urls = ["data:,"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 300}
+    _pending_close: bool = False
 
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
+        signal.signal(signal.SIGTERM, self.sigint)
+        signal.signal(signal.SIGINT if sys.platform != "win32" else signal.SIGBREAK, self.sigint)
         for url in self.region_urls:
+            if self._pending_close:
+                break
+
             region_name = url.split("openaddress-")[1].replace(".zip", "")
             self.logger.info(f"Processing region: {region_name}")
 
@@ -46,6 +54,9 @@ class BeSTAddressesBESpider(AddressSpider):
         text_file = TextIOWrapper(csvfile, encoding="utf-8")
 
         for row in csv.DictReader(text_file):
+            if self._pending_close:
+                break
+
             if row.get("status") != "current":
                 self.crawler.stats.inc_value(f"{self.name}/skipped_status/{row.get('status')}")
                 continue
@@ -77,3 +88,6 @@ class BeSTAddressesBESpider(AddressSpider):
     def post_process_item(self, item: Feature, row: dict) -> Iterable[Feature]:
         """Override for custom actions on items"""
         return item
+
+    def sigint(self, *args):
+        self._pending_close = True
