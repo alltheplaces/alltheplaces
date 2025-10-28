@@ -11,7 +11,6 @@ class HdfcBankINSpider(Spider):
     name = "hdfc_bank_in"
     item_attributes = {"brand": "HDFC Bank", "brand_wikidata": "Q631047"}
     start_urls = ["https://www.hdfc.bank.in/content/hdfcbankpws/api/city.json/content-fragments/branch-locator"]
-    requires_proxy = "IN"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
