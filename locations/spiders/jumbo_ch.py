@@ -19,7 +19,7 @@ class JumboCHSpider(SitemapSpider):
     sitemap_urls = ["https://www.jumbo.ch/sitemap.xml"]
     sitemap_follow = ["/sitemap/STORE-de-"]
     sitemap_rules = [(r"_POS$", "parse_store")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT,"ROBOTSTXT_OBEY":False}
     requires_proxy = True
 
     def parse_store(self, response):
