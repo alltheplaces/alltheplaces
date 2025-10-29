@@ -22,6 +22,7 @@ class GadisaESSpider(Spider):
         "CLAUDIO": {"brand": "Claudio", "brand_wikidata": "Q123369953", "extras": Categories.SHOP_SUPERMARKET.value},
         "GADIS": {"brand": "Gadis", "brand_wikidata": "Q114398305", "extras": Categories.SHOP_SUPERMARKET.value},
     }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
