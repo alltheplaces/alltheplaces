@@ -20,6 +20,7 @@ class JumboCHSpider(SitemapSpider):
     sitemap_follow = ["/sitemap/STORE-de-"]
     sitemap_rules = [(r"_POS$", "parse_store")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def parse_store(self, response):
         # Not using StructuredDataSpider because the site supplies *two*
