@@ -34,7 +34,9 @@ class NSI(metaclass=Singleton):
     @staticmethod
     def _request_file(file: str) -> dict:
         resp = requests.get(
-            "https://cdn.jsdelivr.net/npm/name-suggestion-index@6/{}".format(file),
+            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/f98dfe538b8afca9b2c3f42608f67b666e7d8017/{}".format(
+                file
+            ),
             headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
         )
         if not resp.status_code == 200:
