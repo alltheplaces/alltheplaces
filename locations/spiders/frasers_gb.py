@@ -36,11 +36,11 @@ class FrasersGBSpider(JSONBlobSpider):
         storedata = response.json()["data"]["getStoresByLocation"]
         for store in storedata:
             item = DictParser.parse(store)
-            if name.startswith("Frasers"):
-                item["name"] = "Frasers"
-            else:
-                item["name"] = "House of Fraser"
-            item["branch"] = name.removeprefix("Frasers ").removeprefix("House of Fraser ").removesuffix(" FRA")
+            #if name.startswith("Frasers"):
+            #    item["name"] = "Frasers"
+            #else:
+            #    item["name"] = "House of Fraser"
+            #item["branch"] = name.removeprefix("Frasers ").removeprefix("House of Fraser ").removesuffix(" FRA")
 
             apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
 
