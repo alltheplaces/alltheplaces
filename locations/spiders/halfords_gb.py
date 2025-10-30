@@ -47,4 +47,6 @@ class HalfordsGBSpider(scrapy.Spider):
                         item["brand_wikidata"] = "Q6979055"
                     elif data["storePrefix"] == "Halfords Store":
                         item["brand_wikidata"] = "Q3398786"
+                    else:
+                        item["brand_wikidata"] = "Q5641894"
                     yield item
