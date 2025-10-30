@@ -24,7 +24,7 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             con.load_extension("spatial")
 
             con.execute(f"SET temp_directory='{temp_dir}'")
-            con.execute("SET memory_limit='4GB'")
+            con.execute("SET memory_limit='1GB'")
             con.execute("SET threads=2")
 
             con.execute(
