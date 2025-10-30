@@ -16,7 +16,7 @@ class FireStationsHUSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(
             response.xpath('//script[contains(text(), "office_Map_data")]/text()').re_first(
-                "office_Map_data = (\[{.+}]);"
+                r"office_Map_data = (\[{.+}]);"
             )
         ):
             item = DictParser.parse(location)
