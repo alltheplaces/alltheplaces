@@ -20,6 +20,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         (r"/find-bhf-near-you/.+-furniture-.*$", "parse"),
         (r"/find-bhf-near-you/stockbridge$", "parse"),
         (r"/find-bhf-near-you/pontefract$", "parse"),
+        (r"/find-bhf-near-you/portsmouth$", "parse"),
     ]
     wanted_types = ["ClothingStore", "HomeGoodsStore"]
     drop_attributes = {"image"}

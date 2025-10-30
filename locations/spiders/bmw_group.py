@@ -34,9 +34,7 @@ class BmwGroupSpider(Spider):
     BMW_MOTORBIKE = "BMW_MOTORBIKE"
     BRAND_MAPPING = {
         "BMW": {"brand": "BMW", "brand_wikidata": "Q26678"},
-        "BMW_I": {"brand": "BMW i", "brand_wikidata": "Q796784"},
-        "ROLLS_ROYCE": {"brand": "Rolls-Royce", "brand_wikidata": "Q243278"},
-        "BMW_M": {"brand": "BMW M", "brand_wikidata": "Q173339"},
+        "ROLLS_ROYCE": {"brand": "Rolls-Royce", "brand_wikidata": "Q234803"},
         "MINI": {"brand": "Mini", "brand_wikidata": "Q116232"},
         BMW_MOTORBIKE: {"brand": "BMW Motorrad", "brand_wikidata": "Q249173"},
     }
