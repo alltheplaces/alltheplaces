@@ -1,10 +1,11 @@
-from typing import Any
+from typing import Any, Iterable
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class StatSpider(Spider):
@@ -16,7 +17,7 @@ class StatSpider(Spider):
 
     dataset_attributes = {"source": "api", "api": "stat"}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
         for store in response.json()["locations"]:
             store.update(store.pop("businessAddress"))
             item = DictParser.parse(store)
@@ -36,5 +37,5 @@ class StatSpider(Spider):
 
             yield from self.post_process_item(item, response, store)
 
-    def post_process_item(self, item, response, store):
+    def post_process_item(self, item: Feature, response: TextResponse, store: dict) -> Iterable[Feature]:
         yield item

@@ -15,7 +15,7 @@ def get_objects():
 def test_no_categories():
     item, pipeline, _ = get_objects()
 
-    assert get_category_tags(item) is None
+    assert get_category_tags(item) == {}
 
 
 def test_categories_apply():
