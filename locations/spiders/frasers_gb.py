@@ -41,7 +41,9 @@ class FrasersGBSpider(JSONBlobSpider):
                 item["name"] = "Frasers"
             else:
                 item["name"] = "House of Fraser"
-            item["branch"] = name.removeprefix("Frasers ").removeprefix("House of Fraser ").removesuffix(" FRA").removesuffix(" HOF")
+            item["branch"] = (
+                name.removeprefix("Frasers ").removeprefix("House of Fraser ").removesuffix(" FRA").removesuffix(" HOF")
+            )
             item["website"] = "https://www.houseoffraser.co.uk/stores" + item["ref"]
 
             apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
