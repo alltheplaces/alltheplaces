@@ -13,7 +13,6 @@ class NatuzziSpider(JSONBlobSpider):
     item_attributes = {"brand": "Natuzzi", "brand_wikidata": "Q3873359"}
     start_urls = ["https://api.natuzzi.com/api/storelocator/italia/all"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
 
