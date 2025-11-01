@@ -37,8 +37,10 @@ class FrasersGBSpider(JSONBlobSpider):
         for store in storedata:
             item = DictParser.parse(store)
             name = item["name"]
-            if name.startswith("Frasers"):
+            if "Frasers" in name or name.endswith("FRA"):
                 item["name"] = "Frasers"
+                item["brand"] = "Frasers"
+                item["brand_wikidata"] = "Q124314052"
             else:
                 item["name"] = "House of Fraser"
             item["branch"] = (
