@@ -1,5 +1,5 @@
 import json
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Spider
@@ -20,13 +20,13 @@ class WalmartUSSpider(Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 7,
+        "DOWNLOAD_DELAY": 10,
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.com/orchestra/home/graphql/nearByNodes"
     hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("US", min_population=15000):
             variables = {
                 "input": {
