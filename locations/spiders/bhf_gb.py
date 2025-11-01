@@ -40,6 +40,7 @@ class BhfGBSpider(SitemapSpider, StructuredDataSpider):
         if "item" not in locals():
             item = Feature()
             item["ref"] = response.url
+            item["website"] = response.url
             item["name"] = "British Heart Foundation"
             item["branch"] = response.xpath("//h1/text()").get()
             if "permanently closed" in item["branch"]:
