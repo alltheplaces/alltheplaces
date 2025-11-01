@@ -20,11 +20,6 @@ class BhfGBSpider(SitemapSpider):
         (r"/find-bhf-near-you/pontefract$", "parse"),
         (r"/find-bhf-near-you/portsmouth-home-fashion", "parse"),
     ]
-    wanted_types = ["ClothingStore", "HomeGoodsStore"]
-    drop_attributes = {"image"}
-
-    search_for_twitter = False
-    search_for_facebook = False
 
     def parse(self, response):
         if "office" in response.url:
