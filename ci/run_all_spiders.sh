@@ -401,8 +401,22 @@ do
 
     retval=$?
     if [ ! $retval -eq 0 ]; then
-        (>&2 echo "Couldn't update latest/output/${spider}.geojson redirect")
-        exit 1
+        (>&2 echo "Couldn't update latest/output/${spider}.geojson redirect in S3")
+    fi
+
+    AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+    AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+    uv run aws s3 \
+        --endpoint-url="${R2_ENDPOINT_URL}" \
+        cp \
+        --only-show-errors \
+        --website-redirect"${RUN_URL_PREFIX}/output/${spider}.geojson" \
+        "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
+        "s3://${R2_BUCKET}/runs/latest/output/${spider}.geojson"
+
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "Couldn't update latest/output/${spider}.geojson redirect in R2")
     fi
 done
 
