@@ -352,27 +352,25 @@ touch "${SPIDER_RUN_DIR}/latest_placeholder.txt"
 
 uv run aws s3 cp \
     --only-show-errors \
-    --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.zip" \
+    --website-redirect="${RUN_URL_PREFIX}/output.zip" \
     "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
     "s3://${S3_BUCKET}/runs/latest/output.zip"
 
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't update latest/output.zip redirect")
-    exit 1
 fi
 
 if [ "${include_pmtiles}" = true ]; then
     uv run aws s3 cp \
         --only-show-errors \
-        --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.pmtiles" \
+        --website-redirect="${RUN_URL_PREFIX}/output.pmtiles" \
         "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
         "s3://${S3_BUCKET}/runs/latest/output.pmtiles"
 
     retval=$?
     if [ ! $retval -eq 0 ]; then
         (>&2 echo "Couldn't update latest/output.pmtiles redirect")
-        exit 1
     fi
 else
     (>&2 echo "Skipping latest/output.pmtiles redirect because pmtiles generation failed")
@@ -381,14 +379,13 @@ fi
 if [ "${include_parquet}" = true ]; then
     uv run aws s3 cp \
         --only-show-errors \
-        --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output.parquet" \
+        --website-redirect="${RUN_URL_PREFIX}/output.parquet" \
         "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
         "s3://${S3_BUCKET}/runs/latest/output.parquet"
 
     retval=$?
     if [ ! $retval -eq 0 ]; then
         (>&2 echo "Couldn't update latest/output.parquet redirect")
-        exit 1
     fi
 else
     (>&2 echo "Skipping latest/output.parquet redirect because parquet generation failed")
@@ -398,7 +395,7 @@ for spider in $(uv run scrapy list)
 do
     uv run aws s3 cp \
         --only-show-errors \
-        --website-redirect="https://data.alltheplaces.xyz/${RUN_KEY_PREFIX}/output/${spider}.geojson" \
+        --website-redirect="${RUN_URL_PREFIX}/output/${spider}.geojson" \
         "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
         "s3://${S3_BUCKET}/runs/latest/output/${spider}.geojson"
 
