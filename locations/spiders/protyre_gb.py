@@ -1,6 +1,8 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,3 +22,7 @@ class ProtyreGBSpider(CrawlSpider, StructuredDataSpider):
         if image := ld_data.get("image"):
             if isinstance(image, dict):
                 ld_data["image"]["contentUrl"] = image.get("url")
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item.pop("email")
+        yield item
