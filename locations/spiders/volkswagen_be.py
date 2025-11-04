@@ -4,7 +4,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -14,10 +14,13 @@ class VolkswagenBESpider(Spider):
         "SE": {"brand": "Seat", "brand_wikidata": "Q188217"},
         "VW": {"brand": "Volkswagen", "brand_wikidata": "Q246"},
         "CV": {"brand": "Volkswagen Commercial Vehicles", "brand_wikidata": "Q699709"},
+        "MW": {"brand": "My Way", "brand_wikidata": ""},
         "CU": {"brand": "Cupra", "brand_wikidata": "Q8352675"},
     }
-    # templateId: 12-SEAT, 50-Volkswagen, 51-Volkswagen Commercial, 98-Cupra
-    start_urls = [f"https://dealerlocator-api.dieteren.be/api/workLocations?templateId={id}" for id in [12, 50, 51, 98]]
+    # templateId: 12-SEAT, 50-Volkswagen, 51-Volkswagen Commercial, 58-My Way, 98-Cupra
+    start_urls = [
+        f"https://dealerlocator-api.dieteren.be/api/workLocations?templateId={id}" for id in [12, 50, 51, 58, 98]
+    ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Dealers"]:
@@ -38,6 +41,7 @@ class VolkswagenBESpider(Spider):
                 shop_item = deepcopy(item)
                 shop_item["ref"] = f"{item['ref']}-SHOP"
                 apply_category(Categories.SHOP_CAR, shop_item)
+                apply_yes_no(Extras.USED_CAR_SALES, item, item["brand"] == "My Way")
                 yield shop_item
             if location.get("APRESVENTE"):  # After Sale
                 service_item = deepcopy(item)
