@@ -17,5 +17,6 @@ class ProtyreGBSpider(CrawlSpider, StructuredDataSpider):
 
         ld_data["branchCode"] = None  # Defaults to "0"
 
-        if image := ld_data.get("image", {}).get("url"):
-            ld_data["image"]["contentUrl"] = image
+        if image := ld_data.get("image"):
+            if isinstance(image, dict):
+                ld_data["image"]["contentUrl"] = image.get("url")
