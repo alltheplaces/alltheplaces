@@ -33,13 +33,12 @@ class NissanSpider(scrapy.Spider):
                 if not re.fullmatch("[a-z]{2}_[a-z]{2}", loc):
                     continue
                 loc = loc[:3] + loc[3:].upper()
-                if "de_DE" in loc:
-                    yield JsonRequest(
-                        url=f"https://eu.nissan-api.net/v2/publicAccessToken?locale={loc}&scope=READ&proxy=*&brand={brand}&environment=prod",
-                        headers={"origin": "https://www.nissan-global.com"},
-                        callback=self.parse_token,
-                        cb_kwargs={"brand": brand},
-                    )
+                yield JsonRequest(
+                    url=f"https://eu.nissan-api.net/v2/publicAccessToken?locale={loc}&scope=READ&proxy=*&brand={brand}&environment=prod",
+                    headers={"origin": "https://www.nissan-global.com"},
+                    callback=self.parse_token,
+                    cb_kwargs={"brand": brand},
+                )
 
     def parse_token(self, response: Response, brand: str) -> Any:
         token = response.json()["access_token"]
