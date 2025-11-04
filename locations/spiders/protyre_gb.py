@@ -24,5 +24,6 @@ class ProtyreGBSpider(CrawlSpider, StructuredDataSpider):
                 ld_data["image"]["contentUrl"] = image.get("url")
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name")
         item.pop("email")
         yield item
