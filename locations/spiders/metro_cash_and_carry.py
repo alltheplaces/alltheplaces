@@ -17,7 +17,12 @@ class MetroCashAndCarrySpider(Spider):
     METRO = ("Metro", "Q13610282")
     MAKRO = ("Makro", "Q704606")
     start_urls = ["https://www.metroag.de/en/about-us/brands"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT, "CONCURRENT_REQUESTS": 1}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_TIMEOUT": 120,
+    }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for url in response.xpath('//a[contains(@title, "MAKRO") or contains(@title, "METRO")]/@href').getall():
