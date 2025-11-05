@@ -1,6 +1,5 @@
 import json
 import urllib.parse
-from typing import AsyncIterator
 
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest
