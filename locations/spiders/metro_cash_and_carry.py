@@ -55,6 +55,7 @@ class MetroCashAndCarrySpider(Spider):
             item["addr_full"] = clean_address(html.xpath("//a[contains(@href, 'maps')]/text()").getall())
             item["phone"] = html.xpath("//a[contains(@href, 'tel:')]/@href").get()
             item["email"] = html.xpath("//a[contains(@href, 'mailto:')]/@href").get()
+            item["website"] = response.urljoin(html.xpath('//a[contains(@class, "store-info-button")]/@href').get(""))
 
             apply_category(Categories.SHOP_WHOLESALE, item)
             # TODO: opening_hours (days format differs per country)
