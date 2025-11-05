@@ -8,8 +8,9 @@ from locations.hours import DAYS, OpeningHours
 class DmSpider(scrapy.Spider):
     name = "dm"
     item_attributes = {"brand": "dm", "brand_wikidata": "Q266572"}
-    allowed_domains = ["store-data-service.services.dmtech.com"]
-    start_urls = ["https://store-data-service.services.dmtech.com/stores/bbox/89.999,-179.999,-89.999,179.999"]
+    start_urls = [
+        "https://store-data-service.services.dmtech.com/stores/bbox/52.774151462229185,2.7320220257874155,50.679356363321546,16.58059153762386"
+    ]
 
     @staticmethod
     def parse_hours(store_hours: list[dict]) -> OpeningHours:
