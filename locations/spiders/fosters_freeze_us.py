@@ -1,6 +1,5 @@
 from scrapy import Spider
 
-from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
