@@ -26,6 +26,7 @@ class MetroCashAndCarrySpider(Spider):
     # API query params default values
     s = "0F3B38A3-7330-4544-B95B-81FC80A6BB6F"
     v = "D5BC0757-6F6D-4BDB-BFBD-065D34D0B4A3"
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Check for updated values
