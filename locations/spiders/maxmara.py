@@ -32,7 +32,9 @@ class MaxmaraSpider(scrapy.Spider):
                 store_info = store["properties"]
                 item = DictParser.parse(store_info)
                 item["ref"] = item.pop("name")
-                item["branch"] = store_info["displayName"].replace("MaxMara ", "").replace("Max Mara ", "").lstrip("(").rstrip(")")
+                item["branch"] = (
+                    store_info["displayName"].replace("MaxMara ", "").replace("Max Mara ", "").lstrip("(").rstrip(")")
+                )
                 item["phone"] = store_info["phone1"]
                 item["addr_full"] = store_info["formattedAddress"]
 
