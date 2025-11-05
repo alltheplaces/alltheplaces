@@ -46,6 +46,7 @@ class MetroCashAndCarrySpider(Spider):
                 item["brand"], item["brand_wikidata"] = self.MAKRO
             else:
                 item["brand"], item["brand_wikidata"] = self.METRO
+            item["name"] = item["brand"]
             item["branch"] = (
                 html.xpath("//*[contains(@class, 'poi-store-name')]/text()")
                 .get("")
