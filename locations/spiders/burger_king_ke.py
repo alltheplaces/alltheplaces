@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import Request
@@ -16,7 +18,7 @@ class BurgerKingKESpider(Spider):
     js_url = "https://burgerking.ke/js/googlemap.js"
     coordinates = {}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.js_url, callback=self.parse_coordinates)
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse)

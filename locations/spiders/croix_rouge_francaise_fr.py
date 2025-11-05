@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,7 +13,7 @@ class CroixRougeFrancaiseFRSpider(Spider):
     allowed_domains = ["backend.structure.croix-rouge.fr"]
     start_urls = ["https://backend.structure.croix-rouge.fr/graphql"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = """query GET_SEARCH_STRUCTURE_ELASTICSEARCH_QUERY($actionIds: [ID], $activityIds: [ID], $from: Int, $lat: Float, $lon: Float, $search: String!, $size: Int) {
     searchStructuresDocuments(
         actionIds: $actionIds

@@ -1,19 +1,18 @@
 import json
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class EvereveUSSpider(scrapy.Spider):
+class EvereveUSSpider(Spider):
     name = "evereve_us"
     item_attributes = {"brand": "Evereve", "brand_wikidata": "Q69891997"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://evereve-prod.labs.wesupply.xyz/searchForStores", method="POST", callback=self.parse
         )

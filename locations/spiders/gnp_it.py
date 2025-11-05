@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -12,7 +13,7 @@ class GnpITSpider(Spider):
     name = "gnp_it"
     item_attributes = {"brand": "GNP", "brand_wikidata": "Q113950825"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.gnpfuel.it/api/v1/public/stations-query-by-prop", headers={"API-TOKEN": "V$MQ?UZB66$RT5"}
         )

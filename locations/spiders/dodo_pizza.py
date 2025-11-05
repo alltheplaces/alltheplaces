@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -14,7 +16,7 @@ class DodoPizzaSpider(Spider):
     # TODO: update list of countries in 2024
     countries = ["RU", "BY", "GB", "VN", "DE", "KZ", "CN", "KG", "LT", "NG", "PL", "RO", "SI", "TJ", "UZ", "EE", "US"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in self.countries:
             yield JsonRequest(
                 url=f"https://publicapi.dodois.io/{country}/api/v1/unitinfo/all",

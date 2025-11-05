@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -31,7 +31,7 @@ class GifiSpider(Spider):
             meta={"index_name": index_name},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for index_name in [
             "AFEB_fr",  # https://www.gifi.fr/
             "GFES_es",  # https://www.gifi.es/

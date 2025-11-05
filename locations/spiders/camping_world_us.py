@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy.http import JsonRequest, Request
@@ -28,7 +29,7 @@ class CampingWorldUSSpider(PlaywrightSpider):
         }
     """.strip()
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.locator_url, callback=self.parse_locator)
 
     def parse_locator(self, response):

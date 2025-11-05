@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Request, Spider
@@ -12,7 +13,7 @@ class AaaCAUSSpider(Spider):
     item_attributes = {"brand": "American Automobile Association", "brand_wikidata": "Q463436"}
     allowed_domains = ["tdr.aaa.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in country_iseadgg_centroids(["CA", "US"], 79):
             params = {
                 "searchtype": "O",

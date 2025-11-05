@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -44,7 +45,7 @@ class EngelAndVolkersSpider(Spider):
         "ZA",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country_code in self.country_codes:
             yield JsonRequest(url=self.search_url_template.format(country_code=country_code))
 

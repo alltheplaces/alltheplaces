@@ -1,8 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
-from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
 
@@ -14,7 +13,7 @@ class AllpointSpider(Spider):
     page_size = 0
     custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
-    def make_request(self, page: int) -> Request:
+    def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
             url="https://clsws.locatorsearch.net/Rest/LocatorSearchAPI.svc/GetLocations",
             data={
@@ -28,7 +27,7 @@ class AllpointSpider(Spider):
             cb_kwargs={"current_page": page},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

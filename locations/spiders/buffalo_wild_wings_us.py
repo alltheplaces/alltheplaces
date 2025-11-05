@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -16,7 +17,7 @@ class BuffaloWildWingsUSSpider(Spider):
         "https://api-idp.buffalowildwings.com/bww/web-exp-api/v1/location?latitude=44.97&longitude=-103.77&radius=100000&limit=100&page=0&locale=en-us"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, meta={"page": 0}, dont_filter=True)
 

@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
@@ -19,7 +19,7 @@ class ChemistWarehouseAUSpider(Spider):
             cb_kwargs=dict(lat=lat, lon=lon, offset=offset, limit=limit),
         )
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("AU", 15000):
             yield self.make_request(city["latitude"], city["longitude"], 0)
 

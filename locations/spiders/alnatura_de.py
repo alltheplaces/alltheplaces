@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -19,7 +19,7 @@ class AlnaturaDESpider(Spider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

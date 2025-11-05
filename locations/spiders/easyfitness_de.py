@@ -1,21 +1,21 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.items import Feature
 
 
-class EasyfitnessDESpider(scrapy.Spider):
+class EasyfitnessDESpider(Spider):
     name = "easyfitness_de"
     item_attributes = {"brand": "EasyFitness", "brand_wikidata": "Q106166703"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         point_files = "eu_centroids_20km_radius_country.csv"
         for lat, lng in point_locations(point_files, ["DE"]):
-            yield scrapy.FormRequest(
+            yield FormRequest(
                 "https://easyfitness.club/wp-admin/admin-ajax.php",
                 formdata={
                     "action": "search_nearby_studios",

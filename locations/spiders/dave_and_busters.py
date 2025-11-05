@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -12,7 +14,7 @@ class DaveAndBustersSpider(Spider):
     allowed_domains = ["www.daveandbusters.com"]
     start_urls = ["https://www.daveandbusters.com/content/dnb-request/datadetails.json?mode=location"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -27,7 +27,7 @@ class CapitalOneSpider(Spider):
 
         return opening_hours
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in country_iseadgg_centroids(["PR", "US", "VI"], 24):  # ~= 15 miles
             yield JsonRequest(
                 url=self.start_urls[0],

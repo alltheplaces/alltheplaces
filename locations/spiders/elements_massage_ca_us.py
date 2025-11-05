@@ -1,6 +1,7 @@
 import json
+from typing import AsyncIterator
 
-from scrapy import Request
+from scrapy.http import Request
 
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -16,7 +17,7 @@ class ElementsMassageCAUSSpider(JSONBlobSpider):
     }
     locations_key = "locations"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country, states in STATES.items():
             for state in states:
                 yield Request(f"https://elementsmassage.com/locator?q={state}%2C%20{country}&lat=0&lng=0")

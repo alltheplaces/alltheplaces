@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
@@ -21,7 +23,7 @@ class BurgerKingNGSpider(JSONBlobSpider):
     request_headers = {"application": "5a426f83bbd4be2eb694497c5700c743"}
     request_data = {"latitude": "0", "longitude": "0", "order_types": [4, 6], "view": "search", "per_page": 50}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,

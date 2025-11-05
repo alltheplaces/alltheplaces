@@ -1,8 +1,7 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import FormRequest, JsonRequest, Response
-from scrapy.spiders import Request
+from scrapy.http import FormRequest, JsonRequest, Request, Response
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -43,7 +42,7 @@ class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
             },
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response) -> Iterable[Feature]:

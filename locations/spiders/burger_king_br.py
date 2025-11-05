@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
@@ -13,13 +15,13 @@ SERVICES_MAPPING = {
 }
 
 
-class BurgerKingBRSpider(scrapy.Spider):
+class BurgerKingBRSpider(Spider):
     name = "burger_king_br"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     allowed_domains = ["www.burgerking.com.br"]
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.burgerking.com.br/api/nearest",
             # We can get all POIs using any city from https://www.burgerking.com.br/api/cities

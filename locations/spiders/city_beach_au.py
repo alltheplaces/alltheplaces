@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -15,7 +17,7 @@ class CityBeachAUSpider(Spider):
         "https://www.citybeach.com/on/demandware.store/Sites-CityBeachAustralia-Site/default/Stores-FindStores?showMap=true&radius=10000&postalCode=0870"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

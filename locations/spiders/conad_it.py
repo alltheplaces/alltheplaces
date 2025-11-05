@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -36,7 +38,7 @@ class ConadITSpider(Spider):
         "TUDAY CONAD": {"brand": "Tuday Conad", "brand_wikidata": None, "extras": Categories.SHOP_CONVENIENCE.value},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.conad.it/api/corporate/it-it.retrievePointOfService.json",
             headers={"Referer": "https://www.conad.it/ricerca-negozi"},

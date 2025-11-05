@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -16,7 +16,7 @@ class FressnapfDESpider(Spider):
     api_key = "fressnapfDE"
     website_format = "https://www.fressnapf.de/stores/{}/"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://api.os.fressnapf.com/rest/v2/{}/stores?fields=FULL".format(self.api_key),
             data={"radius": 20000, "filterProperties": []},

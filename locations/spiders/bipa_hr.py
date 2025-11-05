@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -12,7 +14,7 @@ class BipaHRSpider(Spider):
         "brand_wikidata": "Q864933",
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://www.bipa.hr/api/2sxc/app/auto/query/SvePoslovnice/Poslovnice",
             headers={

@@ -1,17 +1,19 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class ChipotleSpider(scrapy.Spider):
+class ChipotleSpider(Spider):
     name = "chipotle"
     item_attributes = {"brand": "Chipotle", "brand_wikidata": "Q465751"}
     allowed_domains = ["chipotle.com", "chipotle.ca", "chipotle.co.uk"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         urls = [
             "https://locations.chipotle.com/",
             "https://locations.chipotle.ca/",
@@ -20,13 +22,13 @@ class ChipotleSpider(scrapy.Spider):
 
         for url in urls:
             if url == "https://locations.chipotle.co.uk/london":
-                yield scrapy.Request(
+                yield Request(
                     url=url,
                     callback=self.parse_same_city,
                     meta={"url": "https://locations.chipotle.co.uk/"},
                 )
             else:
-                yield scrapy.Request(url=url, callback=self.parse_state, meta={"url": url})
+                yield Request(url=url, callback=self.parse_state, meta={"url": url})
 
     def parse_state(self, response):
         states = response.xpath('//*[@class="Directory-listLink"]/@href').extract()
@@ -37,11 +39,11 @@ class ChipotleSpider(scrapy.Spider):
         for c, state in zip(count, states):
             url = base_url + state
             if c == "(1)":
-                yield scrapy.Request(url=url, callback=self.parse_store)
+                yield Request(url=url, callback=self.parse_store)
             elif state == "dc/washington" or state == "nd/fargo":
-                yield scrapy.Request(url=url, callback=self.parse_same_city, meta={"url": base_url})
+                yield Request(url=url, callback=self.parse_same_city, meta={"url": base_url})
             else:
-                yield scrapy.Request(url=url, callback=self.parse_city, meta={"url": base_url})
+                yield Request(url=url, callback=self.parse_city, meta={"url": base_url})
 
     def parse_city(self, response):
         city_count = response.xpath('//*[@class="Directory-listLink"]/@data-count').extract()
@@ -52,9 +54,9 @@ class ChipotleSpider(scrapy.Spider):
         for count, city in zip(city_count, cities):
             url = base_url + city
             if count == "(1)":
-                yield scrapy.Request(url=url, callback=self.parse_store)
+                yield Request(url=url, callback=self.parse_store)
             else:
-                yield scrapy.Request(url=url, callback=self.parse_same_city, meta={"url": base_url})
+                yield Request(url=url, callback=self.parse_same_city, meta={"url": base_url})
 
     def parse_same_city(self, response):
         stores = response.xpath('//*[@class="Teaser-titleLink"]/@href').extract()
@@ -67,7 +69,7 @@ class ChipotleSpider(scrapy.Spider):
                 store = store[2:]
             url = base_url + store
 
-            yield scrapy.Request(url=url, callback=self.parse_store)
+            yield Request(url=url, callback=self.parse_store)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

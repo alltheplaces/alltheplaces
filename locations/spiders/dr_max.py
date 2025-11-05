@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 from zoneinfo import ZoneInfo
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -13,7 +12,7 @@ from locations.hours import OpeningHours
 from locations.items import set_closed
 
 
-class DrMaxSpider(scrapy.Spider):
+class DrMaxSpider(Spider):
     name = "dr_max"
     item_attributes = {"brand": "Dr. Max", "brand_wikidata": "Q56317371"}
     store_locators = {
@@ -24,7 +23,7 @@ class DrMaxSpider(scrapy.Spider):
         "ro": "https://www.drmax.ro/farmacii/",
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in self.store_locators:
             yield JsonRequest(
                 url=f"https://pharmacy.drmax.{country}/api/v1/public/pharmacies",

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -20,7 +20,7 @@ class ClarksSpider(JSONBlobSpider):
     }
     locations_key = "hits"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://kij46symwd-3.algolianet.com/1/indexes/prod_store/query?x-algolia-api-key=14be9e2da22ce62ef749138c685e623b&x-algolia-application-id=KIJ46SYMWD",
             data={"hitsPerPage": 1000},

@@ -1,16 +1,19 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.searchable_points import open_searchable_points
 
 
-class CheddarsScratchKitchenSpider(scrapy.Spider):
+class CheddarsScratchKitchenSpider(Spider):
     name = "cheddars_scratch_kitchen"
     allowed_domains = ["cheddars.com"]
     item_attributes = {"brand": "Cheddar's", "brand_wikidata": "Q5089187"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.cheddars.com/web-api/restaurants"
 
         with open_searchable_points("us_centroids_100mile_radius.csv") as points:
@@ -25,7 +28,7 @@ class CheddarsScratchKitchenSpider(scrapy.Spider):
                     "locale": "en_US",
                 }
 
-                yield scrapy.http.FormRequest(
+                yield FormRequest(
                     url,
                     self.parse,
                     method="POST",

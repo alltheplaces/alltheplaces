@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.json_blob_spider import JSONBlobSpider
@@ -9,7 +11,7 @@ class BurgerKingHNSpider(JSONBlobSpider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://www.com1dav1rtual.com/api/em/store/get_filter"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, data={"business_partner": 15})
 

@@ -1,13 +1,13 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class FirstCashSpider(scrapy.Spider):
+class FirstCashSpider(Spider):
     name = "first_cash"
 
     BRANDS = {
@@ -35,7 +35,7 @@ class FirstCashSpider(scrapy.Spider):
             meta={"page": page},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request()
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

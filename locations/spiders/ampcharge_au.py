@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -16,7 +16,7 @@ class AmpchargeAUSpider(Spider):
     name = "ampcharge_au"
     item_attributes = {"name": "AmpCharge", "operator": "AmpCharge", "operator_wikidata": "Q111744561"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://digital-api.ampol.com.au/siteservice/Service/Ext.Closest(lg=115.76657537179369,lt=-32.340979786001604,distance=4000000)?$filter=(EVFastCharging+eq+true)",
             headers={"ocp-apim-subscription-key": "fd5342b7b7304260910be1d73a296114"},

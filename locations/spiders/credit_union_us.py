@@ -1,6 +1,7 @@
+from typing import AsyncIterator
+
 from geonamescache import GeonamesCache
-from scrapy import Request
-from scrapy.http import Response
+from scrapy.http import Request, Response
 from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import Categories
@@ -14,7 +15,7 @@ class CreditUnionUSSpider(CSVFeedSpider):
     allowed_domains = ["co-opcreditunions.org"]
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for state in GeonamesCache().get_us_states().keys():
             yield Request(
                 url="https://co-opcreditunions.org/wp-content/themes/coop019901/inc/locator/locator-csv.php?loctype=S&state={}&statewide=yes&country=&Submit=Search&lp=1%22".format(

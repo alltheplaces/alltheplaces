@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -12,7 +12,7 @@ class DuffysSpider(Spider):
     item_attributes = {"name": "Duffy's", "brand": "Duffy's"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.duffysmvp.com/api/app/nearByLocations",
             data={"latitude": "26.6289791", "longitude": "-80.0724384"},

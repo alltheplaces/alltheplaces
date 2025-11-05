@@ -1,18 +1,17 @@
 import base64
 import json
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy import Request
-from scrapy.spiders import Response
+from scrapy.http import FormRequest, Request, Response
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, DAYS_IT, OpeningHours
 from locations.items import Feature
 
 
-class EathappySpider(scrapy.Spider):
+class EathappySpider(Spider):
     name = "eathappy"
     item_attributes = {"brand": "Eat Happy", "brand_wikidata": "Q125578025"}
     countries = {
@@ -31,7 +30,7 @@ class EathappySpider(scrapy.Spider):
     }
     ajax_post_id = 1086
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         # Need to get the data from two URLs: The HTML page contains a JavaScript block with the IDs and coordinates
         for country, country_definition in self.countries.items():
             yield Request(url=country_definition["url"], callback=self.parse, cb_kwargs={"country": country})
@@ -49,7 +48,7 @@ class EathappySpider(scrapy.Spider):
         shop_coordinates = {shop["id"]: shop for shop in locations_array}
         # This is the second URL and contains the name, address and opening hours. The data is merged with the first URL
         # via the ID
-        yield scrapy.FormRequest(
+        yield FormRequest(
             url=response.urljoin("/wp-admin/admin-ajax.php"),
             formdata={"action": "ajax_load_map_locations", "post_id": str(self.ajax_post_id)},
             meta={"shops": shop_coordinates},

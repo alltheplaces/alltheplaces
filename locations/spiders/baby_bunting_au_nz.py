@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class BabyBuntingAUNZSpider(JSONBlobSpider):
     allowed_domains = ["www.babybunting.com.au"]
     start_urls = ["https://www.babybunting.com.au/api/cnts/getAllFromType"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=self.start_urls[0],
             data=[{"type": "store"}],

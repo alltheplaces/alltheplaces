@@ -41,7 +41,6 @@ class WyndhamSpider(SitemapSpider):
     sitemap_follow = [r"https:\/\/www\.wyndhamhotels\.com\/sitemap_en-us_([\w]{2})_properties_\d\.xml"]
     sitemap_rules = [(r"https:\/\/www\.wyndhamhotels\.com\/([-\w]+)\/([-\w]+)\/([-\w]+)\/overview", "parse_property")]
     custom_settings = {"REDIRECT_ENABLED": False}
-    requires_proxy = True
     drop_attributes = {"image"}
 
     def parse_property(self, response):

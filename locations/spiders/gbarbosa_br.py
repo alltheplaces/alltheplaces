@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -12,7 +12,7 @@ class GbarbosaBRSpider(JSONBlobSpider):
     name = "gbarbosa_br"
     item_attributes = {"brand": "GBarbosa", "brand_wikidata": "Q10287817"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.gbarbosa.com.br/api/dataentities/LJ/search/?_fields=storeName,address,complement,city,state,businessHours,phone,storeType,storeLink,zipCode,city,state,id",
             headers={"REST-Range": "resources=0-500"},

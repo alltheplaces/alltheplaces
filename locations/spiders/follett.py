@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -14,7 +16,7 @@ class FollettSpider(Spider):
     allowed_domains = ["svc.bkstr.com"]
     start_urls = ["https://svc.bkstr.com/store/byName?storeType=FMS&langId=-1&schoolName=*"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_location_list)
 

@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -31,7 +31,7 @@ class BlinkSpider(Spider):
     custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 5}
 
     # First request the map, but it only returns lat/lon/ID for each station
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://apigw.blinknetwork.com/nmap/v3/locations/map/pins",
             data={

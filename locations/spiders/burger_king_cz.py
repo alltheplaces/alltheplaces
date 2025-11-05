@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
@@ -18,7 +18,7 @@ class BurgerKingCZSpider(Spider):
     db = "prod_bk_cz"
     base = "https://burgerking.cz/store-locator/store/"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://czqk28jt.api.sanity.io/v2023-08-01/graphql/{}/gen3".format(self.db),
             data={

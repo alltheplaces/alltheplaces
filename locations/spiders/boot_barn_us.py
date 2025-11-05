@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -19,7 +19,7 @@ class BootBarnUSSpider(JSONBlobSpider):
     locations_key = ["InquiryResult", "data"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "Limit": 5000,
             "Offset": 0,

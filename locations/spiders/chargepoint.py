@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+from typing import AsyncIterator
 
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest
@@ -9,7 +10,7 @@ from locations.geo import make_subdivisions
 from locations.items import Feature, set_closed
 
 
-class ChargepointSpider(scrapy.Spider):
+class ChargepointSpider(Spider):
     name = "chargepoint"
     item_attributes = {"brand": "ChargePoint", "brand_wikidata": "Q5176149"}
     custom_settings = {"DOWNLOAD_TIMEOUT": 180}

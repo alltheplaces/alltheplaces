@@ -1,23 +1,25 @@
 import json
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 
 
-class EcopackBGSpider(scrapy.Spider):
+class EcopackBGSpider(Spider):
     name = "ecopack_bg"
     item_attributes = {"operator": "Екопак", "operator_wikidata": "Q116687081", "country": "BG"}
     allowed_domains = ["ecopack.bg"]
     start_urls = ["https://www.ecopack.bg/bg/containers_xhr/?method=pins"]
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         headers = {
             "X-Requested-With": "XMLHttpRequest",
         }
         for url in self.start_urls:
-            yield scrapy.Request(url, headers=headers)
+            yield Request(url, headers=headers)
 
     def parse(self, response):
         data = json.loads(response.text)

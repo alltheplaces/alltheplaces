@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -7,7 +9,7 @@ from locations.geo import point_locations
 from locations.hours import OpeningHours, day_range
 
 
-class ColesAUSpider(scrapy.Spider):
+class ColesAUSpider(Spider):
     name = "coles_au"
 
     BRANDS = {
@@ -17,7 +19,7 @@ class ColesAUSpider(scrapy.Spider):
         5: {"brand": "Vintage Cellars", "brand_wikidata": "Q7932815"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in point_locations("au_centroids_20km_radius.csv"):
             yield JsonRequest(
                 f"https://apigw.coles.com.au/digital/colesweb/v1/stores/search?latitude={lat}&longitude={lon}&brandIds=1,2,3,4,5&numberOfStores=15",

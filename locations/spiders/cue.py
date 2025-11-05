@@ -1,4 +1,5 @@
 import json
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -17,7 +18,7 @@ class CueSpider(Spider):
         "https://www.cue.com/GeoLocation/GetStoresByCoordinates",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             if "GetStoresByState" in url:
                 for state_code in ["ACT", "NSW", "QLD", "SA", "TAS", "VIC", "WA"]:  # No stores in NT

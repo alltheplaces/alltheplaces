@@ -1,18 +1,20 @@
 import json
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
 
 
-class EdibleArrangementsSpider(scrapy.Spider):
+class EdibleArrangementsSpider(Spider):
     name = "edible_arrangements"
     item_attributes = {"brand": "Edible Arrangements", "brand_wikidata": "Q5337996"}
     allowed_domains = ["www.ediblearrangements.com"]
 
-    def start_requests(self):
-        yield scrapy.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             "https://www.ediblearrangements.com/stores/store-locator.aspx/GetStoresByCurrentLocation",
             method="POST",
             headers={

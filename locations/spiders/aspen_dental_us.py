@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
@@ -76,7 +77,7 @@ class AspenDentalUSSpider(JSONBlobSpider):
     }
     locations_key = ["data", "facilityCollection", "items"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://www.aspendental.com/api/bff",
             data={

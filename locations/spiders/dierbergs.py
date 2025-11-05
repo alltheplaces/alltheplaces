@@ -1,16 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class DierbergsSpider(scrapy.Spider):
+class DierbergsSpider(Spider):
     name = "dierbergs"
     item_attributes = {"brand": "Dierbergs", "brand_wikidata": "Q5274978"}
     allowed_domains = ["api.dierbergs.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.dierbergs.com/graphql/",
             data={

@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request
@@ -19,7 +20,7 @@ class BurgerKingBSSpider(Spider):
     country_code = "BS"
     custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for city in city_locations(self.country_code):
             yield Request(
                 url=f"{self.host}/locations?field_geofield_distance[origin][lat]={city['latitude']}&field_geofield_distance[origin][lon]={city['longitude']}",

@@ -1,9 +1,12 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 
 
-class AcomJPSpider(scrapy.Spider):
+class AcomJPSpider(Spider):
     name = "acom_jp"
 
     item_attributes = {
@@ -15,11 +18,11 @@ class AcomJPSpider(scrapy.Spider):
         },
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(0)
 
     def get_page(self, n):
-        return scrapy.Request(
+        return Request(
             f"https://store.acom.co.jp/acomnavi/api/proxy2/shop/list?limit=500&offset={n}",
             meta={"offset": n},
         )

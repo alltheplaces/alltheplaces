@@ -1,6 +1,5 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -15,7 +14,7 @@ class DominosPizzaAUSpider(Spider):
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     custom_settings = {"DOWNLOAD_TIMEOUT": 180, "USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in point_locations("au_centroids_20km_radius.csv"):
             # The API does not support a custom radius parameter and returns up to 10 records per request.
             yield JsonRequest(

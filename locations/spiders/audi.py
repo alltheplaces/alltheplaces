@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -16,7 +16,7 @@ class AudiSpider(JSONBlobSpider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"clientid": "d7sfqwrxzu"}, "ROBOTSTXT_OBEY": False}
     locations_key = ["data", "dealersByMarket", "dealers"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=self.graphql_url,
             method="POST",

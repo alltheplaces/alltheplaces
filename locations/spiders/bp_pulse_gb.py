@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -17,7 +19,7 @@ class BpPulseGBSpider(Spider):
             meta={"page": page},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response, **kwargs):

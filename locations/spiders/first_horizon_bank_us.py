@@ -1,16 +1,18 @@
-import scrapy
-from scrapy import FormRequest
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours, day_range
 
 
-class FirstHorizonBankUSSpider(scrapy.Spider):
+class FirstHorizonBankUSSpider(Spider):
     name = "first_horizon_bank_us"
     item_attributes = {"brand": "First Horizon Bank", "brand_wikidata": "Q5453875"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         payload = {
             "Latitude": "0",
             "Longitude": "0",

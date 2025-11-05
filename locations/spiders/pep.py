@@ -12,7 +12,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class PepSpider(Spider):
     name = "pep"
-    start_urls = ["https://www.pepstores.com/cdn/shop/t/3/assets/env.js"]
+    start_urls = ["https://www.pepstores.com/cdn/shop/t/6/assets/env.js"]
     brands = {
         "PEP": ("PEP", "Q7166182"),
         "PEP Cell": ("PEP Cell", "Q128802743"),

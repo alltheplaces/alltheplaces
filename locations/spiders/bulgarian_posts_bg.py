@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -14,7 +15,7 @@ class BulgarianPostsBGSpider(Spider):
     allowed_domains = ["bgpost.bg"]
     start_urls = ["https://bgpost.bg/api/offices?search_by_city_name_or_address="]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url)
 

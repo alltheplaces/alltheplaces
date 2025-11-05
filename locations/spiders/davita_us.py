@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from geonamescache import GeonamesCache
 from scrapy import Spider
@@ -13,7 +13,7 @@ class DavitaUSSpider(Spider):
     item_attributes = {"operator": "DaVita Dialysis", "operator_wikidata": "Q5207184", "country": "US"}
     allowed_domains = ["davita.com"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for state in GeonamesCache().get_us_states():
             yield JsonRequest(
                 url=f"https://davita.com/wp-json/davita/v1/find-a-center?location={state}&p=1&lat=32.3182314&lng=-86.902298"

@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -14,7 +17,7 @@ class CadillacUSSpider(Spider):
     }
     allowed_domains = ["cadillac.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         headers = {
             "clientapplicationid": "quantum",
             "locale": "en-US",

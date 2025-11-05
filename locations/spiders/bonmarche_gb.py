@@ -1,6 +1,6 @@
 import re
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class BonmarcheGBSpider(JSONBlobSpider):
     allowed_domains = ["www.bonmarche.co.uk"]
     locations_key = "stores"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("GB", 500):
             lat, lon = city["latitude"], city["longitude"]
             yield JsonRequest(

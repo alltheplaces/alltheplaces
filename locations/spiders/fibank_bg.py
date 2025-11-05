@@ -1,5 +1,7 @@
-import scrapy
-from scrapy import Selector
+from typing import AsyncIterator
+
+from scrapy import Selector, Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
@@ -7,15 +9,15 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class FibankBGSpider(scrapy.Spider):
+class FibankBGSpider(Spider):
     name = "fibank_bg"
     item_attributes = {"brand": "Fibank", "brand_wikidata": "Q3367065"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.fibank.bg/bg/branch_network_xhr?method=get_locations"
         headers = {"x-requested-with": "XMLHttpRequest", "User-Agent": BROWSER_DEFAULT}
-        yield scrapy.Request(url=url, headers=headers, callback=self.parse)
+        yield Request(url=url, headers=headers, callback=self.parse)
 
     def parse(self, response):
         cities = response.json()

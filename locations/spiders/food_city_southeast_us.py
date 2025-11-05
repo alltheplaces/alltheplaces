@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
@@ -22,7 +22,7 @@ class FoodCitySoutheastUSSpider(Spider):
             meta=dict(offset=offset),
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield self._make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

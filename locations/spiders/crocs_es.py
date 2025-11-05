@@ -1,17 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
 import xmltodict
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.spiders.crocs_eu import CrocsEUSpider
 
 
-class CrocsESSpider(scrapy.Spider):
+class CrocsESSpider(Spider):
     name = "crocs_es"
     item_attributes = CrocsEUSpider.item_attributes
     drop_attributes = {"email"}
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             url="https://crocs.es/storefinder?ajax=1&all=1",
             method="POST",
         )

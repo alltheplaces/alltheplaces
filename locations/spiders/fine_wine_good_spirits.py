@@ -1,23 +1,22 @@
-import scrapy
+from scrapy import Spider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 
 
-class FineWineGoodSpiritsSpider(scrapy.Spider):
+class FineWineGoodSpiritsSpider(Spider):
     name = "fine_wine_good_spirits"
     item_attributes = {
         "name": "Fine Wine & Good Spirits",
         "brand": "Fine Wine & Good Spirits",
         "brand_wikidata": "Q64514776",
     }
+    start_urls = [
+        "https://www.finewineandgoodspirits.com/webapp/wcs/stores/servlet/FindStoreView?storeId=10051&langId=-1&catalogId=10051&pageNum=1&listSize=1000&category=&city=&zip_code=&county=All+Stores&storeNO="
+    ]
     allowed_domains = ["www.finewineandgoodspirits.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    def start_requests(self):
-        url = "https://www.finewineandgoodspirits.com/webapp/wcs/stores/servlet/FindStoreView?storeId=10051&langId=-1&catalogId=10051&pageNum=1&listSize=1000&category=&city=&zip_code=&county=All+Stores&storeNO="
-        yield scrapy.http.Request(url, self.parse)
 
     def parse(self, response):
         for row in response.css(".tabContentRow"):

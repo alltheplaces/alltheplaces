@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Access, Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
@@ -63,11 +65,11 @@ SERVICES_MAPPING = {
 }
 
 
-class GazpromneftRUSpider(scrapy.Spider):
+class GazpromneftRUSpider(Spider):
     name = "gazpromneft_ru"
     requires_proxy = "RU"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://gpnbonus.ru/api/stations/list", method="POST")
 
     def parse(self, response):

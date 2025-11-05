@@ -20,7 +20,7 @@ class AmericanGolfGBSpider(JSONBlobSpider):
     def extract_json(self, response: Response, **kwargs: Any) -> Any:
         raw_data = json.loads(
             re.search(
-                r"channel\":(\[.*\])}},\"content",
+                r"channel\":(\[.*\]),\"p1BadgeData",
                 response.xpath('//*[contains(text(),"address1")]/text()').get().replace("\\", ""),
             ).group(1)
         )

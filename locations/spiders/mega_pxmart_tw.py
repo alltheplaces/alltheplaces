@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class MegaPxmartTWSpider(scrapy.Spider):
     name = "mega_pxmart_tw"
-    item_attributes = {"brand_wikidata": "Q135550746"}
+    item_attributes = {"brand": "大全聯", "brand_wikidata": "Q135550746"}
 
     def start_requests(self):
         yield JsonRequest(url="https://www.pxmart.com.tw/mega/api/stores", method="POST")

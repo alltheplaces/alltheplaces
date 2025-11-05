@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -10,7 +12,7 @@ class BiedronkaPLSpider(Spider):
     name = "biedronka_pl"
     item_attributes = {"brand": "Biedronka", "brand_wikidata": "Q857182"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://www.biedronka.pl/api/shop/shippingcenter", headers={"X-Requested-With": "XMLHttpRequest"}
         )

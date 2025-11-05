@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -17,7 +17,7 @@ class DairyQueenUSSpider(Spider):
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
     item_attributes = {"nsi_id": "N/A"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=self.start_urls[0],
             method="POST",

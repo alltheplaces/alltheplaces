@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 
@@ -57,16 +60,16 @@ POSTALS = [
 ]
 
 
-class DishSpider(scrapy.Spider):
+class DishSpider(Spider):
     name = "dish"
     item_attributes = {"brand": "DISH", "brand_wikidata": "Q1199757"}
     allowed_domains = ["webapps.dish.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for postal in POSTALS:
             url = "https://webapps.dish.com/find-retailer/getretailershandler.ashx?Zip=" + postal + "&Miles=1000"
 
-            yield scrapy.http.FormRequest(
+            yield FormRequest(
                 url,
                 self.parse_store,
                 method="GET",
