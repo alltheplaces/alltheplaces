@@ -16,6 +16,7 @@ class MitsubishiBELUSpider(JSONBlobSpider):
     start_urls = ["https://service.mitsubishi-motors.be/dealers.json"]
     locations_key = "dealers"
     skip_auto_cc_spider_name = True
+    requires_proxy = True
 
     def pre_process_data(self, feature: dict):
         for key in list(feature.keys()):
