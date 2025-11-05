@@ -1,157 +1,93 @@
 import json
 import urllib.parse
 
-import scrapy
+from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.geo import make_subdivisions
+from locations.items import Feature, set_closed
 
 
 class ChargepointSpider(scrapy.Spider):
     name = "chargepoint"
     item_attributes = {"brand": "ChargePoint", "brand_wikidata": "Q5176149"}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
-    def start_requests(self):
-        bounds = (-180.0, -90.0, 180.0, 90.0)
+    def make_request(self, bounds=(-180.0, -90.0, 180.0, 90.0), page_offset="", page=0):
         query = {
-            "map_data": {
-                "screen_width": 1024,
-                "screen_height": 1024,
+            "station_list": {
                 "sw_lon": bounds[0],
                 "sw_lat": bounds[1],
                 "ne_lon": bounds[2],
                 "ne_lat": bounds[3],
-                "filter": {
-                    "connector_l1": False,
-                    "connector_l2": False,
-                    "is_bmw_dc_program": False,
-                    "is_nctc_program": False,
-                    "connector_chademo": False,
-                    "connector_combo": False,
-                    "connector_tesla": False,
-                    "price_free": False,
-                    "status_available": False,
-                    "network_chargepoint": True,
-                    "network_blink": False,
-                    "network_semacharge": False,
-                    "network_evgo": False,
-                    "connector_l2_nema_1450": False,
-                    "connector_l2_tesla": False,
-                },
+                "page_size": 50,
+                "page_offset": page_offset,
             }
         }
-        yield scrapy.http.JsonRequest(
-            url="https://mc.chargepoint.com/map-prod/get?" + urllib.parse.quote(json.dumps(query).encode("utf8")),
-            method="GET",
+        return JsonRequest(
+            url="https://mc.chargepoint.com/map-prod/v2?"
+            + urllib.parse.quote(json.dumps(query, separators=(",", ":")).encode("utf-8")),
+            method="POST",
+            cb_kwargs={"bounds": bounds, "page": page},
         )
 
-    def parse(self, response):
-        response_data = response.json()["map_data"]
+    async def start(self):
+        for bounds in make_subdivisions((-180.0, -90.0, 180.0, 90.0), 2):
+            yield self.make_request(bounds)
 
-        for summary in response_data.get("summaries"):
-            port_count = summary.get("port_count", {}).get("total", 0)
-
-            if port_count < 100:
-                # If there's a small-ish number of ports in this summary bounding box
-                # then request station list for the bbox
-
-                # If there's a single station here, the bounding box will have zero area
-                # around the point, and the API doesn't like that. So we make it a little
-                # bigger manually.
-                if summary["ne_lon"] - summary["sw_lon"] < 0.001:
-                    summary["ne_lon"] += 0.01
-                    summary["sw_lon"] -= 0.01
-                if summary["ne_lat"] - summary["sw_lat"] < 0.001:
-                    summary["ne_lat"] += 0.01
-                    summary["sw_lat"] -= 0.01
-
-                query = {
-                    "station_list": {
-                        "screen_width": 1024,
-                        "screen_height": 1024,
-                        "sw_lon": summary["sw_lon"],
-                        "sw_lat": summary["sw_lat"],
-                        "ne_lon": summary["ne_lon"],
-                        "ne_lat": summary["ne_lat"],
-                        "page_size": 100,
-                        "page_offset": "",
-                        "filter": {
-                            "connector_l1": False,
-                            "connector_l2": False,
-                            "is_bmw_dc_program": False,
-                            "is_nctc_program": False,
-                            "connector_chademo": False,
-                            "connector_combo": False,
-                            "connector_tesla": False,
-                            "price_free": False,
-                            "status_available": False,
-                            "network_chargepoint": True,
-                            "network_blink": False,
-                            "network_semacharge": False,
-                            "network_evgo": False,
-                            "connector_l2_nema_1450": False,
-                            "connector_l2_tesla": False,
-                        },
-                    }
-                }
-                yield scrapy.http.JsonRequest(
-                    url="https://mc.chargepoint.com/map-prod/get?"
-                    + urllib.parse.quote(json.dumps(query).encode("utf8")),
-                    method="GET",
-                    callback=self.parse_station_list,
+    def parse(self, response, bounds, page):
+        if "error" in response.json():
+            self.logger.error("Server error: " + response.json()["error"])
+            if "station_list" not in response.json():
+                return get_retry_request(
+                    response.request,
+                    spider=self,
+                    reason=response.json()["error"],
                 )
 
-            else:
-                # Otherwise make another map data request for the summary bounding box, simulating zooming in
-                query = {
-                    "map_data": {
-                        "screen_width": 1024,
-                        "screen_height": 1024,
-                        "sw_lon": summary["sw_lon"],
-                        "sw_lat": summary["sw_lat"],
-                        "ne_lon": summary["ne_lon"],
-                        "ne_lat": summary["ne_lat"],
-                        "filter": {
-                            "connector_l1": False,
-                            "connector_l2": False,
-                            "is_bmw_dc_program": False,
-                            "is_nctc_program": False,
-                            "connector_chademo": False,
-                            "connector_combo": False,
-                            "connector_tesla": False,
-                            "price_free": False,
-                            "status_available": False,
-                            "network_chargepoint": True,
-                            "network_blink": False,
-                            "network_semacharge": False,
-                            "network_evgo": False,
-                            "connector_l2_nema_1450": False,
-                            "connector_l2_tesla": False,
-                        },
-                    }
-                }
-                yield scrapy.http.JsonRequest(
-                    url="https://mc.chargepoint.com/map-prod/get?"
-                    + urllib.parse.quote(json.dumps(query).encode("utf8")),
-                    method="GET",
-                )
-
-    def parse_station_list(self, response):
         station_list = response.json()["station_list"]
 
-        for summary in station_list.get("summaries"):
-            properties = {
-                "ref": summary["device_id"],
-                "lat": summary["lat"],
-                "lon": summary["lon"],
-                "name": " ".join(summary.get("station_name", [])) or None,
-                "city": summary.get("address", {}).get("city"),
-                "state": summary.get("address", {}).get("state_name"),
-                "street_address": summary.get("address", {}).get("address1"),
-            }
+        if "error" in station_list:
+            self.logger.error("Request error: " + station_list["error"])
 
-            apply_category(Categories.CHARGING_STATION, properties)
+        if station_list.get("page_offset") != "last_page":
+            # More pages
+            yield self.make_request(bounds, station_list["page_offset"], page=page + 1)
+        elif page == 1 and len(station_list.get("stations", [])) >= 50 and (st["ne_lon"] - st["sw_lon"]) > 8.6e-05:
+            # Even paginated results have a result limit. Try with a narrower area, if possible.
+            for sub_bounds in make_subdivisions(bounds, 2):
+                yield self.make_request(sub_bounds)
 
-            properties["extras"]["capacity"] = summary["port_count"]["total"]
+        for station in station_list.get("stations", []):
+            item = Feature(
+                lat=station["lat"],
+                lon=station["lon"],
+                ref=station["device_id"],
+                name=f"{station.get('name1', '')} {station.get('name2', '')}".strip(),
+                street_address=station.get("address1"),
+                city=station.get("city"),
+                website=f"https://driver.chargepoint.com/stations/{station['device_id']}",
+            )
 
-            yield Feature(**properties)
+            apply_yes_no(
+                Extras.WHEELCHAIR, item, station.get("parking_accessibility") in ("DISABLED_PARKING", "VAN_ACCESSIBLE")
+            )
+            apply_yes_no(Extras.FEE, item, station["payment_type"] != "free", False)
+            if station["tou_status"] == "close":
+                # indicates temporary closure - is set_closed right to use?
+                set_closed(item)
+            apply_yes_no(f"currency:{station.get('currency_iso_code')}", item, "currency_iso_code" in station)
+            if station.get("access_restriction", "NONE") != "NONE":
+                item["extras"]["access"] = "private"
+            if "max_power" in station:
+                item["extras"][
+                    "socket:unknown:output"
+                ] = f"{station['max_power']['max']} {station['max_power']['unit']}"
+            if "ports" in station:
+                item["extras"]["capacity"] = len(station["ports"])
+            item["extras"]["network"] = station["network_display_name"]
+
+            apply_category(Categories.CHARGE_POINT, item)
+
+            yield item
