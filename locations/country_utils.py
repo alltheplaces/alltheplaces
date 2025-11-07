@@ -22,6 +22,7 @@ class CountryUtils:
         "scotland": "GB",
         "wales": "GB",
         "northern ireland": "GB",
+        "netherlands": "NL",
         "uk": "GB",
         "norge": "NO",
         "united states of america": "US",

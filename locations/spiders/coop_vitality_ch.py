@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class CoopVitalityCHSpider(JSONBlobSpider):
     ]
     locations_key = ["stores"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], headers={"Accept-Language": "de"})
 
     def pre_process_data(self, feature: dict) -> None:

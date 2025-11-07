@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, Fuel, apply_yes_no
 from locations.dict_parser import DictParser
@@ -11,7 +14,7 @@ class Dats24BESpider(Spider):
     start_urls = ["https://dats24.be/api/service_point_locator"]
     allowed_domains = ["dats24.be"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         query = '{"latitude":0,"longitude":0,"searchRadius":1000000000,"filterCriteria":{"serviceDeliveryPointType":["FUEL"],"serviceDeliveryPointAvailability":[],"chargingConnectorType":[],"chargingConnectorPowerType":[],"chargingLocationOperatorName":["ALL"],"fuelProductType":[]}}'
         yield Request(
             url=self.start_urls[0],

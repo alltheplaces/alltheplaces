@@ -1,7 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -15,13 +14,13 @@ class FirstCommercialBankTWSpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     locations_key = "branchData"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.firstbank.com.tw/sites/REST/controller/BusinessUnitsDomesticRevCTL/searchBranch"
         headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         }
-        yield scrapy.Request(url=url, method="POST", headers=headers, callback=self.parse)
+        yield Request(url=url, method="POST", headers=headers, callback=self.parse)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["branchTitle"]

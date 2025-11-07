@@ -1,8 +1,9 @@
 import binascii
 import os
+from typing import AsyncIterator
 
-import scrapy
 from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
@@ -30,8 +31,8 @@ class CarrefourPLSpider(Spider):
         "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE},
     }
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             self.start_urls[0],
             headers={
                 # random 16 hex

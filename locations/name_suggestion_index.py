@@ -1,3 +1,4 @@
+import json
 import re
 from typing import Iterable
 from urllib.parse import urlparse
@@ -8,6 +9,9 @@ import tldextract
 from unidecode import unidecode
 
 from locations.user_agents import BOT_USER_AGENT_REQUESTS
+
+NSI_FILE_PATH = "locations/data/nsi.json"
+WIKIDATA_FILE_PATH = "locations/data/nsi-wikidata.json"
 
 
 class Singleton(type):
@@ -34,7 +38,7 @@ class NSI(metaclass=Singleton):
     @staticmethod
     def _request_file(file: str) -> dict:
         resp = requests.get(
-            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/{}".format(file),
+            "https://cdn.jsdelivr.net/npm/name-suggestion-index@7/dist/{}".format(file),
             headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
         )
         if not resp.status_code == 200:
@@ -43,8 +47,8 @@ class NSI(metaclass=Singleton):
 
     def _ensure_loaded(self):
         if not self.loaded:
-            self.wikidata_json = self._request_file("dist/wikidata.min.json")["wikidata"]
-            self.nsi_json = self._request_file("dist/nsi.min.json")["nsi"]
+            self.wikidata_json = json.load(open(WIKIDATA_FILE_PATH))["wikidata"]
+            self.nsi_json = json.load(open(NSI_FILE_PATH))["nsi"]
             self.loaded = True
 
     def get_wikidata_code_from_url(self, url: str = None) -> str | None:
