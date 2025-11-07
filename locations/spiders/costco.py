@@ -56,6 +56,7 @@ class CostcoSpider(JSONBlobSpider):
         if isinstance(item.get("state"), dict):
             item["state"] = item.get("state")["name"]
         item.pop("name", None)
+        item.pop("website", None)
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
 
         warehouse = item.deepcopy()
