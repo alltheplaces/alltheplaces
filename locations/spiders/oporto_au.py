@@ -22,7 +22,7 @@ class OportoAUSpider(Spider):
                 item["housenumber"] = " / ".join(
                     filter(None, [address["unit"]["value"], address["streetNumber"]["value"]])
                 )
-                item["street"] = address["streetName"]["value"]
+                item["street_address"] = address["streetName"]["value"]
                 item["city"] = address["suburb"]["value"]
                 item["state"] = address["state"]["value"]
                 item["country"] = address["country"]["longValue"]
