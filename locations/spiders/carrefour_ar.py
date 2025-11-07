@@ -1,7 +1,7 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -14,7 +14,7 @@ from locations.spiders.carrefour_fr import (
 )
 
 
-class CarrefourARSpider(scrapy.Spider):
+class CarrefourARSpider(Spider):
     name = "carrefour_ar"
     brands = {
         "Express": CARREFOUR_EXPRESS,
@@ -23,7 +23,7 @@ class CarrefourARSpider(scrapy.Spider):
         "Maxi": CARREFOUR_SUPERMARKET,
     }
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.carrefour.com.ar/_v/public/graphql/v1",
             data={

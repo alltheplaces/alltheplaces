@@ -1,8 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import urljoin
 
-from scrapy import Request
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -15,7 +14,7 @@ class ChestertonsGBSpider(JSONBlobSpider):
     name = "chestertons_gb"
     item_attributes = {"brand": "Chestertons", "brand_wikidata": "Q24298789"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request("https://www.chestertons.co.uk/estate-agents", headers={"RSC": 1})
 
     def extract_json(self, response):

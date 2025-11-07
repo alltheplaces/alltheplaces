@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import FormRequest
 
@@ -13,7 +15,7 @@ class EmpresUSSpider(Spider):
     start_urls = ["https://www.empres.com/wp-admin/admin-ajax.php"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "within": "200",
             "state": "",

@@ -14,9 +14,9 @@ class PremierurgentcareSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.premier.care/sitemap.xml"]
     # Example:     # https://www.premier.care/locations/thumbs-up-temple/
     sitemap_rules = [(r"/locations/[\w-]+/$", "parse_sd")]
-    wanted_types = ["MedicalOrganization"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["addr_full"] = response.xpath('//a[contains(@href,"maps/search")]/span/text()').get()
         apply_category(Categories.CLINIC, item)
         apply_yes_no("emergency", item, True)
         yield item

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,7 +13,7 @@ class CrownDecoratingCentresGBSpider(Spider):
     allowed_domains = ["www.crowndecoratingcentres.co.uk"]
     start_urls = ["https://www.crowndecoratingcentres.co.uk/api/sitecore/crowndecorating/stores/search"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url)
 

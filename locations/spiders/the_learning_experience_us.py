@@ -31,21 +31,14 @@ class TheLearningExperienceUSSpider(SitemapSpider):
             "addr_full": merge_address_lines(
                 response.xpath('//div[@class="banner__left_contacts_item location"]/p[1]//text()').getall()
             ),
-            "phone": response.xpath('//div[@class="banner__left_contacts_item phone"]/a[1]/@href')
-            .get()
-            .removeprefix("tel:"),
-            "email": response.xpath('//div[@class="banner__left_contacts_item mail"]/a[1]/@href')
-            .get()
-            .removeprefix("mailto:"),
+            "phone": response.xpath('.//*[contains(@href,"tel:")]/text()').get().removeprefix("tel:"),
+            "email": response.xpath('.//*[contains(@href,"mailto:")]/text()').get().removeprefix("mailto:"),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
-        hours_text = (
-            response.xpath('//div[@class="banner__left_contacts_item time"]/p[1]/text()')
-            .get()
-            .replace("M-F", "Mon-Fri")
-        )
-        properties["opening_hours"].add_ranges_from_string(hours_text)
+        if hours_text := response.xpath('//div[@class="center-details__item"]/p[1]/text()').get():
+            hours_text = hours_text.replace("M-F", "Mon-Fri")
+            properties["opening_hours"].add_ranges_from_string(hours_text)
         extract_google_position(properties, response)
         apply_category(Categories.KINDERGARTEN, properties)
         yield Feature(**properties)
