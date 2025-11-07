@@ -1,5 +1,5 @@
 from locations.categories import Extras, apply_yes_no
-from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -15,10 +15,10 @@ class EspressolabSpider(JSONBlobSpider):
         apply_yes_no(Extras.WIFI, item, feature["hasWifi"])
 
         oh = OpeningHours()
-        weekday_open, weekday_close = feature["workingHours"].split("-")
-        oh.add_days_range(DAYS_WEEKDAY, weekday_open, weekday_close)
-        weekend_open, weekend_close = feature["workingHoursWeekend"].split("-")
-        oh.add_days_range(DAYS_WEEKEND, weekend_open, weekend_close)
+        opening_data = feature.get("storeWorkTimes")
+        for days_range in opening_data:
+            if not days_range.get("isClosed"):
+                oh.add_range(DAYS_FULL[days_range["dayNumber"] - 1], days_range["openTime"], days_range["closeTime"])
         item["opening_hours"] = oh
 
         yield item
