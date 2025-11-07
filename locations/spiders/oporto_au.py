@@ -30,7 +30,6 @@ class OportoAUSpider(Spider):
                 item["lat"] = address["latitude"]["value"]
                 item["lon"] = address["longitude"]["value"]
             item["phone"] = location["attributes"]["storePhone"]
-            item["email"] = location["attributes"]["storeEmail"]
             item["website"] = "https://www.oporto.com.au/locations/" + item["branch"].lower().replace(" ", "-")
 
             extra_features = [
