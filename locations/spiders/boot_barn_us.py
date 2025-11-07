@@ -18,7 +18,6 @@ class BootBarnUSSpider(JSONBlobSpider):
     ]
     locations_key = ["InquiryResult", "data"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
