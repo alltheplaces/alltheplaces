@@ -13,7 +13,6 @@ class BupaGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.bupa.co.uk/robots.txt"]
     sitemap_rules = [(r"/practices/([-\w]+)$", "parse_sd")]
     time_format = "%I:%M %p"
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if "Total Dental Care" in item["name"]:
