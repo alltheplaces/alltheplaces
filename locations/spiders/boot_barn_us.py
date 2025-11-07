@@ -18,6 +18,7 @@ class BootBarnUSSpider(JSONBlobSpider):
     ]
     locations_key = ["InquiryResult", "data"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
@@ -41,7 +42,12 @@ class BootBarnUSSpider(JSONBlobSpider):
             if not day_hours["Open"] or "CLOSED" in day_hours["Open"].upper():
                 item["opening_hours"].set_closed(day_hours["Day"])
             else:
-                item["opening_hours"].add_range(day_hours["Day"], day_hours["Open"], day_hours["Close"], "%I:%M%p")
+                item["opening_hours"].add_range(
+                    day_hours["Day"],
+                    day_hours["Open"].replace("**", ""),
+                    day_hours["Close"].replace("**", ""),
+                    "%I:%M%p",
+                )
 
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
