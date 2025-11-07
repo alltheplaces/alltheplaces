@@ -69,8 +69,9 @@ class NomNomSpider(Spider):
         for location in response.json()["restaurants"]:
             item = DictParser.parse(location)
             item["ref"] = location["extref"]
-            item["branch"] = location["name"].replace(location["storename"], "").strip()
-            item["name"] = location["storename"]
+            if location.get("storename"):
+                item["branch"] = location["name"].replace(location.get("storename"), "").strip()
+                item["name"] = location["storename"]
 
             apply_yes_no(Extras.DELIVERY, item, location["candeliver"] or location["supportsdispatch"])
             apply_yes_no(Extras.TAKEAWAY, item, location["canpickup"] or location["supportscurbside"])
