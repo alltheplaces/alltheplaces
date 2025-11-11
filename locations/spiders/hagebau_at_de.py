@@ -3,6 +3,7 @@ import re
 import scrapy
 from scrapy.http import Response
 
+from locations.categories import apply_category, Categories
 from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -27,6 +28,7 @@ class HagebauATDESpider(StructuredDataSpider):
         store = response.meta["store_info"]
         item["lat"] = store["lat"]
         item["lon"] = store["lon"]
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         oh = OpeningHours()
         for day_time in ld_data["openingHoursSpecification"]:
             open_time = day_time["opens"]
