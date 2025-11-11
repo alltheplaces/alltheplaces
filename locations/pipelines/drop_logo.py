@@ -4,11 +4,12 @@ from locations.items import Feature
 
 
 class DropLogoPipeline:
-    def process_item(self, item: Feature, spider: Spider):
+    def process_item(self, item: Feature, spider: Spider) -> Feature:
         if image := item.get("image"):
             if isinstance(image, str):
                 if "logo" in image or "favicon" in image:
                     item["image"] = None
-                    spider.crawler.stats.inc_value("atp/field/image/dropped")
+                    if spider.crawler.stats:
+                        spider.crawler.stats.inc_value("atp/field/image/dropped")
 
         return item

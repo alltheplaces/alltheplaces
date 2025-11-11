@@ -55,7 +55,7 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
             return
 
         self.set_category(item, row)
-        if get_category_tags(item) is None:
+        if not get_category_tags(item):
             return
 
         if row.get("Easting") not in ["0", ""] and row.get("Northing") not in ["0", ""]:

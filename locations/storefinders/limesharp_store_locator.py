@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -22,7 +24,8 @@ from locations.items import Feature
 
 
 class LimesharpStoreLocatorSpider(Spider):
-    def start_requests(self):
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
                 yield JsonRequest(url=f"https://{domain}/stockists/ajax/stores/")
@@ -30,7 +33,7 @@ class LimesharpStoreLocatorSpider(Spider):
             for url in self.start_urls:
                 yield JsonRequest(url=url)
 
-    def parse(self, response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():
             if (
                 not location["name"]
@@ -44,5 +47,5 @@ class LimesharpStoreLocatorSpider(Spider):
             item["street_address"] = location["address"]
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

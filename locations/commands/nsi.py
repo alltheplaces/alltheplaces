@@ -1,3 +1,5 @@
+import argparse
+
 import requests
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
@@ -19,13 +21,13 @@ class NameSuggestionIndexCommand(ScrapyCommand):
     default_settings = {"LOG_ENABLED": False}
     nsi = NSI()
 
-    def syntax(self):
+    def syntax(self) -> str:
         return "[options] <name | code | detect-missing>"
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Lookup wikidata code, (fuzzy match) brand name in the name suggestion index, or detecting missing by category"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         ScrapyCommand.add_options(self, parser)
         parser.add_argument(
             "--name",
@@ -46,7 +48,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             help="Query NSI for missing by NSI category. ie brands/shop/supermarket",
         )
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         if not len(args) == 1:
             raise UsageError("please supply one and only one argument")
         if opts.lookup_name:
@@ -56,11 +58,11 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         if opts.detect_missing:
             self.detect_missing(args)
 
-    def lookup_name(self, args):
+    def lookup_name(self, args: list[str]) -> None:
         for code, _ in self.nsi.iter_wikidata(args[0]):
             self.lookup_code([code])
 
-    def lookup_code(self, args):
+    def lookup_code(self, args: list[str]) -> None:
         if v := self.nsi.lookup_wikidata(args[0]):
             NameSuggestionIndexCommand.show(args[0], v)
             for item in self.nsi.iter_nsi(args[0]):
@@ -71,7 +73,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 )
                 print("       -> " + str(item))
 
-    def detect_missing(self, args):
+    def detect_missing(self, args: list[str]) -> None:
         codes = DuplicateWikidataCommand.wikidata_spiders(self.crawler_process)
 
         missing = {}  # dict to filter out duplicates
@@ -104,7 +106,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.issue_template(code, data)
 
     @staticmethod
-    def show(code, data):
+    def show(code: str, data: dict) -> None:
         print('"{}", "{}"'.format(data["label"], code))
         print("       -> https://www.wikidata.org/wiki/{}".format(code))
         print("       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(code))
@@ -114,7 +116,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("       -> {}".format(s.get("website", "N/A")))
 
     @staticmethod
-    def issue_template(code, data):
+    def issue_template(code: str, data: dict) -> None:
         print("### Brand name\n")
         print(data["label"])
         print("")

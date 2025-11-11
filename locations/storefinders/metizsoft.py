@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import FormRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -14,14 +16,14 @@ class MetizsoftSpider(Spider):
     dataset_attributes = {"source": "api", "api": "storelocator.metizapps.com"}
     shopify_url: str = ""
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://storelocator.metizapps.com/stores/storeDataGet",
             method="POST",
             formdata={"shopData": self.shopify_url},
         )
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         if not response.json()["success"]:
             return
 
@@ -34,5 +36,5 @@ class MetizsoftSpider(Spider):
             item["opening_hours"].add_ranges_from_string(location["hour_of_operation"].replace("</br>", " "))
             yield from self.parse_item(item, location)
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

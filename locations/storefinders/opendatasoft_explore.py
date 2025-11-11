@@ -1,9 +1,9 @@
 from datetime import UTC, datetime, timedelta
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import quote_plus, urljoin
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -50,12 +50,12 @@ class OpendatasoftExploreSpider(Spider):
     # download. The download size warning is increased to 256MiB.
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 120, "DOWNLOAD_WARNSIZE": 268435456}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=urljoin(self.api_endpoint, f"catalog/datasets/{self.dataset_id}"), callback=self.parse_dataset_metadata
         )
 
-    def parse_dataset_metadata(self, response: Response) -> Iterable[JsonRequest]:
+    def parse_dataset_metadata(self, response: TextResponse) -> Iterable[JsonRequest]:
         metadata = response.json()["metas"]["default"]
         timestamp_of_last_edit = datetime.fromisoformat(metadata["data_processed"])
         self.dataset_attributes.update({"source:date": timestamp_of_last_edit.isoformat()})
@@ -93,7 +93,7 @@ class OpendatasoftExploreSpider(Spider):
             callback=self.parse_dataset_records,
         )
 
-    def parse_dataset_records(self, response: Response) -> Iterable[Feature]:
+    def parse_dataset_records(self, response: TextResponse) -> Iterable[Feature]:
         features = response.json()["features"]
 
         for feature in features:
@@ -110,5 +110,5 @@ class OpendatasoftExploreSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         return
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         yield item

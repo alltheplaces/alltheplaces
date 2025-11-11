@@ -1,22 +1,21 @@
 import json
 import re
-from typing import Union
 from urllib.parse import urljoin
 
-import lxml
-import parsel
-import scrapy
+from lxml.html import HtmlElement
+from scrapy.http import TextResponse
+from scrapy.selector import Selector
 
 
 def token_split(val):
     return re.findall(r"\S+", val, flags=re.ASCII)
 
 
-def top_level_items(selector: parsel.Selector):
+def top_level_items(selector: Selector):
     yield from selector.xpath("//*[(@itemscope and not(@itemprop)) or (@typeof and not(@property))]")
 
 
-def property_value(element: lxml.html.HtmlElement):
+def property_value(element: HtmlElement):
     # 5.2.4 Values
 
     # The property value of a name-value pair added by an element with an
@@ -101,7 +100,7 @@ def property_value(element: lxml.html.HtmlElement):
         return value
 
 
-def item_props(scope: lxml.html.HtmlElement):
+def item_props(scope: HtmlElement):
     assert "itemscope" in scope.attrib or "typeof" in scope.attrib
     # 5.2.5 Associating names with items
 
@@ -158,7 +157,7 @@ def item_props(scope: lxml.html.HtmlElement):
     return results
 
 
-def get_object(item: lxml.html.HtmlElement, memory=None):
+def get_object(item: HtmlElement, memory=None):
     # 1. Let result be an empty object.
     result = {}
     # 2. If no memory was passed to the algorithm, let memory be an empty list.
@@ -200,7 +199,7 @@ def get_object(item: lxml.html.HtmlElement, memory=None):
         # be the string "ERROR". Otherwise, get the object for value, passing a
         # copy of memory, and then replace value with the object returned from
         # those steps.
-        if isinstance(value, lxml.html.HtmlElement):
+        if isinstance(value, HtmlElement):
             if value in memory:
                 value = "ERROR"
             else:
@@ -301,7 +300,7 @@ class MicrodataParser:
         return result
 
     @staticmethod
-    def extract_microdata(doc: parsel.Selector):
+    def extract_microdata(doc: Selector):
         # 1. Let result be an empty object.
         result = {}
         # 2. Let items be an empty array.
@@ -324,10 +323,9 @@ class MicrodataParser:
         return result
 
     @staticmethod
-    def convert_to_json_ld(response: Union["parsel.Selector", "scrapy.http.Response"]):
-        selector = getattr(response, "selector", response)
-        obj = MicrodataParser.extract_microdata(selector)
+    def convert_to_json_ld(response: TextResponse):
+        obj = MicrodataParser.extract_microdata(response.selector)
         ld = MicrodataParser.convert_to_graph(obj)
-        script = selector.root.makeelement("script", {"type": "application/ld+json"})
+        script = response.selector.root.makeelement("script", {"type": "application/ld+json"})
         script.text = json.dumps(ld, indent=2)
-        selector.root.append(script)
+        response.selector.root.append(script)
