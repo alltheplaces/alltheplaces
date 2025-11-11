@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -11,7 +11,7 @@ class CpFreshmartTHSpider(JSONBlobSpider):
     name = "cp_freshmart_th"
     item_attributes = {"brand": "CP Freshmart", "brand_wikidata": "Q125917787", "country": "TH"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://cpfmapi.addressasia.com/wp-json/store/v2/collect?lang=th",
             method="POST",

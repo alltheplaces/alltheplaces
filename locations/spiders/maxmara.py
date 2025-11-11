@@ -31,16 +31,18 @@ class MaxmaraSpider(scrapy.Spider):
             if not store.get("storeHidden"):
                 store_info = store["properties"]
                 item = DictParser.parse(store_info)
-                item["ref"] = store_info["name"]
-                item["name"] = store_info["displayName"]
+                item["ref"] = item.pop("name")
+                item["branch"] = (
+                    store_info["displayName"].replace("MaxMara ", "").replace("Max Mara ", "").lstrip("(").rstrip(")")
+                )
                 item["phone"] = store_info["phone1"]
                 item["addr_full"] = store_info["formattedAddress"]
 
                 oh = OpeningHours()
                 for day, hours in store_info.get("openingHours").items():
-                    for chunk in hours:
-                        open_at, close_at = chunk.replace(".", ":").split(" - ")
-                        oh.add_range(day=DAYS_EN[day], open_time=open_at, close_time=close_at, time_format="%H:%M")
+                    for time_period in hours:
+                        open_at, close_at = time_period.replace(".", ":").split(" - ")
+                        oh.add_range(day=DAYS_EN[day], open_time=open_at, close_time=close_at, time_format="%I:%M %p")
                 item["opening_hours"] = oh
 
                 apply_category(Categories.SHOP_CLOTHES, item)

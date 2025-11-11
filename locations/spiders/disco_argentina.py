@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
@@ -13,7 +16,7 @@ class DiscoArgentinaSpider(Spider):
     ]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.start_urls[0], headers={"Accept": "application/json", "Rest-Range": "resources=0-999"})
 
     def parse(self, response):

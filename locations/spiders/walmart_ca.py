@@ -23,8 +23,8 @@ class WalmartCASpider(scrapy.Spider):
         "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
     }
-    base_url = "https://www.walmart.ca/orchestra/graphql/nearByNodes"
-    hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
+    base_url = "https://www.walmart.ca/orchestra/graphql/storeFinderNearbyNodesQuery"
+    hash = "d3236419dacf3a02137445459aeaeda81fd40630ddd2d3f218cf43f60e1ad16a"
 
     def start_requests(self) -> Iterable[JsonRequest]:
         # Tried raw GraphQL query, but it's blocked, hash appears to be stable and required for successful requests.
@@ -49,7 +49,7 @@ class WalmartCASpider(scrapy.Spider):
             yield JsonRequest(
                 url=f"{self.base_url}/{self.hash}?{urlencode({'variables': json.dumps(variables)})}",
                 headers={
-                    "x-apollo-operation-name": "nearByNodes",
+                    "x-apollo-operation-name": "storeFinderNearbyNodesQuery",
                     "x-o-bu": "WALMART-CA",
                     "x-o-segment": "oaoh",
                 },

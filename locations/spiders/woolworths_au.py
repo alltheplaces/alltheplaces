@@ -18,7 +18,6 @@ class WoolworthsAUSpider(scrapy.Spider):
         "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=10000&Division=SUPERMARKETS&Facility=&postcode=*"
     ]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = "AU"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Stores"]:

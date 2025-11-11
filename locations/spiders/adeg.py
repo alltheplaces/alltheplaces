@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Selector, Spider
+from scrapy.http import Request
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -14,16 +17,16 @@ wochentag = {
 }
 
 
-class AdegSpider(scrapy.Spider):
+class AdegSpider(Spider):
     name = "adeg"
     item_attributes = {"brand": "ADEG", "brand_wikidata": "Q290211"}
     allowed_domains = ["adeg.at"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(1)
 
-    def get_page(self, n):
-        return scrapy.Request(
+    def get_page(self, n: int) -> Request:
+        return Request(
             f"https://www.adeg.at/services/maerkte-oeffnungszeiten?tx_solr[page]={n}&type=7382&distance=1000",
             meta={"page": n},
         )
@@ -38,7 +41,7 @@ class AdegSpider(scrapy.Spider):
             lat, lon = store["coordinates"].split(",")
 
             oh = OpeningHours()
-            for row in scrapy.Selector(text=store["openingHours"]).xpath(".//dt"):
+            for row in Selector(text=store["openingHours"]).xpath(".//dt"):
                 day = wochentag[row.xpath("normalize-space()").get().removesuffix(":")]
                 for interval in row.xpath("./following-sibling::dd[position()=1]/span/text()").extract():
                     open_time, close_time = interval.strip(",").split(" \u2013 ")

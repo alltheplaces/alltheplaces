@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -14,7 +14,7 @@ class BerelMXSpider(JSONBlobSpider):
     no_refs = True
     locations_key = ["bloques", 0, "sucursales"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://berel-web-cms.playfuldemo.com/rest/basicpage",
             data={"id": "ubica-tienda"},

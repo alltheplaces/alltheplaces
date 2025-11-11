@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 from scrapy.selector import Selector
 
@@ -11,7 +13,7 @@ class BccITSpider(JSONBlobSpider):
     name = "bcc_it"
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in country_iseadgg_centroids("IT", 24):
             yield JsonRequest(
                 f"https://ws-annuario.service.gbi.bcc.it/Territorio.svc/REST/geosearch/bcc/sede,filiale,bancomat/{lat}/{lon}/25000/"

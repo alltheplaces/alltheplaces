@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
@@ -15,7 +15,7 @@ class DeutscheBankDESpider(Spider):
     SPARDA_BANK = {"brand": "Sparda-Bank", "brand_wikidata": "Q2307136"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         base_url = "https://www.deutsche-bank.de/cip/rest/api/url/pfb/content/gdata/Presentation/DbFinder/Home/IndexJson?label={type}&searchTerm={searchBy}&country=D"
 
         for city in city_locations("DE", 15000):

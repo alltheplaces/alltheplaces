@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class BatteryWorldAUSpider(Spider):
     allowed_domains = ["www.batteryworld.com.au"]
     start_urls = ["https://www.batteryworld.com.au/app/services/Store.Service.ss"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

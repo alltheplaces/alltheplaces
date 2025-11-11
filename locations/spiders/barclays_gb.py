@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -12,11 +12,11 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class BarclaysGBSpider(scrapy.Spider):
+class BarclaysGBSpider(Spider):
     name = "barclays_gb"
     item_attributes = {"brand": "Barclays", "brand_wikidata": "Q245343"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("GB", 10000):
             url = f'https://search.barclays.co.uk/content/bf/en/4_0/branches_atms?lat={city["latitude"]}&lng={city["longitude"]}'
             yield JsonRequest(url=url, callback=self.parse)

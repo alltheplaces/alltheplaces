@@ -1,8 +1,7 @@
 import json
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import FormRequest, Request
-from scrapy.http import JsonRequest
+from scrapy import FormRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
@@ -15,7 +14,7 @@ class BurgerKingKRSpider(JSONBlobSpider):
     locations_key = ["body", "storInfo"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.burgerking.co.kr/burgerking/BKR0343.json",
             headers={"accept": "*/*"},
