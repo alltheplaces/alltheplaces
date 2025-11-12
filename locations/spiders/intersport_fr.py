@@ -2,7 +2,7 @@ import re
 from typing import AsyncIterator
 
 from chompjs import parse_js_object
-from scrapy import Request, Selector
+from scrapy import Request, Selector, Spider
 
 from locations.categories import Categories
 from locations.items import Feature
