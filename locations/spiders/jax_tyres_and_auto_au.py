@@ -1,5 +1,5 @@
-from typing import AsyncIterator
 import re
+from typing import AsyncIterator
 
 from scrapy import Request, Spider
 
