@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -46,7 +48,7 @@ class InsomniaCookiesSpider(Spider):
     name = "insomnia_cookies"
     item_attributes = {"brand": "Insomnia Cookies", "brand_wikidata": "Q16997024"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # First get a list of countries with their IDs, websites, and API
         # endpoints.
         yield JsonRequest(
