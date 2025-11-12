@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Request
 from scrapy.linkextractors import LinkExtractor
 
@@ -14,7 +16,7 @@ class HudsonsZASpider(GoReviewSpider):
     }
     start_urls = ["https://hudsons.goreview.co.za/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_store)
 

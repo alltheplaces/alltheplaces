@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class HyundaiUSSpider(JSONBlobSpider):
     item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["www.hyundaiusa.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for index, record in enumerate(postal_regions("US")):
             if index % 100 == 0:
                 yield JsonRequest(
