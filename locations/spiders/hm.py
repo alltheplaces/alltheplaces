@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 
-from scrapy import Request, Spider
 from geonamescache import GeonamesCache
+from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
