@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import FormRequest, Spider
 from scrapy.http import Response
@@ -23,7 +23,7 @@ class WordpressHeronFoodsSpider(Spider):
         []
     )  # DetectionRequestRule(https://{self.domain}/wp-admin/admin-ajax.php, but its a POST and has get_stores), or DetectionResponseRule(jsblob with na zp lng lon ID)
 
-    def make_request(self, lat: float, lon: float, radius: int):
+    def make_request(self, lat: float, lon: float, radius: int) -> FormRequest:
         return FormRequest(
             url=f"https://{self.domain}/wp-admin/admin-ajax.php",
             formdata={
@@ -36,7 +36,7 @@ class WordpressHeronFoodsSpider(Spider):
             headers={"Referer": f"https://{self.domain}/storelocator/"},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(self.lat, self.lon, self.radius)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

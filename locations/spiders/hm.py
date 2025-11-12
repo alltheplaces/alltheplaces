@@ -1,5 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
 from geonamescache import GeonamesCache
+from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -7,7 +9,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class HmSpider(scrapy.Spider):
+class HmSpider(Spider):
     name = "hm"
     item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326"}
 
@@ -16,16 +18,16 @@ class HmSpider(scrapy.Spider):
     def country_url(self, country_code):
         return f"https://api.storelocator.hmgroup.tech/v2/brand/hm/stores/locale/en_us/country/{country_code}?_type=json&campaigns=true&departments=true&openinghours=true"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         if self.use_hardcoded_countries:
             for country in GeonamesCache().get_countries():
-                yield scrapy.Request(self.country_url(country.lower()), callback=self.parse_country)
+                yield Request(self.country_url(country.lower()), callback=self.parse_country)
         else:
-            yield scrapy.Request("http://www.hm.com/entrance.ahtml", callback=self.parse)
+            yield Request("http://www.hm.com/entrance.ahtml", callback=self.parse)
 
     def parse(self, response):
         for country_code in response.xpath("//@data-location").getall():
-            yield scrapy.Request(self.country_url(country_code), callback=self.parse_country)
+            yield Request(self.country_url(country_code), callback=self.parse_country)
 
     def parse_country(self, response):
         for store in response.json()["stores"]:

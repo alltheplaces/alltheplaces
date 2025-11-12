@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -13,7 +15,7 @@ class HuddleHouseUSSpider(Spider):
     allowed_domains = ["www.huddlehouse.com"]
     start_urls = ["https://www.huddlehouse.com/api"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             for lat, lon in country_iseadgg_centroids(["US"], 48):
                 yield JsonRequest(

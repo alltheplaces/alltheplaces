@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import Response
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
@@ -14,7 +14,7 @@ class HeronFoodsGBSpider(WordpressHeronFoodsSpider):
     item_attributes = {"brand": "Heron Foods", "brand_wikidata": "Q5743472"}
     domain = "heronfoods.com"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(54.181549, -2.1392032, 250)
         yield self.make_request(50.6109195, -1.3020278, 250)
         yield self.make_request(57.5448845, -4.8655852, 250)

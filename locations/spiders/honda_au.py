@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -16,7 +16,7 @@ class HondaAUSpider(Spider):
     allowed_domains = ["www.honda.com.au"]
     start_urls = ["https://www.honda.com.au/api/locateDealer/Dealerships/get"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

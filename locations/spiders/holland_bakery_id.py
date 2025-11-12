@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
@@ -10,7 +10,7 @@ class HollandBakeryIDSpider(Spider):
     name = "holland_bakery_id"
     item_attributes = {"branch": "Holland Bakery", "brand_wikidata": "Q19726345"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.hollandbakery.co.id/get-group", headers={"X-Requested-With": "XMLHttpRequest"}
         )
