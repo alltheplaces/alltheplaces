@@ -1,5 +1,5 @@
-from typing import AsyncIterator
 import re
+from typing import AsyncIterator
 
 from chompjs import parse_js_object
 from scrapy import Request, Selector
