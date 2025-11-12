@@ -29,7 +29,7 @@ class PennyDESpider(scrapy.Spider):
                 "/".join(["/markt", location["citySlug"], location["wwIdent"], location["slug"]])
             )
             item["image"] = location["image"]
-            item["ref"] = location["@id"]
+            item["ref"] = location["marketId"]
             item["opening_hours"] = self.parse_hours(location)
 
             yield item
