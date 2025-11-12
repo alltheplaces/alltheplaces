@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from zoneinfo import ZoneInfo
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -110,7 +109,7 @@ class JumboNLSpider(Spider):
             },
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 import re
 
 from scrapy import Request, Spider
@@ -12,7 +13,7 @@ class JaxTyresAndAutoAUSpider(Spider):
     allowed_domains = ["www.jaxtyres.com.au"]
     start_urls = ["https://www.jaxtyres.com.au/tyre-stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse_store_list)
 
