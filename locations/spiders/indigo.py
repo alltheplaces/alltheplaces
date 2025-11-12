@@ -14,7 +14,6 @@ class IndigoSpider(Spider):
     url = "https://salesforce.parkindigo.com/locations?"
 
     async def start(self) -> AsyncIterator[Request]:
-    def start_requests(self):
         params = {
             "location.language": "en",
             "page": 0,
@@ -37,4 +36,4 @@ class IndigoSpider(Spider):
                 "location.language": "en",
                 "page": int(data.get("number")) + 1,
             }
-            yield scrapy.Request(self.url + urlencode(params), callback=self.parse)
+            yield Request(self.url + urlencode(params), callback=self.parse)
