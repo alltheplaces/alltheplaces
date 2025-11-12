@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.items import SocialMedia, set_social_media
@@ -20,7 +22,7 @@ class InxpressSpider(JSONBlobSpider):
     locations_key = "Franchises"
     custom_settings = {"ROBOTSTXT_OBEY": False}  # timeout on attempting to fetch robots.txt
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, method="POST", headers={"content-length": 0})
 

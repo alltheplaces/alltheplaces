@@ -1,4 +1,7 @@
 import re
+from typing import AsyncIterator
+
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
@@ -16,10 +19,9 @@ class InpostITSpider(JSONBlobSpider):
     brand_locker = {"brand": "InPost", "brand_wikidata": "Q3182097"}
     brand_partner = {"post_office:brand": "InPost", "post_office:brand:wikidata": "Q3182097"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for domain in self.allowed_domains:
-            self.start_urls.append(f"https://{domain}/sites/default/files/points.json")
-        yield from super().start_requests()
+            yield JsonRequest(url=f"https://{domain}/sites/default/files/points.json")
 
     def pre_process_data(self, v):
         # this mapping comes from "load" js function in inpost webpage

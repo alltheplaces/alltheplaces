@@ -1,6 +1,8 @@
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import FormRequest, Selector, Spider
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 
@@ -10,7 +12,7 @@ class InterparkingSpider(Spider):
     item_attributes = {"brand": "Interparking", "brand_wikidata": "Q1895863"}
     countries = ["be", "fr", "fr", "it", "nl", "pl", "ro", "es"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for country in self.countries:
             yield FormRequest(
                 url=f"https://www.interparking.{country}/en/find-parking/search-results/?keyword=",

@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -8,12 +8,12 @@ from locations.hours import DAYS_IT, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class IntesaSanpaoloITSpider(scrapy.Spider):
+class IntesaSanpaoloITSpider(Spider):
     name = "intesa_sanpaolo_it"
     item_attributes = {"brand": "Intesa Sanpaolo", "brand_wikidata": "Q1343118"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "payload": {"latitudine": 41.95131997447626, "longitudine": 12.496400000000012, "numeroRisultati": 100000}
         }

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -16,7 +16,7 @@ class IsuzuTHSpider(JSONBlobSpider):
     start_urls = ["https://www.isuzu-tis.com/api/contentstack"]
     locations_key = "entries"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "bodyPaint": False,
             "changeTire": False,
