@@ -60,5 +60,4 @@ dev = [
     "pre-commit",
     "pylint",
     "pytest",
-    "pytest-cov",
 ]
