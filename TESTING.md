@@ -7,12 +7,12 @@ This document summarizes the testing setup and changes on 11/12/2025 made for al
 ### How run isolated testfiles
 
 ```bash
-pytest <your/file/path> 
+pytest <your/file/path>
 ```
 OR
 
 ```bash
-uv run pytest <your/file/path> 
+uv run pytest <your/file/path>
 ```
 
 ### How run repo-wide test
@@ -20,7 +20,7 @@ uv run pytest <your/file/path>
 ```bash
 uv run pytest
 ```
-OR 
+OR
 ```bash
 pytest
 ```
@@ -107,7 +107,7 @@ The following is the test coverage summary for the files modified and added as p
 
 - `tests/test_lineage.py` on Windows this test failed when testing (from original repo).
 
-Two files needed updating when running repo-wide test. 
+Two files needed updating when running repo-wide test.
 - `locations/data/nsi-wikidata.json`
 - `tests/data/londis.html`
 

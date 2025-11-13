@@ -1,6 +1,7 @@
 import re
 from types import SimpleNamespace
 from unittest.mock import MagicMock
+
 import pytest
 import scrapy
 from scrapy.exceptions import UsageError
@@ -8,8 +9,9 @@ from scrapy.exceptions import UsageError
 import locations.commands.sitemap as sitemap_mod
 from locations.commands.sitemap import MySitemapSpider, SitemapCommand
 
+
 @pytest.fixture(autouse=True)
-def reset_class_state(): 
+def reset_class_state():
     MySitemapSpider.matched_patterns = {}
     MySitemapSpider.pages = False
     MySitemapSpider.requires_proxy = False
@@ -22,7 +24,7 @@ def reset_class_state():
 
 
 @pytest.fixture
-def spider(monkeypatch): 
+def spider(monkeypatch):
     sp = MySitemapSpider()
     sp.sitemap_alternate_links = False
     sp._follow = [re.compile(".*")]
@@ -138,7 +140,7 @@ def test_parse_sitemap_urlset_pages_true_triggers_extract(monkeypatch, spider, c
     resp = scrapy.http.TextResponse(url="https://site/sitemap.xml", request=req, body=b"<urlset/>")
 
     out = list(spider._parse_sitemap(resp))
-    assert out == []  
+    assert out == []
 
     assert len(spider.matched_patterns) == 1
     assert sum(spider.matched_patterns.values()) == 1

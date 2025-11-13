@@ -1,7 +1,5 @@
-import builtins
-import types
-import pytest
 
+import pytest
 from scrapy.exceptions import UsageError
 
 # Import the source under test
@@ -9,32 +7,38 @@ from scrapy.exceptions import UsageError
 # from locations.commands.name_suggestion_index import NameSuggestionIndexCommand
 from locations.commands.nsi import NameSuggestionIndexCommand  # <-- CHANGE THIS
 
-
 # ---------- Helpers ----------
+
 
 class _DummyGroup:
     def __init__(self, parent):
         self.parent = parent
+
     def add_argument(self, *args, **kwargs):
         # record on the parent so we can assert later
         self.parent.added.append((args, kwargs))
 
+
 class DummyParser:
     def __init__(self):
         self.added = []
+
     def add_argument(self, *args, **kwargs):
         self.added.append((args, kwargs))
+
     def add_argument_group(self, *args, **kwargs):
         # Scrapy uses this; return a group that supports add_argument
         return _DummyGroup(self)
 
+
 def make_opts(**flags):
     import types
+
     return types.SimpleNamespace(**flags)
 
 
-
 # ---------- Basic API surface ----------
+
 
 def test_syntax_and_short_desc_exist():
     cmd = NameSuggestionIndexCommand()
@@ -56,7 +60,9 @@ def test_add_options_registers_expected_flags(mocker):
     for flag in ("--name", "--code", "--detect-missing"):
         assert flag in joined
 
+
 # ---------- run() dispatch & errors ----------
+
 
 def test_run_raises_on_wrong_arg_count():
     cmd = NameSuggestionIndexCommand()
@@ -91,6 +97,7 @@ def test_run_dispatches_to_selected_method(mocker, flag_name, method_name):
 
 # ---------- lookup_name() ----------
 
+
 def test_lookup_name_calls_lookup_code_for_each_found_wikidata(mocker, capsys):
     cmd = NameSuggestionIndexCommand()
     # Mock NSI.iter_wikidata to yield (code, whatever)
@@ -108,12 +115,17 @@ def test_lookup_name_calls_lookup_code_for_each_found_wikidata(mocker, capsys):
 
 # ---------- lookup_code() ----------
 
+
 def test_lookup_code_prints_summary_and_items(mocker, capsys):
     cmd = NameSuggestionIndexCommand()
 
     # Mock NSI.lookup_wikidata to return wikidata info
     mocker.patch.object(cmd, "nsi", autospec=True)
-    cmd.nsi.lookup_wikidata.return_value = {"label": "CoolBrand", "description": "desc", "identities": {"website": "https://x"}}
+    cmd.nsi.lookup_wikidata.return_value = {
+        "label": "CoolBrand",
+        "description": "desc",
+        "identities": {"website": "https://x"},
+    }
 
     # Mock NSI.iter_nsi to iterate items with tags
     cmd.nsi.iter_nsi.return_value = [
@@ -140,11 +152,12 @@ def test_lookup_code_no_match_prints_nothing(mocker, capsys):
 
 # ---------- detect_missing() integration paths ----------
 
+
 @pytest.mark.parametrize(
     "arg,uses_request_file",
     [
         ("brands/shop/supermarket", True),  # contains "/"
-        ("US", False),                      # country code path
+        ("US", False),  # country code path
     ],
 )
 def test_detect_missing_routes_by_argument_shape(mocker, capsys, arg, uses_request_file):
@@ -158,13 +171,17 @@ def test_detect_missing_routes_by_argument_shape(mocker, capsys, arg, uses_reque
 
     # When using the "/" path, we fetch a JSON file
     if uses_request_file:
-        mocker.patch.object(NameSuggestionIndexCommand, "_request_file", return_value={
-            "items": [
-                {"tags": {"brand:wikidata": "Q2"}, "displayName": "Brand Two"},
-                {"tags": {"brand:wikidata": "Q1"}, "displayName": "Brand One (already present)"},
-            ],
-            "properties": {"path": f"data/{arg}.json"},
-        })
+        mocker.patch.object(
+            NameSuggestionIndexCommand,
+            "_request_file",
+            return_value={
+                "items": [
+                    {"tags": {"brand:wikidata": "Q2"}, "displayName": "Brand Two"},
+                    {"tags": {"brand:wikidata": "Q1"}, "displayName": "Brand One (already present)"},
+                ],
+                "properties": {"path": f"data/{arg}.json"},
+            },
+        )
     else:
         # For country path, iterate over country items
         cmd.nsi.iter_country.return_value = [
@@ -206,13 +223,15 @@ def test_detect_missing_no_results_prints_zero(mocker, capsys):
 
 # ---------- show() & issue_template() formatting ----------
 
+
 @pytest.mark.parametrize(
     "data, contains",
     [
-        ({"label": "Nice", "description": "desc", "identities": {"website": "https://a"}},
-         ["\"Nice\", \"Q5\"", "EntityData/Q5.json", "desc", "https://a"]),
-        ({"label": "JustLabel"},  # no desc or identities
-         ["\"JustLabel\", \"Q5\"", "EntityData/Q5.json"]),
+        (
+            {"label": "Nice", "description": "desc", "identities": {"website": "https://a"}},
+            ['"Nice", "Q5"', "EntityData/Q5.json", "desc", "https://a"],
+        ),
+        ({"label": "JustLabel"}, ['"JustLabel", "Q5"', "EntityData/Q5.json"]),  # no desc or identities
     ],
 )
 def test_show_outputs_expected_lines(data, contains, capsys):
@@ -226,20 +245,31 @@ def test_show_outputs_expected_lines(data, contains, capsys):
     "data, expect_bits",
     [
         (
-            {"label": "Brand A", "description": "A desc", "identities": {"website": "https://a"},
-             "officialWebsites": ["https://site1", "https://site2"]},
-            ["### Brand name", "Brand A", "A desc", "### Wikidata ID", "Q7",
-             "Primary website: https://a",
-             "Official Url(s): https://site1", "Official Url(s): https://site2", "----"]
+            {
+                "label": "Brand A",
+                "description": "A desc",
+                "identities": {"website": "https://a"},
+                "officialWebsites": ["https://site1", "https://site2"],
+            },
+            [
+                "### Brand name",
+                "Brand A",
+                "A desc",
+                "### Wikidata ID",
+                "Q7",
+                "Primary website: https://a",
+                "Official Url(s): https://site1",
+                "Official Url(s): https://site2",
+                "----",
+            ],
         ),
         (
             {"label": "Brand B"},
             # 👇 no "Primary website: N/A" here; function skips when identities is absent
-            ["### Brand name", "Brand B", "### Wikidata ID", "Q7", "### Store finder url(s)", "----"]
+            ["### Brand name", "Brand B", "### Wikidata ID", "Q7", "### Store finder url(s)", "----"],
         ),
     ],
 )
-
 def test_issue_template_prints(data, expect_bits, capsys):
     NameSuggestionIndexCommand.issue_template("Q7", data)
     out = capsys.readouterr().out
@@ -248,6 +278,7 @@ def test_issue_template_prints(data, expect_bits, capsys):
 
 
 # ---------- _request_file() error / success ----------
+
 
 def test_request_file_success_json(mocker):
     resp = mocker.Mock()

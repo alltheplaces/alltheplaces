@@ -1,22 +1,22 @@
 import re
 import types
+from urllib.parse import parse_qs, urlparse
+
 import pytest
-
-from urllib.parse import urlparse, parse_qs
-
 from scrapy.http import Response
 from scrapy.http.request.json_request import JsonRequest
 
-from locations.storefinders.geo_me import GeoMeSpider 
-from locations.hours import OpeningHours, DAYS_EN
-
+from locations.hours import DAYS_EN, OpeningHours
+from locations.storefinders.geo_me import GeoMeSpider
 
 # --------
 # Helpers
 # --------
 
+
 class FakeResponse(Response):
     """Minimal Response with controllable .json()."""
+
     def __init__(self, payload):
         super().__init__(url="https://example.test/")
         self._payload = payload
@@ -44,6 +44,7 @@ def spider(mocker):
 # start_requests / wiring
 # ----------------------------
 
+
 def test_start_requests_connects_signal_and_yields_initial_request(spider, mocker):
     gen = spider.start_requests()
     req = next(gen)
@@ -67,6 +68,7 @@ def test_start_requests_connects_signal_and_yields_initial_request(spider, mocke
 # parse_bounding_box (parametrized)
 # --------------------------------
 
+
 @pytest.mark.parametrize(
     "clusters,locations,expected_child_calls",
     [
@@ -76,8 +78,7 @@ def test_start_requests_connects_signal_and_yields_initial_request(spider, mocke
         ([{"bounds": {"sw": [10, 20], "ne": [30, 40]}}], [{"id": "L1", "lat": "1.0", "lng": "2.0"}], 1),
         # two clusters with bounds, two locations
         (
-            [{"bounds": {"sw": [-10, -20], "ne": [10, 20]}},
-             {"bounds": {"sw": [0, 0], "ne": [1, 1]}}],
+            [{"bounds": {"sw": [-10, -20], "ne": [10, 20]}}, {"bounds": {"sw": [0, 0], "ne": [1, 1]}}],
             [{"id": "A", "lat": "45.5", "lng": "-122.7"}, {"id": "B", "lat": "0", "lng": "0"}],
             2,
         ),
@@ -106,6 +107,7 @@ def test_parse_bounding_box_param(spider, clusters, locations, expected_child_ca
 # (mocking)
 # ------------------------------------------------
 
+
 def test_start_location_requests_disconnects_and_crawls_next(spider, mocker):
     # Provide a stub get_next_location that returns a sentinel
     sentinel_req = object()
@@ -121,6 +123,7 @@ def test_start_location_requests_disconnects_and_crawls_next(spider, mocker):
 # get_next_location edge case (empty)
 # ------------------------------------
 
+
 def test_get_next_location_empty_returns_none(spider):
     spider._locations_found.clear()
     assert spider.get_next_location() is None
@@ -131,9 +134,10 @@ def test_get_next_location_empty_returns_none(spider):
 # (mocking random.choice for determinism)
 # ---------------------------------------------------
 
+
 def test_get_next_location_returns_valid_request_and_pops(spider, mocker):
     spider._locations_found = {"X": (10.5, 20.25), "Y": (0.0, 0.0)}
-    mod = GeoMeSpider.__module__                     
+    mod = GeoMeSpider.__module__
     mocker.patch(f"{mod}.random.choice", return_value="X")
 
     req = spider.get_next_location()
@@ -149,6 +153,7 @@ def test_get_next_location_returns_valid_request_and_pops(spider, mocker):
 # (mock DictParser.parse + parse_item + response.json)
 # --------------------------------------------------------
 
+
 def test_parse_locations_processes_and_yields_next(spider, mocker):
     spider._locations_found = {"KEPT": (1.0, 2.0), "GONE": (0.0, 0.0)}
     payload = {
@@ -160,7 +165,7 @@ def test_parse_locations_processes_and_yields_next(spider, mocker):
     resp = FakeResponse(payload)
 
     parsed_item = {"brand": "demo"}
-    mod = GeoMeSpider.__module__                     
+    mod = GeoMeSpider.__module__
     dp = mocker.patch(f"{mod}.DictParser.parse", return_value=parsed_item)
 
     eh = mocker.spy(spider, "extract_hours")
@@ -183,10 +188,10 @@ def test_parse_locations_processes_and_yields_next(spider, mocker):
     assert "KEPT" in spider._locations_found
 
 
-
 # ----------------------------------------------------------
 # extract_hours: multiple cases (parametrized) + mocking
 # ----------------------------------------------------------
+
 
 @pytest.mark.parametrize(
     "location_builder, expect_24h, expect_ranges",
@@ -196,18 +201,22 @@ def test_parse_locations_processes_and_yields_next(spider, mocker):
         # no hours case
         (lambda: {}, False, False),
         # structured hours using real keys from DAYS_EN
-        (lambda: {
-            "opening_hours": [
-                {
-                    # get two valid consecutive day keys from DAYS_EN
-                    "days": list(DAYS_EN.keys())[:2],
-                    "hours": [
-                        ["1900-01-01 08:00:00", "1900-01-01 12:30:00"],
-                        ["1900-01-01 13:15:00", "00:00:00"],  # should normalize to 23:59
-                    ],
-                }
-            ]
-        }, False, True),
+        (
+            lambda: {
+                "opening_hours": [
+                    {
+                        # get two valid consecutive day keys from DAYS_EN
+                        "days": list(DAYS_EN.keys())[:2],
+                        "hours": [
+                            ["1900-01-01 08:00:00", "1900-01-01 12:30:00"],
+                            ["1900-01-01 13:15:00", "00:00:00"],  # should normalize to 23:59
+                        ],
+                    }
+                ]
+            },
+            False,
+            True,
+        ),
     ],
 )
 def test_extract_hours_various_cases(location_builder, expect_24h, expect_ranges, mocker):
@@ -224,7 +233,7 @@ def test_extract_hours_various_cases(location_builder, expect_24h, expect_ranges
 
     if expect_24h:
         assert spy_add_days_range.call_count >= 1
-        args = spy_add_days_range.call_args[0]         # args: (self, days, open_time, close_time)
+        args = spy_add_days_range.call_args[0]  # args: (self, days, open_time, close_time)
         assert args[2] == "00:00" and args[3] == "23:59"
         assert spy_add_ranges.call_count == 0
     elif expect_ranges:
@@ -250,18 +259,21 @@ def test_extract_hours_various_cases(location_builder, expect_24h, expect_ranges
 # (uses 2+ mocks)
 # -------------------------------------------------------
 
+
 def test_integration_seed_flow(spider, mocker):
-    bbox_resp = FakeResponse({
-        "clusters": [],
-        "locations": [
-            {"id": "A", "lat": "10.0", "lng": "20.0"},
-            {"id": "B", "lat": "0", "lng": "0"},
-        ],
-    })
+    bbox_resp = FakeResponse(
+        {
+            "clusters": [],
+            "locations": [
+                {"id": "A", "lat": "10.0", "lng": "20.0"},
+                {"id": "B", "lat": "0", "lng": "0"},
+            ],
+        }
+    )
     list(spider.parse_bounding_box(bbox_resp))
     assert set(spider._locations_found.keys()) == {"A", "B"}
 
-    mod = GeoMeSpider.__module__                    
+    mod = GeoMeSpider.__module__
     mocker.patch(f"{mod}.random.choice", return_value="A")
 
     req = spider.get_next_location()

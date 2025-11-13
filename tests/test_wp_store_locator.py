@@ -1,5 +1,6 @@
 import json
 from types import SimpleNamespace
+
 import pytest
 import scrapy
 
@@ -30,8 +31,12 @@ def spider(monkeypatch):
         def __init__(self):
             self.inc_calls = []
             self.max_calls = []
-        def inc_value(self, key): self.inc_calls.append(key)
-        def max_value(self, key, value): self.max_calls.append((key, value))
+
+        def inc_value(self, key):
+            self.inc_calls.append(key)
+
+        def max_value(self, key, value):
+            self.max_calls.append((key, value))
 
     sp.crawler = SimpleNamespace(stats=FakeStats())
 
@@ -58,7 +63,8 @@ def test_geo_iseadgg_happy(monkeypatch, spider):
     spider.max_results = 500
 
     monkeypatch.setattr(
-        wpsl_mod, "country_iseadgg_centroids",
+        wpsl_mod,
+        "country_iseadgg_centroids",
         lambda countries, radius: [(12.34, 56.78)],
         raising=True,
     )
@@ -90,7 +96,8 @@ def test_geo_manual_points(monkeypatch, spider):
 
     # Mock file-driven points
     monkeypatch.setattr(
-        wpsl_mod, "point_locations",
+        wpsl_mod,
+        "point_locations",
         lambda fname, area: [(1.0, 2.0), (3.0, 4.0)],
         raising=True,
     )
@@ -122,22 +129,26 @@ def test_parse_empty_page_records_miss_and_yields_nothing(spider):
 
 def test_parse_features_valid_path(monkeypatch, spider, caplog):
     monkeypatch.setattr(
-        wpsl_mod.DictParser, "parse",
+        wpsl_mod.DictParser,
+        "parse",
         lambda feature: {"addr_full": "x", "ref": feature.get("id", "ref")},
         raising=True,
     )
     monkeypatch.setattr(
-        wpsl_mod.DictParser, "get_first_key",
+        wpsl_mod.DictParser,
+        "get_first_key",
         lambda feature, keys: feature.get("hours_html"),
         raising=True,
     )
     monkeypatch.setattr(
-        wpsl_mod, "merge_address_lines",
+        wpsl_mod,
+        "merge_address_lines",
         lambda parts: ", ".join([p for p in parts if p]),
         raising=True,
     )
 
     calls = {"n": 0}
+
     def fake_parse_oh(self, feature, days):
         calls["n"] += 1
         return None if calls["n"] == 1 else "OH-OBJ"
@@ -146,8 +157,20 @@ def test_parse_features_valid_path(monkeypatch, spider, caplog):
 
     spider.max_results = 10
     features = [
-        {"id": "A1", "store": "AT&amp;T", "address": "123 Main", "address2": "Suite 5", "hours_html": "<p>Mon-Fri 9-5</p>"},
-        {"id": "B2", "store": "Coffee &amp; Co", "address": "456 Center", "address2": "", "hours_html": "<div>Sat 10-2</div>"},
+        {
+            "id": "A1",
+            "store": "AT&amp;T",
+            "address": "123 Main",
+            "address2": "Suite 5",
+            "hours_html": "<p>Mon-Fri 9-5</p>",
+        },
+        {
+            "id": "B2",
+            "store": "Coffee &amp; Co",
+            "address": "456 Center",
+            "address2": "",
+            "hours_html": "<div>Sat 10-2</div>",
+        },
     ]
     resp = DummyResponse(data=features)
 

@@ -4,6 +4,7 @@ from pathlib import Path
 from types import ModuleType
 
 import pytest
+
 from locations.commands.genspider import Command
 
 
@@ -63,17 +64,31 @@ def test_auto_from_start_url_no_match_does_nothing(tmp_path, monkeypatch):
 @pytest.mark.parametrize(
     "seed_key, wikidata, tags, gen_keys, expect_key, expect_class, expect_field, expect_value",
     [
-        ("brand_wikidata", "Q123",
-         {"brand:wikidata": "Q123", "brand": "Foo Brand", "name": "Fallback Brand"},
-         ("foo_brand", "FooBrand"),
-         "foo_brand", "FooBrand", "brand", "Foo Brand"),
-        ("operator_wikidata", "Q777",
-         {"operator:wikidata": "Q777", "operator": "Bar Operator", "name": "Fallback Operator"},
-         ("bar_operator", "BarOperator"),
-         "bar_operator", "BarOperator", "operator", "Bar Operator"),
+        (
+            "brand_wikidata",
+            "Q123",
+            {"brand:wikidata": "Q123", "brand": "Foo Brand", "name": "Fallback Brand"},
+            ("foo_brand", "FooBrand"),
+            "foo_brand",
+            "FooBrand",
+            "brand",
+            "Foo Brand",
+        ),
+        (
+            "operator_wikidata",
+            "Q777",
+            {"operator:wikidata": "Q777", "operator": "Bar Operator", "name": "Fallback Operator"},
+            ("bar_operator", "BarOperator"),
+            "bar_operator",
+            "BarOperator",
+            "operator",
+            "Bar Operator",
+        ),
     ],
 )
-def test_automatically_set_parameters_params(tmp_path, monkeypatch, seed_key, wikidata, tags, gen_keys, expect_key, expect_class, expect_field, expect_value):
+def test_automatically_set_parameters_params(
+    tmp_path, monkeypatch, seed_key, wikidata, tags, gen_keys, expect_key, expect_class, expect_field, expect_value
+):
     monkeypatch.chdir(tmp_path)
     from locations.name_suggestion_index import NSI
 
@@ -98,9 +113,7 @@ def test_automatically_set_parameters_multiple_matches_returns_early(tmp_path, m
     monkeypatch.setattr(
         NSI,
         "iter_nsi",
-        lambda self, code: iter([
-            {"tags": {"brand:wikidata": "Q123"}}, {"tags": {"brand:wikidata": "Q123"}}
-        ]),
+        lambda self, code: iter([{"tags": {"brand:wikidata": "Q123"}}, {"tags": {"brand:wikidata": "Q123"}}]),
     )
 
     cmd = Command()
@@ -142,9 +155,12 @@ def test_automatically_set_parameters_no_keys_generated(tmp_path, monkeypatch):
         ("acme", "acme", "http://acme.test", "acme.test", "AcmeSpider"),
     ],
 )
-def test_generate_template_variables_param(tmp_path, monkeypatch, module, name, url, expected_domain, expected_classname):
+def test_generate_template_variables_param(
+    tmp_path, monkeypatch, module, name, url, expected_domain, expected_classname
+):
     monkeypatch.chdir(tmp_path)
     from locations.name_suggestion_index import NSI
+
     monkeypatch.setattr(NSI, "get_wikidata_code_from_url", lambda self, url: None)
     monkeypatch.setattr(NSI, "iter_nsi", lambda self, code: iter([]))
 
@@ -170,6 +186,7 @@ def test_genspider_param(tmp_path, monkeypatch, use_newspider_module):
     monkeypatch.chdir(tmp_path)
 
     from locations.commands import genspider as genspider_mod
+
     calls = []
     monkeypatch.setattr(
         genspider_mod,
@@ -178,6 +195,7 @@ def test_genspider_param(tmp_path, monkeypatch, use_newspider_module):
     )
 
     from locations.name_suggestion_index import NSI
+
     monkeypatch.setattr(NSI, "get_wikidata_code_from_url", lambda self, url: None)
     monkeypatch.setattr(NSI, "iter_nsi", lambda self, code: iter([]))
     monkeypatch.setattr(NSI, "generate_keys_from_nsi_attributes", lambda attrs: ())

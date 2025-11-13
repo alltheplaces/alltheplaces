@@ -1,4 +1,4 @@
-from typing import Iterable, Any
+from typing import Any, Iterable
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Request, Response
@@ -10,19 +10,20 @@ from locations.items import Feature
 # Custom, domain-specific errors
 # ------------------------------
 
+
 class TreePlotterConfigError(Exception):
     """Raised when required spider configuration (host, folder, layer_name) is missing or invalid."""
-    pass
+
 
 
 class TreePlotterAPIError(Exception):
     """Raised when TreePlotter API responses cannot be parsed or do not contain expected structures/keys."""
-    pass
+
 
 
 class TreePlotterDataError(Exception):
     """Raised when TreePlotter returns logically inconsistent or unusable data (e.g., mismatched counts)."""
-    pass
+
 
 
 class TreePlotterSpider(Spider):
@@ -85,7 +86,6 @@ class TreePlotterSpider(Spider):
                 raise TreePlotterAPIError(f"Response missing expected key path: {'/'.join(path)}")
             cur = cur[key]
         return cur
-
 
     def start_requests(self) -> Iterable[Request]:
         """
@@ -206,7 +206,7 @@ class TreePlotterSpider(Spider):
         pids = results.get("pids")
         if not isinstance(pids, list):
             raise TreePlotterAPIError("Missing or invalid results/pids list in tree id response.")
-        
+
         if len(pids) != total_count:
             raise RuntimeError(
                 "Requested up to 1000000 features (of a total of {}) but only received {} features.".format(
@@ -251,7 +251,7 @@ class TreePlotterSpider(Spider):
             features = self._expect(data, "results", self.layer_name, "geojson", "features")
         except TreePlotterAPIError:
             raise  # Preserve message; caller will log appropriately.
-        
+
         if not isinstance(features, list):
             raise TreePlotterAPIError("Feature collection not found or not a list.")
 
@@ -293,7 +293,7 @@ class TreePlotterSpider(Spider):
                 self.logger.warning("Tree with PID=%s has unknown species %s.", props.get("pid"), species_id)
             else:
                 properties["extras"].update(self._species[species_id])
-            
+
             # Diameter handling (prefer cm if present; otherwise convert dm -> cm)
             dbh_cm = props.get("dbh_cm")
             if dbh_cm:
@@ -306,7 +306,7 @@ class TreePlotterSpider(Spider):
                     except Exception:
                         # Be defensive; if conversion fails, skip diameter rather than fail the item.
                         self.logger.debug("Non-numeric dbh encountered for PID=%s", pid)
-    
+
             # Yield post-processed item; post_process_item may itself raise if overridden incorrectly.
             try:
                 yield from self.post_process_item(Feature(**properties), response, tree)
