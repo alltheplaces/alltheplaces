@@ -9,7 +9,11 @@ class DmSpider(scrapy.Spider):
     name = "dm"
     item_attributes = {"brand": "dm", "brand_wikidata": "Q266572"}
     start_urls = [
-        "https://store-data-service.services.dmtech.com/stores/bbox/52.774151462229185,2.7320220257874155,50.679356363321546,16.58059153762386"
+        "https://store-data-service.services.dmtech.com/stores/bbox/49.27562530004775%2C10.195245519081993%2C47.019140477949975%2C24.043815030918438",
+        "https://store-data-service.services.dmtech.com/stores/bbox/53.81734501171468%2C-0.8184878281186911%2C46.98695695433199%2C16.603367890508224",
+        "https://store-data-service.services.dmtech.com/stores/bbox/47.786865948031554,14.70566557769028,42.709273836666,24.75120274749999",
+        "https://store-data-service.services.dmtech.com/stores/bbox/47.786865948031554,14.70566557769028,45.21501355698323,16.19156309497206",
+        "https://store-data-service.services.dmtech.com/stores/bbox/47.786865948031554,14.70566557769028,41.78413678399999,21.484047576",
     ]
 
     @staticmethod
