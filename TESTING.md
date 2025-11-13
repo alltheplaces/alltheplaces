@@ -91,21 +91,17 @@ Current code still raises RuntimeError for PID mismatches. Future refactor recom
 ## Test coverage summary
 The following is the test coverage summary for the files modified and added as part of this project.
 
-                                                                                                          Stmts   Miss  Cover
-locations/commands/genspider.py                                                                             64      0   100%
-
-locations/commands/sitemap.py                                                                               75      8    89%
-
-locations/commands/nsi.py                                                                                   92      0   100%
-
-locations/storefinders/wp_store_locator.py                                                                  101     25    75%
-
-locations/storefinders/geo_me.py                                                                            67      1    99%
-
-locations/storefinders/treeplotter.py                                                                       131    102    22%
-
-TOTAL                                                                                                       110796  55654    50%
-
+```bash
+| File                                             | Stmts | Miss | Cover |
+|--------------------------------------------------|-------|------|-------|
+| locations/commands/genspider.py                  | 64    | 0    | 100%  |
+| locations/commands/sitemap.py                    | 75    | 8    | 89%   |
+| locations/commands/nsi.py                        | 92    | 0    | 100%  |
+| locations/storefinders/wp_store_locator.py       | 101   | 25   | 75%   |
+| locations/storefinders/geo_me.py                 | 67    | 1    | 99%   |
+| locations/storefinders/treeplotter.py            | 131   | 102  | 22%   |
+| TOTAL                                            | 110796| 55654| 50%   |
+```
 
 ## Any known issues or limitations
 
