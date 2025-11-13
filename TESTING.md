@@ -105,7 +105,7 @@ The following is the test coverage summary for the files modified and added as p
 
 ## Any known issues or limitations
 
-- `tests/test_lineage.py` failed when testing (from original repo).
+- `tests/test_lineage.py` on Windows this test failed when testing (from original repo).
 
 Two files needed updating when running repo-wide test. 
 - `locations/data/nsi-wikidata.json`
