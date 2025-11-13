@@ -60,4 +60,6 @@ dev = [
     "pre-commit",
     "pylint",
     "pytest",
+    "pytest-mock>=3.12.0",
+    "pytest-cov",
 ]
