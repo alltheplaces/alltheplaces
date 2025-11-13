@@ -2,7 +2,7 @@
 
 This document summarizes the testing setup and changes on 11/12/2025 made for alltheplaces.
 
-## How to run tests.
+## How to run tests
 
 ### How run isolated testfiles
 
@@ -30,18 +30,18 @@ pytest
 ### Created (Test Files)
 These files were created to thest their corresponding source modules:
 
-- tests/test_geo_me.py — tests `locations/storefinders/geo_me.py`
-- tests/test_genspider.py — tests `locations/commands/genspider.py`
-- tests/test_sitemap.py — tests `locations/commands/sitemap.py`
-- tests/test_nsi.py — tests `locations/commands/nsi.py`
-- tests/test_wp_store_locator.py — tests `locations/storefinders/wp_store_locator.py`
+- `tests/test_geo_me.py` — tests `locations/storefinders/geo_me.py`
+- `tests/test_genspider.py`— tests `locations/commands/genspider.py`
+- `tests/test_sitemap.py` — tests `locations/commands/sitemap.py`
+- `tests/test_nsi.py` — tests `locations/commands/nsi.py`
+- `tests/test_wp_store_locator.py` — tests `locations/storefinders/wp_store_locator.py`
 
 ### Modified
 These files were modified and updated.
 
-- locations/storefinders/treeplotter.py (added comprehensive exception handling)
-- pyproject.toml (added test dependencies and pytest configuration)
-- uv.lock (updated lockfile after adding test dependencies)
+- `locations/storefinders/treeplotter.py` (added comprehensive exception handling)
+- `pyproject.toml` (added test dependencies and pytest configuration)
+- `uv.lock` (updated lockfile after adding test dependencies)
 
 ## Description of custom exceptions and their use cases
 
@@ -66,9 +66,9 @@ Raised when API responses are malformed, missing expected keys, or contain inval
 **Where raised:**
 - `_json()` when JSON cannot be decoded
 - `_expect()` when nested keys are missing
-- parse_species_list()
-- parse_tree_ids() for missing pids/total/count
-- parse_tree_details() for invalid feature structures
+- `parse_species_list()`
+- `parse_tree_ids()` for missing pids/total/count
+- `parse_tree_details()` for invalid feature structures
 
 **Why:**
 To clearly isolate API-shape issues and make them testable.
@@ -89,7 +89,7 @@ Current code still raises RuntimeError for PID mismatches. Future refactor recom
 
 
 ## Test coverage summary
-The following is the test coverage summary for the files modified and added as part of this project.
+The following is the test coverage summary for the files modified and added as part of this project. We also included `locations/storefinders/treeplotter.py` although no tests were added for this file, yet exception handling was updated.
 
 ```bash
 | File                                             | Stmts | Miss | Cover |
@@ -105,13 +105,13 @@ The following is the test coverage summary for the files modified and added as p
 
 ## Any known issues or limitations
 
-Two files needed updating when running repo wide test. 
-- locations/data/nsi-wikidata.json 
-- tests/data/londis.html
+- `tests/test_lineage.py` failed when testing (from original repo).
+
+Two files needed updating when running repo-wide test. 
+- `locations/data/nsi-wikidata.json`
+- `tests/data/londis.html`
 
 In `locations/storefinders/treeplotter.py`:
 
 - PID count mismatch currently raises RuntimeError instead of TreePlotterDataError.
 - parse_tree_details() skips malformed features but does not raise, which is intentional.
-
-

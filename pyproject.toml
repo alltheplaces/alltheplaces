@@ -63,3 +63,10 @@ dev = [
     "pytest-mock>=3.12.0",
     "pytest-cov",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov --cov-report=term-missing"
