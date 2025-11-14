@@ -1,26 +1,39 @@
-import scrapy
+import json
+import re
+from typing import Any
+
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class BricoBELUSpider(scrapy.Spider):
+class BricoBELUSpider(SitemapSpider):
     name = "brico_be_lu"
     item_attributes = {"brand": "Brico", "brand_wikidata": "Q2510786"}
-    start_urls = ["https://www.brico.be/nl/store-finder"]
+    sitemap_urls = ["https://www.brico.be/fr/store/sitemap.xml"]
 
-    def parse(self, response):
-        for store_url in response.xpath('//a[contains(@href, "/storedetail/")]/@href').getall():
-            id = store_url.split("/")[2]
-            yield scrapy.Request(
-                url="https://www.brico.be/rest/v1/storefinder/store/{}?format=brico&lang=nl_BE".format(id),
-                callback=self.parse_store,
-                cb_kwargs=dict(website=store_url),
-            )
-
-    def parse_store(self, response, website):
-        store = response.json()
-        store.update(store.pop("address"))
-        item = DictParser.parse(store)
-        item["ref"] = item.pop("name")
-        item["website"] = "https://www.brico.be/nl" + website
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        if data := re.search(
+            r"preLoadedStoreData\"\s*:\s*({.*}),\"address",
+            response.xpath('//*[contains(text(),"markers")]/text()').get(),
+        ):
+            raw_data = json.loads(data.group(1))
+            item = DictParser.parse(raw_data)
+            item.pop("name")
+            item["ref"] = item["website"] = response.url
+            item["branch"] = raw_data["displayName"]
+            item["street_address"] = merge_address_lines([raw_data["address"]["line2"], raw_data["address"]["line1"]])
+            oh = OpeningHours()
+            for day_time in raw_data["openingHours"]["weekDayOpeningList"]:
+                day = sanitise_day(day_time["weekDay"], DAYS_FR)
+                if day_time["closed"]:
+                    oh.set_closed(day)
+                else:
+                    open_time = day_time["openingTime"]["formattedHour"]
+                    close_time = day_time["closingTime"]["formattedHour"]
+                    oh.add_range(day=day, open_time=open_time, close_time=close_time)
+            item["opening_hours"] = oh
+            yield item
