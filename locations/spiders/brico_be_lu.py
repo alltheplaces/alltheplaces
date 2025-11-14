@@ -28,7 +28,6 @@ class BricoBELUSpider(SitemapSpider):
             item["street_address"] = merge_address_lines([raw_data["address"]["line2"], raw_data["address"]["line1"]])
             oh = OpeningHours()
             for day_time in raw_data["openingHours"]["weekDayOpeningList"]:
-                print(day_time)
                 day = sanitise_day(day_time["weekDay"], DAYS_FR)
                 if day_time["closed"]:
                     oh.set_closed(day)
