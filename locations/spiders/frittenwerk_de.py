@@ -10,7 +10,7 @@ class FrittenwerkDESpider(CrawlSpider, StructuredDataSpider):
     name = "frittenwerk_de"
     item_attributes = {"brand": "Frittenwerk", "brand_wikidata": "Q121094275"}
     start_urls = ["https://frittenwerk.com/index.php"]
-    rules = [Rule(LinkExtractor(restrict_xpaths='//li[@class="locchange "]'), callback="parse")]
+    rules = [Rule(LinkExtractor(restrict_xpaths='//li[contains(@class, "locchange")]'), callback="parse")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if lat := re.search(r'"latitude": "(-?\d+\.\d+)"', response.text):
