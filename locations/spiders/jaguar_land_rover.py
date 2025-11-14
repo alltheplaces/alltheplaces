@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import quote
 
 from scrapy import Request, Spider
@@ -136,7 +137,7 @@ COUNTRIES = {
 class JaguarLandRoverSpider(Spider):
     name = "jaguar_land_rover"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for brand, brand_wikidata in {("Jaguar", "Q21170490"), ("Land Rover", "Q26777551")}:
             for language, country_jlr, country_iso in COUNTRIES:
                 for lat, lng in country_iseadgg_centroids(country_iso, 458):

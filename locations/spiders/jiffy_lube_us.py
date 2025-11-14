@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 import pycountry
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -12,7 +14,7 @@ class JiffyLubeUSSpider(Spider):
     allowed_domains = ["www.jiffylube.com"]
     start_urls = ["https://www.jiffylube.com/accel/locations/search/state/##"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             for state in pycountry.subdivisions.get(country_code="US"):
                 yield JsonRequest(url=url.replace("##", state.code[-2:]))

@@ -1,18 +1,18 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
 from requests_cache import Response
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 
 
-class JasonsDeliSpider(scrapy.Spider):
+class JasonsDeliSpider(Spider):
     name = "jasons_deli"
     item_attributes = {"brand": "Jason's Deli", "brand_wikidata": "Q16997641"}
     allowed_domains = ["jasonsdeli.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://jdapi.jasonsdeli.com/api/v1/stores",
             headers={"x-api-key": "683d4f90-1e20-11ef-9b2d-bf7a8563af57", "x-application-name": "jd-website-2024"},
