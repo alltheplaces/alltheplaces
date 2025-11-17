@@ -9,8 +9,8 @@ from locations.hours import DAYS_FULL, OpeningHours, day_range
 
 class CheddarsScratchKitchenSpider(Spider):
     name = "cheddars_scratch_kitchen"
-    allowed_domains = ["cheddars.com"]
     item_attributes = {"brand": "Cheddar's", "brand_wikidata": "Q5089187"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
