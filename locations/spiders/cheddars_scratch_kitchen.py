@@ -31,8 +31,9 @@ class CheddarsScratchKitchenSpider(Spider):
                 [
                     "https://www.cheddars.com/locations",
                     location["stateCode"],
-                    location["city"],
-                    location["restaurantName"].replace(" ", ""),
+                    location["city"].replace(" ", "-"),
+                    location["restaurantName"].replace(" - ", "-").replace(" ", "-"),
+                    str(item["ref"]),
                 ]
             )
             oh = OpeningHours()
