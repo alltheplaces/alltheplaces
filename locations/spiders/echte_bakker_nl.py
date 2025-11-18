@@ -14,5 +14,7 @@ class EchteBakkerNLSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
+            item["name"], item["branch"] = item.pop("name").split(" - ")
+            item["name"] = item["name"].split(", ")[0]
             item["street_address"] = item.pop("addr_full")
             yield item
