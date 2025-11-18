@@ -1,6 +1,5 @@
 from locations.hours import DAYS_ES
-from locations.storefinders.dominos_pizza_international import \
-    DominosPizzaInternationalSpider
+from locations.storefinders.dominos_pizza_international import DominosPizzaInternationalSpider
 
 
 class DominosPizzaHNSpider(DominosPizzaInternationalSpider):
