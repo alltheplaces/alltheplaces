@@ -42,7 +42,7 @@ class ShellAUSpider(MapDataServicesSpider):
 
         if feature.get("retail_shop") == "1":
             shop = item.deepcopy()
-            shop["ref"] = "{}-shop".format(shop["ref"])
+            shop["name"] = None
             set_located_in(FUEL_BRANDS[feature["forecourt_brand"]], shop)
 
             apply_category(Categories.SHOP_CONVENIENCE, shop)
