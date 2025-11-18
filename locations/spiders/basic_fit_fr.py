@@ -17,6 +17,7 @@ class BasicFitFRSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"https://www.basic-fit.com/fr-fr/salles-de-sport")),
         Rule(LinkExtractor(allow=r"https://www.basic-fit.com/fr-fr/clubs/.*.html"), callback="parse_sd"),
     ]
+    custom_settings = {"DOWNLOAD_DELAY": 2}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Salle de sport ")
