@@ -32,12 +32,12 @@ class ShellAUSpider(MapDataServicesSpider):
     api_brand_name = "SHE_FuelLocations"
     api_key = "KYAmqfaKFEsYWtweMcoqStasRlCoipBukIAt3gSb"
     api_filter = '(shell_card_accepted = 1) AND (Status = "Temp Closure" OR Status = "Open")'
+    no_refs = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if not FUEL_BRANDS.get(feature["forecourt_brand"]):
             return
 
-        item["ref"] = feature.get("uuid")
         item["street_address"] = item.pop("street", None)
 
         if feature.get("retail_shop") == "1":
