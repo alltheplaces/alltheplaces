@@ -11,9 +11,19 @@ from locations.spiders.tesco_gb import set_located_in
 from locations.storefinders.mapdata_services import MapDataServicesSpider
 
 SHOP_BRANDS = {
+    "Dunnings": {"brand": "Dunnings"},
+    "Eagle Group": None,
+    "Maranos": None,
+    "NightOwl": None,
+    "NorthCoast": None,
+    "OTR": OtrAUSpider.item_attributes,
+    "OilsPlus": None,
+    "Perrys": None,
     "Reddy Express": {"brand": "Reddy Express", "brand_wikidata": "Q5144653"},
-    "Coles Express": {},
-    "Otr": OtrAUSpider.item_attributes,
+    "Store24": None,
+    "Sunraysia": None,
+    "TAS Petroleum": None,
+    "Urbanista": None,
 }
 FUEL_BRANDS = {
     "Advantage": None,
@@ -47,12 +57,8 @@ class ShellAUSpider(MapDataServicesSpider):
 
             apply_category(Categories.SHOP_CONVENIENCE, shop)
 
-            name = shop.pop("name").removeprefix(feature["forecourt_brand"]).strip()
-            for shop_brand in SHOP_BRANDS.keys():
-                if name.startswith(shop_brand):
-                    shop["branch"] = name.removeprefix(shop_brand).strip()
-                    shop.update(SHOP_BRANDS[shop_brand])
-                    break
+            if brand := SHOP_BRANDS.get(feature["shop_brand"]):
+                shop.update(brand)
 
             yield shop
 
