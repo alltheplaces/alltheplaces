@@ -1,7 +1,7 @@
-from typing import Any, AsyncIterator
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 
@@ -9,9 +9,7 @@ from locations.dict_parser import DictParser
 class EchteBakkerNLSpider(Spider):
     name = "echte_bakker_nl"
     item_attributes = {"brand": "De Echte Bakker", "brand_wikidata": "Q16920716"}
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url="https://echtebakker.nl/api/fetch-dealers")
+    start_urls = ["https://echtebakker.nl/api/fetch-dealers"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
