@@ -3,6 +3,10 @@
 A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [from websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to execute individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) that retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials on the Internet and [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
 
 ```mermaid
+---
+sources:
+      foursquare: https://docs.foursquare.com/data-products/docs/fsq-os-places-release-notes
+---
 flowchart
    Spiders(["Thousands of first party datasets"])
    ATP(["All The Places"])
@@ -13,11 +17,14 @@ flowchart
    click TT "https://www.tomtom.com/"
    Overture(["Overture"])
    click Overture "https://overturemaps.org/"
+   Foursquare(["Foursquare OS Places"])
+   click Foursquare "https://opensource.foursquare.com/os-places/"
 
    Spiders --> ATP
    ATP --> TT
    ATP --> OSM
    ATP --> Overture
+   Overture --> Foursquare
 ```
 ## Getting started
 
