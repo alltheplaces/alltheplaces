@@ -1,6 +1,8 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
@@ -16,7 +18,7 @@ STORE_STATES = [
 ]
 
 
-class InglesSpider(scrapy.Spider):
+class InglesSpider(Spider):
     name = "ingles"
     item_attributes = {
         "brand": "Ingles",
@@ -24,9 +26,9 @@ class InglesSpider(scrapy.Spider):
     }
     allowed_domains = ["www.ingles-markets.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for state in STORE_STATES:
-            yield scrapy.Request(
+            yield Request(
                 "https://www.ingles-markets.com/storelocate/storelocator.php?address=" + state,
                 callback=self.parse,
             )
@@ -82,7 +84,7 @@ class InglesSpider(scrapy.Spider):
             longs = store.xpath("./@lng").get()
 
             for id in ids:
-                yield scrapy.Request(
+                yield Request(
                     "https://www.ingles-markets.com/storelocate/storeinfo.php?storenum=" + id,
                     callback=self.parse_store,
                     meta={
