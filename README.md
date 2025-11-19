@@ -5,7 +5,7 @@ A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Po
 ```mermaid
 ---
 sources:
-      foursquare: https://docs.foursquare.com/data-products/docs/fsq-os-places-release-notes
+      foursquare: https://docs.foursquare.com/data-products/docs/fsq-os-places-release-notes#november-2025
 ---
 flowchart
    Spiders(["Thousands of first party datasets"])
