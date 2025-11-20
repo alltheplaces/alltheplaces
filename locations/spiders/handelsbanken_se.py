@@ -13,6 +13,7 @@ class HandelsbankenSESpider(scrapy.Spider):
     start_urls = [
         "https://locator.maptoweb.dk/handelsbanken.com/locator/points/where/CountryCode/eqi/se?callback=jQuery1820675693055071215_1676888222517&_=1676888222528"
     ]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         stores_raw = response.text
