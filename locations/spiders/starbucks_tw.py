@@ -51,7 +51,7 @@ class StarbucksTWSpider(Spider):
                 r"fetchStoreMapLocation\((\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\)",
                 location.xpath("./@onmouseover").get(""),
             ).groups()
-            item["name"] = location.xpath('.//*[@class="store_name"]/text()').get()
+            item["branch"] = location.xpath('.//*[@class="store_name"]/text()').get()
             item["addr_full"] = location.xpath('.//*[@class="store_add"]/text()').get()
             if details := selector.xpath(f'//div[@id="store_info_{item["ref"]}"]'):
                 item["phone"] = details.xpath('.//*[@class="store_phone"]/a/text()').get()
