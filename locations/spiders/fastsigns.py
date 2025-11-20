@@ -31,5 +31,6 @@ class FastsignsSpider(JSONBlobSpider):
 
         if location["Country"] == "AUS":
             item["name"] = item["brand"] = "Signwave"
+            item["brand_wikidata"] = "Q136850122"
 
         yield item
