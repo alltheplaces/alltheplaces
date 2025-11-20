@@ -7,11 +7,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class UrbanPlatesUSSpider(JSONBlobSpider):
     name = "urban_plates_us"
-    item_attributes = {
-        "brand": "Urban Plates",
-        "brand_wikidata": "Q96413021",
-        "name": "Urban Plates",
-    }
+    item_attributes = {"brand": "Urban Plates", "brand_wikidata": "Q96413021"}
     locations_key = "response"
 
     async def start(self):
