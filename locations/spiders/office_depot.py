@@ -16,6 +16,7 @@ class OfficeDepotSpider(SitemapSpider, StructuredDataSpider):
     requires_proxy = "US"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = None
         item["website"] = response.url
         if item.get("image") == "http://www.example.com/LocationImageURL":
             item["image"] = None
