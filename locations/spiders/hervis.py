@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -9,7 +11,7 @@ class HervisSpider(Spider):
     name = "hervis"
     item_attributes = {"brand": "Hervis", "brand_wikidata": "Q1614816"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["at", "de", "hr", "hu", "ro", "si"]:
             url = f"https://www.hervis.{country}/api/v2/hervis-spa.{country}/stores?longitude=13.0417811&latitude=47.8007642&pageSize=500"
             yield JsonRequest(url=url)

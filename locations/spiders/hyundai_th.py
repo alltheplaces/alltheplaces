@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import FormRequest, Response
 
@@ -14,7 +14,7 @@ class HyundaiTHSpider(JSONBlobSpider):
     allowed_domains = ["www.hyundai.com"]
     start_urls = ["https://www.hyundai.com/wsvc/template_en/spa/common/dealer/list.html"]
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
             "Accept": "application/json",
             "Referer": "https://www.hyundai.com/th/th/build-a-car/find-a-dealer",

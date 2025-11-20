@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -15,7 +15,7 @@ class IcelandFoodsSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     access_token = ""
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.iceland.co.uk/mobify/proxy/ocapi/on/demandware.store/Sites-icelandfoodsuk-Site/default/Account-GetAccessToken",
             data={},
