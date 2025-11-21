@@ -1,7 +1,6 @@
 import json
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
 from scrapy import Request, Spider
 from scrapy.http import Response
 
@@ -14,8 +13,8 @@ class KasikornBankTHSpider(Spider):
     item_attributes = {"brand_wikidata": "Q276557"}
     requires_proxy = "TH"
 
-    def start_requests(self) -> Iterable[Request]:
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             url="https://www.kasikornbank.com/th/branch/Pages/result.aspx?qs=branch&qw=&qn=n",
             method="POST",
             callback=self.parse,

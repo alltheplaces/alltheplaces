@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class KitchenWarehouseAUSpider(JSONBlobSpider):
     access_token = ""
     request_body = {}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"{self.stores_api}/ct-auth/getAnonymousAccessToken",
             method="POST",

@@ -1,6 +1,7 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
@@ -9,12 +10,12 @@ from locations.hours import DAYS, OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class KfcIDSpider(scrapy.Spider):
+class KfcIDSpider(Spider):
     name = "kfc_id"
     item_attributes = KFC_SHARED_ATTRIBUTES
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         url = "https://kfcku.com/api/stores?page=1"
         yield JsonRequest(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 

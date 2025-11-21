@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -14,7 +14,7 @@ class KrefelBESpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://api.krefel.be/occ/v2/krefel/stores?fields=STORE_FINDER&pageSize=1000&lang=nl")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

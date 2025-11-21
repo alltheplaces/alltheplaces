@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -13,7 +13,7 @@ class KfcNLSpider(Spider):
     name = "kfc_nl"
     item_attributes = KFC_SHARED_ATTRIBUTES
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://245fidy0v1-3.algolianet.com/1/indexes/production_0_locations_all/query?x-algolia-api-key=e24223afcd0148f3679075ed6c8d3767&x-algolia-application-id=245FIDY0V1",
             data={"aroundLatLngViaIP": True, "aroundRadius": "all", "hitsPerPage": 10000},

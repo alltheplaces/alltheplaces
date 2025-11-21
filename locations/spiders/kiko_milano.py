@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.json_blob_spider import JSONBlobSpider
@@ -9,7 +11,7 @@ class KikoMilanoSpider(JSONBlobSpider):
     item_attributes = {"brand": "KIKO Milano", "brand_wikidata": "Q3812045"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.retailtune.com/storelocator/v1/stores/get",
             data={"language": "en"},
