@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Request, Spider
 
 from locations.items import Feature
@@ -8,7 +10,7 @@ class JllSpider(Spider):
     item_attributes = {"brand": "JLL", "brand_wikidata": "Q1703389"}
     allowed_domains = ["jll.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         base_url = "https://www.us.jll.com/bin/jll/search?q=locations&currentPage=/content/jll-dot-com/countries/amer/us/en/locations&top=100&p={page}&contentTypes=Location"
         pages = ["1", "2", "3", "4"]
 

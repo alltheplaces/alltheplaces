@@ -10,7 +10,6 @@ class SbarroSpider(scrapy.Spider):
     item_attributes = {"brand": "Sbarro", "brand_wikidata": "Q2589409"}
     allowed_domains = ["sbarro.com"]
     start_urls = ["https://sbarro.com/locations/?user_search=78749&radius=50000&count=5000"]
-    requires_proxy = True
 
     def parse_store(self, response):
         try:

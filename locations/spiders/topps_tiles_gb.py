@@ -10,6 +10,7 @@ class ToppsTilesGBSpider(Spider):
     name = "topps_tiles_gb"
     item_attributes = {"brand": "Topps Tiles", "brand_wikidata": "Q17026595"}
     start_urls = ["https://www.toppstiles.co.uk/api/n/find?type=store"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["catalog"]:
