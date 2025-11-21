@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
 
+# FUNCTION: Check for existence of a required dependency of this script.
+# $1 is the name of the command to search for existence of.
+# If the dependency is not found, this function will print an error and cause
+# this script to exit with an error code of 1.
+ensure_dependency_exists() {
+  echo "Checking for existence of required dependency '$1'..."
+  if ! command -v $1 >/dev/null 2>&1
+  then
+    echo "Required dependency '$1' is missing. Install '$1' and try again."
+    exit 1
+  fi
+}
+
+# Check for dependencies
+ensure_dependency_exists 'git'
+ensure_dependency_exists 'cmake'
+ensure_dependency_exists 'g++'
+ensure_dependency_exists 'curl'
+ensure_dependency_exists 'unzip'
+ensure_dependency_exists 'ogrinfo'
+ensure_dependency_exists 'bash'
+
 # Clean up any old files from the previous execution
 echo 'Cleaning up any old temporary files...'
 rm -Rf iseadgg_gen 2>/dev/null
@@ -58,7 +80,7 @@ git rm *_centroids_iseadgg_*km_radius.csv
 cd ../iseadgg_gen
 
 # FUNCTION: Generate ISEADGG centroid lists in CSV format for each country.
-# $1 is the the minimum search radius in kilometres that the centroid list is
+# $1 is the minimum search radius in kilometres that the centroid list is
 #    intended to support. This value is calculated as
 #    CEILING(MAX_INTERNODE_SPACING/2) where MAX_INTERNODE_SPACING is taken
 #    from Appendix D "Statistics for Some Preset ISEA DGGs", DGGRID Manual.
