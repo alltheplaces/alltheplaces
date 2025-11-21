@@ -1,21 +1,21 @@
 import datetime
 import re
+from typing import AsyncIterator
 
-import scrapy
-from scrapy import Selector
-from scrapy.http import JsonRequest
+from scrapy import Selector, Spider
+from scrapy.http import JsonRequest, Request
 
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
-class LaFitnessSpider(scrapy.Spider):
+class LaFitnessSpider(Spider):
     name = "la_fitness"
     item_attributes = {"brand": "LA Fitness", "brand_wikidata": "Q6457180"}
     allowed_domains = ["lafitness.com"]
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://lafitness.com/Pages/GetClubLocations.aspx/GetClubLocation",
             method="POST",
@@ -90,7 +90,7 @@ class LaFitnessSpider(scrapy.Spider):
                 "state": location["State"],
             }
 
-            yield scrapy.Request(
+            yield Request(
                 "https://www.lafitness.com/pages/" + location["ClubHomeURL"],
                 callback=self.parse_club,
                 meta={"properties": properties},

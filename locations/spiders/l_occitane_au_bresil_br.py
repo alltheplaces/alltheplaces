@@ -1,8 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-import scrapy
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -16,9 +15,9 @@ class LOccitaneAuBresilBRSpider(Spider):
     url_template = "https://br.loccitaneaubresil.com/on/demandware.store/Sites-LoccitaneBR-Site/pt_BR/Stores-FindStores?showMap=true&radius=300&cityName={}"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[scrapy.Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for city in city_locations("BR", 100_000):
-            yield scrapy.Request(self.url_template.format(city["name"]), callback=self.parse)
+            yield Request(self.url_template.format(city["name"]), callback=self.parse)
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for store in response.json()["stores"]:

@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
-class LoblawsSpider(scrapy.Spider):
+class LoblawsSpider(Spider):
     name = "loblaws"
     BRANDS = {
         "loblaw": ("Loblaws", "Q3257626", "loblaws"),
@@ -28,7 +28,7 @@ class LoblawsSpider(scrapy.Spider):
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for banner_id in self.BRANDS:
             yield JsonRequest(
                 url=f"https://api.pcexpress.ca/pcx-bff/api/v1/pickup-locations?bannerIds={banner_id}",

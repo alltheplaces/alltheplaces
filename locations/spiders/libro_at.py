@@ -1,8 +1,8 @@
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request, Selector
-from scrapy.http import Response
+from scrapy import Selector
+from scrapy.http import Request, Response
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -13,7 +13,7 @@ class LibroATSpider(AmastyStoreLocatorSpider):
     name = "libro_at"
     item_attributes = {"brand": "Libro", "brand_wikidata": "Q1823138"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://www.libro.at/rest/V1/mthecom/storelocator/locations")
 
     def parse(self, response: Response) -> Iterable[Feature]:
