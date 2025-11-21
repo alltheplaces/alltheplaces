@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -16,7 +18,7 @@ class MrPriceSpider(Spider):
     name = "mr_price"
     start_urls = ["https://apiprd.omni.mrpg.com/graphql"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,

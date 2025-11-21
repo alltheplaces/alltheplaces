@@ -1,4 +1,6 @@
-from scrapy import Request
+from typing import AsyncIterator
+
+from scrapy.http import Request
 from scrapy.linkextractors import LinkExtractor
 
 from locations.storefinders.go_review import GoReviewSpider
@@ -9,7 +11,7 @@ class MooMooZASpider(GoReviewSpider):
     item_attributes = {"brand": "Moo Moo Meet & Whine", "brand_wikidata": "Q130378128"}
     start_urls = ["https://moomoo.goreview.co.za/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_store)
 

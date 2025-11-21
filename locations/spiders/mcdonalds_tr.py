@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -17,7 +19,7 @@ class McdonaldsTRSpider(Spider):
     # Minimise requests and retry a few extra times.
     custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "cityId": "0",
             "subcity": "",

@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -6,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class MotrioSpider(scrapy.Spider):
+class MotrioSpider(Spider):
     name = "motrio"
     item_attributes = {"brand": "Motrio", "brand_wikidata": "Q6918585"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -16,7 +18,7 @@ class MotrioSpider(scrapy.Spider):
             "https://www.motrio.fr/api/establishments?domain=motrio&size={}&page={}".format(page_size, page)
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response):

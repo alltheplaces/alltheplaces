@@ -1,7 +1,9 @@
-import json
 import re
+from json import loads
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -12,7 +14,7 @@ class MaxSpider(Spider):
     item_attributes = {"brand": "Max", "brand_wikidata": "Q1912172"}
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         start_urls = {
             "SE": "https://www.max.se/hitta-max/restauranger/",
             "DK": "https://www.max.dk/find-max/restauranter/",
@@ -24,7 +26,7 @@ class MaxSpider(Spider):
 
     def parse(self, response, country=None):
         raw_data = response.xpath("//div[@data-app='RestaurantList']").get()
-        for location in json.loads(re.search(r'"restaurants":\s*(.*?),\s*"i18n"', raw_data).group(1)):
+        for location in loads(re.search(r'"restaurants":\s*(.*?),\s*"i18n"', raw_data).group(1)):
             item = DictParser.parse(location)
             item["postcode"] = location["postalCode"].strip(location["city"]).strip()
             item["country"] = country

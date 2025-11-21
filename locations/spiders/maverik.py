@@ -1,20 +1,23 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
-class MaverikSpider(scrapy.Spider):
+class MaverikSpider(Spider):
     name = "maverik"
     item_attributes = {"brand": "Maverik", "brand_wikidata": "Q64149010"}
     allowed_domains = ["maverik.com"]
     requires_proxy = True
 
-    def start_requests(self):
-        yield scrapy.Request("https://gateway.maverik.com/ac-loc/location/all", callback=self.add_fuels)
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request("https://gateway.maverik.com/ac-loc/location/all", callback=self.add_fuels)
 
     def add_fuels(self, response):
-        yield scrapy.Request(
+        yield Request(
             "https://gateway.maverik.com/ac-loc/location/fuel/all",
             headers={"APP-ID": "PAYX"},
             meta=response.json(),

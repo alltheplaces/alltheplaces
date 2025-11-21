@@ -1,7 +1,7 @@
 from copy import deepcopy
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -9,14 +9,14 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class MitsubishiNZSpider(scrapy.Spider):
+class MitsubishiNZSpider(Spider):
     name = "mitsubishi_nz"
     item_attributes = {
         "brand": "Mitsubishi",
         "brand_wikidata": "Q36033",
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.mmnz.co.nz/graphql",
             data={

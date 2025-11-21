@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy.http import Request
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider
 
@@ -13,10 +15,10 @@ class MitraNLSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["LiquorStore"]
     drop_attributes = {"image"}
 
-    def start_requests(self):
-        yield scrapy.Request("https://www.mitra.nl/winkels/", callback=self.parse)
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request("https://www.mitra.nl/winkels/", callback=self.parse)
 
     def parse(self, response):
         links = self.link_extractor.extract_links(response)
         for link in links:
-            yield scrapy.Request(link.url, callback=self.parse_sd)
+            yield Request(link.url, callback=self.parse_sd)

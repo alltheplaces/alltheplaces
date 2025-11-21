@@ -1,12 +1,15 @@
-import scrapy
+from typing import AsyncIterator
+
 from geonamescache import GeonamesCache
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MexxSpider(scrapy.Spider):
+class MexxSpider(Spider):
     name = "mexx"
     item_attributes = {"brand": "Mexx", "brand_wikidata": "Q1837290"}
     gc = GeonamesCache()
@@ -19,16 +22,16 @@ class MexxSpider(scrapy.Spider):
         },
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country_code in self.gc.get_countries().keys():
             url = f"https://www.mexx.com/en/storepickup/index/loadstore/?tagIds%5B%5D=3&countryId={country_code}"
-            yield scrapy.Request(url=url, meta={"country_code": country_code}, callback=self.parse)
+            yield Request(url=url, meta={"country_code": country_code}, callback=self.parse)
 
     def parse(self, response):
         stores = response.json().get("storesjson")
         for store in stores:
             store["country_code"] = response.meta["country_code"]
-            yield scrapy.Request(
+            yield Request(
                 f"https://www.mexx.com/en/{store['rewrite_request_path']}", meta=store, callback=self.parse_store
             )
 

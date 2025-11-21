@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
@@ -12,7 +12,7 @@ class MasoutisGRSpider(Spider):
     item_attributes = {"brand_wikidata": "Q6783887"}
     allowed_domains = ["www.masoutis.gr"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.masoutis.gr/api/masoutis/GetAllStoresEnabledLinks", method="POST", formdata={}
         )

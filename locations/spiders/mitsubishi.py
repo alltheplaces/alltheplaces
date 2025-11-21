@@ -1,7 +1,8 @@
 from copy import deepcopy
+from typing import AsyncIterator, Iterable
 
-import scrapy
 from geonamescache import GeonamesCache
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -10,7 +11,7 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MitsubishiSpider(scrapy.Spider):
+class MitsubishiSpider(Spider):
     """
     API for the spider is found on https://www.mitsubishi-motors.co.th/en/dealer-locator.
     At the time of writing it covers dealers for below countries:
@@ -25,7 +26,7 @@ class MitsubishiSpider(scrapy.Spider):
     }
     handle_httpstatus_list = [403]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         countries = GeonamesCache().get_countries().keys()
         for country in countries:
             locale = get_locale(country)
@@ -33,7 +34,7 @@ class MitsubishiSpider(scrapy.Spider):
             country = country.lower()
             yield self.get_locations(country, language)
 
-    def get_locations(self, country, language):
+    def get_locations(self, country, language) -> JsonRequest:
         return JsonRequest(
             url="https://www-graphql.prod.mipulse.co/prod/graphql",
             data={
@@ -70,7 +71,7 @@ class MitsubishiSpider(scrapy.Spider):
             callback=self.parse,
         )
 
-    def get_details(self, country, language, dealer_id, item):
+    def get_details(self, country, language, dealer_id, item) -> Iterable[JsonRequest]:
         yield JsonRequest(
             url="https://www-graphql.prod.mipulse.co/prod/graphql",
             data={

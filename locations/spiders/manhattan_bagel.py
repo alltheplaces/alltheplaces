@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
 
@@ -12,7 +12,7 @@ class ManhattanBagelSpider(Spider):
     name = "manhattan_bagel"
     item_attributes = {"brand": "Manhattan Bagel", "brand_wikidata": "Q64517333"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.manhattanbagel.com/wp-admin/admin-ajax.php"
 
         form_data = {

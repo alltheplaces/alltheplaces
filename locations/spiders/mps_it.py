@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -12,7 +12,7 @@ class MpsITSpider(Spider):
     name = "mps_it"
     item_attributes = {"brand": "Monte dei Paschi di Siena", "brand_wikidata": "Q46730"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("IT"):
             yield JsonRequest(
                 url=f'https://appx.mps.it/VWRestServices/client/public/filiale/elenco?elemPag=999&ckF=true&ckB=true&pk=1&lat={city["latitude"]}&lon={city["longitude"]}&output=json',

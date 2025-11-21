@@ -1,15 +1,17 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class MediamarktDESpider(scrapy.Spider):
+class MediamarktDESpider(Spider):
     name = "mediamarkt_de"
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         url = "https://www.mediamarkt.de/api/v1/graphql?operationName=AllStores&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%2260c474a136d174045108cc578a0c99621e9eea0b3ae26d2c30f2fdfee410abb5%22%7D%2C%22pwa%22%3A%7B%22captureChannel%22%3A%22DESKTOP%22%2C%22salesLine%22%3A%22Media%22%2C%22country%22%3A%22DE%22%2C%22language%22%3A%22de%22%2C%22globalLoyaltyProgram%22%3Atrue%2C%22isOneAccountProgramActive%22%3Atrue%2C%22isMdpActive%22%3Atrue%7D%7D"
         headers = {
             "x-operation": "AllStores",
