@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_PL, OpeningHours
@@ -11,7 +14,7 @@ class OrlenPaczkaPLSpider(Spider):
     start_urls = ["https://ruch-osm.sysadvisors.pl/api.php"]
     allowed_domains = ["ruch-osm.sysadvisors.pl"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(
                 url=url,

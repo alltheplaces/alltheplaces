@@ -1,7 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -16,13 +15,13 @@ class OrangeFRSpider(Spider):
     skip_auto_cc_domain = True
     skip_auto_cc_spider_name = True
 
-    def make_request(self, page: int, page_size: int = 100) -> Request:
+    def make_request(self, page: int, page_size: int = 100) -> JsonRequest:
         return JsonRequest(
             url="https://7jl9sk5vbq-dsn.algolia.net/1/indexes/stores_locator_ofr/query?x-algolia-application-id=7JL9SK5VBQ&x-algolia-api-key=409fd5e4ef65efe7dacf57d93698910c",
             data={"params": "hitsPerPage={}&page={}".format(page_size, page)},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
