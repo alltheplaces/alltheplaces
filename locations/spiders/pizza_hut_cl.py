@@ -1,4 +1,3 @@
-from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
