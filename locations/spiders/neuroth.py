@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.hours import DAYS, OpeningHours
@@ -11,7 +11,7 @@ class NeurothSpider(Spider):
     name = "neuroth"
     item_attributes = {"brand": "Neuroth", "brand_wikidata": "Q15836645"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["at", "ba", "ch", "de", "hr", "si", "rs"]:
             yield JsonRequest("https://{}.neuroth.com/wp-json/neuroth/v1/appointments/stores".format(country))
 

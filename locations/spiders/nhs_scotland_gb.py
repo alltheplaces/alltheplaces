@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
@@ -49,7 +52,7 @@ class NhsScotlandGBSpider(Spider):
     requires_proxy = True
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for service in self.services.keys():
             yield Request(
                 "https://www.nhsinform.scot/scotlands-service-directory/{}?page=1&sortby=_distance&sortdir=Asc".format(

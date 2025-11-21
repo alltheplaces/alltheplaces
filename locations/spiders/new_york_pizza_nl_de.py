@@ -1,9 +1,8 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Request, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DE, DAYS_EN, OpeningHours
@@ -13,17 +12,17 @@ class NewYorkPizzaNLDESpider(Spider):
     name = "new_york_pizza_nl_de"
     item_attributes = {"brand": "New York Pizza", "brand_wikidata": "Q2639128"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for country, page in (("nl", "vestigingen"), ("de", "filialen")):
-            yield scrapy.Request(
+            yield Request(
                 f"https://www.newyorkpizza.{country}/{page}",
                 callback=self.parse_auth_token,
                 cb_kwargs={"top_level_domain": country},
             )
 
-    def parse_auth_token(self, response: Response, top_level_domain: str = None) -> Iterable[Request]:
+    def parse_auth_token(self, response: Response, top_level_domain: str = None) -> Iterable[FormRequest]:
         auth_token = response.xpath('//input[@id="completeAntiForgeryToken"]/@value').get()
-        yield scrapy.FormRequest(
+        yield FormRequest(
             url=f"https://www.newyorkpizza.{top_level_domain}/General/GetFilteredStores/",
             formdata={"includeSliceStores": "false", "storeIds": ""},
             headers={"RequestVerificationToken": auth_token},
@@ -47,7 +46,7 @@ class NewYorkPizzaNLDESpider(Spider):
             yield item
 
     @staticmethod
-    def convert_opening_hours(store, language):
+    def convert_opening_hours(store, language) -> OpeningHours:
         days_to_en = DAYS_DE if language == "de" else DAYS_EN
         re_interval = re.compile(r"(\d\d:\d\d) - (\d\d:\d\d)")
         hours = OpeningHours()

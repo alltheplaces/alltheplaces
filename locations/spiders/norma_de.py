@@ -1,21 +1,23 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class NormaDESpider(scrapy.Spider):
+class NormaDESpider(Spider):
     name = "norma_de"
     item_attributes = {"brand_wikidata": "Q450180"}
     allowed_domains = ["www.norma-online.de"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.norma-online.de/de/filialfinder/suchergebnis?lng={}&lat={}&r=80000"
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "DE"):
-            yield scrapy.Request(url.format(lon, lat))
+            yield Request(url.format(lon, lat))
 
     def parse_hours(self, store):
         opening_hours = OpeningHours()

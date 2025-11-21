@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,7 +13,7 @@ class NewHampshireLiquorAndWineUSSpider(Spider):
     item_attributes = {"brand": "New Hampshire Liquor & Wine Outlets", "brand_wikidata": "Q98400557"}
     start_urls = ["https://www.liquorandwineoutlets.com/api/checkout/carts_storelist"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse)
 
