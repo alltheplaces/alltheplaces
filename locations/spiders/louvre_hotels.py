@@ -1,6 +1,6 @@
-import json
 from collections.abc import Iterable
-from typing import Any
+from json import dumps
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -28,7 +28,7 @@ class LouvreHotelsSpider(Spider):
         "KE": {"brand": "Kyriad Hotels", "brand_wikidata": "Q11751808"},
     }
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         query = """
             query resortsSearchByBrandsV2($locale: String! $brandCode: String! $withCrossSell: Boolean!)
             {
@@ -52,7 +52,7 @@ class LouvreHotelsSpider(Spider):
         yield JsonRequest(
             url="https://api.louvrehotels.com/api/v1/graphql",
             method="POST",
-            body=json.dumps(payload),
+            body=dumps(payload),
             headers=headers,
         )
 

@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -6,11 +8,11 @@ from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
 
-class LclSpider(scrapy.Spider):
+class LclSpider(Spider):
     name = "lcl"
     item_attributes = {"brand": "LCL", "brand_wikidata": "Q779722"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest
         for city in city_locations("FR", 15000):
             yield JsonRequest(
                 url="https://www.lcl.fr/api/graphql",
