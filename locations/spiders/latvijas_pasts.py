@@ -11,7 +11,9 @@ from locations.spiders.central_england_cooperative import set_operator
 
 class LatvijasPastsSpider(Spider):
     name = "latvijas_pasts"
-    start_urls = ["https://mans.pasts.lv/api/public/addresses/service_location?type[]=7&type[]=6&type[]=1&type[]=2&search=&itemsPerPage=1500&page=1"]
+    start_urls = [
+        "https://mans.pasts.lv/api/public/addresses/service_location?type[]=7&type[]=6&type[]=1&type[]=2&search=&itemsPerPage=1500&page=1"
+    ]
     allowed_domains = ["mans.pasts.lv"]
     LATVIJAS_PASTS = {"brand": "Latvijas Pasts", "brand_wikidata": "Q1807088"}
 
