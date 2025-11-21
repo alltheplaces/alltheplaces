@@ -13,6 +13,13 @@ class RoadhouseITSpider(UberallSpider):
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         item["ref"] = location["id"]
+        item["branch"] = (
+            item.pop("name")
+            .removeprefix("ROADHOUSE RESTAURANT ")
+            .removeprefix("Roadhouse Restaurant ")
+            .removeprefix("Roadhouse ")
+            .strip(" -")
+        )
         item["website"] = "/".join(
             [
                 "https://www.roadhouse.it/store-locator/#!/l",
