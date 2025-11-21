@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -10,7 +12,7 @@ class PenzeysUSSpider(Spider):
     name = "penzeys_us"
     item_attributes = {"brand_wikidata": "Q7165435"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         url = "https://www.penzeys.com/api/GetLocations"
         headers = {
             "Referer": "https://www.penzeys.com/locations/",

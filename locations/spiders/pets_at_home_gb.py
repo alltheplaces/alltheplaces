@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Selector, Spider
 from scrapy.http import FormRequest
 
@@ -11,7 +13,7 @@ class PetsAtHomeGBSpider(Spider):
     item_attributes = {"brand": "Pets at Home", "brand_wikidata": "Q7179258"}
     wanted_types = ["PetStore"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "UK"):
             yield FormRequest(
                 url="https://community.petsathome.com/models/utils.cfc",

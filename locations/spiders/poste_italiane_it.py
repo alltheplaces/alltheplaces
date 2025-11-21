@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
@@ -40,7 +41,7 @@ class PosteItalianeITSpider(JSONBlobSpider):
         "SPESA_E_CUCINA": Categories.SHOP_SUPERMARKET,
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for group in self.point_groups:
             yield JsonRequest(
                 "https://mapcollection.poste.it/v2/map/geoList",

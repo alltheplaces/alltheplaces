@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -12,7 +12,7 @@ class PizzaHutLUSpider(Spider):
     name = "pizza_hut_lu"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # https://restaurants.pizzahut.lu/ provide few locations and without coordinates.
         yield JsonRequest(
             url="https://takeout.pizzahut.lu/api/1/restaurants/",

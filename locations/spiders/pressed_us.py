@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import quote
 
 from scrapy import Spider
@@ -35,7 +36,7 @@ class PressedUSSpider(Spider):
     name = "pressed_us"
     item_attributes = {"brand": "Pressed", "brand_wikidata": "Q123005477"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://graphql.pressedjuicery.com/",
             data={

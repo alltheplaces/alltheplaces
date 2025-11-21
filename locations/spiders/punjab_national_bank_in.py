@@ -1,20 +1,22 @@
-import json
+from json import loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
 
-class PunjabNationalBankINSpider(scrapy.Spider):
+class PunjabNationalBankINSpider(Spider):
     name = "punjab_national_bank_in"
     item_attributes = {"brand": "Punjab National Bank", "brand_wikidata": "Q2743499"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for branch_atm in ["Branch", "ATM"]:
             for city in city_locations("IN", 1500):
-                yield scrapy.http.JsonRequest(
+                yield JsonRequest(
                     url="https://www.pnbindia.in/LocateUS.aspx/loadMAPDataonButton",
                     data={"searchType": branch_atm, "searchText": city["name"]},
                 )
@@ -22,7 +24,7 @@ class PunjabNationalBankINSpider(scrapy.Spider):
     def parse(self, response):
         data = response.json()["d"]
         if "MarkerData" in data:
-            for index, store in enumerate(json.loads(data)["MarkerData"]):
+            for index, store in enumerate(loads(data)["MarkerData"]):
                 store["lon"] = store.pop("longt")
                 store["address"] = store.pop("location")
                 item = DictParser.parse(store)

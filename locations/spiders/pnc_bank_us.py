@@ -1,7 +1,8 @@
 import re
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -15,7 +16,7 @@ class PncBankUSSpider(Spider):
     start_urls = ["https://apps.pnc.com/locator/bundle/bundle.js"]
     allowed_domains = ["apps.pnc.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.start_urls[0], callback=self.parse_app_key)
 
     def parse_app_key(self, response):

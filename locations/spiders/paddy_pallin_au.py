@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Request, Selector
 from scrapy.http import Response
@@ -18,7 +18,7 @@ class PaddyPallinAUSpider(AmastyStoreLocatorSpider):
     }
     allowed_domains = ["www.paddypallin.com.au"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         # The request won't work without the headers supplied below.
         headers = {
             "X-Requested-With": "XMLHttpRequest",

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -13,12 +15,12 @@ class PetrolSpider(Spider):
     item_attributes = PETROL
 
     @staticmethod
-    def make_request(offset):
+    def make_request(offset: int) -> JsonRequest:
         return JsonRequest(
             f"https://www.petrol.eu/restservices/sales-service/filterStores?offset={offset}", meta={"offset": offset}
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response, **kwargs):

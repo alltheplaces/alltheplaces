@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Iterable
+from typing import AsyncIterator
 
 from geonamescache import GeonamesCache
 from scrapy import Spider
@@ -17,7 +17,7 @@ class PorscheSpider(Spider):
     item_attributes = {"brand": "Porsche", "brand_wikidata": "Q40993"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for country in GeonamesCache().get_countries().keys():
             for city in list(city_locations(country))[:1]:
                 url = f"https://resources-nav.porsche.services/dealers/{country}?coordinates={city['latitude']},{city['longitude']}&radius=100000&unit=KM"

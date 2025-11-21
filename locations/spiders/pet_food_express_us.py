@@ -1,4 +1,6 @@
-from scrapy import Request
+from typing import AsyncIterator
+
+from scrapy.http import Request
 
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -10,7 +12,7 @@ class PetFoodExpressUSSpider(JSONBlobSpider):
         "brand_wikidata": "Q7171541",
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             "https://apis.petfood.express/bigcommerce/store/map/",
             headers={"x-api-key": "5a69a1c9bb55458d8d831768ae2ab349"},
