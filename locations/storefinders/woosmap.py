@@ -1,12 +1,12 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # Documentation available at https://developers.woosmap.com/products/search-api/get-started/
 #
@@ -18,22 +18,23 @@ from locations.pipelines.address_clean_up import clean_address
 
 class WoosmapSpider(Spider):
     dataset_attributes = {"source": "api", "api": "woosmap.com"}
-    key: str = ""
-    origin: str = ""
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    key: str
+    origin: str
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page=1",
             headers={"Origin": self.origin},
             meta={"referrer_policy": "no-referrer"},
         )
 
-    def parse(self, response: Response) -> Iterable[Feature | JsonRequest]:
+    def parse(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         if features := response.json()["features"]:
             for feature in features:
                 item = DictParser.parse(feature["properties"])
 
-                item["street_address"] = clean_address(feature["properties"]["address"]["lines"])
+                item["street_address"] = merge_address_lines(feature["properties"]["address"]["lines"])
                 item["geometry"] = feature["geometry"]
 
                 item["opening_hours"] = OpeningHours()

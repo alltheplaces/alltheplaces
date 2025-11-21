@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -30,19 +32,20 @@ class StoremapperSpider(Spider):
     """
 
     dataset_attributes = {"source": "api", "api": "storemapper.com"}
-    company_id: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    company_id: str
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/{self.company_id}/stores.js"
         )
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
 
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item
