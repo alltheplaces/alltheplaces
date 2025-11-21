@@ -12,7 +12,7 @@ class LclSpider(Spider):
     name = "lcl"
     item_attributes = {"brand": "LCL", "brand_wikidata": "Q779722"}
 
-    async def start(self) -> AsyncIterator[JsonRequest
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("FR", 15000):
             yield JsonRequest(
                 url="https://www.lcl.fr/api/graphql",
