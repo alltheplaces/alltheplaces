@@ -41,6 +41,7 @@ class OkFoodsSpider(Spider):
         "ESWATINI": "https://www.okfoods.co.za/content/okfoods/sz/en_SZ/find-a-store.html",
         "SOUTH AFRICA": "https://www.okfoods.co.za/find-a-store.html",
     }
+    requires_proxy = True
 
     def start_requests(self):
         for url in self.start_urls:
