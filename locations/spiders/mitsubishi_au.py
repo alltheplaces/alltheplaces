@@ -1,13 +1,14 @@
 from copy import deepcopy
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class MitsubishiAUSpider(scrapy.Spider):
+class MitsubishiAUSpider(Spider):
     """
     The API is found in https://www.mitsubishi-motors.com.au/buying-tools/locate-a-dealer.html
     """
@@ -19,7 +20,7 @@ class MitsubishiAUSpider(scrapy.Spider):
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://store.mitsubishi-motors.com.au/graphql", data=self.build_query())
 
     def build_query(self):

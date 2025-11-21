@@ -1,8 +1,9 @@
-import json
+from json import loads
 from html import unescape
+from typing import AsyncIterator
 
-from scrapy import Request, Selector
-from scrapy.http import JsonRequest
+from scrapy import Selector
+from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories
 from locations.hours import DAYS_FR, OpeningHours
@@ -18,12 +19,12 @@ class MicromaniaFRSpider(StructuredDataSpider):
         "https://www.micromania.fr/on/demandware.store/Sites-Micromania-Site/default/Stores-FindStoresLocator?radius=3000&postalCode=*"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_store_list)
 
     def parse_store_list(self, response):
-        locations = json.loads(response.json()["locations"])
+        locations = loads(response.json()["locations"])
         for location in locations:
             html_blob = Selector(text=location["infoWindowHtml"])
             store_page = html_blob.xpath('//a[contains(@class, "info-window__magazine-link")]/@href').get()
