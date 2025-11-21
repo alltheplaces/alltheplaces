@@ -1,5 +1,5 @@
-from json import loads
 from html import unescape
+from json import loads
 from typing import AsyncIterator
 
 from scrapy import Selector

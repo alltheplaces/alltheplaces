@@ -1,6 +1,6 @@
 from typing import AsyncIterator, Iterable
 
-from scrapy import Selector, Spider
+from scrapy import Selector
 from scrapy.http import Request, Response
 
 from locations.items import Feature
