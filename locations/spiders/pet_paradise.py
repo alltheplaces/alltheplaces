@@ -1,4 +1,4 @@
-from json import loads
+from json import dumps, loads
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -30,8 +30,8 @@ class PetParadiseSpider(Spider):
         data = loads(text)
 
         for stores in data["PropertyorInterestPoint"]:
-            store = json.dumps(stores)
-            store_data = json.loads(store)
+            store = dumps(stores)
+            store_data = loads(store)
 
             properties = {
                 "ref": store_data["interestpointpropertyname"],
