@@ -41,7 +41,7 @@ class MicromaniaFRSpider(StructuredDataSpider):
         item.pop("twitter", None)
 
         hours_json_string = unescape(" ".join(response.xpath('//span[@itemprop="openingHours"]/text()').getall()))
-        hours_json = json.loads(hours_json_string)
+        hours_json = loads(hours_json_string)
         item["opening_hours"] = OpeningHours()
         for day_hours in hours_json.values():
             if day_hours["ouverture"] == day_hours["fermeture"]:
