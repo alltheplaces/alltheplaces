@@ -134,7 +134,7 @@ class RuralKingUSSpider(scrapy.Spider):
             apply_yes_no(Fuel.PROPANE, item, True)
 
         if "RKGuns" in services:
-            extras["shop"] = "guns"
+            extras["shop"] = "weapons"
 
         if "In-Store Pickup" in services:
             extras["pickup"] = "yes"
