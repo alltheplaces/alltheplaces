@@ -4,14 +4,14 @@ from typing import AsyncIterator
 from chompjs import parse_js_object
 from scrapy import Request, Selector, Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class IntersportFRSpider(Spider):
     name = "intersport_fr"
-    item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888", "extras": Categories.SHOP_SPORTS.value}
+    item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
     start_url = "https://www.intersport.fr/store-finder/"
     requires_proxy = "FR"
 
@@ -36,7 +36,8 @@ class IntersportFRSpider(Spider):
                 country = "BE"
             else:
                 country = "FR"
-            yield Feature(
+
+            item = Feature(
                 {
                     "ref": ref,
                     "name": store["name"].title(),
@@ -47,3 +48,9 @@ class IntersportFRSpider(Spider):
                     "country": country,
                 }
             )
+
+            if item["name"].startswith("Intersport "):
+                item["branch"] = item.pop("name").removeprefix("Intersport").strip(" -")
+
+            apply_category(Categories.SHOP_SPORTS, item)
+            yield item
