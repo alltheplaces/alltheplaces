@@ -20,7 +20,9 @@ class YoungsGBSpider(scrapy.Spider):
 
             item = DictParser.parse(data)
             item["ref"] = data.get("siteId")
-            item["website"] = data.get("pubExternalUrl")
+            item["website"] = (
+                data.get("pubExternalUrl").replace("https://https://", "https://").replace("http://", "https://")
+            )
             item["branch"] = data.get("venueName")
             item["addr_full"] = merge_address_lines([item["city"], item["postcode"]])
             lon = item.get("lon", "")
