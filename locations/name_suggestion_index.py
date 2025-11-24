@@ -1,5 +1,6 @@
 import json
 import re
+from pathlib import Path
 from typing import Iterable
 from urllib.parse import urlparse
 
@@ -10,8 +11,9 @@ from unidecode import unidecode
 
 from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
-NSI_FILE_PATH = "locations/data/nsi.json"
-WIKIDATA_FILE_PATH = "locations/data/nsi-wikidata.json"
+_DATA_DIR = Path(__file__).resolve().parent / "data"
+NSI_FILE_PATH = _DATA_DIR / "nsi.json"
+WIKIDATA_FILE_PATH = _DATA_DIR / "nsi-wikidata.json"
 
 
 class Singleton(type):
