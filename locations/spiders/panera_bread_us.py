@@ -1,7 +1,9 @@
 import re
+from typing import AsyncIterator
 
 from geonamescache import GeonamesCache
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -15,7 +17,7 @@ class PaneraBreadUSSpider(Spider):
     name = "panera_bread_us"
     item_attributes = {"brand": "Panera Bread", "brand_wikidata": "Q7130852"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for state in GeonamesCache().get_us_states():
             yield Request(
                 f"https://www-api.panerabread.com/www-api/public/cafe/location/{state.lower()}",

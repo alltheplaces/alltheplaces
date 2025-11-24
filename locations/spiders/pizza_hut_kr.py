@@ -1,7 +1,7 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -10,11 +10,11 @@ from locations.geo import city_locations
 from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 
 
-class PizzaHutKRSpider(scrapy.Spider):
+class PizzaHutKRSpider(Spider):
     name = "pizza_hut_kr"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("KR", 15000):
             # API requires city name in korean language
             for city_name in city["alternatenames"]:
