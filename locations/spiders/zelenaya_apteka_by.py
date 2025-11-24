@@ -21,6 +21,5 @@ class ZelenayaAptekaBYSpider(scrapy.Spider):
             item["street_address"] = store.xpath('.//*[@class="address"]/text()').get()
             item["lat"], item["lon"] = store.xpath("./@data-coords").get().strip("[]").split(",")
             item["phone"] = store.xpath('.//a[contains(@href, "tel:")]/@href').get()
-            item["website"] = response.url
             apply_category(Categories.PHARMACY, item)
             yield item
