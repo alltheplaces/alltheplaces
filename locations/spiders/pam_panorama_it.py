@@ -1,8 +1,8 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import FormRequest, Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -26,7 +26,7 @@ BRANDS = {
 class PamPanoramaITSpider(Spider):
     name = "pam_panorama_it"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://coeus.ppapi.it/api/v2_2/post/query?noCache=0&typeUuid=store",
             formdata={

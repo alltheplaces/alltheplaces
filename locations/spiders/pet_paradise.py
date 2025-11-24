@@ -1,35 +1,37 @@
-import json
+from json import dumps, loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class PetParadiseSpider(scrapy.Spider):
+class PetParadiseSpider(Spider):
     name = "pet_paradise"
     item_attributes = {"brand": "Pet Paradise", "brand_wikidata": "Q122955413"}
     allowed_domains = ["petparadise.com"]
     start_urls = ("https://www.petparadise.com/locations.htm",)
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.petparadise.com/files/4859/widget856515.js"
 
         headers = {
             "Accept": "application/javascript",
         }
 
-        yield scrapy.http.FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
+        yield FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         text1 = response.text
         text2 = text1.lstrip("widget856515DataCallback (")
         text = text2.rstrip(");")
-        data = json.loads(text)
+        data = loads(text)
 
         for stores in data["PropertyorInterestPoint"]:
-            store = json.dumps(stores)
-            store_data = json.loads(store)
+            store = dumps(stores)
+            store_data = loads(store)
 
             properties = {
                 "ref": store_data["interestpointpropertyname"],

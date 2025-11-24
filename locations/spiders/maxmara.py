@@ -1,8 +1,8 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import chompjs
-import scrapy
+from chompjs import parse_js_object
 from geonamescache import GeonamesCache
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Clothes, apply_category, apply_clothes
@@ -12,21 +12,21 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MaxmaraSpider(scrapy.Spider):
+class MaxmaraSpider(Spider):
     name = "maxmara"
     item_attributes = {"brand": "Max Mara", "brand_wikidata": "Q1151774"}
     gc = GeonamesCache()
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country_code in self.gc.get_countries().keys():
             yield JsonRequest(
                 url=f"https://us.maxmara.com/store-locator?listJson=true&withoutRadius=false&country={country_code}"
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        stores = chompjs.parse_js_object(response.text).get("features", [])
+        stores = parse_js_object(response.text).get("features", [])
         for store in stores:
             if not store.get("storeHidden"):
                 store_info = store["properties"]

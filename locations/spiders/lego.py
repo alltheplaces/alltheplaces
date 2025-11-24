@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 import pycountry
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class LegoSpider(JSONBlobSpider):
     # locations_key = ["data", "storeSearch", "stores"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in pycountry.countries:
             yield JsonRequest(
                 url="https://www.lego.com/api/graphql/StoreSearch",

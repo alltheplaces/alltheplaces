@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -12,7 +12,7 @@ class NutritionWarehouseAUSpider(Spider):
     name = "nutrition_warehouse_au"
     item_attributes = {"brand": "Nutrition Warehouse", "brand_wikidata": "Q117747424"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://brauz-api-netlify-v2.netlify.app/api/thirdparty/store/find-stores-with-items-availability",
             data={

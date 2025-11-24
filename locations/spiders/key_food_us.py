@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -31,7 +33,7 @@ class KeyFoodUSSpider(Spider):
         "https://www.keyfood.com/store": {"brand": "Key Food", "brand_wikidata": "Q6398037"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, meta={"page": 0})
 
