@@ -3,17 +3,17 @@ import re
 
 from scrapy import Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class SephoraBRSpider(Spider):
     name = "sephora_br"
-    item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041", "extras": Categories.SHOP_COSMETICS.value}
+    item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     allowed_domains = ["www.sephora.com.br"]
     start_urls = ["https://www.sephora.com.br/nossas-lojas/"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
         for location in response.xpath("//li[@data-storeaddress]"):
@@ -28,4 +28,7 @@ class SephoraBRSpider(Spider):
             if " - " in properties["name"]:
                 properties["name"] = properties["name"].split(" - ", 1)[1]
             properties["ref"] = properties["name"].lower().replace(" ", "_")
+
+            apply_category(Categories.SHOP_COSMETICS, properties)
+
             yield Feature(**properties)

@@ -17,14 +17,14 @@ class MbplcGBSpider(WoosmapSpider):
         "Nicholsons": {"brand": "Nicholson's", "brand_wikidata": "Q113130666"},
         "O'Neill's": {"brand": "O'Neill's", "brand_wikidata": "Q7071905"},
         "Premium Country Pubs": {"brand": "Premium Country Pubs", "brand_wikidata": "Q118606900"},
-        "Stonehouse": {"brand": "Stonehouse", "brand_wikidata": "Q78192049"},
+        "Stonehouse": {"brand": "Stonehouse Pizza & Carvery", "brand_wikidata": "Q78192049"},
         "Toby Carvery": {"brand": "Toby Carvery", "brand_wikidata": "Q7811777"},
         "Oak Tree pubs": {
             "brand": "Oak Tree pubs",
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },
-        "Inn Keepers Collection": {"brand": "Inn Keepers Collection", "brand_wikidata": "Q6035891"},
+        "Inn Keepers Collection": {"brand": "Innkeeper's Collection", "brand_wikidata": "Q6035891"},
         "Vintage Inns": {"brand": "Vintage Inns", "brand_wikidata": "Q87067899"},
         "Browns": {"brand": "Browns", "brand_wikidata": "Q4976672"},
         "Son of Steak": {
@@ -37,8 +37,8 @@ class MbplcGBSpider(WoosmapSpider):
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },
-        "Castle": {"brand": "Castle Pubs", "brand_wikidata": "Q133280052"},
-        "EGO Mediterranean": {"brand": "EGO Mediterranean", "brand_wikidata": "Q133279746"},
+        "Castle": {"brand": "Castle", "brand_wikidata": "Q133280052"},
+        "EGO Mediterranean": {"brand": "Ego", "brand_wikidata": "Q133279746"},
         "Orleans Smokehouse": {
             "brand": "Orleans Smokehouse",
             "brand_wikidata": "",

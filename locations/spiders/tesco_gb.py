@@ -39,7 +39,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
         (r"/store-locator/[-\w]+/[-\w]+$", "parse_sd"),
     ]
     wanted_types = ["Pharmacy", "GasStation", "CafeOrCoffeeShop", "GroceryStore"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
     strip_names = [
         "Tesco Café",

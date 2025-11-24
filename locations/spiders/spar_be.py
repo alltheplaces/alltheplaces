@@ -3,13 +3,14 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
 class SparBESpider(scrapy.Spider):
     name = "spar_be"
     allowed_domains = ["www.spar.be"]
     start_urls = ["https://www.spar.be/winkels"]
-    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
+    item_attributes = SPAR_SHARED_ATTRIBUTES
 
     def parse(self, response, **kwargs):
         result = response.xpath("//*[@id][@data-lat]")

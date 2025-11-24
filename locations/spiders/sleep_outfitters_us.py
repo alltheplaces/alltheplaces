@@ -1,46 +1,45 @@
-from urllib.parse import urlencode
+import re
+from typing import Any
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy import Request
+from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.items import Feature
 
 
-class SleepOutfittersUSSpider(Spider):
+class SleepOutfittersUSSpider(CrawlSpider):
     name = "sleep_outfitters_us"
     item_attributes = {"brand": "Sleep Outfitters", "brand_wikidata": "Q120509459"}
-    offset = 0
-    page_size = 20
-    fields = ["address", "address2", "city", "state", "postal", "lat", "lng", "hours_summary", "phone", "storefront"]
-    api = "https://www.sleepoutfitters.com/api/cms/v2/retail-location-pages/"
+    start_urls = ["https://sleepoutfitters.com/store-locator"]
 
-    def next_request(self) -> JsonRequest:
-        return JsonRequest(
-            url="{}?{}".format(
-                self.api,
-                urlencode(
-                    {
-                        "offset": self.offset,
-                        "limit": self.page_size,
-                        "fields": ",".join(self.fields),
-                    }
-                ),
-            )
+    rules = [
+        Rule(LinkExtractor(allow=r"/store-locator/[a-z]+$")),
+        Rule(
+            LinkExtractor(allow=r"/store-locator/mattress-stores-in"),
+            callback="parse",
+            follow=True,
+        ),
+    ]
+
+    store_link_extractor = LinkExtractor(allow=r"/store-locator/sleep-outfitters-of-")
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        lat_lon_data = re.findall(
+            r"(\d+\.\d+),.*?(-?\d+\.\d+)", response.xpath('//*[contains(text(),"loaderData")]/text()').get(default="")
         )
+        links = self.store_link_extractor.extract_links(response)
+        for link in links:
+            for lat_lon in lat_lon_data:
+                yield Request(url=link.url, callback=self.parse_details, cb_kwargs={"lat_lon": lat_lon})
 
-    def start_requests(self):
-        yield self.next_request()
-
-    def parse(self, response, **kwargs):
-        for location in response.json()["items"]:
-            item = DictParser.parse(location)
-            item["street_address"] = merge_address_lines([item.pop("addr_full", None), location["address2"]])
-            item["image"] = location.get("storefront", {}).get("meta", {}).get("download_url")
-            item["branch"] = item.pop("name", "").replace("Sleep Outfitters", "").strip(", !")
-
-            yield item
-
-        if len(response.json()["items"]) == self.page_size:
-            self.offset += self.page_size
-            yield self.next_request()
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["branch"] = response.xpath("//h1/div[2]/text()").get()
+        item["addr_full"] = response.xpath('//*[@class="flex items-center gap-3"]//text()').get()
+        item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        item["ref"] = item["website"] = response.url
+        item["lat"], item["lon"] = kwargs.get("lat_lon", (None, None))
+        yield item

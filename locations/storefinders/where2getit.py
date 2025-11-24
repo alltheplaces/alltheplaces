@@ -1,6 +1,8 @@
+from typing import Any, Iterable
+
 import pycountry
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -75,7 +77,7 @@ class Where2GetItSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     api_endpoint: str = ""
     api_brand_name: str = ""
-    api_key: str = ""
+    api_key: str | list[str] = ""
     api_filter: dict = {}
     # api_filter_admin_level:
     #   0 = no filtering
@@ -112,34 +114,40 @@ class Where2GetItSpider(Spider):
         url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
         if self.api_endpoint:
             url = self.api_endpoint
-        yield JsonRequest(
-            url=url,
-            data={
-                "request": {
-                    "appkey": self.api_key,
-                    "formdata": {"objectname": "Locator::Store", "limit": self.api_limit, "where": where_clause},
-                }
-            },
-            callback=self.parse_locations,
-            dont_filter=True,
-        )
+        if not isinstance(self.api_key, list):
+            self.api_key = [self.api_key]
+        for key in self.api_key:
+            yield JsonRequest(
+                url=url,
+                data={
+                    "request": {
+                        "appkey": key,
+                        "formdata": {"objectname": "Locator::Store", "limit": self.api_limit, "where": where_clause},
+                    }
+                },
+                callback=self.parse_locations,
+                dont_filter=True,
+            )
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         if self.api_filter_admin_level > 0:
             url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
             if self.api_endpoint:
                 url = self.api_endpoint
-            yield JsonRequest(
-                url=url,
-                data={"request": {"appkey": self.api_key, "formdata": {"objectname": "Account::Country"}}},
-                method="POST",
-                callback=self.parse_country_list,
-                dont_filter=True,
-            )
+            if not isinstance(self.api_key, list):
+                self.api_key = [self.api_key]
+            for key in self.api_key:
+                yield JsonRequest(
+                    url=url,
+                    data={"request": {"appkey": key, "formdata": {"objectname": "Account::Country"}}},
+                    method="POST",
+                    callback=self.parse_country_list,
+                    dont_filter=True,
+                )
         else:
             yield from self.make_request()
 
-    def parse_country_list(self, response, **kwargs):
+    def parse_country_list(self, response: Response, **kwargs: Any) -> Any:
         for country in response.json()["response"]["collection"]:
             country_code = country["name"]
             subdivisions = pycountry.subdivisions.get(country_code=country_code)
@@ -153,7 +161,7 @@ class Where2GetItSpider(Spider):
             else:
                 yield from self.make_request(country_code=country_code)
 
-    def parse_locations(self, response, **kwargs):
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         if response.json().get("code") and response.json()["code"] == 5007:
             # No results returned for the provided API filter.
             return
@@ -179,5 +187,5 @@ class Where2GetItSpider(Spider):
     def pre_process_data(self, location: dict) -> None:
         """Override with any pre-processing on the item."""
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         yield item

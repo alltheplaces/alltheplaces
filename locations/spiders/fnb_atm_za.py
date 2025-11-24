@@ -1,8 +1,8 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Selector, Spider
+from scrapy import Selector, Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
@@ -32,7 +32,7 @@ class FnbAtmZASpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for province in ZA_PROVINCES:
             yield Request(
                 url="https://www.fnb.co.za/Controller?nav=locators.ATMLocatorSearch",

@@ -1,11 +1,13 @@
-import re
+from typing import Any
 
 import scrapy
-import xmltodict
+from scrapy import FormRequest
+from scrapy.http import Response
 
-from locations.categories import Categories
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.google_url import url_to_coords
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BancoDelBienestarMXSpider(scrapy.Spider):
@@ -13,64 +15,27 @@ class BancoDelBienestarMXSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Banco del Bienestar",
         "brand_wikidata": "Q5719137",
-        "extras": Categories.BANK.value,
     }
+    start_urls = ["https://directoriodesucursales.bancodelbienestar.gob.mx"]
+    no_refs = True
 
-    def start_requests(self):
-        yield scrapy.Request(
-            url="http://www.bansefi.gob.mx/_vti_bin/Lists.asmx",
-            method="POST",
-            headers={"Content-Type": "text/xml; charset='UTF-8'"},
-            body="""<soap:Envelope
-                xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-                xmlns:xsd='http://www.w3.org/2001/XMLSchema'
-                xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
-                <soap:Body>
-                    <GetListItems
-                        xmlns='http://schemas.microsoft.com/sharepoint/soap/'>
-                        <listName>Sucursales</listName>
-                        <viewName></viewName>
-                        <query>
-                            <Query>
-                                <Where>
-                                    <Eq>
-                                        <FieldRef Name='Tipo' />
-                                        <Value Type='Text'>Sucursal</Value>
-                                    </Eq>
-                                </Where>
-                            </Query>
-                        </query>
-                        <viewFields>
-                            <ViewFields>
-                                <FieldRef Name='Title' />
-                                <FieldRef Name='Estado' />
-                                <FieldRef Name='Municipio' />
-                                <FieldRef Name='Localidad' />
-                                <FieldRef Name='Direccion' />
-                                <FieldRef Name='Lada' />
-                                <FieldRef Name='Telefono' />
-                                <FieldRef Name='Horario' />
-                                <FieldRef Name='Localizacion' />
-                            </ViewFields>
-                        </viewFields>
-                        <rowLimit>0</rowLimit>
-                        <queryOptions>
-                            <QueryOptions></QueryOptions>
-                        </queryOptions>
-                    </GetListItems>
-                </soap:Body>
-            </soap:Envelope>""",
-        )
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for state_info in response.xpath('//select[@id="bandas"]/option'):
+            if state_id := state_info.xpath("./@value").get(""):
+                yield FormRequest(
+                    url="https://directoriodesucursales.bancodelbienestar.gob.mx/home.php",
+                    formdata={"entidadtxt": state_id},
+                    callback=self.parse_locations,
+                    cb_kwargs={"state": state_info.xpath("./text()").get("")},
+                )
 
-    def parse(self, response):
-        data = xmltodict.parse(response.body)
-        for bank in DictParser.get_nested_key(data, "z:row"):
+    def parse_locations(self, response: Response, state: str) -> Any:
+        for location in response.xpath('//*[@class="card hsucursal"]'):
             item = Feature()
-            item["ref"] = bank["@ows_ID"]
-            if m := re.match(r"POINT\((-?\d+\.\d+) (-?\d+\.\d+)\)", bank.get("@ows_Localizacion", "")):
-                item["lon"], item["lat"] = m.groups()
-            item["name"] = bank["@ows_Title"]
-            item["addr_full"] = bank.get("@ows_Direccion")
-            item["city"] = bank.get("@ows_Municipio") or bank.get("@ows_Localidad")
-            item["phone"] = ";".join([n.strip() for n in bank.get("@ows_Telefono", "").split("/")])
+            item["state"] = state
+            item["ref"] = item["branch"] = location.xpath('.//*[@class="card-title"]/text()').get("").strip()
+            item["addr_full"] = clean_address(location.xpath('.//p[@class="card-text"]/text()').getall())
+            if map_url := location.xpath('.//a[contains(@href, "maps")]/@href').get():
+                item["lat"], item["lon"] = url_to_coords(map_url)
+            apply_category(Categories.BANK, item)
             yield item

@@ -21,7 +21,7 @@ class RioSeoSpider(Spider):
         `?template=search&level=search`
       - `template`: mandatory parameter, should be either "domain" or "search"
       - `radius`: optional parameter, default value is 20038
-      - `limit`: optional parameter, default value is 3000
+      - `limit`: optional parameter, default value is 10000
     """
 
     dataset_attributes = {"source": "api", "api": "rio_seo"}
@@ -31,8 +31,11 @@ class RioSeoSpider(Spider):
     radius: int = 20038
     template: str = "domain"
 
-    def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(f"{self.end_point}/api/getAutocompleteData", callback=self.parse_autocomplete)
+    async def start(self) -> Iterable[Request]:
+        yield JsonRequest(
+            f"{self.end_point}/api/getAutocompleteData?template={self.template}&level={self.template}",
+            callback=self.parse_autocomplete,
+        )
 
     def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
         yield JsonRequest(

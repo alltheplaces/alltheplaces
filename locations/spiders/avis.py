@@ -3,6 +3,7 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -46,5 +47,7 @@ class AvisSpider(CrawlSpider, StructuredDataSpider):
                     item["opening_hours"].add_days_range(
                         day_range(start_day, end_day), start_time, end_time, time_format="%I:%M %p"
                     )
+
+        apply_category(Categories.CAR_RENTAL, item)
 
         yield item

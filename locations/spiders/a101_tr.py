@@ -7,7 +7,7 @@ from pygeohash import encode
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
+from locations.geo import country_iseadgg_centroids
 
 
 class A101TRSpider(scrapy.Spider):
@@ -16,14 +16,19 @@ class A101TRSpider(scrapy.Spider):
     #       5k locations instead of 13k.
     name = "a101_tr"
     item_attributes = {"brand": "A101", "brand_wikidata": "Q6034496"}
+    requires_proxy = True
+    custom_settings = {
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 1,
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def start_requests(self) -> Iterable[scrapy.Request]:
-        for city in city_locations("TR"):
-            data = {"geoHash": encode(city.get("latitude"), city.get("longitude"), precision=9)}
+        for lat, lon in country_iseadgg_centroids("TR", 24):
+            data = {"geoHash": encode(lat, lon, precision=9)}
             data = b64encode(json.dumps(data).encode("utf-8"))
             data = data.decode("utf-8")  # convert bytes back to string
-            url_template = "https://api-bp.a101prod.retter.io/dbmk89vnr/CALL/StoreContentManager/nearestStores/default?__culture=tr-TR&__platform=web&data={}&__isbase64=true"
-            # TODO: /dbmk89vnr/ part of the url may not be constant
+            url_template = "https://rio.a101.com.tr/dbmk89vnr/CALL/StoreContentManager/nearestStores/default?__culture=tr-TR&__platform=web&data={}&__isbase64=true"
             yield scrapy.Request(url=url_template.format(data), callback=self.parse)
 
     def parse(self, response):

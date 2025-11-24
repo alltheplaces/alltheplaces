@@ -1,8 +1,10 @@
+import requests
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 from locations.name_suggestion_index import NSI
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
 class NameSuggestionIndexCommand(ScrapyCommand):
@@ -78,7 +80,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         # TODO: This assumes you are going for only one category, by wikidata ID.
         #       Is it worth having this just check all of the wikidata entries and printing out what is missing globally?
         if "/" in args[0]:
-            response = self.nsi._request_file(f"data/{args[0]}.json")
+            response = self._request_file(f"data/{args[0]}.json")
             print(f"Fetched {len(response['items'])} {response['properties']['path']} from NSI")
 
             for item in response["items"]:
@@ -130,3 +132,13 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print("Official Url(s): {}".format(website))
         print("")
         print("----")
+
+    @staticmethod
+    def _request_file(file: str) -> dict:
+        resp = requests.get(
+            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/refs/heads/main/{}".format(file),
+            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
+        )
+        if not resp.status_code == 200:
+            raise Exception("NSI load failure")
+        return resp.json()

@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
@@ -25,10 +26,32 @@ class NationalParksBoardTreesSGSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["Public_treeid"]
         apply_category(Categories.NATURAL_TREE, item)
-        item["extras"]["species"] = feature["SPSC_NM"]
         item["extras"]["protected"] = "yes"
+        item["extras"]["species"] = feature["SPSC_NM"]
+
         if dbh_m := feature.get("GRTH_SIZE"):
             item["extras"]["diameter"] = f"{dbh_m} m"
+
         if height_range_m := feature.get("HEIGHT"):
-            item["extras"]["height:range"] = f"{height_range_m} m"
+            height_range_m = height_range_m.strip()
+            if m := re.match(r">(\d+) but ≤(\d+)", height_range_m):
+                height_min = m.group(1)
+                height_max = m.group(2)
+                item["extras"]["height:range"] = f"{height_min}-{height_max} m"
+            elif m := re.match(r"(\d+)\s*-\s*(\d+)", height_range_m):
+                height_min = m.group(1)
+                height_max = m.group(2)
+                item["extras"]["height:range"] = f"{height_min}-{height_max} m"
+            elif m := re.match(r"(?:[<≤]|<=)(\d+)", height_range_m):
+                height_max = m.group(1)
+                item["extras"]["height:range"] = f"0-{height_max} m"
+            elif m := re.match(r">(\d+)", height_range_m):
+                height_min = m.group(1)
+                item["extras"]["height"] = f"{height_min} m"
+            elif height_range_m.startswith("-"):
+                # Unknown height range listed as -1. Ignore.
+                pass
+            else:
+                self.logger.warning("Unknown height range format: {}".format(height_range_m))
+
         yield item

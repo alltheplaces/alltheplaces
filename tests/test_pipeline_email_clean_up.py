@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
@@ -6,7 +6,7 @@ from locations.pipelines.email_clean_up import EmailCleanUpPipeline
 
 
 def get_objects(email):
-    spider = Spider(name="test")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return (
         Feature(email=email),

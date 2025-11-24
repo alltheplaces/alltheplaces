@@ -7,6 +7,8 @@ from locations.dict_parser import DictParser
 
 class ChurchOfEnglandGBSpider(Spider):
     name = "church_of_england_gb"
+    item_attributes = {"operator": "Church of England", "operator_wikidata": "Q82708"}
+    # This is the official "finder" site for the Church of England
     start_urls = ["https://www.achurchnearyou.com/api/internal/venues/venue/?format=json"]
 
     def parse(self, response, **kwargs):

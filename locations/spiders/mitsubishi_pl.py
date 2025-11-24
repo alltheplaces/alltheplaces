@@ -1,41 +1,61 @@
-import json
 import re
-from typing import Any
+from copy import deepcopy
+from typing import Iterable
 
-from scrapy import Spider
+import chompjs
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class MitsubishiPLSpider(Spider):
+class MitsubishiPLSpider(JSONBlobSpider):
     name = "mitsubishi_pl"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
     start_urls = ["https://www.mitsubishi.pl/dealerzy"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        raw_data = json.loads(
+    def extract_json(self, response: Response) -> list[dict]:
+        return chompjs.parse_js_object(
             re.search(
                 r"dealerLocations\":(\[.*\])}\]\],\[\[\"\$\"",
                 response.xpath('//*[contains(text(),"latitude")]/text()').get().replace("\\", ""),
             ).group(1)
         )
-        for location in raw_data:
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full")
-            item["addr_full"] = location["full_address"]
-            item["name"] = location["dealer_name"]
 
-            services = location["services"]
-            if "SHOWROOM" in services:
-                apply_category(Categories.SHOP_CAR, item)
-                if "SERVICE" in services:
-                    apply_yes_no(Extras.CAR_REPAIR, item, True)
-            elif "SERVICE" in services:
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
+    def build_sales_item(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
 
-            if isinstance(location["dealer_websites"], list):
-                item["website"] = location["dealer_websites"][0]["url"]
+    def build_service_item(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
 
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = item.pop("addr_full")
+        item["addr_full"] = feature["full_address"]
+        item["name"] = feature["dealer_name"]
+
+        if isinstance(feature["dealer_websites"], list):
+            item["website"] = feature["dealer_websites"][0]["url"]
+
+        services = feature["services"]
+        sales_available = "SHOWROOM" in services
+        service_available = "SERVICE" in services
+
+        if sales_available:
+            sales_item = self.build_sales_item(item)
+            if service_available:
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, True)
+            yield sales_item
+
+        if service_available:
+            service_item = self.build_service_item(item)
+            yield service_item
+
+        if not sales_available and not service_available:
+            self.logger.error(f"Unknown services: {services}, {item['name']}, {item['ref']}")

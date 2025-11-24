@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import Any, AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.dict_parser import DictParser
@@ -11,10 +14,10 @@ class CarbonHealthUSSpider(Spider):
     name = "carbon_health_us"
     item_attributes = {"brand": "Carbon Health", "brand_wikidata": "Q110076263"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request("https://carbonhealth.com/locations", headers={"RSC": "1"})
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = dict(parse_rsc(response.body))[2][3]
 
         specialty_id_to_speciality = {}

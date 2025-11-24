@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class MazdaJPSpider(JSONBlobSpider):
     allowed_domains = ["ssl.mazda.co.jp"]
     locations_key = ["Shops"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for coordinates in country_iseadgg_centroids(["JP"], 79):
             yield JsonRequest(
                 url="https://ssl.mazda.co.jp/api/v1/shopslist/?latitude={}&longitude={}".format(

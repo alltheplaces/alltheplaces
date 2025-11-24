@@ -32,8 +32,7 @@ class SleepNumberUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["entities"]:
             item = DictParser.parse(store)
-            item["ref"] = store["cid"]
-            item["website"] = store["c_storePagesURLURL"]
+            item["ref"] = item["website"] = store["c_storePagesURLURL"]
             item["extras"]["ref:google:place_id"] = store.get("googlePlaceId")
 
             try:
@@ -48,6 +47,8 @@ class SleepNumberUSSpider(Spider):
     def parse_opening_hours(self, hours: dict) -> OpeningHours:
         oh = OpeningHours()
         for day_name, day_hours in hours.items():
+            if "holiday" in day_name:
+                continue
             if not day_hours:
                 continue
             if day_hours.get("isClosed"):

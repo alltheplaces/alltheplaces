@@ -1,7 +1,9 @@
 import re
 from datetime import datetime
+from typing import Any
 
 import chompjs
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Drink, Extras, apply_yes_no
@@ -25,15 +27,11 @@ def get_time_from_iso(s):
 
 class RedRoofUSSpider(SitemapSpider):
     name = "red_roof_us"
-    item_attributes = {
-        "brand_wikidata": "Q7304949",
-    }
+    item_attributes = {"brand_wikidata": "Q7304949"}
     sitemap_urls = ["https://www.redroof.com/sitemap.xml"]
-    sitemap_rules = [
-        (r"^https://www.redroof.com/[\w/]*property/\w{2}/[\w-]+/(\w+)", "parse"),
-    ]
+    sitemap_rules = [(r"^https://www.redroof.com/[\w/]*property/\w{2}/[\w-]+/(\w+)", "parse")]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
         objs = [chompjs.parse_js_object(s) for s in scripts]
         rsc = "".join([s for n, s in objs]).encode()

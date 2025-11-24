@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import urljoin
 
 import scrapy
 import xmltodict
@@ -14,19 +15,19 @@ class OttosCHSpider(scrapy.Spider):
     name = "ottos_ch"
     item_attributes = {"brand": "Otto's", "brand_wikidata": "Q2041507"}
     start_urls = [
-        "https://api.ottos.ch/occ/v2/ottos/stores?fields=stores(additionalOpeningInformation%2Cname%2CdisplayName%2CformattedDistance%2CopeningHours(weekDayOpeningList(FULL)%2CspecialDayOpeningList(FULL))%2CgeoPoint(latitude%2Clongitude)%2Caddress(line1%2Cline2%2Ctown%2Cregion(FULL)%2CpostalCode%2Cphone%2Ccountry%2Cemail)%2Cfeatures%2CtodaySchedule(DEFAULT)%2CstoreFeatures(code%2Cname%2Ctooltip))%2Cpagination(DEFAULT)%2Csorts(DEFAULT)%2CselectableStoreFeatures%2CselectedStoreFeature%2CselectableStoreDistances%2CselectedStoreDistance&query=&radius=10000&lang=de&curr=CHF",
+        "https://api.ottos.ch/occ/v2/ottos/stores?fields=stores(additionalOpeningInformation,storeDetailUrl,name,displayName,formattedDistance,openingHours(weekDayOpeningList(FULL),specialDayOpeningList(FULL)),geoPoint(latitude,longitude),address(line1,line2,town,region(FULL),postalCode,phone,country,email),features,todaySchedule(DEFAULT),storeFeatures(code,name,tooltip)),pagination(DEFAULT),sorts(DEFAULT),selectableStoreFeatures,selectedStoreFeature,selectableStoreDistances,selectedStoreDistance&query=&radius=10000&lang=de&curr=CHF"
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in xmltodict.parse(response.text)["StoreFinderSearchPageWsDTO"]["stores"]["stores"]:
+        for store in DictParser.get_nested_key(xmltodict.parse(response.text), "stores"):
             store.update(store.pop("address"))
             item = DictParser.parse(store)
             item["ref"] = item.pop("name")
             if state := item.get("state"):
                 item["state"] = state["isocodeShort"]
-            item["street_address"] = merge_address_lines([store["line1"], store["line2"]])
+            item["street_address"] = merge_address_lines([store.get("line1"), store.get("line2")])
             item["opening_hours"] = OpeningHours()
-            for day_time in store["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
+            for day_time in store["openingHours"]["weekDayOpeningList"]:
                 if day_time["closed"] == "true":
                     item["opening_hours"].set_closed(day_time["weekDay"])
                 else:
@@ -51,5 +52,10 @@ class OttosCHSpider(scrapy.Spider):
             else:
                 item["branch"] = store["displayName"].removeprefix("OTTO'S ")
                 apply_category(Categories.SHOP_VARIETY_STORE, item)
+
+            slug = store["storeDetailUrl"].removeprefix("/")
+            item["website"] = item["extras"]["website:de"] = urljoin("https://www.ottos.ch/de/", slug)
+            item["extras"]["website:it"] = urljoin("https://www.ottos.ch/it/", slug)
+            item["extras"]["website:de"] = urljoin("https://www.ottos.ch/fr/", slug)
 
             yield item

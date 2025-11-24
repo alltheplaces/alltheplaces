@@ -1,28 +1,66 @@
-from urllib.parse import urljoin
+import json
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 
 
-class AgataMeblePLSpider(scrapy.Spider):
+class AgataMeblePLSpider(Spider):
     name = "agata_meble_pl"
     item_attributes = {"brand": "Agata Meble", "brand_wikidata": "Q9141928"}
-    start_urls = ["https://www.agatameble.pl/api/v1/pos/pos/poses.json"]
+
+    async def start(self) -> AsyncIterator[Request]:
+        url = "https://www.agatameble.pl/graphql"
+        query = """
+        query PickupLocations($deviceType: Int!) {
+          pickupLocations(pageSize: 1000) {
+            total_count
+            items {
+              city
+              latitude
+              longitude
+              name
+              phone
+              pickup_location_code
+              postcode
+              street
+              is_megabox_location_active
+              url_key
+              opening_hours {
+                monday_friday_hours
+                saturday_hours
+                sunday_hours
+              }
+              salon_data {
+                salon_code
+                salon_id
+                salon_name
+              }
+            }
+          }
+          getStoresBanners(input: {
+            type: $deviceType
+            source_code: ""
+            listing: true
+          }) {
+            top_banner {
+              image
+              url
+            }
+          }
+        }
+        """
+
+        payload = {"query": query, "operationName": "PickupLocations", "variables": {"deviceType": 1}}
+
+        headers = {"Content-Type": "application/json"}
+
+        yield Request(url=url, method="POST", body=json.dumps(payload), headers=headers, callback=self.parse)
 
     def parse(self, response):
-        for poi in response.json()["results"]:
-            # Skip disabled results
-            if poi["Enabled"] is False:
-                continue
-
-            item = DictParser.parse(poi)
-            item.pop("name", None)
-            item["website"] = urljoin("https://www.agatameble.pl/salon/", poi["Slug"])
-
-            # Make a request to the website so that we filter out closed stores that 404
-            yield scrapy.Request(item["website"], self.parse_store, meta={"item": item})
-
-    def parse_store(self, response, **kwargs):
-        item = response.meta["item"]
-        yield item
+        for location in response.json()["data"]["pickupLocations"]["items"]:
+            item = DictParser.parse(location)
+            item["website"] = item["ref"] = "https://www.agatameble.pl/sklep/" + location["url_key"]
+            yield item

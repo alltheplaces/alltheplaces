@@ -12,10 +12,7 @@ class BootsNOSpider(scrapy.Spider):
     name = "boots_no"
     item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
     allowed_domains = ["apotek.boots.no", "zpin.it"]
-    download_delay = 0.5
-    start_urls = [
-        "https://apotek.boots.no",
-    ]
+    start_urls = ["https://apotek.boots.no"]
 
     def parse_map(self, response):
         map_data = response.xpath(

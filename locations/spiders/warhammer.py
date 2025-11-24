@@ -28,4 +28,5 @@ class WarhammerSpider(AlgoliaSpider):
             for time in rule.get("openIntervals", []):
                 item["opening_hours"].add_range(day, time["start"], time["end"])
 
-        yield item
+        if item.get("lat") is None or item["lat"] > -80:  # skips broken/joke entries
+            yield item

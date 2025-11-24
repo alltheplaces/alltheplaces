@@ -1,38 +1,30 @@
+import re
 from typing import Any
 
+import chompjs
+from scrapy import Selector
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import Spider
 
-from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class EasyBathroomsGBSpider(CrawlSpider):
+class EasyBathroomsGBSpider(Spider):
     name = "easy_bathrooms_gb"
     item_attributes = {"brand": "Easy Bathrooms", "brand_wikidata": "Q114348566"}
     allowed_domains = ["www.easybathrooms.com"]
     start_urls = ["https://www.easybathrooms.com/our-showrooms"]
-    rules = [Rule(LinkExtractor(allow=r"^https:\/\/www\.easybathrooms\.com\/our-showrooms\/[^/]+$"), callback="parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        properties = {
-            "ref": response.url.split("/(?!$)")[-1],
-            "branch": response.xpath("//h1/span[2]/text()").get(),
-            "addr_full": merge_address_lines(
-                response.xpath('//div[contains(span/text(), "Find Us")]/ul/li/text()').getall()
-            ),
-            "phone": response.xpath('//span[@class="text-base"][contains(text(), "0")]/text()').get(),
-            "website": response.url,
-        }
-        hours_string = " ".join(
-            filter(None, map(str.strip, response.xpath('//div[@id="opening-times"]/ul[1]//text()').getall()))
-        )
-        properties["opening_hours"] = OpeningHours()
-        properties["opening_hours"].add_ranges_from_string(hours_string)
-
-        apply_category(Categories.SHOP_BATHROOM_FURNISHING, properties)
-
-        yield Feature(**properties)
+        for lat, lon, popup in re.findall(
+            r"lat: (-?\d+\.\d+),.+?lng: (-?\d+\.\d+),.+?\(({.+?})\);", response.text, re.DOTALL
+        ):
+            item = Feature()
+            item["lat"] = lat
+            item["lon"] = lon
+            sel = Selector(text=chompjs.parse_js_object(popup)["content"])
+            item["ref"] = item["website"] = response.urljoin(sel.xpath("//a/@href").get())
+            item["branch"] = sel.xpath("//a/text()").get()
+            item["addr_full"] = merge_address_lines(sel.xpath("//div/p/text()").getall())
+            yield item

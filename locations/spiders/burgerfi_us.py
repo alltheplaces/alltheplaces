@@ -17,7 +17,10 @@ class BurgerfiUSSpider(JSONBlobSpider):
             return
         item["ref"] = item["website"] = feature["url"].replace(" ", "")
         item["branch"] = item.pop("name").replace(" - NOW OPEN", "")
+
         item["opening_hours"] = OpeningHours()
-        for rule in feature.get("hours", []):
-            item["opening_hours"].add_ranges_from_string(f'{rule.get("label")} {rule.get("location_hours")}')
+        if opening_hours := feature.get("hours"):
+            for rule in opening_hours:
+                if "Hours of Operation" not in rule.get("label"):
+                    item["opening_hours"].add_ranges_from_string(f'{rule.get("label")} {rule.get("location_hours")}')
         yield item

@@ -1,7 +1,12 @@
+from typing import Any, Iterable
+
 import scrapy
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -18,11 +23,20 @@ class InditexSpider(scrapy.Spider):
     }
     # Each site has the same multi-brand catalogue JSON, could have picked any site!
     start_urls = ["https://www.massimodutti.com/itxrest/2/web/seo/config?appId=1"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
-    download_delay = 2.0
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 5,
+        "DEFAULT_REQUEST_HEADERS": {
+            "Host": "www.massimodutti.com",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Connection": "keep-alive",
+        },
+    }
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         config = response.json()["seoParamMap"]
         for store_id, country in config["storeId"].items():
             # First character of the store_id is the index into the brand table.
@@ -39,7 +53,7 @@ class InditexSpider(scrapy.Spider):
             )
             yield scrapy.http.JsonRequest(url, callback=self.parse_stores, cb_kwargs=dict(brand=brand))
 
-    def parse_stores(self, response, brand):
+    def parse_stores(self, response: Response, brand: str) -> Iterable[Feature]:
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
             item["website"] = "https://www.{}.com/".format(brand) + item["country"].lower()

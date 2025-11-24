@@ -94,44 +94,17 @@ class YextAnswersSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = location.get("geomodifier")
 
-            phones = []
-            for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
-                if phone := location.get(phone_type):
-                    if isinstance(phone, dict):
-                        phones.append(phone.get("number"))
-                    elif isinstance(phone, str):
-                        phones.append(phone)
-            if len(phones) > 0:
-                item["phone"] = "; ".join(phones)
-
-            if emails := location.get("emails"):
-                item["email"] = ";".join(emails)
-
-            item["extras"]["ref:google"] = location.get("googlePlaceId")
-            item["twitter"] = location.get("twitterHandle")
-            item["extras"]["contact:instagram"] = location.get("instagramHandle")
-            item["extras"]["fax"] = location.get("fax")
-            if "facebookVanityUrl" in location:
-                item["facebook"] = clean_facebook(location["facebookVanityUrl"])
-            else:
-                item["facebook"] = clean_facebook(location.get("facebookPageUrl"))
-
-            if website_url_dict := location.get("websiteUrl"):
-                if website_url_dict.get("preferDisplayUrl"):
-                    item["website"] = website_url_dict.get("displayUrl")
-                else:
-                    item["website"] = website_url_dict.get("url")
-
-            if menu_url_dict := location.get("menuUrl"):
-                if menu_url_dict.get("preferDisplayUrl"):
-                    item["extras"]["website:menu"] = menu_url_dict.get("displayUrl")
-                else:
-                    item["extras"]["website:menu"] = menu_url_dict.get("url")
+            self.parse_socials(item, location)
 
             item["opening_hours"] = self.parse_opening_hours(location.get("hours"))
-            item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(location.get("deliveryHours"))
-            item["extras"]["happy_hours"] = self.parse_opening_hours(location.get("happyHours"))
-            item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(location.get("driveThroughHours"))
+            if delivery_hours := location.get("deliveryHours"):
+                item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(delivery_hours).as_opening_hours()
+            if happy_hours := location.get("happyHours"):
+                item["extras"]["happy_hours"] = self.parse_opening_hours(happy_hours).as_opening_hours()
+            if drive_through_hours := location.get("driveThroughHours"):
+                item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(
+                    drive_through_hours
+                ).as_opening_hours()
 
             self.parse_payment_methods(location, item)
             self.parse_google_attributes(location, item)
@@ -141,7 +114,62 @@ class YextAnswersSpider(Spider):
         if len(response.json()["response"]["results"]) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
 
-    def parse_opening_hours(self, hours: dict, **kwargs: Any) -> str | None:
+    @staticmethod
+    def parse_socials(item: Feature, location: dict) -> None:
+        """
+        Parse contact and social media fields of information from the
+        supplied dictionary and add to the supplied item (Feature).
+        :param item: item to add contact and social media information to.
+        :param location: dictionary to parse information from.
+        :returns: None
+        """
+        phones = []
+        for phone_type in ["localPhone", "mainPhone", "mobilePhone"]:
+            if phone := location.get(phone_type):
+                if isinstance(phone, dict):
+                    phones.append(phone.get("number"))
+                elif isinstance(phone, str):
+                    phones.append(phone)
+        if len(phones) > 0:
+            item["phone"] = "; ".join(phones)
+
+        if emails := location.get("emails"):
+            item["email"] = ";".join(emails)
+
+        if google_place_id := location.get("googlePlaceId"):
+            item["extras"]["ref:google"] = google_place_id
+        if twitter_handle := location.get("tritterHandle"):
+            item["twitter"] = twitter_handle
+        if instagram_handle := location.get("instagramHandle"):
+            item["extras"]["contact:instagram"] = instagram_handle
+        if fax_number := location.get("fax"):
+            item["extras"]["fax"] = fax_number
+        if "facebookVanityUrl" in location.keys():
+            item["facebook"] = clean_facebook(location["facebookVanityUrl"])
+        elif "facebookPageUrl" in location.keys():
+            item["facebook"] = clean_facebook(location["facebookPageUrl"])
+
+        if website_url_dict := location.get("websiteUrl"):
+            if website_url_dict.get("preferDisplayUrl"):
+                item["website"] = website_url_dict.get("displayUrl")
+            else:
+                item["website"] = website_url_dict.get("url")
+
+        if menu_url_dict := location.get("menuUrl"):
+            if menu_url_dict.get("preferDisplayUrl"):
+                item["extras"]["website:menu"] = menu_url_dict.get("displayUrl")
+            else:
+                item["extras"]["website:menu"] = menu_url_dict.get("url")
+
+    @staticmethod
+    def parse_opening_hours(hours: dict) -> OpeningHours | None:
+        """
+        Parse opening hours from the supplied dictionary and return an
+        OpeningHours object.
+        :param hours: dictionary provided by a Yext API.
+        :returns: OpeningHours object if hours could be parsed, or None if the
+                  supplied hours dictionary cnanot be parsed.
+        """
         if not hours:
             return None
         oh = OpeningHours()
@@ -155,8 +183,7 @@ class YextAnswersSpider(Spider):
                 continue
             for time in rule["openIntervals"]:
                 oh.add_range(day, time["start"], time["end"])
-
-        return oh.as_opening_hours()
+        return oh
 
     def parse_payment_methods(self, location: dict, item: Feature) -> None:
         if payment_methods := location.get("paymentOptions"):

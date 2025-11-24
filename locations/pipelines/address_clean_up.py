@@ -6,11 +6,33 @@ from scrapy import Spider
 from locations.items import Feature
 
 
-def merge_address_lines(address_lines: [str]) -> str:
+def merge_address_lines(address_lines: list[str]) -> str:
     return ", ".join(filter(None, [line.strip() if line else None for line in address_lines]))
 
 
 _multiple_spaces = re.compile(r" +")
+
+
+def is_primarily_cjk(text: str) -> bool:
+    """
+    Check if more than half of `text` contains CJK (Chinese, Japanese, Korean) characters.
+    """
+    if not text:
+        return False
+
+    cjk_count = 0
+    for char in text:
+        if any(
+            [
+                "\u4e00" <= char <= "\u9fff",  # CJK Unified Ideographs
+                "\u3040" <= char <= "\u309f",  # Hiragana
+                "\u30a0" <= char <= "\u30ff",  # Katakana
+                "\uac00" <= char <= "\ud7af",  # Hangul
+            ]
+        ):
+            cjk_count += 1
+
+    return cjk_count > len(text) / 2
 
 
 def clean_address(address: list[str] | str, min_length=2) -> str:
@@ -46,8 +68,9 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
                 return_addr.append(line)
     assembled_address = ", ".join(return_addr)
 
-    # If after all of the cleaning our address is very short, its likely to be "-" or similar dud content
-    if len(assembled_address) <= min_length:
+    # If after all of the cleaning our address is very short, its likely to be "-" or similar dud content.
+    # Don't discard valid CJK characters, which may be short.
+    if len(assembled_address) <= min_length and not is_primarily_cjk(assembled_address):
         return ""
 
     return assembled_address

@@ -1,53 +1,26 @@
-import html
-import json
-import re
+from typing import Any
+from urllib.parse import urljoin
 
-from parsel import Selector
+from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-
-HTML_TAGS = re.compile("<[^<]+?>")
-
-
-def strip_tags(s):
-    return html.unescape(HTML_TAGS.sub("", s))
+from locations.items import Feature
 
 
 class AwaySpider(Spider):
     name = "away"
     item_attributes = {"brand": "Away", "brand_wikidata": "Q48743138"}
-    start_urls = ["https://www.awaytravel.com/stores"]
+    start_urls = ["https://www.awaytravel.com/pages/stores"]
 
-    def parse(self, response):
-        data = json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())
-        for location in data["props"]["pageProps"]["fallback"]["store-location-section-us"]["stores"]:
-            item = DictParser.parse(location)
-
-            item["addr_full"] = strip_tags(item["addr_full"])
-            item["branch"] = location["homepageCity"]
-            item["website"] = response.urljoin(location["linkHref"])
-            item["image"] = location["metaImage"]["url"]
-            del item["name"]
-
-            oh = OpeningHours()
-            oh.add_ranges_from_string(strip_tags(location["hours"]))
-            item["opening_hours"] = oh
-
-            links = Selector(text=location["description"]).xpath("//a/@href").getall()
-
-            if not item["email"]:
-                for link in links:
-                    if link.startswith("mailto:"):
-                        item["email"] = link.removeprefix("mailto:")
-
-            if not item["phone"]:
-                for link in links:
-                    if link.startswith("tel:"):
-                        item["phone"] = link.removeprefix("tel:")
-
-            apply_category(Categories.SHOP_BAG, item)
-
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.xpath('//*[contains(@class,"flex md:justify-end w-full gap-md md:gap-lg")]'):
+            item = Feature()
+            item["addr_full"] = store.xpath(".//address/span/text()").get()
+            item["branch"] = store.xpath('.//*[@class="flex flex-col gap-sm"]/p/a[1]/text()').get()
+            item["phone"] = store.xpath('.//*[@class="flex flex-col gap-sm"]/p/a[2]/text()').get()
+            item["ref"] = item["website"] = urljoin(
+                "https://www.awaytravel.com", store.xpath('.//*[@class="flex flex-col gap-sm"]/p/a/@href').get()
+            )
+            item["lat"] = response.xpath(f"""//*[contains(@value,"{(item["branch"])}")]/@data-latitude""").get()
+            item["lon"] = response.xpath(f"""//*[contains(@value,"{item["branch"]}")]/@data-longitude""").get()
             yield item

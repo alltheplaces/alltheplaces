@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
@@ -118,17 +120,16 @@ PROPERTIES = {
 }
 
 
-class LukoilSpider(scrapy.Spider):
+class LukoilSpider(Spider):
     name = "lukoil"
-    download_delay = 0.10
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://lukoil.bg/api/cartography/GetCountryDependentSearchObjectData?form=gasStation"]
+    allowed_domains = ["lukoil.bg"]
     handle_httpstatus_list = [403]
 
-    def start_requests(self):
-        yield JsonRequest(
-            "https://lukoil.bg/api/cartography/GetCountryDependentSearchObjectData?form=gasStation",
-            callback=self.get_results,
-        )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for url in self.start_urls:
+            yield JsonRequest(url=url, callback=self.get_results)
 
     def get_results(self, response):
         for station in response.json()["GasStations"]:

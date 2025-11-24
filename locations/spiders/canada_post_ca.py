@@ -23,12 +23,23 @@ class CanadaPostCASpider(ArcGISFeatureServerSpider):
         item["name"] = feature["displaynameen"]
         item["street_address"] = feature["structureaddress"]
         item["opening_hours"] = self.parse_opening_hours(feature)
+        item["website"] = item["extras"]["website:en"] = (
+            "https://www.canadapost-postescanada.ca/cpc/en/tools/find-a-post-office.page?outletId={}&detail=true".format(
+                feature["costcentre"]
+            )
+        )
+        item["extras"]["website:fr"] = (
+            "https://www.canadapost-postescanada.ca/scp/fr/outils/trouver-un-bureau-de-poste.page?idComptoir={}&detail=vrai".format(
+                feature["costcentre"]
+            )
+        )
 
         if feature["grouping"] == "Post Office":
             item.update(CANADA_POST)
             apply_category(Categories.POST_OFFICE, item)
         elif feature["grouping"] == "Pick and Drop":
-            apply_category(Categories.POST_PARTNER, item)
+            apply_category(Categories.GENERIC_POI, item)
+            item["extras"]["post_office"] = "post_partner"
             item["operator"] = feature["sitebusinessname"]
             item["extras"]["post_office:brand"] = CANADA_POST["brand"]
             item["extras"]["post_office:brand:wikidata"] = CANADA_POST["brand_wikidata"]
@@ -38,13 +49,15 @@ class CanadaPostCASpider(ArcGISFeatureServerSpider):
             item["extras"]["post_office:stamps"] = "Canada Post"
             item["extras"]["post_office:packaging"] = "Canada Post"
         elif feature["grouping"] == "Parcel Pickup":
-            apply_category(Categories.POST_PARTNER, item)
+            apply_category(Categories.GENERIC_POI, item)
+            item["extras"]["post_office"] = "post_partner"
             item["operator"] = feature["sitebusinessname"]
             item["extras"]["post_office:brand"] = CANADA_POST["brand"]
             item["extras"]["post_office:brand:wikidata"] = CANADA_POST["brand_wikidata"]
             item["extras"]["post_office:parcel_to"] = "Canada Post"
         elif feature["grouping"] == "Post Point":
-            apply_category(Categories.POST_PARTNER, item)
+            apply_category(Categories.GENERIC_POI, item)
+            item["extras"]["post_office"] = "post_partner"
             item["operator"] = feature["sitebusinessname"]
             item["extras"]["post_office:brand"] = CANADA_POST["brand"]
             item["extras"]["post_office:brand:wikidata"] = CANADA_POST["brand_wikidata"]

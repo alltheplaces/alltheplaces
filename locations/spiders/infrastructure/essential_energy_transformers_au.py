@@ -17,11 +17,15 @@ class EssentialEnergyTransformersAUSpider(ArcGISFeatureServerSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["WACS_ID_A"]
-        item.pop("state", None)
+        item["addr_full"] = feature["VICINITY"]
         apply_category(Categories.TRANSFORMER, item)
-        item["extras"]["alt_ref"] = feature["SW_LABEL"]
-        if rating_kva := feature.get("KVA"):
-            item["extras"]["rating"] = f"{rating_kva} kVA"
-        if voltage_primary := feature.get("PRIMARY_VO"):
-            item["extras"]["voltage:primary"] = voltage_primary.replace("kV", " kV")
+        item["extras"]["alt_ref"] = feature["W_LABEL_A"]
+        if voltage_kv_str := feature["PRIMARY_VO"]:
+            try:
+                voltage_v = int(float(voltage_kv_str.strip().removesuffix("kV").strip()) * 1000)
+                item["extras"]["voltage:primary"] = f"{voltage_v}"
+            except ValueError:
+                pass
+        if rating := feature["KVA"]:
+            item["extras"]["rating"] = rating + " kVA"
         yield item
