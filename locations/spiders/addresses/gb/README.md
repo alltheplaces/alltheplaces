@@ -16,7 +16,6 @@ the history of address data in the UK and the issues involved.
 Some further useful external GB sources around addressing include:
 
 * [Owen Boswarva](https://www.owenboswarva.com/blog/): [campaigning for UK open address data](https://www.owenboswarva.com/blog/post-addr4.htm)
-* [Rob Whittaker](https://osm.mathmos.net/): [UK OSM guy with some interest in addresses](https://osm.mathmos.net/addresses/)
 
 ## Ordnance Survey Open Data
 
@@ -110,11 +109,10 @@ Owen and published. Others are helping.
 | Birmingham City       | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr11.htm) blog entry.                                                                                                                     |
 | Bristol City          | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr19.htm) blog entry.                                                                                                                     |
 | Cornwall County       | [Council tax data](https://www.cornwall.gov.uk/council-tax/your-council-tax-bill/council-tax-data/) + [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr14.htm) blog entry.               |
-| Dundee City           | FoI request lodged (29/10/25).                                                                                                                                                                     |
 | Durham County         | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr17.htm) blog entry.                                                                                                                     |
-| Edinburgh City        | FoI request lodged (29/10/25).                                                                                                                                                                     |
 | Leeds City            | [Council Tax Bands](https://datamillnorth.org/dataset/council-tax-bands-of-all-properties-in-leeds-em7lg) released ([Owen Boswarva](https://www.owenboswarva.com/blog/post-addr9.htm) blog entry). |
 | Lichfield District    | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr11.htm) blog entry.                                                                                                                     |
+| London (Camden)       | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr21.htm) blog entry.                                                                                                                     |
 | London (Hackney)      | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr12.htm) blog entry.                                                                                                                     |
 | London (Islington)    | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr15.htm) blog entry.                                                                                                                     |
 | Rushcliffe Borough    | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr13.htm) blog entry.                                                                                                                     |
