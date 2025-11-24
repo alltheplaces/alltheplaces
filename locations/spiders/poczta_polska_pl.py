@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import FormRequest
 
@@ -10,7 +12,7 @@ class PocztaPolskaPLSpider(Spider):
     name = "poczta_polska_pl"
     item_attributes = {"brand": "Poczta Polska", "brand_wikidata": "Q168833"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.poczta-polska.pl/wp-content/plugins/pp-poiloader/find-markers.php",
             formdata={

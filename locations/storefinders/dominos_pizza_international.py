@@ -30,7 +30,7 @@ class DominosPizzaInternationalSpider(JSONBlobSpider):
     def start_requests(self):
         headers = {"DPZ-Language": self.dpz_language, "DPZ-Market": self.dpz_market} | self.additional_headers
         if self.city_search:
-            url = f"https://order.golo01.dominos.com/store-locator-international/locations/city?regionCode={self.region_code}"
+            url = f"https://{self.domain}/store-locator-international/locations/city?regionCode={self.region_code}"
             yield JsonRequest(url=url, headers=headers, callback=self.parse_cities)
         coordinates = [coords for country, coords in country_coordinates(True).items() if country == self.region_code]
         for lat, lon in coordinates:
@@ -42,7 +42,7 @@ class DominosPizzaInternationalSpider(JSONBlobSpider):
     def parse_cities(self, response):
         for city in response.json():
             headers = {"DPZ-Language": self.dpz_language, "DPZ-Market": self.dpz_market}
-            url = f"https://order.golo01.dominos.com/store-locator-international/locate/store?regionCode={self.region_code}&City={city['name']}"
+            url = f"https://{self.domain}/store-locator-international/locate/store?regionCode={self.region_code}&City={city['name']}"
             yield JsonRequest(url=url, headers=headers, callback=self.parse)
 
     def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:

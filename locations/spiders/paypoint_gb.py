@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -14,7 +14,7 @@ class PaypointGBSpider(Spider):
     item_attributes = {"brand": "PayPoint", "brand_wikidata": "Q7156561"}
     custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_TIMEOUT": 120}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("GB", 15000):
             yield JsonRequest(
                 url="https://www.paypoint.com/umbraco/surface/StoreLocatorSurface/StoreLocator",
