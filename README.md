@@ -5,6 +5,7 @@ A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Po
 ```mermaid
 ---
 sources:
+      overture: https://docs.overturemaps.org/blog/2025/11/19/release-notes/#places
       foursquare: https://docs.foursquare.com/data-products/docs/fsq-os-places-release-notes#november-2025
 ---
 flowchart
