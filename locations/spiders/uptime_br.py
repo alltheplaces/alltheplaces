@@ -45,7 +45,6 @@ class UptimeBRSpider(Spider):
         item["branch"] = item.pop("name").replace("UNIDADE ", "")
         item["street_address"] = item.pop("addr_full")
         item["phone"] = "; ".join(filter(None, [branch.get("phone1"), branch.get("phone2")]))
-        item["website"] = "https://uptime.com.br/unidades-uptime"
         extract_google_position(item, Selector(text=branch["map"]))
         apply_category({"amenity": "language_school"}, item)
         yield item
