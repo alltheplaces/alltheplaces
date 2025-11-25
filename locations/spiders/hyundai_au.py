@@ -13,7 +13,6 @@ class HyundaiAUSpider(JSONBlobSpider):
     item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["www.hyundai.com"]
     start_urls = ["https://www.hyundai.com/content/api/au/hyundai/v3/findadealer?postcode=0"]
-    locations_key = ["allDealers", "dealers", "partsDealers", "serviceDealers"]
 
     def parse(self, response: Response) -> Iterable[Feature]:
         yield from self.parse_feature_array(response, response.json()["allDealers"]["dealers"]) or []
