@@ -30,9 +30,9 @@ class CheddarsScratchKitchenSpider(Spider):
             item["website"] = "/".join(
                 [
                     "https://www.cheddars.com/locations",
-                    location["stateCode"],
-                    location["city"].replace(" ", "-"),
-                    location["restaurantName"].replace(" - ", "-").replace(" ", "-"),
+                    location["stateCode"].lower(),
+                    location["city"].lower().replace(" ", "-"),
+                    location["restaurantName"].lower().replace(" - ", "-").replace(" ", "-"),
                     str(item["ref"]),
                 ]
             )
