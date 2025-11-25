@@ -57,6 +57,9 @@ class VolkswagenSpider(JSONBlobSpider):
 
     for country in GeonamesCache().get_countries().keys():
         if lang := get_locale(country):
+            # get_locale returns ar-TN, but API works with fr-TN
+            if country == "TN":
+                lang = "fr-TN"
             countries[country] = lang
 
     countries.pop("BE")  # volkswagen_be spider
