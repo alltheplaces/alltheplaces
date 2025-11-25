@@ -1,4 +1,4 @@
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories
@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
 
-class PizzaHutCLSpider(scrapy.Spider):
+class PizzaHutCLSpider(Spider):
     name = "pizza_hut_cl"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615", "extras": Categories.RESTAURANT.value}
 

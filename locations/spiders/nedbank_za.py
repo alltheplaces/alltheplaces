@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -23,7 +25,7 @@ class NedbankZASpider(JSONBlobSpider):
     start_urls = ["https://personal.nedbank.co.za/contact/find-us.html"]
     locations_key = "data"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_json)
 

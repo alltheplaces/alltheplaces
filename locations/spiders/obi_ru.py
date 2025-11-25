@@ -1,8 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import chompjs
-import scrapy
-from scrapy import Request
+from chompjs import parse_js_object
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -11,13 +10,13 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.obi_eu import OBI_SHARED_ATTRIBUTES
 
 
-class ObiRUSpider(scrapy.Spider):
+class ObiRUSpider(Spider):
     name = "obi_ru"
     item_attributes = OBI_SHARED_ATTRIBUTES
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://obi.ru/graphql",
             data={
@@ -52,7 +51,7 @@ class ObiRUSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # HTML response contains JSON data
-        for store in chompjs.parse_js_object(response.text)["data"]["offlineStores"]:
+        for store in parse_js_object(response.text)["data"]["offlineStores"]:
             if any(keyword in store["name"] for keyword in ["Тест", "Default"]):
                 continue  # Exclude test POIs
             if "не работает" in store["schedule"]:  # not operating

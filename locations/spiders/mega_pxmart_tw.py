@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -8,11 +8,11 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class MegaPxmartTWSpider(scrapy.Spider):
+class MegaPxmartTWSpider(Spider):
     name = "mega_pxmart_tw"
     item_attributes = {"brand": "大全聯", "brand_wikidata": "Q135550746"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.pxmart.com.tw/mega/api/stores", method="POST")
 
     def parse(self, response: Response) -> Iterable[Feature]:
