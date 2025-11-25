@@ -5,7 +5,7 @@ from locations.categories import apply_category
 from locations.dict_parser import DictParser
 
 
-class WiseupBRSpider(scrapy.Spider):
+class WiseUpBRSpider(scrapy.Spider):
     name = "wise_up_br"
     item_attributes = {"brand": "Wise Up", "brand_wikidata": "Q123166153"}
 
