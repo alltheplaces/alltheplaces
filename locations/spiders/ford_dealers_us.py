@@ -40,19 +40,20 @@ class FordDealersUSSpider(scrapy.Spider):
             )
 
     def parse_details(self, response):
-        for dealer in response.json()["Response"]["Dealer"]:
-            item = DictParser.parse(dealer)
-            item["ref"] = dealer.get("PACode")
-            item["street_address"] = dealer.get("Address").get("Street1")
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, True if dealer.get("serviceAppointmentURL") else False)
-            oh = OpeningHours()
-            if dealer.get("SalesHours"):
-                for day_time in dealer["SalesHours"]["Day"]:
-                    day = day_time["name"]
-                    if day_time.get("closed"):
-                        oh.set_closed(day)
-                    else:
-                        oh.add_range(day=day, open_time=day_time.get("open"), close_time=day_time.get("close"))
-            item["opening_hours"] = oh
-            yield item
+        if data := response.json().get("Response").get("Dealer"):
+            for dealer in data:
+                item = DictParser.parse(dealer)
+                item["ref"] = dealer.get("PACode")
+                item["street_address"] = dealer.get("Address").get("Street1")
+                apply_category(Categories.SHOP_CAR, item)
+                apply_yes_no(Extras.CAR_REPAIR, item, True if dealer.get("serviceAppointmentURL") else False)
+                oh = OpeningHours()
+                if dealer.get("SalesHours"):
+                    for day_time in dealer["SalesHours"]["Day"]:
+                        day = day_time["name"]
+                        if day_time.get("closed"):
+                            oh.set_closed(day)
+                        else:
+                            oh.add_range(day=day, open_time=day_time.get("open"), close_time=day_time.get("close"))
+                item["opening_hours"] = oh
+                yield item
