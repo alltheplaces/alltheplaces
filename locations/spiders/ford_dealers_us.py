@@ -45,6 +45,8 @@ class FordDealersUSSpider(scrapy.Spider):
                 item = DictParser.parse(dealer)
                 item["ref"] = dealer.get("PACode")
                 item["street_address"] = dealer.get("Address").get("Street1")
+                if item["website"] == "http://DealerOn-null":
+                    item.pop("website")
                 apply_category(Categories.SHOP_CAR, item)
                 apply_yes_no(Extras.CAR_REPAIR, item, True if dealer.get("serviceAppointmentURL") else False)
                 oh = OpeningHours()
