@@ -1,3 +1,4 @@
+from typing import Iterable
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from scrapy import Selector
@@ -6,11 +7,11 @@ from scrapy.http import Response
 from locations.items import Feature
 
 
-def _get_possible_links(response: Response | Selector):
+def _get_possible_links(response: Response | Selector) -> Iterable[str]:
     yield from response.xpath(".//a[contains(@href, 'mapy.cz')]/@href").getall()
 
 
-def extract_mapy_cz_position(item: Feature, response: Response | Selector):
+def extract_mapy_cz_position(item: Feature, response: Response | Selector) -> None:
     for link in _get_possible_links(response):
         try:
             coords = url_to_coords(link)
@@ -21,8 +22,8 @@ def extract_mapy_cz_position(item: Feature, response: Response | Selector):
             return
 
 
-def url_to_coords(url: str) -> (float, float):
-    def get_query_param(link, query_param):
+def url_to_coords(url: str) -> tuple[float | None, float | None]:
+    def get_query_param(link: str, query_param: str) -> list[str]:
         parsed_link = urlsplit(link)
         queries = parse_qs(parsed_link.query)
         return queries.get(query_param, [])

@@ -53,7 +53,7 @@ class PlaywrightMiddleware:
             # the page is replaced with a link with the "download" attribute
             # set, which is then clicked to force Firefox to download (not
             # render) the XML document.
-            spider._last_scrapy_request_url = request.url
+            setattr(spider, "_last_scrapy_request_url", request.url)
             if issubclass(type(spider), CamoufoxSpider):
                 request.meta["camoufox_page_event_handlers"][
                     "response"
@@ -109,8 +109,8 @@ class PlaywrightMiddleware:
         if last_scrapy_request_url := getattr(spider, "_last_scrapy_request_url", None):
             if last_scrapy_request_url == response.url:
                 if xml_document := getattr(spider, "_last_observed_xml_document", None):
-                    spider._last_scrapy_request_url = None
-                    spider._last_observed_xml_document = None
+                    setattr(spider, "_last_scrapy_request_url", None)
+                    setattr(spider, "_last_observed_xml_document", None)
                     return response.replace(body=xml_document.encode("utf-8"))
 
         # At this point the response should be a HTML document or binary

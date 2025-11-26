@@ -3,7 +3,7 @@ import re
 from base64 import b64decode
 from itertools import pairwise
 from json import loads
-from typing import Iterable, NamedTuple, get_type_hints
+from typing import AsyncIterator, Iterable, NamedTuple, get_type_hints
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -115,11 +115,12 @@ class RosettaAPRSpider(Spider):
     key: str | None = None
     iv: str | None = None
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         if (not self.key or not self.iv) and True in [x[2] for x in self.data_files]:
             yield Request(url=self.start_urls[0], callback=self.parse_decryption_params)
         else:
-            yield from self.request_data_files()
+            async for request in self.request_data_files():
+                yield request
 
     def parse_decryption_params(self, response: Response) -> Iterable[Request]:
         js_blob_candidates = response.xpath('//script[contains(text(), "var _0x")]/text()').getall()
@@ -153,11 +154,12 @@ class RosettaAPRSpider(Spider):
             return
         yield from self.request_data_files()
 
-    def request_data_files(self) -> Iterable[Request]:
+    async def request_data_files(self) -> AsyncIterator[Request]:
         for data_file in self.data_files:
-            yield from self.request_data_file(data_file=data_file)
+            async for request in self.request_data_file(data_file=data_file):
+                yield request
 
-    def request_data_file(self, data_file: RosettaAPRDataFile, meta: dict = {}) -> Iterable[Request]:
+    async def request_data_file(self, data_file: RosettaAPRDataFile, meta: dict = {}) -> AsyncIterator[Request]:
         new_meta = meta.copy()
         new_meta.update({"data_file": data_file})
         if data_file.url.startswith("https://") or data_file.url.startswith("http://"):
@@ -244,17 +246,17 @@ class RosettaAPRSpider(Spider):
         if encrypted:
             ciphertext = b64decode(raw_data_file.decode("utf-8"))
             unpadded_plaintext = decrypt_aes256cbc_pkcs7(ciphertext=ciphertext, key=self.key, iv=self.iv)
-            if archive_format == "zip":
+            if archive_format == "zip" and archive_filename is not None:
                 data_file_bytes = unzip_file_from_archive(
                     compressed_data=unpadded_plaintext, file_path=archive_filename
                 )
             else:
                 data_file_bytes = unpadded_plaintext
-        elif archive_format == "zip":
+        elif archive_format == "zip" and archive_filename is not None:
             data_file_bytes = unzip_file_from_archive(compressed_data=raw_data_file, file_path=archive_filename)
         elif archive_format:
             raise Exception("Unknown archive format for data file: {}.".format(archive_format))
-            return
+            return []
         else:
             data_file_bytes = raw_data_file
 

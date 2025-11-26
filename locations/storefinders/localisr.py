@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Selector, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -39,7 +41,7 @@ class LocalisrSpider(Spider):
     search_coordinates: list[tuple[float, float]] = []
     search_radius: int = 400
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "key": self.api_key,
             "version": self.api_version,
@@ -51,7 +53,7 @@ class LocalisrSpider(Spider):
             callback=self.parse_session_token,
         )
 
-    def parse_session_token(self, response: Response):
+    def parse_session_token(self, response: TextResponse) -> Iterable[JsonRequest]:
         request_token = response.json()["data"]["request_token"]
         user_token = (
             Selector(text=response.json()["data"]["builder"]).xpath('//input[@id="slmUniqueUserToken"]/@value').get()
@@ -64,7 +66,7 @@ class LocalisrSpider(Spider):
             }
             yield JsonRequest(url=url, headers=headers, method="GET", callback=self.parse)
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["data"]:
             item = DictParser.parse(location)
             item["ref"] = location["store_identifier"]
@@ -89,5 +91,5 @@ class LocalisrSpider(Spider):
                 item["opening_hours"].add_range(day_name, day_hours[0].upper(), day_hours[1].upper(), "%I:%M %p")
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

@@ -1,8 +1,8 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 from urllib.parse import urlparse
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, DELIMITERS_EN, NAMED_DAY_RANGES_EN, NAMED_TIMES_EN, OpeningHours
@@ -28,14 +28,14 @@ class PapaJohnsStorefinderSpider(Spider):
     named_times = NAMED_TIMES_EN
     named_day_ranges = NAMED_DAY_RANGES_EN
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         url = urlparse(self.start_urls[0])
         yield JsonRequest(
             url=url._replace(path="/api/outlet/list/", query="all=true").geturl(),
             headers={"Referer": self.start_urls[0]},
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
         for location in response.json().get("list", []):
             if location["public"] is False:
                 continue
@@ -86,6 +86,6 @@ class PapaJohnsStorefinderSpider(Spider):
 
             yield from self.post_process_item(item, response, location) or []
 
-    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         """Override with any post processing on the item"""
         yield item

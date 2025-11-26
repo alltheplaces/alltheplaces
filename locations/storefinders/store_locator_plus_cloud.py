@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -18,15 +20,15 @@ from locations.items import Feature
 
 class StoreLocatorPlusCloudSpider(Spider):
     dataset_attributes = {"source": "api", "api": "storelocatorplus.com"}
-    slp_dataset: str = None
-    slp_key: str = None
+    slp_dataset: str
+    slp_key: str
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://dashboard.storelocatorplus.com/{self.slp_dataset}/wp-json/myslp/v2/locations-map/search?action=csl_ajax_onload&api_key={self.slp_key}"
         )
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         if not response.json()["data"]["success"]:
             return
 
@@ -37,5 +39,5 @@ class StoreLocatorPlusCloudSpider(Spider):
 
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

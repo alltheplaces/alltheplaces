@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -18,15 +18,16 @@ from locations.items import Feature
 
 class SylinderSpider(Spider):
     dataset_attributes = {"source": "api", "api": "api.ngadata.no"}
-    app_key: str = None
-    base_url: str = None
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    app_key: str
+    base_url: str | None = None
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if self.base_url is None:
             self.logger.warning("Specify self.base_url to allow extraction of website values for each feature.")
         yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info?chainId={self.app_key}")
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():
             yield from self.parse_location(location) or []
 

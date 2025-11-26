@@ -1,13 +1,13 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from chompjs import parse_js_object
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AmaiPromapSpider(JSONBlobSpider):
@@ -17,11 +17,11 @@ class AmaiPromapSpider(JSONBlobSpider):
 
     locators = ["amaicdn", "roseperl"]  # Amai ProMap is same as Roseperl ProMap
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_js)
 
-    def fetch_js(self, response: Response):
+    def fetch_js(self, response: TextResponse) -> Iterable[JsonRequest]:
         urls = parse_js_object(
             response.xpath('.//script[contains(text(), "var urls =")]/text()').get().split("var urls =")[1]
         )
@@ -31,11 +31,11 @@ class AmaiPromapSpider(JSONBlobSpider):
         for url in js_url:
             yield JsonRequest(url=url, callback=self.parse)
 
-    def extract_json(self, response: Response):
+    def extract_json(self, response: TextResponse) -> dict:
         chunks = response.text.split("SCASLWtb=")
         return parse_js_object(chunks[1])["locations"]
 
-    def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
+    def parse_feature_array(self, response: TextResponse, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
@@ -54,5 +54,5 @@ class AmaiPromapSpider(JSONBlobSpider):
 
             item["image"] = feature.get("store_image")
             item.pop("addr_full")
-            item["street_address"] = clean_address([feature.get("address"), feature.get("address2")])
+            item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address2")])
             yield from self.post_process_item(item, response, feature) or []
