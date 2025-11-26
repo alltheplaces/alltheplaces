@@ -10,7 +10,6 @@ from locations.dict_parser import DictParser
 class PizzaHutMXSpider(Spider):
     name = "pizza_hut_mx"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
