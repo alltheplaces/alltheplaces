@@ -9,6 +9,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class FordDealersUSSpider(scrapy.Spider):
@@ -18,7 +19,8 @@ class FordDealersUSSpider(scrapy.Spider):
         "brand_wikidata": "Q44294",
     }
     start_urls = ["https://www.ford.com/dealerships/"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs):
         client_id = re.search(r"clientId\":\"([0-9-a-z-]+)\"", response.text).group(1)
@@ -40,9 +42,10 @@ class FordDealersUSSpider(scrapy.Spider):
     def parse_details(self, response):
         for dealer in response.json()["Response"]["Dealer"]:
             item = DictParser.parse(dealer)
-            item["ref"] = dealer["PACode"]
-            item["street_address"] = dealer["Address"]["Street1"]
+            item["ref"] = dealer.get("PACode")
+            item["street_address"] = dealer.get("Address").get("Street1")
             apply_category(Categories.SHOP_CAR, item)
+            apply_yes_no(Extras.CAR_REPAIR,item,True if dealer.get("serviceAppointmentURL") else False )
             oh = OpeningHours()
             if dealer.get("SalesHours"):
                 for day_time in dealer["SalesHours"]["Day"]:
