@@ -5,11 +5,11 @@ import scrapy
 from requests import Response
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class FordDealersUSSpider(scrapy.Spider):
@@ -45,7 +45,7 @@ class FordDealersUSSpider(scrapy.Spider):
             item["ref"] = dealer.get("PACode")
             item["street_address"] = dealer.get("Address").get("Street1")
             apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR,item,True if dealer.get("serviceAppointmentURL") else False )
+            apply_yes_no(Extras.CAR_REPAIR, item, True if dealer.get("serviceAppointmentURL") else False)
             oh = OpeningHours()
             if dealer.get("SalesHours"):
                 for day_time in dealer["SalesHours"]["Day"]:
