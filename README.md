@@ -15,7 +15,7 @@ sources:
 ---
 flowchart
    Spiders(["Thousands of first party datasets"])
-   ATP(["All The Places"])
+   ATP(["All the Places"])
    click ATP "https://alltheplaces.xyz/"
    OSM(["OpenStreetMap"])
    click OSM "https://www.openstreetmap.org/"
