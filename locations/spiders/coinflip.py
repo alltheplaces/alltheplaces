@@ -1,3 +1,5 @@
+import re
+
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -15,6 +17,7 @@ class CoinflipSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 3, "CONCURRENT_REQUESTS": 1}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["lat"], item["lon"] = re.search(r"q=(-?\d+\.\d+),(-?\d+\.\d+)", ld_data["hasMap"]).groups()
         oh = OpeningHours()
         for day_time in ld_data["openingHoursSpecification"]:
             day = DAYS_FULL[int(day_time["dayOfWeek"][0])]
