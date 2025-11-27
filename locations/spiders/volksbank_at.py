@@ -27,9 +27,11 @@ class VolksbankATSpider(scrapy.Spider):
                     item["postcode"] = store.get("plz")
                     item["email"] = store.get("email")
                     branch = store.get("branch").replace("internet_p_", "").strip()
-                    item["website"] = (
-                        f"https://{store.get('url')}/m101/volksbank/{branch}/de/filiale/{store.get('shortPath').strip()}.jsp"
-                    )
+
+                    if url := store.get("url"):
+                        item["website"] = (
+                            f"https://{url}/m101/volksbank/{branch}/de/filiale/{store.get('shortPath').strip()}.jsp"
+                        )
                     apply_category(Categories.BANK, item)
                     apply_yes_no(Extras.ATM, item, "bankomat" in store.get("icons"))
                     item["opening_hours"] = OpeningHours()
