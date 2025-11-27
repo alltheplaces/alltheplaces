@@ -23,6 +23,11 @@ class JumboNLSpider(Spider):
     def make_request(self, page: int, size: int = 30) -> JsonRequest:
         return JsonRequest(
             url="https://www.jumbo.com/api/graphql",
+            headers={
+                "apollographql-client-name": "JUMBO_WEB-store",
+                "apollographql-client-version": "master-v22.12.1-web",
+                "content-type": "application/json",
+            },
             data={
                 "operationName": "GetStoreList",
                 "variables": {
