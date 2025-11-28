@@ -16,7 +16,6 @@ class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 3}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["street_address"] = item.pop("street_address", None)
         item["branch"] = item.pop("name").removeprefix("T-Mobile ").removeprefix("at ")
         item["image"] = (
             ld_data["image"].split("(webp)")[1].strip("/") if "(webp)" in ld_data["image"] else ld_data["image"]
