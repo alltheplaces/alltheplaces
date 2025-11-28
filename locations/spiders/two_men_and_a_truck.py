@@ -33,4 +33,6 @@ class TwoMenAndATruckSpider(scrapy.Spider):
                 "lon": place["coordinates_longitude"],
             }
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            item["street_address"] = item.pop("addr_full", None)
+            yield item

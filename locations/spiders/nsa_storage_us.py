@@ -56,11 +56,12 @@ class NsaStorageUSSpider(SitemapSpider, StructuredDataSpider):
                 days = day_range(*days.split(" - "))
             else:
                 days = [days]
-            times = rule.xpath('.//div[@class="val"]/text()').get()
-            if times == "Closed":
-                oh.set_closed(days)
-            else:
-                start_time, end_time = times.split(" - ", 1)
-                if start_time and end_time:
-                    oh.add_days_range(days, start_time, end_time, "%I:%M %p")
+            if times := rule.xpath('.//div[@class="val"]/text()').get():
+                times = times.strip()
+                if times == "Closed":
+                    oh.set_closed(days)
+                else:
+                    start_time, end_time = times.split("-", 1)
+                    if start_time and end_time:
+                        oh.add_days_range(days, start_time, end_time, "%I:%M %p")
         return oh

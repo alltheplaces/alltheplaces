@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class ProvidenceUSSpider(StructuredDataSpider):
     name = "providence_us"
-    item_attributes = {"brand": "Providence", "brand_wikidata": "Q7252430"}
+    item_attributes = {"operator_wikidata": "Q7252430"}
     allowed_domains = ["www.providence.org"]
     start_urls = ["https://www.providence.org/locations?postal=66102&latlng=39.103,-94.666&radius=100000&page=1"]
     wanted_types = ["MedicalOrganization", "MedicalClinic", "Hospital"]

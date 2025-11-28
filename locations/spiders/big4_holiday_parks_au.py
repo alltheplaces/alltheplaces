@@ -1,5 +1,5 @@
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
 
@@ -10,11 +10,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class Big4HolidayParksAUSpider(JSONBlobSpider):
     name = "big4_holiday_parks_au"
-    item_attributes = {"brand": "BIG4 Holiday Parks", "brand_wikidata": "Q18636678"}
+    item_attributes = {"brand": "Big 4 Holiday Parks", "brand_wikidata": "Q18636678"}
     allowed_domains = ["www.big4.com.au"]
     start_urls = ["https://www.big4.com.au/park-directory"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         headers = {
             "Content-Type": "text/plain;charset=UTF-8",
             "Next-Action": "7651f6930c5534ce73277e1932d402973523f326",

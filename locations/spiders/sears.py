@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -9,12 +12,9 @@ class SearsSpider(scrapy.spiders.SitemapSpider):
     item_attributes = {"brand": "Sears", "brand_wikidata": "Q6499202"}
     allowed_domains = ["www.sears.com"]
     sitemap_urls = ["https://www.sears.com/Sitemap_Local.xml.gz"]
-    sitemap_rules = [
-        (r"\d+\.html$", "parse"),
-    ]
-    download_delay = 0.3
+    sitemap_rules = [(r"\d+\.html$", "parse")]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         # Handle redirects to closed store page, majority are regular store detail pages
         if response.request.meta.get("redirect_urls") and "store-closed" in response.url:
             return

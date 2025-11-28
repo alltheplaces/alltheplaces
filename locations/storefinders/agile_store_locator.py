@@ -54,6 +54,9 @@ class AgileStoreLocatorSpider(Spider):
             return oh
 
         for day_name, hours_ranges in hours_json.items():
+            if not hours_ranges or hours_ranges == "0":
+                oh.set_closed(day_name)
+                continue
             for hours_range in hours_ranges:
                 hours_range = hours_range.upper()
                 if not hours_range or hours_range == "0":

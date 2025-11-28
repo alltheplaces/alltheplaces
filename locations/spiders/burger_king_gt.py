@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
@@ -13,7 +13,7 @@ class BurgerKingGTSpider(Spider):
     name = "burger_king_gt"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # https://api.bk.gt/v1/restaurant/nearby?latitude=14.587041&longitude=-90.5210362 this API currently leads to
         # HTTP Error 500, but might fetch more POIs if works.
         for city in city_locations("GT", 1000):
@@ -25,6 +25,8 @@ class BurgerKingGTSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         if result := response.json().get("data"):
             location = result.get("restaurant")
+            if not location:
+                return
             item = DictParser.parse(location)
             item["geometry"] = location.get("point")
             item["branch"] = item.pop("name").removeprefix("BK ").removeprefix("Burger King ")

@@ -7,7 +7,7 @@ from locations.hours import DAYS, OpeningHours
 
 class ThomasPhilippsSpider(Spider):
     name = "thomas_philipps"
-    item_attributes = {"brand": "Thomas Philipps", "brand_wikidata": "Q1424735"}
+    item_attributes = {"brand": "Thomas Philipps Sonderposten", "brand_wikidata": "Q1424735"}
 
     def start_requests(self):
         yield JsonRequest(

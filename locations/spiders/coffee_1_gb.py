@@ -64,7 +64,9 @@ class Coffee1GBSpider(scrapy.Spider):
                 item["opening_hours"].add_range(day, open_time, close_time, time_format=time_format)
                 continue
             start, _, end = day.partition("-")
-            days = day_range(start, end)
-            item["opening_hours"].add_days_range(days, open_time, close_time, time_format=time_format)
-
+            if end:
+                days = day_range(start, end)
+                item["opening_hours"].add_days_range(days, open_time, close_time, time_format=time_format)
+            else:
+                item["opening_hours"].add_range(day.replace("-", ""), open_time, close_time, time_format=time_format)
         yield item

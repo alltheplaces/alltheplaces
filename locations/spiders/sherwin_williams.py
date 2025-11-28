@@ -13,7 +13,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
     name = "sherwin_williams"
     item_attributes = {"brand": "Sherwin-Williams", "brand_wikidata": "Q48881"}
     allowed_domains = ["www.sherwin-williams.com"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     #  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius - (from regis spider)
     lats = [
@@ -91,7 +91,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
-                    meta={"store_type": "Sherwin-Williams Paint Store"},
+                    meta={"store_type": "Sherwin-Williams"},
                 )
 
         with open_searchable_points("ca_centroids_50mile_radius.csv") as points:
@@ -102,7 +102,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
-                    meta={"store_type": "Sherwin-Williams Paint Store"},
+                    meta={"store_type": "Sherwin-Williams"},
                 )
 
         for lat, lon in addtional_lat_lons:
@@ -110,7 +110,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
             yield scrapy.Request(
                 url=base_url + urlencode(params),
                 callback=self.parse,
-                meta={"store_type": "Sherwin-Williams Paint Store"},
+                meta={"store_type": "Sherwin-Williams"},
             )
 
         # the other store types are much more sparse so we can search with a larger
@@ -147,7 +147,8 @@ class SherwinWilliamsSpider(scrapy.Spider):
             for store in data["stores"]:
                 properties = {
                     "ref": store["storeNumber"],
-                    "name": store["name"],
+                    "name": store_type,
+                    "branch": store["name"],
                     "addr_full": html.unescape(store["address"].strip()),
                     "city": store["city"].strip(),
                     "state": store["state"].strip(),
@@ -156,10 +157,6 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     "lat": float(store["latitude"]),
                     "lon": float(store["longitude"]),
                     "website": "https://www.sherwin-williams.com" + store["url"],
-                    "brand": store_type,
-                    "extras": {
-                        "number": store["storeNumber"],
-                    },
                 }
 
                 yield Feature(**properties)

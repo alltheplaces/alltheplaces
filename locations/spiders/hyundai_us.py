@@ -1,4 +1,5 @@
-from typing import Iterable
+import re
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -16,7 +17,7 @@ class HyundaiUSSpider(JSONBlobSpider):
     item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["www.hyundaiusa.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for index, record in enumerate(postal_regions("US")):
             if index % 100 == 0:
                 yield JsonRequest(
@@ -31,10 +32,17 @@ class HyundaiUSSpider(JSONBlobSpider):
         item["name"] = feature.get("dealerNm")
         item["street_address"] = clean_address([feature.get("address1"), feature.get("address2")])
         item["postcode"] = feature.get("zipCd")
-        item["email"] = feature.get("dealerEmail")
-        item["website"] = feature.get("dealerUrl")
-        if item["website"] and item["website"].startswith("www."):
-            item["website"] = "https://" + item["website"]
+
+        if email := feature.get("dealerEmail"):
+            email = re.sub(r"[;,].*", "", email)
+            if "@" in email and "." in email:
+                item["email"] = email
+
+        if website := feature.get("dealerUrl"):
+            if website.upper().startswith("WWW."):
+                item["website"] = "https://" + website
+            elif "Inc" not in website and "None" not in website:
+                item["website"] = "https://" + website
 
         if "showroom" in feature.keys():
             sales = item.deepcopy()

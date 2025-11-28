@@ -1,14 +1,16 @@
 import functools
+from typing import AsyncIterator
 
 import pycountry
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
 
-class FordSpider(scrapy.Spider):
+class FordSpider(Spider):
     name = "ford"
     available_countries = [
         "PER",
@@ -146,10 +148,10 @@ class FordSpider(scrapy.Spider):
     }
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"x-apikey": "45ab9277-3014-4c9e-b059-6c0542ad9484"}}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country in self.available_countries:
             url = f"https://spatial.virtualearth.net/REST/v1/data/1652026ff3b247cd9d1f4cc12b9a080b/FordEuropeDealers_Transition/Dealer?$filter=CountryCode%20Eq%20%27{country}%27&$top=100000&$format=json&key=Al1EdZ_aW5T6XNlr-BJxCw1l4KaA0tmXFI_eTl1RITyYptWUS0qit_MprtcG7w2F&$skip=0"
-            yield scrapy.Request(url=url, callback=self.parse_stores)
+            yield Request(url=url, callback=self.parse_stores)
 
     def parse_stores(self, response):
         results = response.json().get("d").get("results")
@@ -174,7 +176,8 @@ class FordSpider(scrapy.Spider):
             item["name"] = data.get("DealerName")
             item["country"] = self.get_country_code(data.get("CountryCode"))
             item["opening_hours"] = oh
-            item["website"] = data["PrimaryURL"]
+            item = self.repair_website(data["PrimaryURL"], item)
+
             item["brand"] = self.brand_mapping.get(data.get("Brand")).get("brand")
             item["brand_wikidata"] = self.brand_mapping.get(data.get("Brand")).get("brand_wikidata")
 
@@ -190,10 +193,24 @@ class FordSpider(scrapy.Spider):
 
         if len(results) == 250:
             base_url, skip_value = response.url.split("skip=")
-            yield scrapy.Request(url=f"{base_url}skip={int(skip_value) + 250}", callback=self.parse_stores)
+            yield Request(url=f"{base_url}skip={int(skip_value) + 250}", callback=self.parse_stores)
 
     def is_ascii(self, str):
         return all(ord(c) < 128 for c in str)
+
+    def repair_website(self, website, item):
+        if "http://" in website:
+            website = website.replace("http://", "https://")
+            item["website"] = website
+        elif website.startswith("www."):
+            website = website.replace("www.", "https://www.")
+            item["website"] = website
+        elif website.startswith("ford-"):
+            website = website.replace("ford-", "https://ford-")
+            item["website"] = website
+        elif "@" in website:
+            item["email"] = website
+        return item
 
     @functools.lru_cache()
     def get_country_code(self, alpha_3):

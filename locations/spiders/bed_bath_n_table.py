@@ -1,8 +1,8 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import unquote_plus
 
-from scrapy import Request, Selector
-from scrapy.http import Response
+from scrapy import Selector
+from scrapy.http import Request, Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -20,7 +20,7 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
     ]
     data_from_locator_page = {}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for allowed_domain in self.allowed_domains:
             self.data_from_locator_page[allowed_domain] = {}
             yield Request(

@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 
 class AccessStorageGBSpider(Spider):
     name = "access_storage_gb"
-    item_attributes = {"brand": "Access", "brand_wikidata": "Q122022507"}
+    item_attributes = {"brand": "Access Self Storage", "brand_wikidata": "Q122022507"}
     start_urls = ["https://www.accessstorage.com/accessapi/stores/getallstores"]
 
     def parse(self, response, **kwargs):

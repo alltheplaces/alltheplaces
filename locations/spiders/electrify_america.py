@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 class ElectrifyAmericaSpider(scrapy.Spider):
     name = "electrify_america"
-    item_attributes = {"brand": "Electrify America", "brand_wikidata": "Q59773555"}
+    item_attributes = {"operator": "Electrify America", "operator_wikidata": "Q59773555"}
     start_urls = ["https://api-prod.electrifyamerica.com/v2/locations"]
 
     def parse(self, response):

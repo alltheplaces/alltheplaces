@@ -1,18 +1,20 @@
 import json
-from datetime import datetime
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, day_range
 
 
-class EdibleArrangementsSpider(scrapy.Spider):
+class EdibleArrangementsSpider(Spider):
     name = "edible_arrangements"
     item_attributes = {"brand": "Edible Arrangements", "brand_wikidata": "Q5337996"}
     allowed_domains = ["www.ediblearrangements.com"]
 
-    def start_requests(self):
-        yield scrapy.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             "https://www.ediblearrangements.com/stores/store-locator.aspx/GetStoresByCurrentLocation",
             method="POST",
             headers={
@@ -29,40 +31,22 @@ class EdibleArrangementsSpider(scrapy.Spider):
 
     def parse(self, response):
         d = json.loads(response.json()["d"])
-        for s in d["_Data"]:
-            properties = {
-                "lat": s["Latitude"],
-                "lon": s["Longitude"],
-                "phone": s["PhoneNumber"],
-                "ref": s["ID"],
-                "addr_full": s["MapAddress"],
-                "name": s["FormalName"],
-                "website": response.urljoin("/stores/" + s["PageFriendlyURL"]),
-            }
-
-            oh = []
-            for h in s["TimingsShort"]:
-                if h["Timing"] == "Closed":
-                    continue
-
-                days = (
-                    h["Days"]
-                    .replace("Monday", "Mo")
-                    .replace("Tuesday", "Tu")
-                    .replace("Wednesday", "We")
-                    .replace("Thursday", "Th")
-                    .replace("Friday", "Fr")
-                    .replace("Saturday", "Sa")
-                    .replace("Sunday", "Su")
-                )
-
-                from_time, to_time = h["Timing"].split("-")
-                from_t = datetime.strptime(from_time, "%I:%M %p").strftime("%H:%M")
-                to_t = datetime.strptime(to_time, "%I:%M %p").strftime("%H:%M")
-
-                oh.append(f"{days} {from_t}-{to_t}")
-
-            if oh:
-                properties["opening_hours"] = "; ".join(oh)
-
-            yield Feature(**properties)
+        for shop in d["_Data"]:
+            item = DictParser.parse(shop)
+            oh = OpeningHours()
+            for day_time in shop["TimingsShort"]:
+                day = day_time["Days"]
+                time = day_time["Timing"]
+                if time == "Closed":
+                    oh.set_closed(day)
+                else:
+                    start_day, end_day = day.split("-") if "-" in day else (day, day)
+                    open_time, close_time = time.split("-")
+                    oh.add_days_range(
+                        day_range(start_day, end_day),
+                        open_time=open_time.strip(),
+                        close_time=close_time.strip(),
+                        time_format="%I:%M %p",
+                    )
+                item["opening_hours"] = oh
+            yield item

@@ -1,7 +1,8 @@
-from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+from typing import Any
 
-from locations.categories import Categories, apply_category
+from scrapy import Selector, Spider
+from scrapy.http import Response
+
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -12,11 +13,7 @@ class GreencrossAUSpider(Spider):
     allowed_domains = ["www.petbarn.com.au"]
     start_urls = ["https://www.petbarn.com.au/store-finder/index/dataAjax/?types=pb%2Cgx%2Ccf"]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             properties = {
                 "ref": location["i"],
@@ -29,36 +26,21 @@ class GreencrossAUSpider(Spider):
                 "postcode": location["a"][-1],
                 "email": location["e"],
                 "phone": location["p"],
-                "website": "https://www.petbarn.com.au" + location["u"],
-                "nsi_id": "-1",  # Skip NSI matching
+                "website": response.urljoin(location["u"]),
             }
             if "Greencross Vets" in properties["name"]:
                 properties["brand"] = "Greencross Vets"
                 properties["brand_wikidata"] = "Q41179992"
+                properties["branch"] = properties.pop("name").removeprefix("Greencross Vets ")
             elif "City Farmers" in properties["name"]:
                 properties["brand"] = "City Farmers"
                 properties["brand_wikidata"] = "Q117357785"
+                properties["branch"] = properties.pop("name").removeprefix("City Farmers ")
             else:
                 properties["brand"] = "Petbarn"
                 properties["brand_wikidata"] = "Q104746468"
-            if "Greencross Vets" in location["n"] or "Vet" in location["s"].split(", "):
-                apply_category(Categories.VETERINARY, properties)
-            if "Pet Hotel" in location["s"].split(", "):
-                if "extras" not in properties:
-                    properties["extras"] = {}
-                if "amenity" in properties["extras"]:
-                    properties["extras"]["amenity"] = properties["extras"]["amenity"] + ";animal_boarding"
-                else:
-                    properties["extras"]["amenity"] = "animal_boarding"
-            if "Greencross Vets" not in location["n"]:
-                apply_category(Categories.SHOP_PET, properties)
-            if "Grooming" in location["s"].split(", "):
-                if "extras" not in properties:
-                    properties["extras"] = {}
-                if "shop" in properties["extras"]:
-                    properties["extras"]["shop"] = properties["extras"]["shop"] + ";pet_grooming"
-                else:
-                    properties["extras"]["shop"] = "pet_grooming"
+                properties["branch"] = properties.pop("name")
+
             properties["opening_hours"] = OpeningHours()
             hours_raw = [s for s in Selector(text=location["oh"]).xpath("//text()").getall() if s.strip()]
             day_names = hours_raw[: len(hours_raw) // 2]

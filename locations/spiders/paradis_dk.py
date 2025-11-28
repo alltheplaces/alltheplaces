@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -25,6 +25,6 @@ class ParadisDKSpider(SitemapSpider):
         item["email"] = (
             response.xpath('//a[contains(@href, "mailto")]/@href').get().replace("mailto:", "") or "info@paradis-is.dk"
         )
-        apply_category({"shop": "ice_cream"}, item)
+        apply_category(Categories.ICE_CREAM, item)
 
         yield item

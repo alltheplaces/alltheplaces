@@ -1,20 +1,19 @@
 import base64
 import json
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy import Request
-from scrapy.spiders import Response
+from scrapy.http import FormRequest, Request, Response
+from scrapy.spiders import Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, DAYS_IT, OpeningHours
 from locations.items import Feature
 
 
-class EathappySpider(scrapy.Spider):
+class EathappySpider(Spider):
     name = "eathappy"
-    item_attributes = {"brand": "Eat Happy", "brand_wikidata": "Q125578025", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {"brand": "Eat Happy", "brand_wikidata": "Q125578025"}
     countries = {
         "AT": {
             "url": "https://www.eathappy.at/standorte/",
@@ -31,7 +30,7 @@ class EathappySpider(scrapy.Spider):
     }
     ajax_post_id = 1086
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         # Need to get the data from two URLs: The HTML page contains a JavaScript block with the IDs and coordinates
         for country, country_definition in self.countries.items():
             yield Request(url=country_definition["url"], callback=self.parse, cb_kwargs={"country": country})
@@ -49,7 +48,7 @@ class EathappySpider(scrapy.Spider):
         shop_coordinates = {shop["id"]: shop for shop in locations_array}
         # This is the second URL and contains the name, address and opening hours. The data is merged with the first URL
         # via the ID
-        yield scrapy.FormRequest(
+        yield FormRequest(
             url=response.urljoin("/wp-admin/admin-ajax.php"),
             formdata={"action": "ajax_load_map_locations", "post_id": str(self.ajax_post_id)},
             meta={"shops": shop_coordinates},
@@ -64,7 +63,7 @@ class EathappySpider(scrapy.Spider):
             shop_id = int(location.attrib["data-location-id"])
             item["ref"] = shop_id
             div = location.xpath('div[@class="desc"]')
-            item["name"] = div.xpath("h6/text()").get()
+            item["located_in"] = div.xpath("h6/text()").get()
             item["addr_full"] = div.xpath("h6/following-sibling::p/text()").get()
             item["country"] = country
             opening_hours = OpeningHours()
@@ -76,9 +75,9 @@ class EathappySpider(scrapy.Spider):
                     opening_time, closing_time = period.split("-")
                     opening_hours.add_range(day, opening_time, closing_time, "%H:%M")
             item["opening_hours"] = opening_hours
-            item["extras"] = {}
-            for tag in div.xpath('p[@class="tag"]/text()').getall():
-                item["extras"][tag] = True
             item["lon"] = shop_coordinates[shop_id]["lng"]
             item["lat"] = shop_coordinates[shop_id]["lat"]
+
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item

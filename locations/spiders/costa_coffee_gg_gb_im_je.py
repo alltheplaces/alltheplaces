@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -10,12 +12,12 @@ from locations.pipelines.address_clean_up import clean_address
 
 class CostaCoffeeGGGBIMJESpider(Spider):
     name = "costa_coffee_gg_gb_im_je"
-    item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
+    item_attributes = {"brand": "Costa", "brand_wikidata": "Q608845"}
     allowed_domains = ["www.costa.co.uk"]
     start_urls = ["https://www.costa.co.uk/api/mdm/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # No robots.txt. 404 HTML page returned instead.
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query_template = """query Sites {
     sites(
         siteStatuses: ["OPEN"]
@@ -124,7 +126,7 @@ class CostaCoffeeGGGBIMJESpider(Spider):
             if location["siteType"] == "Global Express":
                 item["brand"] = "Costa Express"
                 item["brand_wikidata"] = "Q113556385"
-                apply_category(Categories.VENDING_MACHINE_COFFEE, item)
+                apply_category(Categories.VENDING_MACHINE, item)
             else:
                 apply_category(Categories.COFFEE_SHOP, item)
 

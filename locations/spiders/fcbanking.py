@@ -1,37 +1,39 @@
 import json
 import re
-import urllib.parse
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
-from locations.linked_data_parser import LinkedDataParser
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class FcbankingSpider(SitemapSpider):
+class FcbankingSpider(SitemapSpider, StructuredDataSpider):
     name = "fcbanking"
     item_attributes = {"brand": "First Commonwealth Bank", "brand_wikidata": "Q5452773"}
-    allowed_domains = ["www.fcbanking.com"]
     sitemap_urls = ["https://www.fcbanking.com/robots.txt"]
-    sitemap_follow = ["branch-locations"]
-    sitemap_rules = [(r"branch-locations/.", "parse")]
+    sitemap_rules = [(r"/branch-locations/[-\w]+/[-\w]+/[-\w]+/[-\w]+", "parse_sd")]
+    wanted_types = ["BankOrCreditUnion"]  # Capture only url specific linked data
+    time_format = "%I:%M %p"
 
-    def parse(self, response):
-        map_script = response.xpath('//script/text()[contains(., "setLat")]').get()
-        map_script = map_script.replace("\r", "\n")
-        lat = re.search(r'setLat\("(.*)"\)', map_script)[1]
-        lon = re.search(r'setLon\("(.*)"\)', map_script)[1]
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data["openingHours"] = [
+            re.sub(r"([ap])\.m\.?", r"\1m", row).replace("\u2013", "-") for row in ld_data.get("openingHours", [])
+        ]
 
-        ldjson = response.xpath('//script[@type="application/ld+json"]/text()').get()
-        ldjson = ldjson.replace("\r", "\n")
-        data = json.loads(re.sub(r"^//.*$", "", ldjson, flags=re.M))
-        item = LinkedDataParser.parse_ld(data)
-        item["lat"] = lat
-        item["lon"] = lon
-        item["website"] = response.url
-        path = urllib.parse.urlsplit(response.url).path
-        item["ref"] = path.removeprefix("/branch-locations")
-        hours_fixed = [re.sub(r"([ap])\.m\.?", r"\1m", row).replace("\u2013", "-") for row in data["openingHours"]]
-        item["opening_hours"] = LinkedDataParser.parse_opening_hours({"openingHours": hours_fixed}, "%I:%M %p")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        location = json.loads(response.xpath("//@data-location").get(""))
+        item["lat"] = location.get("latLng", {}).get("latitude")
+        item["lon"] = location.get("latLng", {}).get("longitude")
+        item["name"], item["branch"] = item["name"].removesuffix(" Office").split(" - ", 1)
         apply_category(Categories.BANK, item)
+        apply_yes_no(
+            Extras.ATM,
+            item,
+            any(
+                location.get(atm_key)
+                for atm_key in ["hasDriveUpATM", "hasWalkUpATM", "hasOffPremiseWalkUpATM", "hasOffPremiseDriveUpATM"]
+            ),
+        )
         yield item

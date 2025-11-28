@@ -1,19 +1,20 @@
 import json
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class DeloitteSpider(scrapy.Spider):
+class DeloitteSpider(Spider):
     name = "deloitte"
     item_attributes = {"brand": "Deloitte", "brand_wikidata": "Q491748"}
     allowed_domains = ["deloitte.com"]
-    download_delay = 0.2
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         start_urls = (
             (
                 "https://www2.deloitte.com/us/en/footerlinks/office-locator.html",
@@ -26,7 +27,7 @@ class DeloitteSpider(scrapy.Spider):
         )
 
         for url, callback in start_urls:
-            yield scrapy.Request(url, callback=callback)
+            yield Request(url, callback=callback)
 
     def parse(self, response):
         """First scrape the data from the location list page.  If there is a link to the details page, then
@@ -78,7 +79,7 @@ class DeloitteSpider(scrapy.Spider):
 
             details_url = office.xpath(".//h3/a/@href").extract_first()
             if details_url:
-                yield scrapy.Request(
+                yield Request(
                     response.urljoin(details_url),
                     callback=self.parse_location,
                     meta={"properties": properties},
@@ -95,7 +96,7 @@ class DeloitteSpider(scrapy.Spider):
                 url = en_links[0]
             else:
                 url = links[0]
-            yield scrapy.Request(response.urljoin(url), callback=self.parse)
+            yield Request(response.urljoin(url), callback=self.parse)
 
     def parse_location(self, response):
         properties = response.meta["properties"]

@@ -1,4 +1,7 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any
+
+from scrapy.http import Response
+from scrapy.spiders import Spider
 
 from locations.categories import (
     Categories,
@@ -7,89 +10,91 @@ from locations.categories import (
     apply_healthcare_specialities,
     apply_yes_no,
 )
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
 
 HEALTHCARE_CATEGORIES = {
-    "/anticoagulation-clinics/": [Categories.CLINIC],
-    "/audiology-hearing/": [Categories.AUDIOLOGIST],
-    "/bariatrics-weight-management/": [Categories.CLINIC, HealthcareSpecialities.BARIATRIC_SURGERY],
-    "/behavioral-mental-health/": [Categories.PSYCHOTHERAPIST, HealthcareSpecialities.PSYCHOTHERAPHY_BEHAVIOR],
-    "/breast-health/": [Categories.CLINIC, HealthcareSpecialities.ONCOLOGY],
-    "/cancer-care-oncology/": [Categories.CLINIC, HealthcareSpecialities.ONCOLOGY],
-    "/dermatology/": [Categories.CLINIC, HealthcareSpecialities.DERMATOLOGY],
-    "/endocrinology-diabetes/": [Categories.CLINIC, HealthcareSpecialities.ENDOCRINOLOGY],
-    "/ent-ear-nose-throat/": [Categories.CLINIC, HealthcareSpecialities.OTOLARYNGOLOGY],
-    "/emergency-room/": [Categories.EMERGENCY_WARD],
-    "/fitness-healthplex/": [Categories.GYM],
-    "/general-surgery/": [Categories.CLINIC, HealthcareSpecialities.SURGERY],
-    "/geriatrics-senior-care/": [Categories.CLINIC, HealthcareSpecialities.GERIATRICS],
-    "/gi-liver-pancreas/": [Categories.CLINIC, HealthcareSpecialities.GASTROENTEROLOGY],
-    "/gynecology-obgyn-womens-health/": [Categories.CLINIC, HealthcareSpecialities.GYNAECOLOGY],
-    "/heart-care-vascular-care/": [Categories.CLINIC, HealthcareSpecialities.CARDIOLOGY],
-    "/home-health-care/": [Categories.CLINIC],
-    "/hospice-care-palliative-care/": [Categories.HOSPICE],
-    "/hospitals/": [Categories.HOSPITAL],
-    "/infectious-disease-specialists/": [Categories.CLINIC, HealthcareSpecialities.INFECTIOUS_DISEASES],
-    "/lab-and-imaging-centers/": [Categories.MEDICAL_LABORATORY],
-    "/maternity-care-birthing-centers/": [Categories.BIRTHING_CENTRE],
-    "/medical-centers-clinics/": [Categories.CLINIC],
-    "/nephrology-kidney-care/": [Categories.CLINIC, HealthcareSpecialities.NEPHROLOGY],
-    "/neurology-neurosurgery-neuroscience/": [
+    "Anticoagulation Clinics": [Categories.CLINIC],
+    "Audiology": [Categories.AUDIOLOGIST],
+    "Bariatrics and Weight Loss": [Categories.CLINIC, HealthcareSpecialities.BARIATRIC_SURGERY],
+    "Behavioral and Mental Health": [Categories.PSYCHOTHERAPIST, HealthcareSpecialities.PSYCHOTHERAPHY_BEHAVIOR],
+    "Breast Health Centers": [Categories.CLINIC, HealthcareSpecialities.ONCOLOGY],
+    "Cancer Care and Oncology": [Categories.CLINIC, HealthcareSpecialities.ONCOLOGY],
+    "Dermatology": [Categories.CLINIC, HealthcareSpecialities.DERMATOLOGY],
+    "Endocrinology and Diabetes": [Categories.CLINIC, HealthcareSpecialities.ENDOCRINOLOGY],
+    "Ear, Nose and Throat (ENT)": [Categories.CLINIC, HealthcareSpecialities.OTOLARYNGOLOGY],
+    "Emergency Care": [Categories.EMERGENCY_WARD],
+    "Fitness Centers": [Categories.GYM],
+    "General Surgery": [Categories.CLINIC, HealthcareSpecialities.SURGERY],
+    "Surgery Centers": [Categories.CLINIC, HealthcareSpecialities.SURGERY],
+    "Geriatrics Senior Care": [Categories.CLINIC, HealthcareSpecialities.GERIATRICS],
+    "Gastroenterology, Liver and Pancreas": [Categories.CLINIC, HealthcareSpecialities.GASTROENTEROLOGY],
+    "Gynecology and OB/GYN": [Categories.CLINIC, HealthcareSpecialities.GYNAECOLOGY],
+    "Women's Health Centers": [Categories.CLINIC, HealthcareSpecialities.GYNAECOLOGY],
+    "Heart and Vascular Care": [Categories.CLINIC, HealthcareSpecialities.CARDIOLOGY],
+    "Home Health Care": [Categories.CLINIC],
+    "Hospice Care": [Categories.HOSPICE],
+    "Hospitals": [Categories.HOSPITAL],
+    "Infectious Diseases": [Categories.CLINIC, HealthcareSpecialities.INFECTIOUS_DISEASES],
+    "Imaging and Radiology": [Categories.MEDICAL_LABORATORY],
+    "Lab Services": [Categories.MEDICAL_LABORATORY],
+    "Maternity and Birthing Centers": [Categories.BIRTHING_CENTRE],
+    "Medical Centers and Clinics": [Categories.CLINIC],
+    "Dialysis and Kidney Care": [Categories.CLINIC, HealthcareSpecialities.NEPHROLOGY],
+    "Neurology and Neurosurgery": [
         Categories.CLINIC,
         HealthcareSpecialities.NEUROLOGY,
         HealthcareSpecialities.NEUROSURGERY,
     ],
-    "/occupational-health/": [Categories.CLINIC, HealthcareSpecialities.OCCUPATIONAL],
-    "/orthopedics-sports-medicine-spine/": [Categories.CLINIC, HealthcareSpecialities.ORTHOPAEDICS],
-    "/other-locations/": [Categories.CLINIC],
-    "/pain-management/": [Categories.CLINIC, HealthcareSpecialities.PAIN_MEDICINE],
-    "/pediatrics/": [Categories.CLINIC, HealthcareSpecialities.PAEDIATRICS],
-    "/pharmacy/": [Categories.PHARMACY],
-    "/physical-therapy-rehabilitation/": [Categories.REHABILITATION, HealthcareSpecialities.REHABILITATION],
-    "/podiatry-foot-care/": [Categories.CLINIC, HealthcareSpecialities.PODIATRY],
-    "/primary-care-family-medicine/": [Categories.DOCTOR_GP],
-    "/pulmonary-respiratory-care/": [Categories.CLINIC, HealthcareSpecialities.PULMONOLOGY],
-    "/reconstructive-plastic-surgery/": [Categories.CLINIC, HealthcareSpecialities.PLASTIC_SURGERY],
-    "/rheumatology/": [Categories.CLINIC, HealthcareSpecialities.RHEUMATOLOGY],
-    "/school-based-health-clinics/": [Categories.CLINIC],
-    "/senior-living/": [Categories.NURSING_HOME],
-    "/sleep-medicine-sleep-centers/": [Categories.CLINIC, HealthcareSpecialities.SLEEP_MEDICINE],
-    "/urgent-care/": [Categories.CLINIC_URGENT],
-    "/urology-pelvic-floor/": [Categories.CLINIC, HealthcareSpecialities.UROLOGY],
-    "/vein-therapy/": [Categories.CLINIC, HealthcareSpecialities.VASCULAR_SURGERY],
-    "/walk-in-care-clinics/": [Categories.CLINIC_URGENT],
-    "/wound-care/": [Categories.CLINIC, HealthcareSpecialities.WOUND_TREATMENT],
+    "Occupational Health": [Categories.CLINIC, HealthcareSpecialities.OCCUPATIONAL],
+    "Orthopedics and Sports Medicine": [Categories.CLINIC, HealthcareSpecialities.ORTHOPAEDICS],
+    "Other Locations": [Categories.CLINIC],
+    "Pain Management": [Categories.CLINIC, HealthcareSpecialities.PAIN_MEDICINE],
+    "Pediatrics": [Categories.CLINIC, HealthcareSpecialities.PAEDIATRICS],
+    "Pharmacy Locations": [Categories.PHARMACY],
+    "Physical Therapy and Rehabilitation": [Categories.REHABILITATION, HealthcareSpecialities.REHABILITATION],
+    "Podiatry": [Categories.CLINIC, HealthcareSpecialities.PODIATRY],
+    "Primary Care and Family Medicine": [Categories.DOCTOR_GP],
+    "Pulmonary and Sleep Medicine": [Categories.CLINIC, HealthcareSpecialities.PULMONOLOGY],
+    "Plastic & Reconstructive Surgery": [Categories.CLINIC, HealthcareSpecialities.PLASTIC_SURGERY],
+    "Rheumatology": [Categories.CLINIC, HealthcareSpecialities.RHEUMATOLOGY],
+    "School-Based Health": [Categories.CLINIC],
+    "Senior Living": [Categories.NURSING_HOME],
+    "Sleep Medicine": [Categories.CLINIC, HealthcareSpecialities.SLEEP_MEDICINE],
+    "Urgent Care": [Categories.CLINIC_URGENT],
+    "Urology Care": [Categories.CLINIC, HealthcareSpecialities.UROLOGY],
+    "Vein Therapy": [Categories.CLINIC, HealthcareSpecialities.VASCULAR_SURGERY],
+    "Walk-In Health Care Clinics": [Categories.CLINIC_URGENT],
+    "Wound Care Centers": [Categories.CLINIC, HealthcareSpecialities.WOUND_TREATMENT],
 }
 
 
-class MercyHealthUSSpider(SitemapSpider, StructuredDataSpider):
+class MercyHealthUSSpider(Spider):
     name = "mercy_health_us"
-    item_attributes = {"brand": "Mercy Health", "brand_wikidata": "Q5053169"}
-    allowed_domains = ["www.mercy.com"]
-    sitemap_urls = ["https://www.mercy.com/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"^https:\/\/www\.mercy\.com\/locations\/(?:emergency-room|fitness-healthplex|hospitals|medical-centers-clinics|primary-care-family-medicine|senior-living|specialty-locations|urgent-care)\/[\w\-]+\/[\w\-]+$",
-            "parse",
-        )
-    ]
-    wanted_types = ["EmergencyService", "ExerciseGym", "Hospital", "MedicalClinic", "Residence"]
-    drop_attributes = {"facebook", "twitter"}
+    item_attributes = {"operator": "Mercy Health", "operator_wikidata": "Q5053169"}
+    start_urls = ["https://www.mercy.com/api/v2/locations"]
 
-    def post_process_item(self, item, response, ld_data):
-        for url_slug in HEALTHCARE_CATEGORIES.keys():
-            if url_slug in response.url:
-                for tags in HEALTHCARE_CATEGORIES[url_slug]:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location_info in response.json()["Results"]:
+            location = location_info["Location"]
+            item = DictParser.parse(location)
+            item["street_address"] = location["Address"]["StreetDisplay"]
+            item["website"] = response.urljoin(location["Link"])
+            if "/podiatry-foot-care/" in item["website"]:
+                facility_type = "Podiatry"
+            elif "/sleep-medicine-sleep-centers/" in item["website"]:
+                facility_type = "Sleep Medicine"
+            elif "/vein-therapy/" in item["website"]:
+                facility_type = "Vein Therapy"
+            else:
+                facility_type = location.get("FacilityType", {}).get("Name")
+            if category := HEALTHCARE_CATEGORIES.get(facility_type):
+                for tags in category:
                     if isinstance(tags, Categories):
                         apply_category(tags, item)
                     elif isinstance(tags, HealthcareSpecialities):
                         apply_healthcare_specialities([tags], item)
-                if "/.home-health-care/" in response.url:
+                if facility_type == "Home Health Care":
                     apply_yes_no("home_visit", item, True)
-                break
-
-        if item.get("image") and item["image"] == "https://www.mercy.com/":
-            # Ignore invalid image field values.
-            item.pop("image")
-
-        yield item
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/unmapped_category/{facility_type}")
+            yield item

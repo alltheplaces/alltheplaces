@@ -1,27 +1,45 @@
-import json
 from typing import Any
+from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
-from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
 class CarlsJrNZSpider(Spider):
     name = "carls_jr_nz"
     item_attributes = CarlsJrUSSpider.item_attributes
-    start_urls = ["https://www.carlsjr.co.nz/stores"]
-    no_refs = True
+    start_urls = ["https://api.carlsjr.co.nz/configurations"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("//@data-block-json").getall():
-            store = json.loads(location)["location"]
-            item = Feature()
-            item["name"] = store.get("addressTitle")
-            item["lat"] = store.get("mapLat")
-            item["lon"] = store.get("mapLng")
-            item["addr_full"] = merge_address_lines([store.get("addressLine1"), store.get("addressLine2")])
-            item["website"] = response.url
+        for key in response.json()["storeKeys"]:
+            yield JsonRequest(url="https://api.carlsjr.co.nz/stores/{}".format(key), callback=self.parse_details)
+
+    def parse_details(self, response):
+        for store in response.json()["Value"]:
+            item = DictParser.parse(store)
+            item["website"] = urljoin("https://carlsjr.co.nz/find-a-carls/", store["url"])
+            item["branch"] = item.pop("name").removeprefix("Carl's Jr ")
+
+            apply_yes_no(Extras.DRIVE_THROUGH, item, store["driveThru"] is True)
+            apply_yes_no(Extras.DELIVERY, item, "delivery" in store["dispositions"])
+
+            item["opening_hours"] = self.parse_opening_hours(store["operatingHoursStore"])
+            item["extras"]["opening_hours:delivery"] = self.parse_opening_hours(
+                store.get("operatingHoursDelivery")
+            ).as_opening_hours()
+            item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(
+                store.get("operatingHoursDriveThru")
+            ).as_opening_hours()
+
             yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules if rules else []:
+            oh.add_range(DAYS[rule["dayofweek"]], rule["start"], rule["end"])
+        return oh

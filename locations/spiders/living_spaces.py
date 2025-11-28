@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -17,5 +18,7 @@ class LivingSpacesSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["code"]
             item["branch"] = item.pop("name")
-            item["website"] = "https://www.livingspaces.com" + location["storePageUrl"]
+            if url := location.get("storePageUrl"):
+                item["website"] = "https://www.livingspaces.com" + url
+            apply_category(Categories.SHOP_FURNITURE, item)
             yield item

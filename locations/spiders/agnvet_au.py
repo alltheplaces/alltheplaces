@@ -1,18 +1,13 @@
 import chompjs
 from scrapy import Selector
 
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class AgnvetAUSpider(JSONBlobSpider):
     name = "agnvet_au"
-    item_attributes = {
-        "brand": "AGnVET",
-        "brand_wikidata": "Q119263284",
-        "extras": {
-            "shop": "agrarian",
-        },
-    }
+    item_attributes = {"brand": "AGnVET", "brand_wikidata": "Q119263284"}
     allowed_domains = ["agnvet.com.au"]
     start_urls = ["https://agnvet.com.au/group/locations/"]
 
@@ -27,4 +22,7 @@ class AgnvetAUSpider(JSONBlobSpider):
         item["postcode"] = location["location"]["postal_code"]
         phone_html = Selector(text=location["location"]["extra_fields"]["phone"])
         item["phone"] = phone_html.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "")
+
+        apply_category(Categories.SHOP_AGRARIAN, item)
+
         yield item

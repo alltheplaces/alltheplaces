@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,13 +14,11 @@ class MarathonPetroleumUSSpider(Spider):
         "ARCO": {"brand": "Arco", "brand_wikidata": "Q304769"},
         "MARATHON": {"brand": "Marathon", "brand_wikidata": "Q458363"},
     }
-    allowed_domains = ["devmarathon.dialogs8.com"]
     start_urls = [
-        "https://devmarathon.dialogs8.com/ajax_stations_search.html?reason=get-station-info&reason=get-station-info"
+        "https://www.marathonarcorewards.com/ajax_trip_planner_search.html?reason=get-station-info&reason=get-station-info"
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url)
 

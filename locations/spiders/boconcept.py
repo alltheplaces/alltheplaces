@@ -2,7 +2,6 @@ from scrapy import Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class BoconceptSpider(Spider):
@@ -17,7 +16,7 @@ class BoconceptSpider(Spider):
             item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street")
 
-            amenities = {amenity["id"] for amenity in (location["amenities"] or [])}
+            amenities = {amenity["id"] for amenity in (location["amenities"] or []) if amenity.get("isAvailable", True)}
             apply_yes_no(Extras.DELIVERY, item, "deliveryassembly" in amenities)
             apply_yes_no(
                 Extras.WHEELCHAIR,
@@ -25,15 +24,6 @@ class BoconceptSpider(Spider):
                 not amenities.isdisjoint({"wheelchairelevator", "wheelchairenterance", "wheelchairparking"}),
             )
             apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, "wheelchairrestroom" in amenities)
-
-            oh = OpeningHours()
-            for day in location["normalWeekOpeningHours"].values():
-                if day["closed"]:
-                    oh.set_closed(day["dayOfWeek"])
-                else:
-                    for row in day["openingHoursList"]:
-                        oh.add_range(day["dayOfWeek"], row["open"], row["close"])
-            item["opening_hours"] = oh
 
             contact_info = location["contactInformation"]
             item["email"] = contact_info["email"]

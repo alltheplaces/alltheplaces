@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -7,13 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class CameraHouseAUSpider(Spider):
     name = "camera_house_au"
-    item_attributes = {
-        "brand": "Camera House",
-        "brand_wikidata": "Q124062505",
-        "extras": {
-            "shop": "camera",
-        },
-    }
+    item_attributes = {"brand": "Camera House", "brand_wikidata": "Q124062505"}
     allowed_domains = ["www.camerahouse.com.au"]
     start_urls = ["https://www.camerahouse.com.au/stores/index/dataAjax"]
 
@@ -42,4 +37,6 @@ class CameraHouseAUSpider(Spider):
                 start_time, end_time = day_hours.split("|", 1)[1].split("-", 1)
                 hours_string = f"{hours_string} {day_name}: {start_time} - {end_time}"
             properties["opening_hours"].add_ranges_from_string(hours_string)
+
+            apply_category(Categories.SHOP_CAMERA, properties)
             yield Feature(**properties)

@@ -28,7 +28,7 @@ class WinnDixieUSSpider(Spider):
     start_urls = [
         "https://www.winndixie.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter="
     ]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], method="POST")

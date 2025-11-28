@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 from urllib.parse import unquote
 
 from scrapy import Selector, Spider
@@ -15,13 +16,15 @@ class MidasAUSpider(Spider):
     allowed_domains = ["www.midas.com.au"]
     start_urls = ["https://www.midas.com.au/wp-admin/admin-ajax.php?action=get_all_stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
     def parse(self, response):
         results = Selector(text=response.json()["result_listing"])
         for location in results.xpath('//div[@class = "result-list"]'):
+            if phone := location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href').get():
+                phone = phone.strip().replace("tel:", "")
             properties = {
                 "ref": location.xpath(".//h4/@data-index").get().strip(),
                 "name": location.xpath(".//h4/text()").get().strip(),
@@ -29,10 +32,7 @@ class MidasAUSpider(Spider):
                 "lon": location.xpath(".//h4/@data-lng").get().strip(),
                 "addr_full": re.sub(r"\s{2,}", " ", " ".join(location.xpath(".//div/p[1]/text()").getall())).strip(),
                 "website": location.xpath('.//div/p[1]/a[contains(@href, "/stores/")]/@href').get().strip(),
-                "phone": location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href')
-                .get()
-                .strip()
-                .replace("tel:", ""),
+                "phone": phone,
                 "email": unquote(
                     location.xpath('.//div/p[2]/a[contains(@href, "admin_email=")]/@href')
                     .get()

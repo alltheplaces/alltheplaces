@@ -15,8 +15,10 @@ from locations.user_agents import FIREFOX_LATEST
 class SuperdrugSpider(Spider):
     name = "superdrug"
     item_attributes = {"brand": "Superdrug", "brand_wikidata": "Q7643261"}
-    user_agent = FIREFOX_LATEST
-    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
+    custom_settings = {
+        "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
+        "USER_AGENT": FIREFOX_LATEST,
+    }
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
@@ -41,11 +43,14 @@ class SuperdrugSpider(Spider):
             )
             item["addr_full"] = location["address"]["formattedAddress"]
             item["website"] = urljoin("https://www.superdrug.com/", location["url"])
-            item["phone"] = location["address"]["phone"]
+            item["phone"] = location["address"].get("phone")
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]["weekDayOpeningList"]:
-                if rule["closed"] is True:
+                if (
+                    rule["closed"] is True
+                    or rule["openingTime"]["formattedHour"] == rule["closingTime"]["formattedHour"] == "00:00"
+                ):
                     item["opening_hours"].set_closed(rule["weekDay"])
                 else:
                     item["opening_hours"].add_range(

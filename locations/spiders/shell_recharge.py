@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -28,7 +31,7 @@ class ShellRechargeSpider(scrapy.Spider):
             },
         )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for row in response.json()["data"]:
             properties = {
                 "ref": row["id"],

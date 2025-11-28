@@ -17,7 +17,7 @@ class ScribblerGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["addr_full"] = clean_address([location["address1"], location["address2"]])
-        item["extras"]["ref:google"] = location.get("placeId")
+        item["extras"]["ref:google:place_id"] = location.get("placeId")
         item["lat"] = location["coords"]["lat"]
         item["lon"] = location["coords"]["lng"]
         yield item

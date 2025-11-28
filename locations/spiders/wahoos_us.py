@@ -8,7 +8,7 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 class WahoosUSSpider(AgileStoreLocatorSpider):
     name = "wahoos_us"
-    item_attributes = {"brand": "Wahoo's Fish Tacos", "brand_wikidata": "Q7959827"}
+    item_attributes = {"brand": "Wahoo's Fish Taco", "brand_wikidata": "Q7959827"}
     allowed_domains = ["www.wahoos.com"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

@@ -21,14 +21,14 @@ class TotalEnergiesSpider(WoosmapSpider):
 
     BRANDS = {
         "tot": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
-        "cepsa": {"brand": "Cepsa", "brand_wikidata": "Q608819"},
+        "cepsa": {"brand": "Moeve", "brand_wikidata": "Q608819"},
         "aral": {"brand": "Aral", "brand_wikidata": "Q565734"},
         "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
         #   1454 "unb" - unbranded/independend
-        "totalerg": {"brand": "TotalErg", "brand_wikidata": "Q3995933"},
+        "totalerg": {"brand": "IP", "brand_wikidata": "Q3788748"},
         "ela": {"brand": "Elan", "brand_wikidata": "Q57980752"},
         "mol": {"brand": "MOL", "brand_wikidata": "Q549181"},
-        "tac": {"brand": "Total Access", "brand_wikidata": "Q154037"},
+        "tac": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
         "avi": {"brand": "Avia", "brand_wikidata": "Q300147"},
         "as24": {"brand": "AS 24", "brand_wikidata": "Q2819394"},
         "ess": {"brand": "Esso", "brand_wikidata": "Q867662"},
@@ -173,8 +173,6 @@ class TotalEnergiesSpider(WoosmapSpider):
         else:
             # Other types, possibly interesting
             return
-
-        item["website"] = f'https://store.totalenergies.fr/en_EN/{item["ref"]}'
 
         self.apply_services(item, feature)
 

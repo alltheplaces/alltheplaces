@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy import Selector
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -24,7 +24,8 @@ class DrummondGolfAUSpider(scrapy.Spider):
                 item["postcode"] = address_string.split("Zip: ", 1)[1].split(" Address: ", 1)[0]
                 item["street_address"] = address_string.split("Address: ", 1)[1].split(" State: ", 1)[0]
                 item["state"] = address_string.split("State: ", 1)[1].split(" Description: ", 1)[0]
-                apply_category({"shop": "golf"}, item)
+                apply_category(Categories.SHOP_SPORTS, item)
+                item["extras"]["sports"] = "golf"
                 yield item
             if next_url := re.search(r"action next.*href=\\\"(.*)\"\s*rel", response.text):
                 yield scrapy.Request(url=next_url.group(1).replace("\\", ""), callback=self.parse)

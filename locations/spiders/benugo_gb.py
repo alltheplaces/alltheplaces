@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -12,7 +13,7 @@ class BenugoGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         amenityType = response.url.split("/")[4]
         if amenityType == "cafes":
-            item["extras"]["amenity"] = "cafe"
+            apply_category(Categories.CAFE, item)
         if amenityType == "restaurants":
-            item["extras"]["amenity"] = "restaurant"
+            apply_category(Categories.RESTAURANT, item)
         yield item

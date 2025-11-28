@@ -7,10 +7,8 @@ from locations.dict_parser import DictParser
 
 class TotalHealthPharmacyIESpider(scrapy.Spider):
     name = "total_health_pharmacy_ie"
-    item_attributes = {"brand": "TotalHealth Pharmacy", "brand_wikidata": "Q123165909"}
-    start_urls = [
-        "https://www.totalhealth.ie/store-locator",
-    ]
+    item_attributes = {"brand_wikidata": "Q123165909"}
+    start_urls = ["https://www.totalhealth.ie/store-locator"]
 
     def parse(self, response, **kwargs):
         data = chompjs.parse_js_object(

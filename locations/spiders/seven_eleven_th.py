@@ -37,7 +37,7 @@ class SevenElevenTHSpider(scrapy.Spider):
                 "distance": 10000000,
                 "limit": 10000000,
             }
-            yield JsonRequest("https://7eleven-api-prod.jenosize.tech/v1/Store/GetStoreByCurrentLocation", data=payload)
+            yield JsonRequest("https://web-api-ro.7eleven.co.th/v1/Store/GetStoreByCurrentLocation", data=payload)
 
     def parse(self, response):
         for poi in response.json().get("data", []):

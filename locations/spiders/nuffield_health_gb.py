@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -22,5 +23,5 @@ class NuffieldHealthGBSpider(SitemapSpider, StructuredDataSpider):
             item["lat"] = coords["lat"]
             item["lon"] = coords["lon"]
         item["phone"] = response.xpath('//span[@class="location__telephone"]/span[@itemprop="telephone"]/text()').get()
-
+        apply_category(Categories.GYM, item)
         yield item

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import Request
 
@@ -14,11 +16,11 @@ class BurgerKingSGSpider(Spider):
     allowed_domains = ["burgerking.com.sg"]
     website_root = "https://www.burgerking.com.sg"
 
-    def start_requests(self):
-        yield from self.request_page(1)
+    async def start(self) -> AsyncIterator[Request]:
+        yield self.request_page(1)
 
-    def request_page(self, page):
-        yield Request(url=f"{self.website_root}/Locator?page={page}", callback=self.parse, meta={"page": page})
+    def request_page(self, page: int) -> Request:
+        return Request(url=f"{self.website_root}/Locator?page={page}", callback=self.parse, meta={"page": page})
 
     def parse(self, response):
         for location in response.xpath('//div[@id="locationsList"]/ul/div'):
@@ -26,11 +28,10 @@ class BurgerKingSGSpider(Spider):
             item["ref"] = location.xpath("@data-restaurant-id").get()
             item["lat"], item["lon"] = url_to_coords(location.xpath('.//a[@class="markerArea"]/@href').get())
             item["branch"] = location.xpath('.//dt[@class="mainAddress"]/text()').get().removeprefix("BK ")
-            item["phone"] = location.xpath('.//span[@class="phone"]/text()').get().replace("Phone:", "")
             item["website"] = f"{self.website_root}/Locator/Details/" + item["ref"]
             yield Request(url=item["website"], callback=self.parse_location, meta={"item": item})
         if response.xpath('//a[contains(@class, "bk-btn-next")]').get() is not None:
-            yield from self.request_page(response.meta["page"] + 1)
+            yield self.request_page(response.meta["page"] + 1)
 
     def parse_location(self, response):
         item = response.meta["item"]

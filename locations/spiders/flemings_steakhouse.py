@@ -7,10 +7,7 @@ from locations.items import Feature
 
 class FlemingsSteakhouseSpider(scrapy.Spider):
     name = "flemings_steakhouse"
-    item_attributes = {
-        "brand": "Fleming's Prime Steakhouse & Wine Bar",
-        "brand_wikidata": "Q5458552",
-    }
+    item_attributes = {"brand": "Fleming's", "brand_wikidata": "Q5458552"}
     allowed_domains = ["flemingssteakhouse.com"]
     start_urls = ("https://www.flemingssteakhouse.com/locations",)
 

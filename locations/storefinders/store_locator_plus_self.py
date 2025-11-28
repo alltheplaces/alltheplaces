@@ -1,5 +1,7 @@
+from typing import Iterable
+
 from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
@@ -61,7 +63,7 @@ class StoreLocatorPlusSelfSpider(Spider):
     search_radius: int = 0
     max_results: int = 0
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[FormRequest]:
         if hasattr(self, "allowed_domains"):
             url = f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php"
         else:
@@ -108,7 +110,7 @@ class StoreLocatorPlusSelfSpider(Spider):
                     }
                     yield FormRequest(url=url, formdata=formdata, method="POST")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
         locations = response.json()["response"]
 
         if self.max_results > 0:
@@ -131,5 +133,5 @@ class StoreLocatorPlusSelfSpider(Spider):
                 item["website"] = f"https://{self.allowed_domains[0]}{item['website']}"
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

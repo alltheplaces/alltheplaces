@@ -6,6 +6,6 @@ class DominosPizzaVESpider(DominosPizzaInternationalSpider):
     name = "dominos_pizza_ve"
     region_code = "VE"
     dpz_market = "VENEZUELA"
-    domain = "order.golo01.dominos.com"
+    domain = "order.golo04.dominos.com"
     dpz_language = "es"
     days = DAYS_ES

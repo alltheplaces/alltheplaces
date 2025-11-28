@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -10,11 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class PaversGBSpider(Spider):
     name = "pavers_gb"
-    item_attributes = {
-        "brand": "Pavers",
-        "brand_wikidata": "Q7155843",
-        "country": "GB",
-    }
+    item_attributes = {"brand_wikidata": "Q7155843"}
     allowed_domains = ["pavers.co.uk"]
 
     def make_request(self, page: int) -> JsonRequest:
@@ -22,7 +18,7 @@ class PaversGBSpider(Spider):
             url="https://www.pavers.co.uk/api/storeLocation/search?query&page={}".format(page), meta={"page": page}
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

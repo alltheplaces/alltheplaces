@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BishopsArmsSESpider(CrawlSpider, StructuredDataSpider):
     name = "bishops_arms_se"
-    item_attributes = {"brand": "Bishops Arms", "brand_wikidata": "Q10430084"}
+    item_attributes = {"brand": "The Bishops Arms", "brand_wikidata": "Q10430084"}
     start_urls = ["https://www.bishopsarms.com/vara-hotell/", "https://www.bishopsarms.com/vara-pubar/"]
     rules = [
         Rule(LinkExtractor(allow="/vara-hotell/", restrict_xpaths="//main//a"), "parse"),

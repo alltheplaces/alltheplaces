@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 
 class BlueBikeBESpider(Spider):
     name = "blue_bike_be"
-    item_attributes = {"brand": "Blue-Bike", "brand_wikidata": "Q17332642"}
+    item_attributes = {"brand_wikidata": "Q17332642"}
     start_urls = ["https://www.blue-bike.be/wp-json/v1/location"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

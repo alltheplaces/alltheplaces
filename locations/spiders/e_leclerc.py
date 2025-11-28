@@ -20,7 +20,7 @@ class ELeclercSpider(WoosmapSpider):
         "E.Leclerc Express": ({"brand": "E.Leclerc Express"}, Categories.SHOP_SUPERMARKET),
         "Voyages": ({"brand": "E.Leclerc"}, Categories.SHOP_TRAVEL_AGENCY),
         "Espace Culturel": ({"brand": "E.Leclerc Espace Culturel"}, Categories.SHOP_ELECTRONICS),
-        "Parapharmacie": ({"brand": " E.Leclerc Parapharmacie"}, Categories.PHARMACY),
+        "Parapharmacie": ({"brand": "E.Leclerc Parapharmacie"}, Categories.PHARMACY),
         "Location": ({"brand": "E.Leclerc Location"}, Categories.CAR_RENTAL),
         "Brico": ({"brand": "E.Leclerc Brico"}, Categories.SHOP_DOITYOURSELF),
         "Click and Collect": None,

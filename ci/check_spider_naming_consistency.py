@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 COUNTRYCODE_COMPONENTS = {
+    "AD",
     "AE",
     "AL",
     "AO",
@@ -43,9 +44,11 @@ COUNTRYCODE_COMPONENTS = {
     "EU",
     "FI",
     "FJ",
+    "FO",
     "FR",
     "GA",
     "GB",
+    "GE",
     "GG",
     "GH",
     "GR",
@@ -60,6 +63,7 @@ COUNTRYCODE_COMPONENTS = {
     "IL",
     "IM",
     "IN",
+    "IS",
     "IT",
     "JE",
     "JM",
@@ -115,6 +119,7 @@ COUNTRYCODE_COMPONENTS = {
     "SG",
     "SI",
     "SK",
+    "SV",
     "SX",
     "SZ",
     "TH",
@@ -123,11 +128,14 @@ COUNTRYCODE_COMPONENTS = {
     "TW",
     "TZ",
     "UA",
+    "UG",
     "US",
     "UY",
     "UZ",
     "VE",
+    "VG",
     "VN",
+    "XK",
     "ZA",
     "ZM",
     "ZW",
@@ -225,7 +233,7 @@ def check_file(file_path: Path) -> Tuple[Path, List[str]]:
     file_name = os.path.splitext(os.path.basename(file_path))[0]
 
     # Open the file and parse it into a Python AST
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         tree = ast.parse(file.read())
 
     # Walk the AST and look for class definitions

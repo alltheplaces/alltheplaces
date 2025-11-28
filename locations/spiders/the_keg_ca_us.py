@@ -1,15 +1,16 @@
 import re
 
-from scrapy import Request, Selector, Spider
+from scrapy import Request, Selector
 
 from locations.categories import Extras, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
 
-class TheKegCAUSSpider(Spider):
+class TheKegCAUSSpider(PlaywrightSpider):
     name = "the_keg_ca_us"
     item_attributes = {"brand": "The Keg", "brand_wikidata": "Q7744066"}
     allowed_domains = ["thekeg.com"]

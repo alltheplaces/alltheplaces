@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BigYellowGBSpider(SitemapSpider, StructuredDataSpider):
     name = "big_yellow_gb"
-    item_attributes = {"brand": "Big Yellow", "brand_wikidata": "Q4906703"}
+    item_attributes = {"brand_wikidata": "Q4906703"}
     sitemap_urls = ["https://www.bigyellow.co.uk/sitemap.xml"]
     sitemap_rules = [("/*-self-storage-units/", "parse")]
     wanted_types = ["SelfStorage"]

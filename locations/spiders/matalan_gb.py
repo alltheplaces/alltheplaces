@@ -1,22 +1,17 @@
 import json
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MatalanGBSpider(CrawlSpider, StructuredDataSpider):
+class MatalanGBSpider(SitemapSpider, StructuredDataSpider):
     name = "matalan_gb"
     item_attributes = {"brand": "Matalan", "brand_wikidata": "Q12061509"}
     allowed_domains = ["www.matalan.co.uk"]
-    start_urls = ["https://www.matalan.co.uk/stores/uk"]
-    rules = [
-        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/stores/uk/[^/]+$")),
-        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/stores/uk/[^/]+/[^/]+$"), "parse_sd", follow=True),
-        Rule(LinkExtractor(allow=r"^https://www.matalan.co.uk/store/[^/]+/[^/]+$"), "parse_sd"),
-    ]
+    sitemap_urls = ["https://www.matalan.co.uk/robots.txt"]
+    sitemap_rules = [(r"/stores/uk/[^/]+/[^/]+/[^/]+$", "parse_sd")]
     time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, ld_data, **kwargs):

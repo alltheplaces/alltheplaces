@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 
 class PodPointSpider(Spider):
     name = "pod_point"
-    item_attributes = {"brand": "Pod Point", "brand_wikidata": "Q42888154"}
+    item_attributes = {"operator": "Pod Point", "operator_wikidata": "Q42888154"}
     start_urls = ["https://charge.pod-point.com/"]
 
     def parse(self, response, **kwargs):

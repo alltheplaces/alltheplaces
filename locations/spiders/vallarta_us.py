@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class VallartaUSSpider(SitemapSpider):
     name = "vallarta_us"
-    item_attributes = {"brand": "Vallarta Supermarkets", "brand_wikidata": "Q7911833"}
+    item_attributes = {"brand": "Vallarta", "brand_wikidata": "Q7911833"}
     allowed_domains = ["vallartasupermarkets.com"]
     sitemap_urls = ("https://vallartasupermarkets.com/store-sitemap.xml",)
     sitemap_rules = [(r"https://vallartasupermarkets.com/store-locations/[\w-]+/", "parse_store")]
@@ -18,7 +18,7 @@ class VallartaUSSpider(SitemapSpider):
 
         item["ref"] = item["website"] = response.url
         item["name"] = response.xpath("//div[@class='page-breadcrumb']/span/text()").extract_first()
-        item["addr_full"] = address[1].strip()
+        item["street_address"] = address[1].strip()
         item["city"] = address[2].split(",")[0].strip()
         item["state"] = address[2].split(" ")[-2].strip()
         item["postcode"] = address[2].split(" ")[-1].strip()

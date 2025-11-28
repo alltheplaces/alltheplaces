@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -14,7 +14,7 @@ class ClosebySpider(Spider):
 
     To use this spider, supply a `api_key` for a brand or operator's store
     locator which is hosted by Closeby. API keys are a 32 character long
-    hexademical value (regex: "[\\da-f]{32}").
+    hexadecimal value (regex: "[\\da-f]{32}").
     """
 
     dataset_attributes = {"source": "api", "api": "closeby.co"}
@@ -23,7 +23,7 @@ class ClosebySpider(Spider):
     def start_requests(self) -> Iterable[JsonRequest]:
         yield JsonRequest(url=f"https://www.closeby.co/embed/{self.api_key}/locations")
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for feature in response.json()["locations"]:
             self.pre_process_data(feature)
 
@@ -32,7 +32,7 @@ class ClosebySpider(Spider):
 
             yield from self.post_process_item(item, response, feature) or []
 
-    def pre_process_data(self, feature: dict) -> dict:
+    def pre_process_data(self, feature: dict):
         """Override with any pre-processing on the item."""
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

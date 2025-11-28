@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.asda_gb import AsdaGBSpider
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
-from locations.spiders.vets4pets_gb import set_located_in
+from locations.spiders.tesco_gb import set_located_in
 from locations.user_agents import FIREFOX_LATEST
 
 
@@ -15,8 +15,7 @@ class KfcGBSpider(Spider):
     name = "kfc_gb"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://uk.kfc-cms.com/api/data/restaurants_all?countrycode=GB"]
-    user_agent = FIREFOX_LATEST
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
     def parse(self, response, **kwargs):
@@ -47,7 +46,7 @@ class KfcGBSpider(Spider):
             apply_yes_no(Extras.WIFI, item, "Free Wifi" in facilities)
 
             if "ASDA" in item["name"].upper():
-                set_located_in(item, AsdaGBSpider.item_attributes)
+                set_located_in(AsdaGBSpider.item_attributes, item)
 
             item["branch"] = item.pop("name")
 

@@ -2,14 +2,14 @@ import re
 
 import scrapy
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_EN, DAYS_FR, DAYS_NL, DAYS_SE, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
 class CitroenSpider(scrapy.Spider):
     name = "citroen"
-    item_attributes = {"brand": "Citroen", "brand_wikidata": "Q6746"}
+    item_attributes = {"brand": "Citroën", "brand_wikidata": "Q6746"}
     start_urls = [
         "https://www.citroen.co.uk/apps/atomic/DealersServlet?path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvdWsvZW4%3D&searchType=latlong",
         "https://www.citroen.be/apps/atomic/DealersServlet?distance=30000&latitude=50.84439&longitude=4.35608&maxResults=1000&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvYmVsZ2l1bS9mcl9mcg%3D%3D&searchType=latlong",
@@ -61,7 +61,7 @@ class CitroenSpider(scrapy.Spider):
             car_repair = re.findall("'type': 'service'", services)
             if len(car_dealer) > 0 and len(car_repair) > 0:
                 apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no("service:vehicle:car_repair", item, True)
+                apply_yes_no(Extras.CAR_REPAIR, item, True)
             elif car_dealer:
                 apply_category(Categories.SHOP_CAR, item)
             elif car_repair:

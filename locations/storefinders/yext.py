@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -6,6 +7,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import clean_facebook
 
 # Documentation for the Yext API is available at:
@@ -88,16 +90,7 @@ class YextSpider(Spider):
                     )
 
             if "hours" in location:
-                item["opening_hours"] = OpeningHours()
-                for day_name, day_intervals in location["hours"].items():
-                    if day_name == "holidayHours":
-                        continue
-                    if "isClosed" in day_intervals and day_intervals["isClosed"]:
-                        continue
-                    if "openIntervals" not in day_intervals:
-                        continue
-                    for interval in day_intervals["openIntervals"]:
-                        item["opening_hours"].add_range(day_name.title(), interval["start"], interval["end"])
+                item["opening_hours"] = self.parse_opening_hours(location["hours"])
 
             yield from self.parse_item(item, location) or []
 
@@ -105,5 +98,19 @@ class YextSpider(Spider):
         if next_offset < response.json()["response"]["count"]:
             yield from self.request_page(next_offset)
 
-    def parse_item(self, item, location, **kwargs):
+    @staticmethod
+    def parse_opening_hours(hours):
+        oh = OpeningHours()
+        for day_name, day_intervals in hours.items():
+            if day_name == "holidayHours":
+                continue
+            if "isClosed" in day_intervals and day_intervals["isClosed"]:
+                continue
+            if "openIntervals" not in day_intervals:
+                continue
+            for interval in day_intervals["openIntervals"]:
+                oh.add_range(day_name.title(), interval["start"], interval["end"])
+        return oh
+
+    def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Any:
         yield item

@@ -1,16 +1,13 @@
 from chompjs import parse_js_object
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class TheBigBiscuitUSSpider(JSONBlobSpider):
     name = "the_big_biscuit_us"
-    item_attributes = {
-        "brand": "The Big Biscuit",
-        "brand_wikidata": "Q124125449",
-        "extras": {"amenity": "restaurant", "cuisine": "american"},
-    }
+    item_attributes = {"brand": "The Big Biscuit", "brand_wikidata": "Q124125449"}
     allowed_domains = ["www.bigbiscuit.com"]
     start_urls = ["https://bigbiscuit.com/locations/"]
 
@@ -27,4 +24,8 @@ class TheBigBiscuitUSSpider(JSONBlobSpider):
         # https://bigbiscuit.com/contact-the-big-biscuit/
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_days_range(DAYS, "06:30", "14:30")
+
+        apply_category(Categories.RESTAURANT, item)
+        item["extras"]["cuisine"] = "american"
+
         yield item

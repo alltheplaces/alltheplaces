@@ -1,6 +1,8 @@
+from typing import AsyncIterator
+
 from scrapy.http import FormRequest
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Sells, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -11,7 +13,7 @@ class CoopCentroItaliaITSpider(JSONBlobSpider):
     BRAND_COOP = {"brand": "Coop Centro Italia", "brand_wikidata": "Q3689971"}
     BRAND_SUPERCONTI = {"brand": "Superconti", "brand_wikidata": "Q69381940"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         data = {"grant_type": "client_credentials", "client_id": "fatt0r!a", "client_secret": "fattM4tt!922"}
         yield FormRequest(f"{self.api_domain}/api/get-token", formdata=data, callback=self.after_token)
 
@@ -69,11 +71,11 @@ class CoopCentroItaliaITSpider(JSONBlobSpider):
 
     known_departments = {
         "coop salute": dict(dispensing="no", **Categories.PHARMACY.value),
-        "coop ottica": Categories.SHOP_OPTICIAN,
-        "pet store": Categories.SHOP_PET,
-        "pet food sfuso": Categories.SHOP_PET,
-        "abbigliamento": Categories.SHOP_CLOTHES,
-        "edicola": Categories.SHOP_NEWSAGENT,
+        "abbigliamento": {Sells.CLOTHES.value: "yes"},
+        "coop ottica": {Sells.EYEGLASSES.value: "yes", Sells.CONTACT_LENSES.value: "yes"},
+        "pet store": {Sells.PET_SUPPLIES.value: "yes"},
+        "pet food sfuso": {Sells.PET_SUPPLIES.value: "yes"},
+        "edicola": {Sells.NEWSPAPERS.value: "yes"},
     }
 
     def apply_departments(self, item, response, location):

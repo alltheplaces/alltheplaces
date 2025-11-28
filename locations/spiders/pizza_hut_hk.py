@@ -17,9 +17,11 @@ class PizzaHutHKSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["addr_full"] = store.get("location").get("line")
             item["opening_hours"] = OpeningHours()
-            for day_time in store.get("openings").get("weekdays"):
-                day = day_time.get("weekday")
-                start_time = day_time.get("startTime")
-                close_time = day_time.get("endTime")
-                item["opening_hours"].add_range(day=DAYS_FULL[day], open_time=start_time, close_time=close_time)
+            if openings := store.get("openings"):
+                if weekdays := openings.get("weekdays"):
+                    for day_time in weekdays:
+                        day = day_time.get("weekday")
+                        start_time = day_time.get("startTime")
+                        close_time = day_time.get("endTime")
+                        item["opening_hours"].add_range(day=DAYS_FULL[day], open_time=start_time, close_time=close_time)
             yield item

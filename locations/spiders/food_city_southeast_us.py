@@ -1,12 +1,11 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 
 
 class FoodCitySoutheastUSSpider(Spider):
@@ -23,7 +22,7 @@ class FoodCitySoutheastUSSpider(Spider):
             meta=dict(offset=offset),
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield self._make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -35,21 +34,32 @@ class FoodCitySoutheastUSSpider(Spider):
             if lat == "0":
                 continue  # skip duplicate store data without coordinates
             item = Feature()
+            ref = store_listing.xpath("@data-id").get()
             item["lat"], item["lon"] = lat, lon
-            item["ref"] = store_listing.xpath("@data-id").get()
-            item["website"] = f"https://www.foodcity.com/stores/store-details/{item['ref']}"
-            item["addr_full"] = clean_address(store_listing.xpath(".//*[@class='location']/p/text()").getall()).split(
-                "miles"
-            )[-1]
-            item["phone"] = store_listing.xpath(".//a[contains(@href,'tel')]/@href").get()
+            item["ref"] = ref
+            item["website"] = f"https://www.foodcity.com/stores/store-details/{ref}"
+            # These hidden input tags are siblings to store_listing
+            item["street_address"] = store_listing.xpath(f"..//input[@id='Address{ref}']/@value").get()
+            item["city"] = store_listing.xpath(f"..//input[@id='City{ref}']/@value").get()
+            item["state"] = store_listing.xpath(f"..//input[@id='State{ref}']/@value").get()
+            item["postcode"] = store_listing.xpath(f"..//input[@id='Zip{ref}']/@value").get()
+
+            item["phone"] = (
+                store_listing.xpath(".//div[@class='location']//a[@class='tel']/@href").get().removeprefix("tel:")
+            )
             for location_hours in store_listing.xpath(".//*[@class='hours']"):
-                if "Store Hours" in location_hours.get():
-                    item["opening_hours"] = self.parse_opening_hours(location_hours.xpath("./p/text()").getall())
-                if "Pharmacy Hours" in location_hours.get():
+                h2 = location_hours.xpath("./h2/text()").get()
+                if h2 == "Store Hours":
+                    item["opening_hours"] = self.parse_opening_hours(
+                        location_hours.xpath("./p/text()").getall()
+                    ).as_opening_hours()
+                if h2 == "Pharmacy Hours":
                     item["extras"]["opening_hours:pharmacy"] = self.parse_opening_hours(
                         location_hours.xpath("./p/text()").getall()
                     ).as_opening_hours()
-            apply_yes_no(Extras.DELIVERY, item, bool(store_listing.xpath(".//img[@src='/images/home-delivery.png']")))
+            apply_yes_no(
+                Extras.DELIVERY, item, bool(store_listing.xpath(".//img[contains(@src, '/home-delivery.png')]"))
+            )
             yield item
 
         if len(listings) == self.page_size:

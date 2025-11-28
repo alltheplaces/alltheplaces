@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 
 class EvyveGBSpider(Spider):
     name = "evyve_gb"
-    item_attributes = {"brand": "evyve", "brand_wikidata": "Q116698197"}
+    item_attributes = {"operator": "evyve", "operator_wikidata": "Q116698197"}
     start_urls = ["https://evyve.co.uk/locations/"]
 
     def parse(self, response):

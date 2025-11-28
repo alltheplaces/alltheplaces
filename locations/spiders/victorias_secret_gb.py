@@ -1,8 +1,12 @@
 import re
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class VictoriasSecretGBSpider(scrapy.Spider):
@@ -14,46 +18,30 @@ class VictoriasSecretGBSpider(scrapy.Spider):
     }
     allowed_domains = ["victoriassecret.co.uk"]
     start_urls = ["https://www.victoriassecret.co.uk/store-locator"]
+    no_refs = True
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath('//li[@class="vs-store"]'):
             item = Feature()
-            item["name"] = " ".join(
-                filter(
-                    None,
-                    map(
-                        str.strip,
-                        store.xpath('./button[@class="vs-store-btn"]/descendant-or-self::text()').getall(),
-                    ),
-                )
-            ).replace(", find us in the Next store", "")
-            item["phone"] = (
-                store.xpath('./div[@class="vs-store-details"]/div[@class="vs-store-address"]/strong/text()')
-                .get("")
-                .strip()
+            item["branch"] = (
+                store.xpath('./button[@class="vs-store-btn"]/strong/text()').get().removesuffix(" Victoria's Secret")
             )
-            item["addr_full"] = (
-                ", ".join(
-                    filter(
-                        None,
-                        map(
-                            str.strip,
-                            store.xpath(
-                                './div[@class="vs-store-details"]/div[@class="vs-store-address"]/descendant-or-self::text()'
-                            ).getall(),
-                        ),
-                    )
-                ).replace(item["phone"], "")
-                + "United Kingdom"
-            )
-            item["ref"] = item["phone"]
 
-            postcode_re = re.search(r"(\w{1,2}\d{1,2}\w? \d\w{2})", item["addr_full"])
-            if postcode_re:
-                item["postcode"] = postcode_re.group(1)
+            addr = list()
+            for line in store.xpath('./div[@class="vs-store-details"]/div[@class="vs-store-address"]//text()').getall():
+                line = line.strip()
+                if not line:
+                    continue
+                if "Opening Times" in line:
+                    item["opening_hours"] = OpeningHours()
+                elif item.get("opening_hours") is None:
+                    addr.append(line)
+                else:
+                    if m := re.match(r"(\w+) - (\d\d:\d\d) - (\d\d:\d\d)", line):
+                        item["opening_hours"].add_range(*m.groups())
+                    elif m := re.match(r"([\s\d()]+)", line):
+                        item["phone"] = m.group(1)
 
-            if "PINK" in item["name"]:
-                item["brand"] = "Pink"
-                item["brand_wikidata"] = "Q20716793"
+            item["addr_full"] = merge_address_lines(addr)
 
             yield item
