@@ -26,6 +26,8 @@ class KayJewelersSpider(scrapy.Spider):
                 poi_addr = poi["ExtraData"]["Address"]
                 item = DictParser.parse(poi)
                 item["street_address"] = poi.get("Address")
+                if item["street_address"] == item["addr_full"]:
+                    item.pop("addr_full", None)
                 item["state"] = poi_addr.get("Region")
                 item["country"] = poi_addr.get("CountryCode")
                 item["city"] = poi_addr.get("Locality")
@@ -36,7 +38,6 @@ class KayJewelersSpider(scrapy.Spider):
                 item["lon"], item["lat"] = coords[0], coords[1]
 
                 self.opening_hours(poi["ExtraData"].get("HoursOfOpStruct"), item)
-                item["street_address"] = item.pop("addr_full", None)
                 yield item
 
     def opening_hours(self, hours, item):
