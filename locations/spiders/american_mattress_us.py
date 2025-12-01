@@ -18,8 +18,8 @@ class AmericanMattressUSSpider(
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
-        print(response.url)
         item = Feature()
+        item["name"] = self.item_attributes["brand"]
         item["branch"] = response.xpath("//h1/text()").get()
         item["ref"] = item["website"] = response.url
         item["street_address"] = response.xpath('//*[@class="dsg-contact-1__address-line"]/text()').get()
