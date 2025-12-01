@@ -22,11 +22,13 @@ class DelArteFRSpider(SitemapSpider):
         apply_category(Categories.RESTAURANT, item)
         item["extras"]["cuisine"] = "italian;pizza"
         extract_google_position(item, response)
+
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath('//*[@class ="cx-schedules-rows"]//div[contains(@class, "row")]'):
             day = sanitise_day(day_time.xpath('.//*[contains(@class,"cx-days")]/text()').get(), DAYS_FR)
             time = day_time.xpath('//*[contains(@class,"cx-hours")]').xpath("normalize-space()").get()
             if "Fermé" in time:
+                item["opening_hours"].set_closed(day)
                 continue
             for open_close_time in time.split("et"):
                 open_time, close_time = open_close_time.split("-")
