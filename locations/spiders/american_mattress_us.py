@@ -8,14 +8,13 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AmericanMattressUSSpider(
-    SitemapSpider,
-):
+class AmericanMattressUSSpider(SitemapSpider):
     name = "american_mattress_us"
     sitemap_urls = ["https://cdn.avbportal.com/magento-media/sitemaps/bs0085/sitemap.xml"]
     item_attributes = {"brand": "American Mattress", "brand_wikidata": "Q126896153"}
     sitemap_rules = [("/locations/", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def parse(self, response):
         item = Feature()
