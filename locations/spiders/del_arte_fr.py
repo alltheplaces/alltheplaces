@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -13,14 +16,19 @@ class DelArteFRSpider(SitemapSpider):
     sitemap_rules = [("/store-finder/", "parse")]
     sitemap_follow = ["Store"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["branch"] = response.xpath("//title/text()").get().replace("Restaurant Italien & Pizzeria ", "")
-        item["addr_full"] = response.xpath('//*[@class = "cx-store-address mb-2"]//text()').get()
+        item["branch"] = (
+            response.xpath("//title/text()")
+            .get()
+            .removeprefix("Restaurant Italien & Pizzeria ")
+            .removesuffix(" I Del Arte")
+        )
+        item["street_address"] = response.xpath('//*[@class = "cx-store-address mb-2"]//text()').get()
         item["phone"] = response.xpath('//*[@class= "cx-store-phone"]/text()').get()
+
         apply_category(Categories.RESTAURANT, item)
-        item["extras"]["cuisine"] = "italian;pizza"
         extract_google_position(item, response)
 
         item["opening_hours"] = OpeningHours()
