@@ -9,7 +9,10 @@ from locations.items import Feature
 
 class VolksbankATSpider(scrapy.Spider):
     name = "volksbank_at"
-    item_attributes = {"brand": "Volksbank", "brand_wikidata": "Q695110", "nsi_id": "N/A"}
+    item_attributes = {
+        "brand": "Volksbank",
+        "brand_wikidata": "Q695110",
+    }
     start_urls = ["https://www.volksbank.at/m101/volksbank/DownloadServlet?action=vb_finder_ajax"]
     no_refs = True
 
