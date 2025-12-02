@@ -8,6 +8,7 @@ class DunnsSpider(JSONBlobSpider):
     start_urls = ["https://store-locator-shopify-app-d9f525452f2f.herokuapp.com/api/stores?brand=Dunns"]
 
     def post_process_item(self, item, response, feature):
+        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
         item["ref"] = feature["_id"]
         oh = OpeningHours()
         for day, time in feature["operating_hours"].items():
