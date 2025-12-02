@@ -13,9 +13,7 @@ class DunnsSpider(JSONBlobSpider):
         oh = OpeningHours()
         for day, time in feature["operating_hours"].items():
             if day.title() in DAYS_FULL:
-                open_time = time["open"]
-                close_time = time["close"]
-                oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
-            item["opening_hours"] = oh.as_opening_hours()
+                oh.add_range(day, time["open"], time["close"], time_format="%H:%M:%S")
+            item["opening_hours"] = oh
 
         yield item
