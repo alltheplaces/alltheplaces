@@ -1,6 +1,5 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,5 +13,4 @@ class GoApeGBSpider(SitemapSpider, StructuredDataSpider):
         item["addr_full"] = item.pop("street_address").removeprefix("Go Ape ")):
         item["branch"] = item.pop("name").removeprefix("Go Ape ")
         item["ref"] = response.url
-        apply_category({"leisure": "sports_centre", "aerialway": "zip_line"}, item)
         yield item
