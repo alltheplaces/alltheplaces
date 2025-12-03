@@ -1,6 +1,8 @@
-import json
+from typing import Any
 
+import chompjs
 from scrapy import Selector, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -13,10 +15,10 @@ class LillyBGSpider(Spider):
     allowed_domains = ["www.lillydrogerie.bg"]
     start_urls = ["https://www.lillydrogerie.bg/stores"]
 
-    def parse(self, response):
-        js_blob = response.xpath('//script[contains(text(), "window.stenikShopShopsData =")]/text()').get()
-        js_blob = js_blob.split("window.stenikShopShopsData =", 1)[1].split("}];", 1)[0] + "}]"
-        for location in json.loads(js_blob):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "window.stenikShopShopsData =")]/text()').get()
+        ):
             location["latitude"] = location["latitude"].replace(",", "")
             location["longitude"] = location["longitude"].replace(",", "")
             item = DictParser.parse(location)
