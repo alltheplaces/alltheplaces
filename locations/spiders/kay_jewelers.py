@@ -27,7 +27,7 @@ class KayJewelersSpider(Spider):
             for poi in data:
                 poi_addr = poi["ExtraData"]["Address"]
                 item = DictParser.parse(poi)
-                item["street_address"] = poi.get("Address")
+                item["street_address"] = item.pop("addr_full", None)
                 item["state"] = poi_addr.get("Region")
                 item["country"] = poi_addr.get("CountryCode")
                 item["city"] = poi_addr.get("Locality")
