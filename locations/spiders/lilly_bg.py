@@ -21,7 +21,8 @@ class LillyBGSpider(Spider):
             location["longitude"] = location["longitude"].replace(",", "")
             item = DictParser.parse(location)
             item["ref"] = location["id"]
-            item["addr_full"] = location["description"]
+            item["addr_full"] = None
+            item["street_address"] = item.pop("name")
             item["phone"] = location["mobilephone"]
             hours_string = " ".join(filter(None, Selector(text=location["worktime"]).xpath("//p/text()").getall()))
             item["opening_hours"] = OpeningHours()
