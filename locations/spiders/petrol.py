@@ -76,8 +76,8 @@ class PetrolSpider(Spider):
             if station["status"] != "ACTIVE":
                 continue
             item = DictParser.parse(station)
+            item["housenumber"] = station["address"]["street"]["number"]
             item["street"] = item["street"]["name"]
-            item["street_address"] = ",".join([station["address"]["street"]["number"], item["street"]])
             apply_category(Categories.FUEL_STATION, item)
             if station["croduxBrand"]:
                 item.update(self.CRODUX)
