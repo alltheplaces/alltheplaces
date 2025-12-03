@@ -30,5 +30,3 @@ class LeightonsGBSpider(SitemapSpider):
                     oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
             item["opening_hours"] = oh
             yield item
-
- 
