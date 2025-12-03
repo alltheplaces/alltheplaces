@@ -1,4 +1,4 @@
-from locations.spiders.amazon_locker import AmazonLockerSpider
+from locations.storefinders.amazon_locker import AmazonLockerSpider
 
 
 class AmazonLockerCASpider(AmazonLockerSpider):
