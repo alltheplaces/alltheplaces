@@ -10,7 +10,7 @@ class GoApeGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https:\/\/goape\.co\.uk\/locations\/([-\w]+)/$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["addr_full"] = item.pop("street_address").removeprefix("Go Ape ")):
+        item["addr_full"] = item.pop("street_address").removeprefix("Go Ape ")
         item["branch"] = item.pop("name").removeprefix("Go Ape ")
         item["ref"] = response.url
         yield item
