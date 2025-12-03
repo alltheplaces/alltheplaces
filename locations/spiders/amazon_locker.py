@@ -1,54 +1,12 @@
 from scrapy import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.country_utils import CountryUtils
 from locations.geo import city_locations, postal_regions
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# List of (domain, country) to search.
-# Country code is used for both the coordinate list and the API parameter.
-# The list of domains is from https://www.amazon.com/customer-preferences/country
-# The list of country codes for each domain is from that domain's locker search page at <domain>/ulp
-COUNTRIES = [
-    ("https://www.amazon.ae/", "AE"),
-    ("https://www.amazon.de/", "AT"),
-    ("https://www.amazon.com.au/", "AU"),
-    ("https://www.amazon.com.be/", "BE"),
-    ("https://www.amazon.fr/", "BE"),
-    ("https://www.amazon.com.br/", "BR"),
-    ("https://www.amazon.ca/", "CA"),
-    # ("https://www.amazon.cn/", "CN"),  # Redirects to a mobile app landing page. Likely different API.
-    ("https://www.amazon.de/", "CZ"),
-    ("https://www.amazon.de/", "DE"),
-    ("https://www.amazon.de/", "DK"),
-    ("https://www.amazon.de/", "EE"),
-    ("https://www.amazon.eg/", "EG"),
-    ("https://www.amazon.es/", "ES"),
-    ("https://www.amazon.de/", "FI"),
-    ("https://www.amazon.fr/", "FR"),
-    ("https://www.amazon.co.uk/", "GB"),
-    # ("https://www.amazon.ie/", "IE"),  # TODO: The API exists, but errors. Does it need a local IP?
-    ("https://www.amazon.com/", "IL"),
-    ("https://www.amazon.in/", "IN"),
-    ("https://www.amazon.it/", "IT"),
-    ("https://www.amazon.co.jp/", "JP"),
-    ("https://www.amazon.de/", "LT"),
-    # ("https://www.amazon.de/", "LU"),  # Redundant?
-    ("https://www.amazon.fr/", "LU"),
-    ("https://www.amazon.de/", "LV"),
-    ("https://www.amazon.fr/", "MC"),
-    ("https://www.amazon.com.mx/", "MX"),
-    ("https://www.amazon.nl/", "NL"),
-    ("https://www.amazon.pl/", "PL"),
-    ("https://www.amazon.es/", "PT"),
-    ("https://www.amazon.sa/", "SA"),
-    ("https://www.amazon.se/", "SE"),
-    ("https://www.amazon.sg/", "SG"),
-    ("https://www.amazon.com.tr/", "TR"),
-    ("https://www.amazon.com/", "US"),
-    ("https://www.amazon.co.za/", "ZA"),
-]
 # located_in for storeType in API response
 STORE_TYPES = {
     "AMAZON_WFM": {"located_in": "Whole Foods Market", "located_in_wikidata": "Q1809448"},
@@ -136,7 +94,6 @@ BRANDS_IN_ADDRESS = {
 
 
 class AmazonLockerSpider(JSONBlobSpider):
-    name = "amazon_locker"
     item_attributes = {
         "brand": "Amazon Locker",
         "brand_wikidata": "Q16974764",
@@ -144,16 +101,18 @@ class AmazonLockerSpider(JSONBlobSpider):
     locations_key = "locationList"
 
     async def start(self):
-        for domain, country in COUNTRIES:
-            if country in ("GB", "US", "FR"):
-                # Tested in US to be the maximum population limit that still returns all lockers
-                regions = postal_regions(country, 6799)
-            else:
-                regions = city_locations(country, 6799)
-            for region in regions:
-                yield Request(
-                    f"{domain}location_selector/fetch_locations?longitude={region['longitude']}&latitude={region['latitude']}&clientId=amazon_us_add_to_addressbook_mkt_mobile&countryCode={country}&sortType=DISTANCE"
-                )
+        country_utils = CountryUtils()
+        for domain in self.allowed_domains:
+            for country in country_utils.country_codes_from_spider_name(self.name):
+                if country in ("GB", "US", "FR"):
+                    # Tested in US to be the maximum population limit that still returns all lockers
+                    regions = postal_regions(country, 6799)
+                else:
+                    regions = city_locations(country, 6799)
+                for region in regions:
+                    yield Request(
+                        f"https://{domain}/location_selector/fetch_locations?longitude={region['longitude']}&latitude={region['latitude']}&clientId=amazon_us_add_to_addressbook_mkt_mobile&countryCode={country}&sortType=DISTANCE"
+                    )
 
     def post_process_item(self, item, response, location):
         # Only process actual lockers.
@@ -187,3 +146,61 @@ class AmazonLockerSpider(JSONBlobSpider):
         apply_category(Categories.PARCEL_LOCKER, item)
 
         yield item
+
+
+# Country codes from spider name are used for both the coordinate list and the API parameter.
+# The list of domains is from https://www.amazon.com/customer-preferences/country
+# The list of country codes for each domain is from that domain's locker search page at <domain>/ulp
+# Each domain has been split into a separate spider for better parallelism during the weekly run.
+
+# Domains removed for having no lockers:
+
+# class AmazonLockerAESpider(AmazonLockerSpider):
+#    name = "amazon_locker_ae"
+#    allowed_domains = ["www.amazon.ae"]
+
+# class AmazonLockerBESpider(AmazonLockerSpider):
+#    name = "amazon_locker_be"
+#    allowed_domains = ["www.amazon.com.be"]
+
+# class AmazonLockerBRSpider(AmazonLockerSpider):
+#    name = "amazon_locker_br"
+#    allowed_domains = ["www.amazon.com.br"]
+
+# class AmazonLockerEGSpider(AmazonLockerSpider):
+#    name = "amazon_locker_eg"
+#    allowed_domains = ["www.amazon.eg"]
+
+# TODO: The API exists and returns a response, but the response is always an error.
+# class AmazonLockerIESpider(AmazonLockerSpider):
+#    name = "amazon_locker_ie"
+#    allowed_domains = ["www.amazon.ie"]
+#    requires_proxy = "ie"
+
+# class AmazonLockerINSpider(AmazonLockerSpider):
+#    name = "amazon_locker_in"
+#    allowed_domains = ["www.amazon.in"]
+
+# class AmazonLockerPLSpider(AmazonLockerSpider):
+#    name = "amazon_locker_pl"
+#    allowed_domains = ["www.amazon.pl"]
+
+# class AmazonLockerSASpider(AmazonLockerSpider):
+#    name = "amazon_locker_sa"
+#    allowed_domains = ["www.amazon.sa"]
+
+# class AmazonLockerSESpider(AmazonLockerSpider):
+#    name = "amazon_locker_se"
+#    allowed_domains = ["www.amazon.se"]
+
+# class AmazonLockerSGSpider(AmazonLockerSpider):
+#    name = "amazon_locker_sg"
+#    allowed_domains = ["www.amazon.sg"]
+
+# class AmazonLockerTRSpider(AmazonLockerSpider):
+#    name = "amazon_locker_tr"
+#    allowed_domains = ["www.amazon.com.tr"]
+
+# class AmazonLockerZASpider(AmazonLockerSpider):
+#    name = "amazon_locker_za"
+#    allowed_domains = ["www.amazon.co.za"]
