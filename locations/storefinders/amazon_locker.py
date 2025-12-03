@@ -1,4 +1,5 @@
 from scrapy import Request
+from scrapy.downloadermiddlewares.retry import get_retry_request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.country_utils import CountryUtils
@@ -113,6 +114,13 @@ class AmazonLockerSpider(JSONBlobSpider):
                     yield Request(
                         f"https://{domain}/location_selector/fetch_locations?longitude={region['longitude']}&latitude={region['latitude']}&clientId=amazon_us_add_to_addressbook_mkt_mobile&countryCode={country}&sortType=DISTANCE"
                     )
+
+    def parse(self, response):
+        if response.json().get("isErrored", True):
+            # Usually intermittent
+            return get_retry_request(response.request, spider=self)
+        else:
+            yield from super().parse(response)
 
     def post_process_item(self, item, response, location):
         # Only process actual lockers.
