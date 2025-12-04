@@ -1,6 +1,7 @@
 import re
 from typing import Any
 
+import scrapy
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -17,10 +18,14 @@ class AmpolAUSpider(Spider):
     name = "ampol_au"
     item_attributes = {"brand": "Ampol", "brand_wikidata": "Q4748528"}
     allowed_domains = ["www.ampol.com.au", "digital-api.ampol.com.au"]
-    start_urls = ["https://www.ampol.com.au/_next/static/chunks/pages/%5B%5B...route%5D%5D-f33655acc94f8dd9.js"]
+    start_urls = ["https://www.ampol.com.au/find-a-service-station"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        js_url = response.xpath('//*[contains(@src,"route")]/@src').get()
+        yield scrapy.Request(url="https://www.ampol.com.au" + js_url, callback=self.parse_token)
+
+    def parse_token(self, response):
         token = re.search(r"Ocp-Apim-Subscription-Key\"\s*:\s*\"([a-z0-9]+)", response.text).group(1)
         yield JsonRequest(
             url="https://digital-api.ampol.com.au/siteservice/Service/",
