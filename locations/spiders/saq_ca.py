@@ -8,7 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class SAQCASpider(scrapy.Spider):
+class SaqCASpider(scrapy.Spider):
     name = "saq_ca"
     item_attributes = {"brand": "SAQ", "brand_wikidata": "Q3488077"}
 
