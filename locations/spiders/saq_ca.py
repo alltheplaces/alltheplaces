@@ -28,7 +28,6 @@ class SAQCASpider(scrapy.Spider):
             for shop in data["list"]:
                 item = DictParser.parse(shop)
                 item["branch"] = item.pop("name")
-                item["website"] = "https://www.saq.com/"
                 apply_category(Categories.SHOP_ALCOHOL, item)
                 yield item
             content_loaded = kwargs["content_loaded"] + 10
