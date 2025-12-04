@@ -15,6 +15,7 @@ class GraingerUSSpider(PlaywrightSpider):
     name = "grainger_us"
     item_attributes = {"brand": "Grainger", "brand_wikidata": "Q1627894"}
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in country_iseadgg_centroids(["US"], 315):
