@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class MitsubishiAUSpider(Spider):
@@ -117,14 +118,29 @@ class MitsubishiAUSpider(Spider):
 
             if sales_available:
                 sales_item = self.build_sales_item(item)
+                sales_item["opening_hours"] = self.parse_hours(poi.get("trading_hours", {}))
                 apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
                 yield sales_item
 
             if service_available:
                 service_item = self.build_service_item(item)
+                service_item["opening_hours"] = self.parse_hours(poi.get("service_hours", {}))
                 yield service_item
 
             if not sales_available and not service_available:
                 self.logger.error(f"Unknown services: {services}, {item['ref']}")
 
-            # TODO: opening hours
+    def parse_hours(self, hours: dict) -> OpeningHours:
+        try:
+            oh = OpeningHours()
+            for day, time in hours.items():
+                if day == "public_holidays":
+                    continue
+                if "closed" in time.lower():
+                    oh.set_closed(day)
+                elif "-" in time:
+                    open, close = time.split("-")
+                    oh.add_range(day, open.strip(), close.strip(), "%I:%M%p")
+            return oh
+        except Exception as e:
+            self.logger.warning("Error parsing {} {}".format(hours, e))
