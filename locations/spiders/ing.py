@@ -34,7 +34,7 @@ class IngSpider(scrapy.Spider):
                     "lat": store.get("latitude"),
                     "lon": store.get("longitude"),
                     "name": store.get("name"),
-                    "type": store.get("type")
+                    "type": store.get("type"),
                 },
             )
 
