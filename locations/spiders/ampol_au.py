@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -15,7 +17,7 @@ class AmpolAUSpider(Spider):
     allowed_domains = ["www.ampol.com.au"]
     start_urls = ["https://www.ampol.com.au/custom/api/locator/get"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.ampol.com.au/custom/api/authorize/token",
             method="POST",

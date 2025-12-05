@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import Request
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.geo import city_locations, country_iseadgg_centroids
@@ -15,7 +15,7 @@ class MitsubishiIDSpider(JSONBlobSpider):
     }
     locations_key = "data"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         # 40 is the maximum and 12 is the default number of results per page.
         # Seems there is no way to go over 40 results for all pages.
         for lat, lon in country_iseadgg_centroids(["ID"], 24):

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from chompjs import parse_js_object
 from scrapy.http import Request
 
@@ -14,7 +16,7 @@ class BurgerKingILSpider(JSONBlobSpider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         headers = {
             "Sec-Ch-Ua-Platform": "Linux",
             "Sec-Fetch-Mode": "navigate",

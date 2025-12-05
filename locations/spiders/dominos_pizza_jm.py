@@ -5,5 +5,5 @@ class DominosPizzaJMSpider(DominosPizzaInternationalSpider):
     name = "dominos_pizza_jm"
     region_code = "JM"
     dpz_market = "JAMAICA"
-    domain = "order.golo01.dominos.com"
+    domain = "order.golo04.dominos.com"
     city_search = True

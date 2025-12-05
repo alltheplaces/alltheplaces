@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
@@ -12,7 +14,7 @@ class BurgerKingMASpider(JSONBlobSpider):
     start_urls = ["https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0"]
     locations_key = "data"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,

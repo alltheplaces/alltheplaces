@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -68,7 +70,7 @@ class CostaCoffeeSpider(Spider):
     def __init__(self):
         self.country_utils = CountryUtils()
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=f"{url}&limit={self.page_size}")
 

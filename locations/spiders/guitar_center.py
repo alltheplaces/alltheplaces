@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.storefinders.rio_seo import RioSeoSpider
@@ -8,7 +10,7 @@ class GuitarCenterSpider(RioSeoSpider):
     item_attributes = {"brand": "Guitar Center", "brand_wikidata": "Q3622794"}
     end_point = "https://maps.stores.guitarcenter.com"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://stores.guitarcenter.com/api/getAutocompleteData", callback=self.parse_autocomplete)
 
     def post_process_feature(self, feature, location):

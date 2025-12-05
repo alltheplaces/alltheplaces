@@ -1,5 +1,5 @@
 import json
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -14,7 +14,7 @@ class AdmiralSportsSpider(JSONBlobSpider):
     item_attributes = {"brand": "Admiral Sports", "brand_wikidata": "Q4683720"}
     locations_key = ["data", "mc_asl_list", "items"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://payment.admiralsports.shop/graphql",
             data={

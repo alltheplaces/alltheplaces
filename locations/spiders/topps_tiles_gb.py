@@ -1,7 +1,7 @@
 from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 
@@ -9,20 +9,11 @@ from locations.dict_parser import DictParser
 class ToppsTilesGBSpider(Spider):
     name = "topps_tiles_gb"
     item_attributes = {"brand": "Topps Tiles", "brand_wikidata": "Q17026595"}
-
-    def start_requests(self):
-        yield JsonRequest(
-            url="https://www.toppstiles.co.uk/api/locateStore",
-            data={
-                "address": "London",
-                "country": "GB",
-                "maxDistance": 1000,
-                "limit": 500,
-            },
-        )
+    start_urls = ["https://www.toppstiles.co.uk/api/n/find?type=store"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["stores"]:
+        for store in response.json()["catalog"]:
             store["street_address"] = store.pop("address")
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")

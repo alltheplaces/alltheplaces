@@ -1,8 +1,8 @@
-import json
-from typing import Iterable
+from json import loads
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request, Selector, Spider
-from scrapy.http import FormRequest, Response
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest, Request, Response
 
 from locations.items import Feature
 
@@ -19,7 +19,7 @@ class PepcoSpider(Spider):
     # collected shop details. When no more pages are found, request https://pepco.eu/find-store/ and combine the data in
     # the parse() method.
 
-    def get_shop_detail_request(self, page: int, shop_details: list[str]):
+    def get_shop_detail_request(self, page: int, shop_details: list[str]) -> FormRequest:
         return FormRequest(
             "https://pepco.eu/wp-admin/admin-ajax.php",
             formdata={"action": "get_more_shops", "search": "", "page": str(page)},
@@ -27,10 +27,10 @@ class PepcoSpider(Spider):
             cb_kwargs={"shop_details": shop_details},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.get_shop_detail_request(0, [])
 
-    def parse_shop_details(self, response, shop_details: list[str] = None):
+    def parse_shop_details(self, response, shop_details: list[str] = None) -> Iterable[FormRequest | Request]:
         result = response.json()
         shop_details += result["shops"]
         next_page = result["page"]
@@ -41,7 +41,7 @@ class PepcoSpider(Spider):
             yield self.get_shop_detail_request(next_page, shop_details)
 
     def parse(self, response: Response, shops: Selector = None) -> Iterable[Feature]:
-        for location in json.loads(response.xpath("//@shops-map-markers").get()):
+        for location in loads(response.xpath("//@shops-map-markers").get()):
             yield Feature(
                 ref=location["shop_id"],
                 lat=location["coordinates"]["lat"],

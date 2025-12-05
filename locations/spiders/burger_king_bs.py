@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request
@@ -10,7 +11,7 @@ from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-# Also used by DO, FJ, HU, PY
+# Also used by DO, HU, PY
 class BurgerKingBSSpider(Spider):
     name = "burger_king_bs"
     allowed_domains = ["www.burgerking.bs"]
@@ -19,7 +20,7 @@ class BurgerKingBSSpider(Spider):
     country_code = "BS"
     custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for city in city_locations(self.country_code):
             yield Request(
                 url=f"{self.host}/locations?field_geofield_distance[origin][lat]={city['latitude']}&field_geofield_distance[origin][lon]={city['longitude']}",

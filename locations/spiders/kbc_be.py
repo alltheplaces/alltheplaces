@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -14,7 +14,7 @@ class KbcBESpider(Spider):
 
     CASHPOINT_BRAND = {"brand": "Bancontact CASH", "brand_wikidata": "Q112875867"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("BE"):
             yield JsonRequest(
                 url=f'https://www.kbc.be/X9Y-P/elasticsearch-service/api/v3/branches/search?q={city["name"]}&filter=KBC_PALO&filter=CBC_PALO&filter=KBC_VERZ&filter=CBC_VERZ&filter=KBC_AUTO&filter=CBC_AUTO&filter=BATOPIN_AUTO&language=en&radius=10',

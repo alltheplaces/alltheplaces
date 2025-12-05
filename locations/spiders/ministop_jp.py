@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
 
@@ -14,7 +14,7 @@ class MinistopJPSpider(JSONBlobSpider):
     start_urls = ["https://map.ministop.co.jp/"]
     locations_key = ["pageProps", "allShopsData", "shops"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.start_urls[0], callback=self.parse_nextjs_build_id)
 
     def parse_nextjs_build_id(self, response: Response) -> Iterable[Request]:

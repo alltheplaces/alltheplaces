@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -36,7 +36,7 @@ class BitstopPRUSSpider(JSONBlobSpider):
         "PAI": {"operator": "PAI", "brand": "PAI"},
     }
 
-    def start_requests(self) -> Feature[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], method="POST")
 
     def extract_json(self, response: Response) -> list[dict]:

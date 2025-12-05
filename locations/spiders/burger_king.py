@@ -1,5 +1,8 @@
+from typing import AsyncIterator
+
 import geonamescache
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -14,12 +17,12 @@ BURGER_KING_SHARED_ATTRIBUTES = {
 }
 
 
-class BurgerKingSpider(scrapy.Spider):
+class BurgerKingSpider(Spider):
     name = "burger_king"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "DOWNLOAD_TIMEOUT": 30}
 
-    def make_request(self, lat, lon, country_code, search_radius, result_limit, url):
+    def make_request(self, lat, lon, country_code, search_radius, result_limit, url) -> JsonRequest:
         body = [
             {
                 "operationName": "GetRestaurants",
@@ -117,7 +120,7 @@ class BurgerKingSpider(scrapy.Spider):
                 ),
             }
         ]
-        return scrapy.http.JsonRequest(
+        return JsonRequest(
             url=url,
             data=body,
             headers={"x-ui-language": "en", "x-ui-region": country_code},
@@ -142,7 +145,7 @@ class BurgerKingSpider(scrapy.Spider):
         gc = geonamescache.GeonamesCache()
         return [(c["iso"], c["capital"]) for c in gc.get_countries().values() if c["continentcode"] == "EU"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         ae_endpoint = "https://www.burgerking.ae/api/whitelabel"
         eu_endpoint = "https://euc1-prod-bk.rbictg.com/graphql"
         gb_endpoint = "https://www.burgerking.co.uk/api/whitelabel"
