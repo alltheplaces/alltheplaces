@@ -96,7 +96,7 @@ tippecanoe --cluster-distance=25 \
            --maximum-tile-bytes=10000000 \
            --layer="alltheplaces" \
            --read-parallel \
-           --attribution="<a href=\"https://www.alltheplaces.xyz/\">All The Places</a> ${RUN_TIMESTAMP}" \
+           --attribution="<a href=\"https://www.alltheplaces.xyz/\">All the Places</a> ${RUN_TIMESTAMP}" \
            -o "${SPIDER_RUN_DIR}/output.pmtiles" \
            "${SPIDER_RUN_DIR}"/output/*.geojson
 retval=$?

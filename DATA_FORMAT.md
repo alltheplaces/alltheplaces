@@ -1,4 +1,4 @@
-# All The Places Data Format
+# All the Places Data Format
 
 The output of the periodic run of all spiders posted on https://www.alltheplaces.xyz/ is a .zip of each spider's output. Each spider produces a single GeoJSON `FeatureCollection` where each `Feature` contains the data for a single scraped item. Along with the GeoJSON output, the collection includes logs and statistics, which can help understand what happened during the spider's run.
 

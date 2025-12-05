@@ -23,7 +23,7 @@ class OSMExporter(XmlItemExporter):
 
     def start_exporting(self):
         self.xg.startDocument()
-        self.xg.startElement("osm", {"version": "0.6", "upload": "never", "generator": "All The Places"})
+        self.xg.startElement("osm", {"version": "0.6", "upload": "never", "generator": "All the Places"})
         self._beautify_newline(new_item=True)
 
     def export_item(self, item):
