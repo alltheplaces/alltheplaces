@@ -15,8 +15,7 @@ class PncBankUSSpider(Spider):
     item_attributes = {"brand": "PNC Bank", "brand_wikidata": "Q38928"}
     start_urls = ["https://apps.pnc.com/locator/bundle/bundle.js"]
     allowed_domains = ["apps.pnc.com"]
-    custom_settings = {"ROBOT"
-    "STXT_OBEY": False}
+    custom_settings = {"ROBOT" "STXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.start_urls[0], callback=self.parse_app_key)
