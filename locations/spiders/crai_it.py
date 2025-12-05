@@ -1,15 +1,6 @@
-import json
-import re
 from scrapy.spiders import SitemapSpider
 
-from requests import Response
-import scrapy
-from scrapy.http.request import Request
-
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_DE, DAYS_HR, DAYS_HU, DAYS_IT, DAYS_SI, OpeningHours, sanitise_day
-from locations.items import Feature
+from locations.hours import DAYS_IT, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
 
