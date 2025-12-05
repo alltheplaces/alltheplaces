@@ -12,6 +12,8 @@ class KbcBESpider(Spider):
     name = "kbc_be"
     item_attributes = {"brand": "KBC", "brand_wikidata": "Q941020"}
 
+    CASHPOINT_BRAND = {"brand": "Bancontact CASH", "brand_wikidata": "Q112875867"}
+
     async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("BE"):
             yield JsonRequest(
@@ -30,4 +32,8 @@ class KbcBESpider(Spider):
                     apply_category(Categories.BANK, item)
                     apply_yes_no(Extras.ATM, item, "KBC_AUTO" in bank["branchTypes"])
                     apply_yes_no(Extras.CASH_IN, item, "KBC_AUTO_CASH_IN" in bank["branchTypes"])
+
+                if bank["branchType"] == "BATOPIN_AUTO":
+                    item.update(self.CASHPOINT_BRAND)
+
                 yield item
