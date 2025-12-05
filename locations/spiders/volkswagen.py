@@ -54,12 +54,11 @@ class VolkswagenSpider(JSONBlobSpider):
         "SRVONLY",
     ]
     countries = {}
-
+    # Some countries use a different language parameter than the one returned by get_locale.
+    OVERRIDE_LOCALE = {"TN": "fr-TN", "NO": "no-NO"}
     for country in GeonamesCache().get_countries().keys():
         if lang := get_locale(country):
-            # get_locale returns ar-TN, but API works with fr-TN
-            if country == "TN":
-                lang = "fr-TN"
+            lang = OVERRIDE_LOCALE.get(country, lang)
             countries[country] = lang
 
     countries.pop("BE")  # volkswagen_be spider
@@ -158,7 +157,7 @@ class VolkswagenSpider(JSONBlobSpider):
         for dealer in dealers:
             item = DictParser.parse(dealer)
             item["street_address"] = item.pop("street")
-            item["ref"] = dealer["bnr"]
+            item["ref"] = f"{dealer['bnr']}-{brand.get('brand')}"
             item["state"] = dealer.get("federalState")
             offers = dealer.get("contracts", {})
             # Locations in ME have country property equal to RS
