@@ -2,7 +2,6 @@ import json
 import re
 
 from locations.categories import Categories
-from locations.hours import DAYS_CZ, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -30,10 +29,3 @@ class TmobileCZSpider(JSONBlobSpider):
         del feature["address"]
         feature["city"] = feature["a_city"]
         feature["postcode"] = feature["a_psc"]
-
-    def post_process_item(self, item, response, feature: dict):
-        oh = OpeningHours()
-        for hrs in feature["openinghrs"]:
-            oh.add_ranges_from_string(hrs, DAYS_CZ)
-        item["opening_hours"] = oh
-        yield item
