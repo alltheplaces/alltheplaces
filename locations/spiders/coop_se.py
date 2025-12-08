@@ -1,12 +1,13 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_SE, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
 class CoopSESpider(scrapy.Spider):
     name = "coop_se"
-    item_attributes = {"brand": "Coop", "brand_wikidata": "Q15229319"}
+    item_attributes = {"brand": "Coop", "brand_wikidata": "Q106684510"}
     start_urls = ["https://proxy.api.coop.se/external/store/stores?api-version=v2"]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"ocp-apim-subscription-key": "990520e65cc44eef89e9e9045b57f4e9"}}
 
@@ -31,7 +32,16 @@ class CoopSESpider(scrapy.Spider):
                 for day in day_range(start_day, end_day):
                     oh.add_range(day, opening_hour["openFrom"], opening_hour["openTo"], time_format="%H:%M:%S")
 
-        yield Feature(
+        website = None
+        if store.get("url"):
+            if store.get("url").startswith("/"):
+                website = f"https://www.coop.se{store.get('url')}"
+            else:
+                website = store.get("url")
+
+        store_type = store.get("concept").get("name")
+
+        item = Feature(
             {
                 "ref": str(store.get("id")),
                 "name": store.get("name"),
@@ -39,10 +49,16 @@ class CoopSESpider(scrapy.Spider):
                 "postcode": store["postalCode"],
                 "city": store["city"],
                 "phone": store.get("phone"),
-                "website": f"https://www.coop.se{store.get('url')}" if store.get("url") else None,
+                "website": website,
                 "lat": store.get("latitude"),
                 "lon": store.get("longitude"),
                 "opening_hours": oh,
-                "extras": {"store_type": store.get("concept").get("name")},
+                "extras": {"store_type": store_type},
             }
         )
+        if store_type == "Coop kök cafe":
+            apply_category(Categories.CAFE, item)
+        else:
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+
+        yield item

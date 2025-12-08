@@ -6,12 +6,12 @@ class RowlandsPharmacyGBSpider(UberallSpider):
     item_attributes = {"brand": "Rowlands Pharmacy", "brand_wikidata": "Q62663235"}
     key = "bwzEvjRHRFzJjkeRduLJgHcDYens3x"
 
-    def parse_item(self, item, feature, **kwargs):
-        if not feature["ref"]:
+    def post_process_item(self, item, response, location):
+        if not location["ref"]:
             return None
 
         item["website"] = "https://rowlandspharmacy.co.uk/find-local-pharmacy#!/l/{}".format(
-            "/".join([item["city"], item["street_address"], feature["ref"]]).lower().replace(" ", "-")
+            "/".join([item["city"], item["street_address"], location["ref"]]).lower().replace(" ", "-")
         )
 
         yield item

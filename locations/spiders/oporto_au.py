@@ -8,31 +8,30 @@ from locations.hours import OpeningHours
 class OportoAUSpider(Spider):
     name = "oporto_au"
     item_attributes = {"brand": "Oporto", "brand_wikidata": "Q4412342"}
-    allowed_domains = ["www.oporto.com.au"]
-    start_urls = ["https://www.oporto.com.au/api-proxy/stores?include=amenities,collection,storeAddress"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt does not exist and HTML page returned instead.
+    start_urls = ["https://d3c377j0gjsips.cloudfront.net/opo_all_store_sync.json?t=202508131411"]
 
     def parse(self, response):
         for location in response.json()["data"]:
             item = DictParser.parse(location["attributes"])
-            item["ref"] = location["attributes"]["storeNumber"]
-            address = location["relationships"]["storeAddress"]["data"]["attributes"]["addressComponents"]
-            if address["floor"]["value"]:
-                item["extras"].update({"addr:floor": address["floor"]["value"]})
-            item["housenumber"] = " / ".join(filter(None, [address["unit"]["value"], address["streetNumber"]["value"]]))
-            item["street"] = address["streetName"]["value"]
-            item["city"] = address["suburb"]["value"]
-            item["state"] = address["state"]["value"]
-            item["country"] = address["country"]["longValue"]
-            item["postcode"] = address["postcode"]["value"]
+            item["ref"] = location["id"]
+            item["branch"] = item.pop("name")
+            if location["relationships"].get("storeAddress"):
+                address = location["relationships"]["storeAddress"]["data"]["attributes"]["addressComponents"]
+                if address["floor"]["value"]:
+                    item["extras"].update({"addr:floor": address["floor"]["value"]})
+                item["housenumber"] = " / ".join(
+                    filter(None, [address["unit"]["value"], address["streetNumber"]["value"]])
+                )
+                item["street_address"] = address["streetName"]["value"]
+                item["city"] = address["suburb"]["value"]
+                item["state"] = address["state"]["value"]
+                item["country"] = address["country"]["longValue"]
+                item["postcode"] = address["postcode"]["value"]
+                item["lat"] = address["latitude"]["value"]
+                item["lon"] = address["longitude"]["value"]
             item["phone"] = location["attributes"]["storePhone"]
-            item["email"] = location["attributes"]["storeEmail"]
-            item["website"] = "https://www.oporto.com.au/locations/" + location["attributes"][
-                "accountName"
-            ].lower().replace(" ", "-")
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"]["pickupTypes"]["driveThru"], False)
-            apply_yes_no(Extras.TAKEAWAY, item, location["attributes"]["pickupTypes"]["instore"], False)
-            apply_yes_no(Extras.DELIVERY, item, location["attributes"]["isDeliveryEnabled"], False)
+            item["website"] = "https://www.oporto.com.au/locations/" + item["branch"].lower().replace(" ", "-")
+
             extra_features = [
                 k for k, v in location["relationships"]["amenities"]["data"]["attributes"].items() if v is True
             ]

@@ -4,7 +4,7 @@ import re
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CineworldGBJESpider(Spider):
@@ -16,7 +16,7 @@ class CineworldGBJESpider(Spider):
     def parse(self, response, **kwargs):
         for location in json.loads(re.search(r"apiSitesList = (\[.+\]),", response.text).group(1)):
             item = DictParser.parse(location)
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [
                     location["address"]["address1"],
                     location["address"]["address2"],

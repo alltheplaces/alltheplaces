@@ -1,15 +1,17 @@
+from typing import Any, AsyncIterator
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsLatinAmericaSpider(Spider):
+class McdonaldsLatinAmericaSpider(Spider):
     name = "mcdonalds_latin_america"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["api-middleware-mcd.mcdonaldscupones.com"]
     start_urls = ["https://api-middleware-mcd.mcdonaldscupones.com/api/restaurant/list"]
     country_codes = [
@@ -30,11 +32,11 @@ class McDonaldsLatinAmericaSpider(Spider):
         "VE",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country_code in self.country_codes:
             yield JsonRequest(url=self.start_urls[0], headers={"x-app-country": country_code}, dont_filter=True)
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         if not response.json().get("status"):
             return
 
@@ -45,7 +47,7 @@ class McDonaldsLatinAmericaSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["code"]
             if location["country"] in ["AR", "PR"]:
-                item["addr_full"] = location["address"]
+                item["street_address"] = location["address"]
                 item.pop("street_address", None)
             else:
                 item["street_address"] = location["address"]
@@ -58,11 +60,11 @@ class McDonaldsLatinAmericaSpider(Spider):
                         item["opening_hours"].add_range(
                             day_hours["day"].title(), time_period["start"], time_period["end"]
                         )
-
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location["services"]["driveThru"], False)
-            apply_yes_no(Extras.DELIVERY, item, location["services"]["mcDelivery"], False)
-            apply_yes_no(Extras.WIFI, item, location["services"]["wifi"], False)
-            apply_yes_no(Extras.WHEELCHAIR, item, location["services"]["wheelchairAccess"], False)
+            if services := location.get("services"):
+                apply_yes_no(Extras.DRIVE_THROUGH, item, services.get("driveThru") is True, False)
+                apply_yes_no(Extras.DELIVERY, item, services.get("mcDelivery") is True, False)
+                apply_yes_no(Extras.WIFI, item, services.get("wifi") is True, False)
+                apply_yes_no(Extras.WHEELCHAIR, item, services.get("wheelchairAccess") is True, False)
 
             apply_category(Categories.FAST_FOOD, item)
 

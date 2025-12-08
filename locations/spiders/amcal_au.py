@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -9,7 +11,7 @@ class AmcalAUSpider(Spider):
     name = "amcal_au"
     item_attributes = {"brand": "Amcal", "brand_wikidata": "Q63367373"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "businessid": "4",
             "latitude": "0",
@@ -56,5 +58,8 @@ class AmcalAUSpider(Spider):
         for day_name, day_hours in response.json()["trading_hours"].items():
             if day_name not in DAYS_FULL:
                 continue
-            item["opening_hours"].add_range(day_name, day_hours["open"], day_hours["closed"], "%I:%M %p")
+            # Open and closes at 12AM is closed in this context; so only
+            # add hours when they differ.
+            if day_hours["open"] != day_hours["closed"]:
+                item["opening_hours"].add_range(day_name, day_hours["open"], day_hours["closed"], "%I:%M %p")
         yield item

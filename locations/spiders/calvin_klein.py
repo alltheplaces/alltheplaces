@@ -1,15 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class CalvinKleinSpider(scrapy.Spider):
+class CalvinKleinSpider(Spider):
     name = "calvin_klein"
     item_attributes = {"brand": "Calvin Klein", "brand_wikidata": "Q1068628"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for region in [
             "CalvinKleinAT",
             "CalvinKleinBE",
@@ -47,7 +50,7 @@ class CalvinKleinSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
-            location["address"]["street_address"] = ", ".join(location["address"].pop("addressLines"))
+            location["address"]["street_address"] = clean_address(location["address"].pop("addressLines"))
             item = DictParser.parse(location)
 
             oh = OpeningHours()

@@ -6,7 +6,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SupervaluIESpider(Spider):
@@ -26,7 +26,7 @@ class SupervaluIESpider(Spider):
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             item["extras"]["check_date"] = location["modified"]
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [location["address_line_1"], location["address_line_2"], location["address_line_3"]]
             )
             item["postcode"] = location["address_post_code"]

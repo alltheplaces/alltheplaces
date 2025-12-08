@@ -1,12 +1,14 @@
 import json
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import FormRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 GAMESTOP_SHARED_ATTRIBUTES = {
@@ -23,11 +25,9 @@ class GamestopUSSpider(Spider):
     start_urls = [
         "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?hasCondition=false&hasVariantsAvailableForLookup=false&hasVariantsAvailableForPickup=false&source=plp&showMap=false&products=undefined:1"
     ]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.2
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -86,15 +86,18 @@ class GamestopUSSpider(Spider):
                     formdata={"postalCode": str(postcode), "radius": "200", "csrf_token": "0"},
                 )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["name"] = item["name"].replace(" - GameStop", "")
             if location.get("address2"):
                 suite = location.get("address2").upper().replace("STE", "Suite")
-                item["street_address"] = ", ".join(filter(None, [suite, location.get("address1")]))
+                item["street_address"] = clean_address([suite, location.get("address1")])
             item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
             item["opening_hours"] = OpeningHours()
             for day_hours in json.loads(location.get("storeOperationHours")):
                 item["opening_hours"].add_range(day_hours["day"], day_hours["open"], day_hours["close"], "%H%M")
+
+            apply_category(Categories.SHOP_VIDEO_GAMES, item)
+
             yield item

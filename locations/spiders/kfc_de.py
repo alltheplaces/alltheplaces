@@ -1,10 +1,15 @@
-from scrapy import Spider
+from typing import Any
+
+import chompjs
+from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
-from locations.user_agents import BROWSER_DEFAULT
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
+from locations.user_agents import FIREFOX_LATEST
 
 SERVICES_MAPPING = {
     "click_collect": Extras.TAKEAWAY,
@@ -15,17 +20,19 @@ SERVICES_MAPPING = {
 }
 
 
-class KFCDESpider(Spider):
+class KfcDESpider(PlaywrightSpider):
     name = "kfc_de"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.de/find-a-kfc/allrestaurant"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST} | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response, **kwargs):
-        for location in response.json():
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in chompjs.parse_js_object(response.text):
+            if location["name"].endswith(" - COMING SOON"):
+                continue
             location["street_address"] = location.pop("address")
             item = DictParser.parse(location)
+            item["name"] = None
             item["ref"] = location["id"]
             item["website"] = "https://www.kfc.de/find-a-kfc/" + location["urlName"]
             oh = OpeningHours()
@@ -40,4 +47,6 @@ class KFCDESpider(Spider):
                     apply_yes_no(tags, item, True, True)
                 else:
                     self.logger.warning(f"Unknown service {service}")
+
+            apply_yes_no(Extras.INDOOR_SEATING, item, "dinein" in location["dispositions"])
             yield item

@@ -5,12 +5,15 @@ import io
 import json
 import logging
 import uuid
+from typing import Any, Generator, Type
 
+from scrapy import Item, Spider
 from scrapy.exporters import JsonItemExporter
 from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
+from locations.extensions.add_lineage import spider_class_to_lineage
 from locations.settings import SPIDER_MODULES
 
 mapping = (
@@ -28,7 +31,7 @@ mapping = (
     ("website", "website"),
     ("twitter", "contact:twitter"),
     ("facebook", "contact:facebook"),
-    ("email", "contact:email"),
+    ("email", "email"),
     ("opening_hours", "opening_hours"),
     ("image", "image"),
     ("brand", "brand"),
@@ -41,7 +44,7 @@ mapping = (
 )
 
 
-def item_to_properties(item):
+def item_to_properties(item: Item) -> dict[str, Any]:
     props = {}
 
     # Ref is required, unless `no_refs = True` is set in spider
@@ -64,7 +67,51 @@ def item_to_properties(item):
     return props
 
 
-def compute_hash(item):
+def item_to_geometry(item: Item) -> dict | None:
+    """
+    Convert the item to a GeoJSON geometry object. If the item has lat and lon fields,
+    but no geometry field, then a Point geometry will be created. Otherwise the
+    geometry field will be returned as is.
+
+    :param item: The scraped item.
+    :return: The GeoJSON geometry object.
+    """
+
+    lat = item.get("lat")
+    lon = item.get("lon")
+    geometry = item.get("geometry")
+
+    if lat and lon and not geometry:
+        try:
+            geometry = {
+                "type": "Point",
+                "coordinates": [float(item["lon"]), float(item["lat"])],
+            }
+        except ValueError:
+            logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
+
+    # Check for empty or missing coordinates list in geometry
+    if geometry and isinstance(geometry, dict):
+        coordinates = geometry.get("coordinates")
+        if not coordinates:
+            logging.warning("Invalid geometry coordinates: %s", geometry)
+            return None
+
+    return geometry
+
+
+def item_to_geojson_feature(item: Item) -> dict:
+    feature = {
+        "id": compute_hash(item),
+        "type": "Feature",
+        "properties": item_to_properties(item),
+        "geometry": item_to_geometry(item),
+    }
+
+    return feature
+
+
+def compute_hash(item: Item) -> str:
     ref = str(item.get("ref") or uuid.uuid1()).encode("utf8")
     sha1 = hashlib.sha1(ref)
 
@@ -74,15 +121,20 @@ def compute_hash(item):
     return base64.urlsafe_b64encode(sha1.digest()).decode("utf8")
 
 
-def find_spider_class(spider_name):
+def find_spider_class(spider_name: str):
     if not spider_name:
         return None
-    for mod in SPIDER_MODULES:
+    for spider_class in iter_spider_classes_in_modules():
+        if spider_name == spider_class.name:
+            return spider_class
+    return None
+
+
+def iter_spider_classes_in_modules(modules=SPIDER_MODULES) -> Generator[Type[Spider], Any, None]:
+    for mod in modules:
         for module in walk_modules(mod):
             for spider_class in iter_spider_classes(module):
-                if spider_name == spider_class.name:
-                    return spider_class
-    return None
+                yield spider_class
 
 
 def get_dataset_attributes(spider_name) -> {}:
@@ -92,6 +144,8 @@ def get_dataset_attributes(spider_name) -> {}:
     if not settings.get("ROBOTSTXT_OBEY", True):
         # See https://github.com/alltheplaces/alltheplaces/issues/4537
         dataset_attributes["spider:robots_txt"] = "ignored"
+    if not dataset_attributes.get("lineage"):
+        dataset_attributes["spider:lineage"] = spider_class_to_lineage(spider_class).value
     dataset_attributes["@spider"] = spider_name
     dataset_attributes["spider:collection_time"] = datetime.datetime.now().isoformat()
 
@@ -108,9 +162,11 @@ class GeoJsonExporter(JsonItemExporter):
 
     def export_item(self, item):
         spider_name = item.get("extras", {}).get("@spider")
+
         if self.first_item:
             self.spider_name = spider_name
             self.write_geojson_header()
+
         if spider_name != self.spider_name:
             # It really should not happen that a single exporter instance
             # handles output from different spiders. If it does happen,
@@ -123,23 +179,12 @@ class GeoJsonExporter(JsonItemExporter):
         super().export_item(item)
 
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
-        feature = []
-        feature.append(("type", "Feature"))
-        feature.append(("id", compute_hash(item)))
-        feature.append(("properties", item_to_properties(item)))
-
-        lat = item.get("lat")
-        lon = item.get("lon")
-        geometry = item.get("geometry")
-        if lat and lon and not geometry:
-            try:
-                geometry = {
-                    "type": "Point",
-                    "coordinates": [float(item["lon"]), float(item["lat"])],
-                }
-            except ValueError:
-                logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
-        feature.append(("geometry", geometry))
+        feature = [
+            ("type", "Feature"),
+            ("id", compute_hash(item)),
+            ("properties", item_to_properties(item)),
+            ("geometry", item_to_geometry(item)),
+        ]
 
         return feature
 

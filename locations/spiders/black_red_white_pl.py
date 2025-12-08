@@ -10,3 +10,7 @@ class BlackRedWhitePLSpider(SitemapSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["@id"] = None
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("name", None)
+        yield item

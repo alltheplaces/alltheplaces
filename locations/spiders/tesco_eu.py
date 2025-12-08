@@ -1,5 +1,5 @@
 import json
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 import scrapy
 from scrapy import Request
@@ -11,14 +11,17 @@ from locations.spiders.tesco_gb import TescoGBSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TescoSpider(scrapy.Spider):
+# TODO: modernize spider to use https://www.tesco.sk/obchody/directory pages + structured data
+class TescoEUSpider(scrapy.Spider):
     name = "tesco_eu"
-    user_agent = BROWSER_DEFAULT
     COUNTRY_WEBSITE_MAP = {
-        "cz": "https://itesco.cz/prodejny/obchody-tesco/",
-        "hu": "https://tesco.hu/aruhazak/aruhaz/",
-        "sk": "https://tesco.sk/obchody/detail-obchodu/",
+        "cz": "https://www.itesco.cz/prodejny/",
+        "hu": "https://www.tesco.hu/aruhazak/",
+        "sk": "https://www.tesco.sk/obchody/",
     }
+    BRANDING_WORDS = ["tesco", "expres", "extra", "expressz"]  # lowercase
+    requires_proxy = "CZ"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         for country, website in self.COUNTRY_WEBSITE_MAP.items():
@@ -31,12 +34,16 @@ class TescoSpider(scrapy.Spider):
         for store in response.json()["stores"]:
             store["street-address"] = store.pop("address", "")
             item = DictParser.parse(store)
+            if name := item.pop("name"):
+                item["branch"] = " ".join([word for word in name.split(" ") if word.lower() not in self.BRANDING_WORDS])
             item["ref"] = store["goldid"]
             item["lat"] = store.get("gpslat")
             item["lon"] = store.get("gpslng")
             item["country"] = country
-            item["website"] = urljoin(self.COUNTRY_WEBSITE_MAP.get(country), f'{store.get("urlname")}/')
             item["opening_hours"] = OpeningHours()
+            item["website"] = self.COUNTRY_WEBSITE_MAP.get(
+                country
+            )  # There is 'urlname' attribute, but it's not leading to the store page
             if timing_text := store.get("opening"):
                 for day, hours in json.loads(timing_text).items():
                     open_time, close_time = hours if hours else [None, None]

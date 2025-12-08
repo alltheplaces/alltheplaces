@@ -1,17 +1,19 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KeyBankUSSpider(SitemapSpider, StructuredDataSpider):
+class KeybankUSSpider(SitemapSpider, StructuredDataSpider):
     name = "keybank_us"
     item_attributes = {"brand": "KeyBank", "brand_wikidata": "Q1740314"}
     sitemap_urls = ["https://www.key.com/about/seo.sitemap-locator.xml"]
     sitemap_rules = [(r"locations/.*/.*/.*/.*", "parse_sd")]
     time_format = "%H:%M:%S"
-    user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = response.css("h1.address__title::text").get()

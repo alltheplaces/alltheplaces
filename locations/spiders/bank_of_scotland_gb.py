@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BankOfScotlandGB(SitemapSpider, StructuredDataSpider):
+class BankOfScotlandGBSpider(SitemapSpider, StructuredDataSpider):
     name = "bank_of_scotland_gb"
     item_attributes = {
         "brand": "Bank of Scotland",
@@ -18,3 +18,4 @@ class BankOfScotlandGB(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
+    drop_attributes = {"image"}

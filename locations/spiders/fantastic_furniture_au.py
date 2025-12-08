@@ -1,8 +1,11 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class FantasticFurnitureAUSpider(Spider):
@@ -11,7 +14,7 @@ class FantasticFurnitureAUSpider(Spider):
     allowed_domains = ["api.fantasticfurniture.com.au"]
     start_urls = ["https://api.fantasticfurniture.com.au/occ/v2/fantasticfurniture-spa/store-finder?fields=FULL&page=0"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, meta={"page": 0})
 
@@ -22,9 +25,7 @@ class FantasticFurnitureAUSpider(Spider):
 
             item = DictParser.parse(location)
             item["ref"] = location["code"]
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
-            ).replace(" , ", ", ")
+            item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
             item["addr_full"] = location["address"]["formattedAddress"].replace(" , ", ", ")
             item.pop("street")
             item["state"] = location["address"]["region"]["name"]

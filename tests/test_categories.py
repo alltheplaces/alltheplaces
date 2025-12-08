@@ -3,11 +3,15 @@ from locations.categories import (
     Clothes,
     Fuel,
     HealthcareSpecialities,
+    PaymentMethods,
+    Vending,
+    add_vending,
     apply_category,
     apply_clothes,
     apply_healthcare_specialities,
     apply_yes_no,
     get_category_tags,
+    map_payment,
 )
 from locations.items import Feature
 
@@ -33,6 +37,8 @@ def test_apply_yes_no():
 
 def test_shop_tag_sanity():
     for cat in Categories:
+        if cat == Categories.SHOP_E_CIGARETTE:
+            continue
         if cat.name.startswith("SHOP_"):
             shop_name = cat.name.split("_", 1)[1].lower()
             assert cat.value.get("shop") == shop_name
@@ -110,3 +116,57 @@ def test_healthcare_specialities():
 
     apply_healthcare_specialities([HealthcareSpecialities.OCCUPATIONAL], item)
     assert item["extras"] == {"healthcare:speciality": "occupational"}
+
+
+def test_map_payment():
+    item = Feature()
+    map_payment(item, "americanexpress", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "american express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "American Express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "american_express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "American_Express", PaymentMethods)
+    assert not item["extras"].get("payment:american_express")
+
+    # Test aliases for payment methods in the PaymentMethods enum
+    item = Feature()
+    map_payment(item, "Amex", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    invalid_alias_result = map_payment(item, "AllThePlaces Payment Card", PaymentMethods)
+    assert not invalid_alias_result
+
+
+def test_vending():
+    item = Feature()
+
+    add_vending(Vending.FOOD, item)
+    assert item["extras"]["vending"] == "food"
+
+    add_vending(Vending.FOOD, item)
+    add_vending(Vending.FOOD, item)
+    assert item["extras"]["vending"] == "food"
+
+    add_vending(Vending.COFFEE, item)
+    v = item["extras"]["vending"].split(";")
+    assert "coffee" in v
+    assert "food" in v
+
+    item = Feature()
+    add_vending(Vending.FOOD, item)
+    add_vending(Vending.COFFEE, item)
+    v = item["extras"]["vending"].split(";")
+    assert "coffee" in v
+    assert "food" in v

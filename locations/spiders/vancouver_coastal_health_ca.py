@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 
 class VancouverCoastalHealthCASpider(Spider):
     name = "vancouver_coastal_health_ca"
-    item_attributes = {"brand": "Vancouver Coastal Health", "brand_wikidata": "Q7914144"}
+    item_attributes = {"operator": "Vancouver Coastal Health", "operator_wikidata": "Q7914144"}
     start_urls = ["https://www.vch.ca/en/find-location"]
 
     CATEGORIES = {
@@ -22,7 +22,7 @@ class VancouverCoastalHealthCASpider(Spider):
         "8": {"amenity": "social_facility", "social_facility:for": "mental_health"},
         "10": {"amenity": "healthcare", "healthcare": "vaccination_centre"},
         "11": {"amenity": "healthcare", "healthcare": "counselling", "healthcare:counselling": "addiction"},
-        "12": {"office": "other"},  # "Environmental health \\u0026 inspections offices",
+        "12": {"office": "yes"},  # "Environmental health \\u0026 inspections offices",
         "13": {"amenity": "healthcare", "healthcare": "centre"},  # "Other",
     }
 

@@ -1,9 +1,12 @@
 from datetime import datetime
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class GreggsGBSpider(Spider):
@@ -11,22 +14,26 @@ class GreggsGBSpider(Spider):
     item_attributes = {"brand": "Greggs", "brand_wikidata": "Q3403981"}
     start_urls = ["https://production-digital.greggs.co.uk/api/v1.0/shops"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
-            store["address"]["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        store["address"].pop("houseNumberOrName"),
-                        store["address"].pop("streetName"),
-                    ],
-                )
+            store["address"]["street_address"] = clean_address(
+                [
+                    store["address"].pop("houseNumberOrName"),
+                    store["address"].pop("streetName"),
+                ]
             )
             item = DictParser.parse(store["address"])
+
+            if store["shopName"].startswith("Outlet: "):
+                item["name"] = "Greggs Outlet"
+                item["branch"] = store["shopName"].removeprefix("Outlet: ")
+            else:
+                item["name"] = "Greggs"
+                item["branch"] = store["shopName"]
+
             item["phone"] = store["address"]["phoneNumber"]
-            item["name"] = store["shopName"]
             item["ref"] = store["shopCode"]
-            item["website"] = f'https://www.greggs.co.uk/shop-finder?shop-code={store["shopCode"]}'
+            item["website"] = f'https://www.greggs.com/shop-finder?shop-code={store["shopCode"]}'
             item["opening_hours"] = self.decode_hours(store)
             yield item
 

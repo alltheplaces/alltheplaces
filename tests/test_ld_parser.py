@@ -142,6 +142,450 @@ def test_ld_lowercase_attributes():
     assert i["lon"] == -99.08411
 
 
+def test_ld_opening_hours_specification_as_dict():
+    i = LinkedDataParser.parse_ld(
+        {
+            "@context": "https://schema.org",
+            "@type": "GroceryStore",
+            "name": "New Seasons Market",
+            "image": "https://www.newseasonsmarket.com/getattachment/1fcd06e5-9cc4-4f64-b887-4b2e169db283/williams_1080x1000_v3.jpg?lang=en-US&ext=.jpg",
+            "@id": "https://www.newseasonsmarket.com/find-a-store/williams",
+            "url": "https://www.newseasonsmarket.com/find-a-store/williams",
+            "telephone": "(503) 528-2888",
+            "priceRange": "$$",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "3445 N Williams Ave",
+                "addressLocality": "Portland",
+                "addressRegion": "OR",
+                "postalCode": "97227",
+                "addressCountry": "US",
+            },
+            "geo": {"@type": "GeoCoordinates", "latitude": 45.5481269199285600, "longitude": -122.6673199714278200},
+            "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "07:00",
+                "closes": "22:00",
+            },
+            "department": {
+                "@type": "Restaurant",
+                "name": "Hot Bar",
+                "image": "",
+                "telephone": "(503) 528-2888",
+                "openingHoursSpecification": {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                    "opens": "07:00",
+                    "closes": "22:00",
+                },
+            },
+        }
+    )
+
+    assert i["opening_hours"].as_opening_hours() == "Mo-Su 07:00-22:00"
+
+
+def test_ld_opening_hours_specification_as_list():
+    i = LinkedDataParser.parse_ld(
+        ld={
+            "@context": ["https://schema.org", {"@language": "en-ca"}],
+            "@type": "Library",
+            "address": {
+                "@id": "_:school_edu_library_1",
+                "@type": "PostalAddress",
+                "addressCountry": "Canada",
+                "addressLocality": "Sudbury",
+                "addressRegion": "ON",
+                "contactType": "Mailing address",
+                "postalCode": "P3E 2C6",
+                "streetAddress": "School of Education - Music Resource Centre Laurentian University",
+            },
+            "email": "mailto:dscott@laurentian.ca",
+            "location": {"@id": "_:school_edu_library_1"},
+            "name": "Music Resource Centre",
+            "parentOrganization": "https://laurentian.concat.ca/eg/opac/library/LUSYS",
+            "openingHoursSpecification": [
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Sunday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Saturday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Thursday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Tuesday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Friday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Monday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Wednesday",
+                    "opens": "09:00:00",
+                },
+            ],
+        },
+        time_format="%H:%M:%S",
+    )
+
+    assert i["opening_hours"].as_opening_hours() == "Mo-Su 09:00-17:00"
+
+
+def test_ld_parse_opening_hours():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Store",
+                "name": "Middle of Nowhere Foods",
+                "openingHoursSpecification":
+                [
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": [
+                            "http://schema.org/Monday",
+                            "https://schema.org/Tuesday",
+                            "Wednesday",
+                            "http://schema.org/Thursday",
+                            "http://schema.org/Friday"
+                        ],
+                        "opens": "09:00",
+                        "closes": "11:00"
+                    },
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": "http://schema.org/Saturday",
+                        "opens": "12:00",
+                        "closes": "14:00"
+                    }
+                ]
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Fr 09:00-11:00; Sa 12:00-14:00"
+    )
+
+
+def test_ld_parse_oh_empty_rule():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            {
+                "@context": "https://schema.org",
+                "@type": "Store",
+                "name": "Middle of Nowhere Foods",
+                "openingHoursSpecification": [
+                    {},
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "closes": "16:30:00",
+                        "dayOfWeek": "https://schema.org/Wednesday",
+                        "opens": "08:30:00",
+                    },
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "closes": "16:30:00",
+                        "dayOfWeek": "https://schema.org/Thursday",
+                        "opens": "08:30:00",
+                    },
+                ],
+            },
+            "%H:%M:%S",
+        ).as_opening_hours()
+        == "We-Th 08:30-16:30"
+    )
+
+
+def test_ld_parse_opening_hours_string():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mo,Tu,We,Th 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Th 09:00-12:00"
+    )
+
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mo-Th 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Th 09:00-12:00"
+    )
+
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mo-Tu 09:00-12:00 We,Th 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Th 09:00-12:00"
+    )
+
+
+def test_ld_parse_opening_hours_days_3_chars():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mon-Thu 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Th 09:00-12:00"
+    )
+
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mon-Tue 09:00-12:00 Wed,Thu 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Th 09:00-12:00"
+    )
+
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "openingHours": "Mon-Sat 10:00 - 19:00 Sun 12:00-17:00"
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Sa 10:00-19:00; Su 12:00-17:00"
+    )
+
+
+def test_ld_parse_opening_hours_array():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": ["TouristAttraction", "AmusementPark"],
+                "name": "Disneyland Paris",
+                "description": "It's an amusement park in Marne-la-Vallée, near Paris, in France and is the most visited theme park in all of France and Europe.",
+                "openingHours":["Mo-Fr 10:00-19:00", "Sa 10:00-22:00", "Su 10:00-21:00"],
+                "isAccessibleForFree": false,
+                "currenciesAccepted": "EUR",
+                "paymentAccepted":"Cash, Credit Card",
+                "url":"http://www.disneylandparis.it/"
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Fr 10:00-19:00; Sa 10:00-22:00; Su 10:00-21:00"
+    )
+
+
+def test_ld_parse_opening_hours_day_range():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "openingHours": ["Th-Tu 09:00-17:00"]
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Tu 09:00-17:00; Th-Su 09:00-17:00"
+    )
+
+
+def test_ld_parse_opening_hours_array_with_commas():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "openingHours": ["Mo-Su 00:00-01:00, 04:00-00:00"]
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Su 00:00-01:00,04:00-24:00"
+    )
+
+
+def test_ld_parse_opening_hours_closed():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "openingHours": [
+                    "Mo Closed",
+                    "Tu Closed",
+                    "We Closed",
+                    "Th Closed",
+                    "Fr Closed",
+                    "Sa Closed",
+                    "Su Closed"
+                ]
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Su closed"
+    )
+
+
+def test_ld_parse_opening_hours_closed_range():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "openingHours": ["Mo-Su Closed"]
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Su closed"
+    )
+
+
+def test_ld_parse_opening_hours_no_commas():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "openingHours": "Su 07:00 - 23:00 Mo 07:00 - 23:00 Tu 07:00 - 23:00 We 07:00 - 23:00 Th 07:00 - 23:00 Fr 07:00 - 23:00 Sa 07:00 - 23:00 "
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Su 07:00-23:00"
+    )
+
+
+def test_ld_parse_opening_hours_no_commas_closed():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "openingHours": "Su closed Mo closed Tu closed We closed Th closed Fr closed Sa closed "
+            }
+            """
+            )
+        ).as_opening_hours()
+        == "Mo-Su closed"
+    )
+
+
+def test_ld_parse_time_format():
+    assert (
+        LinkedDataParser.parse_opening_hours(
+            json.loads(
+                """
+            {
+                "@context": "https://schema.org",
+                "@type": "Store",
+                "name": "Middle of Nowhere Foods",
+                "openingHoursSpecification":
+                [
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": "http://schema.org/Saturday",
+                        "opens": "12:00:00",
+                        "closes": "14:00:00"
+                    }
+                ]
+            }
+            """
+            ),
+            "%H:%M:%S",
+        ).as_opening_hours()
+        == "Sa 12:00-14:00"
+    )
+
+
 def test_ld_lat_lon():
     i = LinkedDataParser.parse_ld(
         json.loads(

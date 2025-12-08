@@ -29,7 +29,6 @@ class DiscReplayUSSpider(CrawlSpider):
     def parse(self, response):
         properties = {
             "ref": response.url.split("/")[-1],
-            "name": response.xpath('//span[@class="loc-loc"]/text()').get().strip(),
             "addr_full": ", ".join(
                 filter(None, map(str.strip, response.xpath('//span[@class="loc-add"]//text()').getall()))
             ),

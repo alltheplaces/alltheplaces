@@ -3,14 +3,18 @@ import re
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.spiders.mcdonalds import McdonaldsSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class McDonaldsMASpider(scrapy.Spider):
+class McdonaldsMASpider(scrapy.Spider):
     name = "mcdonalds_ma"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.ma"]
-    start_urls = ("http://www.mcdonalds.ma/nos-restaurants/r%C3%A9seau-maroc",)
+    start_urls = ["https://www.mcdonalds.ma/nos-restaurants/r%C3%A9seau-maroc"]
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse_address(self, data):
         address = ""

@@ -5,11 +5,12 @@ from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 
 
 class AviaRSSpider(Spider):
     name = "avia_rs"
-    item_attributes = {"brand": "Avia", "brand_wikidata": "Q300147"}
+    item_attributes = AVIA_SHARED_ATTRIBUTES
     start_urls = [
         "https://radunavia.rs/en/avia-petrol-stations",
     ]
@@ -30,7 +31,6 @@ class AviaRSSpider(Spider):
             item["name"] = address_data.xpath(r"//h5/text()").get()
             item["addr_full"] = address_data.xpath(r"//p/text()").get()
             item["phone"] = address_data.xpath(r"//p[3]/text()").get()
-            item["website"] = "https://radunavia.rs/"
             for lat_lon in lat_lon_data:
                 if item["name"] in lat_lon:
                     item["lat"] = lat_lon[1]

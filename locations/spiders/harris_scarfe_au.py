@@ -1,7 +1,9 @@
 import html
 import re
 import unicodedata
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -12,11 +14,12 @@ class HarrisScarfeAUSpider(SitemapSpider):
     name = "harris_scarfe_au"
     item_attributes = {"brand": "Harris Scarfe", "brand_wikidata": "Q5665029"}
     sitemap_urls = ["https://www.harrisscarfe.com.au/sitemap/store/store-sitemap.xml"]
-    sitemap_rules = [(r"^https:\//www\.harrisscarfe\.com\.au\/store\/(?!online)", "parse")]
-    allowed_domains = ["www.harrisscarfe.com.au"]
+    sitemap_rules = [
+        ("/store/", "parse"),
+    ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.xpath('//div[@id="maps_canvas"]/@data-storeid').get(),
             "name": response.xpath('//div[@id="maps_canvas"]/@data-storename').get(),

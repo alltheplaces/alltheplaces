@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 class SweetgreenUSSpider(Spider):
     name = "sweetgreen_us"
     item_attributes = {"brand": "Sweetgreen", "brand_wikidata": "Q18636413"}
-    allowed_domains = ["www.sweetgreen.com"]
+    allowed_domains = ["sweetgreen.com"]
     start_urls = ["https://order.sweetgreen.com/graphql"]
 
     def start_requests(self):
@@ -20,8 +20,8 @@ class SweetgreenUSSpider(Spider):
         point_files = "us_centroids_100mile_radius.csv"
         for url in self.start_urls:
             for lat, lon in point_locations(point_files):
-                nw_coords = vincenty_distance(float(lat), float(lon), 115, 315)
-                se_coords = vincenty_distance(float(lat), float(lon), 115, 135)
+                nw_coords = vincenty_distance(lat, lon, 115, 315)
+                se_coords = vincenty_distance(lat, lon, 115, 135)
                 request = {
                     "operationName": "LocationsSearchByArea",
                     "query": graphql_query,
@@ -55,5 +55,6 @@ class SweetgreenUSSpider(Spider):
                 item["image"] = location["location"]["imageUrl"]
             item["website"] = "https://order.sweetgreen.com/" + location["location"]["slug"] + "/"
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(location["location"]["storeHours"])
+            if opening_times := location["location"]["storeHours"]:
+                item["opening_hours"].add_ranges_from_string(opening_times)
             yield item

@@ -3,9 +3,9 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class StonehouseGB(SitemapSpider, StructuredDataSpider):
+class StonehouseGBSpider(SitemapSpider, StructuredDataSpider):
     name = "stonehouse_gb"
-    item_attributes = {"brand": "Stonehouse", "brand_wikidata": "Q78192049"}
+    item_attributes = {"brand": "Stonehouse Pizza & Carvery", "brand_wikidata": "Q78192049"}
     sitemap_urls = ["https://www.stonehouserestaurants.co.uk/sitemap.xml"]
     sitemap_rules = [
         (
@@ -14,3 +14,4 @@ class StonehouseGB(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["Restaurant"]
+    requires_proxy = True

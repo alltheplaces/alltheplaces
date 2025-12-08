@@ -1,17 +1,20 @@
-import scrapy
-from scrapy import FormRequest
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 
 
-class OlliesBargainOutletSpider(scrapy.Spider):
+class OlliesBargainOutletSpider(Spider):
     name = "ollies_bargain_outlet"
     allowed_domains = ["ollies.us"]
     item_attributes = {"brand": "Ollie's Bargain Outlet", "brand_wikidata": "Q7088304"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "US"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "Page": "0",
             "PageSize": "1",
@@ -57,9 +60,9 @@ class OlliesBargainOutletSpider(scrapy.Spider):
             item["ref"] = data.get("StoreCode")
 
             open_hours = data.get("OpenHours").split("<br />")
-            open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
-            oh = OpeningHours()
-            oh.from_linked_data({"openingHours": open_hour_filtered}, "%I%p")
-            item["opening_hours"] = oh.as_opening_hours()
-
-            yield item
+            if "COMING SOON" not in open_hours[0].upper():
+                open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
+                item["opening_hours"] = LinkedDataParser.parse_opening_hours(
+                    {"openingHours": open_hour_filtered}, "%I%p"
+                )
+                yield item

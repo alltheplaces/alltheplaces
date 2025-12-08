@@ -2,6 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class QuestDiagnosticsSpider(SitemapSpider):
@@ -11,8 +12,6 @@ class QuestDiagnosticsSpider(SitemapSpider):
     sitemap_urls = ["https://www.questdiagnostics.com/locations-sitemap.xml"]
 
     def parse(self, response):
-        address_components = response.xpath('//div[@class="address"]/text()').extract()
-
         properties = {
             "ref": response.url,
             "lat": response.xpath('//div[@class="latitude"]/text()').get(),
@@ -20,7 +19,7 @@ class QuestDiagnosticsSpider(SitemapSpider):
             "name": response.xpath('//div[@class="location-detail-title"]/text()').extract_first().strip(),
             "website": response.url,
             "phone": response.xpath('//a[@id="phone"]/text()').extract_first(),
-            "addr_full": ", ".join(" ".join(x.split()) for x in address_components),
+            "addr_full": clean_address(response.xpath('//div[@class="address"]/text()').getall()),
         }
 
         if not properties["name"]:

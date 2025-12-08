@@ -1,85 +1,51 @@
-import json
-import math
+from scrapy.http import JsonRequest
 
-import scrapy
-from scrapy.downloadermiddlewares.retry import get_retry_request
+from locations.categories import Categories, apply_category
+from locations.items import set_closed
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import clean_address
 
-from locations.items import Feature
 
-
-class WorldcatSpider(scrapy.Spider):
+class WorldcatSpider(JSONBlobSpider):
     name = "worldcat"
-    allowed_domains = ["worldcat.org"]
-    download_delay = 0.5
+    locations_key = "libraries"
 
-    def get_page(self, offset):
-        return scrapy.Request(
-            # This URL returns JSON array
-            f"https://worldcat.org/webservices/registry/find?oclcAccountName=+&institutionAlias=&instType=&country=&city=&subdivision=&postalCode=&regID=&oclcSymbol=&ISIL=&marcOrgCode=&blCode=&searchTermSet=1&getData=getData&offset={offset}",
-            meta={"offset": offset},
+    def request_page(self, next_offset):
+        yield JsonRequest(
+            url=f"https://search.worldcat.org/api/library?lat=0&lon=0%20%20%20%20%20%20%20%20&distance=999999&unit=K&offset={next_offset}&limit=50",
+            headers={"Accept": "*/*", "Referer": "https://search.worldcat.org/libraries"},
+            meta={"offset": next_offset},
         )
 
     def start_requests(self):
-        yield scrapy.Request(
-            # This URL returns HTML search page
-            "https://www.worldcat.org/webservices/registry/find?oclcAccountName=+&institutionAlias=&instType=&country=&city=&subdivision=&postalCode=&regID=&oclcSymbol=&ISIL=&marcOrgCode=&blCode=&offset=0&searchTermSet=1",
-            callback=self.parse_search_page,
-        )
-
-    def parse_search_page(self, response):
-        total_records = int(response.xpath("//script/text()").re_first(r"var totalRecords = '(\d+)'"))
-        total_pages = math.ceil(total_records / 10)
-        for i in range(1, total_pages + 1):
-            yield self.get_page(i)
+        yield from self.request_page(1)
 
     def parse(self, response):
-        data = response.json()
-        if data == []:
-            # Seems to sometimes return empty array as a transient error,
-            # let's call their bluff to see if that's actually the end.
-            yield get_retry_request(response.request, spider=self, reason="empty array")
-            return
-        for row in data:
-            inst_id = row["inst_id"]
-            yield scrapy.Request(
-                f"https://worldcat.org/webservices/registry/Institutions/{inst_id}",
-                callback=self.parse_library,
-            )
+        features = self.extract_json(response)
+        yield from self.parse_feature_array(response, features) or []
+        next_offset = response.meta["offset"] + 50
+        if len(response.json()["libraries"]) == 50:
+            yield from self.request_page(next_offset)
 
-    def parse_library(self, response):
-        script = response.xpath('//script/text()[contains(., "var JSON_Obj")]').get()
-        data = json.decoder.JSONDecoder().raw_decode(script, script.index("{", script.index("var JSON_Obj")))[0]
+    def post_process_item(self, item, response, location):
+        apply_category(Categories.LIBRARY, item)
 
-        if "addresses" not in data:
-            # No physical description, possibly related to another institution but that
-            # doesn't concern us here.
-            return
+        if location["institutionType"] != "PUBLIC":
+            item["extras"]["access"] = "private"
+        item["extras"]["worldcat:type"] = location["institutionType"]
+        self.crawler.stats.inc_value(f"atp/{self.name}/type/{location['institutionType']}")
 
-        geo_address = next(
-            (addr for addr in data["addresses"] if {"latitude", "longitude"} <= addr.keys()),
-            {},
-        )
+        item["ref"] = location["registryId"]
+        item["name"] = location["institutionName"]
 
-        if not geo_address:
-            # No coordinates given in any of the addresses, omit it
-            return
+        if "closed" in item["name"].lower():
+            set_closed(item)  # On initial run, all such items' names indicated they were closed
 
-        # We have coordinates, all other data should be optional
+        item["street_address"] = clean_address([location.get("street1"), location.get("street2")])
 
-        street_address = next((addr for addr in data["addresses"] if {"city"} <= addr.keys()), {})
+        if "emails" in location:
+            item["email"] = "; ".join(location["emails"])
+        if "homePageUrl" in location:
+            item["website"] = location["homePageUrl"]
 
-        properties = {
-            "ref": response.url,
-            "lat": geo_address["latitude"],
-            "lon": geo_address["longitude"],
-            "name": data["name"],
-            "phone": data.get("phoneNumber"),
-            "extras": {"fax": data.get("faxNumber")},
-            "website": data.get("instURL", [{}])[0].get("instURL"),
-            "street_address": street_address.get("street1"),
-            "city": street_address.get("city"),
-            "state": street_address.get("subdivisionDescription"),
-            "postcode": street_address.get("postalCode"),
-            "country": street_address.get("countryDescription"),
-        }
-        yield Feature(**properties)
+        yield item

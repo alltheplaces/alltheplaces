@@ -15,4 +15,5 @@ class VideoproAUSpider(LocalisrSpider):
     def parse_item(self, item, location):
         if "WAREHOUSE" in item["name"].upper().split():
             return
+        item["street_address"] = item.pop("addr_full", None)
         yield item

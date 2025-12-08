@@ -9,8 +9,7 @@ class UltraLiquorsZASpider(scrapy.Spider):
     name = "ultra_liquors_za"
     item_attributes = {"brand": "Ultra Liquors", "brand_wikidata": "Q116620602"}
     allowed_domains = ["greenpoint.ultraliquors.co.za"]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def start_requests(self):
         yield scrapy.FormRequest(
@@ -20,10 +19,10 @@ class UltraLiquorsZASpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for data in response.json()["Data"]:
-            data["name"] = data.pop("CompanyName")
             data["address"] = data.pop("CompanyAddress")
             data["phone"] = data.pop("CompanyPhoneNumber")
             item = DictParser.parse(data)
+            item["branch"] = item.pop("name")
 
             apply_yes_no(Extras.DELIVERY, item, data.get("IsDeliveryAvailable"))
 

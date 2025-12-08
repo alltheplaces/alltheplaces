@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -7,11 +9,11 @@ from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 
 class CroixRougeFrancaiseFRSpider(Spider):
     name = "croix_rouge_francaise_fr"
-    item_attributes = {"brand": "Croix-Rouge française", "brand_wikidata": "Q3003244"}
+    item_attributes = {"brand_wikidata": "Q3003244"}
     allowed_domains = ["backend.structure.croix-rouge.fr"]
     start_urls = ["https://backend.structure.croix-rouge.fr/graphql"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = """query GET_SEARCH_STRUCTURE_ELASTICSEARCH_QUERY($actionIds: [ID], $activityIds: [ID], $from: Int, $lat: Float, $lon: Float, $search: String!, $size: Int) {
     searchStructuresDocuments(
         actionIds: $actionIds
@@ -69,8 +71,10 @@ class CroixRougeFrancaiseFRSpider(Spider):
             if location.get("slug"):
                 item["website"] = "https://www.croix-rouge.fr/" + location["slug"]
             item["opening_hours"] = OpeningHours()
-            for day_hours in location["schedule"]:
-                item["opening_hours"].add_range(
-                    sanitise_day(day_hours["day"], DAYS_FR), day_hours["open"], day_hours["closed"]
-                )
+            if schedule := location["schedule"]:
+                if isinstance(schedule, list):
+                    for day_hours in schedule:
+                        item["opening_hours"].add_range(
+                            sanitise_day(day_hours["day"], DAYS_FR), day_hours["open"], day_hours["closed"]
+                        )
             yield item

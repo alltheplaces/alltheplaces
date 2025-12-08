@@ -44,7 +44,7 @@ FUEL_TYPES_MAPPING = {
 
 class Q8ItaliaSpider(Spider):
     name = "q8_italia"
-    item_attributes = {"brand": "Q8", "brand_wikidata": "Q1634762"}
+    item_attributes = {"brand": "Q8", "brand_wikidata": "Q4119207"}
     start_urls = ["https://www.q8.it/geolocalizzatore/pv/all"]
 
     BRANDS = {

@@ -1,19 +1,36 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from typing import Any
 
+from scrapy import Spider
+from scrapy.http import Request, Response
+
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_EN, OpeningHours
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
-from locations.spiders.vapestore_gb import clean_address
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class NandosAESpider(CrawlSpider, StructuredDataSpider):
+class NandosAESpider(Spider):
     name = "nandos_ae"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
-    start_urls = ["https://www.nandos.ae/eat/restaurants-all"]
-    rules = [Rule(LinkExtractor(allow=r"/eat/restaurant/"), callback="parse_sd")]
+    start_urls = ["https://store.nandos.ae/"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = response.url
-        item["addr_full"] = clean_address(item.pop("street_address"))
+    def parse(self, response: Response) -> Any:
+        id = response.xpath('//div[@class="LB_StoreLocator"]/@id').get()
+        yield Request(f"https://api.locationbank.net/storelocator/StoreLocatorAPI?clientid={id}", self.parse_stores)
 
-        yield item
+    def parse_stores(self, response: Response) -> Any:
+        stores = response.json()
+        for store in stores.get("locations", []):
+            item = DictParser.parse(store)
+            self.parse_hours(item, store.get("regularHours"))
+
+            yield item
+
+    def parse_hours(self, item, hours):
+        if hours:
+            try:
+                oh = OpeningHours()
+                for day in hours:
+                    oh.add_range(DAYS_EN[day["openDay"].capitalize()], day.get("openTime"), day.get("closeTime"))
+                item["opening_hours"] = oh.as_opening_hours()
+            except Exception:
+                self.crawler.stats.inc_value("failed_to_parse_hours")

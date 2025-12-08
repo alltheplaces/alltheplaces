@@ -3,9 +3,9 @@ import scrapy
 from locations.items import Feature
 
 
-class Freebirds(scrapy.Spider):
+class FreebirdsSpider(scrapy.Spider):
     name = "freebirds"
-    item_attributes = {"brand": "Freebirds World Burrito", "brand_wikidata": "Q5500367"}
+    item_attributes = {"brand": "Freebirds", "brand_wikidata": "Q5500367"}
     start_urls = ["https://www.freebirds.com/api/locations?includePrivate=false"]
 
     def parse(self, response):

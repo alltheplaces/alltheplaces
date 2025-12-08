@@ -5,6 +5,7 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.central_england_cooperative import set_operator
 
 
@@ -40,8 +41,8 @@ class MorrisonsGBSpider(Spider):
         for location in response.json()["stores"]:
             location["id"] = str(location.pop("name"))
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("addressLine1"), location["address"].get("addressLine2")])
+            item["street_address"] = clean_address(
+                [location["address"].get("addressLine1"), location["address"].get("addressLine2")]
             )
             item["website"] = "https://my.morrisons.com/storefinder/{}/{}".format(
                 item["ref"], self.create_slug(location["storeName"])
@@ -77,5 +78,5 @@ class MorrisonsGBSpider(Spider):
 
             if not item.get("brand"):
                 continue
-
+            item["branch"] = item.pop("name", None)
             yield item

@@ -1,15 +1,17 @@
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
 
-from locations.structured_data_spider import StructuredDataSpider
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class BeallsUSSpider(SitemapSpider, StructuredDataSpider):
+class BeallsUSSpider(YextAnswersSpider):
     name = "bealls_us"
     item_attributes = {"brand": "Bealls", "brand_wikidata": "Q4876153"}
-    sitemap_urls = ["https://stores.bealls.com/robots.txt"]
-    sitemap_rules = [(r"\.com/\w\w/[^/]+/clothing-store-(\d+)\.html$", "parse")]
-    wanted_types = ["ClothingStore"]
-    search_for_email = False
+    api_key = "94c39b95b0b1b36c4e686a543eba842b"
+    experience_key = "pages-locator"
+    feature_type = "bealls-usa-locations"
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["name"] = None
+    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+        yield item

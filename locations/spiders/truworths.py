@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TruworthsSpider(Spider):
@@ -13,6 +14,7 @@ class TruworthsSpider(Spider):
         "Identity": {"brand": "Identity", "brand_wikidata": "Q116378109"},
         "Loads of Living": {"brand": "Loads of Living", "brand_wikidata": "Q116418933"},
         "Office London": {"brand": "Office London", "brand_wikidata": "Q116418894"},
+        "YDE": {"brand": "YDE", "brand_wikidata": "Q130063413"},
     }
 
     def parse(self, response, **kwargs):
@@ -20,8 +22,8 @@ class TruworthsSpider(Spider):
             clean_location = {}
             for key, value in location["attributes"].items():
                 clean_location[key.replace("store.", "")] = value[0]
-            clean_location["street_address"] = ", ".join(
-                filter(None, [clean_location.pop("address1", ""), clean_location.pop("address2", "")])
+            clean_location["street_address"] = clean_address(
+                [clean_location.pop("address1", ""), clean_location.pop("address2", "")]
             )
             clean_location["lat"], clean_location["lon"] = clean_location.pop("geocode", ",").split(",")
 
@@ -29,7 +31,10 @@ class TruworthsSpider(Spider):
 
             if brand := self.BRANDS.get(clean_location["companyName"]):
                 item.update(brand)
+            else:
+                self.crawler.stats.inc_value(f'atp/{self.name}/unknown_brand/{clean_location["companyName"]}')
 
+            item["branch"] = item.pop("name").replace(item.get("brand", ""), "").strip()
             apply_category(Categories.SHOP_CLOTHES, item)
 
             yield item

@@ -1,7 +1,7 @@
 from locations.storefinders.freshop import FreshopSpider
 
 
-class FamilyFareUS(FreshopSpider):
+class FamilyFareUSSpider(FreshopSpider):
     name = "family_fare_us"
     item_attributes = {"brand": "Family Fare", "brand_wikidata": "Q19868045"}
     app_key = "family_fare"

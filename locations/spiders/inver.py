@@ -2,7 +2,6 @@ from scrapy import Spider
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
 
 
 class InverSpider(Spider):
@@ -16,7 +15,6 @@ class InverSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
-            item["addr_full"] = clean_address(item.get("addr_full"))
 
             apply_yes_no(Extras.TOILETS, item, "toilet" in location["services"])
             apply_yes_no(Extras.ATM, item, "atm" in location["services"])

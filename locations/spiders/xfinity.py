@@ -3,23 +3,13 @@ from geonamescache import GeonamesCache
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature, set_closed
-
-US_TERRITORIES = {
-    "AS": {"code": "AS", "name": "American Samoa"},
-    "FM": {"code": "FM", "name": "Micronesia"},
-    "GU": {"code": "GU", "name": "Guam"},
-    "MH": {"code": "MH", "name": "Marshall Islands"},
-    "MP": {"code": "MP", "name": "Northern Mariana Islands"},
-    "PW": {"code": "PW", "name": "Palau"},
-    "PR": {"code": "PR", "name": "Puerto Rico"},
-    "VI": {"code": "VI", "name": "U.S. Virgin Islands"},
-}
+from locations.pipelines.state_clean_up import US_TERRITORIES
 
 
 class XfinitySpider(scrapy.Spider):
     name = "xfinity"
     item_attributes = {"brand": "Xfinity", "brand_wikidata": "Q5151002"}
-    allowed_domains = ["www.xfinity.com"]
+    allowed_domains = ["www.xfinity.com", "api-support.xfinity.com"]
 
     def start_requests(self):
         for state in GeonamesCache().get_us_states() | US_TERRITORIES:

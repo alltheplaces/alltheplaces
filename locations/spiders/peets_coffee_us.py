@@ -1,4 +1,6 @@
-from locations.categories import Categories
+from urllib.parse import parse_qs, urlparse
+
+from locations.categories import Categories, Extras, PaymentMethods, apply_yes_no
 from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
@@ -14,32 +16,36 @@ class PeetsCoffeeUSSpider(StockistSpider):
             if field["name"].startswith("Hours:"):
                 day = field["name"][6:]
                 hours = field["value"]
+
                 if hours.endswith("pm") and "-" in hours and ":" in hours:
+                    # Find and fix PM hours > 12
                     open, close = hours.split("-")
                     closeHour, closeMinute = close.split(":")
                     closeHour = int(closeHour)
                     if closeHour >= 12:
                         closeHour -= 12
-                        close = str(closeHour) + ":" + closeMinute
-                    hours = open + "-" + close
-                item["opening_hours"].add_ranges_from_string(day + " " + hours)
+                        close = f"{closeHour}:{closeMinute}"
+                    hours = f"{open}-{close}"
 
-            if field["name"] == "Order Online" and item.get("website") is None:
-                item["website"] = field["value"]
+                item["opening_hours"].add_ranges_from_string(f"{day} {hours}")
+
+            if field["name"] == "Order Online":
+                website_orders = field["value"]
+                orders_query = parse_qs(urlparse(website_orders).query)
+                if "$fallback_url" in orders_query:
+                    website_orders = orders_query["$fallback_url"][0]
+                item["extras"]["website:orders"] = website_orders
+
             if field["name"] == "Type" and field["value"] == "Licensed Partner":
                 item["located_in"] = item.pop("name")
 
-        for feature in location["filters"]:
-            if feature["name"] == "Contactless Payments":
-                item["extras"]["payment:contactless"] = "yes"
-            if feature["name"] == "Accepts Peet's Cards":
-                item["extras"]["payment:gift_card"] = "yes"
-            if feature["name"] == "Warm Breakfast":
-                item["extras"]["breakfast"] = "yes"
-            if feature["name"] == "Free Wi-Fi":
-                item["extras"]["internet_access"] = "wlan"
-                item["extras"]["internet_access:fee"] = "no"
-            if feature["name"] == "Delivery":
-                item["extras"]["delivery"] = "yes"
+        item["branch"] = item.pop("name", None)
+
+        features = {feature["name"] for feature in location["filters"]}
+        apply_yes_no(PaymentMethods.CONTACTLESS, item, "Contactless Payments" in features)
+        apply_yes_no(PaymentMethods.GIFT_CARD, item, "Accepts Peet's Cards" in features)
+        apply_yes_no(Extras.BREAKFAST, item, "Warm Breakfast" in features)
+        apply_yes_no(Extras.WIFI, item, "Free Wi-Fi" in features)
+        apply_yes_no(Extras.DELIVERY, item, "Delivery" in features)
 
         yield item

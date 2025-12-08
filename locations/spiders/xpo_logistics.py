@@ -5,7 +5,7 @@ import scrapy
 from locations.items import Feature
 
 
-class XPOLogisticsSpider(scrapy.Spider):
+class XpoLogisticsSpider(scrapy.Spider):
     name = "xpo_logistics"
     item_attributes = {"brand": "XPO Logistics", "brand_wikidata": "Q8042415"}
     allowed_domains = ["www.xpo.com"]

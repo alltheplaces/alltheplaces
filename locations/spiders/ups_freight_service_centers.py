@@ -5,8 +5,7 @@ import scrapy
 from locations.items import Feature
 
 
-class UPSFreightServiceCentersSpider(scrapy.Spider):
-    download_delay = 0.2
+class UpsFreightServiceCentersSpider(scrapy.Spider):
     name = "ups_freight_service_centers"
     item_attributes = {"brand": "UPS Freight Service Centers"}
     allowed_domains = ["upsfreight.com"]

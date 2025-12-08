@@ -1,20 +1,22 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Request, Spider
 
 from locations.items import Feature
 
 
-class JllSpider(scrapy.Spider):
+class JllSpider(Spider):
     name = "jll"
     item_attributes = {"brand": "JLL", "brand_wikidata": "Q1703389"}
     allowed_domains = ["jll.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         base_url = "https://www.us.jll.com/bin/jll/search?q=locations&currentPage=/content/jll-dot-com/countries/amer/us/en/locations&top=100&p={page}&contentTypes=Location"
         pages = ["1", "2", "3", "4"]
 
         for page in pages:
             url = base_url.format(page=page)
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield Request(url=url, callback=self.parse)
 
     def parse(self, response):
         data = response.json()
@@ -33,7 +35,9 @@ class JllSpider(scrapy.Spider):
                 "website": place["cityPageLink"],
             }
 
-            if "https://www.us.jll.com/en/locations" in properties["website"]:
+            if properties["website"].startswith("https://www.google.com"):
+                properties.pop("website")
+            elif properties["website"].startswith("https://www.us.jll.com/en/locations"):
                 properties["country"] = "US"
 
             yield Feature(**properties)

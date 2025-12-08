@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class LandmarkCinemasCASpider(Spider):
@@ -26,6 +26,6 @@ class LandmarkCinemasCASpider(Spider):
         item["name"] = location["CinemaName"]
         item["website"] = item["ref"] = f'https://www.landmarkcinemas.com{location["CinemaInfoUrl"]}'
         item["image"] = f'https://www.landmarkcinemas.com{location["Image"]}'
-        item["street_address"] = clean_address([location["Address1"], location["Address2"]])
+        item["street_address"] = merge_address_lines([location["Address1"], location["Address2"]])
 
         yield item

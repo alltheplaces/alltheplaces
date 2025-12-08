@@ -20,7 +20,7 @@ class WesternUnionSpider(Spider):
     allowed_domains = ["www.westernunion.com"]
     # start_urls[0] is a GraphQL endpoint.
     start_urls = ["https://www.westernunion.com/router/"]
-    download_delay = 0.2
+    custom_settings = {"DOWNLOAD_DELAY": 0.2}
 
     def request_page(self, latitude, longitude, page_number):
         # An access code for querying the GraphQL endpoint is
@@ -41,9 +41,10 @@ class WesternUnionSpider(Spider):
             "query": "query locations($req:LocationInput) { locations(input: $req) }",
             "variables": {
                 "req": {
-                    "longitude": longitude,
-                    "latitude": latitude,
+                    "longitude": str(longitude),
+                    "latitude": str(latitude),
                     "country": "US",  # Seemingly has no effect.
+                    "brand": "wu",
                     "openNow": "",
                     "services": [],
                     "sortOrder": "Distance",

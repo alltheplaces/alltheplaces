@@ -40,18 +40,10 @@ class GammaSpider(scrapy.Spider):
                     "name": store.get("name"),
                     "housenumber": address_details.get("streetNumber"),
                     "street": address_details.get("street"),
-                    "street_address": " ".join([address_details.get("streetNumber"), address_details.get("street")]),
                     "country": address_details.get("country"),
                     "phone": address_details.get("phoneNumber"),
                     "postcode": address_details.get("postalCode"),
                     "city": address_details.get("city"),
-                    "addr_full": ", ".join(
-                        [
-                            " ".join([address_details.get("streetNumber"), address_details.get("street")]),
-                            address_details.get("city"),
-                            address_details.get("postalCode"),
-                        ]
-                    ),
                     "lat": coordinates.get("latitude"),
                     "lon": coordinates.get("longitude"),
                     "website": formatted_website,

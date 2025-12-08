@@ -1,4 +1,4 @@
-from scrapy.crawler import Crawler
+from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
 from locations.pipelines.state_clean_up import StateCodeCleanUpPipeline
@@ -7,8 +7,7 @@ from locations.spiders.greggs_gb import GreggsGBSpider
 
 def get_objects():
     spider = GreggsGBSpider()
-    spider.crawler = Crawler(GreggsGBSpider)
-    spider.crawler._apply_settings()
+    spider.crawler = get_crawler()
     return Feature(), StateCodeCleanUpPipeline(), spider
 
 

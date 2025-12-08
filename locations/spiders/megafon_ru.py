@@ -5,7 +5,7 @@ from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_T
 from locations.items import Feature
 
 
-class MegafonRuSpider(scrapy.Spider):
+class MegafonRUSpider(scrapy.Spider):
     name = "megafon_ru"
     allowed_domains = ["www.megafon.ru"]
     item_attributes = {"brand_wikidata": "Q1720713"}

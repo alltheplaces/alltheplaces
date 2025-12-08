@@ -1,7 +1,10 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PureBarreUSSpider(Spider):
@@ -10,7 +13,7 @@ class PureBarreUSSpider(Spider):
     allowed_domains = ["members.purebarre.com"]
     start_urls = ["https://members.purebarre.com/api/brands/purebarre/locations?open_status=external"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -21,6 +24,6 @@ class PureBarreUSSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location.get("seq")
             item.pop("addr_full", None)
-            item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
+            item["street_address"] = clean_address([location.get("address"), location.get("address2")])
             item["website"] = location.get("site_url")
             yield item

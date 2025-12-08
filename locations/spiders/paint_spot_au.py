@@ -1,6 +1,11 @@
-import json
+from json import loads
+from typing import Iterable
 
+from scrapy import Selector
+
+from locations.categories import Categories
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -9,17 +14,16 @@ class PaintSpotAUSpider(AmastyStoreLocatorSpider):
     item_attributes = {
         "brand": "Paint Spot",
         "brand_wikidata": "Q117852598",
-        "extras": {
-            "shop": "paint",
-        },
+        "extras": Categories.SHOP_PAINT.value,
     }
     allowed_domains = ["paintspot.com.au"]
+    requires_proxy = "AU"  # Geoblocking appears to be used
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         if "Dulux Spray Centre" in item["name"]:
             return
         item["opening_hours"] = OpeningHours()
-        schedule = json.loads(location["schedule_string"])
+        schedule = loads(feature["schedule_string"])
         for day_name, day in schedule.items():
             if day[f"{day_name}_status"] != "1":
                 continue
@@ -32,4 +36,5 @@ class PaintSpotAUSpider(AmastyStoreLocatorSpider):
             else:
                 item["opening_hours"].add_range(day_name.title(), open_time, break_start)
                 item["opening_hours"].add_range(day_name.title(), break_end, close_time)
+        item["street_address"] = item.pop("addr_full", None)
         yield item

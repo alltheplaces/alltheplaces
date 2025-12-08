@@ -16,6 +16,8 @@ class TimberlandSpider(Where2GetItSpider):
             item["ref"] = location.get("enterprise_store_identifier")
         item["name"] = item["name"].replace("&reg", "").replace(";", "").replace("TIMBERLAND", "Timberland")
         item["name"] = re.sub(r" {2,}", " ", item["name"])
+        item["lat"] = location.get("latitude")
+        item["lon"] = location.get("longitude")
         hours_string = ""
         for day in list(zip(["m", "t", "w", "thu", "f", "sa", "su"], DAYS)):
             if location.get(day[0]):

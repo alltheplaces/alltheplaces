@@ -11,6 +11,7 @@ class BaskinRobbinsUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://locations.baskinrobbins.com/robots.txt"]
     sitemap_rules = [(r"/\w\w/[-\w]+/[-\w]+", "parse")]
     wanted_types = ["IceCreamShop"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item.get("name") == "Baskin-Robbins - Closed™":

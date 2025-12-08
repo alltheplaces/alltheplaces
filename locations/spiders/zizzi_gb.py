@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class ZizziGBSpider(scrapy.Spider):
@@ -11,7 +12,7 @@ class ZizziGBSpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json()["data"]:
             item = DictParser.parse(store)
-            item["addr_full"] = ", ".join(store["address"].split("\r\n"))
+            item["addr_full"] = clean_address(store["address"].split("\r\n"))
             item["image"] = store["featured_image"]
             item["website"] = store["link"]
 

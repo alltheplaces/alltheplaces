@@ -1,9 +1,12 @@
+from typing import Any, Iterable
+
 import pycountry
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 # To use this storefinder, supply an api_brand_name value as would
 # be found in the following URL template:
@@ -51,7 +54,7 @@ from locations.items import Feature
 # }
 #
 # As filters are complex to understand, it is best to search spiders
-# using "api_query" to see other examples of filters being used.
+# using "api_filter" to see other examples of filters being used.
 
 # Instead of Where2GetIt being provided as a service, it is also
 # possible for brands to self-host the software at a custom domain
@@ -72,13 +75,16 @@ from locations.items import Feature
 class Where2GetItSpider(Spider):
     dataset_attributes = {"source": "api", "api": "where2getit.com"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    api_endpoint = ""
-    api_brand_name = ""
-    api_key = ""
-    api_filter = {}
-    api_filter_admin_level = 0  # 0 = no filtering,
-    # 1 = filter by country
-    # 2 = filter by state/province
+    api_endpoint: str = ""
+    api_brand_name: str = ""
+    api_key: str | list[str] = ""
+    api_filter: dict = {}
+    # api_filter_admin_level:
+    #   0 = no filtering
+    #   1 = filter by country
+    #   2 = filter by state/province
+    api_filter_admin_level: int = 0
+    api_limit: int = 10000
 
     def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:
         where_clause = {}
@@ -108,36 +114,45 @@ class Where2GetItSpider(Spider):
         url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
         if self.api_endpoint:
             url = self.api_endpoint
-        yield JsonRequest(
-            url=url,
-            data={
-                "request": {"appkey": self.api_key, "formdata": {"objectname": "Locator::Store", "where": where_clause}}
-            },
-            method="POST",
-            callback=self.parse_locations,
-            dont_filter=True,
-        )
+        if not isinstance(self.api_key, list):
+            self.api_key = [self.api_key]
+        for key in self.api_key:
+            yield JsonRequest(
+                url=url,
+                data={
+                    "request": {
+                        "appkey": key,
+                        "formdata": {"objectname": "Locator::Store", "limit": self.api_limit, "where": where_clause},
+                    }
+                },
+                callback=self.parse_locations,
+                dont_filter=True,
+            )
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[JsonRequest]:
         if self.api_filter_admin_level > 0:
             url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
             if self.api_endpoint:
                 url = self.api_endpoint
-            yield JsonRequest(
-                url=url,
-                data={"request": {"appkey": self.api_key, "formdata": {"objectname": "Account::Country"}}},
-                method="POST",
-                callback=self.parse_country_list,
-                dont_filter=True,
-            )
+            if not isinstance(self.api_key, list):
+                self.api_key = [self.api_key]
+            for key in self.api_key:
+                yield JsonRequest(
+                    url=url,
+                    data={"request": {"appkey": key, "formdata": {"objectname": "Account::Country"}}},
+                    method="POST",
+                    callback=self.parse_country_list,
+                    dont_filter=True,
+                )
         else:
             yield from self.make_request()
 
-    def parse_country_list(self, response, **kwargs):
+    def parse_country_list(self, response: Response, **kwargs: Any) -> Any:
         for country in response.json()["response"]["collection"]:
             country_code = country["name"]
-            if self.api_filter_admin_level > 1:
-                for state in pycountry.subdivisions.get(country_code=country_code):
+            subdivisions = pycountry.subdivisions.get(country_code=country_code)
+            if self.api_filter_admin_level > 1 and subdivisions:
+                for state in subdivisions:
                     state_code = state.code[-2:]
                     if state.type == "Province":
                         yield from self.make_request(country_code=country_code, province_code=state_code)
@@ -146,18 +161,31 @@ class Where2GetItSpider(Spider):
             else:
                 yield from self.make_request(country_code=country_code)
 
-    def parse_locations(self, response, **kwargs):
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         if response.json().get("code") and response.json()["code"] == 5007:
             # No results returned for the provided API filter.
             return
+
+        locations = response.json()["response"]["collection"]
+        if len(locations) == self.api_limit:
+            self.logger.error(
+                f"Locations have probably been truncated due to {self.api_limit} features being returned by a single query. Increase api_limit to a higher value or try setting the api_filter_admin_level to a more specific value to avoid {self.api_limit} features being returned in any given request."
+            )
+            self.crawler.stats.inc_value("api_limit_per_request_reached")
+
         for location in response.json()["response"]["collection"]:
+            self.pre_process_data(location)
+
             item = DictParser.parse(location)
             if not item["ref"]:
                 item["ref"] = location["clientkey"]
-            item["street_address"] = ", ".join(
-                filter(None, [location.get("address1"), location.get("address2"), location.get("address3")])
+            item["street_address"] = clean_address(
+                [location.get("address1"), location.get("address2"), location.get("address3")]
             )
             yield from self.parse_item(item, location)
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def pre_process_data(self, location: dict) -> None:
+        """Override with any pre-processing on the item."""
+
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         yield item

@@ -2,7 +2,7 @@ from locations.categories import Categories, Extras, Fuel, apply_category, apply
 from locations.storefinders.storepoint import StorepointSpider
 
 
-class CEFCOUSSpider(StorepointSpider):
+class CefcoUSSpider(StorepointSpider):
     name = "cefco_us"
     item_attributes = {"brand": "CEFCO", "brand_wikidata": "Q110209230"}
     key = "164a579f9b686a"

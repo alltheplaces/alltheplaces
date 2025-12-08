@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PizzaHutBESpider(scrapy.Spider):
@@ -25,20 +26,7 @@ class PizzaHutBESpider(scrapy.Spider):
         address_details = store.get("address")
         properties = {
             "ref": store.get("code"),
-            "addr_full": ", ".join(
-                filter(
-                    None,
-                    [
-                        address_details.get("address1"),
-                        address_details.get("address2"),
-                        address_details.get("city"),
-                        address_details.get("zipCode"),
-                    ],
-                )
-            ),
-            "street_address": ", ".join(
-                filter(None, [address_details.get("address1"), address_details.get("address2")])
-            ),
+            "street_address": clean_address([address_details.get("address1"), address_details.get("address2")]),
             "name": store["name"],
             "postcode": address_details.get("zipCode"),
             "city": address_details.get("city"),

@@ -1,15 +1,17 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsTRSpider(Spider):
+class McdonaldsTRSpider(Spider):
     name = "mcdonalds_tr"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.com.tr"]
     start_urls = ["https://www.mcdonalds.com.tr/restaurants/getstores"]
     # A significant proportion of requests are either blocked (possibly
@@ -17,7 +19,7 @@ class McDonaldsTRSpider(Spider):
     # Minimise requests and retry a few extra times.
     custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "cityId": "0",
             "subcity": "",

@@ -7,8 +7,8 @@ from locations.categories import apply_category
 from locations.items import Feature
 
 category_mapping = {
-    "neurological": {"healthcare": "centre", "healthcare:specialty": "neurology"},
-    "mental health and wellbeing": {"healthcare": "centre", "healthcare:specialty": "psychiatry"},
+    "neurological": {"healthcare": "centre", "healthcare:speciality": "neurology"},
+    "mental health and wellbeing": {"healthcare": "centre", "healthcare:speciality": "psychiatry"},
     "learning disabilities & autism": {"amenity": "social_facility", "social_facility:for": "disabled"},
     "children & education": {"amenity": "social_facility", "social_facility:for": "disabled"},
 }
@@ -16,12 +16,10 @@ category_mapping = {
 
 class ElysiumHealthcareSpider(scrapy.Spider):
     name = "elysium_healthcare"
-    item_attributes = {"brand": "Elysium Healthcare", "brand_wikidata": "Q39086513"}
+    item_attributes = {"operator": "Elysium Healthcare", "operator_wikidata": "Q39086513"}
     allowed_domains = ["www.elysiumhealthcare.co.uk"]
-    start_urls = [
-        "https://www.elysiumhealthcare.co.uk/locations/",
-    ]
-    download_delay = 0.3
+    start_urls = ["https://www.elysiumhealthcare.co.uk/locations/"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         urls = response.xpath('//li[@class="elementor-icon-list-item"]/a/@href').extract()

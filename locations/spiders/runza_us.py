@@ -1,0 +1,73 @@
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
+
+
+class RunzaUSSpider(JSONBlobSpider):
+    name = "runza_us"
+    item_attributes = {"brand": "Runza", "brand_wikidata": "Q108795782"}
+    start_urls = [
+        "https://drupal.runza.com/api/locations?proximity[value]=15&proximity[source_configuration][origin][lat]=&proximity[source_configuration][origin][lon]="
+    ]
+
+    def post_process_item(self, item, response, location):
+        item["lat"] = location["field_lat_lon"][0]["lat"]
+        item["lon"] = location["field_lat_lon"][0]["lon"]
+        item["street_address"] = merge_address_lines(
+            [location["field_address"][0]["address_line1"], location["field_address"][0]["address_line2"]]
+        )
+        item["city"] = location["field_address"][0]["locality"]
+        item["state"] = location["field_address"][0]["administrative_area"]
+        item["postcode"] = location["field_address"][0]["postal_code"]
+        item["ref"] = location["uuid"][0]["value"]
+        item.pop("name", None)
+
+        apply_category(Categories.FAST_FOOD, item)
+
+        if location["field_hide_dining_room_hours"][0]["value"] is False:
+            oh = OpeningHours()
+            for day in range(0, 7):
+                day_hours = location["field_dining_room_hours"][day]
+
+                if not day_hours:
+                    continue
+
+                open_time = day_hours.get("starthours")
+                close_time = day_hours.get("endhours")
+                if not open_time:
+                    continue
+                if not close_time:
+                    continue
+
+                oh.add_range(
+                    day=DAYS[day],
+                    open_time=f"{open_time}",
+                    close_time=f"{close_time}",
+                    time_format="%H%M",
+                )
+            item["opening_hours"] = oh
+
+        if location["field_hide_drive_thru_hours"][0]["value"] is False:
+            oh = OpeningHours()
+            for day in range(0, 7):
+                day_hours = location["field_drive_thru_hours"][day]
+                if not day_hours:
+                    continue
+
+                open_time = day_hours.get("starthours")
+                close_time = day_hours.get("endhours")
+                if not open_time:
+                    continue
+                if not close_time:
+                    continue
+
+                oh.add_range(
+                    day=DAYS[day],
+                    open_time=f"{open_time}",
+                    close_time=f"{close_time}",
+                    time_format="%H%M",
+                )
+            item["extras"]["opening_hours:drive_through"] = oh.as_opening_hours()
+
+        yield item

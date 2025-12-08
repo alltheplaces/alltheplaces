@@ -2,15 +2,15 @@ from urllib.parse import urljoin
 
 import scrapy
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McDonaldsPLSpider(scrapy.Spider):
+class McdonaldsPLSpider(scrapy.Spider):
     name = "mcdonalds_pl"
-    item_attributes = McDonaldsSpider.item_attributes
+    item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.pl"]
 
     start_urls = ["https://mcdonalds.pl/data/places"]
@@ -38,4 +38,13 @@ class McDonaldsPLSpider(scrapy.Spider):
             apply_yes_no(Extras.WIFI, item, poi.get("wifi"))
             apply_yes_no(Extras.DELIVERY, item, poi.get("mcDelivery"))
             apply_yes_no(Extras.DRIVE_THROUGH, item, poi.get("mcDrive"))
+
+            if poi.get("mcCafe"):
+                mccafe = item.deepcopy()
+                mccafe["ref"] = "{}-mccafe".format(item["ref"])
+                mccafe["brand"] = "McCafé"
+                mccafe["brand_wikidata"] = "Q3114287"
+                apply_category(Categories.CAFE, mccafe)
+                yield mccafe
+
             yield item

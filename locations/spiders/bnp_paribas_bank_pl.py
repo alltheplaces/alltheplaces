@@ -14,7 +14,7 @@ BRANDS = {
 }
 
 
-class BNPParibasBankPLSpider(scrapy.Spider):
+class BnpParibasBankPLSpider(scrapy.Spider):
     name = "bnp_paribas_bank_pl"
     start_urls = ["https://www.bnpparibas.pl/kontakt/oddzialy-z-obsluga-detaliczna-i-biznesowa"]
 

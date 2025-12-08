@@ -2,18 +2,14 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 from unidecode import unidecode
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class JacquesWeinDepotDESpider(Spider):
     name = "jacques_wein_depot_de"
-    item_attributes = {
-        "brand": "Jacques’ Wein-Depot",
-        "brand_wikidata": "Q1678150",
-        "extras": Categories.SHOP_WINE.value,
-    }
+    item_attributes = {"brand": "Jacques' Wein-Depot", "brand_wikidata": "Q1678150"}
     allowed_domains = ["www.jacques.de", "commerce.api.jacques.de"]
     start_urls = ["https://www.jacques.de/weindepots"]
 
@@ -84,5 +80,7 @@ class JacquesWeinDepotDESpider(Spider):
                 item["opening_hours"].add_range(
                     day_name.title(), day_hours["anteMeridiem"]["from"], day_hours["anteMeridiem"]["to"], "%H%M"
                 )
+
+        apply_category(Categories.SHOP_WINE, item)
 
         yield item

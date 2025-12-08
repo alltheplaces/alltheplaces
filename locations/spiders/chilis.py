@@ -1,71 +1,47 @@
-import html
-import json
+from typing import Any
 
-import scrapy
+import chompjs
+from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class ChilisSpider(scrapy.Spider):
+class ChilisSpider(CrawlSpider):
     name = "chilis"
     item_attributes = {"brand": "Chili's", "brand_wikidata": "Q1072948"}
     allowed_domains = ["chilis.com"]
-    download_delay = 0.5
-    start_urls = ("https://www.chilis.com/locations/us/all",)
+    start_urls = ["https://www.chilis.com/locations"]
+    custom_settings = {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,  # Avoid http 429 error
+        "DOWNLOAD_DELAY": 3,
+    }
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"/locations/[a-z]{2}/[-\w]+$"),
+        ),
+        Rule(
+            LinkExtractor(
+                allow=r"/locations/[a-z]{2}/[-\w]+/[-\w]+$",
+            ),
+            callback="parse",  # Parse locations from city page, rather than from individual POI pages because some of the urls actually don't work
+        ),
+    ]
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for hour in hours:
-            opening_hours.add_range(
-                day=DAY_MAPPING[hour["dayOfWeek"]],
-                open_time=hour["opens"],
-                close_time=hour["closes"],
-            )
-
-        return opening_hours.as_opening_hours()
-
-    def parse_store(self, response):
-        scripts = response.xpath('//script[@type="application/ld+json"]/text()').extract()
-        data = [json.loads(x) for x in scripts if json.loads(x)["@type"] == "Restaurant"][0]
-
-        properties = {
-            "street_address": html.unescape(data["address"]["streetAddress"]),
-            "phone": data["telephone"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "country": "US",
-            "ref": data["branchCode"],
-            "website": response.url,
-            "lat": float(data["geo"]["latitude"]),
-            "lon": float(data["geo"]["longitude"]),
-            "name": html.unescape(data["name"]),
-        }
-        hours = self.parse_hours(data["openingHoursSpecification"])
-
-        if hours:
-            properties["opening_hours"] = hours
-
-        yield Feature(**properties)
-
-    def parse_city(self, response):
-        urls = response.xpath('//a[text()="Details"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
-
-    def parse(self, response):
-        urls = response.xpath('//div[contains(@class, "city-locations")]//a[@class="city-link"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        if locations := response.xpath('//script[contains(text(), "currentCityMergedData")]/text()').re_first(
+            r"currentCityMergedData\\\":\[.+\]"
+        ):
+            for location in chompjs.parse_js_object(locations.replace("\\", "")):
+                item = DictParser.parse(location)
+                item["ref"] = location.get("restaurantId")
+                item["branch"] = item.pop("name")
+                item["street_address"] = merge_address_lines(
+                    [location.get("streetaddress"), location.get("streetaddress2")]
+                )
+                item["website"] = f'{response.url.strip("/")}/{location["slug"]}'
+                yield item

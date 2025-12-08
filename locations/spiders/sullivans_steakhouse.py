@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 class SullivansSteakhouseSpider(SitemapSpider):
-    name = "saullivans_steakhouse"
+    name = "sullivans_steakhouse"
     item_attributes = {"brand": "Sullivan's Steakhouse"}
     allowed_domains = ["www.sullivanssteakhouse.com"]
     sitemap_urls = ["https://www.sullivanssteakhouse.com/locations-sitemap.xml"]

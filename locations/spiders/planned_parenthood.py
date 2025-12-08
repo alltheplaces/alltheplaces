@@ -8,8 +8,8 @@ from locations.items import Feature
 class PlannedParenthoodSpider(SitemapSpider):
     name = "planned_parenthood"
     item_attributes = {
-        "brand": "Planned Parenthood",
-        "brand_wikidata": "Q2553262",
+        "operator": "Planned Parenthood",
+        "operator_wikidata": "Q2553262",
         "country": "US",
     }
     allowed_domains = ["www.plannedparenthood.org"]

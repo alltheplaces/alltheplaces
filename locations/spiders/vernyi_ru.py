@@ -1,26 +1,26 @@
-import scrapy
 from chompjs import chompjs
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class VernyiRUSpider(scrapy.Spider):
+class VernyiRUSpider(JSONBlobSpider):
     name = "vernyi_ru"
     start_urls = ["https://www.verno-info.ru/shops"]
     item_attributes = {"brand_wikidata": "Q110037370"}
 
-    def parse(self, response):
-        data = response.xpath('//script[@type="text/javascript" and contains(text(), "var shops =")]').get()
-        pois = chompjs.parse_js_object(data)
-        for poi in pois:
-            if poi.get("will_open_soon") == 1:
-                continue
-            item = DictParser.parse(poi)
-            self.parse_hours(item, poi)
-            apply_category(Categories.SHOP_SUPERMARKET, item)
-            yield item
+    def extract_json(self, response):
+        return chompjs.parse_js_object(
+            response.xpath('//script[@type="text/javascript" and contains(text(), "var shops =")]').get()
+        )
+
+    def post_process_item(self, item, response, location):
+        if location.get("will_open_soon") == 1:
+            return
+        self.parse_hours(item, location)
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+        yield item
 
     def parse_hours(self, item, poi):
         time_weekdays = poi.get("worktime_weekdays")

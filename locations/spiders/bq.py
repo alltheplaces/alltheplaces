@@ -2,9 +2,10 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class BQSpider(scrapy.Spider):
+class BqSpider(scrapy.Spider):
     name = "bq"
     item_attributes = {"brand": "B&Q", "brand_wikidata": "Q707602"}
     allowed_domains = ["www.diy.com"]
@@ -30,8 +31,8 @@ class BQSpider(scrapy.Spider):
             item["country"] = store["geoCoordinates"]["countryCode"]
             item["postcode"] = store["geoCoordinates"]["postalCode"]
 
-            item["addr_full"] = ", ".join(filter(None, store["geoCoordinates"]["address"]["lines"]))
-            item["street_address"] = ", ".join(filter(None, store["geoCoordinates"]["address"]["lines"][:3]))
+            item["addr_full"] = clean_address(store["geoCoordinates"]["address"]["lines"])
+            item["street_address"] = clean_address(store["geoCoordinates"]["address"]["lines"][:3])
             oh = OpeningHours()
             for rule in store["openingHoursSpecifications"]:
                 if not rule.get("opens"):

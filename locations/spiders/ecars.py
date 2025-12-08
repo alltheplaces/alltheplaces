@@ -1,4 +1,5 @@
 import logging
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -9,10 +10,10 @@ from locations.dict_parser import DictParser
 
 class EcarsSpider(Spider):
     name = "ecars"
-    item_attributes = {"brand": "ecars", "brand_wikidata": "Q3050566"}
+    item_attributes = {"brand": "ESB ecars", "brand_wikidata": "Q134882112"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://myaccount.esbecars.com/stationFacade/findSitesInBounds",
             data={
@@ -24,7 +25,7 @@ class EcarsSpider(Spider):
         if not response.json()["success"]:
             self.log(response.json()["errors"], logging.ERROR)
             return
-        for location in response.json()["data"][1]:
+        for location in response.json()["data"]:
             if location["deleted"]:
                 continue
 

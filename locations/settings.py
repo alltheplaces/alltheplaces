@@ -21,7 +21,7 @@ COMMANDS_MODULE = "locations.commands"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = f"Mozilla/5.0 (X11; Linux x86_64) {BOT_NAME}/{locations.__version__} (+https://github.com/alltheplaces/alltheplaces; framework {scrapy.__version__})"
+USER_AGENT = f"Mozilla/5.0 (X11; Linux x86_64) {BOT_NAME}/{locations.__version__} (+https://github.com/alltheplaces/alltheplaces; +https://alltheplaces.xyz/) framework/{scrapy.__version__}"
 
 ROBOTSTXT_USER_AGENT = BOT_NAME
 
@@ -32,6 +32,7 @@ FEED_URI = os.environ.get("FEED_URI")
 FEED_FORMAT = os.environ.get("FEED_FORMAT")
 FEED_EXPORTERS = {
     "geojson": "locations.exporters.geojson.GeoJsonExporter",
+    "parquet": "locations.exporters.geoparquet.GeoparquetExporter",
     "ndgeojson": "locations.exporters.ld_geojson.LineDelimitedGeoJsonExporter",
     "osm": "locations.exporters.osm.OSMExporter",
 }
@@ -47,6 +48,9 @@ DOWNLOAD_DELAY = 1
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
 
+# Set a timeout for requests
+DOWNLOAD_TIMEOUT = 15
+
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
 
@@ -61,9 +65,9 @@ TELNETCONSOLE_ENABLED = False
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-# SPIDER_MIDDLEWARES = {
-#    'locations.middlewares.MyCustomSpiderMiddleware': 543,
-# }
+SPIDER_MIDDLEWARES = {
+    "locations.middlewares.track_sources.TrackSourcesMiddleware": 500,
+}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
@@ -86,7 +90,6 @@ if os.environ.get("ZYTE_API_KEY"):
         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
     }
     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
-    TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
 DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
@@ -97,24 +100,31 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 # }
 
 EXTENSIONS = {
-    "locations.extensions.LogStatsExtension": 101,
+    "locations.extensions.add_lineage.AddLineageExtension": 100,
+    "locations.extensions.log_stats.LogStatsExtension": 1000,
 }
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "locations.pipelines.duplicates.DuplicatesPipeline": 200,
+    "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
     "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
     "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
+    "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
     "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
     "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
+    "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
+    "locations.pipelines.email_clean_up.EmailCleanUpPipeline": 370,
+    "locations.pipelines.geojson_geometry_reprojection.GeoJSONGeometryReprojectionPipeline": 380,
     "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
     "locations.pipelines.drop_logo.DropLogoPipeline": 550,
     "locations.pipelines.closed.ClosePipeline": 650,
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
     "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 750,
+    "locations.pipelines.geojson_multipoint_simplification.GeoJSONMultiPointSimplificationPipeline": 760,
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
     "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
@@ -143,23 +153,55 @@ LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
-
 DEFAULT_PLAYWRIGHT_SETTINGS = {
-    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
-    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
     "DOWNLOAD_HANDLERS": {
         "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
         "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
     },
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
+    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
 }
 
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document"
-    and not request.resource_type == "script",
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script"],
+}
+
+DEFAULT_CAMOUFOX_SETTINGS = {
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "CAMOUFOX_LAUNCH_OPTIONS": {
+        "headless": True,
+    },
+    "DOWNLOAD_HANDLERS": {
+        "http": "scrapy_camoufox.handler.ScrapyCamoufoxDownloadHandler",
+        "https": "scrapy_camoufox.handler.ScrapyCamoufoxDownloadHandler",
+    },
+    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+    "ROBOTSTXT_OBEY": False,
+}
+
+DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS | {
+    # Cloudflare Turnstile makes script, xhr, fetch and image requests to
+    # challenges.cloudflare.com.
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not (
+        request.resource_type in ["document", "script", "xhr", "fetch", "image"]
+        and (
+            "/cdn-cgi/challenge-platform/" in request.url or request.url.startswith("https://challenges.cloudflare.com")
+        )
+    ),
+    "CAMOUFOX_LAUNCH_OPTIONS": {
+        "config": {
+            # Required for playwright_captcha.
+            "forceScopeAccess": True,
+        },
+        # Required for playwright_captcha.
+        "disable_coop": True,
+        "headless": True,
+        # Required for playwright_captcha.
+        "i_know_what_im_doing": True,
+    },
 }
 
 REQUESTS_CACHE_ENABLED = True
@@ -168,3 +210,5 @@ REQUESTS_CACHE_BACKEND_SETTINGS = {
     "backend": "filesystem",
     "wal": True,
 }
+
+TEMPLATES_DIR = "templates/"

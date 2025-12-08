@@ -3,6 +3,7 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class MidcountiesCooperativeGBSpider(Spider):
@@ -18,9 +19,8 @@ class MidcountiesCooperativeGBSpider(Spider):
     def parse(self, response):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
-
-            item["street_address"] = ", ".join(
-                filter(None, [store.get("addressLine1"), store.get("addressLine2"), store.get("addressLine3")])
+            item["street_address"] = clean_address(
+                [store.get("addressLine1"), store.get("addressLine2"), store.get("addressLine3")]
             )
 
             item["opening_hours"] = OpeningHours()
@@ -46,10 +46,15 @@ class MidcountiesCooperativeGBSpider(Spider):
                 item["brand_wikidata"] = "Q7726526"
                 apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
             elif store["tradingGroupId"] == 4:
-                apply_category({"amenity": "kindergarten"}, item)
+                apply_category(Categories.KINDERGARTEN, item)
             elif store["tradingGroupId"] == 6:
                 item["brand"] = "Post Office"
                 item["brand_wikidata"] = "Q1783168"
+                # see https://www.midcounties.coop/our-businesses/post-office/
+                # "majority of these offices are located within our food stores, either in the larger supermarkets or in our convenience stores."
+                # some are separate branches and should be simply Categories.POST_OFFICE, without post_office=post_partner
+                # some are aspect of another shop and should use post_office=post_partner, without being marked as a standalone post office
+                # as there is no way to distinguish this cases, all get both
                 apply_category(Categories.POST_OFFICE.value | {"post_office": "post_partner"}, item)
 
             yield item

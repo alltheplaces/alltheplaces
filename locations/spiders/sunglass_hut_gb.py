@@ -1,28 +1,25 @@
-from scrapy import Spider
+import re
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.spiders.sunglass_hut_1 import SunglassHut1Spider
-from locations.user_agents import BROWSER_DEFAULT
+from scrapy.spiders import SitemapSpider
+
+from locations.spiders.sunglass_hut import SUNGLASS_HUT_SHARED_ATTRIBUTES
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class SunglassHutGBSpider(Spider):
+class SunglassHutGBSpider(SitemapSpider, StructuredDataSpider):
     name = "sunglass_hut_gb"
-    item_attributes = SunglassHut1Spider.item_attributes
-    start_urls = [
-        "https://www.sunglasshut.com/AjaxSGHFindPhysicalStoreLocations?latitude=53.4138458&longitude=-1.782017&radius=1000&storeId=11352"
+    item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
+    sitemap_urls = ["https://stores.sunglasshut.com/sitemap1.xml"]
+    sitemap_rules = [
+        (r"^https://stores.sunglasshut.com/gb/.*$", "parse_sd"),
     ]
-    user_agent = BROWSER_DEFAULT
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["locationDetails"]:
-            if location.get("storeStatus") != "OPEN":
-                continue
-            location["street_address"] = location.pop("address")
-            item = DictParser.parse(location)
-
-            item["opening_hours"] = OpeningHours()
-            for rule in location["hours"]:
-                item["opening_hours"].add_range(rule["day"], rule["open"], rule["close"])
-
-            yield item
+    def post_process_item(self, item, response, location):
+        item.pop("image", None)
+        if m := re.search(r'"geocodedCoordinate":{"latitude":(-?\d+\.\d+),"longitude":(-?\d+\.\d+)}', response.text):
+            item["lat"], item["lon"] = m.groups()
+        elif m := re.search(
+            r'"yextDisplayCoordinate":{"latitude":(-?\d+\.\d+),"longitude":(-?\d+\.\d+)}', response.text
+        ):
+            item["lat"], item["lon"] = m.groups()
+        yield item

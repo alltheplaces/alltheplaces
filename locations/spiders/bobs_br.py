@@ -3,7 +3,6 @@ import re
 from scrapy import Selector, Spider
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
 class BobsBRSpider(Spider):
@@ -23,6 +22,6 @@ class BobsBRSpider(Spider):
             sel = Selector(text=popup)
 
             item["name"] = sel.xpath('//span[@class="marker_popup_content_title"]/text()').get()
-            item["street_address"] = clean_address(sel.xpath('//div[@class="marker_popup_content"]/text()').getall()[1])
+            item["street_address"] = sel.xpath('//div[@class="marker_popup_content"]/text()').getall()[1]
 
             yield item

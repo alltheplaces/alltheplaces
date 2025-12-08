@@ -1,35 +1,25 @@
-from html import unescape
+import json
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
-class EVEREVEUSSpider(AmastyStoreLocatorSpider):
+class EvereveUSSpider(Spider):
     name = "evereve_us"
-    item_attributes = {"brand": "EVEREVE", "brand_wikidata": "Q69891997"}
-    allowed_domains = ["evereve.com"]
+    item_attributes = {"brand": "Evereve", "brand_wikidata": "Q69891997"}
 
-    def start_requests(self):
-        # The request won't work without the headers supplied below.
-        headers = {
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        for domain in self.allowed_domains:
-            yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
-
-    def parse_item(self, item, location, popup_html):
-        if "COMING SOON" in item["name"].upper():
-            return
-        popup_text = list(
-            filter(
-                None,
-                map(unescape, map(str.strip, popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())),
-            )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            url="https://evereve-prod.labs.wesupply.xyz/searchForStores", method="POST", callback=self.parse
         )
-        if len(popup_text) == 3:
-            item["addr_full"] = ", ".join([popup_text[0], popup_text[1]])
-            item["phone"] = popup_text[2]
-        elif len(popup_text) == 2:
-            item["addr_full"] = ", ".join([popup_text[0], popup_text[1]])
-        yield item
+
+    def parse(self, response: Response) -> Iterable[Feature]:
+        for store in json.loads(response.json())["MetaData"].values():
+            store.update(store["Geometry"].pop("location"))
+            item = DictParser.parse(store)
+            item["ref"] = store["PlaceId"]
+            yield item

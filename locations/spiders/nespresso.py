@@ -1,21 +1,90 @@
-import scrapy
+from typing import AsyncIterator
 
+from scrapy import Spider
+from scrapy.http import Request
+
+from locations.geo import city_locations
 from locations.items import Feature
 
 
-class NespressoSpider(scrapy.Spider):
+class NespressoSpider(Spider):
     name = "nespresso"
     allowed_domains = ["nespresso.com"]
     item_attributes = {"brand": "Nespresso", "brand_wikidata": "Q301301"}
 
-    def start_requests(self):
-        countries = ["US", "CA", "FR", "NL", "GB", "DE", "CH", "IT", "ZA"]
+    async def start(self) -> AsyncIterator[Request]:
+        countries = [
+            "AD",
+            "AE",
+            "AR",
+            "AT",
+            "AU",
+            "BE",
+            "BH",
+            "BL",
+            "BR",
+            "CA",
+            "CH",
+            "CI",
+            "CL",
+            "CN",
+            "CO",
+            "CY",
+            "CZ",
+            "DE",
+            "DK",
+            "DZ",
+            "EG",
+            "ES",
+            "FI",
+            "FR",
+            "GB",
+            "GF",
+            "GP",
+            "GR",
+            "HK",
+            "HU",
+            "IE",
+            "IL",
+            "IT",
+            "JP",
+            "KR",
+            "KW",
+            "LB",
+            "LU",
+            "MA",
+            "MF",
+            "MQ",
+            "MU",
+            "MX",
+            "MY",
+            "NL",
+            "NO",
+            "NZ",
+            "OM",
+            "PL",
+            "PT",
+            "QA",
+            "RE",
+            "RO",
+            "RU",
+            "SA",
+            "SE",
+            "SK",
+            "TH",
+            "TR",
+            "TW",
+            "US",
+            "YT",
+            "ZA",
+        ]
 
-        base_url = "https://www.nespresso.com/storelocator/app/find_poi-v4.php?country={country}&lang=EN"
-
+        base_url = "https://www.nespresso.com/storelocator/app/find_poi-v4.php?&lang=EN&lat={lat}&lng={lon}"
         for country in countries:
-            url = base_url.format(country=country)
-            yield scrapy.Request(url, callback=self.parse, meta={"country": country})
+            for city in city_locations(country, 1000000):
+                lat, lon = city["latitude"], city["longitude"]
+                url = base_url.format(lat=lat, lon=lon)
+                yield Request(url, callback=self.parse)
 
     def parse(self, response):
         stores = response.json()
@@ -27,7 +96,6 @@ class NespressoSpider(scrapy.Spider):
                 "street_address": store["point_of_interest"]["address"]["address_line"],
                 "city": store["point_of_interest"]["address"]["city"]["name"],
                 "postcode": store["point_of_interest"]["address"]["postal_code"],
-                "country": response.meta["country"],
                 "lat": store["position"]["latitude"],
                 "lon": store["position"]["longitude"],
                 "phone": store["point_of_interest"]["phone"],

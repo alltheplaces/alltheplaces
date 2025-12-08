@@ -1,24 +1,35 @@
-from locations.categories import Categories, apply_category
-from locations.storefinders.yext import YextSpider
+import scrapy
+from scrapy.http import Response
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
 
 
-class IndependentFinancialUSSpider(YextSpider):
+class IndependentFinancialUSSpider(scrapy.Spider):
     name = "independent_financial_us"
     item_attributes = {"brand": "Independent Financial", "brand_wikidata": "Q6016398"}
-    api_key = "ee4600854cf5501c53831bf944472e57"
-    wanted_types = ["location", "atm"]
+    start_urls = ["https://www.independentbank.com/find-a-location/"]
 
-    def parse_item(self, item, location):
-        if location["meta"]["entityType"] == "location":
-            apply_category(Categories.BANK, item)
-            item["ref"] = location.get("c_branchCode", location["meta"].get("id"))
-            item["name"] = " ".join(filter(None, [location.get("name"), location.get("geomodifier")]))
-        elif location["meta"]["entityType"] == "atm":
-            apply_category(Categories.ATM, item)
-            item["name"] = location.get("geomodifier")
-        item["website"] = location.get("c_pagesURL")
-        item.pop("email", None)
-        item["extras"].pop("contact:instagram", None)
-        item.pop("twitter", None)
-        item.pop("facebook", None)
-        yield item
+    def parse(self, response: Response, **kwargs):
+        for location in response.xpath('//*[@class="locations-listings"]//article'):
+            item = Feature()
+            item["branch"] = location.xpath(".//@aria-label").get()
+            item["name"] = self.item_attributes["brand"]
+            item["ref"] = location.xpath(".//@id").get()
+            item["lat"] = location.xpath(".//@data-lat").get()
+            item["lon"] = location.xpath(".//@data-lng").get()
+            item["addr_full"] = location.xpath(".//@data-address").get()
+            location_type = (
+                location.xpath('.//*[@class="location-item__options options"]/span').xpath("normalize-space()").getall()
+            )
+            if "Bank" in location_type:
+                apply_category(
+                    Categories.BANK,
+                    item,
+                )
+                apply_yes_no(Extras.ATM, item, ("ATM" in location_type))
+            elif location_type in [["ATM"], ["Drive Up"]]:
+                apply_category(Categories.ATM, item)
+            elif location_type in [["Mortgage & Loan Center"], ["Commercial Loan Center"]]:
+                apply_category(Categories.OFFICE_FINANCIAL, item)
+            yield item

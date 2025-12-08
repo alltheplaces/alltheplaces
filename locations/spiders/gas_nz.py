@@ -2,7 +2,7 @@ from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
-class GASNZSpider(StoreLocatorWidgetsSpider):
+class GasNZSpider(StoreLocatorWidgetsSpider):
     name = "gas_nz"
     item_attributes = {"brand": "G.A.S.", "brand_wikidata": "Q112189761"}
     key = "ed66addbfde705ac2e642e1ecd322ccd"

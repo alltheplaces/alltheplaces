@@ -19,6 +19,7 @@ class TheCooperativeGroupSpider(SitemapSpider, StructuredDataSpider):
         ("/funeralcare/funeral-directors/", "parse_sd"),
     ]
     wanted_types = ["ConvenienceStore", "LocalBusiness"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if ld_data["@type"] == "ConvenienceStore":

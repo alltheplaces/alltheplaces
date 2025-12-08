@@ -1,0 +1,14 @@
+from locations.storefinders.wp_go_maps import WpGoMapsSpider
+from locations.categories import Categories
+
+
+class $classname(WpGoMapsSpider):
+    name = "$name"
+    item_attributes = {
+        # Uncomment and populate if known
+        # "brand": "$brand",
+        # "brand_wikidata": "$brand_wikidata",
+        # "operator": "$operator",
+        # "operator_wikidata": "$operator_wikidata",
+    }
+    allowed_domains = ["$domain"]

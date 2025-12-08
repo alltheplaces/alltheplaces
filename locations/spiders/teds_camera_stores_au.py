@@ -1,6 +1,11 @@
-from scrapy import Request
+from typing import Iterable
 
+from scrapy import Request, Selector
+from scrapy.http import Response
+
+from locations.categories import Categories
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -9,13 +14,11 @@ class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
     item_attributes = {
         "brand": "Ted's Camera Stores",
         "brand_wikidata": "Q117958394",
-        "extras": {
-            "shop": "camera",
-        },
+        "extras": Categories.SHOP_CAMERA.value,
     }
     allowed_domains = ["www.teds.com.au"]
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[Request]:
         # The request won't work without the headers supplied below.
         headers = {
             "X-Requested-With": "XMLHttpRequest",
@@ -23,7 +26,16 @@ class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
         for domain in self.allowed_domains:
             yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
-    def add_hours(self, response):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
+        item["addr_full"] = ", ".join(
+            filter(
+                lambda field: field.strip(),
+                popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall(),
+            )
+        )
+        yield Request(url=item["website"], meta={"item": item}, callback=self.parse_opening_hours)
+
+    def parse_opening_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
         if response.xpath('//div[contains(@class, "amlocator-location-info")]').get():
             item["email"] = (
@@ -38,12 +50,3 @@ class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
-
-    def parse_item(self, item, location, popup_html):
-        item["addr_full"] = ", ".join(
-            filter(
-                lambda field: field.strip(),
-                popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall(),
-            )
-        )
-        yield Request(url=item["website"], meta={"item": item}, callback=self.add_hours)

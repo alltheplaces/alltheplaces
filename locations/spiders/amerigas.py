@@ -1,13 +1,14 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class AmerigasSpider(SitemapSpider):
+class AmerigasSpider(SitemapSpider, StructuredDataSpider):
     name = "amerigas"
     item_attributes = {
         "brand": "AmeriGas",
         "brand_wikidata": "Q23130318",
+        "extras": {"amenity": "vending_machine", "vending": "gas"},
     }
 
     # Note, /api/search is forbidden by robots.txt, this spider produces their
@@ -15,12 +16,8 @@ class AmerigasSpider(SitemapSpider):
 
     sitemap_urls = ["https://www.amerigas.com/local_office_sitemap.xml.gz"]
     sitemap_rules = [
-        (r"/locations/propane-offices/[^/]+/[^/]+/[^/]+$", "parse"),
+        (r"/locations/propane-offices/[^/]+/[^/]+/[^/]+$", "parse_sd"),
     ]
 
-    def parse(self, response):
-        item = LinkedDataParser.parse(response, "LocalBusiness")
-        if "extras" not in item:
-            item["extras"] = {}
-        item["extras"].update({"shop": "gas"})
-        yield item
+    def pre_process_data(self, ld_data, **kwargs):
+        ld_data["openingHoursSpecification"] = None

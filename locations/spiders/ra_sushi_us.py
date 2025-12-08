@@ -5,7 +5,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class RASushiUSSpider(SitemapSpider):
+class RaSushiUSSpider(SitemapSpider):
     name = "ra_sushi_us"
     item_attributes = {"brand": "RA Sushi", "brand_wikidata": "Q117400401"}
     sitemap_urls = ["https://rasushi.com/stores-sitemap.xml"]

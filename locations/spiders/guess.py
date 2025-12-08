@@ -1,12 +1,17 @@
-from scrapy.spiders import SitemapSpider
+from locations.categories import Categories, apply_category
+from locations.storefinders.rio_seo import RioSeoSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 
-
-class GuessSpider(SitemapSpider, StructuredDataSpider):
+class GuessSpider(RioSeoSpider):
     name = "guess"
-    item_attributes = {"brand": "Guess", "brand_wikidata": "Q2470307"}
-    sitemap_urls = ["https://stores.guess.com/sitemap.xml"]
-    sitemap_rules = [(".html", "parse_sd")]
-    wanted_types = ["ClothingStore"]
-    custom_settings = {"REDIRECT_ENABLED": False}
+    item_attributes = {"brand": "Guess", "brand_wikidata": "Q2470307", "extras": Categories.SHOP_CLOTHES.value}
+    end_point = "https://maps.stores.guess.com"
+
+    def post_process_feature(self, feature, location):
+        if location["store_type_cs"] == "Guess Accessories":
+            apply_category(Categories.SHOP_FASHION_ACCESSORIES, feature)
+        elif location["store_type_cs"] == "G by Guess":
+            feature["brand_wikidata"] = "Q5515159"
+        if location["store_type_cs"] not in ("Clothing Store,GUESS", ""):
+            feature["brand"] = location["store_type_cs"]
+        yield feature

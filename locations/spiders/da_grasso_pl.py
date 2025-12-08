@@ -27,4 +27,5 @@ class DaGrassoPLSpider(Spider):
                     close_time=hours["close"],
                 )
             item["opening_hours"] = opening_hours
+            item.pop("name", None)
             yield item

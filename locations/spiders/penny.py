@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -9,14 +11,14 @@ class PennySpider(Spider):
     name = "penny"
     item_attributes = PennyDESpider.item_attributes
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["at", "cz", "hu", "it", "ro"]:
             yield JsonRequest(url=f"https://www.penny.{country}/api/stores", cb_kwargs={"cc": country})
 
     def parse(self, response, **kwargs):
         for store in response.json():
-            store["lat"] = store["coordinate"]["y"]
-            store["lon"] = store["coordinate"]["x"]
+            store["lat"] = store["position"]["lat"]
+            store["lon"] = store["position"]["lng"]
             store["street_address"] = store.pop("street")
             store["country"] = kwargs["cc"].upper()
 

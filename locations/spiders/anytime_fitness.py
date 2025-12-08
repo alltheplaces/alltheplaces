@@ -5,6 +5,7 @@ import scrapy
 from scrapy.http import Response
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AnytimeFitnessSpider(scrapy.Spider):
@@ -17,7 +18,7 @@ class AnytimeFitnessSpider(scrapy.Spider):
             yield Feature(
                 lat=gym["latitude"],
                 lon=gym["longitude"],
-                street_address=", ".join(filter(None, [gym["content"]["address"], gym["content"]["address2"]])),
+                street_address=clean_address([gym["content"]["address"], gym["content"]["address2"]]),
                 city=gym["content"]["city"],
                 phone=gym["content"]["phone"],
                 website=gym["content"]["url"].replace(

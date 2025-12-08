@@ -1,9 +1,12 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class ModernMarketUSSpider(Spider):
@@ -12,7 +15,7 @@ class ModernMarketUSSpider(Spider):
     allowed_domains = ["modernmarket.com"]
     start_urls = ["https://modernmarket.com/api/restaurants"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -21,9 +24,7 @@ class ModernMarketUSSpider(Spider):
             if "COMING SOON" in location["name"].upper():
                 continue
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(
-                filter(None, [location.get("streetaddress"), location.get("streetaddress2")])
-            )
+            item["street_address"] = clean_address([location.get("streetaddress"), location.get("streetaddress2")])
             apply_yes_no(Extras.DELIVERY, item, location.get("candeliver"), False)
             apply_yes_no(Extras.DRIVE_THROUGH, item, location.get("supportsdrivethru"), False)
             item["opening_hours"] = OpeningHours()

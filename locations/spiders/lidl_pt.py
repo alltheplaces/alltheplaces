@@ -7,5 +7,5 @@ class LidlPTSpider(LidlATSpider):
 
     dataset_id = "e470ca5678c5440aad7eecf431ff461a"
     dataset_name = "Filialdaten-PT/Filialdaten-PT"
-    key = "Ahu0_AMpxF4eh7QlrRMfkhtrPnAKxYItqztODUDyRvuE4TzajeGVOxJSIZ6PUoR_"
+    api_key = "Ahu0_AMpxF4eh7QlrRMfkhtrPnAKxYItqztODUDyRvuE4TzajeGVOxJSIZ6PUoR_"
     days = DAYS_PT

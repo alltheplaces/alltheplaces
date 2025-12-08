@@ -20,7 +20,7 @@ class CoachSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"/stores/[-\w]+/[-\w]+\.html$")),
         Rule(LinkExtractor(allow=r"/stores/[-\w]+/[-\w]+/[-\w]+\.html$"), callback="parse_sd"),
     ]
-    wanted_types = ["BagsStore"]
+    wanted_types = ["Organization"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if not ld_data.get("address", {}).get("streetAddress"):

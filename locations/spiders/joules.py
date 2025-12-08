@@ -1,14 +1,25 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any
+from urllib.parse import urljoin
 
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.http import Response
+from scrapy.spiders import Spider
+
+from locations.items import Feature
 
 
-class JoulesSpider(SitemapSpider, StructuredDataSpider):
+class JoulesSpider(Spider):
     name = "joules"
     item_attributes = {"brand": "Joules", "brand_wikidata": "Q25351738"}
-    sitemap_urls = ["https://www.joules.com/sitemap.xml"]
-    sitemap_follow = ["Store-en-GBP"]
-    sitemap_rules = [("/store-locator/store/", "parse_sd")]
+    start_urls = ["https://www.joules.com/storelocator/data/stores"]
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["url"] = None
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["Stores"]:
+            item = Feature()
+            item["ref"] = location["BR"]
+            item["lat"] = location["LT"]
+            item["lon"] = location["LN"]
+            item["branch"] = location["NA"]
+            s = location["NA"]
+            name = "".join(s.split()).lower() + "/" + location["BR"]
+            item["website"] = urljoin("https://www.joules.com/storelocator/", name)
+            yield item

@@ -1,42 +1,17 @@
-import hashlib
+from typing import Iterable
 
-import scrapy
-from scrapy import FormRequest
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.uberall import UberallSpider
 
 
-class ArdeneSpider(scrapy.Spider):
+class ArdeneSpider(UberallSpider):
     name = "ardene"
     item_attributes = {"brand": "Ardene", "brand_wikidata": "Q2860764"}
+    key = "APLOifTJjDLpXnd0K1bTlQmbKKM3mt"
 
-    def start_requests(self):
-        yield FormRequest(
-            url="https://www.ardene.com/on/demandware.store/Sites-ardene-Site/en_US/Stores-GetStoresUpdate",
-            formdata={
-                "distanceUnit": "mi",
-                "maxDistance": "1000000",
-                "lat": "56.1304",
-                "lng": "-102.34680000000003",
-                "maxStores": "1000000",
-            },
-        )
-
-    def parse(self, response, **kwargs):
-        store_data = response.json()
-
-        for store in store_data:
-            if "LIQUIDATION" in store["name"]:
-                continue
-
-            store["street_address"] = ", ".join(filter(None, [store.get("address1"), store.get("address2")]))
-            if store["postalCode"] == "0":
-                store["postalCode"] = None
-
-            item = DictParser.parse(store)
-
-            item["ref"] = hashlib.sha256(
-                f'{item["name"]}-{item["postcode"]}-{item["country"]}-{item["lat"]}-{item["lon"]}'.encode()
-            ).hexdigest()
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item

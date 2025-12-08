@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import SocialMedia, set_social_media
 
 
 class TheCheesecakeShopSpider(Spider):
@@ -57,8 +58,8 @@ class TheCheesecakeShopSpider(Spider):
                 item["postcode"] = item["postcode"].strip()
                 item["phone"] = store.get("store_phone")
                 item["email"] = store.get("store_email")
-                item["facebook"] = store.get("store_facebook")
-                item["extras"]["instagram"] = store.get("store_instagram")
+                set_social_media(item, SocialMedia.FACEBOOK, store.get("store_facebook"))
+                set_social_media(item, SocialMedia.INSTAGRAM, store.get("store_instagram"))
                 if ".com.au" in response.url:
                     item["website"] = "https://www.cheesecake.com.au/find-bakery/" + store["store_identifier"] + "/"
                 elif ".co.nz" in response.url:

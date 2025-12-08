@@ -9,3 +9,4 @@ class VansSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["vans.com"]
     sitemap_urls = ["https://www.vans.com/sitemaps/store-locations.xml"]
     sitemap_rules = [(r"/stores/.+/.+/\w+\d+$", "parse_sd")]
+    drop_attributes = {"image"}

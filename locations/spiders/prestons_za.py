@@ -1,22 +1,25 @@
-from html import unescape
+from typing import Iterable
 
-from locations.categories import Categories
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_EN
+from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
 class PrestonsZASpider(WPStoreLocatorSpider):
     name = "prestons_za"
-    item_attributes = {
-        "brand": "Prestons",
-        "brand_wikidata": "Q116861728",
-        "extras": Categories.SHOP_ALCOHOL.value,
-    }
+    item_attributes = {"brand": "Prestons Liquor Stores", "brand_wikidata": "Q116861728"}
     allowed_domains = ["prestonsliquors.co.za"]
-    time_format = "%I:%M %p"
+    days = DAYS_EN
 
-    def parse_item(self, item, location):
-        item["name"] = unescape(item["name"])
-        item["street_address"] = location.get("address")
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["street_address"] = feature.get("address")
         item.pop("addr_full", None)
-        item["city"] = location.get("address2")
+        item["city"] = feature.get("address2")
+
+        apply_category(Categories.SHOP_ALCOHOL, item)
+
         yield item

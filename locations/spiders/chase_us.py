@@ -1,36 +1,28 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
+from locations.storefinders.yext import YextSpider
 
 
-class ChaseUSSpider(SitemapSpider, StructuredDataSpider):
+class ChaseUSSpider(YextSpider):
     name = "chase_us"
     item_attributes = {"brand": "Chase", "brand_wikidata": "Q524629"}
-    allowed_domains = ["locator.chase.com"]
-    sitemap_urls = ["https://locator.chase.com/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/locator\.chase\.com\/(?!es)[a-z]{2}\/[\w\-]+\/[\w\-]+$", "parse_sd")]
+    drop_attributes = {"twitter"}
+    api_key = "e8996b1ad0e9b3a59e3d1251bbcc0b4b"
+    api_version = "20240816"
 
-    def post_process_item(self, item, response, ld_data):
-        item["ref"] = item["ref"].split("#", 1)[1]
-        hours_text = " ".join(
-            response.xpath(
-                '//div[contains(@class, "Core-branchRow--hours")]//table[1]/tbody/tr[@itemprop="openingHours"]/@content'
-            ).getall()
+    def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Any:
+        item[
+            "website"
+        ] = f'https://www.chase.com/locator/banking/us/{item["state"]}/{item["city"]}/{item["street_address"]}'.lower().replace(
+            " ", "-"
         )
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_text)
-        atm_count = response.xpath('//div[@class="Core-atmCount"]/text()').get()
-        if hours_text and atm_count:
+        if item["name"] == "Chase Bank":
+            item.pop("name")
             apply_category(Categories.BANK, item)
-            apply_yes_no(Extras.ATM, item, True)
-        elif hours_text:
-            apply_category(Categories.BANK, item)
-            apply_yes_no(Extras.ATM, item, False)
-        elif atm_count:
+            apply_yes_no(Extras.ATM, item, location.get("c_primaryATM"))
+        elif item["name"] == "Chase ATM":
             apply_category(Categories.ATM, item)
-        item.pop("image")
-        item.pop("facebook")
-        item.pop("twitter")
+
         yield item

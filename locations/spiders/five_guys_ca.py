@@ -1,11 +1,9 @@
-from scrapy.spiders import SitemapSpider
+from locations.spiders.five_guys_us import FIVE_GUYS_SHARED_ATTRIBUTES, FiveGuysUSSpider
 
-from locations.spiders.five_guys_us import FiveGuysUSSpider
-from locations.structured_data_spider import StructuredDataSpider
+# Five Guys YextSearch
 
 
-class FiveGuysCASpider(SitemapSpider, StructuredDataSpider):
+class FiveGuysCASpider(FiveGuysUSSpider):
     name = "five_guys_ca"
-    item_attributes = FiveGuysUSSpider.item_attributes
-    sitemap_urls = ["https://restaurants.fiveguys.ca/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.ca\/[^/]+$", "parse_sd")]
+    item_attributes = FIVE_GUYS_SHARED_ATTRIBUTES
+    host = "https://restaurants.fiveguys.ca"

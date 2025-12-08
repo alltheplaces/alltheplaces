@@ -11,6 +11,7 @@ HEART_OF_ENGLAND_COOP = {"brand": "Heart of England Co-operative Society", "bran
 class HeartOfEnglandCooperativeGBSpider(SuperStoreFinderSpider):
     name = "heart_of_england_cooperative_gb"
     start_urls = ["https://www.cawtest.com/heartofengland/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php"]
+    requires_proxy = "GB"  # Cloudflare geoblocking used for https://heartofengland.coop/ etc
 
     def parse_item(self, item: Feature, location: Selector, **kwargs):
         item["branch"] = item.pop("name")

@@ -1,18 +1,13 @@
-from scrapy.crawler import Crawler
+from scrapy.spiders import Spider
+from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
 from locations.pipelines.country_code_clean_up import CountryCodeCleanUpPipeline
-from locations.spiders.greggs_gb import GreggsGBSpider
 
 
 def get_objects(spider_name):
-    class Spider(object):
-        pass
-
-    spider = Spider()
-    spider.name = spider_name
-    spider.crawler = Crawler(GreggsGBSpider)
-    spider.crawler._apply_settings()
+    spider = Spider(name=spider_name)
+    spider.crawler = get_crawler()
     return Feature(), CountryCodeCleanUpPipeline(), spider
 
 

@@ -7,10 +7,9 @@ from locations.items import Feature
 
 
 class SeriousCoffeeSpider(scrapy.Spider):
-    name = "seriouscoffee"
+    name = "serious_coffee"
     item_attributes = {"brand": "Serious Coffee", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.seriouscoffee.com"]
-    download_delay = 0.5
     start_urls = ("http://www.seriouscoffee.com/locations/",)
 
     def parse_day(self, day):

@@ -1,86 +1,24 @@
-from urllib.parse import urlencode
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-import scrapy
-
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.searchable_points import open_searchable_points
-
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
-
-BASE_URL = "https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/v2.1/getStoresByCoordinates?"
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class TMobileUSSpider(scrapy.Spider):
+class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
     name = "tmobile_us"
-    item_attributes = {
-        "brand": "T-Mobile",
-        "brand_wikidata": "Q3511885",
-        "country": "US",
-    }
+    item_attributes = {"brand": "T-Mobile", "brand_wikidata": "Q3511885"}
+    sitemap_urls = ["https://www.t-mobile.com/stores/sitemap-business-main-pages.xml"]
+    sitemap_rules = [(r"/stores/[a-z]{2}/t-mobile-", "parse_sd")]
     allowed_domains = ["www.t-mobile.com"]
-    download_delay = 0.2
+    drop_attributes = {"facebook", "twitter"}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 3}
 
-    def parse_hours(self, store_hours):
-        opening_hours = OpeningHours()
-        if store_hours is None:
-            return
-
-        for store_day in store_hours:
-            day = DAY_MAPPING[store_day.get("day")]
-            open_time = store_day.get("opens")
-            close_time = store_day.get("closes")
-            if open_time is None and close_time is None:
-                continue
-            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
-
-        return opening_hours.as_opening_hours()
-
-    def start_requests(self):
-        url = BASE_URL
-
-        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
-            next(points)  # Ignore the header
-            for point in points:
-                _, lat, lon = point.strip().split(",")
-
-                params = {
-                    "latitude": "{}".format(lat),
-                    "longitude": "{}".format(lon),
-                    "count": "1000",
-                    "radius": "25",
-                    "ignoreLoadingBar": "false",
-                }
-
-                yield scrapy.http.Request(url + urlencode(params), callback=self.parse)
-
-    def parse(self, response):
-        data = response.json()
-
-        for store in data:
-            properties = {
-                "name": store.get("name"),
-                "ref": store["id"],
-                "street_address": store["location"]["address"]["streetAddress"],
-                "city": store["location"]["address"]["addressLocality"],
-                "state": store["location"]["address"]["addressRegion"],
-                "postcode": store["location"]["address"]["postalCode"],
-                "phone": store.get("telephone"),
-                "website": store.get("url") or response.url,
-                "lat": store["location"]["latitude"],
-                "lon": store["location"]["longitude"],
-            }
-
-            hours = self.parse_hours(store.get("hours", []))
-            if hours:
-                properties["opening_hours"] = hours
-
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("T-Mobile ").removeprefix("at ")
+        item["image"] = (
+            ld_data["image"].split("(webp)")[1].strip("/") if "(webp)" in ld_data["image"] else ld_data["image"]
+        )
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
+        yield item

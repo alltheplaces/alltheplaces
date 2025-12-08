@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import quote
 
 from scrapy import Spider
@@ -5,43 +6,54 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BestAndLessAUSpider(Spider):
     name = "best_and_less_au"
     item_attributes = {"brand": "Best & Less", "brand_wikidata": "Q4896542"}
-    allowed_domains = ["www.bestandless.com.au"]
-    start_urls = [
-        f"https://prodapi.bestandless.com.au/occ/v2/bnlsite/stores/location/{state}?fields=FULL"
-        for state in ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"]
-    ]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url="https://prodapi.bestandless.com.au/occ/v2/bnlsite/stores?fields=FULL&currentPage={}".format(page)
+        )
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(0)
 
     def parse(self, response):
         for location in response.json()["stores"]:
+            location.update(location.pop("address"))
             item = DictParser.parse(location)
-            item["ref"] = location["address"]["id"]
-            item["addr_full"] = location["address"].get("formattedAddress")
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
-            )
-            item["city"] = location["address"].get("town")
-            item["state"] = location["address"].get("state")
-            item["postcode"] = location["address"].get("postalCode")
-            item["phone"] = location["address"].get("phone")
-            item["email"] = location["address"].get("email")
+            item["branch"] = item.pop("name")
+            item["addr_full"] = location.get("formattedAddress")
+            item["street_address"] = clean_address([location.get("line1"), location.get("line2")])
+            item["city"] = location.get("town")
+            item["state"] = item["state"].get("name")
             item["website"] = "https://www.bestandless.com.au" + quote(location["url"])
-            item["opening_hours"] = OpeningHours()
-            for day in location["openingHours"]["weekDayOpeningList"]:
-                if day["closed"]:
-                    continue
-                item["opening_hours"].add_range(
-                    day["weekDay"],
-                    day["openingTime"]["formattedHour"].upper(),
-                    day["closingTime"]["formattedHour"].upper(),
-                    "%I:%M %p",
-                )
+            try:
+                item["opening_hours"] = self.get_opening_hours(location)
+            except Exception as e:
+                self.logger.warning(f"Failed to parse opening hours for {response.url}, {e}")
+                self.crawler.stats.inc_value("atp/hours/failed")
             yield item
+
+        pagination = response.json()["pagination"]
+        if pagination["currentPage"] < pagination["totalPages"]:
+            yield self.make_request(pagination["currentPage"] + 1)
+
+    def get_opening_hours(self, location) -> OpeningHours:
+        o = OpeningHours()
+        if opening_hours := location.get("openingHours"):
+            for day in opening_hours["weekDayOpeningList"]:
+                if day["closed"]:
+                    o.set_closed(day["weekDay"])
+                else:
+                    o.add_range(
+                        day["weekDay"],
+                        day["openingTime"]["formattedHour"].upper(),
+                        day["closingTime"]["formattedHour"].upper(),
+                        "%I:%M %p",
+                    )
+
+        return o

@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import url_to_coords
@@ -5,7 +8,7 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TUIGBSpider(SitemapSpider):
+class TuiGBSpider(SitemapSpider):
     name = "tui_gb"
     item_attributes = {
         "brand": "TUI",
@@ -14,7 +17,8 @@ class TUIGBSpider(SitemapSpider):
     }
     sitemap_urls = ["https://www.tui.co.uk/sitemap/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.tui\.co\.uk\/shop-finder\/([-\w]+)$", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
@@ -23,7 +27,7 @@ class TUIGBSpider(SitemapSpider):
             else:
                 yield entry
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         item = LinkedDataParser.parse(response, "Store")
 
         item["ref"] = response.url.split("/")[-1]

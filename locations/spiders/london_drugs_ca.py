@@ -1,9 +1,12 @@
 import json
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class LondonDrugsCASpider(scrapy.Spider):
@@ -11,9 +14,9 @@ class LondonDrugsCASpider(scrapy.Spider):
     item_attributes = {"brand": "London Drugs", "brand_wikidata": "Q3258955"}
     allowed_domains = ["www.londondrugs.com"]
     start_urls = ["https://www.londondrugs.com/on/demandware.store/Sites-LondonDrugs-Site/default/MktStoreList-All"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         stores = json.loads(response.body)
         for store in stores:
             item = DictParser.parse(store)

@@ -16,11 +16,15 @@
 		}
 	},
 
+	"containerEnv": {
+		"EDITOR": "code"
+	},
+
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "cd /workspaces/alltheplaces && pipenv run scrapy"
+	"postCreateCommand": "cd /workspaces/alltheplaces && git config core.hooksPath contrib/hooks && uv run scrapy"
 
 	// Configure tool-specific properties.
 	// "customizations": {},

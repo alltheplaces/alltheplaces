@@ -1,9 +1,17 @@
+from typing import Any
+from urllib.parse import urljoin
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+
+SUB_TENANTS = {
+    "pieFace": ({"brand": "Pie Face", "brand_wikidata": "Q18166370"}, Categories.COFFEE_SHOP),
+    "quickStop": ({"brand": "Quick Stop", "name": "Quick Stop"}, Categories.SHOP_CONVENIENCE),
+}
 
 
 class UnitedPetroleumAUSpider(Spider):
@@ -14,32 +22,46 @@ class UnitedPetroleumAUSpider(Spider):
     # possible to determine whether a location is "Astron" or
     # "United" branded, but in all but seemingly < 5 cases, United
     # is almost always used.
-    item_attributes = {"brand": "United Petroleum", "brand_wikidata": "Q28224393"}
+    UNITED = {"brand": "United", "brand_wikidata": "Q28224393"}
     allowed_domains = ["servicestations.unitedpetroleum.com.au"]
-    start_urls = ["https://servicestations.unitedpetroleum.com.au/api/find"]
 
     def start_requests(self):
-        data = {
-            "brand": [],
-            "facilitiesAndServices": [],
-            "foodAndDrinks": [],
-            "fuelCards": [],
-            "fuels": [],
-            "lat": -37.8585540736312,
-            "lon": 145.02824508187487,
-            "range": 20000,
-            "supermarketVouchers": [],
-            "truckFriendly": [],
-        }
-        for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", data=data)
+        yield JsonRequest(
+            url="https://servicestations.unitedpetroleum.com.au/api/find",
+            data={
+                "brand": [],
+                "facilitiesAndServices": [],
+                "foodAndDrinks": [],
+                "fuelCards": [],
+                "fuels": [],
+                "lat": -37.8585540736312,
+                "lon": 145.02824508187487,
+                "range": 20000,
+                "supermarketVouchers": [],
+                "truckFriendly": [],
+            },
+        )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["addr_full"] = " ".join(
+            item["addr_full"] = ", ".join(
                 filter(None, [location["address1"], location["address2"], location["address3"]])
             )
+
+            if food_and_drinks := location.get("foodAndDrinks"):
+                for tenant_key, (brand, cat) in SUB_TENANTS.items():
+                    if food_and_drinks.get(tenant_key) is True:
+                        tenant = item.deepcopy()
+                        tenant["name"] = None
+                        tenant["ref"] = "{}-{}".format(item["ref"], tenant_key)
+                        tenant.update(brand)
+                        apply_category(cat, tenant)
+                        yield tenant
+
+            if location["brand"] == "united":
+                item.update(self.UNITED)
+            item["website"] = urljoin("https://servicestations.unitedpetroleum.com.au/location/", location["slug"])
             item["phone"] = location["publicPhoneNumber"]
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
@@ -80,23 +102,6 @@ class UnitedPetroleumAUSpider(Spider):
             apply_yes_no(Extras.TOILETS, item, location["facilitiesAndServices"]["toilets"], False)
             apply_yes_no(Extras.SHOWERS, item, location["facilitiesAndServices"]["showers"], False)
             apply_yes_no(Extras.ATM, item, location["facilitiesAndServices"]["atm"], False)
-            apply_yes_no(Extras.CAR_WASH, item, location["facilitiesAndServices"]["carWash"], False)
-            if location.get("foodAndDrinks"):
-                apply_yes_no(Extras.DRIVE_THROUGH, item, location["foodAndDrinks"]["driveThru"], False)
-                if location["foodAndDrinks"]["roadhouse"]:
-                    apply_category(Categories.RESTAURANT, item)
-                    apply_yes_no(Extras.INDOOR_SEATING, item, True)
-                if location["foodAndDrinks"]["quickStop"]:
-                    apply_category(Categories.SHOP_CONVENIENCE, item)
-                if location["foodAndDrinks"]["pieFace"] or location["foodAndDrinks"]["baristaCoffee"]:
-                    apply_category(Categories.FAST_FOOD, item)
-                    apply_yes_no(Extras.TAKEAWAY, item, True)
-                    cuisine = ""
-                    if location["foodAndDrinks"]["pieFace"] and location["foodAndDrinks"]["baristaCoffee"]:
-                        cuisine = "pie;coffee_shop"
-                    elif location["foodAndDrinks"]["pieFace"]:
-                        cuisine = "pie"
-                    elif location["foodAndDrinks"]["baristaCoffee"]:
-                        cuisine = "coffee_shop"
-                    apply_category({"cuisine": cuisine}, item)
+            apply_yes_no(Extras.CAR_WASH, item, location["facilitiesAndServices"].get("carWash"))
+
             yield item

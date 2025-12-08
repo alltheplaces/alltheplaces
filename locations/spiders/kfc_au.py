@@ -1,31 +1,38 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.pipelines.address_clean_up import clean_address
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class KFCAUSpider(scrapy.Spider):
+class KfcAUSpider(Spider):
     name = "kfc_au"
     item_attributes = KFC_SHARED_ATTRIBUTES
-    start_urls = ["https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/"]
+    region_code = "apac"
     tenant_id = "afd3813afa364270bfd33f0a8d77252d"
-    requires_proxy = True  # Requires AU proxy, possibly residential IPs only.
+    web_root = "https://www.kfc.com.au/restaurants/"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url, headers={"x-tenant-id": self.tenant_id})
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            url="https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/",
+            headers={"x-tenant-id": self.tenant_id},
+        )
 
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            if location["code"] == "1000" or location["code"] == "1001":
+            if location["code"] == "1000" or location["code"] == "1001" or "testing" in location["name"]:
                 # Ignore dummy stores used for internal testing/development
                 continue
             item["ref"] = location["code"]
-            item["street_address"] = " ".join(location["localAddress"][0]["address"]["addressLines"])
+            item["street_address"] = clean_address(location["localAddress"][0]["address"]["addressLines"])
             item["city"] = location["localAddress"][0]["address"]["city"]
             item["state"] = location["localAddress"][0]["address"]["state"]
             item["country"] = location["localAddress"][0]["address"]["country"]
@@ -40,8 +47,12 @@ class KFCAUSpider(scrapy.Spider):
                     apply_yes_no(Extras.DELIVERY, item, "delivery" in channel["services"], False)
                     break
             web_path = item["name"].lower().replace(" ", "-") + "/" + item["postcode"]
-            item["website"] = "https://www.kfc.com.au/restaurants/" + web_path
-            details_url = "https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/details/" + web_path
+            if self.web_root:
+                item["website"] = self.web_root + web_path
+            details_url = (
+                "https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/details/" + web_path
+            )
+            item["branch"] = item.pop("name").removeprefix("KFC ")
             yield JsonRequest(
                 url=details_url, headers={"x-tenant-id": self.tenant_id}, meta={"item": item}, callback=self.parse_hours
             )

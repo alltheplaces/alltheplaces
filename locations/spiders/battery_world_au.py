@@ -1,8 +1,11 @@
+from typing import AsyncIterator
+
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BatteryWorldAUSpider(Spider):
@@ -11,7 +14,7 @@ class BatteryWorldAUSpider(Spider):
     allowed_domains = ["www.batteryworld.com.au"]
     start_urls = ["https://www.batteryworld.com.au/app/services/Store.Service.ss"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -19,7 +22,7 @@ class BatteryWorldAUSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location.get("internalid")
-            item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+            item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
             item["website"] = "https://www.batteryworld.com.au/stores/" + location.get("urlcomponent")
             hours_html = Selector(text=location.get("openingHours"))
             hours_string = " ".join(hours_html.xpath(".//text()").getall())

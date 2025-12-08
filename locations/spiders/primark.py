@@ -1,77 +1,57 @@
-import json
+import re
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import FIREFOX_LATEST
 
 
-class PrimarkSpider(SitemapSpider):
+class PrimarkSpider(SitemapSpider, StructuredDataSpider):
     name = "primark"
     item_attributes = {"brand": "Primark", "brand_wikidata": "Q137023"}
-    allowed_domains = ["primark.com"]
-    sitemap_urls = ["https://stores.primark.com/sitemap.xml"]
-    sitemap_rules = [(r"https:\/\/stores\.primark\.com\/[-\w]+\/[-\w]+\/[-\w%']+", "parse")]
+    sitemap_urls = ["https://www.primark.com/robots.txt"]
+    sitemap_rules = [
+        # Root sitemap should be a sitemap index, normal sitemap
+        ("sitemap-store-locator.xml", "_parse_sitemap"),
+        # We need to have languages in here to avoid multilingual duplicates
+        (r"/de-at/stores/[^/]+/[^/]+$", "parse"),
+        (r"/nl-be/stores/[^/]+/[^/]+$", "parse"),
+        (r"/cs-cz/stores/[^/]+/[^/]+$", "parse"),
+        (r"/de-de/stores/[^/]+/[^/]+$", "parse"),
+        (r"/es-es/stores/[^/]+/[^/]+$", "parse"),
+        (r"/fr-fr/stores/[^/]+/[^/]+$", "parse"),
+        (r"/en-gb/stores/[^/]+/[^/]+$", "parse"),
+        (r"/en-ie/stores/[^/]+/[^/]+$", "parse"),
+        (r"/it-it/stores/[^/]+/[^/]+$", "parse"),
+        (r"/nl-nl/stores/[^/]+/[^/]+$", "parse"),
+        (r"/pl-pl/stores/[^/]+/[^/]+$", "parse"),
+        (r"/pt-pt/stores/[^/]+/[^/]+$", "parse"),
+        (r"/ro-ro/stores/[^/]+/[^/]+$", "parse"),
+        (r"/sl-si/stores/[^/]+/[^/]+$", "parse"),
+        (r"/sk-sk/stores/[^/]+/[^/]+$", "parse"),
+        (r"/en-us/stores/[^/]+/[^/]+$", "parse"),
+    ]
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
+    requires_proxy = True
 
-    def parse(self, response):
-        json_text = response.xpath('//script[@class="js-map-config"]/text()').get()
-        if json_text is None:
-            # These stores are "opening soon"
-            return
-        js = json.loads(json_text)["entities"][0]["profile"]
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["image"] = None
+        item["website"] = response.url
+        for k in item.fields.keys():
+            if item.get(k) == "{{placeholder}}":
+                item[k] = None
 
-        opening_hours = OpeningHours()
-        for row in js["hours"]["normalHours"]:
-            day = row["day"][:2].capitalize()
-            for interval in row["intervals"]:
-                start_time = "{:02}:{:02}".format(*divmod(interval["start"], 100))
-                end_time = "{:02}:{:02}".format(*divmod(interval["end"], 100))
-                opening_hours.add_range(day, start_time, end_time)
+        item["branch"] = item.pop("name").removeprefix("Primark ").removeprefix("Penneys ")
 
-        properties = {
-            "name": js["name"],
-            "street_address": ", ".join(
-                filter(
-                    None,
-                    [
-                        js["address"]["line1"],
-                        js["address"]["line2"],
-                        js["address"]["line3"],
-                    ],
-                )
-            ),
-            "ref": js["meta"]["id"],
-            "website": response.url,
-            "city": js["address"]["city"],
-            "state": js["address"]["region"],
-            "postcode": js["address"]["postalCode"],
-            "country": js["address"]["countryCode"],
-            "opening_hours": opening_hours.as_opening_hours(),
-            "phone": js["mainPhone"]["number"],
-            "lat": response.xpath('//meta[@itemprop="latitude"]/@content').get(),
-            "lon": response.xpath('//meta[@itemprop="longitude"]/@content').get(),
-            "facebook": js.get("facebookPageUrl"),
-            "extras": {},
-        }
+        item["state"] = None
+        item["country"] = response.url.split("/")[3].split("-")[1]
+        if m := re.search(
+            r'\\"displayCoordinate\\":{\\"latitude\\":(-?\d+\.\d+),\\"longitude\\":(-?\d+\.\d+)', response.text
+        ):
+            item["lat"], item["lon"] = m.groups()
 
-        if js.get("paymentOptions"):
-            for payment in js["paymentOptions"]:
-                if payment == "Google Pay":
-                    properties["extras"]["payment:google_pay"] = "yes"
-                elif payment == "Apple Pay":
-                    properties["extras"]["payment:apple_pay"] = "yes"
-                elif payment == "Cash":
-                    properties["extras"]["payment:cash"] = "yes"
-                elif payment == "MasterCard":
-                    properties["extras"]["payment:mastercard"] = "yes"
-                elif payment == "Visa":
-                    properties["extras"]["payment:visa"] = "yes"
-                elif payment == "American Express":
-                    properties["extras"]["payment:american_express"] = "yes"
-                elif payment == "Maestro":
-                    properties["extras"]["payment:maestro"] = "yes"
-
-        if js["name"] == "Penneys":
-            properties["brand"] = "Penneys"
-
-        yield Feature(**properties)
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item

@@ -1,10 +1,14 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
-class MyHouseAUSpider(Spider):
+class MyhouseAUSpider(Spider):
     name = "myhouse_au"
     item_attributes = {
         "brand": "MyHouse",
@@ -14,7 +18,7 @@ class MyHouseAUSpider(Spider):
     allowed_domains = ["myhouse.com.au"]
     start_urls = ["https://myhouse.com.au/api/get-stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, method="POST")
 
@@ -22,7 +26,7 @@ class MyHouseAUSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["geometry"] = location["location"]
-            item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
             item["website"] = "https://myhouse.com.au/stores/" + location["slug"]
             item["opening_hours"] = OpeningHours()
             for day_name, day_hours in location["storeHours"].items():

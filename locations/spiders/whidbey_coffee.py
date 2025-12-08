@@ -1,46 +1,32 @@
 import re
 from datetime import datetime
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class WhidbeyCoffeeSpider(scrapy.Spider):
-    name = "whidbeycoffee"
+class WhidbeyCoffeeSpider(SitemapSpider, StructuredDataSpider):
+    name = "whidbey_coffee"
     item_attributes = {"brand": "Whidbey Coffee", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.whidbeycoffee.com"]
-    start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)
+    sitemap_urls = ("https://www.whidbeycoffee.com/sitemap.xml",)
+    sitemap_rules = [(r"/pages/", "parse_sd")]
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-        for url in urls:
-            yield scrapy.Request(url.strip(), callback=self.parse_store)
-
-    def parse_store(self, response):
+    def post_process_item(self, item, response, ld_data):
         map_link = response.xpath('//div[@itemprop="address"]/p/a/@href').extract_first()
         if not map_link:
             self.logger.info(f"Skipping URL {response.url}")
             return
 
-        lat, lon = re.search(r".*@(-?[\d.]+),(-?[\d.]+).*", map_link).groups()
-
-        yield Feature(
-            ref=response.url.split("/")[-1],
-            name=response.xpath("//h1/text()").extract_first().strip(),
-            lat=float(lat),
-            lon=float(lon),
-            addr_full=response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first().strip(),
-            city=response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first().strip(),
-            state=response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first().strip(),
-            postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
-            phone=response.xpath('//span[@itemprop="telephone"]/text()').extract_first().strip(),
-            website=response.url,
-            opening_hours=self.parse_hours(response.xpath('//p[strong[contains(text(), "Hours")]]//text()').extract()),
+        item["lat"], item["lon"] = re.search(r".*@(-?[\d.]+),(-?[\d.]+).*", map_link).groups()
+        item["name"] = response.xpath("//h1/text()").extract_first().strip()
+        item["opening_hours"] = self.parse_hours(
+            response.xpath('//p[strong[contains(text(), "Hours")]]//text()').extract()
         )
+        yield item
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

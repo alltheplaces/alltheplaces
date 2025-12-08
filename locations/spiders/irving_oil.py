@@ -5,7 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class IrvingOilSpider(Spider):
@@ -23,7 +23,7 @@ class IrvingOilSpider(Spider):
             item["ref"] = props["nid"]
             item["geometry"] = location["geometry"]
             item["website"] = response.urljoin(props["link"])
-            item["addr_full"] = clean_address(Selector(text=props["address"]).xpath("//text()").getall())
+            item["addr_full"] = merge_address_lines(Selector(text=props["address"]).xpath("//text()").getall())
             item["phone"] = props["phone"]
 
             apply_yes_no(Extras.SHOWERS, item, props["showers"])

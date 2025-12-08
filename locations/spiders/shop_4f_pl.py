@@ -4,7 +4,7 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 
 
-class Shop4fPL(Spider):
+class Shop4fPLSpider(Spider):
     name = "shop_4f_pl"
     item_attributes = {"brand": "4F", "brand_wikidata": "Q16525801"}
     start_urls = [

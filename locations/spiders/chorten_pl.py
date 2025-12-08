@@ -2,13 +2,13 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
 class ChortenPLSpider(CrawlSpider):
     name = "chorten_pl"
-    item_attributes = {"brand": "Chorten", "brand_wikidata": "Q48843988"}
     start_urls = ["https://chorten.com.pl/sklepy/lista/"]
     rules = [
         Rule(LinkExtractor(allow=[r"/sklepy/lista/p\d+?$"])),
@@ -36,4 +36,8 @@ class ChortenPLSpider(CrawlSpider):
             "website": response.url,
             "ref": response.url.split("_")[-1],
         }
-        yield Feature(**properties)
+        returned = Feature(**properties)
+
+        apply_category(Categories.GENERIC_SHOP, returned)
+
+        return returned

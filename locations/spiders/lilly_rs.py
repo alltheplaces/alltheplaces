@@ -1,31 +1,40 @@
+import re
+from typing import Any
+
+import xmltodict
+from requests_cache import Response
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_SR, OpeningHours
+from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
 
 
 class LillyRSSpider(Spider):
     name = "lilly_rs"
     item_attributes = {"brand": "Lilly", "brand_wikidata": "Q111764460"}
     allowed_domains = ["www.lilly.rs"]
-    start_urls = [
-        "https://www.lilly.rs/phpsqlsearch_genjson.php?lat=44.8019&lng=20.4671&radius=10000&limit=10000&keyword=none"
-    ]
-    requires_proxy = "US"  # Cloudflare bot blocking is in use
+    start_urls = ["https://www.lilly.rs/rest/V1/locations?name="]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json():
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in xmltodict.parse(response.text)["response"]["item"]:
             item = DictParser.parse(location)
-            item["name"] = location["naziv_prodavnice"]
-            item["street_address"] = location["adresa"]
-            item["city"] = location["naziv_grada"]
-            item["phone"] = location["telefon"]
-            item["opening_hours"] = OpeningHours()
-            hours_string = "Pon-Pet: " + location["pon_pet"] + " Sub: " + location["sub"] + " Ned: " + location["ned"]
-            item["opening_hours"].add_ranges_from_string(hours_string, DAYS_SR)
+            item["ref"] = location["entity_id"]
+            item["branch"] = item.pop("name")
+            item["street_address"] = item.pop("addr_full")
+
+            oh = OpeningHours()
+            hours_data = {
+                "Weekdays": re.sub("Ne radi", "", location["monday_to_friday_wh"]),
+                "Sa": re.sub("Ne radi", "", location["saturday_wh"]),
+                "Su": re.sub("Ne radi", "", location["sunday_wh"]),
+            }
+            for day, hours in hours_data.items():
+                if hours:
+                    hour = hours.split("-")
+                    if len(hour) == 2:
+                        oh.add_days_range(
+                            NAMED_DAY_RANGES_EN[day] if day == "Weekdays" else [day], hour[0].strip(), hour[1].strip()
+                        )
+
+            item["opening_hours"] = oh
             yield item

@@ -1,13 +1,16 @@
-from locations.items import Feature
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.categories import Categories
+from locations.storefinders.stockinstore import StockInStoreSpider
 
 
-class IntersportAUSpider(WPStoreLocatorSpider):
+class IntersportAUSpider(StockInStoreSpider):
     name = "intersport_au"
-    item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
-    allowed_domains = ["intersport.com.au"]
-    time_format = "%I:%M %p"
+    item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888", "extras": Categories.SHOP_SPORTS.value}
+    api_site_id = "10208"
+    api_widget_id = "212"
+    api_widget_type = "storelocator"
+    api_origin = "https://intersport.com.au"
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
-        item["website"] = location["permalink"]
+    def parse_item(self, item, location):
+        item["branch"] = item.pop("name")
+        item["website"] = "https://intersport.com.au" + item["website"]
         yield item

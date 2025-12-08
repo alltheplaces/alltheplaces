@@ -4,6 +4,7 @@ from scrapy import Spider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BiggbyCoffeeUSSpider(Spider):
@@ -12,16 +13,17 @@ class BiggbyCoffeeUSSpider(Spider):
     allowed_domains = ["www.biggby.com"]
     start_urls = ["https://www.biggby.com/locations/"]
 
-    def parse(self, response):
+    def extract_json(self, response):
         js_blob = response.xpath('//script[contains(text(), "locations: [{")]/text()').get()
         js_blob = "[{" + js_blob.split("locations: [{", 1)[1].split("}]", 1)[0] + "}]"
-        for location in parse_js_object(js_blob):
+        return parse_js_object(js_blob)
+
+    def parse(self, response):
+        for location in self.extract_json(response):
             if location["acf"]["store_coming_soon"]:
                 continue
             item = DictParser.parse(location["acf"])
-            item["street_address"] = ", ".join(
-                filter(None, map(str.strip, [location["acf"]["address_one"], location["acf"]["address_two"]]))
-            )
+            item["street_address"] = clean_address([location["acf"]["address_one"], location["acf"]["address_two"]])
             if location["acf"].get("location_map"):
                 item["addr_full"] = location["acf"]["location_map"]["address"]
                 item["lat"] = location["acf"]["location_map"]["lat"]

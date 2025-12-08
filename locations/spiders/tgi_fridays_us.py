@@ -1,11 +1,17 @@
-from locations.storefinders.yext import YextSpider
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class TGIFridaysUS(YextSpider):
+class TgiFridaysUSSpider(SitemapSpider, StructuredDataSpider):
     name = "tgi_fridays_us"
     item_attributes = {"brand": "TGI Fridays", "brand_wikidata": "Q1524184"}
-    api_key = "96b4f9cb0c9c2f050eeec613af5b5340"
+    sitemap_urls = ["https://locations.tgifridays.com/robots.txt"]
+    sitemap_rules = [(r"locations\.tgifridays\.com/[a-z]{2}/[-\w]+/[-\w]+\.html$", "parse_sd")]
+    drop_attributes = {"facebook", "twitter"}
 
-    def parse_item(self, item, location):
-        item["name"] = location["geomodifier"]
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").split(",")[0].title()
         yield item

@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class HardeesUSSpider(SitemapSpider, StructuredDataSpider):
     name = "hardees_us"
     item_attributes = {"brand": "Hardee's", "brand_wikidata": "Q1585088"}
-    sitemap_urls = ["https://locations.hardees.com/robots.txt"]
+    sitemap_urls = ["https://locations.hardees.com/sitemap.xml"]
     sitemap_rules = [(r"com/\w\w/[^/]+/[^/]+/$", "parse")]
     wanted_types = ["LocalBusiness"]
 

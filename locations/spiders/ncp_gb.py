@@ -6,8 +6,9 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.central_england_cooperative import set_operator
-from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 PAYMENT = {
@@ -21,19 +22,25 @@ OPERATORS = {
 }
 
 
-class NCPGB(SitemapSpider):
+class NcpGBSpider(SitemapSpider):
     name = "ncp_gb"
     sitemap_urls = ["https://www.ncp.co.uk/uploads/sitemap.xml"]
     sitemap_rules = [("/find-a-car-park/car-parks/", "parse_pois")]
-    user_agent = BROWSER_DEFAULT
-    download_delay = 2.0
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_DELAY": 2,
+    }
 
     def parse_pois(self, response):
         if poi_match := re.search(r"'carparks'      : (\[.+}\]),", response.text):
             data = json.loads(poi_match.group(1))
             for poi in data:
                 item = DictParser.parse(poi)
-                item["street_address"] = clean_address([poi["addressLine1"], poi["addressLine2"], poi["addressLine3"]])
+                item["street_address"] = merge_address_lines(
+                    [poi["addressLine1"], poi["addressLine2"], poi["addressLine3"]]
+                )
                 item["website"] = response.urljoin(poi["clickUrl"])
                 item["ref"] = poi.get("carParkHeadingID")
                 item["name"] = poi.get("carParkTitle")

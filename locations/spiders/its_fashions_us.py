@@ -10,3 +10,4 @@ class ItsFashionsUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.itsfashions.com/robots.txt"]
     sitemap_rules = [(r"\.com/\w\w/[-.\w]+/[-.\w]+$", "parse_sd")]
     wanted_types = ["ClothingStore"]
+    drop_attributes = {"image"}

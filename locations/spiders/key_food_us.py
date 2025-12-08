@@ -1,9 +1,12 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class KeyFoodUSSpider(Spider):
@@ -30,7 +33,7 @@ class KeyFoodUSSpider(Spider):
         "https://www.keyfood.com/store": {"brand": "Key Food", "brand_wikidata": "Q6398037"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, meta={"page": 0})
 
@@ -42,7 +45,7 @@ class KeyFoodUSSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["name"]
             item["name"] = location["displayName"]
-            item["street_address"] = ", ".join(filter(None, [location["line1"], location["line2"]]))
+            item["street_address"] = clean_address([location["line1"], location["line2"]])
             item["website"] = location["siteUrl"] + location["url"].split("?", 1)[0]
 
             if brand := self.brands.get(location["siteUrl"]):

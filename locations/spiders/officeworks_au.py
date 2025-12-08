@@ -1,3 +1,5 @@
+import urllib
+
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -24,6 +26,7 @@ class OfficeworksAUSpider(scrapy.Spider):
                 + "/"
                 + item["city"].strip()
             )
+            item["website"] = urllib.parse.quote(item["website"], safe=":/?=&")
             oh = OpeningHours()
             for day in store["openingHours"]:
                 oh.add_range(day["dayOfWeek"], day["open"], day["close"], "%I%p")

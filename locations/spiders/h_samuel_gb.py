@@ -3,7 +3,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -17,7 +17,7 @@ class HSamuelGBSpider(CrawlSpider, StructuredDataSpider):
         item["branch"] = item.pop("name")
 
         data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "storeInformation")]/text()').get())
-        item["street_address"] = clean_address([data["line1"], data["line2"]])
+        item["street_address"] = merge_address_lines([data["line1"], data["line2"]])
 
         item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:

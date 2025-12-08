@@ -4,8 +4,7 @@ from locations.dict_parser import DictParser
 
 
 class CaliforniaPizzaKitchenSpider(scrapy.Spider):
-    download_delay = 0.2
-    name = "cpk"
+    name = "california_pizza_kitchen"
     item_attributes = {
         "brand": "California Pizza Kitchen",
         "brand_wikidata": "Q15109854",

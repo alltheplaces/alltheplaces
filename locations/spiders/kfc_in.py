@@ -5,8 +5,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
 class KfcINSpider(CrawlSpider):
@@ -21,7 +21,7 @@ class KfcINSpider(CrawlSpider):
             item["ref"] = item["website"] = location.xpath('.//a[contains(@href, "/Home")]/@href').get()
             item["lat"] = location.xpath('input[@class="outlet-latitude"]/@value').get()
             item["lon"] = location.xpath('input[@class="outlet-longitude"]/@value').get()
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 location.xpath('.//li[@class="outlet-address"]/div[@class="info-text"]/span/text()').getall()
             )
             item["phone"] = location.xpath('.//li[@class="outlet-phone"]/div[@class="info-text"]/a/text()').get()

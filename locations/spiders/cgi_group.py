@@ -4,7 +4,7 @@ from locations.categories import Categories
 from locations.items import Feature
 
 
-class CGIGroupSpider(scrapy.Spider):
+class CgiGroupSpider(scrapy.Spider):
     name = "cgi_group"
     item_attributes = {"brand": "CGI Group", "brand_wikidata": "Q1798370", "extras": Categories.OFFICE_COMPANY.value}
     allowed_domains = ["cgi.com"]

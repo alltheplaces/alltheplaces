@@ -7,10 +7,12 @@ class FjallravenSpider(Where2GetItSpider):
     item_attributes = {
         "brand": "Fjällräven",
         "brand_wikidata": "Q1422481",
-        "extras": Categories.SHOP_CLOTHES.value,
+        "extras": Categories.SHOP_OUTDOOR.value,
     }
     api_brand_name = "fjallraven"
     api_key = "FE424754-8D89-11E7-A07A-F839407E493E"
     api_filter = {
         "brand_store": {"eq": "1"},
     }
+    # Website seems to be generic
+    drop_attributes = {"website"}

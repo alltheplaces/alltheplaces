@@ -3,7 +3,7 @@ import re
 from scrapy import Selector, Spider
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class UpdateFitnessCHSpider(Spider):
@@ -26,7 +26,7 @@ class UpdateFitnessCHSpider(Spider):
             item["image"] = html_selector.xpath("//img/@src").get()
             item["website"] = item["ref"] = html_selector.xpath("//a/@href").get()
             item["name"] = html_selector.xpath("//a/text()").get().strip()
-            item["addr_full"] = clean_address(
+            item["addr_full"] = merge_address_lines(
                 html_selector.xpath('//div[@class="location-content"]//p[not(span)]/text()').getall()
             )
 

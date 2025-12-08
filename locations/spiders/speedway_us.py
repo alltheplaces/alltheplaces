@@ -1,70 +1,100 @@
-import json
-from io import BytesIO
-from time import sleep
-from zipfile import ZipFile
+import re
+from typing import Any, Iterable
 
 import scrapy
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, Fuel, apply_yes_no
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
-class SpeedwayUSSpider(scrapy.Spider):
+class SpeedwayUSSpider(Spider):
     name = "speedway_us"
     item_attributes = {"brand": "Speedway", "brand_wikidata": "Q7575683"}
-    allowed_domains = ["mobileapps.speedway.com"]
-    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 210}
 
-    def start_requests(self):
-        # We make this request to start a session and store cookies that the actual request requires
-        yield scrapy.Request("https://mobileapps.speedway.com/", callback=self.get_results)
+    def start_requests(self) -> Iterable[Request]:
+        yield scrapy.Request(url="https://www.speedway.com/locations", callback=self.parse_cookies)
 
-    def get_results(self, response):
-        self.logger.debug("Waiting 5 seconds to make make the session cookie stick...")
-        sleep(5)
-        yield scrapy.Request(
-            "https://mobileapps.speedway.com/S3cur1ty/VServices/StoreService.svc/getallstores/321036B0-4359-4F4D-A01E-A8DDEE0EC2F7"
-        )
+    def parse_cookies(self, response, **kwargs):
+        for token_string in response.headers.getlist("Set-Cookie"):
+            if "accessToken" not in str(token_string):
+                continue
+            token = re.search(r"accessToken%22%3A%22(.*)%22%7D;", str(token_string)).group(1)
+            url = "https://apis.7-eleven.com/v5/stores/graphql"
+            query = """query stores(
+  $brand: String,
+  $lat: String,
+  $lon: String,
+  $radius: Float,
+  $limit: Int,
+  $offset: Int,
+  $curr_lat: String,
+  $curr_lon: String,
+  $filters: [String]
+) {
+  stores(
+    brand: $brand,
+    lat: $lat,
+    lon: $lon,
+    radius: $radius,
+    limit: $limit,
+    offset: $offset,
+    curr_lat: $curr_lat,
+    curr_lon: $curr_lon,
+    filters: $filters
+  ) {
+    id
+    brand_id
+    brand {
+      name
+    }
+    distance
+    distance_label
+    hours
+    is_open_for_business
+    address
+    city
+    phone
+    state
+    country
+    postal_code
+    lat
+    lon
+    fuel_data
+    services {
+      title
+      slug
+    }
+  }
+}
+"""
+            data = {
+                "query": query,
+                "variables": {
+                    "brand": "speedway",
+                    "radius": 2000000,
+                    "limit": 4000,
+                    "offset": 0,
+                    "lat": "36.778261",
+                    "lon": "-119.4179324",
+                    "curr_lat": "36.778261",
+                    "curr_lon": "-119.4179324",
+                    "filters": [],
+                },
+            }
+            headers = {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+            }
+            yield JsonRequest(url=url, method="POST", headers=headers, data=data, callback=self.parse_details)
 
-    def parse(self, response):
-        z = ZipFile(BytesIO(response.body))
-        stores = json.loads(z.read("SpeedwayStores.json").decode("utf-8", "ignore").encode("utf-8"))
-
-        for store in stores:
-            amenities = [amenity["name"] for amenity in store["amenities"]]
-            fuels = [fuel["description"] for fuel in store["fuelItems"]]
-
-            item = Feature(
-                lat=store["latitude"],
-                lon=store["longitude"],
-                name=store["brandName"],
-                street_address=store["address"],
-                city=store["city"],
-                state=store["state"],
-                postcode=store["zip"],
-                country="US",
-                opening_hours="24/7" if "Open 24 Hours" in amenities else None,
-                phone=store["phoneNumber"],
-                website=f"https://www.speedway.com/locations/store/{store['costCenterId']}",
-                ref=store["costCenterId"],
-            )
-
-            apply_yes_no(Extras.ATM, item, "ATM" in amenities)
-            apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in amenities)
-            apply_yes_no(Fuel.PROPANE, item, "Propane" in amenities)
-            apply_yes_no(Fuel.DIESEL, item, "DSL" in fuels)
-            apply_yes_no(Fuel.E15, item, "E15" in fuels)
-            apply_yes_no(Fuel.E20, item, "E20" in fuels)
-            apply_yes_no(Fuel.E30, item, "E30" in fuels)
-            apply_yes_no(Fuel.E85, item, "E85" in fuels)
-            apply_yes_no(Fuel.OCTANE_87, item, "Unleaded" in fuels)
-            apply_yes_no(Fuel.OCTANE_89, item, "Plus" in fuels)
-            apply_yes_no(Fuel.OCTANE_90, item, "90" in fuels)
-            apply_yes_no(Fuel.OCTANE_91, item, "91" in fuels)
-            apply_yes_no(Fuel.OCTANE_93, item, "Premium" in fuels)
-            apply_yes_no(Fuel.OCTANE_100, item, "Racing" in fuels)
-            apply_yes_no("hgv", item, "Truck" in fuels)
-            apply_yes_no(Fuel.HGV_DIESEL, item, ("Truck" in fuels or "Truck" in amenities))
-            apply_yes_no(Fuel.OCTANE_87, item, "Unleaded" in fuels)
-
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["data"]["stores"]:
+            item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full")
+            item["website"] = "https://www.speedway.com/"
+            apply_category(Categories.FUEL_STATION, item)
             yield item

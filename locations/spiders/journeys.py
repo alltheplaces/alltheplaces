@@ -3,6 +3,7 @@ import re
 from scrapy import FormRequest, Request
 
 from locations.categories import Categories, apply_category
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -10,7 +11,6 @@ class JourneysSpider(StructuredDataSpider):
     name = "journeys"
     item_attributes = {"brand": "Journeys", "brand_wikidata": "Q61994838"}
     start_urls = ["https://www.journeys.com/stores", "https://www.journeys.ca/stores"]
-    requires_proxy = True
     time_format = "%I:%M %p"
 
     def parse(self, response, **kwargs):
@@ -35,7 +35,24 @@ class JourneysSpider(StructuredDataSpider):
                 )
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["brand"], item["ref"] = item.pop("name").split(" #")
+        _, item["ref"] = item["name"].split(" #", 1)
+        if item["name"].startswith("JOURNEYS KIDZ"):
+            item["name"] = "Journeys Kidz"
+        elif item["name"].startswith("JOURNEYS"):
+            item["name"] = "Journeys"
+        elif item["name"].startswith("UNDERGROUND"):
+            item["name"] = "Underground by Journeys"
+        elif item["name"].startswith("SHI"):
+            item["name"] = "Shi by Journeys"
+        else:
+            self.logger.error("Unknown name: {}".format(item["name"]))
+
+        item["street_address"] = merge_address_lines(
+            [
+                response.xpath('//div[@itemprop="address"]/p[1]/text()').get(),
+                response.xpath('//div[@itemprop="address"]/p[2]/text()').get(),
+            ]
+        )
 
         apply_category(Categories.SHOP_SHOES, item)
 

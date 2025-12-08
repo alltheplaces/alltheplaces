@@ -1,15 +1,17 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ChiquinhoSorvetesBRSpider(Spider):
     name = "chiquinho_sorvetes_br"
     item_attributes = {"brand": "Chiquinho Sorvetes", "brand_wikidata": "Q65164356"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.itfgestor.com.br/ITFWebServiceSiteChiquinho/estado?key=f3a06f73b2d8dc7c3befe2c287981418",
             callback=self.parse_states,
@@ -33,8 +35,7 @@ class ChiquinhoSorvetesBRSpider(Spider):
             item = Feature()
             item["ref"] = location["codigo"]
             item["name"] = location["nome"]
-            item["street_address"] = clean_address([location.get("complemento"), location["endereco"]])
+            item["street_address"] = merge_address_lines([location.get("complemento"), location["endereco"]])
             item["postcode"] = location["cep"]
-            item["phone"] = location["telefone"]
-
+            item["phone"] = location.get("telefone")
             yield item

@@ -4,6 +4,7 @@ from scrapy import Spider
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class GullNZSpider(Spider):
@@ -16,7 +17,7 @@ class GullNZSpider(Spider):
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = str(location["location_id"])
-            item["street_address"] = ", ".join(filter(None, [location["addr1"], location["addr2"]]))
+            item["street_address"] = clean_address([location["addr1"], location["addr2"]])
             item["city"] = location["addr3"]
             item["postcode"] = location["addr4"]
             item["name"] = location["label"]

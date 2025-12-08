@@ -1,10 +1,10 @@
 import json
-import re
 
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class RebelSportNZSpider(Spider):
@@ -22,11 +22,9 @@ class RebelSportNZSpider(Spider):
         for location in locations:
             item = DictParser.parse(location)
             item.pop("addr_full", None)
-            item["street_address"] = re.sub(
-                r"\s+",
-                " ",
-                " ".join(Selector(text="<div>" + location["address"] + "</div>").xpath("//div/text()").getall()),
-            ).strip()
+            item["street_address"] = clean_address(
+                " ".join(Selector(text="<div>" + location["address"] + "</div>").xpath("//div/text()").getall())
+            )
             item["phone"] = Selector(text=location["telephone"]).xpath("//@href").get().replace("tel:", "")
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location["hours"])

@@ -5,7 +5,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingEsPtSpider(scrapy.Spider):
+class BurgerKingESPTSpider(scrapy.Spider):
     name = "burger_king_es_pt"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = [

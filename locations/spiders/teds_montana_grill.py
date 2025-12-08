@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TedsMontanaGrillSpider(scrapy.Spider):
@@ -21,7 +22,7 @@ class TedsMontanaGrillSpider(scrapy.Spider):
         city = location.xpath(".//h5/text()").extract_first()
         phone = location.xpath(".//p")[-1].xpath(".//span/a/@href").extract_first().replace("tel:", "")
         address = location.xpath(".//p")[-1].xpath("text()").extract()
-        street_address = ", ".join([line.strip() for line in address[:-1]])
+        street_address = clean_address([line.strip() for line in address[:-1]])
         postcode = address[-1].strip()
         addr_full = f"{street_address}, {postcode}"
         properties = {

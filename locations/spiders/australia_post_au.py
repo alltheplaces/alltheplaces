@@ -1,17 +1,19 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AustraliaPostAUSpider(scrapy.Spider):
+class AustraliaPostAUSpider(Spider):
     name = "australia_post_au"
     item_attributes = {"brand": "Australia Post", "brand_wikidata": "Q1142936"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in [
             (-29, 119),
             (-16, 125),
@@ -30,7 +32,7 @@ class AustraliaPostAUSpider(scrapy.Spider):
         for store in response.json()["points"]:
             item = DictParser.parse(store)
             item["ref"] = store["location_code"]
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [store.get("address_line_1"), store.get("address_line_2"), store.get("address_line_3")]
             )
             item["opening_hours"] = OpeningHours()

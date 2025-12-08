@@ -2,7 +2,7 @@ from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class TheNorthFaceSpider(Where2GetItSpider):
+class TheNorthFaceEUSpider(Where2GetItSpider):
     name = "the_north_face_eu"
     item_attributes = {"brand": "The North Face", "brand_wikidata": "Q152784"}
     api_brand_name = "northfaceeu"

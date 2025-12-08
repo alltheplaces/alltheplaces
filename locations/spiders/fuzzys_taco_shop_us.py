@@ -1,7 +1,8 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -11,15 +12,13 @@ class FuzzysTacoShopUSSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["fuzzystacoshop.com"]
     start_urls = ["https://fuzzystacoshop.com/locations/list/"]
     rules = [
-        Rule(LinkExtractor(allow=r"https:\/\/fuzzystacoshop\.com\/locations\/list\/.+")),
         Rule(
-            LinkExtractor(allow=r"https:\/\/fuzzystacoshop\.com\/locations\/(?!list\/).+"),
+            LinkExtractor(allow=r"/locations"),
             callback="parse_sd",
-            follow=False,
+            follow=True,
         ),
     ]
 
-    def post_process_item(self, item, response, ld_data):
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].from_linked_data(ld_data, time_format="%H:%M:%S")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Fuzzy's Taco Shop ").split(",")[0]
         yield item

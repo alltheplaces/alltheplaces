@@ -4,7 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.linked_data_parser import LinkedDataParser
 
 
-class AshleyHomeStoreSpider(CrawlSpider):
+class AshleyHomestoreSpider(CrawlSpider):
     name = "ashley_homestore"
     item_attributes = {"brand": "Ashley HomeStore", "brand_wikidata": "Q4805437"}
     start_urls = ["https://stores.ashleyhomestore.ca/store/"]

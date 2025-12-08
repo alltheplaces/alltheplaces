@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -5,14 +7,14 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CommonwealthBankAUSpider(Spider):
     name = "commonwealth_bank_au"
     item_attributes = {"brand": "Commonwealth Bank", "brand_wikidata": "Q285328"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("AU", 1500):
             yield JsonRequest(
                 f'https://www.commbank.com.au/digital/locate-us/api/branches/findByLocation?location={city["latitude"]},{city["longitude"]}&top=1000',
@@ -26,7 +28,7 @@ class CommonwealthBankAUSpider(Spider):
     def parse_atms(self, response, **kwargs):
         for location in response.json():
             for atm in location["atmList"]:
-                atm["street_address"] = clean_address([atm.pop("street1"), atm.pop("street2")])
+                atm["street_address"] = merge_address_lines([atm.pop("street1"), atm.pop("street2")])
                 item = DictParser.parse(atm)
                 item["name"] = atm["siteName"]
                 item["ref"] = atm["atmId"]
@@ -37,7 +39,7 @@ class CommonwealthBankAUSpider(Spider):
 
     def parse_banks(self, response, **kwargs):
         for location in response.json():
-            location["street_address"] = clean_address([location.pop("street1"), location.pop("street2")])
+            location["street_address"] = merge_address_lines([location.pop("street1"), location.pop("street2")])
             item = DictParser.parse(location)
             item["city"] = location["suburb"]
 

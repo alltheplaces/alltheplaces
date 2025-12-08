@@ -2,7 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class NeuhausSpider(Spider):
@@ -15,7 +15,7 @@ class NeuhausSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:
-            location["street_address"] = clean_address([location.pop("address1"), location.pop("address2")])
+            location["street_address"] = merge_address_lines([location.pop("address1"), location.pop("address2")])
             item = DictParser.parse(location)
             item["website"] = f'https://www.neuhauschocolates.com/en_US/stores/detail?store={item["ref"]}'
 

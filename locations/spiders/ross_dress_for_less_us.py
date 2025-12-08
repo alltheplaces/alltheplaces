@@ -4,7 +4,7 @@ from locations.storefinders.where2getit import Where2GetItSpider
 
 class RossDressForLessUSSpider(Where2GetItSpider):
     name = "ross_dress_for_less_us"
-    item_attributes = {"brand": "Ross Dress for Less", "brand_wikidata": "Q3442791"}
+    item_attributes = {"brand": "Ross", "brand_wikidata": "Q3442791"}
     api_brand_name = "rossdressforless"
     api_key = "1F663E4E-1B64-11E5-B356-3DAF58203F82"
 

@@ -28,8 +28,14 @@ class KampsDESpider(SitemapSpider):
         for row in response.xpath('//div[@class="card-block"]/table/tr'):
             day_de = row.xpath("./td/text()")[0].extract()
             range_str = row.xpath("./td/text()")[-1].extract()
-            range_start, range_end = range_str.split("-")
-            oh.add_range(DAYS_DE[day_de], range_start, range_end)
+            if "geschlossen" in range_str:
+                oh.set_closed(DAYS_DE[day_de])
+            else:
+                times = range_str.replace("–", "-")
+                if "-" in times:
+                    for time in times.split(","):
+                        range_start, range_end = map(str.strip, time.split("-"))
+                        oh.add_range(DAYS_DE[day_de], range_start, range_end)
 
         properties["opening_hours"] = oh.as_opening_hours()
 

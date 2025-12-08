@@ -2,8 +2,10 @@ import json
 
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HarveyNormanSpider(Spider):
@@ -21,7 +23,7 @@ class HarveyNormanSpider(Spider):
         for location in json.loads(data_raw)["props"]["pageProps"]["locations"]:
             item = DictParser.parse(location)
             item["ref"] = location["storeCode"]
-            item["street_address"] = ", ".join(filter(None, location["addressLines"]))
+            item["street_address"] = clean_address(location["addressLines"])
             if ".co.nz" in response.url:
                 item.pop("state")
             if len(location["phoneNumbers"]) > 0:
@@ -31,4 +33,5 @@ class HarveyNormanSpider(Spider):
                 if len(hours) < 2:
                     continue
                 item["opening_hours"].add_range(DAYS[day_number - 1], hours[0], hours[1])
+            apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
             yield item

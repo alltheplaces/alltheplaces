@@ -5,11 +5,10 @@ from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DE, DAYS_NL, OpeningHours, sanitise_day
-from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import extract_phone
 
 
-class EyesAndMoreDESpider(Spider):
+class EyesAndMoreSpider(Spider):
     name = "eyes_and_more"
     item_attributes = {"brand": "eyes + more", "brand_wikidata": "Q1385775"}
     start_urls = [
@@ -17,7 +16,7 @@ class EyesAndMoreDESpider(Spider):
         "https://www.eyesandmore.at/optiker/",
         "https://www.eyesandmore.de/optiker/",
         "https://www.eyesandmore.nl/opticiens/",
-        # "https://www.eyesandmore.se/",  # 1 store, no store finer ATM
+        # "https://www.eyesandmore.se/",  # 1 store, no store finder ATM
     ]
     DAYS = DAYS_NL | DAYS_DE
 
@@ -26,7 +25,7 @@ class EyesAndMoreDESpider(Spider):
             item = DictParser.parse(location)
 
             selector = Selector(text=location["infoWindowHtml"])
-            item["addr_full"] = clean_address(selector.xpath('//div[@class="address"]/text()').get())
+            item["addr_full"] = selector.xpath('//div[@class="address"]/text()').get()
             item["website"] = urljoin(response.url, selector.xpath('//a[@class="button"]/@href').get())
             extract_phone(item, selector)
 

@@ -1,0 +1,28 @@
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest
+
+from locations.categories import Categories
+from locations.dict_parser import DictParser
+
+
+class GapTWSpider(Spider):
+    name = "gap_tw"
+    item_attributes = {"brand": "Gap", "brand_wikidata": "Q420822", "extras": Categories.SHOP_CLOTHES.value}
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        url = "https://api.gap.tw/store/queryStoreLocation"
+        yield JsonRequest(
+            url=url,
+            method="POST",
+            headers={"Content-Type": "application/json;charset=UTF-8"},
+            data={"id": 1, "locationIdentifier": "Gap"},
+        )
+
+    def parse(self, response, **kwargs):
+        for city in response.json()["data"][0]["cityList"]:
+            for store in city["storeLocations"]:
+                item = DictParser.parse(store)
+                item["country"] = "TW"
+                yield item

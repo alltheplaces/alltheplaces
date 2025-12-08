@@ -8,4 +8,4 @@ class LidlROSpider(VirtualEarthSpider):
 
     dataset_id = "5fa0193e1e0c4496aed1acb4af59f35b"
     dataset_name = "Filialdaten-RO/Filialdaten-RO"
-    key = "An0oYvlZIU9SiOXJnlxv88zCVWyKYv4Z59Uv77KTalXIp--H9F_cg8vioBxxF5im"
+    api_key = "An0oYvlZIU9SiOXJnlxv88zCVWyKYv4Z59Uv77KTalXIp--H9F_cg8vioBxxF5im"

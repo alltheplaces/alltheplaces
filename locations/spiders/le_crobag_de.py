@@ -1,15 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 from scrapy.selector import Selector
 
 from locations.dict_parser import DictParser
 
 
-class LeCrobagDESpider(scrapy.Spider):
+class LeCrobagDESpider(Spider):
     name = "le_crobag_de"
     item_attributes = {"brand": "Le Crobag", "brand_wikidata": "Q1558025"}
 
-    def start_requests(self):
-        yield scrapy.http.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://www.lecrobag.de/en/shops-en/locations.html",
             method="POST",
             formdata={
@@ -41,6 +44,6 @@ class LeCrobagDESpider(scrapy.Spider):
             address_text = description_elem.xpath('//span[@class="locationaddress"]/text()').extract()
             item["street_address"] = "".join(address_text[:-2]).strip()
             item["postcode"] = address_text[-2].strip().split("\xa0")[0]
-            item["city"] = address_text[-2].strip().split("\xa0")[1]
+            item["city"] = address_text[-2].strip().split("\xa0")[1].rstrip(",")
 
             yield item

@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class RemaxFrSpider(scrapy.Spider):
+class RemaxFRSpider(scrapy.Spider):
     name = "remax_fr"
     item_attributes = {
         "brand": "RE/MAX",

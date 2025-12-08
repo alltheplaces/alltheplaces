@@ -2,6 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TyrepowerAUSpider(Spider):
@@ -18,7 +19,7 @@ class TyrepowerAUSpider(Spider):
     def parse(self, response):
         for location in response.json()["all_stores"]:
             item = DictParser.parse(location)
-            item["street_address"] = ",".join(filter(None, [location["address1"], location["address2"]]))
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
             if location.get("websiteUrl"):
                 item["website"] = location["websiteUrl"]
             elif location.get("url"):

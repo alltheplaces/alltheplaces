@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_DE, OpeningHours
 
 
-class HITDESpider(Spider):
+class HitDESpider(Spider):
     name = "hit_de"
     item_attributes = {"brand": "HIT", "brand_wikidata": "Q1548713", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.hit.de"]

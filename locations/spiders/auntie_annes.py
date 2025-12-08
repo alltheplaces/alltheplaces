@@ -9,8 +9,8 @@ class AuntieAnnesSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["auntieannes.com"]
     sitemap_urls = ["https://locations.auntieannes.com/robots.txt"]
     sitemap_rules = [(r"https://locations\.auntieannes\.com/\w\w/[-.\w]+/[-–\w]+$", "parse_sd")]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = response.xpath('//meta[@property="og:title"]/@content').get().split(" | ")[0]
-
         yield item

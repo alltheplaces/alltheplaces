@@ -1,11 +1,11 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.spiders.five_guys_us import FiveGuysUSSpider
-from locations.structured_data_spider import StructuredDataSpider
+from locations.spiders.five_guys_au import FiveGuysAUSpider
 
 
-class FiveGuysSASpider(SitemapSpider, StructuredDataSpider):
+class FiveGuysSASpider(FiveGuysAUSpider):
     name = "five_guys_sa"
-    item_attributes = FiveGuysUSSpider.item_attributes
-    sitemap_urls = ["https://restaurants.fiveguys.sa/sitemap.xml"]
-    sitemap_rules = [(r"^https://restaurants\.fiveguys\.sa\/en_sa\/[^/]+$", "parse_sd")]
+    experience_key = "search-backend-sa"
+    locale = "ar-SA"
+
+    def process_websites(self, item) -> None:
+        item["extras"]["website:ar"] = item["website"]
+        item["extras"]["website:en"] = item["website"].replace("fiveguys.sa/", "fiveguys.sa/en_sa/")

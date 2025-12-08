@@ -1,0 +1,34 @@
+version: 0.2
+
+env:
+  variables:
+    S3_BUCKET: alltheplaces.openaddresses.io
+    R2_BUCKET: alltheplaces-openaddresses-io
+  secrets-manager:
+    ZYTE_API_KEY: "alltheplaces:ZYTE_API_KEY"
+    GITHUB_APP_ID: "alltheplaces:GITHUB_APP_ID"
+    GITHUB_APP_PRIVATE_KEY_BASE64: "alltheplaces:GITHUB_APP_PRIVATE_KEY_BASE64"
+    GITHUB_APP_INSTALLATION_ID: "alltheplaces:GITHUB_APP_INSTALLATION_ID"
+    R2_ENDPOINT_URL: "alltheplaces:R2_ENDPOINT_URL"
+    R2_ACCESS_KEY_ID: "alltheplaces:R2_ACCESS_KEY_ID"
+    R2_SECRET_ACCESS_KEY: "alltheplaces:R2_SECRET_ACCESS_KEY"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+  pre_build:
+    commands:
+      - uv sync --cache-dir /root/.cache/uv
+  build:
+    commands:
+      - uv run scrapy check
+      - /bin/bash ci/run_pr_spiders.sh
+  post_build:
+    commands:
+      - uv cache prune --ci
+
+cache:
+  key: python-uv-$(codebuild-hash-files uv.lock)
+  paths:
+    - /root/.cache/uv/**/*

@@ -1,48 +1,31 @@
-import re
+from typing import AsyncIterator, Iterable
 
-import scrapy
+from scrapy.http import JsonRequest
 
+from locations.geo import point_locations
 from locations.items import Feature
-from locations.linked_data_parser import LinkedDataParser
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class PandoraSpider(scrapy.spiders.SitemapSpider):
+class PandoraSpider(RioSeoSpider):
     name = "pandora"
-    item_attributes = {
-        "brand": "Pandora",
-        "brand_wikidata": "Q2241604",
-    }
-    download_delay = 0.2
-    allowed_domains = ["pandora.net"]
-    sitemap_urls = ["https://stores.pandora.net/sitemap.xml"]
-    sitemap_rules = [(r"https:\/\/stores\.pandora\.net\/[^(?{2,})]+-([\w\d]+)\.html$", "parse_store")]
+    item_attributes = {"brand": "Pandora", "brand_wikidata": "Q2241604"}
+    end_point = "https://maps.pandora.net"
+    radius = 346
 
-    def parse_store(self, response):
-        yield self.parse_item(response, self.sitemap_rules[0][0])
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for lat, lng in point_locations("earth_centroids_iseadgg_346km_radius.csv"):
+            yield JsonRequest(
+                f"{self.end_point}/api/getAsyncLocations?template={self.template}&level={self.template}&radius={self.radius}&limit={self.limit}&lat={lat}&lng={lng}",
+                callback=self.parse,
+            )
 
-    @staticmethod
-    def parse_item(response, ref_regex) -> Feature:
-        ld_item = LinkedDataParser.find_linked_data(response, "JewelryStore")
-
-        if not ld_item:
+    def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
+        if location.get("Store Type_CS") == "Authorized Retailers":
             return
-
-        if not ld_item.get("telephone"):
-            ld_item["telephone"] = ld_item["address"].get("telephone")
-
-        if ld_item.get("openingHours") and isinstance(ld_item["openingHours"], str):
-            ld_item["openingHours"] = re.findall(r"\w{2} \d{2}:\d{2} - \d{2}:\d{2}", ld_item["openingHours"])
-
-        if not ld_item.get("branchCode") and not ld_item.get("@id"):
-            ld_item["branchCode"] = re.match(ref_regex, response.url).group(1)
-
-        item = LinkedDataParser.parse_ld(ld_item)
-        if item:
-            if item["state"] == "JE":
-                item["state"] = "JE-JerseyIsSpecial"
-            # In many countries "state" is set to "country-region", unpick and discard region
-            splits = item["state"].split("-")
-            if len(splits) == 2 and len(splits[0]) == 2:
-                item["state"] = None
-                item["country"] = splits[0]
-            return item
+        feature["phone"] = location.get("location_phone") or location.get("local_phone")
+        feature["postcode"] = location.get("location_post_code") or location.get("post_code")
+        feature["country"] = feature["ref"][:2].upper()
+        feature["website"] = "https:" + location["indy_url"]
+        feature["branch"] = feature.pop("name").removeprefix("Pandora ").removeprefix("Store ").removeprefix("@ ")
+        yield feature

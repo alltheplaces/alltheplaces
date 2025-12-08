@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class OKQ8Spider(Spider):
+class Okq8Spider(Spider):
     name = "okq8"
     start_urls = [
         "https://www.okq8.se/-/Station/GetGlobalMapStations?appDataSource=9d780912-2801-4457-9376-16c48d02e688"

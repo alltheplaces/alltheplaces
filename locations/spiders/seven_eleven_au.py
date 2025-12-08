@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 SEVEN_ELEVEN_SHARED_ATTRIBUTES = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
 
@@ -14,8 +15,8 @@ class SevenElevenAUSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:
-            location["address"]["street_address"] = ", ".join(
-                filter(None, [location["address"].pop("address1"), location["address"].pop("address2")])
+            location["address"]["street_address"] = clean_address(
+                [location["address"].pop("address1"), location["address"].pop("address2")]
             )
             location["address"]["country_code"] = location["region"]["countryId"]
             item = DictParser.parse(location)

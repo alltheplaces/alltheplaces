@@ -11,9 +11,12 @@ class RalphLaurenSpider(scrapy.Spider):
     name = "ralph_lauren"
     item_attributes = {"brand_wikidata": "Q1641437"}
     start_urls = ["https://www.ralphlauren.com/stores"]
-    custom_settings = {"COOKIES_ENABLED": False, "ROBOTSTXT_OBEY": False}
-    download_delay = 10
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {
+        "COOKIES_ENABLED": False,
+        "ROBOTSTXT_OBEY": False,
+        "DOWNLOAD_DELAY": 10,
+        "USER_AGENT": BROWSER_DEFAULT,
+    }
     requires_proxy = True
 
     def parse(self, response, **kwargs):

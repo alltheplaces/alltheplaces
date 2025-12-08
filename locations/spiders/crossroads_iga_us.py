@@ -2,7 +2,7 @@ from locations.categories import Categories, apply_category
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
-class CrossroadsIGAUSSpider(StoreLocatorWidgetsSpider):
+class CrossroadsIgaUSSpider(StoreLocatorWidgetsSpider):
     name = "crossroads_iga_us"
     item_attributes = {"brand": "Crossroads IGA", "brand_wikidata": "Q119141723"}
     key = "8fd8a5ddd08a378ebba22cc2c9dce74f"

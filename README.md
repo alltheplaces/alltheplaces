@@ -1,6 +1,37 @@
 # All the Places
 
-A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [primarily from major websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to write individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) to retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials, [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
+A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [from websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to execute individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) that retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials on the Internet and [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
+
+## Data users
+
+All the Places is used many places, including some of the most popular maps.
+Having high quality, fresh, first party data here helps help brands be accurately listed in many apps.
+
+```mermaid
+---
+sources:
+      overture: https://docs.overturemaps.org/blog/2025/11/19/release-notes/#places
+      foursquare: https://docs.foursquare.com/data-products/docs/fsq-os-places-release-notes#november-2025
+---
+flowchart
+   Spiders(["Thousands of first party datasets"])
+   ATP(["All the Places"])
+   click ATP "https://alltheplaces.xyz/"
+   OSM(["OpenStreetMap"])
+   click OSM "https://www.openstreetmap.org/"
+   TT(["TomTom"])
+   click TT "https://www.tomtom.com/"
+   Overture(["Overture"])
+   click Overture "https://overturemaps.org/"
+   Foursquare(["Foursquare OS Places"])
+   click Foursquare "https://opensource.foursquare.com/os-places/"
+
+   Spiders --> ATP
+   ATP --> TT
+   ATP --> OSM
+   ATP --> Overture
+   Overture --> Foursquare
+```
 
 ## Getting started
 
@@ -8,33 +39,97 @@ A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Po
 
 Windows users may need to follow some extra steps, please follow the [scrapy docs](https://docs.scrapy.org/en/latest/intro/install.html#windows) for up to date details.
 
-1. Clone a copy of the project from the [GitHub All The Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
+#### Ubuntu
+
+These instructions were tested with Ubuntu 24.04 LTS on 2024-02-21.
+
+1. Install `uv`:
 
    ```
-   $ git clone git@github.com:alltheplaces/alltheplaces.git
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   source $HOME/.local/bin/env
    ```
 
-1. If you haven't done so already, [install `pipenv`](https://github.com/pypa/pipenv#installation) and check that it runs:
+1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
 
    ```
-   $ pipenv --version
-   pipenv, version 2022.8.30
+   git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
-1. Use `pipenv` to install the project dependencies:
+1. Use `uv` to install the project dependencies:
 
    ```
-   $ cd alltheplaces
-   $ pipenv install
+   cd alltheplaces
+   uv sync
    ```
 
 1. Test for successful project installation:
 
    ```
-   $ pipenv run scrapy
+   uv run scrapy
    ```
 
    If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
+
+#### macOS
+
+These instructions were tested with macOS 15.3.2 on 2025-04-01.
+
+1. Install `uv`:
+
+   ```
+   brew install uv
+   ```
+
+1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
+
+   ```
+   git clone git@github.com:alltheplaces/alltheplaces.git
+   ```
+
+1. Use `uv` to install the project dependencies:
+
+   ```
+   cd alltheplaces
+   uv sync
+   ```
+
+1. Test for successful project installation:
+
+   ```
+   uv run scrapy
+   ```
+
+   If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
+
+#### Codespaces
+
+You can use GitHub Codespaces to run the project. This is a cloud-based development environment that is created from the project's repository and includes a pre-configured environment with all the tools you need to develop the project. To use Codespaces, click the button below:
+
+   [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/alltheplaces/alltheplaces)
+
+#### Docker
+
+You can use Docker to run the project. This is a container-based development environment that is created from the project's repository and includes a pre-configured environment with all the tools you need to develop the project.
+
+1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
+
+   ```
+   git clone git@github.com:alltheplaces/alltheplaces.git
+   ```
+
+1. Build the Docker image:
+
+   ```
+   cd alltheplaces
+   docker build -t alltheplaces .
+   ```
+
+1. Run the Docker container:
+
+   ```
+   docker run --rm -it alltheplaces
+   ```
 
 ### Contributing code
 
@@ -45,6 +140,9 @@ Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA
 * [Sitemaps make finding POI pages easier](docs/SITEMAP.md)
 * [Data from many POI pages can be extracted without writing code](docs/STRUCTURED_DATA.md)
 * [What is expected in a pull request?](docs/PULL_REQUEST.md)
+* [What we do behind the scenes](docs/PIPELINES.md)
+
+Spiders are typically written by map makers who want the data, however we welcome [brands to be involved](docs/MY_BRAND.md).
 
 ### The weekly run
 
@@ -52,7 +150,7 @@ The output from running the project is [published on a regular cadence](docs/WEE
 
 ## Contact us
 
-Communication is primarily through tickets on the project GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues). Many contributors are also present on [OSM US Slack](https://slack.openstreetmap.us/), in particular we watch the [#poi](https://osmus.slack.com/archives/CDJ4LKA2Y) channel.
+Communication is primarily through tickets on the project GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues). Many contributors are also present on [OSM US Slack](https://slack.openstreetmap.us/), which has an [#alltheplaces](https://osmus.slack.com/archives/C07EY4Y3M6F) channel.
 
 ## License
 

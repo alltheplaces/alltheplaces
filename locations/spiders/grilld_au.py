@@ -1,31 +1,28 @@
 from scrapy import Spider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class GrilldAUSpider(Spider):
     name = "grilld_au"
-    item_attributes = {"brand": "Grill'd", "brand_wikidata": "Q18165852"}
+    item_attributes = {"brand": "Grill'd", "brand_wikidata": "Q18165852", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["www.grilld.com.au"]
-    start_urls = ["https://www.grilld.com.au/api/locations.json"]
+    start_urls = ["https://api.digital.grilld.com.au/v1/Restaurants/nearby?lat=-23.12&lng=132.13&limit=10000"]
 
     def parse(self, response):
-        for location in response.json()["data"]:
+        for location in response.json():
             item = DictParser.parse(location)
-            if "TRAINING" in item["name"]:
-                return
-            item["street_address"] = ", ".join(
-                filter(None, [location["location"]["street1"].strip(), location["location"]["street2"].strip()])
-            )
-            item["city"] = location["location"]["city"]
-            item["state"] = location["location"]["state"]
-            item["postcode"] = location["location"]["postcode"]
-            apply_yes_no(Extras.DELIVERY, item, location["delivery"], False)
-            item["opening_hours"] = OpeningHours()
-            for day_name, day in location["hours"].items():
-                if day["closed"]:
+            if location.get("slug"):
+                item["website"] = "https://grilld.com.au/restaurants/" + location["slug"]
+
+            hours_string = ""
+            for day_hours in location.get("hours", []):
+                if day_hours.get("isClosed"):
                     continue
-                item["opening_hours"].add_range(day_name, day["store"]["open"], day["store"]["close"], "%I:%M %p")
+                hours_string = "{} {}: {}".format(hours_string, day_hours["name"], day_hours["description"])
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_string)
+
             yield item

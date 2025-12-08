@@ -19,4 +19,12 @@ class MattressWarehouseUSSpider(YextSpider):
 
         item["branch"] = item.pop("name").removeprefix("Mattress Warehouse ").removeprefix("of ").removeprefix("- ")
 
+        # Remove brand data from POI
+        if item.get("email") == "info@mattresswarehouse.com":
+            del item["email"]
+        if item.get("twitter") == "MWarehouseLLC":
+            del item["twitter"]
+        if item["extras"]["contact:instagram"] == "mattresswarehousellc":
+            del item["extras"]["contact:instagram"]
+
         yield item

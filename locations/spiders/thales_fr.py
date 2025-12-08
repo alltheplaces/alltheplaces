@@ -7,7 +7,7 @@ import scrapy
 from locations.items import Feature
 
 
-class ThalesFrSpider(scrapy.Spider):
+class ThalesFRSpider(scrapy.Spider):
     name = "thales_fr"
     item_attributes = {"brand": "Thales", "brand_wikidata": "Q1161666"}
     allowed_domains = ["google.com"]

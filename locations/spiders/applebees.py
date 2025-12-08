@@ -1,16 +1,13 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class ApplebeesSpider(SitemapSpider, StructuredDataSpider):
+class ApplebeesSpider(RioSeoSpider):
     name = "applebees"
-    item_attributes = {"brand": "Applebees", "brand_wikidata": "Q621532"}
-    sitemap_urls = ["https://restaurants.applebees.com/robots.txt"]
-    sitemap_rules = [(r"https://restaurants\.applebees\.com/en-us/\w\w/[-\w]+/[-.\w]+\d+$", "parse_sd")]
-    wanted_types = ["Restaurant"]
+    item_attributes = {"brand": "Applebee's Neighborhood Grill & Bar", "brand_wikidata": "Q621532"}
+    end_point = "https://maps.restaurants.applebees.com"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = response.xpath("//h3/text()").get()
-
-        yield item
+    def post_process_feature(self, feature, location):
+        feature["branch"] = feature.pop("name")
+        feature["website"] = feature["website"].replace(".com/", ".com/en-us/")
+        feature["extras"]["website:menu"] = location["location_menu_link"]
+        yield feature

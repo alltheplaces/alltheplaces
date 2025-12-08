@@ -13,7 +13,7 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
     requires_proxy = "US"
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         matches = re.search(r'location: \["(.*)", "(.*)"\],', response.text)
         item["lat"], item["lon"] = matches[1], matches[2]
         yield item

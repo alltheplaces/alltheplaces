@@ -1,20 +1,20 @@
 import json
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class EmpikSpider(Spider):
+class EmpikPLSpider(Spider):
     name = "empik_pl"
     item_attributes = {"brand": "Empik", "brand_wikidata": "Q3045978"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             method="POST",
             url="https://www.empik.com/ajax/delivery-point/empik?query=",
@@ -29,6 +29,7 @@ class EmpikSpider(Spider):
             properties["email"] = properties["email"].strip()
             properties["phone"] = shop["phone"] or shop["cellPhone"]
             properties["website"] = "https://www.empik.com" + shop["storePage"]
+            properties.pop("name", None)
             properties["opening_hours"] = OpeningHours()
 
             hours = {
@@ -47,4 +48,6 @@ class EmpikSpider(Spider):
                 start, end = hours.split("-")
                 properties["opening_hours"].add_range(weekday, start, end)
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            item["street_address"] = item.pop("addr_full", None)
+            yield item

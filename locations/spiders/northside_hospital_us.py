@@ -1,17 +1,20 @@
-from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 
-class NorthsideHospitalUSSpider(Spider):
+class NorthsideHospitalUSSpider(CamoufoxSpider):
     name = "northside_hospital_us"
     item_attributes = {"brand": "Northside Hospital", "brand_wikidata": "Q7059745"}
-    start_urls = [
-        "https://locations-api.northside.production.merge-digital.com/api/LocationsSearch?page=1&pageSize=500&sortField=Name"
-    ]
+    start_urls = ["https://locations-api-prod.northside.com/api/LocationsSearch?&Page=1&PageSize=10"]
+    captcha_type = "cloudflare_turnstile"
+    captcha_selector_indicating_success = '//link[@href="resource://content-accessible/plaintext.css"]'
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
+    handle_httpstatus_list = [403]
 
     categories = {
         "Cancer Services": {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "oncology"},
@@ -43,7 +46,7 @@ class NorthsideHospitalUSSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
-            location["street_address"] = clean_address([location.pop("address"), location.pop("addressLine2")])
+            location["street_address"] = merge_address_lines([location.pop("address"), location.pop("addressLine2")])
             item = DictParser.parse(location)
             item["ref"] = location["id_string"]
             item["state"] = location["state"]["abbreviation"]

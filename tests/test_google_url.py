@@ -1,4 +1,7 @@
-from locations.google_url import url_to_coords
+from scrapy import Selector
+
+from locations.google_url import extract_google_position, url_to_coords
+from locations.items import Feature
 
 
 def test_embed():
@@ -43,6 +46,10 @@ def test_maps_url():
         57.213,
         -2.187,
     )
+    assert url_to_coords("https://maps.google.com/?ll=11.0153524,-74.8279875,18z") == (
+        11.0153524,
+        -74.8279875,
+    )
     assert url_to_coords("https://www.google.com/maps?daddr=44.5043,8.9074") == (
         44.5043,
         8.9074,
@@ -51,6 +58,9 @@ def test_maps_url():
         52.01390075683594,
         4.152029991149902,
     )
+    assert url_to_coords("https://maps.google.com/maps?daddr=1.3914° N, 103.8761° E") == (1.3914, 103.8761)
+    assert url_to_coords("https://maps.google.com/maps?daddr=1.3914° S, 103.8761° W") == (-1.3914, -103.8761)
+    assert url_to_coords("https://maps.google.com/maps?daddr=5.673573 100.509574") == (5.673573, 100.509574)
 
 
 def test_directions():
@@ -93,6 +103,26 @@ def test_search():
     )
 
 
+def test_alternative_domain():
+    assert url_to_coords("https://www.google.co.uk/maps/search/?api=1&query=48.929153%2C21.911026") == (
+        48.929153,
+        21.911026,
+    )
+    assert url_to_coords("https://www.google.cz/maps/search/?api=1&query=48.929153,21.911026") == (
+        48.929153,
+        21.911026,
+    )
+
+
 def test_apple_maps():
     assert url_to_coords("http://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)
     assert url_to_coords("https://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)
+
+
+def test_onclick():
+    item = Feature()
+    button = Selector(
+        text="<button onclick=\"window.location.href='https://maps.google.com/?saddr=&daddr=-26.105640858464167,28.23227355940527'\">Get Directions </button>"
+    )
+    extract_google_position(item, button)
+    assert item == {"extras": {}, "lat": -26.105640858464167, "lon": 28.23227355940527}

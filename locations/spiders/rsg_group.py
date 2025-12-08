@@ -1,7 +1,7 @@
 from locations.storefinders.woosmap import WoosmapSpider
 
 
-class RSGGroupSpider(WoosmapSpider):
+class RsgGroupSpider(WoosmapSpider):
     name = "rsg_group"
     key = "woos-3cb8caa3-ad4d-3e7b-b7d6-221a7b72398d&stores_by_page=300"
     origin = "https://www.mcfit.com"

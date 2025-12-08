@@ -1,21 +1,28 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.google_url import extract_google_position
+from locations.hours import DAYS_PL, DELIMITERS_PL, OpeningHours
+from locations.items import Feature
 
 
-class OdidoPLSpider(Spider):
+class OdidoPLSpider(SitemapSpider):
     name = "odido_pl"
     item_attributes = {"brand": "Odido", "brand_wikidata": "Q106947294"}
-
-    def start_requests(self):
-        yield JsonRequest(url="https://www.sklepy-odido.pl/api/shops?itemsPerPage=10000")
+    sitemap_urls = ["https://www.sklepy-odido.pl/sitemap.xml"]
+    sitemap_rules = [("-sklep/", "parse")]
 
     def parse(self, response, **kwargs):
-        for feature in response.json()["data"]:
-            item = DictParser.parse(feature)
-            item["postcode"] = item["postcode"].strip()
-            if "building" in feature:
-                item["housenumber"] = feature["building"]
-            item["ref"] = feature["index"]  # Unknown whether it's stable
-            yield item
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["addr_full"] = response.xpath('//*[@class="store-address"]/text()').get()
+        extract_google_position(item, response)
+        date_time = response.css(".date-time")
+        if date_time:
+            item["opening_hours"] = OpeningHours()
+            days = date_time.css(".days::text").getall()
+            hours = date_time.css(".time::text").getall()
+            for day, hour in zip(days, hours):
+                if hour == "Zamknięte":
+                    continue
+                item["opening_hours"].add_ranges_from_string(f"{day} {hour}", days=DAYS_PL, delimiters=DELIMITERS_PL)
+        yield item

@@ -16,7 +16,7 @@ DAYS = [
 ]
 
 
-class EightyFourLumberUSSpider(scrapy.Spider):
+class EightyfourLumberUSSpider(scrapy.Spider):
     name = "eightyfour_lumber_us"
     item_attributes = {"brand": "84 Lumber", "brand_wikidata": "Q4644779"}
     allowed_domains = ["84lumber.com"]

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import Feature
+from locations.items import Feature, SocialMedia, set_social_media
 
 
 class CrunchFitnessSpider(scrapy.Spider):
@@ -22,10 +22,11 @@ class CrunchFitnessSpider(scrapy.Spider):
                 "phone": club.get("phone"),
                 "email": club.get("email"),
                 "facebook": club.get("facebook_url"),
-                "extras": {"instagram": club.get("instagram_url")},
                 "website": "https://www.crunch.com/locations/" + club["slug"],
                 "lat": float(club["latitude"]),
                 "lon": float(club["longitude"]),
             }
+            item = Feature(**properties)
+            set_social_media(item, SocialMedia.INSTAGRAM, club.get("instagram_url"))
 
-            yield Feature(**properties)
+            yield item

@@ -1,17 +1,21 @@
+from typing import Any
+
 import scrapy
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
 class SparGBSpider(scrapy.Spider):
     name = "spar_gb"
-    item_attributes = {"brand": "SPAR", "brand_wikidata": "Q610492"}
+    item_attributes = SPAR_SHARED_ATTRIBUTES
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://www.spar.co.uk/umbraco/api/storelocationapi/stores?pageNumber=1"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         stores = response.json().get("storeList", [])
         if len(stores) == 10:
             page_no = response.meta.get("page", 1) + 1
@@ -22,9 +26,9 @@ class SparGBSpider(scrapy.Spider):
 
         for store in stores:
             item = DictParser.parse(store)
-            item["website"] = "https://www.spar.co.uk" + store["StoreUrl"]
-            item["street_address"] = ", ".join(
-                filter(None, [store.get("Address1"), store.get("Address2"), store.get("Address3")])
+            item["website"] = "https://www.spar.co.uk" + store["StoreUrl"].rstrip("/")
+            item["street_address"] = clean_address(
+                [store.get("Address1"), store.get("Address2"), store.get("Address3")]
             )
 
             services = [s["Name"] for s in store["Services"]]

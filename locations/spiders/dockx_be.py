@@ -49,7 +49,6 @@ class DockxBESpider(scrapy.Spider):
                     "postcode": address_details.get("postalCode"),
                     "city": address_details.get("city"),
                     "country": address_details.get("country"),
-                    "street_address": ", ".join([address_details.get("number"), address_details.get("street")]),
                     "addr_full": store.get("labelAddress"),
                     "phone": store.get("phoneNumber"),
                     "email": store.get("emailAddress"),

@@ -1,10 +1,13 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
-class Phillips66Conoco76Spider(scrapy.Spider):
+class Phillips66Conoco76Spider(Spider):
     name = "phillips_66_conoco_76"
     allowed_domains = ["spatial.virtualearth.net"]
     base_url = (
@@ -16,16 +19,15 @@ class Phillips66Conoco76Spider(scrapy.Spider):
     )
 
     BRANDS = {
-        # TODO: Disabled NSI look up on U76 until matching improves
-        "76": {"brand": "U76", "brand_wikidata": "Q1658320", "nsi_id": "N/A"},
-        "U76": {"brand": "U76", "brand_wikidata": "Q1658320", "nsi_id": "N/A"},
+        "76": {"brand": "76", "brand_wikidata": "Q1658320"},
+        "U76": {"brand": "76", "brand_wikidata": "Q1658320"},
         "CON": {"brand": "Conoco", "brand_wikidata": "Q109341187"},
         "COP": None,
         "P66": {"brand": "Phillips 66", "brand_wikidata": "Q1656230"},
     }
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             self.base_url + "&$inlinecount=allpages" + "&$format=json",
             callback=self.get_pages,
         )
@@ -36,7 +38,7 @@ class Phillips66Conoco76Spider(scrapy.Spider):
         page_size = 250
 
         while offset < total_count:
-            yield scrapy.Request(self.base_url + f"&$top={page_size}&$skip={offset}&$format=json")
+            yield Request(self.base_url + f"&$top={page_size}&$skip={offset}&$format=json")
             offset += page_size
 
     def parse(self, response):
@@ -58,6 +60,8 @@ class Phillips66Conoco76Spider(scrapy.Spider):
             )
             if brand := self.BRANDS.get(station["Brand"]):
                 item.update(brand)
+            else:
+                self.crawler.stats.inc_value(f'atp/{self.name}/brand/fail/{station["Brand"]}')
 
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.E85, item, station["e85"])

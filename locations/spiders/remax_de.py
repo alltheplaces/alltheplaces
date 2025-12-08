@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class RemaxDeSpider(scrapy.Spider):
+class RemaxDESpider(scrapy.Spider):
     name = "remax_de"
     item_attributes = {
         "brand": "RE/MAX",

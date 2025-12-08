@@ -1,5 +1,9 @@
-from scrapy import Request
+from typing import AsyncIterator, Iterable
 
+from scrapy import Selector
+from scrapy.http import Request, Response
+
+from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -8,17 +12,17 @@ class MephistoSpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Mephisto", "brand_wikidata": "Q822975"}
     start_urls = ["https://www.mephisto.com/be-fr/points-de-vente/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse_website)
 
-    def parse_website(self, response, **kwargs):
+    def parse_website(self, response: Response) -> Iterable[Request]:
         page = "https://www.mephisto.com/be-fr/amlocator/index/ajax/"
         count_page = int(response.xpath('//*[@id="am-page-count"]/text()').get())
         for p in range(1, count_page + 1):
             yield Request(url=page + f"?p={p}", callback=self.parse)
 
-    def parse_item(self, item, location, popup_html):
+    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         # We don't want resellers. Only brand shop.
         if item["name"] in ("MEPHISTO-SHOP", "MEPHISTO SHOP"):
             item["street_address"] = item["addr_full"]

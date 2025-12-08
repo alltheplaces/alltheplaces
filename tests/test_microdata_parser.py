@@ -113,3 +113,49 @@ def test_multiple_addresses():
             "addressCountry": "GB",
         },
     }
+
+
+def test_rdfa():
+    src = """
+<main vocab="http://schema.org/" typeof="GroceryStore">
+    <article property="event" typeof="Event">
+        <div id="schema-location" property="location" typeof="Place">
+            <span property="name">Test</span>
+            <meta property="branchCode" content="001">
+        </div>
+    </article>
+</main>
+    """
+    doc = Selector(text=src)
+    items = MicrodataParser.extract_microdata(doc)
+    assert items == {
+        "items": [
+            {
+                "type": ["http://schema.org/GroceryStore"],
+                "properties": {
+                    "event": [
+                        {
+                            "type": ["http://schema.org/Event"],
+                            "properties": {
+                                "location": [
+                                    {
+                                        "type": ["http://schema.org/Place"],
+                                        "properties": {
+                                            "name": ["Test"],
+                                            "branchCode": ["001"],
+                                        },
+                                    }
+                                ]
+                            },
+                        }
+                    ]
+                },
+            }
+        ]
+    }
+    ld = MicrodataParser.convert_to_graph(items)
+    assert ld == {
+        "@context": "https://schema.org",
+        "@type": "GroceryStore",
+        "event": {"@type": "Event", "location": {"@type": "Place", "name": "Test", "branchCode": "001"}},
+    }

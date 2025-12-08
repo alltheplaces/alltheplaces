@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -5,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, DAYS_FR, OpeningHours
 
 
-class McKessonCASpider(Spider):
+class MckessonCASpider(Spider):
     name = "mckesson_ca"
     allowed_domains = [
         "www.guardian-ida-remedysrx.ca",
@@ -24,7 +26,7 @@ class McKessonCASpider(Spider):
         "UX": {"brand": "Uniprix", "brand_wikidata": "Q683265"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

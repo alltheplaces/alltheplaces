@@ -1,3 +1,7 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.categories import Categories
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
@@ -12,6 +16,6 @@ class TheExerciseCoachUSSpider(AgileStoreLocatorSpider):
     }
     allowed_domains = ["exercisecoach.com"]
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         yield item

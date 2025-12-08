@@ -10,3 +10,4 @@ class CarharttSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.carhartt.com/robots.txt"]
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["ClothingStore"]
+    drop_attributes = {"image"}

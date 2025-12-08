@@ -11,6 +11,7 @@ from locations.materials import MATERIALS_DE
 class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 20}
 
     dataset_attributes = {
         "attribution": "optional",
@@ -55,6 +56,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         url_pattern % ("Schulanlagen", "poi_kinderhort_view"),
         url_pattern % ("Schulanlagen", "poi_sonderschule_view"),
         url_pattern % ("Schulanlagen", "poi_volksschule_view"),
+        url_pattern % ("Sitzbankkataster_OGD", "bankstandorte_ogd"),
         url_pattern % ("Stadtpolizei", "poi_stadtpolizei_view"),
         url_pattern % ("Zueri_WC", "poi_zueriwc_rs_view"),
         url_pattern % ("Zweiradparkierung", "zweiradabstellplaetze_p"),
@@ -63,6 +65,8 @@ class StadtZuerichCHSpider(scrapy.Spider):
     def parse(self, response):
         for f in response.json()["features"]:
             if item := self.parse_item(f):
+                if item["ref"] == "vap105184":
+                    continue
                 yield item
 
     def parse_item(self, f):
@@ -89,6 +93,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         # The type-specific parsers should come after the general ones,
         # so they can overwrite tags.
         if parser := {
+            "bankstandorte_ogd": self.parse_bench,
             "ewz_brennstelle_p": self.parse_street_lamp,
             "poi_kindergarten_view": self.parse_kindergarten,
             "poi_kinderhort_view": self.parse_after_school,
@@ -101,7 +106,8 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "wvz_brunnen": self.parse_fountain,
             "zweiradabstellplaetze_p": self.parse_bicycle_parking,
         }.get(id.split(".")[0]):
-            tags.update(parser(props))
+            if parser(props) is not None:
+                tags.update(parser(props))
 
         item = {
             "addr_full": tags.pop("addr:full", None),
@@ -139,7 +145,14 @@ class StadtZuerichCHSpider(scrapy.Spider):
                 "nohousenumber": "yes" if not housenumber else None,
             }
         if addr := p.get("adresse"):
-            return {"addr:full": f"{addr}, Zürich"}
+            if m := re.match(r"^(.+) (\d+\s?[a-kA-K]?)$", addr):
+                return {
+                    "addr:street": m.group(1),
+                    "addr:housenumber": m.group(2),
+                    "addr:postcode": p.get("plz"),
+                }
+            else:
+                return {"addr:full": f"{addr}, Zürich"}
         return {}
 
     def parse_after_school(self, p):
@@ -162,6 +175,35 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "opening_hours": oh.as_opening_hours(),
         }
 
+    bench_models = {
+        "mit Rückenlehne": {"backrest": "yes"},
+        "mit Rückenlehne und 2 Armlehnen": {
+            "armrest": "yes",
+            "backrest": "yes",
+        },
+        "ohne Rückenlehne": {"backrest": "no"},
+        "mit Rückenlehne und Armlehne links": {
+            "armrest": "left",
+            "backrest": "yes",
+        },
+        "mit Rückenlehne und Armlehne rechts": {
+            "armrest": "right",
+            "backrest": "yes",
+        },
+        "Tisch-Bank-Kombination": {"picnic_table": "yes"},
+        "Tisch": {"picnic_table": "yes"},
+    }
+
+    def parse_bench(self, p):
+        operator, operator_wikidata = self.operators["Grün Stadt Zürich"]
+        tags = {
+            "amenity": "bench",
+            "operator": operator,
+            "operator:wikidata": operator_wikidata,
+        }
+        tags.update(self.bench_models.get(p.get("sitzbankmodelle"), {}))
+        return tags
+
     def parse_bicycle_parking(self, p):
         # For bicycle and motorcycle parkings, the data feed puts the
         # feature type into the name; the parkings have no real names.
@@ -171,14 +213,15 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "Beide": {"amenity": "bicycle_parking", "motorcycle": "yes"},
         }.get(p["name"])
         operator, operator_wikidata = self.operators["Tiefbauamt"]
-        tags.update(
-            {
-                "capacity": str(int(p.get("anzahl_pp", 0))) or None,
-                "name": None,
-                "operator": operator,
-                "operator:wikidata": operator_wikidata,
-            }
-        )
+        if tags is not None:
+            tags.update(
+                {
+                    "capacity": str(int(p.get("anzahl_pp", 0))) or None,
+                    "name": None,
+                    "operator": operator,
+                    "operator:wikidata": operator_wikidata,
+                }
+            )
         return tags
 
     def parse_fountain(self, p):
@@ -197,7 +240,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "ref": "wvz-%s" % p["brunnennummer"],
             "sculpture:material": sculpture_material,
             "sculpture:material:wikidata": sculpture_material_wikidata,
-            "start_date": str(p.get("baujahr", "")),
+            "start_date": str(p.get("baujahr") or ""),
             "trough:material": trough_material,
             "trough:material:wikidata": trough_material_wikidata,
         }

@@ -8,9 +8,9 @@ class ChaayosINSpider(StoreRocketSpider):
 
     def parse_item(self, item, location):
         # remove unused/non-store-specific-value fields
-        item.pop("email")
-        item.pop("phone")
-        item.pop("facebook")
-        item.pop("twitter")
-        item["extras"].pop("instagram")
+        item.pop("email", None)
+        item.pop("phone", None)
+        item.pop("facebook", None)
+        item.pop("twitter", None)
+        item["extras"].pop("instagram", None)
         yield item

@@ -1,26 +1,30 @@
-from locations.categories import Extras, PaymentMethods, apply_yes_no
-from locations.hours import DAYS, OpeningHours
-from locations.storefinders.where2getit import Where2GetItSpider
+from typing import Any, Iterable
+
+import scrapy
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
+
+from locations.dict_parser import DictParser
+from locations.geo import city_locations
 
 
-class CulversUSSpider(Where2GetItSpider):
+class CulversUSSpider(scrapy.Spider):
     name = "culvers_us"
     item_attributes = {"brand": "Culver's", "brand_wikidata": "Q1143589"}
-    api_brand_name = "culvers"
-    api_key = "1099682E-D719-11E6-A0C4-347BDEB8F1E5"
-    api_filter = {"number": {"ne": "P"}}
 
-    def parse_item(self, item, location):
-        item["opening_hours"] = OpeningHours()
-        for day_index in range(-1, 5, 1):
-            item["opening_hours"].add_range(
-                DAYS[day_index], location["bho"][day_index + 1][0], location["bho"][day_index + 1][1], "%H%M"
+    async def start(self) -> Iterable[Request]:
+        for city in city_locations("US", 100000):
+            yield JsonRequest(
+                url=f'https://www.culvers.com/api/locator/getLocations?lat={city["latitude"]}&long={city["longitude"]}&radius=600000&limit=10000'
             )
-        apply_yes_no(Extras.INDOOR_SEATING, item, location["dine_in"], False)
-        apply_yes_no(Extras.TAKEAWAY, item, location["takeout"], False)
-        apply_yes_no(Extras.DELIVERY, item, location["delivery"], False)
-        apply_yes_no(Extras.DRIVE_THROUGH, item, location["drivethru"], False)
-        apply_yes_no(Extras.TOILETS, item, location["restroom"], False)
-        apply_yes_no(PaymentMethods.VISA, item, location["visa"], False)
-        apply_yes_no(PaymentMethods.MASTER_CARD, item, location["mastercard"], False)
-        yield item
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["data"]["geofences"]:
+            location.update(location.pop("metadata"))
+            location.pop("geometry")
+            item = DictParser.parse(location)
+            item["ref"] = location["_id"]
+            item["name"] = self.item_attributes["brand"]
+            item["lon"], item["lat"] = location["geometryCenter"]["coordinates"]
+            item["website"] = "https://www.culvers.com/restaurants/" + location["slug"]
+            yield item

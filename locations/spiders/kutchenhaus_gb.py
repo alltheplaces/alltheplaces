@@ -12,8 +12,8 @@ class KutchenhausGBSpider(SitemapSpider):
     custom_settings = {"REDIRECT_ENABLED": False}
 
     def parse(self, response, **kwargs):
-        if label := response.xpath('//div[@class="store-details--label"]/text()').get():
-            if label.strip() == "COMING SOON":
+        if label := response.xpath('//*[@class="store-details-top-banner-caption"]/text()').get():
+            if label.strip().upper() == "COMING SOON":
                 return
 
         item = Feature()

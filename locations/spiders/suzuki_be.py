@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 from scrapy.selector import Selector
 
 from locations.categories import Categories, apply_category
@@ -6,14 +9,14 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SuzukiBeSpider(scrapy.Spider):
+class SuzukiBESpider(scrapy.Spider):
     name = "suzuki_be"
     item_attributes = {"brand": "Suzuki", "brand_wikidata": "Q181642"}
     allowed_domains = ["suzuki.be"]
     start_urls = ["https://www.suzuki.be/fr/ajax/dealers"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for key, row in response.json().get("map_data", {}).get("locations").items():
             item = Feature()
             item["ref"] = key

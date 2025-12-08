@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 
 
-class NewYorkerSpider(scrapy.Spider):
+class NewyorkerSpider(scrapy.Spider):
     name = "newyorker"
     start_urls = ["https://api.newyorker.de/csp/stores/store/query?limit=10000"]
 

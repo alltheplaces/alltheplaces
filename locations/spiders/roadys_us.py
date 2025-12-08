@@ -8,7 +8,7 @@ from locations.hours import DAYS, OpeningHours
 
 class RoadysUSSpider(scrapy.Spider):
     name = "roadys_us"
-    item_attributes = {"brand": "Roady’s Truck Stops", "brand_wikidata": "Q7339701"}
+    item_attributes = {"brand": "Roady's", "brand_wikidata": "Q7339701"}
     allowed_domains = ["roadys.com"]
     start_urls = ["https://api-v2.roadys.com/locations?show_all=true"]
 
@@ -25,6 +25,7 @@ class RoadysUSSpider(scrapy.Spider):
             item["ref"] = location["location_id"]
             item["name"] = location["location_name"]
             item["street_address"] = item.pop("addr_full")
+            item["postcode"] = str(item["postcode"])
             apply_category(Categories.FUEL_STATION, item)
             for amenity in location["amenities"]:
                 match amenity["name"]:

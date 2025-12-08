@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -5,9 +7,9 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class BPPulseGBSpider(Spider):
+class BpPulseGBSpider(Spider):
     name = "bp_pulse_gb"
-    item_attributes = {"brand": "bp pulse", "brand_wikidata": "Q39057719"}
+    item_attributes = {"brand_wikidata": "Q39057719"}
 
     @staticmethod
     def make_request(page: int) -> JsonRequest:
@@ -17,7 +19,7 @@ class BPPulseGBSpider(Spider):
             meta={"page": page},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response, **kwargs):

@@ -1,8 +1,11 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class MarathonPetroleumUSSpider(Spider):
@@ -11,20 +14,18 @@ class MarathonPetroleumUSSpider(Spider):
         "ARCO": {"brand": "Arco", "brand_wikidata": "Q304769"},
         "MARATHON": {"brand": "Marathon", "brand_wikidata": "Q458363"},
     }
-    allowed_domains = ["devmarathon.dialogs8.com"]
     start_urls = [
-        "https://devmarathon.dialogs8.com/ajax_stations_search.html?reason=get-station-info&reason=get-station-info"
+        "https://www.marathonarcorewards.com/ajax_trip_planner_search.html?reason=get-station-info&reason=get-station-info"
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url)
 
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, [location.get("addr1"), location.get("addr2")]))
+            item["street_address"] = clean_address([location.get("addr1"), location.get("addr2")])
             if location["site_brand"] in self.brands.keys():
                 item.update(self.brands[location["site_brand"]])
             apply_category(Categories.FUEL_STATION, item)

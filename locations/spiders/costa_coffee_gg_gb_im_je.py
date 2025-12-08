@@ -1,20 +1,23 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CostaCoffeeGGGBIMJESpider(Spider):
     name = "costa_coffee_gg_gb_im_je"
-    item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
+    item_attributes = {"brand": "Costa", "brand_wikidata": "Q608845"}
     allowed_domains = ["www.costa.co.uk"]
     start_urls = ["https://www.costa.co.uk/api/mdm/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # No robots.txt. 404 HTML page returned instead.
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query_template = """query Sites {
     sites(
         siteStatuses: ["OPEN"]
@@ -104,25 +107,36 @@ class CostaCoffeeGGGBIMJESpider(Spider):
         }
     }
 }"""
-        for lat, lon in point_locations("gg_gb_im_je_centroids_iseadgg_48km_radius.csv"):
+        for lat, lon in country_iseadgg_centroids(["GG", "GB", "IM", "JE"], 48):
             graphql_query = graphql_query_template.replace("__LATITUDE__", str(lat)).replace("__LONGITUDE__", str(lon))
             yield JsonRequest(url=self.start_urls[0], data={"query": graphql_query})
 
     def parse(self, response):
-        for location in response.json()["data"]["sites"]["items"]:
+        locations = response.json()["data"]["sites"]["items"]
+
+        if len(locations) > 0:
+            self.crawler.stats.inc_value("atp/geo_search/hits")
+        else:
+            self.crawler.stats.inc_value("atp/geo_search/misses")
+        self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+
+        for location in locations:
             item = DictParser.parse(location)
+
             if location["siteType"] == "Global Express":
                 item["brand"] = "Costa Express"
                 item["brand_wikidata"] = "Q113556385"
-                apply_category(Categories.VENDING_MACHINE_COFFEE, item)
+                apply_category(Categories.VENDING_MACHINE, item)
             else:
                 apply_category(Categories.COFFEE_SHOP, item)
+
             item["lat"] = location["location"]["geo"]["latitude"]
             item["lon"] = location["location"]["geo"]["longitude"]
-            item["street_address"] = ", ".join(
-                filter(None, [location["location"]["address"]["address1"], location["location"]["address"]["address2"]])
+            item["street_address"] = clean_address(
+                [location["location"]["address"]["address1"], location["location"]["address"]["address2"]]
             )
             item["city"] = location["location"]["address"]["city"]
+
             item["postcode"] = location["location"]["address"]["postCode"]
             if item["postcode"]:
                 if item["postcode"][:2] == "GY":
@@ -133,6 +147,7 @@ class CostaCoffeeGGGBIMJESpider(Spider):
                     item["country"] = "JE"
                 else:
                     item["country"] = "GB"
+
             if len(location["operatingHours"]) > 0:
                 item["opening_hours"] = OpeningHours()
                 for day_name, day_hours in location["operatingHours"][0].items():
@@ -140,10 +155,12 @@ class CostaCoffeeGGGBIMJESpider(Spider):
                         item["opening_hours"].add_range(day_name, "00:00", "24:00")
                     else:
                         item["opening_hours"].add_range(day_name, day_hours["open"], day_hours["close"])
+
             apply_yes_no(Extras.BABY_CHANGING_TABLE, item, location["facilities"].get("babyChanging"), False)
             apply_yes_no(Extras.DELIVERY, item, location["facilities"].get("delivery"), False)
             apply_yes_no(Extras.WHEELCHAIR, item, location["facilities"].get("disabledAccess"), False)
             apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, location["facilities"].get("disabledWC"), False)
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["facilities"].get("driveThru"), False)
             apply_yes_no(Extras.WIFI, item, location["facilities"].get("wifi"), False)
+
             yield item
