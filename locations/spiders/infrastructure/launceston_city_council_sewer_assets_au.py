@@ -34,7 +34,18 @@ class LauncestonCityCouncilSewerAssetsAUSpider(ArcGISFeatureServerSpider):
                     apply_category(Categories.SEWER_VENT, item)
                 case "Waste Water Treatment Plant":
                     apply_category(Categories.WASTEWATER_PLANT, item)
-                case "Abandoned Pump Station" | "Air Valve" | "Dump Point" | "End of Line" | "Estimated Sewer Manhole" | "Flow Meter" | "Grease Trap" | "Junction" | "No Type Allocated" | "Stop Valve":
+                case (
+                    "Abandoned Pump Station"
+                    | "Air Valve"
+                    | "Dump Point"
+                    | "End of Line"
+                    | "Estimated Sewer Manhole"
+                    | "Flow Meter"
+                    | "Grease Trap"
+                    | "Junction"
+                    | "No Type Allocated"
+                    | "Stop Valve"
+                ):
                     return
                 case _:
                     self.logger.warning("Unknown sewer feature type: {}".format(feature["Type"]))
