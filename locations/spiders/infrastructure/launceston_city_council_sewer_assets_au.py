@@ -51,4 +51,4 @@ class LauncestonCityCouncilSewerAssetsAUSpider(ArcGISFeatureServerSpider):
                     self.logger.warning("Unknown sewer feature type: {}".format(feature["Type"]))
                     return
 
-        yield item
+            yield item
