@@ -9,7 +9,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class NTLHRSpider(JSONBlobSpider):
+class NtlHRSpider(JSONBlobSpider):
     name = "ntl_hr"
     item_attributes = {"brand": "NTL", "brand_wikidata": "Q6966095"}
     start_urls = ["https://ntl.hr/prodajna-mjesta"]
