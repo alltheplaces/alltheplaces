@@ -28,9 +28,11 @@ class McdonaldsBGSpider(Spider):
 
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
+            location.update(location.pop("address_on_map", {}))
             item = DictParser.parse(location)
             item["ref"] = str(item["ref"])
-            item["city"] = location.get("city", {}).get("city_name")
+            if isinstance(location.get("city"), dict):
+                item["city"] = location["city"].get("city_name")
             if phone_numbers := location.get("phone_numbers", []):
                 item["phone"] = phone_numbers[0]
             item["website"] = None
