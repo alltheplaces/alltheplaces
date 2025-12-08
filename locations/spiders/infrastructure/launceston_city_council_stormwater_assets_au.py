@@ -40,10 +40,21 @@ class LauncestonCityCouncilStormwaterAssetsAUSpider(ArcGISFeatureServerSpider):
                     item["extras"]["manhole"] = "rainwater"
                 case "Pump Station":
                     apply_category(Categories.PUMPING_STATION_STORMWATER, item)
-                case "Bend" | "Detention Basin" | "End of Line" | "Gross Pit" | "Headwall" | "Junction" | "Penstock Chamber" | "Penstock Gate" | "Sonde Point" | "Tide Flap" | "Valve":
+                case (
+                    "Bend"
+                    | "Detention Basin"
+                    | "End of Line"
+                    | "Gross Pit"
+                    | "Headwall"
+                    | "Junction"
+                    | "Penstock Chamber"
+                    | "Penstock Gate"
+                    | "Sonde Point"
+                    | "Tide Flap"
+                    | "Valve"
+                ):
                     pass
                 case _:
                     self.logger.warning("Unknown stormwater feature type: {}".format(feature["Class"]))
-                    pass
 
         yield item
