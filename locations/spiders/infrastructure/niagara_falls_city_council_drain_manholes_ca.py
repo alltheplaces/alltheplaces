@@ -23,5 +23,7 @@ class NiagaraFallsCityCouncilDrainManholesCASpider(ArcGISFeatureServerSpider):
         else:
             item["ref"] = str(feature["OBJECTID"])
         apply_category(Categories.MANHOLE, item)
-        item["extras"]["manhole"] = "rainwater"
+        item["extras"]["manhole"] = "drain"
+        item["extras"]["utility"] = "stormwater"
+        item["extras"]["substance"] = "rainwater"
         yield item

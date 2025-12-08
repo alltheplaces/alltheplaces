@@ -35,11 +35,17 @@ class LauncestonCityCouncilStormwaterAssetsAUSpider(ArcGISFeatureServerSpider):
             match asset_type:
                 case "Grated Pit" | "Gully Pit" | "Inlet Grate":
                     apply_category(Categories.KERB_GRATE, item)
+                    item["extras"]["utility"] = "stormwater"
+                    item["extras"]["substance"] = "rainwater"
                 case "Manhole" | "Inspection Opening":
                     apply_category(Categories.MANHOLE, item)
-                    item["extras"]["manhole"] = "rainwater"
+                    item["extras"]["manhole"] = "drain"
+                    item["extras"]["utility"] = "stormwater"
+                    item["extras"]["substance"] = "rainwater"
                 case "Pump Station":
                     apply_category(Categories.PUMPING_STATION_STORMWATER, item)
+                    item["extras"]["utility"] = "stormwater"
+                    item["extras"]["substance"] = "rainwater"
                 case (
                     "Bend"
                     | "Detention Basin"
