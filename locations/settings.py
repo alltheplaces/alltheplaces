@@ -181,7 +181,9 @@ DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS |
     and not (
         request.resource_type in ["document", "script", "xhr", "fetch", "image"]
         and (
-            "/cdn-cgi/challenge-platform/" in request.url or request.url.startswith("https://challenges.cloudflare.com")
+            "/cloudflare-static/rocket-loader.min.js" in request.url
+            or "/cdn-cgi/challenge-platform/" in request.url
+            or request.url.startswith("https://challenges.cloudflare.com")
         )
     ),
     "CAMOUFOX_LAUNCH_OPTIONS": {
@@ -196,6 +198,8 @@ DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS |
         "i_know_what_im_doing": True,
     },
 }
+
+DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_INTERSTITIAL = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 REQUESTS_CACHE_ENABLED = True
 REQUESTS_CACHE_BACKEND_SETTINGS = {

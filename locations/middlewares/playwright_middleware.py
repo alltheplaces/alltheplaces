@@ -4,7 +4,7 @@ from scrapy.spiders import SitemapSpider, XMLFeedSpider
 from scrapy_camoufox.page import PageMethod
 
 from locations.camoufox_spider import CamoufoxSpider
-from locations.captcha_solvers import click_solver
+from locations.captcha_solvers import cloudflare_interstitial_solver, cloudflare_turnstile_solver
 from locations.playwright_spider import PlaywrightSpider
 
 
@@ -19,9 +19,13 @@ class PlaywrightMiddleware:
                 request.meta["camoufox_page_methods"] = []
             if captcha_type := getattr(spider, "captcha_type", None):
                 match captcha_type:
+                    case "cloudflare_interstitial":
+                        request.meta["camoufox_page_methods"].append(
+                            PageMethod(cloudflare_interstitial_solver, request=request, spider=spider)
+                        )
                     case "cloudflare_turnstile":
                         request.meta["camoufox_page_methods"].append(
-                            PageMethod(click_solver, request=request, spider=spider)
+                            PageMethod(cloudflare_turnstile_solver, request=request, spider=spider)
                         )
         elif issubclass(type(spider), PlaywrightSpider) or getattr(spider, "is_playwright_spider", False):
             # TODO: remove "is_playwright_spider" check once fully deprecated
