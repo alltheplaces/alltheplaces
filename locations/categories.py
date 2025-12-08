@@ -396,6 +396,7 @@ class Categories(Enum):
         "utility": "water",
         "substance": "water",
     }
+    SEWER_VENT = {"man_made": "sewer_vent", "utility": "sewerage"}
     STREET_CABINET_LIGHTING = {"man_made": "street_cabinet", "utility": "street_lighting"}
     STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
     STREET_CABINET_TRAFFIC_CONTROL = {"man_made": "street_cabinet", "street_cabinet": "traffic_control"}
@@ -409,6 +410,7 @@ class Categories(Enum):
     SUBSTATION_ZONE = {"power": "substation", "substation": "distribution"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
     TRANSFORMER = {"power": "transformer"}
+    WASTEWATER_PLANT = {"man_made": "wastewater_plant", "utility": "sewerage", "substance": "sewage;wastewater"}
     WATER_WELL = {"man_made": "water_well"}
 
     NATURAL_BASIN = {"natural": "water", "water": "basin"}
