@@ -1,9 +1,8 @@
 from copy import deepcopy
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from geonamescache import GeonamesCache
-from scrapy import Request
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -65,7 +64,7 @@ class MercedesBenzGroupSpider(JSONBlobSpider):
         )
         return Request(url, meta={"country": country})
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         countries = GeonamesCache().get_countries().keys()
         for country in countries:
             yield self.make_request(country)

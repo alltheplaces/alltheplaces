@@ -16,11 +16,10 @@ class CharlesTyrwhittSpider(scrapy.Spider):
         "brand": "Charles Tyrwhitt",
         "brand_wikidata": "Q924963",
     }
-    allowed_domains = ["www.charlestyrwhitt.com"]
     start_urls = ["https://www.charlestyrwhitt.com/uk/stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        mapdata = response.xpath('//div[@id="map-data"]//text()').get()
+        mapdata = response.xpath('//*[@id="bm-stores-data"]/text()').get()
         data = json.loads(mapdata)
         for location in data:
             item = DictParser.parse(location)

@@ -1,15 +1,17 @@
 import re
 from time import time
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class OrlenSpider(scrapy.Spider):
+class OrlenSpider(Spider):
     name = "orlen"
     custom_settings = {"ROBOTSTXT_OBEY": False}
     brand_mappings = {
@@ -39,15 +41,15 @@ class OrlenSpider(scrapy.Spider):
             | session_id_dict
         )
 
-    def start_requests(self):
-        yield scrapy.http.JsonRequest(
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
             "https://wsp.orlen.pl/plugin/GasStations.svc/GetPluginBaseConfig?" + self.build_url_params(),
             callback=self.parse_config,
         )
 
     def parse_config(self, response):
         self.session_id = response.json()["SessionId"]
-        yield scrapy.http.JsonRequest(
+        yield JsonRequest(
             "https://wsp.orlen.pl/plugin/GasStations.svc/FindPOI?"
             + self.build_url_params(
                 languageCode="EN",
@@ -65,7 +67,7 @@ class OrlenSpider(scrapy.Spider):
 
     def parse(self, response):
         for location in response.json()["Results"]:
-            yield scrapy.http.JsonRequest(
+            yield JsonRequest(
                 "https://wsp.orlen.pl/plugin/GasStations.svc/GetGasStation?"
                 + self.build_url_params(
                     languageCode="EN",

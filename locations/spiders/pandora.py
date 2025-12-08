@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest
 
@@ -13,7 +13,7 @@ class PandoraSpider(RioSeoSpider):
     end_point = "https://maps.pandora.net"
     radius = 346
 
-    def start_requests(self) -> JsonRequest:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lng in point_locations("earth_centroids_iseadgg_346km_radius.csv"):
             yield JsonRequest(
                 f"{self.end_point}/api/getAsyncLocations?template={self.template}&level={self.template}&radius={self.radius}&limit={self.limit}&lat={lat}&lng={lng}",

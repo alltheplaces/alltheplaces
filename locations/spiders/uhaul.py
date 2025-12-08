@@ -49,7 +49,7 @@ class UhaulSpider(scrapy.Spider):
         properties = {
             "ref": ref,
             "name": store_obj.get("name"),
-            "addr_full": store_obj.get("address", {}).get("streetAddress").strip(),
+            "street_address": store_obj.get("address", {}).get("streetAddress").strip(),
             "city": store_obj.get("address", {}).get("addressLocality").strip(),
             "state": store_obj.get("address", {}).get("addressRegion"),
             "postcode": store_obj.get("address", {}).get("postalCode"),

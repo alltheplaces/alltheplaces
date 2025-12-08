@@ -1,43 +1,45 @@
 import csv
 import re
+from typing import AsyncIterator
 from urllib.parse import parse_qs, urlsplit
 
-import chompjs
-import scrapy
+from chompjs import parse_js_object
+from scrapy import Selector, Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 
-class MightyFlameSpider(scrapy.Spider):
+class MightyFlameSpider(Spider):
     name = "mighty_flame"
     item_attributes = {"brand": "Mighty Flame"}
     allowed_domains = ["secure.gotwww.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for name in [
             "ca_centroids_100mile_radius.csv",
             "us_centroids_100mile_radius.csv",
         ]:
             with open_searchable_points(name) as points:
                 for point in csv.DictReader(points):
-                    yield scrapy.Request(
+                    yield Request(
                         f'https://secure.gotwww.com/gotlocations.com/mightyflame/index.php?bypass=y&lat2={point["latitude"]}&lon2={point["longitude"]}'
                     )
 
     def parse(self, response):
         js = response.xpath('//script[contains(text(), "L.marker")]').get()
         for line in re.findall(r"^L\.marker.*", js, re.M):
-            [lat, lon] = chompjs.parse_js_object(line)
+            [lat, lon] = parse_js_object(line)
             popup = re.search(r".bindPopup\((.*)\);", line)[1]
 
             # Evidently this is what happens when you use PHP to write JavaScript
             # Just remove the entire area with the syntax error since we don't need it
             popup = re.sub(r'google\.com/maps\?.*?"', "", popup)
 
-            [popup] = chompjs.parse_js_object("[" + popup + "]")
-            popup = scrapy.Selector(text=popup)
+            [popup] = parse_js_object("[" + popup + "]")
+            popup = Selector(text=popup)
 
             [ref] = parse_qs(urlsplit(popup.css('a[href*="id="]').attrib["href"]).query)["id"]
             text = popup.xpath("//div/text()").getall()

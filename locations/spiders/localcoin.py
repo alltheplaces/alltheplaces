@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -15,7 +15,7 @@ class LocalcoinSpider(JSONBlobSpider):
     start_urls = ["https://localcoinatm.com/api/locations/"]
     locations_key = "body"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for language_code in ["en-ca", "en-au", "en-hk"]:
             # en-nz and en-au return the same features.
             yield JsonRequest(url=self.start_urls[0], headers={"x-lc-locale": language_code}, dont_filter=True)

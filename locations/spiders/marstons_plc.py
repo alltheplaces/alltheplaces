@@ -1,17 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 
 
-class MarstonsPlcSpider(scrapy.Spider):
+class MarstonsPlcSpider(Spider):
     name = "marstons_plc"
     MARSTONS = {"brand": "Marston's", "brand_wikidata": "Q6773982"}
     allowed_domains = ["marstonspubs.co.uk"]
     store_types = {}
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             url="https://www.marstonspubs.co.uk/ajax/finder/markers/",
             callback=self.parse_store_ids,
         )
@@ -38,13 +41,13 @@ class MarstonsPlcSpider(scrapy.Spider):
                 url = url + params
                 count = 0
                 params = ""
-                yield scrapy.Request(url, callback=self.parse)
+                yield Request(url, callback=self.parse)
             count += 1
 
         url = "https://www.marstonspubs.co.uk/ajax/finder/outlet/?"
         params = params[:-1]
         url = url + params
-        yield scrapy.Request(url, callback=self.parse)
+        yield Request(url, callback=self.parse)
 
     def parse(self, response):
         data = response.json()

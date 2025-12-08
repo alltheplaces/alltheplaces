@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -11,7 +11,7 @@ class PizzaHutQASpider(Spider):
     name = "pizza_hut_qa"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.qatar.pizzahut.me/api/customer/stores/1")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

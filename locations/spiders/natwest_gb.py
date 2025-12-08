@@ -1,8 +1,8 @@
-import json
-from typing import Any, Iterable
+from json import dumps
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.exceptions import CloseSpider
 from scrapy.http import JsonRequest, Response
 
@@ -18,7 +18,7 @@ class NatwestGBSpider(Spider):
     total_pois = -1
     seen_refs = set()
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for region in postal_regions("GB"):
             yield JsonRequest(
                 url="https://www.natwest.com/content/natwest_com/en_uk/personal/search-results/locator/jcr:content/root/responsivegrid/locator/results.blapi.search.json?{}".format(
@@ -27,7 +27,7 @@ class NatwestGBSpider(Spider):
                             "search_term": region["postal_region"],
                             "search_limit": "50",
                             "search_radius": "2000",
-                            "filter": json.dumps(
+                            "filter": dumps(
                                 {
                                     "$and": [
                                         {"c_brand": {"$eq": "NatWest"}},
