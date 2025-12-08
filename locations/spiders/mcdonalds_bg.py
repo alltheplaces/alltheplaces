@@ -5,7 +5,7 @@ import chompjs
 from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, DAYS_BG, DAYS_EN, OpeningHours
 from locations.spiders.mcdonalds import McdonaldsSpider
@@ -29,14 +29,22 @@ class McdonaldsBGSpider(Spider):
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
             item = DictParser.parse(location)
+            item["ref"] = str(item["ref"])
             item["city"] = location.get("city", {}).get("city_name")
             if phone_numbers := location.get("phone_numbers", []):
                 item["phone"] = phone_numbers[0]
             item["website"] = None
 
-            for benefit in location.get("benefits", []):
-                apply_yes_no(Extras.WIFI, item, benefit.get("name") == "WiFi")
-                apply_yes_no(Extras.DRIVE_THROUGH, item, benefit.get("name") == "McDrive™")
+            services = [benefit.get("name") for benefit in location.get("benefits", [])]
+            if "McCafe™" in services:
+                mccafe = item.deepcopy()
+                mccafe["ref"] += "_mccafe"
+                mccafe["brand"] = "McCafé"
+                mccafe["brand_wikidata"] = "Q3114287"
+                apply_category(Categories.CAFE, mccafe)
+                yield mccafe
+            apply_yes_no(Extras.WIFI, item, "WiFi" in services)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "McDrive™" in services)
 
             apply_yes_no(Extras.DELIVERY, item, location.get("is_delivery_available"))
 
