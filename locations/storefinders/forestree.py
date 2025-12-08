@@ -36,7 +36,7 @@ class ForestreeSpider(Spider):
         )
 
     def parse_species_list(self, response: Response) -> Iterable[JsonRequest]:
-        fixed_json = loads(response.text.replace("\\\\\"", ""))
+        fixed_json = loads(response.text.replace('\\\\"', ""))
         for species in fixed_json["features"]:
             self._species[species["id"]] = {
                 "protected": "yes",
@@ -50,7 +50,7 @@ class ForestreeSpider(Spider):
         )
 
     def parse_trees_list(self, response: Response) -> Iterable[Feature]:
-        fixed_json = loads(response.text.replace("\\\\\"", ""))
+        fixed_json = loads(response.text.replace('\\\\"', ""))
         for tree in fixed_json["features"]:
             properties = {
                 "ref": str(tree["id"]),
