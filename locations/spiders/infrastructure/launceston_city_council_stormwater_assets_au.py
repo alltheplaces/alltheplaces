@@ -53,8 +53,9 @@ class LauncestonCityCouncilStormwaterAssetsAUSpider(ArcGISFeatureServerSpider):
                     | "Tide Flap"
                     | "Valve"
                 ):
-                    pass
+                    return
                 case _:
                     self.logger.warning("Unknown stormwater feature type: {}".format(feature["Class"]))
+                    return
 
         yield item
