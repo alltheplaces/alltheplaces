@@ -27,6 +27,8 @@ class RenaultSpider(Spider):
         yield self.make_request("https://www.renault.nl/")
         yield self.make_request("https://www.dacia.fr/")
         yield self.make_request("https://www.alpinecars.de/")
+        yield self.make_request("https://www.renault.co.in/")
+        yield self.make_request("https://www.renault.com.br/")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:

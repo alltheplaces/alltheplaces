@@ -1,25 +1,28 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.geo import city_locations
 from locations.items import Feature
 
 
-class BankinterESSpider(scrapy.Spider):
+class BankinterESSpider(Spider):
     name = "bankinter_es"
     item_attributes = {"brand": "Bankinter", "brand_wikidata": "Q806808"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for city in city_locations("ES", 40000):
             # BANK URL
-            yield scrapy.Request(
+            yield Request(
                 url="https://bancaonline.bankinter.com/publico/rs/loc/oficinas?lat={}&lng={}&max=11&tipo=OF".format(
                     city["latitude"], city["longitude"]
                 ),
                 callback=self.branch_data,
             )
             # ATM URL
-            yield scrapy.Request(
+            yield Request(
                 url="https://bancaonline.bankinter.com/publico/rs/loc/cajeros?lat={}&lng={}&max=11&tipo=Bankinter&time=1669031848635".format(
                     city["latitude"], city["longitude"]
                 ),

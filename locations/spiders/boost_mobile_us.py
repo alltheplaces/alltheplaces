@@ -25,8 +25,7 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
         ld_data["openingHours"] = ld_data.pop("openingHoursSpecification", [])
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["addr_full"] = item.pop("street_address")
-        item["street_address"] = item.pop("name").removeprefix("Boost ")
+        item.pop("name")
         item["image"] = None
         if "Temporarily Closed" in response.xpath('//*[contains(@class, "location-details")]').get(""):
             item["opening_hours"] = "off"

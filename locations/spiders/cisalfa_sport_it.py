@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -10,10 +10,10 @@ from locations.user_agents import BROWSER_DEFAULT
 class CisalfaSportITSpider(JSONBlobSpider):
     name = "cisalfa_sport_it"
     item_attributes = {"brand": "Cisalfa Sport", "brand_wikidata": "Q113535511"}
-    user_agent = BROWSER_DEFAULT
     locations_key = "stores"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.retailtune.com/storelocator/it/?rt_api_key=LgLwP3qejs1nUXFMt4rNSyZO5Iif0pXVw9wUmlcaWRe40uYfXqekTj7SytclsWxuHwBhHiHn7bwxttY9hMdFbv9uNu0jK44bJ1Bs",
             headers={

@@ -38,14 +38,14 @@ class LibertyTaxUSSpider(SitemapSpider, StructuredDataSpider):
             if office_data["active"] != "true":
                 set_closed(item)
 
-            set_social_media(item, SocialMedia.LINKEDIN, office_data["socialMedia"]["linkedin"])
-            set_social_media(item, SocialMedia.PINTEREST, office_data["socialMedia"]["pinterest"])
-            set_social_media(item, SocialMedia.TWITTER, office_data["socialMedia"]["twitter"])
-            set_social_media(item, SocialMedia.YELP, office_data["socialMedia"]["yelp"])
+            set_social_media(item, SocialMedia.LINKEDIN, office_data["socialMedia"].get("linkedin"))
+            set_social_media(item, SocialMedia.PINTEREST, office_data["socialMedia"].get("pinterest"))
+            set_social_media(item, SocialMedia.TWITTER, office_data["socialMedia"].get("twitter"))
+            set_social_media(item, SocialMedia.YELP, office_data["socialMedia"].get("yelp"))
 
             item["lat"] = office_data.get("latitude")
             item["lon"] = office_data.get("longitude")
-            if item["lon"] and not item["lon"].startswith("-"):
-                item["lon"] = "-" + item["lon"]
+            if isinstance(item["lon"], float) and item["lon"] >= 0:
+                item["lon"] = -item["lon"]
 
         yield item

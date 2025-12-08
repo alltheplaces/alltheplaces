@@ -15,8 +15,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class WawaSpider(scrapy.Spider):
     name = "wawa"
     item_attributes = {"brand": "Wawa", "brand_wikidata": "Q5936320"}
-    download_delay = 1.5
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_DELAY": 1.5}
 
     def start_requests(self) -> Iterable[Request]:
         for city in city_locations("US", 87000):

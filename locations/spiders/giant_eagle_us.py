@@ -1,7 +1,7 @@
 from copy import deepcopy
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -116,7 +116,7 @@ class GiantEagleUSSpider(Spider):
             cb_kwargs=dict(zipcode=zipcode),
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for index, record in enumerate(postal_regions("US")):
             if index % 25 == 0:
                 yield self.make_request(zipcode=record["postal_region"])

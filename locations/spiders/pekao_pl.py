@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -11,7 +11,7 @@ class PekaoPLSpider(Spider):
     name = "pekao_pl"
     item_attributes = {"brand_wikidata": "Q806642"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.pekao.com.pl/.rest/atms", callback=self.parse_atms)
         yield JsonRequest(
             url="https://www.pekao.com.pl/.rest/branches?clientType=INDIVIDUAL", callback=self.parse_banks

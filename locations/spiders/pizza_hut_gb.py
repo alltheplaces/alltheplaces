@@ -1,11 +1,11 @@
-from typing import Any
+from typing import Any, Iterable
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.items import set_closed
+from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
 
 PIZZA_HUT = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
@@ -25,14 +25,16 @@ class PizzaHutGBSpider(Spider):
             if location["closed"] is True:
                 set_closed(item)
 
-            if location["type"] == "restaurant":
-                item.update(PIZZA_HUT)
-                apply_category(Categories.RESTAURANT, item)
-            elif location["type"] == "delivery":
-                item.update(PIZZA_HUT_DELIVERY)
-                apply_category(Categories.FAST_FOOD, item)
+            yield from self.post_process_item(item, response, location) or []
 
-            apply_yes_no(Extras.DELIVERY, item, location["allowedDisposition"]["delivery"])
-            apply_yes_no(Extras.TAKEAWAY, item, location["allowedDisposition"]["collection"])
+    def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs) -> Iterable[Feature]:
+        if location["type"] == "restaurant":
+            item.update(PIZZA_HUT)
+            apply_category(Categories.RESTAURANT, item)
+        elif location["type"] == "delivery":
+            item.update(PIZZA_HUT_DELIVERY)
+            apply_category(Categories.FAST_FOOD, item)
 
-            yield item
+        apply_yes_no(Extras.DELIVERY, item, location.get("allowedDisposition", {}).get("delivery"))
+        apply_yes_no(Extras.TAKEAWAY, item, location.get("allowedDisposition", {}).get("collection"))
+        yield item

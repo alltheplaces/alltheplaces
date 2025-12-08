@@ -1,4 +1,5 @@
-import json
+from json import loads
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -14,14 +15,14 @@ class MailBoxesEtcGBIESpider(Spider):
     skip_auto_cc_spider_name = True
     skip_auto_cc_domain = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://www.mbe.co.uk/Services/StoreLocationWebService.asmx/ShowAllStores",
             data={"userRegionCheckBoxValue": False},
         )
 
     def parse(self, response: Response, **kwargs):
-        for location in json.loads(response.json()["d"]["StoreLocationResults"]):
+        for location in loads(response.json()["d"]["StoreLocationResults"]):
             item = DictParser.parse(location)
             item["website"] = urljoin("https://www.mbe.co.uk", location["Directory"])
             apply_category(Categories.POST_OFFICE, item)

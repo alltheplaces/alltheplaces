@@ -21,7 +21,7 @@ class BataSpider(JSONBlobSpider):
         "https://www.bata.com/on/demandware.store/Sites-bata-sk-sfra-Site/sk_SK/Stores-FindStores",
         "https://www.bata.com/on/demandware.store/Sites-bata-th-Site/en_TH/Stores-FindStores",
     ]
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
     locations_key = "stores"
     requires_proxy = True
 

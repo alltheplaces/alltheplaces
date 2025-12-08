@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import urljoin
 
 from scrapy.http import JsonRequest, Response
@@ -14,10 +14,10 @@ from locations.user_agents import FIREFOX_LATEST
 class IciParisXlSpider(JSONBlobSpider):
     name = "ici_paris_xl"
     item_attributes = {"brand": "ICI PARIS XL", "brand_wikidata": "Q769749"}
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
     locations_key = "stores"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["be", "nl", "lu"]:
             yield JsonRequest(
                 f"https://api.iciparisxl.{country}/api/v2/ici{country}2/stores?pageSize=10000&currentPage=0"

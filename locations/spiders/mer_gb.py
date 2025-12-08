@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -10,7 +12,7 @@ class MerGBSpider(Spider):
     item_attributes = {"brand": "Mer", "brand_wikidata": "Q100821564"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://driver.uk.mer.eco/stationFacade/findSitesInBounds",
             data={

@@ -1,24 +1,37 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.geo import city_locations
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DominosPizzaTWSpider(SitemapSpider):
+class DominosPizzaTWSpider(Spider):
     name = "dominos_pizza_tw"
     item_attributes = {"brand_wikidata": "Q839466"}
-    sitemap_urls = ["https://www.dominos.com.tw/sitemap.aspx"]
-    sitemap_rules = [("tw/store/", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for city in city_locations("TW", 16000):
+            yield JsonRequest(
+                url=f"https://www.dominos.com.tw/dynamicstoresearchapi/getstoresfromquery?lon={city['longitude']}&lat={city['latitude']}&count=100000"
+            )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["branch"] = response.xpath('//*[@class="storetitle"]/text()').get().removeprefix("Domino's ")
-        item["addr_full"] = response.xpath('//*[@id="store-address-info"]//a').xpath("normalize-space()").get()
-        item["lat"] = response.xpath('//*[@name="store-lat"]/@value').get()
-        item["lon"] = response.xpath('//*[@name="store-lon"]/@value').get()
-        item["ref"] = item["website"] = response.url
-        yield item
+        for restaurant in response.json()["PickupSearchStore"]:
+            restaurant.update(restaurant["locations"][0].pop("address"))
+            item = DictParser.parse(restaurant)
+            item["branch"] = item.pop("name")
+            item["ref"] = restaurant["storeNo"]
+            for address in restaurant["attributes"]:
+                if address["key"] == "streetName":
+                    item["street_address"] = address["value"]
+                elif address["key"] == "state":
+                    item["state"] = address["value"]
+                elif address["key"] == "suburb":
+                    item["city"] = address["value"]
+                elif address["key"] == "postCode":
+                    item["postcode"] = address["value"]
+            yield item

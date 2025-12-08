@@ -1,4 +1,6 @@
-from scrapy import Request
+from typing import AsyncIterator
+
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.geo import country_iseadgg_centroids
@@ -19,7 +21,7 @@ class CapitecBankZASpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "ZA"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         # Maximum returned is 100, even with larger "Take"
         # Even with 48km radius, not all locations are returned, and it is making over 260 requests
         for lat, lon in country_iseadgg_centroids("ZA", 48):

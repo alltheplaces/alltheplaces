@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 import chompjs
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -12,11 +12,10 @@ from locations.user_agents import FIREFOX_LATEST
 class GucciSpider(Spider):
     name = "gucci"
     item_attributes = {"brand": "Gucci", "brand_wikidata": "Q178516"}
-    user_agent = FIREFOX_LATEST
     is_playwright_spider = True
-    custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST} | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url="https://www.gucci.com/int/en/store/all?south=-90&west=-180&north=90&east=180&latitude=0&longitude=0",
             headers={"Referer": "https://www.gucci.com/int/en/store?store-search=&search-cat=store-locator"},

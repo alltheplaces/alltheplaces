@@ -10,11 +10,11 @@ class TractorSupplySpider(scrapy.Spider):
     name = "tractor_supply"
     item_attributes = {"brand": "Tractor Supply Company", "brand_wikidata": "Q15109925"}
     allowed_domains = ["tractorsupply.com"]
-    download_delay = 1.5
-    user_agent = BROWSER_DEFAULT
     custom_settings = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "ROBOTSTXT_OBEY": False,
+        "DOWNLOAD_DELAY": 1.5,
+        "USER_AGENT": BROWSER_DEFAULT,
     }
 
     def start_requests(self):

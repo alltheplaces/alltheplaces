@@ -18,12 +18,8 @@ class RuralKingUSSpider(scrapy.Spider):
     """
 
     name = "rural_king_us"
-    item_attributes = {
-        "brand": "Rural King",
-        "brand_wikidata": "Q7380525",
-    }
+    item_attributes = {"brand": "Rural King", "brand_wikidata": "Q7380525"}
     allowed_domains = ["ruralking.com"]
-    download_delay = 0.5  # Reasonable delay to avoid overloading servers
 
     def start_requests(self):
         # Check if a specific URL was passed for testing
@@ -138,7 +134,7 @@ class RuralKingUSSpider(scrapy.Spider):
             apply_yes_no(Fuel.PROPANE, item, True)
 
         if "RKGuns" in services:
-            extras["shop"] = "guns"
+            extras["shop"] = "weapons"
 
         if "In-Store Pickup" in services:
             extras["pickup"] = "yes"

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
@@ -16,8 +18,9 @@ class DuluxDecoratorCentreGBSpider(Spider):
     allowed_domains = ["www.duluxdecoratorcentre.co.uk"]
     start_urls = ["https://www.duluxdecoratorcentre.co.uk/store/getstores"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

@@ -1,6 +1,6 @@
 import secrets
 import string
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -20,9 +20,8 @@ class BunningsSpider(Spider):
     item_attributes = {"brand": "Bunnings Warehouse", "brand_wikidata": "Q4997829"}
     custom_settings = {"COOKIES_ENABLED": True, "ROBOTSTXT_OBEY": False, "ZYTE_API_EXPERIMENTAL_COOKIES_ENABLED": True}
     requires_proxy = "AU"  # Requires AU or NZ proxy, possibly residential IP addresses only.
-    user_agent = None
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://www.bunnings.com.au", callback=self.parse_apigee_client_id)
 
     def parse_apigee_client_id(self, response: Response) -> Iterable[Request]:

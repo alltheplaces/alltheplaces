@@ -1,4 +1,7 @@
-from scrapy import Request, Selector, Spider
+from typing import AsyncIterator
+
+from scrapy import Selector, Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 
@@ -16,7 +19,7 @@ class ConcentraUSSpider(Spider):
         "https://www.concentra.com/sxa/search/results/?s={449ED3CA-26F3-4E6A-BF21-9808B60D936F}&itemid={739CBD3C-A3B6-4CA2-8004-BF6005BB28E9}&v={D907A7FD-050F-4644-92DC-267C1FDE200C}&g=&p=250&e="
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=f"{url}0", meta={"url": url, "offset": 0})
 

@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request
@@ -75,7 +76,7 @@ class BashSpider(JSONBlobSpider):
     allowed_domains = ["bash.com"]
     start_urls = ["https://bash.com/store-finder"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         self.brand_name_regex = re.compile(r"^(" + "|".join(BASH_BRANDS) + r") ", re.IGNORECASE)
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_json)

@@ -31,7 +31,6 @@ CATEGORIES_SERVICE = {
 class ToyotaSacuSpider(JSONBlobSpider):
     name = "toyota_sacu"
     start_urls = ["https://api-toyota.azure-api.net/suppliers?filter[where][supplierType]=dealer"]
-    requires_proxy = True
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
