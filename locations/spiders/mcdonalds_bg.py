@@ -32,6 +32,7 @@ class McdonaldsBGSpider(Spider):
             item["city"] = location.get("city", {}).get("city_name")
             if phone_numbers := location.get("phone_numbers", []):
                 item["phone"] = phone_numbers[0]
+            item["website"] = None
 
             for benefit in location.get("benefits", []):
                 apply_yes_no(Extras.WIFI, item, benefit.get("name") == "WiFi")
