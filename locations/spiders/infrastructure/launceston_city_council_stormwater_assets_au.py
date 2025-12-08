@@ -64,4 +64,4 @@ class LauncestonCityCouncilStormwaterAssetsAUSpider(ArcGISFeatureServerSpider):
                     self.logger.warning("Unknown stormwater feature type: {}".format(feature["Class"]))
                     return
 
-        yield item
+            yield item
