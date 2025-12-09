@@ -1,3 +1,4 @@
+import chompjs
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Extras, apply_yes_no
@@ -17,8 +18,17 @@ class DogHausUSSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
     search_for_twitter = False
 
+    def parse(self, response):
+        for nextjs_script in response.xpath(
+            "//script[starts-with(text(), 'self.__next_f.push([1,\"{\\\"@context')]/text()"
+        ).getall():
+            script_el = response.selector.root.makeelement("script", {"type": "application/ld+json"})
+            script_el.text = chompjs.parse_js_object(nextjs_script)[1]
+            response.selector.root.append(script_el)
+        yield from super().parse(response)
+
     def extract_amenity_features(self, item, response, ld_item):
-        features = {f["name"] for f in ld_item["amenityFeature"]}
+        features = {f["name"] for f in ld_item.get("amenityFeature", [])}
         apply_yes_no(Extras.BAR, item, "Bar Onsite" in features)
         apply_yes_no(Extras.HIGH_CHAIR, item, "High Chairs Available" in features)
         apply_yes_no(Extras.OUTDOOR_SEATING, item, "Outdoor Seating" in features)
