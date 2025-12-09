@@ -39,7 +39,6 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "HVOlution": Fuel.BIODIESEL,
         "Blue Super": Fuel.OCTANE_100,
         "Supreme Diesel": Fuel.GTL_DIESEL,
-        "Hi-Q Diesel": Fuel.GTL_DIESEL,
         "HVO": Fuel.BIODIESEL,
         "Gasolio speciale": Fuel.GTL_DIESEL,
         "Gasolio Premium": Fuel.GTL_DIESEL,
