@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 
@@ -9,7 +12,7 @@ class AsicsEUSpider(scrapy.Spider):
     allowed_domains = ["www.asics.com"]
     start_urls = ["https://cdn.crobox.io/content/ujf067/stores.json"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             if store["storetype"] in ["factory-outlet", "retail-store"]:
                 item = DictParser.parse(store)
