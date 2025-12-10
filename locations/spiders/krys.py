@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -35,7 +37,7 @@ class KrysSpider(Spider):
             },
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response, **kwargs):

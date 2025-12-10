@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -9,7 +11,7 @@ class KfcJPSpider(Spider):
     name = "kfc_jp"
     item_attributes = {"brand_wikidata": "Q524757"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["x", "wv", "wy"]:
             yield JsonRequest(url=f"https://search.kfc.co.jp/api/points/{points}")
 

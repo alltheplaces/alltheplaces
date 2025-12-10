@@ -13,7 +13,7 @@ class CenexSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            "https://www.cenex.com/getlocationsearch",
+            "https://www.cenex.com/chs-sitecore/api/locationsearch/search",
             method="POST",
             data={
                 "SearchLat": 0,

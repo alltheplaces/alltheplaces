@@ -1,6 +1,8 @@
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -17,5 +19,11 @@ class ProtyreGBSpider(CrawlSpider, StructuredDataSpider):
 
         ld_data["branchCode"] = None  # Defaults to "0"
 
-        if image := ld_data.get("image", {}).get("url"):
-            ld_data["image"]["contentUrl"] = image
+        if image := ld_data.get("image"):
+            if isinstance(image, dict):
+                ld_data["image"]["contentUrl"] = image.get("url")
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name")
+        item.pop("email")
+        yield item

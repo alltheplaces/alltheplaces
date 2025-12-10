@@ -1,19 +1,21 @@
 from typing import Any
 from urllib.parse import urljoin
 
-import scrapy
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsITSpider(scrapy.Spider):
+class McdonaldsITSpider(PlaywrightSpider):
     name = "mcdonalds_it"
     item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     start_urls = ["https://www.mcdonalds.it/static/json/store_locator.json"]
-    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["sites"]:
