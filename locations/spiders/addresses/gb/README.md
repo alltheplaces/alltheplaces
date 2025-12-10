@@ -126,4 +126,5 @@ Owen and published. Others are helping.
 | Rushcliffe Borough    | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr13.htm) blog entry.                                                                                                                     |
 | Sheffield City        | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr16.htm) blog entry.                                                                                                                     |
 | West Northamptonshire | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr27.htm) blog entry.                                                                                                                     |
+| Wigan                 | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr30.htm) blog entry.                                                                                                                     |
 | Wiltshire             | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr18.htm) blog entry.                                                                                                                     |
