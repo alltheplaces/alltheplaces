@@ -20,7 +20,6 @@ class FitServiceSpider(scrapy.Spider):
     allowed_domains = ["fitauto.ru"]
     item_attributes = {"brand": "Fit Service", "brand_wikidata": "Q129632037"}
     start_urls = ["https://fitauto.ru/contacts/"]
-    requires_proxy = True
 
     def parse(self, response: Response):
         for poi in response.xpath("//e-page--contacts--item"):
