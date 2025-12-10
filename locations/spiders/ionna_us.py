@@ -72,8 +72,8 @@ class IonnaUSSpider(scrapy.Spider):
                 nacs_count = nacs_text.rstrip(" NACS")
                 ccs_count = ccs_text.rstrip(" CCS")
 
-                item["extras"]["connector:type1_combo"] = ccs_count
-                item["extras"]["connector:nacs"] = nacs_count
+                item["extras"]["socket:type1_combo"] = ccs_count
+                item["extras"]["socket:nacs"] = nacs_count
                 item["extras"]["capacity"] = str(int(ccs_count) + int(nacs_count))
             apply_category(Categories.CHARGING_STATION, item)
             yield item
