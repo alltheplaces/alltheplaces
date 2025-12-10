@@ -73,6 +73,8 @@ class Q8ItaliaSpider(Spider):
             location_type = location["tipologia"]
             if location_type == "TANGO":
                 continue  # Throw away Tango POIs as duplicates data from TangoSpider
+            elif location_type == "IMPIANTO FITTIZIO":
+                continue
 
             if brand := self.BRANDS.get(location_type):
                 item.update(brand)
