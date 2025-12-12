@@ -1,5 +1,4 @@
 import re
-
 from typing import Any
 
 from scrapy.http import Response
@@ -39,7 +38,7 @@ class TheFragranceShopGBSpider(Spider):
         if "openingHours" in location:
             times = location.get("openingHours")
             oh = OpeningHours()
-            hours = re.split(r',\s*',times)
+            hours = re.split(r",\s*", times)
             if hours[-1] == "":
                 hours.pop()
             i = 1
