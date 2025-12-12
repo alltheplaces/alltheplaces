@@ -14,6 +14,16 @@ class TwentyFourHourFitnessUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/gyms/[^/]+/[^/]+", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        if item["name"].endswith(" Super-Sport"):
+            item["branch"] = item.pop("name").removeprefix("24 Hour Fitness ").removesuffix(" Super-Sport")
+            item["name"] = "24 Hour Fitness Super Sport"
+        elif item["name"].endswith(" Sport"):
+            item["branch"] = item.pop("name").removeprefix("24 Hour Fitness ").removesuffix(" Sport")
+            item["name"] = "24 Hour Fitness Sport"
+        elif item["name"].endswith(" Active"):
+            item["branch"] = item.pop("name").removeprefix("24 Hour Fitness ").removesuffix(" Active")
+            item["name"] = "24 Hour Fitness"
+
         oh = OpeningHours()
         if response.xpath('//*[@id="gym-info-hours"]//li'):
             for day_time in response.xpath('//*[@id="gym-info-hours"]//li'):
@@ -30,5 +40,7 @@ class TwentyFourHourFitnessUSSpider(SitemapSpider, StructuredDataSpider):
             if time_string == "OPEN 24/7":
                 oh = "24/7"
         item["opening_hours"] = oh
+
         apply_category(Categories.GYM, item)
+
         yield item
