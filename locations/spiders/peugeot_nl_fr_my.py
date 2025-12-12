@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class PeugeotNLFRSpider(scrapy.Spider):
+class PeugeotNLFRMYSpider(scrapy.Spider):
     name = "peugeot_nl_fr_my"
     start_urls = [
         "https://www.peugeot.nl/apps/atomic/DealersServlet?distance=30000&latitude=52.36993&longitude=4.90787&maxResults=40000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvbmV0aGVybGFuZHMvbmw%3D&searchType=latlong",
