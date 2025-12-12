@@ -5,10 +5,11 @@ from locations.items import Feature
 
 
 class PeugeotNLFRSpider(scrapy.Spider):
-    name = "peugeot_nl_fr"
+    name = "peugeot_nl_fr_my"
     start_urls = [
         "https://www.peugeot.nl/apps/atomic/DealersServlet?distance=30000&latitude=52.36993&longitude=4.90787&maxResults=40000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvbmV0aGVybGFuZHMvbmw%3D&searchType=latlong",
         "https://www.peugeot.fr/apps/atomic/DealersServlet?path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvZnJhbmNlL2ZyX2Zy&searchType=latlong",
+        "https://www.peugeot.com.my/apps/atomic/DealersServlet?path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvbWFsYXlzaWEvZW4%3D&searchType=latlong",
     ]
 
     item_attributes = {"brand": "Peugeot", "brand_wikidata": "Q6742"}
@@ -33,5 +34,19 @@ class PeugeotNLFRSpider(scrapy.Spider):
                     "lon": float(coordinates.get("longitude")),
                 }
             )
-            apply_category(Categories.SHOP_CAR, item)
-            yield item
+            for service_type in store["services"]:
+                if service_type["name"] in ["Nieuwe auto's", "VENTES DE VÉHICULES NEUFS", "New Vehicles"]:
+                    sales_item = item.deepcopy()
+                    sales_item["ref"] = sales_item["ref"] + "-SALES"
+                    apply_category(Categories.SHOP_CAR, sales_item)
+                    yield sales_item
+                elif service_type["name"] in ["Après-vente", "Après-vente", "Aftersales"]:
+                    service_item = item.deepcopy()
+                    service_item["ref"] = service_item["ref"] + "-SERVICE"
+                    apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                    yield service_item
+                elif service_type["name"] in ["Parts"]:
+                    spare_parts_item = item.deepcopy()
+                    spare_parts_item["ref"] = spare_parts_item["ref"] + "-SPARE_PARTS"
+                    apply_category(Categories.SHOP_CAR_PARTS, spare_parts_item)
+                    yield spare_parts_item
