@@ -2,9 +2,10 @@ import json
 import logging
 import re
 import traceback
+from json import JSONDecodeError
 
-import chompjs
 import json5
+from chompjs import parse_js_object
 
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature, add_social_media
@@ -21,10 +22,10 @@ class LinkedDataParser:
                 if json_parser == "json5":
                     ld_obj = json5.loads(ld)
                 elif json_parser == "chompjs":
-                    ld_obj = chompjs.parse_js_object(ld)
+                    ld_obj = parse_js_object(ld)
                 else:
                     ld_obj = json.loads(ld, strict=False)
-            except (json.decoder.JSONDecodeError, ValueError):
+            except (JSONDecodeError, ValueError):
                 continue
 
             if isinstance(ld_obj, dict):
@@ -38,7 +39,7 @@ class LinkedDataParser:
                 raise TypeError(ld_obj)
 
     @staticmethod
-    def find_linked_data(response, wanted_type, json_parser="json") -> {}:
+    def find_linked_data(response, wanted_type, json_parser="json") -> dict:
         if isinstance(wanted_type, list):
             wanted_types = [LinkedDataParser.clean_type(t) for t in wanted_type]
         else:
@@ -57,6 +58,7 @@ class LinkedDataParser:
 
             if all(wanted in types for wanted in wanted_types):
                 return ld_obj
+        return {}
 
     @staticmethod
     def parse_ld(ld, time_format: str = "%H:%M") -> Feature:  # noqa: C901
@@ -159,7 +161,7 @@ class LinkedDataParser:
         return item
 
     @staticmethod
-    def parse(response, wanted_type, json_parser="json") -> Feature:
+    def parse(response, wanted_type, json_parser="json") -> Feature | None:
         ld_item = LinkedDataParser.find_linked_data(response, wanted_type, json_parser=json_parser)
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
@@ -173,6 +175,8 @@ class LinkedDataParser:
                 item["website"] = "https://" + item["website"]
 
             return item
+
+        return None
 
     # Parses an openingHoursSpecification dict
     # e.g.:
@@ -305,7 +309,7 @@ class LinkedDataParser:
         return type.lower().replace("http://", "").replace("https://", "").replace("schema.org/", "")
 
     @staticmethod
-    def clean_float(value: str | float) -> float:
+    def clean_float(value: str | float) -> str | float:
         if isinstance(value, float):
             return value
         if isinstance(value, str):

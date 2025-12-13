@@ -7,6 +7,7 @@ class ForeverNewINSpider(JSONBlobSpider):
     item_attributes = FOREVER_NEW_SHARED_ATTRIBUTES
     start_urls = ["https://www.forevernew.co.in/mpstorelocator/storelocator/locationsdata/"]
     needs_json_request = True
+    requires_proxy = True
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace("Forever New - ", "")
