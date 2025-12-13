@@ -24,7 +24,7 @@ class JungeDESpider(Spider):
             item["ref"] = location.xpath(".//@data-storeid").get()
             item["street_address"] = location.xpath(".//p/text()").get()
             item["addr_full"] = merge_address_lines([item["street_address"], location.xpath(".//p[2]/text()").get()])
-            item["lat"], item["lon"] = re.search(
+            item["lon"], item["lat"] = re.search(
                 r"clickStore\((\d+\.\d+)\s*,\s*(\d+\.\d+)", location.xpath(".//@onclick").get()
             ).groups()
             oh = OpeningHours()
