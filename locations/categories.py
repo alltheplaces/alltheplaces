@@ -384,6 +384,12 @@ class Categories(Enum):
         "utility": "sewerage",
         "substance": "sewage",
     }
+    PUMPING_STATION_STORMWATER = {
+        "man_made": "pumping_station",
+        "pumping_station": "stormwater",
+        "utility": "stormwater",
+        "substance": "rainwater",
+    }
     PUMPING_STATION_WASTEWATER = {
         "man_made": "pumping_station",
         "pumping_station": "wastewater",
