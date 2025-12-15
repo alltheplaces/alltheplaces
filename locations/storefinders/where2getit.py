@@ -77,8 +77,8 @@ class Where2GetItSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     api_endpoint: str | None = None
-    api_brand_name: str
-    api_key: str | list[str]
+    api_brand_name: str = ""
+    api_key: str | list[str] = ""
     api_filter: dict = {}
     # api_filter_admin_level:
     #   0 = no filtering
@@ -148,7 +148,7 @@ class Where2GetItSpider(Spider):
                     dont_filter=True,
                 )
         else:
-            async for request in self.make_request():
+            for request in self.make_request():
                 yield request
 
     def parse_country_list(self, response: TextResponse, **kwargs: Any) -> Iterable[JsonRequest]:
