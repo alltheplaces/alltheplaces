@@ -57,7 +57,7 @@ class JSONBlobSpider(Spider):
     Example 2:
     locations_key = ["data", "locationData", "stores"]
     """
-    locations_key: str | list[str]
+    locations_key: str | list[str] = None
     needs_json_request = False
 
     async def start(self) -> AsyncIterator[JsonRequest | Request]:
