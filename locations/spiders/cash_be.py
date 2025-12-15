@@ -79,9 +79,7 @@ class CashBESpider(Spider):
 
             # Add denomination availability
             denomination_fields = ["5_eur", "10_eur", "20_eur", "50_eur", "100_eur"]
-            denominations = [
-                field.replace("_eur", "") for field in denomination_fields if location.get(field) == "1"
-            ]
+            denominations = [field.replace("_eur", "") for field in denomination_fields if location.get(field) == "1"]
             if denominations:
                 item["extras"]["currency:EUR"] = ";".join(denominations)
 
