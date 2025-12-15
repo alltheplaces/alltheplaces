@@ -1,7 +1,7 @@
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -16,4 +16,15 @@ class AlliedIrishBanksIESpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.BANK, item)
+
+        # Extract ATM information from makesOffer
+        services = [service.get("name") for service in ld_data.get("makesOffer", []) if service.get("name")]
+        has_atm = any("ATM" in service for service in services)
+        apply_yes_no(Extras.ATM, item, has_atm)
+
+        if has_atm:
+            # Check if ATM has deposit capability (ATM & Lodge)
+            has_deposit = any("ATM" in service and "Lodge" in service for service in services)
+            apply_yes_no(Extras.CASH_IN, item, has_deposit)
+
         yield item
