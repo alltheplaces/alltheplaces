@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
 
@@ -20,7 +20,7 @@ class MississippiDepartmentOfTransportationUSSpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     locations_key = "value"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.start_urls[0], headers={"Client-Id": "01072004-0bce-4b91-b9e1-adfa6f7260d4"})
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

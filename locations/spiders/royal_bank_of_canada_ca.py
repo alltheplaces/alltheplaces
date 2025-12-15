@@ -14,7 +14,7 @@ class RoyalBankOfCanadaCASpider(JSONBlobSpider):
     item_attributes = {"brand_wikidata": "Q735261"}
     locations_key = "locations"
 
-    def start_requests(self):
+    async def start(self):
         for city in city_locations("CA", min_population=20000):
             yield scrapy.Request(
                 url=f'https://maps.rbcroyalbank.com/api/?q={city["name"]}',

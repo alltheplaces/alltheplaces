@@ -21,7 +21,7 @@ class GoReviewApiSpider(JSONBlobSpider):
     domain = None
     domain_list = None
 
-    def start_requests(self):
+    async def start(self):
         if self.domain is not None:
             self.domain_list = [self.domain]
         if self.domain_list is not None:

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -14,7 +14,7 @@ class TravelMidwestUSSpider(JSONBlobSpider):
     start_urls = ["https://travelmidwest.com/lmiga/cameraMap.json"]
     locations_key = "features"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {"bbox": [-90, -180, 90, 180]}
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
 

@@ -60,7 +60,7 @@ class ToyotaEUSpider(JSONBlobSpider):
         "zw",  # toyota_africa
     ]
 
-    def start_requests(self):
+    async def start(self):
         available_countries = [c for c in self.all_countries if c not in self.exclude_countries]
         for brand in ["toyota", "lexus"]:
             for country in available_countries:
