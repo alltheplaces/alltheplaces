@@ -1,6 +1,5 @@
-from typing import Iterable
 from copy import deepcopy
-
+from typing import Iterable
 
 from scrapy.http import Response
 
@@ -28,7 +27,7 @@ class HyundaiBWLSNASZZASpider(JSONBlobSpider):
 
         if slug := feature.get("Slug"):
             item["website"] = "https://www.hyundai.co.za/dealers/" + slug
-        
+
         if feature.get("Sales") or feature.get("CommercialSales"):
             shop = deepcopy(item)
             apply_category(Categories.SHOP_CAR, shop)
@@ -37,7 +36,7 @@ class HyundaiBWLSNASZZASpider(JSONBlobSpider):
             if feature.get("Parts") or feature.get("CommercialParts"):
                 apply_yes_no(Extras.CAR_PARTS, shop, True)
             yield shop
-        
+
         if feature.get("Service") or feature.get("CommercialService"):
             service = deepcopy(item)
             service["ref"] = f"{item['ref']}_service"
@@ -51,5 +50,3 @@ class HyundaiBWLSNASZZASpider(JSONBlobSpider):
             parts["ref"] = f"{item['ref']}_parts"
             apply_category(Categories.SHOP_CAR_PARTS, parts)
             yield parts
-
-
