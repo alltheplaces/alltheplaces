@@ -88,21 +88,12 @@ class CashBESpider(Spider):
     def parse_opening_hours(self, hours: dict) -> OpeningHours:
         """Parse opening hours from the regular_hours dictionary."""
         oh = OpeningHours()
-        day_mapping = {
-            "MO": "Mo",
-            "TU": "Tu",
-            "WE": "We",
-            "TH": "Th",
-            "FR": "Fr",
-            "SA": "Sa",
-            "SU": "Su",
-        }
 
         for day, times in hours.items():
             if not times or not isinstance(times, str):
                 continue
 
-            day_short = day_mapping.get(day)
+            day_short = sanitise_day(day)
             if not day_short:
                 continue
 
