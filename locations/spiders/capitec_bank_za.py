@@ -19,7 +19,6 @@ class CapitecBankZASpider(JSONBlobSpider):
     item_attributes = {"brand": "Capitec Bank", "brand_wikidata": "Q5035822"}
     locations_key = "Branches"
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = "ZA"
 
     async def start(self) -> AsyncIterator[Request]:
         # Maximum returned is 100, even with larger "Take"
