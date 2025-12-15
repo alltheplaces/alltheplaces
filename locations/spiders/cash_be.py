@@ -36,7 +36,6 @@ class CashBESpider(Spider):
             item["country"] = location.get("adr_country")
             item["lat"] = location.get("adr_latitude")
             item["lon"] = location.get("adr_longitude")
-            item["phone"] = location.get("phone_number")
             item["website"] = location.get("website")
 
             # Use Dutch name by default
