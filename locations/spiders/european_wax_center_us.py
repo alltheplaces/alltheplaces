@@ -1,14 +1,13 @@
-from locations.storefinders.rio_seo import RioSeoSpider
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class EuropeanWaxCenterUSSpider(RioSeoSpider):
+class EuropeanWaxCenterUSSpider(SitemapSpider, StructuredDataSpider):
     name = "european_wax_center_us"
     item_attributes = {
         "brand_wikidata": "Q5413426",
         "brand": "European Wax Center",
     }
-    end_point = "https://maps.locations.waxcenter.com"
-
-    def post_process_feature(self, feature, location):
-        feature["branch"] = feature.pop("name")
-        yield feature
+    sitemap_urls = ["https://locations.waxcenter.com/sitemap/sitemap_index.xml"]
+    sitemap_rules = [(r"https://locations.waxcenter.com/[^/]+/[^/]+/[^/]+\.html$", "parse_sd")]
