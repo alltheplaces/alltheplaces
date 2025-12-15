@@ -28,7 +28,7 @@ class CashBESpider(Spider):
 
             item = DictParser.parse(location)
             item["ref"] = location.get("shop_code")
-            item["street_address"] = location.get("adr_street_nl")
+            item["street"] = location.get("adr_street_nl")
             if housenumber := location.get("adr_street_number"):
                 item["housenumber"] = housenumber
             item["postcode"] = location.get("adr_zipcode")
