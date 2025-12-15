@@ -84,13 +84,13 @@ class WPStoreLocatorSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.iseadgg_countries_list) > 0 and self.search_radius != 0 and self.max_results != 0:
-            async for request in self.start_requests_geo_search_iseadgg_method():
+            for request in self.start_requests_geo_search_iseadgg_method():
                 yield request
         elif len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
-            async for request in self.start_requests_geo_search_manual_method():
+            for request in self.start_requests_geo_search_manual_method():
                 yield request
         else:
-            async for request in self.start_requests_all_at_once_method():
+            for request in self.start_requests_all_at_once_method():
                 yield request
 
     def start_requests_all_at_once_method(self) -> Iterable[JsonRequest]:
