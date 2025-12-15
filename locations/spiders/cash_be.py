@@ -4,8 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
@@ -26,7 +25,7 @@ class CashBESpider(Spider):
             if location.get("status") != "OPEN":
                 continue
 
-            item = DictParser.parse(location)
+            item = Feature()
             item["ref"] = location.get("shop_code")
             item["street"] = location.get("adr_street_nl")
             if housenumber := location.get("adr_street_number"):
