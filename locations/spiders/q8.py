@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -20,7 +20,7 @@ class Q8Spider(JSONBlobSpider):
     }
     locations_key = "results"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.q8.be/api/poi/locations",
             data={

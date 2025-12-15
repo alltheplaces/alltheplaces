@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -17,8 +19,9 @@ class WorldcatSpider(JSONBlobSpider):
             meta={"offset": next_offset},
         )
 
-    def start_requests(self):
-        yield from self.request_page(1)
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for request in self.request_page(1):
+            yield request
 
     def parse(self, response):
         features = self.extract_json(response)

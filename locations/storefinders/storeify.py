@@ -19,7 +19,7 @@ class StoreifySpider(JSONBlobSpider):
 
     # TODO: Autodetection
 
-    def start_requests(self):
+    async def start(self):
         yield Request(url=f"https://sl.storeify.app/js/stores/{self.api_key}/storeifyapps-storelocator-geojson.js")
 
     # API returns a geojson feature collection
