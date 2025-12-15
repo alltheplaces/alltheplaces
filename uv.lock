@@ -1425,15 +1425,16 @@ wheels = [
 
 [[package]]
 name = "pygeohash"
-version = "3.2.1"
+version = "3.2.2"
 source = { registry = "https://pypi.python.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cf/37/5eb23181abcc30cf36a2b22d98e074a6554c7d49703ad08bcc42ca5de9ac/pygeohash-3.2.1.tar.gz", hash = "sha256:dc5d5ea8b3e86e310667e98a854f54fa5586f80768b1d73ba8968e71b187d9d7", size = 38555, upload-time = "2025-11-25T15:46:02.229Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/09/1962fd2887010d375a05eb7b9c8e8ae3b385681b770d6f8effb6018bfa94/pygeohash-3.2.2.tar.gz", hash = "sha256:aac5071f9a90232c50d8c6a124a150ffdb7006905314f72a10d686a07d2c5187", size = 38556, upload-time = "2025-12-09T11:59:45.638Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/ed/1b268d3770e046110bd846ae4b95bd2fbebb2340a7250379a7c8dd684033/pygeohash-3.2.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:6064577cbe68c3afa09a9a6f223ffb6d61fd27bc1f5e07783cd449eb151b06c2", size = 32101, upload-time = "2025-11-25T15:45:20.901Z" },
-    { url = "https://files.pythonhosted.org/packages/24/57/e1b0ec73e2d530b5e5a716d0e64f6c38404b5382147073f9aa66b93adf1e/pygeohash-3.2.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:474a09a264f89fb7903d67944cb5678a5a3738c5934a99734dfc5a7c2a66d4e5", size = 32368, upload-time = "2025-11-25T15:45:22.266Z" },
-    { url = "https://files.pythonhosted.org/packages/c9/bb/7d0e434adda60144009894a4a45019115ac0435166fda6a715f7ed2abfac/pygeohash-3.2.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:d6f09d444afb8da3c2f8828cd0e76c669c56db2a5dfbe799c786a6798caeeebe", size = 43354, upload-time = "2025-11-25T15:45:23.24Z" },
-    { url = "https://files.pythonhosted.org/packages/e6/7d/2a55691f9d63602dc1a91b4079ab2dcbdd312d5e3981c0af4eeaa9d28996/pygeohash-3.2.1-cp311-cp311-win32.whl", hash = "sha256:0ffbb7112fea4f37bb9867675e979f7a5b0a5deaf1f32be70a877ac4dfdd732f", size = 34335, upload-time = "2025-11-25T15:45:24.388Z" },
-    { url = "https://files.pythonhosted.org/packages/12/81/1ac67a76ece381105c4e5f90ff0a63014356a89e8edc421f0112184c235f/pygeohash-3.2.1-cp311-cp311-win_amd64.whl", hash = "sha256:99ed2c1402cff74fb2e94384a2f88562be4706f9126ef17231ead13610576cea", size = 35291, upload-time = "2025-11-25T15:45:25.373Z" },
+    { url = "https://files.pythonhosted.org/packages/20/71/49604a5d22ba8cbd5069d33a5d7e6d72fdb40f2a8a2e7442b87b0cb1b6c0/pygeohash-3.2.2-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0b78a6ad41d599147f182789e10a52c356b9616998ee09796ac4950f2e0ed87b", size = 32101, upload-time = "2025-12-09T11:58:59.222Z" },
+    { url = "https://files.pythonhosted.org/packages/41/91/a1186c06c380329aea0a20854bb31aad583c8fee6f7b0b6a9628e6cf0583/pygeohash-3.2.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:0e11730274b46e35d3a244d6bd34a2f4cbccf22e9d384181d760b9f58b315caf", size = 32364, upload-time = "2025-12-09T11:59:00.226Z" },
+    { url = "https://files.pythonhosted.org/packages/de/33/6d4b0a1eae7df8d9c9741067d490f6832a7965802cfdd475dc01ae13f5d2/pygeohash-3.2.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:8b09d99c9885939864611f4db4afa19a30411cd63d7e2a4dfffc1e5af63e2292", size = 43354, upload-time = "2025-12-09T11:59:02.277Z" },
+    { url = "https://files.pythonhosted.org/packages/de/10/dc825b63d1b1855406759ca799f4dea4f2ad6f52603e996657330f398c76/pygeohash-3.2.2-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a6da1622126b32e801214934377e53bca5396081b11517ea09c5b6441741241d", size = 44923, upload-time = "2025-12-09T11:59:03.28Z" },
+    { url = "https://files.pythonhosted.org/packages/40/a5/9b533e84063c9e9543aff75f4f1f8b7bb8a7daca7aeb0eaf1922e20e22d6/pygeohash-3.2.2-cp311-cp311-win32.whl", hash = "sha256:70da377cc777a0456a7ca44b2a1773fdd68e72dbaf31b3806f196bb2f91d4c30", size = 34331, upload-time = "2025-12-09T11:59:04.796Z" },
+    { url = "https://files.pythonhosted.org/packages/74/91/174d359ae773144ccff419de3bc59a4aacc0925dc80b39910bd9c3d44d44/pygeohash-3.2.2-cp311-cp311-win_amd64.whl", hash = "sha256:82cfb60dafa47fd8097ad61835e2db25ae5ee0b374fcdd6e203a1de5642252b9", size = 35292, upload-time = "2025-12-09T11:59:06.106Z" },
 ]
 
 [[package]]
