@@ -82,8 +82,8 @@ class BmoCASpider(Where2GetItSpider):
                 item["located_in"] = CaseysGeneralStoreSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CaseysGeneralStoreSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Chevron":
-                item["located_in"] = ChevronUSSpider.CHEVRON["brand"]
-                item["located_in_wikidata"] = ChevronUSSpider.CHEVRON["brand_wikidata"]
+                item["located_in"] = ChevronUSSpider.BRANDS["Chevron"][0]["brand"]
+                item["located_in_wikidata"] = ChevronUSSpider.BRANDS["Chevron"][0]["brand_wikidata"]
             elif item["name"] == "Circle K" or item["name"] == "Irving - Circle K":
                 item["located_in"] = CircleKSpider.CIRCLE_K["brand"]
                 item["located_in_wikidata"] = CircleKSpider.CIRCLE_K["brand_wikidata"]
