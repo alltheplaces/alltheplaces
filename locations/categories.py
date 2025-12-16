@@ -440,7 +440,7 @@ def apply_category(category: Mapping | Enum, item: Feature | dict) -> None:
     """
     if isinstance(category, Enum):
         tags = category.value
-    elif isinstance(category, dict):
+    elif isinstance(category, Mapping):
         tags = category
     else:
         raise TypeError("dict or Enum required")
