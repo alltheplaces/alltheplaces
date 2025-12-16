@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
-from locations.spiders.chevron_us import ChevronUSSpider
+from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
@@ -82,8 +82,8 @@ class BmoCASpider(Where2GetItSpider):
                 item["located_in"] = CaseysGeneralStoreSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CaseysGeneralStoreSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Chevron":
-                item["located_in"] = ChevronUSSpider.BRANDS["Chevron"][0]["brand"]
-                item["located_in_wikidata"] = ChevronUSSpider.BRANDS["Chevron"][0]["brand_wikidata"]
+                item["located_in"] = CHEVRON_BRANDS["Chevron"][0]["brand"]
+                item["located_in_wikidata"] = CHEVRON_BRANDS["Chevron"][0]["brand_wikidata"]
             elif item["name"] == "Circle K" or item["name"] == "Irving - Circle K":
                 item["located_in"] = CircleKSpider.CIRCLE_K["brand"]
                 item["located_in_wikidata"] = CircleKSpider.CIRCLE_K["brand_wikidata"]
