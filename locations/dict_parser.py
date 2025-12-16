@@ -334,7 +334,7 @@ class DictParser:
                 #   "location" style of named dictionary.
                 item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
                 item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
-            if item["lat"] is None or item["lon"] is None:
+            if item.get("lat", None) is None or item.get("lon", None) is None:
                 # Second attempt to find coordinates if first attempt failed:
                 #   Latitude/longitude are properties of the root dictionary
                 #   or any other nested dictionary of any name.
