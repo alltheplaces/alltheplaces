@@ -9,7 +9,7 @@ class SmoothieKingKYUSTTSpider(Where2GetItSpider):
     api_key = "AA777E40-E5F4-11ED-B583-3193A96E38C4"
     custom_settings = {
         "DOWNLOAD_TIMEOUT": 30,
-        "DOWNLOAD_WARNSIZE": 268435456, # 256 MiB needed as results are >150 MiB
+        "DOWNLOAD_WARNSIZE": 268435456,  # 256 MiB needed as results are >150 MiB
     }
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
