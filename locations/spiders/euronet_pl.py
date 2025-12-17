@@ -1,11 +1,12 @@
 import io
+from typing import Any
 
 from openpyxl import load_workbook
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 BRAND_MAPPING = {
@@ -21,7 +22,7 @@ BRAND_MAPPING = {
 }
 
 
-def parse_hours(hours_str: str) -> str:
+def parse_hours(hours_str: str) -> str | OpeningHours | None:
     """Parse hours like '00:00-23:59' into OpeningHours format"""
     if not hours_str or hours_str == "24/7":
         return "24/7"
@@ -31,9 +32,9 @@ def parse_hours(hours_str: str) -> str:
         # Format appears to be HH:MM-HH:MM for all days
         if "-" in hours_str:
             start, end = hours_str.split("-")
-            oh.add_days_range(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], start.strip(), end.strip())
-        return oh.as_opening_hours()
-    except Exception:
+            oh.add_days_range(DAYS, start.strip(), end.strip())
+        return oh
+    except:
         # If parsing fails, return None
         return None
 
@@ -44,7 +45,7 @@ class EuronetPLSpider(Spider):
     start_urls = ["https://euronet.pl/Lista_wplatomatow_sieci_Euronet.xlsx"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
-    def parse(self, response: Response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         excel_file = response.body
         excel_data = io.BytesIO(excel_file)
         workbook = load_workbook(excel_data, read_only=True)
