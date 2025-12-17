@@ -1,15 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy.http import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class ChedrauiMXSpider(scrapy.Spider):
+class ChedrauiMXSpider(Spider):
     name = "chedraui_mx"
     item_attributes = {"brand": "Chedraui", "brand_wikidata": "Q2961952"}
+    allowed_domains = ["www.chedraui.com.mx"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.chedraui.com.mx/_v/public/graphql/v1",
             data={

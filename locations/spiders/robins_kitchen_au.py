@@ -1,6 +1,9 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
 
-from locations.categories import Categories
+from scrapy import Spider
+from scrapy.http import Request
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -11,12 +14,11 @@ class RobinsKitchenAUSpider(Spider):
     item_attributes = {
         "brand": "Robins Kitchen",
         "brand_wikidata": "Q126175864",
-        "extras": Categories.SHOP_HOUSEWARE.value,
     }
     allowed_domains = ["www.robinskitchen.com.au"]
     start_urls = ["https://www.robinskitchen.com.au/api/get-stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, method="POST")
 
@@ -39,4 +41,5 @@ class RobinsKitchenAUSpider(Spider):
                     hours["close"].replace(".", ":").replace(":-", ":").strip(),
                 )
 
+            apply_category(Categories.SHOP_HOUSEWARE, item)
             yield item
