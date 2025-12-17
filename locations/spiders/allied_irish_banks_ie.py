@@ -1,3 +1,5 @@
+import re
+
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -13,6 +15,14 @@ class AlliedIrishBanksIESpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://branches.aib.ie/.+/.+/.+", "parse_sd")]
     wanted_types = ["BankOrCreditUnion"]
     drop_attributes = {"image"}
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        new_rules = []
+        for rule in ld_data["openingHours"]:
+            if m := re.match(r"(\w\w) (\d\d:\d\d-\d\d:\d\d) (\d\d:\d\d-\d\d:\d\d)", rule):
+                rule = "{} {},{}".format(*m.groups())
+            new_rules.append(rule)
+        ld_data["openingHours"] = new_rules
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = (
