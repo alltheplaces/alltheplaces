@@ -23,7 +23,7 @@ class SaveMartUSSpider(JSONBlobSpider):
     name = "save_mart_us"
     locations_key = ["data", "stores", "all"]
 
-    def start_requests(self):
+    async def start(self):
         for brand in ["fm", "lu", "sm"]:
             yield JsonRequest(
                 f"https://{brand}.swiftlyapi.net/graphql",

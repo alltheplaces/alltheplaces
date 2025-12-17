@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import FormRequest, Response
 
@@ -94,7 +94,7 @@ class TimpsonGroupSpider(JSONBlobSpider):
         },
     }
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {"start": "50000"}
         headers = {"X-Requested-With": "XMLHttpRequest"}
         yield FormRequest(url=self.start_urls[0], formdata=formdata, headers=headers, method="POST")
