@@ -15,7 +15,13 @@ class AlliedIrishBanksIESpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        apply_category(Categories.BANK, item)
+        item["branch"] = (
+            item.pop("name")
+            .removeprefix("AIB Glanmire")
+            .removeprefix("AIB Bank Castleblayney")
+            .removeprefix("AIB Bank")
+            .strip(" -")
+        )
 
         # Extract ATM information from makesOffer
         services = [service.get("name") for service in ld_data.get("makesOffer", []) if service.get("name")]
@@ -26,5 +32,7 @@ class AlliedIrishBanksIESpider(SitemapSpider, StructuredDataSpider):
             # Check if ATM has deposit capability (ATM & Lodge)
             has_deposit = any("ATM" in service and "Lodge" in service for service in services)
             apply_yes_no(Extras.CASH_IN, item, has_deposit)
+
+        apply_category(Categories.BANK, item)
 
         yield item
