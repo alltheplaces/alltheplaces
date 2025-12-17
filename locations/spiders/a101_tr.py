@@ -2,9 +2,9 @@ from base64 import b64encode
 from json import dumps
 from typing import AsyncIterator
 
+from pygeohash import encode
 from scrapy import Spider
 from scrapy.http import Request
-from pygeohash import encode
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser

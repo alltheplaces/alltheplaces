@@ -1,7 +1,6 @@
 from typing import AsyncIterator
 
-from scrapy.http import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Spider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
