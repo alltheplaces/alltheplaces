@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
@@ -24,7 +24,7 @@ class ReeceSpider(SitemapSpider, PlaywrightSpider):
     ]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.sitemap_urls:
             yield Request(url=url, callback=self.parse_sitemap)
 
