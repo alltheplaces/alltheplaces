@@ -14,6 +14,7 @@ class StarbucksMenaSpider(YextSearchSpider):
     name = name = "starbucks_mena"
     item_attributes = {"brand": "ستاربكس", "brand_wikidata": "Q37158"}
     stored_items = {}
+    requires_proxy = True
 
     def start_requests(self) -> Iterable[Request]:
         offset = 0
