@@ -257,12 +257,12 @@ BRAND_MAPPING = {
 }
 
 FORM_FACTOR_MAP = {
-    "bicycle": {"amenity": "bicycle_rental"},
+    "bicycle": Categories.BICYCLE_RENTAL,
     "cargo_bicycle": {"amenity": "bicycle_rental", "rental": "cargo_bike"},
     "car": {"amenity": "car_sharing"},
     "moped": {"amenity": "motorcycle_rental"},
-    "scooter_standing": {"amenity": "kick-scooter_rental"},
-    "scooter_seated": {"amenity": "kick-scooter_rental"},
+    "scooter_standing": Categories.KICK_SCOOTER_RENTAL,
+    "scooter_seated": Categories.KICK_SCOOTER_RENTAL,
 }
 
 PARKING_TYPE_MAP = {
