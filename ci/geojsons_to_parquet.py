@@ -29,45 +29,52 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
 
             con.execute(
                 f"""
+            CREATE TABLE geojson_data AS
+                SELECT 
+                    id,
+                    type,
+                    dataset_attributes,
+                    properties,
+                    ST_GeomFromGeoJSON(geometry) AS geom
+                FROM read_ndjson(
+                    '{input_files_pattern}',
+                    columns={{
+                        'type': 'VARCHAR' ,
+                        'id': 'VARCHAR',
+                        'dataset_attributes': 'MAP(VARCHAR, VARCHAR)', 
+                        'properties' : 'MAP(VARCHAR, VARCHAR)',
+                        'geometry': 'JSON',
+                        }}
+                    );
+
             COPY (
                 SELECT 
                     id,
                     type,
                     dataset_attributes,
                     properties,
-                    ST_GeomFromGeoJSON(geometry) AS geometry
-                FROM read_ndjson(
-                        '{input_files_pattern}',
-                        columns={{
-                            'type': 'VARCHAR' ,
-                            'id': 'VARCHAR',
-                            'dataset_attributes': 'MAP(VARCHAR, VARCHAR)', 
-                            'properties' : 'MAP(VARCHAR, VARCHAR)',
-                            'geometry': 'JSON',
-                            }}
-                        )
+                    geom,
+                    {{
+                        'xmin': ST_XMin(geom),
+                        'ymin': ST_YMin(geom),
+                        'xmax': ST_XMax(geom),
+                        'ymax': ST_YMax(geom)
+                    }} as bbox
+                FROM geojson_data
+                ORDER BY ST_Hilbert(geom)
             ) TO '{str(output_file_path)}'
             (FORMAT PARQUET, COMPRESSION 'ZSTD', ROW_GROUP_SIZE 65536);
             """
             )
-
-            # # Debug: log the schema and a sample row
-            # res = con.execute(f'describe select * from read_parquet("{str(output_file_path)}")').fetchall()
-            # logger.info(f"Parquet file schema: {res}")
-            # res = con.execute(f'SELECT * FROM read_parquet("{str(output_file_path)}") LIMIT 1').fetchone()
-            # logger.info(f"Sample row from Parquet file: {res}")
-
             # TODO: size of group should be 128MB-256MB for better performance
-            # TODO: spatial ordering
-            # TODO: bbox metadata
 
     logger.info(f"✓ Created {output_file_path}")
 
 
 def main() -> None:
-    parser = ArgumentParser(description="Pack collection of GeoJSON files to Parquet format.")
+    parser = ArgumentParser(description="Pack collection of NdGeoJSON files to Parquet format.")
     parser.add_argument(
-        "-d", "--directory", type=str, required=True, nargs="?", help="Directory containing GeoJSON files"
+        "-d", "--directory", type=str, required=True, nargs="?", help="Directory containing NdGeoJSON files"
     )
     parser.add_argument("-o", "--output", type=str, required=True, nargs="?", help="Output Parquet file path")
 

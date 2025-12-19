@@ -142,7 +142,7 @@ requires-dist = [
     { name = "brotli" },
     { name = "chompjs" },
     { name = "cryptography" },
-    { name = "duckdb", specifier = ">=1.4.1" },
+    { name = "duckdb" },
     { name = "geonamescache" },
     { name = "geopandas" },
     { name = "ijson" },
