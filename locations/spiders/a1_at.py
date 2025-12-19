@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,7 +13,7 @@ class A1ATSpider(Spider):
     allowed_domains = ["www.a1.net"]
     start_urls = ["https://www.a1.net/o/gucci/widgets/apis/shopfinder/bff/microservice-shopfinder/shop/basicData"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_store_list)
 

@@ -8,6 +8,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Drink, Extras, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.items import Feature
 from locations.react_server_components import parse_rsc
 
 BRANDS = {
@@ -38,17 +39,20 @@ class RedRoofUSSpider(SitemapSpider):
         data = dict(parse_rsc(rsc))
 
         pms_data = DictParser.get_nested_key(data, "pmsData")
-        item = DictParser.parse(pms_data)
-        item.update(BRANDS.get(pms_data["brand"], {}))
-        item["extras"]["check_in"] = get_time_from_iso(pms_data["checkInTime"])
-        item["extras"]["check_out"] = get_time_from_iso(pms_data["checkOutTime"])
-        item["name"] = pms_data["description"]
-        item["addr_full"] = pms_data["displayAddressWithZip"]
-        item["extras"]["fax"] = pms_data["faxNumber"]
-        item["ref"] = pms_data["propertyId"]
-        item["street_address"] = pms_data["street1"]
-        if pms_data["propertyName"] != pms_data["description"]:
-            item["branch"] = pms_data["propertyName"]
+        if pms_data:
+            item = DictParser.parse(pms_data)
+            item.update(BRANDS.get(pms_data["brand"], {}))
+            item["extras"]["check_in"] = get_time_from_iso(pms_data["checkInTime"])
+            item["extras"]["check_out"] = get_time_from_iso(pms_data["checkOutTime"])
+            item["name"] = pms_data["description"]
+            item["addr_full"] = pms_data["displayAddressWithZip"]
+            item["extras"]["fax"] = pms_data["faxNumber"]
+            item["ref"] = pms_data["propertyId"]
+            item["street_address"] = pms_data["street1"]
+            if pms_data["propertyName"] != pms_data["description"]:
+                item["branch"] = pms_data["propertyName"]
+        else:
+            item = Feature()
 
         item["website"] = response.url
         if not item["ref"]:
@@ -58,28 +62,32 @@ class RedRoofUSSpider(SitemapSpider):
                         item["ref"] = match.group(1).upper()
 
         cms_data = DictParser.get_nested_key(data, "cmsData")["componentContent"]
-        item["image"] = cms_data["propertyImage"]["image"]["originalUrl"]
-        del cms_data["roomDetails"]
-        amenities = set(DictParser.iter_matching_keys(cms_data, "key"))
-        apply_yes_no(Extras.WHEELCHAIR, item, "AdaAccessibleRooms" in amenities)
-        apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, "AccessiblePublicRestrooms" in amenities)
-        apply_yes_no(Extras.ATM, item, "Atm" in amenities)
-        apply_yes_no(Extras.SWIMMING_POOL, item, "IndoorPool" in amenities or "Pool" in amenities)
-        apply_yes_no(Extras.PICNIC_TABLES, item, "PicnicArea" in amenities)
-        apply_yes_no(Drink.COFFEE, item, "FreeCoffeeLobby" in amenities)
-        apply_yes_no(
-            Extras.BREAKFAST,
-            item,
-            not amenities.isdisjoint({"FreeHotBreakfast", "FreeContinentalBreakfast", "FreeGrabGoBreakfast"}),
-        )
-        apply_yes_no(Extras.WIFI, item, "FreeWifi" in amenities or "VerifiedWifi" in amenities)
-        apply_yes_no(
-            Extras.PETS_ALLOWED,
-            item,
-            not amenities.isdisjoint({"PetsOnly1Allowed", "PetsUpto2Allowed", "PetsUpto3Allowed", "PetsUpto4Allowed"}),
-            "PetsNotAllowed" not in amenities,
-        )
-        if "SmokeFree" in amenities:
-            apply_yes_no(Extras.SMOKING, item, False, False)
+        if cms_data:
+            if property_image := cms_data.get("propertyImage"):
+                item["image"] = property_image["image"]["originalUrl"]
+            del cms_data["roomDetails"]
+            amenities = set(DictParser.iter_matching_keys(cms_data, "key"))
+            apply_yes_no(Extras.WHEELCHAIR, item, "AdaAccessibleRooms" in amenities)
+            apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, "AccessiblePublicRestrooms" in amenities)
+            apply_yes_no(Extras.ATM, item, "Atm" in amenities)
+            apply_yes_no(Extras.SWIMMING_POOL, item, "IndoorPool" in amenities or "Pool" in amenities)
+            apply_yes_no(Extras.PICNIC_TABLES, item, "PicnicArea" in amenities)
+            apply_yes_no(Drink.COFFEE, item, "FreeCoffeeLobby" in amenities)
+            apply_yes_no(
+                Extras.BREAKFAST,
+                item,
+                not amenities.isdisjoint({"FreeHotBreakfast", "FreeContinentalBreakfast", "FreeGrabGoBreakfast"}),
+            )
+            apply_yes_no(Extras.WIFI, item, "FreeWifi" in amenities or "VerifiedWifi" in amenities)
+            apply_yes_no(
+                Extras.PETS_ALLOWED,
+                item,
+                not amenities.isdisjoint(
+                    {"PetsOnly1Allowed", "PetsUpto2Allowed", "PetsUpto3Allowed", "PetsUpto4Allowed"}
+                ),
+                "PetsNotAllowed" not in amenities,
+            )
+            if "SmokeFree" in amenities:
+                apply_yes_no(Extras.SMOKING, item, False, False)
 
         yield item

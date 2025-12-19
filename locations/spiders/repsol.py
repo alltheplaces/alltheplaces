@@ -1,7 +1,7 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
@@ -16,7 +16,7 @@ class RepsolSpider(Spider):
     start_urls = ["https://www.repsol.es/bin/repsol/searchmiddleware/station-search.json?action=search&tipo=1,2"]
     skip_auto_cc_domain = True
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, method="POST")
 

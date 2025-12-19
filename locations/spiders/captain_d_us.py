@@ -7,7 +7,7 @@ from locations.storefinders.where2getit import Where2GetItSpider
 class CaptainDUSSpider(Where2GetItSpider):
     name = "captain_d_us"
     item_attributes = {"brand": "Captain D's", "brand_wikidata": "Q5036616"}
-    api_endpoint = "https://locations.captainds.com/rest/getlist"
+    api_brand_name = "captainseafoodsites"
     api_key = "596EECC8-DFC6-11EE-AA1D-2E122CD69500"
     custom_settings = {
         "DOWNLOAD_WARNSIZE": 67108864,  # 64 MiB needed as results are >32 MiB
