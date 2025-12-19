@@ -293,8 +293,8 @@ class GbfsSpider(CSVFeedSpider):
     def parse_row(self, response: Response, row: dict[str, str]) -> Iterator[Request]:
         """Entry point. For every row in the MobilityData spreadsheet, queue a
         download for the system manifest."""
-        if url := self.get_authorized_url(row["Auto-Discovery URL"], row["Authentication Info"]):
-            yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
+        if row["Authentication Type"] in ("", "0"):
+            yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
 
     def set_localized_name(
         self, item: Feature | dict[str, Any], itemkey: str, station: dict[str, Any], stationkey: str
@@ -322,7 +322,6 @@ class GbfsSpider(CSVFeedSpider):
         all_feeds: Iterable[dict[str, Any]],
         feed_name: str,
         deferreds: list[Deferred[Response]],
-        authentication_info: str,
     ) -> bool:
         """Look for a GBFS feed by the given name (e.g. "system_information",
         "station_information") in the system's list of feeds. If it exists,
@@ -332,9 +331,9 @@ class GbfsSpider(CSVFeedSpider):
         feeds = [feed for feed in all_feeds if feed["name"] == feed_name]
 
         # If any feeds by that name exist, request the first.
-        if len(feeds) > 0 and (url := self.get_authorized_url(feeds[0]["url"], authentication_info)):
+        if len(feeds) > 0:
             assert self.crawler.engine is not None
-            deferreds.append(self.crawler.engine.download(JsonRequest(url=url)))
+            deferreds.append(self.crawler.engine.download(JsonRequest(url=feeds[0]["url"])))
             return True
         else:
             return False
@@ -422,20 +421,19 @@ class GbfsSpider(CSVFeedSpider):
 
         feeds = DictParser.get_nested_key(data, "feeds") or []
         deferreds: list[Deferred[Response]] = []
-        authentication_info = kwargs["Authentication Info"]
 
         # Network and operator information
-        has_system_information = self.defer_request_feed(feeds, "system_information", deferreds, authentication_info)
+        has_system_information = self.defer_request_feed(feeds, "system_information", deferreds)
 
         # Vehicle types, used to determine feature category
-        has_vehicle_types = self.defer_request_feed(feeds, "vehicle_types", deferreds, authentication_info)
+        has_vehicle_types = self.defer_request_feed(feeds, "vehicle_types", deferreds)
 
         # Information about each docking station
-        has_station_information = self.defer_request_feed(feeds, "station_information", deferreds, authentication_info)
+        has_station_information = self.defer_request_feed(feeds, "station_information", deferreds)
 
         # Current status of each docking station.
         # Only needed as fallback if station_information doesn't have vehicle type tags.
-        has_station_status = self.defer_request_feed(feeds, "station_status", deferreds, authentication_info)
+        has_station_status = self.defer_request_feed(feeds, "station_status", deferreds)
 
         if not has_station_information:
             # Can't proceed without station locations.
