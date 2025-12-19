@@ -13,7 +13,6 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class PacsunUSSpider(JSONBlobSpider):
     name = "pacsun_us"
     item_attributes = {"brand": "PacSun", "brand_wikidata": "Q7121857"}
-    requires_proxy = True
     start_urls = ["https://www.pacsun.com/on/demandware.store/Sites-pacsun-Site/default/Stores-FindStores?radius=30000"]
     locations_key = "stores"
 
