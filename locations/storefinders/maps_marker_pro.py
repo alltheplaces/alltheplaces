@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Selector, Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import FormRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
@@ -33,9 +33,9 @@ from locations.items import Feature
 
 
 class MapsMarkerProSpider(Spider):
-    days: dict = None
+    days: dict | None = None
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "action": "mmp_map_markers",
             "type": "map",
@@ -48,7 +48,7 @@ class MapsMarkerProSpider(Spider):
             for url in self.start_urls:
                 yield FormRequest(url=url, method="POST", formdata=formdata, callback=self.parse)
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[FormRequest]:
         # Response is a GeoJSON object
         ids = []
         for location in response.json()["data"]["features"]:
@@ -67,7 +67,7 @@ class MapsMarkerProSpider(Spider):
             meta={"features": response.json()["data"]["features"]},
         )
 
-    def parse_popups(self, response: Response):
+    def parse_popups(self, response: TextResponse) -> Iterable[Feature]:
         features = response.meta["features"]
         popups = {popup["id"]: popup for popup in response.json()["data"]}
         for feature in features:

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -9,10 +9,12 @@ from locations.dict_parser import DictParser
 class LonghornSteakhouseSpider(Spider):
     name = "longhorn_steakhouse"
     item_attributes = {"brand": "LongHorn Steakhouse", "brand_wikidata": "Q3259007"}
+    start_urls = ["https://m.longhornsteakhouse.com/api/restaurants?"]
+    allowed_domains = ["m.longhornsteakhouse.com"]
 
-    def start_requests(self):
-        url = "https://m.longhornsteakhouse.com/api/restaurants?"
-        yield JsonRequest(url=url, headers={"X-Source-Channel": "WEB"})
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for url in self.start_urls:
+            yield JsonRequest(url=url, headers={"X-Source-Channel": "WEB"})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["restaurants"]:

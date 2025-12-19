@@ -5,13 +5,12 @@ from locations.spiders.addresses.be.best_addresses_be import BeSTAddressesBESpid
 class BeSTBruAddressesBESpider(BeSTAddressesBESpider):
     name = "best_bru_addresses_be"
     dataset_attributes = {
-        "attribution": "optional",
+        "attribution": "required",
         "attribution:name": "Paradigm.brussels",
         "attribution:website": "https://datastore.brussels/web/data/dataset/a8c9ccde-5c2b-11ed-913a-900f0cda5d5c",
-        "license": "Creative Commons Zero",
-        "license:website": "https://creativecommons.org/publicdomain/zero/1.0/",
-        "license:wikidata": "Q6938433",
-        "attribution": "optional",
+        "license": "Creative Commons Attribution 4.0 International",
+        "license:website": "http://creativecommons.org/licenses/by/4.0/",
+        "license:wikidata": "Q20007257",
         "use:commercial": "permit",
     }
     region_urls = [

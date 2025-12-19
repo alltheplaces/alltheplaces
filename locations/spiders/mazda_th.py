@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
 
@@ -16,7 +16,7 @@ class MazdaTHSpider(JSONBlobSpider):
     start_urls = ["https://www.mazda.co.th/th/dealer"]
     locations_key = ["pageProps", "getDataDealerAll"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.start_urls[0], callback=self.parse_next_build_id)
 
     def parse_next_build_id(self, response: Response) -> Iterable[Request]:

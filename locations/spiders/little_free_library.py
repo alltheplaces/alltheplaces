@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -19,7 +19,7 @@ class LittleFreeLibrarySpider(Spider):
     # to add a large delay between requests.
     custom_settings = {"DOWNLOAD_TIMEOUT": 60, "DOWNLOAD_DELAY": 60}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_library_list)
 

@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from scrapy.http import Response
@@ -34,16 +35,19 @@ class TheFragranceShopGBSpider(Spider):
             yield item
 
     def parse_hours(self, item, location):
-        times = location.get("openingHours")
-        oh = OpeningHours()
-        hours = times.split(",")
-        i = 1
-        for times in hours:
-            # Days off
-            if times == "CLOSED":
-                continue
-            day = DAYS_MAPPING.get(i)
-            open, close = times.split("-")
-            oh.add_range(day, open, close)
-            i = i + 1
-        item["opening_hours"] = oh.as_opening_hours()
+        if "openingHours" in location:
+            times = location.get("openingHours")
+            oh = OpeningHours()
+            hours = re.split(r",\s*", times)
+            if hours[-1] == "":
+                hours.pop()
+            i = 1
+            for times in hours:
+                # Days off
+                if times == "CLOSED":
+                    continue
+                day = DAYS_MAPPING.get(i)
+                open, close = times.split("-")
+                oh.add_range(day, open, close)
+                i = i + 1
+            item["opening_hours"] = oh.as_opening_hours()

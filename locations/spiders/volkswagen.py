@@ -1,6 +1,6 @@
 import re
 from copy import deepcopy
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 import reverse_geocoder
 from geonamescache import GeonamesCache
@@ -54,16 +54,18 @@ class VolkswagenSpider(JSONBlobSpider):
         "SRVONLY",
     ]
     countries = {}
-
+    # Some countries use a different language parameter than the one returned by get_locale.
+    OVERRIDE_LOCALE = {"TN": "fr-TN", "NO": "no-NO"}
     for country in GeonamesCache().get_countries().keys():
         if lang := get_locale(country):
+            lang = OVERRIDE_LOCALE.get(country, lang)
             countries[country] = lang
 
     countries.pop("BE")  # volkswagen_be spider
     countries.pop("BW")  # included in ZA
     countries.pop("NA")  # included in ZA
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.fetch_json)
 
@@ -155,7 +157,7 @@ class VolkswagenSpider(JSONBlobSpider):
         for dealer in dealers:
             item = DictParser.parse(dealer)
             item["street_address"] = item.pop("street")
-            item["ref"] = dealer["bnr"]
+            item["ref"] = f"{dealer['bnr']}-{brand.get('brand')}"
             item["state"] = dealer.get("federalState")
             offers = dealer.get("contracts", {})
             # Locations in ME have country property equal to RS

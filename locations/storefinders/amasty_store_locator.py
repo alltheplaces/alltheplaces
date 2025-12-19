@@ -1,9 +1,9 @@
-import json
 import re
-from typing import Iterable
+from json import loads
+from typing import AsyncIterator, Iterable
 
 from scrapy import Request, Selector, Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -40,7 +40,7 @@ class AmastyStoreLocatorSpider(Spider):
     _first_feature_id: int | None = None
     _crawl_completed: bool = False
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         headers = {"X-Requested-With": "XMLHttpRequest"}
         pagination_attribute = ""
         if self.pagination_mode:
@@ -54,9 +54,14 @@ class AmastyStoreLocatorSpider(Spider):
             for url in self.start_urls:
                 yield Request(url=f"{url}{pagination_attribute}", headers=headers, method="POST")
 
-    def parse(self, response: Response) -> Iterable[Feature | Request]:
-        raw_data = json.loads(re.search(r"items\":(\[.*\]),\"", response.text).group(1))
-        yield from self.parse_features(raw_data)
+    def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
+        json_blob = re.search(r"items\":(\[.*\]),\"", response.text)
+        if not json_blob or len(json_blob.groups()) != 1:
+            raise RuntimeError(
+                "Could not locate JSON blob to parse. Perhaps this storefinder is no longer using Amasty Store Locator?"
+            )
+            return
+        yield from self.parse_features(loads(json_blob.group(1)))
 
         if self.pagination_mode and not self._crawl_completed:
             # Continue the crawl by requesting the next page of features.

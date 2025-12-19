@@ -27,4 +27,5 @@ class HotterGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["store"]
         apply_category(Categories.SHOP_SHOES, item)
+        item["street_address"] = item.pop("addr_full", None)
         yield item

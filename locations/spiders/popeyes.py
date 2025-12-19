@@ -1,7 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -15,7 +14,7 @@ class PopeyesSpider(Spider):
     name = "popeyes"
     item_attributes = {"brand": "Popeyes", "brand_wikidata": "Q1330910"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["us", "fr", "ca", "kr", "ro"]:
             yield JsonRequest(
                 f"https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_plk_{country}/default",

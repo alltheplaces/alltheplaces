@@ -1,5 +1,5 @@
 import json
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Spider
@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
@@ -20,21 +20,21 @@ class WalmartUSSpider(Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 7,
+        "DOWNLOAD_DELAY": 10,
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.com/orchestra/home/graphql/nearByNodes"
     hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
-        for city in city_locations("US", min_population=15000):
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for lat, lon in country_iseadgg_centroids("US", 94):
             variables = {
                 "input": {
                     "postalCode": "",
                     "accessTypes": ["PICKUP_INSTORE", "PICKUP_CURBSIDE"],
                     "nodeTypes": ["STORE", "PICKUP_SPOKE", "PICKUP_POPUP"],
-                    "latitude": city["latitude"],
-                    "longitude": city["longitude"],
+                    "latitude": lat,
+                    "longitude": lon,
                     "radius": 100,
                 },
                 "checkItemAvailability": False,
@@ -55,7 +55,7 @@ class WalmartUSSpider(Spider):
                     "x-o-platform-version": "usweb-1.220.0-ada3f07b1e1f576f89fca794606c73b0cd2ce649-8211424r",
                     "x-o-segment": "oaoh",
                 },
-                cookies={"walmart.nearestLatLng": f'{city["latitude"]},{city["longitude"]}'},
+                cookies={"walmart.nearestLatLng": f"{lat},{lon}"},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

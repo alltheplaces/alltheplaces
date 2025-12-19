@@ -13,7 +13,7 @@ class TangoSpider(JSONBlobSpider):
     item_attributes = {"brand": "Tango", "brand_wikidata": "Q125867683"}
     locations_key = "results"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> Iterable[JsonRequest]:
         yield JsonRequest(
             url="https://www.tango.nl/api/poi/locations",
             data={

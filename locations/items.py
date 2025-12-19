@@ -51,7 +51,7 @@ class Feature(scrapy.Item):
             self.__setitem__("extras", {})
 
 
-def get_lat_lon(item: Feature) -> (float, float):
+def get_lat_lon(item: Feature) -> tuple[float, float] | None:
     if geometry := item.get("geometry"):
         if isinstance(geometry, dict):
             if geometry.get("type") == "Point":
@@ -68,7 +68,7 @@ def get_lat_lon(item: Feature) -> (float, float):
     return None
 
 
-def set_lat_lon(item: Feature, lat: float, lon: float):
+def set_lat_lon(item: Feature, lat: float, lon: float) -> None:
     item.pop("lat", None)
     item.pop("lon", None)
     try:
@@ -108,17 +108,17 @@ def get_social_media(item: Feature, service: str | Enum) -> str:
         raise TypeError("string or Enum required")
 
     if service_str in item.fields:
-        return item.get(service_str)
+        return str(item.get(service_str))
     else:
-        return item["extras"].get("contact:{}".format(service_str))
+        return str(item["extras"].get("contact:{}".format(service_str)))
 
 
-def add_social_media(item: Feature, service: str, account: str):
+def add_social_media(item: Feature, service: str, account: str) -> None:
     """Deprecated, use set_social_media"""
     set_social_media(item, service, account)
 
 
-def set_social_media(item: Feature, service: str | Enum, account: str):
+def set_social_media(item: Feature, service: str | Enum, account: str) -> None:
     if isinstance(service, Enum):
         service_str = service.value
     elif isinstance(service, str):
@@ -132,7 +132,7 @@ def set_social_media(item: Feature, service: str | Enum, account: str):
         item["extras"]["contact:{}".format(service_str)] = account
 
 
-def set_closed(item: Feature, end_date: datetime = None):
+def set_closed(item: Feature, end_date: datetime | None = None) -> None:
     item["extras"]["end_date"] = end_date.strftime("%Y-%m-%d") if end_date else "yes"
 
 

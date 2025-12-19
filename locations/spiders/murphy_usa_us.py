@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -19,7 +20,7 @@ class MurphyUsaUSSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://service.murphydriverewards.com/api/store/list", callback=self.parse_location_list)
 
     def parse_location_list(self, response):
