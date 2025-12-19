@@ -1494,6 +1494,7 @@ class GtfsSpider(CSVFeedSpider):
     name = "gtfs"
     start_urls = ["https://files.mobilitydatabase.org/feeds_v2.csv"]
     no_refs = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_row(self, response, row):
         if row["status"] not in ("active", ""):
