@@ -357,8 +357,8 @@ class GbfsSpider(CSVFeedSpider):
         # "network" is a better place than "brand" for the "system name," since a brand can have many non-interoperable networks
         shared_attributes: dict[str, Any] = {"country": kwargs["Country Code"], "extras": {"network": kwargs["Name"]}}
 
-        if kwargs["System ID"] in BRAND_MAPPING:
-            shared_attributes.update(BRAND_MAPPING[kwargs["System ID"]])
+        if brand_info := BRAND_MAPPING.get(kwargs["System ID"]):
+            shared_attributes.update(brand_info)
         else:
             # In the absence of a known brand mapping, use the network name.
             shared_attributes["brand"] = kwargs["Name"]
@@ -374,8 +374,8 @@ class GbfsSpider(CSVFeedSpider):
 
         self.set_localized_name(shared_attributes, "network", system_information, "name")
 
-        if "opening_hours" in system_information:
-            shared_attributes["opening_hours"] = system_information["opening_hours"]
+        if opening_hours := system_information.get("opening_hours"):
+            shared_attributes["opening_hours"] = opening_hours
 
         self.set_localized_name(shared_attributes, "network:short", system_information, "short_name")
         self.set_localized_name(shared_attributes, "operator", system_information, "operator")
@@ -494,8 +494,8 @@ class GbfsSpider(CSVFeedSpider):
         self.set_localized_name(item, "name", station, "name")
         self.set_localized_name(item, "short_name", station, "short_name")
 
-        if "capacity" in station:
-            item["extras"]["capacity"] = str(station["capacity"])
+        if capacity := station.get("capacity"):
+            item["extras"]["capacity"] = str(capacity)
 
         if station.get("is_charging_station"):
             apply_category(Categories.CHARGING_STATION, item)
@@ -523,8 +523,8 @@ class GbfsSpider(CSVFeedSpider):
                     cat = vehicle_types_categories.get(vehicle_type_id, {})
                     apply_category(cat, item)
                     # Additionally, specify the capacity of each vehicle type
-                    if "rental" in cat and vehicle_capacity.get("count") is not None:
-                        for biketype in cat["rental"].split(";"):
+                    if cat_rental := cat.get("rental") and vehicle_capacity.get("count") is not None:
+                        for biketype in cat_rental.split(";"):
                             capacity_key = f"capacity:{biketype}"
                             capacity = item["extras"].get(capacity_key, 0)
                             capacity += vehicle_capacity["count"]
