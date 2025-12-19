@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category, apply_yes_no
@@ -7,10 +9,10 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
-class RosticsRUSpider(scrapy.Spider):
+class RosticsRUSpider(Spider):
     name = "rostics_ru"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://api.prod.digital.uni.rest/api/store/v2/store.get_restaurants?showClosed=false")
 
     def parse(self, response):

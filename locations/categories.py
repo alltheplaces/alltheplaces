@@ -192,6 +192,7 @@ class Categories(Enum):
     SHOP_PRINTER_INK = {"shop": "printer_ink"}
     SHOP_PYROTECHNICS = {"shop": "pyrotechnics"}
     SHOP_RENTAL = {"shop": "rental"}
+    SHOP_SAFETY_EQUIPMENT = {"shop": "safety_equipment"}
     SHOP_SEAFOOD = {"shop": "seafood"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOE_REPAIR = {"shop": "shoe_repair"}

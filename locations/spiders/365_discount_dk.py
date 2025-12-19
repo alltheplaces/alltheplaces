@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Request, Spider
+from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
 from locations.items import Feature
@@ -11,7 +11,7 @@ class ThreehundredsixtyfiveDiscountDKSpider(Spider):
     item_attributes = {"brand": "365discount", "brand_wikidata": "Q104671354"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             "https://365discount.coop.dk/umbraco/api/Chains/GetAllStores",
             formdata={"pageId": "4976", "chainsToShowStoresFrom": "Coop 365", "hideClosedStores": "false"},

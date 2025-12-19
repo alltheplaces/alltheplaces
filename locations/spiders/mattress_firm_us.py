@@ -6,10 +6,13 @@ from locations.storefinders.where2getit import Where2GetItSpider
 
 class MattressFirmUSSpider(Where2GetItSpider):
     name = "mattress_firm_us"
-    api_endpoint = "https://www.mattressfirm.com/en-us/stores/rest/getlist"
-    api_key = "88FD3C6E-2B22-11EE-86CD-EF1E9DC6E625"
+    api_brand_name = "mattressfirmsites"
+    api_key = "1693675C-6DFD-11EE-B679-54AE4A66C4B2"
     drop_attributes = {"email"}
-    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
+    custom_settings = {
+        "DOWNLOAD_TIMEOUT": 30,
+        "DOWNLOAD_WARNSIZE": 268435456,  # 256 MiB needed as results are >150 MiB
+    }
 
     def pre_process_data(self, location):
         location.pop("location")
