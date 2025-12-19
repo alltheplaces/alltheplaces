@@ -484,6 +484,7 @@ class GbfsSpider(CSVFeedSpider):
         item["lon"] = station["lon"]
         item["street_address"] = station.get("address")
         item["postcode"] = station.get("post_code")
+        item["city"] = station.get("city")
         item["opening_hours"] = station.get("station_opening_hours")
         item["geometry"] = station.get("station_area")
         item["extras"]["parking"] = PARKING_TYPE_MAP.get(station.get("parking_type"))
