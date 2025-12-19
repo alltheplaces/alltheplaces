@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -17,7 +17,7 @@ class DhlExpressFRSpider(Spider):
     allowed_domains = ["wsbexpress.dhl.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # Fifty closest shops are returned no matter their distance from the
         # supplied centroid. Small search radius (24km) required to find the
         # maximum number of features.

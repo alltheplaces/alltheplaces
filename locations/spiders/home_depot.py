@@ -4,20 +4,22 @@ import chompjs
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
     name = "home_depot"
     item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
-    allowed_domains = ["www.homedepot.com"]
     start_urls = ["https://www.homedepot.com/l/storeDirectory"]
     rules = [
         Rule(LinkExtractor(allow=r"^https:\/\/www.homedepot.com\/l\/..$")),
         Rule(LinkExtractor(allow=r"^https:\/\/www.homedepot.com\/l\/.*\/\d*$"), callback="parse_sd"),
     ]
     requires_proxy = "US"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
@@ -49,5 +51,5 @@ class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
                 continue
 
             item["opening_hours"].add_range(day, info["open"], info["close"])
-
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item

@@ -1,8 +1,8 @@
 import html
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Selector, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
@@ -74,20 +74,24 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class WPStoreLocatorSpider(Spider):
-    days: dict = None
+    days: dict | None = None
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
+    area_field_filter: list[str] = []
     search_radius: int = 0
     max_results: int = 0
     possible_days: list[dict] = DAYS_BY_FREQUENCY
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.iseadgg_countries_list) > 0 and self.search_radius != 0 and self.max_results != 0:
-            yield from self.start_requests_geo_search_iseadgg_method()
+            for request in self.start_requests_geo_search_iseadgg_method():
+                yield request
         elif len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
-            yield from self.start_requests_geo_search_manual_method()
+            for request in self.start_requests_geo_search_manual_method():
+                yield request
         else:
-            yield from self.start_requests_all_at_once_method()
+            for request in self.start_requests_all_at_once_method():
+                yield request
 
     def start_requests_all_at_once_method(self) -> Iterable[JsonRequest]:
         """
@@ -145,7 +149,7 @@ class WPStoreLocatorSpider(Spider):
         specifying centroids.
         """
         for searchable_points_file in self.searchable_points_files:
-            for lat, lon in point_locations(searchable_points_file):
+            for lat, lon in point_locations(searchable_points_file, self.area_field_filter):
                 if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
                     for domain in self.allowed_domains:
                         yield JsonRequest(
@@ -157,7 +161,7 @@ class WPStoreLocatorSpider(Spider):
                             url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
                         )
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         if response.text.strip():
             features = response.json()
         else:
@@ -173,7 +177,7 @@ class WPStoreLocatorSpider(Spider):
             self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
 
             if len(features) >= self.max_results:
-                raise RuntimeError(
+                self.logger.error(
                     "Locations have probably been truncated due to max_results (or more) features being returned by a single geographic radius search. Use a smaller search_radius."
                 )
 
@@ -187,7 +191,7 @@ class WPStoreLocatorSpider(Spider):
             if self.days is not None:
                 # If we have preconfigured the exact days to use, start there
                 item["opening_hours"] = self.parse_opening_hours(feature, self.days)
-            else:
+            elif DictParser.get_first_key(feature, DictParser.hours_keys):
                 # Otherwise, iterate over the possibilities until we get a first match
                 self.logger.warning(
                     "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
@@ -200,21 +204,17 @@ class WPStoreLocatorSpider(Spider):
 
             yield from self.post_process_item(item, response, feature) or []
 
-    def parse_opening_hours(self, feature: dict, days: dict) -> OpeningHours | None:
+    def parse_opening_hours(self, feature: dict, days: dict) -> OpeningHours:
+        oh = OpeningHours()
         hours_raw = DictParser.get_first_key(feature, DictParser.hours_keys)
         if hours_raw:
             hours_raw = " ".join(filter(None, map(str.strip, Selector(text=hours_raw).xpath("//text()").getall())))
-            oh = OpeningHours()
             oh.add_ranges_from_string(hours_raw, days=days)
-            if oh.as_opening_hours():
-                # Opening hours ranges detected and extracted.
-                return oh
-        # No opening hours ranges were detected and extracted.
-        return
+        return oh
 
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

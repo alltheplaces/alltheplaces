@@ -8,7 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class MitsubishiPaNiSvSpider(scrapy.Spider):
+class MitsubishiPANISVSpider(scrapy.Spider):
     name = "mitsubishi_pa_ni_sv"
     item_attributes = {
         "brand": "Mitsubishi",

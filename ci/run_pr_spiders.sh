@@ -142,10 +142,15 @@ if [ "${spider_count}" -eq 0 ]; then
     fi
 fi
 
-if grep PLAYWRIGHT -q -m 1 $spiders; then
-    echo "Playwright detected. Installing requirements."
+if grep PlaywrightSpider -q -m 1 $spiders; then
+    echo "Playwright spider detected. Installing requirements."
     uv run playwright install-deps
     uv run playwright install firefox
+fi
+
+if grep CamoufoxSpider -q -m 1 $spiders; then
+    echo "Camoufox spider detected. Installing requirements."
+    uv run camoufox fetch
 fi
 
 RUN_DIR="/tmp/output"
@@ -170,7 +175,7 @@ do
     STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
-    timeout -k 5s 150s \
+    timeout -k 1m 150s \
     uv run scrapy runspider \
         -o "file://${OUTFILE}:geojson" \
         -o "file://${PARQUETFILE}:parquet" \
@@ -257,7 +262,7 @@ do
             fi
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
-            dupe_dropped=$(jq '."dupefilter/filtered" // 0' "${STATSFILE}")
+            dupe_dropped=$(jq '."atp/duplicate_count" // 0' "${STATSFILE}")
             dupe_percent=$(awk -v dd="${dupe_dropped}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (dd / fc) * 100 }')
             if awk -v dp="${dupe_percent}" 'BEGIN { exit !(dp > 30) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"

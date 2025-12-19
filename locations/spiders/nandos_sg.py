@@ -1,6 +1,8 @@
 import re
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.items import Feature
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
@@ -10,12 +12,9 @@ class NandosSGSpider(scrapy.Spider):
     name = "nandos_sg"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
     allowed_domains = ["nandos.com.sg"]
-    start_urls = [
-        "https://www.nandos.com.sg/restaurants/",
-    ]
-    download_delay = 0.3
+    start_urls = ["https://www.nandos.com.sg/restaurants/"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         urls = response.xpath('//div[@class="restaurant col-xs-12 col-sm-6 col-md-4"]/a/@href').extract()
 
         for url in urls:

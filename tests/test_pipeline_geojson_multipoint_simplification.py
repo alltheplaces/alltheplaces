@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
@@ -6,7 +6,7 @@ from locations.pipelines.geojson_multipoint_simplification import GeoJSONMultiPo
 
 
 def get_objects():
-    spider = Spider(name="test_spider")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return Feature(), GeoJSONMultiPointSimplificationPipeline(), spider
 

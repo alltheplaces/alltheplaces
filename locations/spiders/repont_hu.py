@@ -1,12 +1,13 @@
-from typing import Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy.http import JsonRequest, Request
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Vending, add_vending, apply_category
-from locations.json_blob_spider import JSONBlobSpider
+from locations.dict_parser import DictParser
 
 
-class RepontHUSpider(JSONBlobSpider):
+class RepontHUSpider(Spider):
     name = "repont_hu"
     item_attributes = {
         "brand": "REpont",
@@ -15,14 +16,21 @@ class RepontHUSpider(JSONBlobSpider):
         "operator_wikidata": "Q130207606",
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            "https://map.mohu.hu/api/Map/SearchWastePoints",
+            "https://map.mohu.hu/api/Map/SearchPoisGeneralData",
             data={"wastePointTypes": ["repont"], "hideDrsPoints": False},
         )
 
-    def post_process_item(self, item, response, location):
-        item["name"] = None
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
+        for poi in response.json():
+            yield JsonRequest(
+                f"https://map.mohu.hu/api/Map/GetDrsPointDetails?id={poi['id']}", callback=self.parse_details
+            )
+
+    def parse_details(self, response: Response) -> Any:
+        item = DictParser.parse(response.json())
+        item["located_in"] = item.pop("name", None)
         item["street_address"] = item.pop("addr_full")
         apply_category(Categories.VENDING_MACHINE, item)
         add_vending(Vending.BOTTLE_RETURN, item)

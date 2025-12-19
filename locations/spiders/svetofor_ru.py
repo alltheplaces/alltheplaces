@@ -1,5 +1,8 @@
+from typing import Any
+
 import scrapy
 from chompjs import chompjs
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -9,8 +12,9 @@ class SvetoforRUSpider(scrapy.Spider):
     name = "svetofor_ru"
     item_attributes = {"brand_wikidata": "Q61875920"}
     start_urls = ["https://svetoforonline.ru/shops/"]
+    requires_proxy = True  # Cloudflare blockage
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.xpath('//script[@type="text/javascript" and contains(text(), "var myPlacemark")]').get()
         for line in data.split(";"):
             if line.startswith("var myPlacemark"):

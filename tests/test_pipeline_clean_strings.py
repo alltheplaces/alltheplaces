@@ -1,4 +1,5 @@
 from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.items import Feature
@@ -6,7 +7,7 @@ from locations.pipelines.clean_strings import CleanStringsPipeline, clean_string
 
 
 def get_spider() -> Spider:
-    spider = Spider(name="test")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return spider
 
@@ -15,25 +16,28 @@ def test_clean_strings_pipeline():
     pipeline = CleanStringsPipeline()
 
     item = Feature(
+        ref="  https://example.com/12345   ",
         name="test",
         addr_full="test str 123",
         phone="1234567890",
-        website="https://example.com",
+        website="  https://example.com/12345/ ",
+        image="  https://example.example.net/image.jpg  ",
         brand="McDonald's",
         brand_wikidata="Q38076",
     )
     spider = get_spider()
     pipeline.process_item(item, spider)
+    assert item["ref"] == "https://example.com/12345"
     assert item["name"] == "test"
     assert item["addr_full"] == "test str 123"
     assert item["phone"] == "1234567890"
-    assert item["website"] == "https://example.com"
+    assert item["website"] == "https://example.com/12345/"
+    assert item["image"] == "https://example.example.net/image.jpg"
     assert item["brand"] == "McDonald's"
     assert item["brand_wikidata"] == "Q38076"
     assert not spider.crawler.stats.get_value("atp/clean_strings/name")
     assert not spider.crawler.stats.get_value("atp/clean_strings/addr_full")
     assert not spider.crawler.stats.get_value("atp/clean_strings/phone")
-    assert not spider.crawler.stats.get_value("atp/clean_strings/website")
     assert not spider.crawler.stats.get_value("atp/clean_strings/brand")
     assert not spider.crawler.stats.get_value("atp/clean_strings/brand_wikidata")
 
@@ -41,7 +45,7 @@ def test_clean_strings_pipeline():
         name="&nbsp;test &amp; test  ",
         addr_full="  &nbsp;test str 123&nbsp;  ",
         phone="  &nbsp;1234567890&nbsp;  ",
-        website="https://example.com?query=title%20EQ%20'%3CMytitle%3E&amp;test'",
+        website="https://example.com?query=title%20EQ%20'%3CMytitle%3E&amp;test'%20",
     )
     spider = get_spider()
     pipeline.process_item(item, spider)
@@ -49,7 +53,7 @@ def test_clean_strings_pipeline():
     assert item["addr_full"] == "test str 123"
     assert item["phone"] == "1234567890"
     assert (
-        item["website"] == "https://example.com?query=title%20EQ%20'%3CMytitle%3E&amp;test'"
+        item["website"] == "https://example.com?query=title%20EQ%20'%3CMytitle%3E&amp;test'%20"
     )  # URL should not be unescaped
     assert spider.crawler.stats.get_value("atp/clean_strings/name")
     assert spider.crawler.stats.get_value("atp/clean_strings/addr_full")

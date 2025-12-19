@@ -1,21 +1,21 @@
 import re
+from typing import AsyncIterator
 
-import chompjs
-import scrapy
-from scrapy import Request, Selector
+from chompjs import parse_js_object
+from scrapy import Request, Selector, Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class IntersportFRSpider(scrapy.Spider):
+class IntersportFRSpider(Spider):
     name = "intersport_fr"
-    item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888", "extras": Categories.SHOP_SPORTS.value}
+    item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
     start_url = "https://www.intersport.fr/store-finder/"
     requires_proxy = "FR"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         # Need to make the request more browser-like to be accepted
         headers = {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
@@ -27,7 +27,7 @@ class IntersportFRSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         store_data = response.xpath('//div[@id="map_canvas"]/@data-stores').get()
         store_data_cleaned = store_data.replace("\n", "").replace("\t", " ")
-        stores = chompjs.parse_js_object(store_data_cleaned)
+        stores = parse_js_object(store_data_cleaned)
         ref_regexp = re.compile(r"<a href='/store/(\d+_\d+)-")
         for _, store in stores.items():
             content_text = Selector(text=store["content"]).xpath("//text()").getall()
@@ -36,7 +36,8 @@ class IntersportFRSpider(scrapy.Spider):
                 country = "BE"
             else:
                 country = "FR"
-            yield Feature(
+
+            item = Feature(
                 {
                     "ref": ref,
                     "name": store["name"].title(),
@@ -47,3 +48,9 @@ class IntersportFRSpider(scrapy.Spider):
                     "country": country,
                 }
             )
+
+            if item["name"].startswith("Intersport "):
+                item["branch"] = item.pop("name").removeprefix("Intersport").strip(" -")
+
+            apply_category(Categories.SHOP_SPORTS, item)
+            yield item

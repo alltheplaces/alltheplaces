@@ -1,9 +1,9 @@
 import io
 import zipfile
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import FormRequest, JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -29,15 +29,15 @@ class BanxicoMXSpider(Spider):
         "40012": ("BBVA México", "Q2876794"),
         "40021": ("HSBC", "Q5635881"),
         "40130": ("Compartamos Banco ICR", "Q2990370"),
-        "40036": ("ICR Inbursa", "Q731123"),
+        "40036": ("Inbursa", "Q731123"),
         "40044": ("Scotiabank", "Q451476"),
         "40136": ("Intercam Banco", "Q30915645"),
         "40143": ("CIBanco", "Q126539570"),
-        "40058": ("BanRegio", "Q4853573"),
+        "40058": ("Banregio", "Q4853573"),
         "40132": ("Banco Multiva", "Q2885364"),
         "40106": ("Bank of America", "Q487907"),
         "40042": ("Banca Mifel", "Q5717818"),
-        "40062": ("Afirme", "Q60825526"),
+        "40062": ("Banca Afirme", "Q60825526"),
         "40060": ("Bansí", "Q5719140"),
         "40133": ("Actinver", None),
         "40128": ("Autofin", None),
@@ -45,7 +45,7 @@ class BanxicoMXSpider(Spider):
         "40140": ("Consubanco", None),
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://www.banxico.org.mx/canje-efectivo/web/ubica-cc")  # branches
         yield Request(
             url="https://www.banxico.org.mx/services/ubicajeros-banxico-mobile-app.html", callback=self.parse_atms

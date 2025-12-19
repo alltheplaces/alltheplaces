@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import FormRequest, JsonRequest
 
@@ -14,7 +16,7 @@ class BuildersSpider(Spider):
         "https://www.builders.co.za/web/v2/builders/channel/web/zone/B14/stores?query=&latitude=-26.1328705&longitude=27.9114834&radius=10000000&fields=FULL"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "client_id": "builders",
             # client_secret appears to be obfuscated within main.???.js and

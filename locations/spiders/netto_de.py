@@ -16,10 +16,10 @@ class NettoDESpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.netto-online.de/ueber-netto/sitemap/index"]
     sitemap_rules = [(r"/filialen/[^/]+/[^/]+/(\d+)$", "parse")]
     wanted_types = ["GroceryStore"]
-    user_agent = FIREFOX_LATEST
     custom_settings = {
         "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
         "RETRY_EXCEPTIONS": RETRY_EXCEPTIONS + [ProtocolError],
+        "USER_AGENT": FIREFOX_LATEST,
     }
 
     categories = {

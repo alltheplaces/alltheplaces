@@ -9,6 +9,7 @@ class SopharmacyBGSpider(scrapy.Spider):
     item_attributes = {"brand": "SOpharmacy", "brand_wikidata": "Q108852081"}
     allowed_domains = ["sopharmacy.bg"]
     start_urls = ["https://sopharmacy.bg/bg/mapbox/contactus.json"]
+    requires_proxy = "BG"  # Cloudflare bot protection used
 
     def parse(self, response):
         for store in response.json()["contact-map"]["features"]:

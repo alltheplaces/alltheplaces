@@ -1,18 +1,18 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class CoopDKSpider(scrapy.Spider):
+class CoopDKSpider(Spider):
     name = "coop_dk"
     BRANDS = {
         "Brugsen": {"brand_wikidata": "Q48772252"},
-        "Coop365": {"brand_wikidata": "Q104671354"},
+        "Coop365": {"brand": "365discount", "brand_wikidata": "Q104671354"},
         "Dagli'Brugsen": {"brand_wikidata": "Q12307017"},
         "FK": {},
         "Irma": {"brand_wikidata": "Q797150"},
@@ -21,14 +21,14 @@ class CoopDKSpider(scrapy.Spider):
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://info.coop.dk/umbraco/api/Chains/GetAllStores"
         headers = {"Accept": "application/json", "Origin": "https://info.coop.dk"}
         form = {
             "pageId": "19807",
             "hideClosedStores": "false",
         }
-        yield scrapy.FormRequest(url, method="POST", formdata=form, headers=headers, callback=self.parse)
+        yield FormRequest(url, method="POST", formdata=form, headers=headers, callback=self.parse)
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for location in response.json():

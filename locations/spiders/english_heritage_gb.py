@@ -5,11 +5,11 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class EnglishHeritageGBSpider(JSONBlobSpider):
     name = "english_heritage_gb"
-    item_attributes = {"brand": "English Heritage", "brand_wikidata": "Q936287", "nsi_id": "N/A"}
+    item_attributes = {"operator": "English Heritage", "operator_wikidata": "Q936287", "nsi_id": "N/A"}
     start_urls = ["https://www.english-heritage.org.uk/api/PropertySearch/GetAll"]
     no_refs = True
     locations_key = "Results"
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, location):
         item["website"] = response.urljoin(location["Path"])

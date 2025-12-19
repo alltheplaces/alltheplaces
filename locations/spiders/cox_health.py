@@ -5,7 +5,6 @@ from locations.items import Feature
 
 
 class CoxHealthSpider(scrapy.Spider):
-    # download_delay = 0.2
     name = "cox_health"
     item_attributes = {"brand": "CoxHealth", "brand_wikidata": "Q5179867"}
     allowed_domains = ["coxhealth.com"]

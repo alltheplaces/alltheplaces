@@ -1,26 +1,36 @@
-import chompjs
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class WesternDentalUSSpider(JSONBlobSpider):
+class WesternDentalUSSpider(CrawlSpider, StructuredDataSpider):
     name = "western_dental_us"
     item_attributes = {
         "brand": "Western Dental",
         "brand_wikidata": "Q64211989",
     }
-    start_urls = ["https://www.westerndental.com/en-us/find-a-location"]
+    allowed_domains = ["www.westerndental.com"]
+    start_urls = ["https://www.westerndental.com/en-us/find-a-location/"]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"https://www.westerndental.com/en-us/find-a-location/[\w.-]+/$"),
+            follow=True,
+        ),
+        Rule(
+            LinkExtractor(allow=r"https://www.westerndental.com/en-us/find-a-location/[\w.-]+/[\w.-]+/$"),
+            follow=True,
+        ),
+        Rule(
+            LinkExtractor(allow=r"https://www.westerndental.com/en-us/find-a-location/[\w.-]+/[\w.-]+/[\w.-]+/$"),
+            callback="parse",
+        ),
+    ]
+    search_for_facebook = False
+    time_format = "%I:%M%p"
 
-    def extract_json(self, response):
-        return chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "var locationsInit = ")]/text()').get()
-        )
-
-    def post_process_item(self, item, response, location):
-        item["branch"] = location["StoreNickname"].title()
-        item["street_address"] = item.pop("addr_full")
-        item["website"] = response.urljoin(location["DocumentUrlPath"])
-        item["postcode"] = str(item["postcode"])
+    def post_process_item(self, item, response, ld_data):
+        item["ref"] = response.url
         apply_category(Categories.DENTIST, item)
         yield item

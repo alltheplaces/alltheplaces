@@ -1,4 +1,3 @@
-import pprint
 from typing import Any
 
 import pyproj
@@ -44,7 +43,7 @@ class PostenNOSpider(Spider):
 
                 break
 
-            if attributes["enhetstype"] in (1, 21):
+            if attributes["enhetstype"] in (1, 21, 32):
                 apply_category(Categories.POST_OFFICE, item)
                 item["extras"]["post_office"] = "bureau"
             elif attributes["enhetstype"] == 4:
@@ -61,14 +60,12 @@ class PostenNOSpider(Spider):
             else:
                 item["extras"]["enhetstype"] = str(attributes["enhetstype"])
                 self.logger.error("Unexpected type: {}".format(attributes["enhetstype"]))
-
             yield item
 
     def parse_opening_hours(self, rules: dict) -> OpeningHours:
         oh = OpeningHours()
         for day, rule in rules["perDay"].items():
             if rule["ErDognApent"] is True:
-                pprint.pp(rule)
                 oh.add_range(day, "00:00", "24:00")
             else:
                 for times in rule["content"].split(", "):

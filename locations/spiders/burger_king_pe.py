@@ -18,6 +18,7 @@ class BurgerKingPESpider(Spider):
     }
     api_token = ""
     start_urls = ["https://www.burgerking.pe/"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Search for the desired JavaScript file

@@ -29,7 +29,7 @@ class WienerschnitzelUSECSpider(StoreLocatorPlusSelfSpider):
     max_results = 10000
     search_radius = 30000
 
-    def start_requests(self):
+    async def start(self):
         url = f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php"
         formdata = {
             "action": "csl_ajax_onload",

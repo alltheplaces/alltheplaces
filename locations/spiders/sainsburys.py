@@ -1,5 +1,7 @@
-import scrapy
-from scrapy import Request
+from typing import Any
+
+from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -8,15 +10,16 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class SainsburysSpider(scrapy.Spider):
+class SainsburysSpider(Spider):
     name = "sainsburys"
     SAINSBURYS = {"brand": "Sainsbury's", "brand_wikidata": "Q152096"}
     SAINSBURYS_LOCAL = {"brand": "Sainsbury's Local", "brand_wikidata": "Q13218434"}
+    SAINSBURYS_BANK = {"brand": "Sainsbury's Bank", "brand_wikidata": "Q7400525"}
     item_attributes = SAINSBURYS
     allowed_domains = ["stores.sainsburys.co.uk"]
-    start_urls = ["https://stores.sainsburys.co.uk/api/v1/stores?api_client_id=slfe"]
+    start_urls = ["https://api.stores.sainsburys.co.uk/v1/stores/?api_client_id=slfe"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
 
         if len(data["results"]) == 0:
@@ -52,26 +55,24 @@ class SainsburysSpider(scrapy.Spider):
             url=f'{self.start_urls[0]}&offset={str(int(data["page_meta"]["offset"] + data["page_meta"]["limit"]))}'
         )
 
-    def parse_extras(self, item: Feature, store: dict):
+    def parse_extras(self, item: Feature, store: dict) -> Feature:
         if fhrs := store["fsa_scores"].get("fhrs_id"):
             item["extras"]["fhrs:id"] = str(fhrs)
 
         # https://stores.sainsburys.co.uk/api/v1/facilities
-        apply_yes_no(Extras.ATM, item, any(f["id"] == 2 for f in store["facilities"]), False)
-        apply_yes_no("sells:national_lottery", item, any(f["id"] == 6 for f in store["facilities"]), False)
-        apply_yes_no(Extras.CAR_WASH, item, any(f["id"] == 30 for f in store["facilities"]), False)
-        apply_yes_no(Extras.WHEELCHAIR, item, any(f["id"] == 162 for f in store["facilities"]), False)
-        apply_yes_no(Extras.TOILETS, item, any(f["id"] == 16 for f in store["facilities"]), False)
-        apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, any(f["id"] == 9 for f in store["facilities"]), False)
-        apply_yes_no(Extras.BABY_CHANGING_TABLE, item, any(f["id"] == 169 for f in store["facilities"]), False)
-        apply_yes_no(Extras.WIFI, item, any(f["id"] == 221 for f in store["facilities"]), False)
-        apply_yes_no(
-            Extras.SELF_CHECKOUT, item, any(f["id"] == 4 or f["id"] == 224 for f in store["facilities"]), False
-        )
+        apply_yes_no(Extras.ATM, item, any(f["id"] == 2 for f in store["facilities"]))
+        apply_yes_no("sells:national_lottery", item, any(f["id"] == 6 for f in store["facilities"]))
+        apply_yes_no(Extras.CAR_WASH, item, any(f["id"] == 30 for f in store["facilities"]))
+        apply_yes_no(Extras.WHEELCHAIR, item, any(f["id"] == 162 for f in store["facilities"]))
+        apply_yes_no(Extras.TOILETS, item, any(f["id"] == 16 for f in store["facilities"]))
+        apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, any(f["id"] == 9 for f in store["facilities"]))
+        apply_yes_no(Extras.BABY_CHANGING_TABLE, item, any(f["id"] == 169 for f in store["facilities"]))
+        apply_yes_no(Extras.WIFI, item, any(f["id"] == 221 for f in store["facilities"]))
+        apply_yes_no(Extras.SELF_CHECKOUT, item, any(f["id"] == 4 or f["id"] == 224 for f in store["facilities"]))
         if any(f["id"] == 28 for f in store["facilities"]):
-            apply_yes_no(Extras.PARKING_PARENT, item, any(f["id"] == 167 for f in store["facilities"]), False)
-            apply_yes_no(Extras.PARKING_WHEELCHAIR, item, any(f["id"] == 166 for f in store["facilities"]), False)
-        apply_yes_no(PaymentMethods.CONTACTLESS, item, any(f["id"] == 104 for f in store["facilities"]), False)
+            apply_yes_no(Extras.PARKING_PARENT, item, any(f["id"] == 167 for f in store["facilities"]))
+            apply_yes_no(Extras.PARKING_WHEELCHAIR, item, any(f["id"] == 166 for f in store["facilities"]))
+        apply_yes_no(PaymentMethods.CONTACTLESS, item, any(f["id"] == 104 for f in store["facilities"]))
 
         if store["store_type"] == "local":
             item.update(self.SAINSBURYS_LOCAL)
@@ -85,15 +86,14 @@ class SainsburysSpider(scrapy.Spider):
         elif store["store_type"] == "pfs":
             item["branch"] = item.pop("name").removesuffix(" Petrol Station")
             apply_category(Categories.FUEL_STATION, item)
-            apply_yes_no(Fuel.DIESEL, item, any(f["id"] == 17 for f in store["facilities"]), False)
-            apply_yes_no(Fuel.LPG, item, any(f["id"] == 192 for f in store["facilities"]), False)
-            apply_yes_no(Fuel.OCTANE_95, item, any(f["id"] == 11 for f in store["facilities"]), False)  # "Petrol"
-            apply_yes_no(
-                Fuel.OCTANE_97, item, any(f["id"] == 34 for f in store["facilities"]), False
-            )  # "Super Unleaded"
+            apply_yes_no(Fuel.DIESEL, item, any(f["id"] == 17 for f in store["facilities"]))
+            apply_yes_no(Fuel.LPG, item, any(f["id"] == 192 for f in store["facilities"]))
+            apply_yes_no(Fuel.OCTANE_95, item, any(f["id"] == 11 for f in store["facilities"]))  # "Petrol"
+            apply_yes_no(Fuel.OCTANE_97, item, any(f["id"] == 34 for f in store["facilities"]))  # "Super Unleaded"
         elif store["store_type"] == "pharmacy":
             return None  # LloydsPharmacyGBSpider
         elif store["store_type"] == "tm":
+            item.update(self.SAINSBURYS_BANK)
             item["branch"] = item.pop("name").removesuffix(" Travel Money")
             apply_category(Categories.BUREAU_DE_CHANGE, item)
         elif store["store_type"] == "specsavers":

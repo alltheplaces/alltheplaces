@@ -16,7 +16,7 @@ class EyesAndMoreSpider(Spider):
         "https://www.eyesandmore.at/optiker/",
         "https://www.eyesandmore.de/optiker/",
         "https://www.eyesandmore.nl/opticiens/",
-        # "https://www.eyesandmore.se/",  # 1 store, no store finer ATM
+        # "https://www.eyesandmore.se/",  # 1 store, no store finder ATM
     ]
     DAYS = DAYS_NL | DAYS_DE
 

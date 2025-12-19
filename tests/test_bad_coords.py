@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.items import Feature, get_lat_lon
@@ -6,7 +6,7 @@ from locations.pipelines.check_item_properties import CheckItemPropertiesPipelin
 
 
 def get_objects(lat, lon):
-    spider = Spider("test")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return (
         [
@@ -28,9 +28,9 @@ def test_out_of_bounds():
     for item in items:
         pipeline.process_item(item, spider)
 
-        assert item.get("lat") is None
-        assert item.get("lon") is None
-        assert item.get("geometry") is None
+        assert item.get("lat", None) is None
+        assert item.get("lon", None) is None
+        assert item.get("geometry", None) is None
 
 
 def test_throw_away_null_island():
@@ -38,17 +38,17 @@ def test_throw_away_null_island():
     for item in items:
         pipeline.process_item(item, spider)
 
-        assert item.get("lat") is None
-        assert item.get("lon") is None
-        assert item.get("geometry") is None
+        assert item.get("lat", None) is None
+        assert item.get("lon", None) is None
+        assert item.get("geometry", None) is None
 
     items, pipeline, spider = get_objects(0.123, 0.456)
     for item in items:
         pipeline.process_item(item, spider)
 
-        assert item.get("lat") is None
-        assert item.get("lon") is None
-        assert item.get("geometry") is None
+        assert item.get("lat", None) is None
+        assert item.get("lon", None) is None
+        assert item.get("geometry", None) is None
 
 
 def test_invalid():
@@ -56,9 +56,9 @@ def test_invalid():
     for item in items:
         pipeline.process_item(item, spider)
 
-        assert item.get("lat") is None
-        assert item.get("lon") is None
-        assert item.get("geometry") is None
+        assert item.get("lat", None) is None
+        assert item.get("lon", None) is None
+        assert item.get("geometry", None) is None
 
 
 def test_bad_geometry():
@@ -66,9 +66,9 @@ def test_bad_geometry():
     for item in items:
         pipeline.process_item(item, spider)
 
-        assert item.get("lat") is None
-        assert item.get("lon") is None
-        assert item.get("geometry") is None
+        assert item.get("lat", None) is None
+        assert item.get("lon", None) is None
+        assert item.get("geometry", None) is None
 
 
 def test_casting():

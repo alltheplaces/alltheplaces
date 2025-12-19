@@ -1,8 +1,10 @@
+import argparse
 import json
 import os
 import pprint
 import re
 from collections import Counter, defaultdict
+from typing import IO, Iterable
 from zipfile import ZipFile
 
 import ijson
@@ -12,9 +14,10 @@ from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
 from locations.name_suggestion_index import NSI
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
-def iter_json(stream, file_name):
+def iter_json(stream: IO[bytes] | IO[str], file_name: str) -> Iterable[dict]:
     try:
         if file_name.endswith("ndgeojson"):
             # New line delimited GeoJSON is to be read a line at a time.
@@ -31,7 +34,7 @@ def iter_json(stream, file_name):
         print(e)
 
 
-def iter_features(files_and_dirs, ignore_spiders):
+def iter_features(files_and_dirs: list[str], ignore_spiders: list[str]) -> Iterable[dict]:
     """
     Iterate through a set of GeoJSON files and directories. Each item in the iteration is a
     single feature. Zero length files are skipped. Only files ending .json, .geojson or .ndgeojson
@@ -41,7 +44,7 @@ def iter_features(files_and_dirs, ignore_spiders):
     :return: a GeoJSON feature iterator
     """
 
-    def ignore_file(s):
+    def ignore_file(s: str) -> bool:
         if s.endswith("json") or s.endswith(".zip"):
             for ignore_spider in ignore_spiders:
                 if ignore_spider in s:
@@ -82,13 +85,13 @@ class InsightsCommand(ScrapyCommand):
     requires_project = True
     default_settings = {"LOG_ENABLED": False}
 
-    def syntax(self):
+    def syntax(self) -> str:
         return "[options] <file/dir> ... <file/dir>"
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Analyze GeoJSON POI files (including ZIP archives) for quality insights"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         ScrapyCommand.add_options(self, parser)
         parser.add_argument(
             "--filter",
@@ -129,7 +132,7 @@ class InsightsCommand(ScrapyCommand):
             help="Check for feature tags that differ from the brand's NSI preset",
         )
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         if len(args) < 1:
             raise UsageError()
         if opts.value_types:
@@ -145,12 +148,12 @@ class InsightsCommand(ScrapyCommand):
             self.nsi_overrides(args, opts)
             return
 
-    def show_counter(self, msg, counter):
+    def show_counter(self, msg: str, counter: Counter) -> None:
         if len(counter.most_common()) > 0:
             print(msg)
             print(counter)
 
-    def check_value_types(self, args, opts):
+    def check_value_types(self, args: list[str], opts: argparse.Namespace) -> None:
         stats = scrapy.statscollectors.StatsCollector(self)
         for feature in iter_features(args, opts.filter_spiders):
             spider_name = feature["properties"].get("@spider")
@@ -160,7 +163,7 @@ class InsightsCommand(ScrapyCommand):
 
             pprint.pp(stats._stats)
 
-    def check_wikidata_codes(self, args, opts):
+    def check_wikidata_codes(self, args: list[str], opts: argparse.Namespace) -> None:
         nsi = NSI()
         spider_empty_counter = Counter()
         spider_nsi_missing_counter = Counter()
@@ -177,14 +180,14 @@ class InsightsCommand(ScrapyCommand):
         self.show_counter("SPIDERS WITH NO BRAND DATA:", spider_empty_counter)
         self.show_counter("NSI MISSING WIKIDATA CODE:", spider_nsi_missing_counter)
 
-    def analyze_atp_nsi_osm(self, args, opts):
+    def analyze_atp_nsi_osm(self, args: list[str], opts: argparse.Namespace) -> None:  # noqa: C901
         """
         Trawl ATP, NSI and OSM for per wikidata code information.
         :param args: ATP output GeoJSON files / directories to load
         :param outfile: JSON result file name to write
         """
 
-        def lookup_code(wikidata_code):
+        def lookup_code(wikidata_code: str) -> dict:
             # Return record for a wikidata code, adding it to dict if not already present.
             if record := wikidata_dict.get(wikidata_code):
                 return record
@@ -203,9 +206,13 @@ class InsightsCommand(ScrapyCommand):
             wikidata_dict[wikidata_code] = record
             return record
 
-        def get_brand_name(item_tags: dict):
+        def get_brand_name(item_tags: dict) -> str | None:
             # Prefer English brand name for insights application (https://www.alltheplaces.xyz/wikidata.html).
-            return item_tags.get("brand:en") or item_tags.get("brand")
+            if brand_en := item_tags.get("brand:en"):
+                return str(brand_en)
+            if brand := item_tags.get("brand"):
+                return str(brand)
+            return None
 
         # A dict keyed by wikidata code.
         wikidata_dict = {}
@@ -215,7 +222,7 @@ class InsightsCommand(ScrapyCommand):
         re_qcode = re.compile(r"^Q\d+")
         osm_url_template = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page={}&rp=999&qtype=value"
         for page in range(1, 1000):
-            response = requests.get(osm_url_template.format(page))
+            response = requests.get(osm_url_template.format(page), headers={"User-Agent": BOT_USER_AGENT_REQUESTS})
             if not response.status_code == 200:
                 raise Exception("Failed to load OSM wikidata tag statistics")
             entries = response.json()["data"]
@@ -283,7 +290,7 @@ class InsightsCommand(ScrapyCommand):
         with open(opts.outfile, "w") as f:
             json.dump(for_datatables, f)
 
-    def nsi_overrides(self, args, opts):
+    def nsi_overrides(self, args: list[str], opts: argparse.Namespace) -> None:
         nsi = NSI()
         nsi._ensure_loaded()
         # Collect category properties like preserveTags for convenience, and create a quick lookup

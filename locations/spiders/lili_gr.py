@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -14,7 +15,7 @@ class LiliGRSpider(Spider):
     start_urls = ["https://lilidrogerie.gr/wp-json/v1/get-store/?lang=el"]
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

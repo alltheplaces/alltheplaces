@@ -1,18 +1,20 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class RedRoosterAUSpider(Spider):
     name = "red_rooster_au"
-    item_attributes = {"brand": "Red Rooster", "brand_wikidata": "Q376466", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {"brand": "Red Rooster", "brand_wikidata": "Q376466"}
     start_urls = ["https://content-acl.redrooster.com.au/all_stores.json"]
     allowed_domains = ["content-acl.redrooster.com.au"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -48,6 +50,7 @@ class RedRoosterAUSpider(Spider):
                         day_hours["dayOfWeek"], time_period["openTime"], time_period["closeTime"], "%H:%M:%S"
                     )
 
+            apply_category(Categories.FAST_FOOD, properties)
             apply_yes_no(
                 Extras.DRIVE_THROUGH,
                 properties,

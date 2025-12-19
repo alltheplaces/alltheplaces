@@ -14,7 +14,6 @@ class BannerHealthSpider(StructuredDataSpider):
     item_attributes = {"operator": "Banner Health", "operator_wikidata": "Q4856918"}
     allowed_domains = ["bannerhealth.com"]
     start_urls = ["https://www.bannerhealth.com/api/sitecore/location/LocationSearch"]
-    wanted_types = ["Hospital"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

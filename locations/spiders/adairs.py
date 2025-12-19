@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -15,7 +17,7 @@ class AdairsSpider(Spider):
         "https://www.adairs.co.nz/api/store/search-store",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "pageId": 665,
             "pageNumber": 1,

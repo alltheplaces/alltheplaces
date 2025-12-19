@@ -24,34 +24,43 @@ class DicksSportingGoodsSpider(SitemapSpider):
         return opening_hours
 
     def fix_hours(self, hours_str):
-        if ":" not in hours_str:
-            hours_str = hours_str + ":00"
+        if hours_str == ":" or hours_str == "/":
+            hours_str = None
+        elif ":00:" in hours_str:
+            # Format is e.g. "08:00:08:00"
+            hours_str = hours_str[:5]
         return hours_str
 
     def parse_store(self, response):
-        ref = re.search(r"/(\d+)/$", response.url).group(1)
-        name = response.xpath('//meta[@property="og:title"]/@content').get()
-        if "GOING, GOING, GONE!" in name:
-            name = "Going, Going, Gone!"
-            branch = response.xpath('//div[@class="addressBlock"]//h1/text()[2]').get()
-        else:
-            name = "Dick's Sporting Goods"
-            branch = response.xpath('//div[@class="addressBlock"]//h1/text()').get()
+        if search := re.search(r"/(\d+)/$", response.url):
+            # else aggregate pages of more than one store
+            ref = search.group(1)
+            name = response.xpath('//meta[@property="og:title"]/@content').get()
+            if "GOING, GOING, GONE!" in name:
+                name = "Going, Going, Gone!"
+                branch = response.xpath('//div[@class="addressBlock"]//h1/text()[2]').get()
+            else:
+                name = "Dick's Sporting Goods"
+                branch = response.xpath('//div[@class="addressBlock"]//h1/text()').get()
 
-        yield Feature(
-            lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
-            lon=float(response.xpath('//meta[@property="place:location:longitude"]/@content').extract_first()),
-            street_address=response.xpath(
-                '//meta[@property="business:contact_data:street_address"]/@content'
-            ).extract_first(),
-            city=response.xpath('//meta[@property="business:contact_data:locality"]/@content').extract_first(),
-            state=response.xpath('//meta[@property="business:contact_data:region"]/@content').extract_first(),
-            postcode=response.xpath('//meta[@property="business:contact_data:postal_code"]/@content').extract_first(),
-            country=response.xpath('//meta[@property="business:contact_data:country_name"]/@content').extract_first(),
-            phone=response.xpath('//meta[@property="business:contact_data:phone_number"]/@content').extract_first(),
-            website=response.xpath('//meta[@property="business:contact_data:website"]/@content').extract_first(),
-            ref=ref,
-            name=name,
-            branch=branch,
-            opening_hours=self.parse_hours(response),
-        )
+            yield Feature(
+                lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
+                lon=float(response.xpath('//meta[@property="place:location:longitude"]/@content').extract_first()),
+                street_address=response.xpath(
+                    '//meta[@property="business:contact_data:street_address"]/@content'
+                ).extract_first(),
+                city=response.xpath('//meta[@property="business:contact_data:locality"]/@content').extract_first(),
+                state=response.xpath('//meta[@property="business:contact_data:region"]/@content').extract_first(),
+                postcode=response.xpath(
+                    '//meta[@property="business:contact_data:postal_code"]/@content'
+                ).extract_first(),
+                country=response.xpath(
+                    '//meta[@property="business:contact_data:country_name"]/@content'
+                ).extract_first(),
+                phone=response.xpath('//meta[@property="business:contact_data:phone_number"]/@content').extract_first(),
+                website=response.xpath('//meta[@property="business:contact_data:website"]/@content').extract_first(),
+                ref=ref,
+                name=name,
+                branch=branch,
+                opening_hours=self.parse_hours(response),
+            )

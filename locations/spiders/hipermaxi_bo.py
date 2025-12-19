@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -15,7 +15,7 @@ class HipermaxiBOSpider(Spider):
         "brand": "Hipermaxi",
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://tienda-api.hipermaxi.com/api/v1/markets/activos?IdMarket=0&IdTipoServicio=0",
             headers={

@@ -44,7 +44,6 @@ class DickeysBarbecuePitSpider(CrawlSpider):
             item = DictParser.parse(location)
             item["ref"] = location["storeCode"]
             item["street_address"] = item.pop("addr_full")
-            item["addr_full"] = location["storeCode"]
             item["state"] = location["state"]["label"]
             item["website"] = kwargs["website"]
             item["opening_hours"] = OpeningHours()

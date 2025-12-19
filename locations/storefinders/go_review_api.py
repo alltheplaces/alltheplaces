@@ -12,24 +12,30 @@ class GoReviewApiSpider(JSONBlobSpider):
     """
     To use this spider, specify the domain, used in the request
     to https://admin.goreview.co.za/website/api/locations/search
+    Alternatively, specify multiple domains in domain_list
     """
 
     start_urls = ["https://admin.goreview.co.za/website/api/locations/search"]
     locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False}
     domain = None
+    domain_list = None
 
-    def start_requests(self):
-        data_raw = {
-            "domain": self.domain,
-            "latitude": "null",
-            "longitude": "null",
-            "attributes": "false",
-            "radius": "null",
-            "initialLoad": "true",
-        }
-        for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", data=data_raw)
+    async def start(self):
+        if self.domain is not None:
+            self.domain_list = [self.domain]
+        if self.domain_list is not None:
+            for domain in self.domain_list:
+                data_raw = {
+                    "domain": domain,
+                    "latitude": "null",
+                    "longitude": "null",
+                    "attributes": "false",
+                    "radius": "null",
+                    "initialLoad": "true",
+                }
+                for url in self.start_urls:
+                    yield JsonRequest(url=url, method="POST", data=data_raw)
 
     def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:

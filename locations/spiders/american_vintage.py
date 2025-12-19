@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy.http import Request
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -10,7 +12,7 @@ class AmericanVintageSpider(JSONBlobSpider):
     locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country in [
             "AT",
             "BE",
@@ -32,7 +34,7 @@ class AmericanVintageSpider(JSONBlobSpider):
             "US",
         ]:
             url = f"https://www.americanvintage-store.com/on/demandware.store/Sites-AMV-Site/fr_FR/Stores-FindStores?countryCode={country}"
-            yield scrapy.Request(url)
+            yield Request(url)
 
     def post_process_item(self, item, response, location):
         item["opening_hours"] = oh = OpeningHours()
