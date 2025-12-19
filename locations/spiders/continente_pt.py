@@ -17,6 +17,9 @@ class ContinentePTSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["response"]["locations"]:
+            if location["name"].startswith("MAXMAT "):
+                continue
+
             item = DictParser.parse(location)
 
             item["street_address"] = location["streetAndNumber"]
@@ -32,8 +35,9 @@ class ContinentePTSpider(Spider):
                     break
 
             for brand in self.brands:
-                if brand["brand"].lower() in item["name"].lower():
+                if item["name"].startswith(brand["brand"]):
                     item.update(brand)
+                    item["branch"] = item.pop("name").removeprefix(item["brand"])
                     break
 
             apply_category(Categories.SHOP_SUPERMARKET, item)

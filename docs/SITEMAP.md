@@ -25,7 +25,7 @@ We found ourselves inspecting websites so often for sitemap data that we built a
 Probe a site for sitemap index files:
 
 ```
-$ pipenv run scrapy sitemap http://smashburger.com
+$ uv run scrapy sitemap http://smashburger.com
 https://smashburger.com/sitemap_index.xml
 https://smashburger.com/post-sitemap.xml
 https://smashburger.com/page-sitemap.xml
@@ -38,7 +38,7 @@ https://smashburger.com/item_type-sitemap.xml
 The store sitemap look interesting, let's see some page links from it:
 
 ```
-$ pipenv run scrapy sitemap --pages https://smashburger.com/store-sitemap.xml
+$ uv run scrapy sitemap --pages https://smashburger.com/store-sitemap.xml
 https://smashburger.com/locations/us/co/glendale/1120-s-colorado-blvd/
 https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/
 https://smashburger.com/locations/us/co/wheatridge/3356-youngfield-st/

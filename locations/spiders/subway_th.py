@@ -6,6 +6,7 @@ import chompjs
 from scrapy import Selector, Spider
 from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.country_utils import CountryUtils, get_locale
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
@@ -86,6 +87,9 @@ class SubwayWorldwideSpider(Spider):
             item["street_address"] = clean_address(
                 [address.get("Address1"), address.get("Address2"), address.get("Address3")]
             )
+            apply_category(Categories.FAST_FOOD, item)
+            item["extras"]["cuisine"] = "sandwich"
+            item["extras"]["takeaway"] = "yes"
             yield item
 
         if int(current) < int(total):

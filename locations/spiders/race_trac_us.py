@@ -7,6 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 ATTRIBUTES_MAP = {
     "Bulk DEF": None,
+    "Certified Truck Scales": None,
     "Check Cashing": None,
     "Compressed Air": Extras.COMPRESSED_AIR,
     "Diesel": Fuel.DIESEL,
@@ -19,6 +20,7 @@ ATTRIBUTES_MAP = {
     "Gaming Machines": None,
     "High Flow Diesel Lanes": "hgv",
     "Mid-grade 89": Fuel.OCTANE_89,
+    "Online Ordering": None,
     "Pizza": "food",
     "Premium 93": Fuel.OCTANE_93,
     "Regular 87": Fuel.OCTANE_87,
@@ -26,6 +28,7 @@ ATTRIBUTES_MAP = {
     "Seating Area": None,
     "Self Checkout": Extras.SELF_CHECKOUT,
     "Swirl World": None,
+    "Travel Center": None,
     "Truck Merchandise": None,
     "Truck Parking": None,
 }
@@ -33,11 +36,10 @@ ATTRIBUTES_MAP = {
 
 class RaceTracUSSpider(SitemapSpider, StructuredDataSpider):
     name = "race_trac_us"
-    item_attributes = {"brand": "RaceTrac", "brand_wikidata": "Q735942", "nsi_id": "N/A"}
+    item_attributes = {"brand": "RaceTrac", "brand_wikidata": "Q735942"}
     allowed_domains = ["www.racetrac.com"]
     sitemap_urls = ["https://www.racetrac.com/robots.txt"]
     sitemap_rules = [(r"/locations/[^/]+/[^/]+/[^/]+$", "parse_sd")]
-    wanted_types = ["GasStation"]
 
     def sitemap_filter(self, entries):
         for entry in entries:
@@ -45,10 +47,9 @@ class RaceTracUSSpider(SitemapSpider, StructuredDataSpider):
                 entry["loc"] = urljoin("https://www.racetrac.com/", entry["loc"])
             yield entry
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["url"] = None
-
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = None
+        item["website"] = response.url
         apply_category(Categories.FUEL_STATION, item)
 
         for amenity in response.xpath('//li[@class="amCol"]/span[@class="displayName"]/text()').getall():

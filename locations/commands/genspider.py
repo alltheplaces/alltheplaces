@@ -34,7 +34,7 @@ class Command(scrapy.commands.genspider.Command):
         )
 
     # TODO: Remove this when autospidergen is merged
-    def automatically_set_brand_or_operator_from_start_url(self):
+    def automatically_set_brand_or_operator_from_start_url(self) -> None:
         """
         Automatically extract parameters["brand_wikidata"] or
         parameters["operator_wikidata"] from a supplied
@@ -55,7 +55,7 @@ class Command(scrapy.commands.genspider.Command):
                         self.parameters["operator_wikidata"] = wikidata_code
 
     # TODO: Remove this when autospidergen is merged
-    def automatically_set_parameters(self):
+    def automatically_set_parameters(self) -> None:
         """
         Automatically extract parameters from at least one or more
         of the following:
@@ -99,7 +99,7 @@ class Command(scrapy.commands.genspider.Command):
         name: str,
         url: str,
         template_name: str,
-    ):
+    ) -> dict:
         capitalized_module = "".join(s.capitalize() for s in module.split("_"))
 
         self.start_urls = [url]

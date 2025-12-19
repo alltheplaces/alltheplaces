@@ -12,3 +12,5 @@ class MensWearhouseSpider(SitemapSpider, StructuredDataSpider):
     ]
     sitemap_rules = [(r"/store-locator/[0-9]+", "parse_sd")]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    wanted_types = ["MensClothingStore"]
+    requires_proxy = True

@@ -1,12 +1,16 @@
+import argparse
 import json
 import os
 import pathlib
 import pprint
+from typing import Iterable
 
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
+from scrapy.http import TextResponse
 
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -16,18 +20,17 @@ class MySpider(StructuredDataSpider):
     name = "my_spider"
     start_urls = None
     item_attributes = {}
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
-        items = MicrodataParser.extract_microdata(response)
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
+        items = MicrodataParser.extract_microdata(response.selector)
         self.logger.debug("Microdata %s", json.dumps(items, indent=2))
         yield from self.parse_sd(response)
 
-    def pre_process_data(self, ld_data, **kwargs):
+    def pre_process_data(self, ld_data: dict, **kwargs) -> None:
         self.logger.debug("JSON-LD %s", json.dumps(ld_data, indent=2))
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if isinstance(item.get("opening_hours"), OpeningHours):
             item["opening_hours"] = item["opening_hours"].as_opening_hours()
 
@@ -40,13 +43,13 @@ class SdCommand(BaseRunSpiderCommand):
     requires_project = True
     default_settings = {"LOG_LEVEL": "WARNING"}
 
-    def syntax(self):
+    def syntax(self) -> str:
         return "[options] <file or URL to decode>"
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Decode a web page or file for structured data with ATP scrapy library code"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         super().add_options(parser)
         parser.add_argument(
             "--wanted-types",
@@ -69,7 +72,7 @@ class SdCommand(BaseRunSpiderCommand):
             help="show crawl counters",
         )
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         if len(args) != 1:
             raise UsageError("Please specify single file or URL to load")
 

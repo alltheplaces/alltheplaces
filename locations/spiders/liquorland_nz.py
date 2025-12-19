@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
@@ -13,15 +14,15 @@ class LiquorlandNZSpider(Spider):
     item_attributes = {"brand": "Liquorland", "brand_wikidata": "Q110295342", "extras": Categories.SHOP_ALCOHOL.value}
     allowed_domains = ["www.liquorland.co.nz"]
     start_urls = ["https://www.liquorland.co.nz/store/GetStoreLocationsJsonFileForRegion?regionid=0"]
+    no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json()["features"]:
             item = DictParser.parse(location["properties"])
-            item["ref"] = location["properties"]["url"].split("?StoreId=", 1)[1]
             item["geometry"] = location["geometry"]
             item["addr_full"] = re.sub(
                 r"\s?,(?=[^\s])",

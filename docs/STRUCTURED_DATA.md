@@ -27,7 +27,7 @@ This is best illustrated by reference to some example spiders in the project:
 Following on from the `smashburger` example in our [sitemap tool](./SITEMAP.md) example then we can run the `scrapy sd` custom tool on one of the URLs:
 
 ```
-$ pipenv run scrapy sd https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/
+$ uv run scrapy sd https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/
 {'city': 'Lafayette',
  'image': 'https://smashburger.com/wp-content/uploads/2021/03/SB_hori_logo_Lt_NoTag_TM_RGB_XL.png',
  'lat': '40.0131850',
@@ -47,7 +47,7 @@ This is good as it shows that `smashburger` can be very easily processed, as we 
 Note that the spider we wrote has [Wikidata](./WIKIDATA.md) included. To get an idea of the kind of output this enables re-run the `scrapy sd` tool but this time pass a Wikidata QID for it to use:
 
 ```
-pipenv run scrapy sd -O smashburger.geojson --wikidata Q17061332 https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/
+uv run scrapy sd -O smashburger.geojson --wikidata Q17061332 https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/
 ```
 
 The single POI has been written as output to the `smashburger.geojson` file shown below:
@@ -66,8 +66,8 @@ The ATP tooling described here and on related pages can go a long way to giving 
 
 To get started quickly, try either of:
 
-`pipenv run scrapy genspider -t structured_data_crawl your_spider_name https://www.your_spider_name.com/`
-`pipenv run scrapy genspider -t structured_data_sitemap your_spider_name https://www.your_spider_name.com/`
+`uv run scrapy genspider -t structured_data_crawl your_spider_name https://www.your_spider_name.com/`
+`uv run scrapy genspider -t structured_data_sitemap your_spider_name https://www.your_spider_name.com/`
 
 Or to make an entire branch:
 `./contrib/new_spider structured_data_spider_sitemap your_spider_name https://www.your_spider_name.com/`

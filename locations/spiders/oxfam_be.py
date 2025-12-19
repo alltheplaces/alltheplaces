@@ -20,7 +20,8 @@ class OxfamBESpider(Spider):
 
             if not location.get("store_url"):
                 item["website"] = "https://oxfambelgie.be/shop-finder?type[container]=container"
-                apply_category({"amenity": "recycling", "recycling_type": "container"}, item)
+                apply_category(Categories.RECYCLING, item)
+                item["extras"]["recycling_type"] = "container"
             else:
                 item["name"] = location["name"]
                 item["website"] = location["store_url"]

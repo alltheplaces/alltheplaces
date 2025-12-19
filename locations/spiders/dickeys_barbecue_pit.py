@@ -1,65 +1,57 @@
-from typing import Any, Iterable
+import json
+from typing import Any
 
-import chompjs
-from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 
 
-class DickeysBarbecuePitSpider(Spider):
+class DickeysBarbecuePitSpider(CrawlSpider):
     name = "dickeys_barbecue_pit"
     item_attributes = {"brand": "Dickey's Barbecue Pit", "brand_wikidata": "Q19880747"}
-    COUNTRY_WEBSITE_MAP = {
-        "US": "https://www.dickeys.com/locations",
-        "CA": "https://www.dickeys.com/ca/en-ca/locations",
-    }
-    build_id = ""
+    start_urls = [
+        "https://www.dickeys.com/locations",
+        "https://www.dickeys.com/ca/en-ca/locations",
+    ]
+    rules = [
+        Rule(
+            LinkExtractor(allow=[r"/locations/\w+$", r"/ca/en-ca/locations/\w+$"]),
+        ),
+        Rule(
+            LinkExtractor(allow=[r"/locations/\w+/[A-Za-z-]+$", r"/ca/en-ca/locations/\w+/[A-Za-z-]+$"]),
+            callback="parse",
+        ),
+    ]
 
-    def start_requests(self) -> Iterable[Request]:
-        for country in self.COUNTRY_WEBSITE_MAP.keys():
-            yield Request(url=self.COUNTRY_WEBSITE_MAP[country], cb_kwargs={"country": country})
+    def parse(
+        self,
+        response: Response,
+    ) -> Any:
+        raw_data = json.loads(response.xpath('//*[@id="__NEXT_DATA__"]//text()').get())
+        yield JsonRequest(
+            url=f'https://api-olo-production.dickeys.com/states/{(raw_data["query"]["state"]).title()}/cities/{raw_data["query"]["city"]}/locations',
+            callback=self.parse_details,
+            headers={"country-alpha-2": "CA" if "/ca/en-ca/" in response.url else "US"},
+            cb_kwargs={"website": response.url},
+        )
 
-    def parse(self, response: Response, country: str) -> Any:
-        location_data = chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-        self.build_id = location_data.get("buildId")
-        api_url = f"https://www.dickeys.com/_next/data/{self.build_id}/locations"
-        if "/ca/" in response.url:
-            api_url = api_url.replace("/locations", "/ca/en-ca/locations")
-        for state_info in location_data["props"]["pageProps"]["locations"]:
-            for state in state_info["states"]:
-                state = state["stateName"].lower()
-                yield JsonRequest(
-                    url=f"{api_url}/{state}.json".replace(" ", "-"),
-                    callback=self.parse_cities,
-                    meta={"website": response.url, "state": state, "country": country},
-                )
-
-    def parse_cities(self, response: Response, **kwargs: Any) -> Any:
-        for city_info in response.json()["pageProps"]["stateCities"]:
-            yield JsonRequest(
-                url=response.url.replace(".json", f"/{city_info['city'].lower()}.json").replace(" ", "-"),
-                callback=self.parse_stores,
-                meta=response.meta,
-            )
-
-    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["pageProps"]["data"]["locations"]:
-            store.update(store.pop("address"))
-            store["state"] = store.pop("state", {}).get("abbreviation")
-            item = DictParser.parse(store)
+    def parse_details(self, response, **kwargs):
+        for location in response.json()["locations"]:
+            location.update(location.pop("address"))
+            item = DictParser.parse(location)
+            item["ref"] = location["storeCode"]
             item["street_address"] = item.pop("addr_full")
-            item["addr_full"] = store.get("fullAddress")
-            item["branch"] = store.get("label")
-            item["website"] = (
-                f'{response.meta["website"]}/{response.meta["state"]}/{item["city"].lower()}/{store["slug"]}'.replace(
-                    " ", "-"
-                )
-            )
-            item["country"] = response.meta["country"]
+            item["state"] = location["state"]["label"]
+            item["website"] = kwargs["website"]
             item["opening_hours"] = OpeningHours()
-            for rule in store.get("workingHours", []):
-                if day := sanitise_day(rule.get("label")):
-                    item["opening_hours"].add_range(day, rule.get("opened"), rule.get("closed"), time_format="%I:%M %p")
+            for day_time in location["workingHours"]:
+                day = day_time["label"]
+                open_time = day_time["opened"]
+                close_time = day_time["closed"]
+                item["opening_hours"].add_range(
+                    day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p"
+                )
             yield item

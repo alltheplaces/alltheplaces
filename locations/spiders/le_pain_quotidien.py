@@ -5,12 +5,13 @@ from scrapy import Request, Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 
 COUNTRY_TO_LANGUAGE = {
     "AE": "en",
     "AR": "es",
+    "AZ": "az",
     "BE": "fr",
     "BR": "pt",
     "CH": "en",
@@ -19,7 +20,9 @@ COUNTRY_TO_LANGUAGE = {
     "FR": "fr",
     "GB": "en",
     "GR": "en",
+    "IN": "en",
     "JP": "ja",
+    "KZ": "kk",
     "LU": "en",
     "MA": "en",
     "MX": "es",
@@ -31,12 +34,16 @@ COUNTRY_TO_LANGUAGE = {
 }
 
 DELIVERY_PARTNERS = {
-    "pedidosYa": "Pedidos Ya",
+    "catering": None,
     "clickAndConnect": None,
-    "uberEats": "Ubereats",
     "deliveroo": "Deliveroo",
+    "eFood": "efood",
+    "iFood": "iFood",
     "justEat": "Just Eat",
+    "pedidosYa": "Pedidos Ya",
     "rappi": "Rappi",
+    "uberEats": "Ubereats",
+    "wolt": "Wolt",
 }
 
 
@@ -53,7 +60,7 @@ class LePainQuotidienSpider(Spider):
     name = "le_pain_quotidien"
     item_attributes = {"brand": "Le Pain Quotidien", "brand_wikidata": "Q2046903"}
 
-    def start_requests(self):
+    async def start(self):
         yield Request(
             "https://api.obenan.com/api/v1/listing/search",
             headers={
@@ -69,18 +76,22 @@ class LePainQuotidienSpider(Spider):
             item["geometry"] = location["latlng"]
             item["street_address"] = merge_address_lines(location["addressLines"])
             # Note: Doesn't work for Mexico (slug missing)
-            item["website"] = (
-                f"https://www.lepainquotidien.com/{location['regionCode'].lower()}/{COUNTRY_TO_LANGUAGE[location['regionCode']]}/locations/{quote(location['slug'])}/{quote(location['addressLines'][0].replace(' ', '-'))}"
-            )
+            if location["regionCode"] in COUNTRY_TO_LANGUAGE:
+                item["website"] = (
+                    f"https://www.lepainquotidien.com/{location['regionCode'].lower()}/{COUNTRY_TO_LANGUAGE[location['regionCode']]}/locations/{quote(location['slug'])}/{quote(location['addressLines'][0].replace(' ', '-'))}"
+                )
+            else:
+                self.logger.warning(f"Unknown language for country={location['regionCode']}")
 
             oh = OpeningHours()
             if location.get("regularHours"):
                 for period in location["regularHours"]["periods"]:
-                    oh.add_range(
-                        period["openDay"],
-                        time_dict_to_struct(period.get("openTime")),
-                        time_dict_to_struct(period.get("closeTime")),
-                    )
+                    if day := sanitise_day(period["openDay"]):
+                        oh.add_range(
+                            day,
+                            time_dict_to_struct(period.get("openTime")),
+                            time_dict_to_struct(period.get("closeTime")),
+                        )
             else:
                 # Temporarily closed
                 oh.set_closed(DAYS)

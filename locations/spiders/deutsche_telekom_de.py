@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories
@@ -21,7 +21,7 @@ class DeutscheTelekomDESpider(Spider):
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(url="https://shopseite.telekom.de/api/shops?_page={}".format(page))
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

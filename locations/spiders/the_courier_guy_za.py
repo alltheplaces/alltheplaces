@@ -1,72 +1,45 @@
+import re
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 
 
 class TheCourierGuyZASpider(scrapy.Spider):
     name = "the_courier_guy_za"
-    PUDO = {"brand": "pudo", "brand_wikidata": "Q116753323"}
     item_attributes = {"brand": "The Courier Guy", "brand_wikidata": "Q116753262"}
-    allowed_domains = ["wp-admin.thecourierguy.co.za", "api-pudo.co.za"]
+    start_urls = ["https://api-pudo.co.za/api/v1/guest/lockers-data"]
 
-    def start_requests(self):
-        yield scrapy.Request(
-            url="https://wp-admin.thecourierguy.co.za/wp-json/acf/v3/service_points?per_page=10000",
-            callback=self.parse_service_points,
-        )
-        yield scrapy.Request(
-            url="https://api-pudo.co.za/api/v1/lockers-data?code=AIzaSyAjMJ4sIAmsTJYEFwI-nClSWvd_3SqbFA0",
-            headers={"Authorization": "Bearer 5wfaWym3thWaOHbRk9AxNUqY4ArowSh1ppsjLz0Mf19bdf0c"},
-            callback=self.parse_lockers,
-        )
-
-    def parse_service_points(self, response):
-        for point in response.json():
-            item = DictParser.parse(point["acf"])
-
-            item["ref"] = point["id"]
-            item["name"] = point["acf"]["location_name"]
-
-            location = point["acf"]["service_location"]
-            if isinstance(location, dict):  # Can be boolean False
-                item["city"] = location.get("city")
-                item["country"] = location.get("country")
-                item["lat"] = location.get("lat")
-                item["lon"] = location.get("lng")
-                item["postcode"] = location.get("post_code")
-                item["state"] = location.get("state")
-                item["street"] = location.get("street_name")
-                item["street_address"] = location.get("address")
-                item["housenumber"] = location.get("street_number")
-
-            service_type = point["acf"].get("service_type")
-            if service_type == "depot":
-                apply_category(Categories.POST_DEPOT, item)
-            elif service_type in ("branch", "kiosk"):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json():
+            location.update(location.pop("detailed_address"))
+            item = DictParser.parse(location)
+            item["ref"] = location["code"]
+            item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name").replace("The Courier Guy ", "")
+            item["name"] = self.item_attributes["brand"]
+            item["opening_hours"] = OpeningHours()
+            if location["type"]["name"] == "Locker":
+                apply_category(Categories.PARCEL_LOCKER, item)
+            else:
                 apply_category(Categories.OFFICE_COURIER, item)
+            for day_time in location["openinghours"]:
+                day = day_time["day"]
+                if day.strip() == "Public Holidays":
+                    continue
+                open_time = day_time["open_time"]
+                close_time = day_time["close_time"]
+                if re.match(r"\d+:\d+:\d+", open_time):
+                    item["opening_hours"].add_range(
+                        day=day.strip(), open_time=open_time, close_time=close_time, time_format="%H:%M:%S"
+                    )
+                else:
+                    item["opening_hours"].add_range(
+                        day=day.strip(), open_time=open_time, close_time=close_time, time_format="%H:%M"
+                    )
 
-            yield item
-
-    def parse_lockers(self, response):
-        for locker in response.json():
-            locker.update(locker.pop("detailed_address", {}))
-            item = DictParser.parse(locker)
-            item["ref"] = locker["code"]
-
-            try:
-                oh = OpeningHours()
-                for day in locker.get("openinghours", []):
-                    if day["day"] == "Public Holidays":
-                        # TODO: parse public holidays
-                        continue
-                    oh.add_range(DAYS_EN.get(day["day"]), day["open_time"], day["close_time"], "%H:%M:%S")
-                item["opening_hours"] = oh
-            except Exception as e:
-                self.logger.warning(f"Failed to parse opening hours: {e}")
-                self.crawler.stats.inc_value("atp/hours/failed")
-
-            apply_category(Categories.PARCEL_LOCKER, item)
-            item.update(self.PUDO)
             yield item

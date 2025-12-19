@@ -48,6 +48,43 @@ get_installation_token() {
          | jq -r '.token'
 }
 
+upload_to_s3() {
+    # Upload a file to S3
+    local file_path="$1"
+    local s3_path="$2"
+
+    uv run aws s3 cp --only-show-errors "${file_path}" "s3://${s3_path}"
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "uploading ${file_path} to s3 failed with exit code ${retval}")
+        exit 1
+    fi
+}
+
+upload_to_r2() {
+    # Upload a file to R2
+    local file_path="$1"
+    local r2_path="$2"
+
+    AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
+    AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+    uv run aws s3 cp --endpoint-url="${R2_ENDPOINT_URL}" --only-show-errors "${file_path}" "s3://${r2_path}"
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "uploading ${file_path} to R2 failed with exit code ${retval}")
+        exit 1
+    fi
+}
+
+upload_file() {
+    # Upload a file to a specified location (S3 and R2)
+    local file_path="$1"
+    local path="$2"
+
+    upload_to_s3 "${file_path}" "${S3_BUCKET}/${path}"
+    upload_to_r2 "${file_path}" "${R2_BUCKET}/${path}"
+}
+
 PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
 if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY_BASE64}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
@@ -89,24 +126,31 @@ fi
 spiders=$(echo "${changed_filenames}" | grep "^locations/spiders/")
 
 spider_count=$(echo "${spiders}" | wc -l)
-if [ $spider_count -gt 15 ]; then
+if [ "${spider_count}" -gt 15 ]; then
     (>&2 echo "refusing to run on more than 15 spiders")
     exit 1
 fi
 
-# Manually run a couple spiders when Pipfile/Pipfile.lock changes
-if echo "${changed_filenames}" | grep -q "Pipfile" || echo "${changed_filenames}" | grep -q "Pipfile.lock"; then
-    echo "Pipfile or Pipfile.lock changed. Running a couple spiders."
-    spiders=("locations/spiders/the_works.py" "locations/spiders/the_coffee_club_au.py" "locations/spiders/woods_coffee_us.py")
-elif [ "$spider_count" -eq 0 ]; then
-    (>&2 echo "no spiders modified (only deleted?)")
-    exit 0
+if [ "${spider_count}" -eq 0 ]; then
+    # Manually run a couple spiders when uv.lock or pyproject.toml changes
+    if echo "${changed_filenames}" | grep -q "pyproject.toml" || echo "${changed_filenames}" | grep -q "uv.lock"; then
+        echo "pyproject.toml or uv.lock changed. Running a couple spiders."
+        spiders=$'locations/spiders/the_works.py\nlocations/spiders/the_coffee_club_au.py\nlocations/spiders/woods_coffee_us.py'
+    else
+        (>&2 echo "no spiders modified (only deleted?)")
+        exit 0
+    fi
 fi
 
-if grep PLAYWRIGHT -q -m 1 $spiders; then
-    echo "Playwright detected. Installing requirements."
-    playwright install-deps
-    playwright install firefox
+if grep PlaywrightSpider -q -m 1 $spiders; then
+    echo "Playwright spider detected. Installing requirements."
+    uv run playwright install-deps
+    uv run playwright install firefox
+fi
+
+if grep CamoufoxSpider -q -m 1 $spiders; then
+    echo "Camoufox spider detected. Installing requirements."
+    uv run camoufox fetch
 fi
 
 RUN_DIR="/tmp/output"
@@ -131,13 +175,13 @@ do
     STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
-    timeout -k 5s 90s \
-    scrapy runspider \
+    timeout -k 1m 150s \
+    uv run scrapy runspider \
         -o "file://${OUTFILE}:geojson" \
         -o "file://${PARQUETFILE}:parquet" \
         --loglevel=INFO \
         --logfile="${LOGFILE}" \
-        -s CLOSESPIDER_TIMEOUT=60 \
+        -s CLOSESPIDER_TIMEOUT=120 \
         -s CLOSESPIDER_ERRORCOUNT=1 \
         -s LOGSTATS_FILE="${STATSFILE}" \
         $spider
@@ -155,60 +199,33 @@ do
         FAILURE_REASON="timeout"
     fi
 
-    aws --only-show-errors s3 cp ${LOGFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt
-    retval=$?
-    if [ ! $retval -eq 0 ]; then
-        (>&2 echo "log copy to s3 failed with exit code ${retval}")
-        exit 1
-    fi
+    upload_file "${LOGFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
 
     LOGFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
     echo "${spider} log: ${LOGFILE_URL}"
 
-    if [ -f "$OUTFILE" ]; then
-        FEATURE_COUNT=$(jq --raw-output '.item_scraped_count' ${SPIDER_RUN_DIR}/stats.json)
-
-        if [ $FEATURE_COUNT == "null" ]; then
-            FEATURE_COUNT="0"
-        fi
-
-        if [ $FEATURE_COUNT == "0" ]; then
-            echo "${spider} has no output"
-            FAILURE_REASON="no output"
-            PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
-            EXIT_CODE=1
-            continue
-        fi
-
-        aws s3 cp --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson
-        retval=$?
-        if [ ! $retval -eq 0 ]; then
-            (>&2 echo "output copy to s3 failed with exit code ${retval}")
-            exit 1
-        fi
-
+    if [ -f "${OUTFILE}" ]; then
+        upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
+        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
-        if grep -q 'Stored geojson feed' $LOGFILE; then
-            echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}"
-        fi
+        if [ -f "${STATSFILE}" ]; then
+            upload_file "${STATSFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json"
 
-        aws s3 cp --only-show-errors ${PARQUETFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet
-        retval=$?
-        if [ ! $retval -eq 0 ]; then
-            (>&2 echo "parquet copy to s3 failed with exit code ${retval}")
-        fi
+            FEATURE_COUNT=$(jq --raw-output '.item_scraped_count' ${SPIDER_RUN_DIR}/stats.json)
 
-        aws s3 cp --only-show-errors ${STATSFILE} s3://${BUCKET}/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/stats.json
-        retval=$?
-        if [ ! $retval -eq 0 ]; then
-            (>&2 echo "stats copy to s3 failed with exit code ${retval}")
-        fi
+            if [ "${FEATURE_COUNT}" == "null" ]; then
+                FEATURE_COUNT="0"
+            fi
 
-        # Check the stats JSON to look for things that we consider warnings or errors
-        if [ ! -f "${STATSFILE}" ]; then
-            (>&2 echo "stats file not found")
-        else
+            if [ "${FEATURE_COUNT}" == "0" ]; then
+                echo "${spider} has no output"
+                FAILURE_REASON="no output"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                EXIT_CODE=1
+                continue
+            fi
+
             STATS_WARNINGS=""
             STATS_ERRORS=""
 
@@ -245,7 +262,7 @@ do
             fi
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
-            dupe_dropped=$(jq '."dupefilter/filtered" // 0' "${STATSFILE}")
+            dupe_dropped=$(jq '."atp/duplicate_count" // 0' "${STATSFILE}")
             dupe_percent=$(awk -v dd="${dupe_dropped}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (dd / fc) * 100 }')
             if awk -v dp="${dupe_percent}" 'BEGIN { exit !(dp > 30) }'; then
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
@@ -274,21 +291,25 @@ do
 
             num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
             num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)
-            if [ $num_errors -gt 0 ]; then
+            if [ "${num_errors}" -gt 0 ]; then
                 FAILURE_REASON="stats"
                 EXIT_CODE=1
             fi
 
-            if [ $num_errors -gt 0 ] || [ $num_warnings -gt 0 ]; then
+            if [ "${num_errors}" -gt 0 ] || [ "${num_warnings}" -gt 0 ]; then
                 # Include details in an expandable section if there are warnings or errors
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
             else
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
             fi
             continue
+        else
+            (>&2 echo "${spider} has no stats file")
+            STATS_WARNINGS=""
+            STATS_ERRORS=""
         fi
 
-        PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+        PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
     else
         echo "${spider} has no output"
         FAILURE_REASON="no output"

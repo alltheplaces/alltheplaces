@@ -276,8 +276,7 @@ PARKING_TYPE_MAP = {
 class GbfsSpider(CSVFeedSpider):
     name = "gbfs"
     start_urls = ["https://github.com/MobilityData/gbfs/raw/master/systems.csv"]
-    download_delay = 2
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2}
 
     def get_authorized_url(self, url: str, authentication_info: str) -> str | None:
         """Adds authentication_info to the url if it's not already part of it,

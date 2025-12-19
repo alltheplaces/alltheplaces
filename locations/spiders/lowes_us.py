@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import FIREFOX_LATEST
@@ -13,7 +14,7 @@ class LowesUSSpider(SitemapSpider):
     allowed_domains = ["lowes.com"]
     sitemap_urls = ["https://www.lowes.com/sitemap/store0.xml"]
     sitemap_rules = [(r"^https://www.lowes.com/store", "parse_store")]
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
     def parse_hours(self, store_hours):
@@ -67,5 +68,7 @@ class LowesUSSpider(SitemapSpider):
 
         if start_date := json_data["storeDetails"].get("openDate"):
             properties["extras"]["start_date"] = start_date
+
+        apply_category(Categories.SHOP_DOITYOURSELF, properties)
 
         yield Feature(**properties)

@@ -51,6 +51,7 @@ DAYS_EN = {
     "Tu": "Tu",
     "Wednesday": "We",
     "Wednesdays": "We",
+    "Wednes": "We",
     "Weds": "We",
     "Wed": "We",
     "We": "We",
@@ -68,6 +69,7 @@ DAYS_EN = {
     "Fr": "Fr",
     "Saturday": "Sa",
     "Saturdays": "Sa",
+    "Satur": "Sa",
     "Sat": "Sa",
     "Sa": "Sa",
     "Sunday": "Su",
@@ -120,6 +122,23 @@ DAYS_BG = {
     "нед": "Su",
     "Не": "Su",
     "Нд": "Su",
+}
+
+DAYS_BR = {
+    "Segunda": "Mo",
+    "Seg": "Mo",
+    "Terça": "Tu",
+    "Ter": "Tu",
+    "Quarta": "We",
+    "Qua": "We",
+    "Quinta": "Th",
+    "Qui": "Th",
+    "Sexta": "Fr",
+    "Sex": "Fr",
+    "Sábado": "Sa",
+    "Sáb": "Sa",
+    "Domingos": "Su",
+    "Dom": "Su",
 }
 
 DAYS_CH = {
@@ -218,6 +237,23 @@ DAYS_CZ = {
     "Ne": "Su",
 }
 
+DAYS_EE = {
+    "Esmaspäev": "Mo",
+    "Es": "Mo",
+    "Teisipäev": "Tu",
+    "Te": "Tu",
+    "Kolmapäev": "We",
+    "Ko": "We",
+    "Neljapäev": "Th",
+    "Ne": "Th",
+    "Reede": "Fr",
+    "Re": "Fr",
+    "Laupäev": "Sa",
+    "La": "Sa",
+    "Pühapäev": "Su",
+    "Pü": "Su",
+}
+
 DAYS_GR = {
     "Δε": "Mo",
     "Δευτέρα": "Mo",
@@ -252,6 +288,7 @@ DAYS_HR = {
 
 DAYS_HU = {
     "Hétfő": "Mo",
+    "Hetfo": "Mo",
     "Hé": "Mo",
     "H": "Mo",
     "Kedd": "Tu",
@@ -261,9 +298,11 @@ DAYS_HU = {
     "Sze": "We",
     # "Sz": "We",
     "Csütörtök": "Th",
+    "Csutortok": "Th",
     "Csü": "Th",
     "Cs": "Th",
     "Péntek": "Fr",
+    "Pentek": "Fr",
     "Pé": "Fr",
     "P": "Fr",
     "Szombat": "Sa",
@@ -272,6 +311,7 @@ DAYS_HU = {
     "Va": "Sa",
     "V": "Su",
     "Vasárnap": "Su",
+    "Vasarnap": "Su",
     "Vas": "Su",
 }
 
@@ -287,12 +327,19 @@ DAYS_IL = {
 
 DAYS_KR = {
     "월요일": "Mo",
+    "월": "Mo",
     "화요일": "Tu",
+    "화": "Tu",
     "수요일": "We",
+    "수": "We",
     "목요일": "Th",
+    "목": "Th",
     "금요일": "Fr",
+    "금": "Fr",
     "토요일": "Sa",
+    "토": "Sa",
     "일요일": "Su",
+    "일": "Su",
 }
 
 DAYS_LT = {
@@ -318,18 +365,25 @@ DAYS_LT = {
 DAYS_SE = {
     "Måndag": "Mo",
     "Mån": "Mo",
+    "Må": "Mo",
     "Tisdag": "Tu",
     "Tis": "Tu",
+    "Ti": "Tu",
     "Onsdag": "We",
     "Ons": "We",
+    "On": "We",
     "Torsdag": "Th",
     "Tors": "Th",
+    "To": "Th",
     "Fredag": "Fr",
     "Fre": "Fr",
+    "Fr": "Fr",
     "Lördag": "Sa",
     "Lör": "Sa",
+    "Lö": "Sa",
     "Söndag": "Su",
     "Sön": "Su",
+    "Sö": "Su",
 }
 DAYS_SI = {
     "Po": "Mo",
@@ -405,6 +459,13 @@ DAYS_FR = {
     "Ve": "Fr",
     "Sa": "Sa",
     "Di": "Su",
+    "Lun": "Mo",
+    "Mar": "Tu",
+    "Mer": "We",
+    "Jeu": "Th",
+    "Ven": "Fr",
+    "Sam": "Sa",
+    "Dim": "Su",
     "Lundi": "Mo",
     "Mardi": "Tu",
     "Mercredi": "We",
@@ -683,6 +744,35 @@ DAYS_ID = {
     "Ahad": "Su",
 }
 
+DAYS_TH = {
+    "วันจันทร์": "Mo",
+    "จันทร์": "Mo",
+    "วันอังคาร": "Tu",
+    "วันพุธ": "We",
+    "วันพฤหัสบดี": "Th",
+    "วันศุกร์": "Fr",
+    "วันเสาร์": "Sa",
+    "เสาร์": "Sa",
+    "วันอาทิตย์": "Su",
+}
+
+DAYS_JP = {
+    "月曜日": "Mo",
+    "月": "Mo",
+    "火曜日": "Tu",
+    "火": "Tu",
+    "水曜日": "We",
+    "水": "We",
+    "木曜日": "Th",
+    "木": "Th",
+    "金曜日": "Fr",
+    "金": "Fr",
+    "土曜日": "Sa",
+    "土": "Sa",
+    "日曜日": "Su",
+    "日": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
@@ -691,7 +781,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_ES,
     DAYS_DE,
     DAYS_RU,
-    # Japanese missing
+    DAYS_JP,
     DAYS_FR,
     DAYS_PT,
     DAYS_IT,
@@ -726,7 +816,9 @@ NAMED_DAY_RANGES_DK = {
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "All Days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "Weekday": ["Mo", "Tu", "We", "Th", "Fr"],
     "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
+    "Weekend": ["Sa", "Su"],
     "Weekends": ["Sa", "Su"],
 }
 
@@ -862,6 +954,12 @@ CLOSED_NL = ["gesloten"]
 
 CLOSED_TH = ["ปิดทำการ"]
 
+CLOSED_ES = ["cerrado"]
+
+CLOSED_SE = ["stängd", "stangd"]
+
+CLOSED_FR = ["fermée", "fermé", "fermee", "ferme"]
+
 logger = logging.getLogger(__name__)
 
 
@@ -874,7 +972,7 @@ def day_range(start_day, end_day):
         return DAYS[start_ix:] + DAYS[: end_ix + 1]
 
 
-def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
+def sanitise_day(day: str, days: dict[str, str] = DAYS_EN) -> str | None:
     if day is None:
         return None
 
@@ -896,7 +994,13 @@ class OpeningHours:
     def __bool__(self):
         return bool(self.day_hours or self.days_closed)
 
-    def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
+    def add_days_range(
+        self,
+        days: list[str],
+        open_time: str | time.struct_time,
+        close_time: str | time.struct_time,
+        time_format: str = "%H:%M",
+    ):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
 
@@ -910,6 +1014,18 @@ class OpeningHours:
 
         Recommended to use with an appropriate helper to pass a specific string or list, ie:
         `set_closed(DAYS_SR["Ponedeljak"])` or `set_closed(["Mo", "Tu", "We"])`
+
+        In the situation where source data does not explicitly state a feature
+        is closed on a specific day of a week, do not make an assumption of
+        closure status in the absence of other data. For example, source data
+        may be `{"open_days": ["monday", "wednesday"]}` for one feature, and
+        `{"open_days": ["monday", "tuesday", "wednesday"]}` for a different
+        feature. Do not assume that the first feature is closed on Tuesdays
+        unless there is other data explicitly stating this is the case. If the
+        front end website displaying this data treats the absence of `"Tuesday"`
+        in the `"open_days"` array as closure and visually states "Tuesdays:
+        closed" on the website, this function can then be used to set Tuesdays
+        to be closed.
         """
         for day in [days] if isinstance(days, str) else days:
             day = sanitise_day(day)
@@ -919,7 +1035,14 @@ class OpeningHours:
             self.day_hours.pop(day, None)
             self.days_closed.add(day)
 
-    def add_range(self, day, open_time, close_time, time_format="%H:%M", closed=CLOSED_EN):
+    def add_range(
+        self,
+        day,
+        open_time: str | time.struct_time,
+        close_time: str | time.struct_time,
+        time_format: str = "%H:%M",
+        closed: list[str] = CLOSED_EN,
+    ):
         day = sanitise_day(day)
 
         if day not in DAYS:
@@ -942,6 +1065,10 @@ class OpeningHours:
         if isinstance(close_time, str):
             if close_time.lower() in closed:
                 return
+            if open_time in ("00:00", "0:00", "00:00:00") and close_time in ("00:00", "0:00", "00:00:00"):
+                # Invalid range supplied. Probably the source data uses this
+                # notation for closed days.
+                return
             if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
             if close_time in ("24:00:00", "00:00:00"):
@@ -955,6 +1082,11 @@ class OpeningHours:
                 # may be 0:00 or even more divergent if time_format
                 # parameter was used with some exotic value
                 close_time = time.strptime("23:59", "%H:%M")
+        if open_time.tm_hour == close_time.tm_hour and open_time.tm_min == close_time.tm_min:
+            # A single time of day was provided, not a range. Ignore request.
+            # Sometimes source data uses 00:00-00:00 as a range denoting a
+            # closed day.
+            return
 
         self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
@@ -1050,7 +1182,7 @@ class OpeningHours:
         return delimiter_regex
 
     @staticmethod
-    def single_days_regex(days: dict = DAYS_EN) -> str:
+    def single_days_regex(days: dict[str, str] = DAYS_EN) -> str:
         """
         Creates a regular expression for capturing single day names
         within a string containing time information. For example, in the
@@ -1064,7 +1196,7 @@ class OpeningHours:
         return single_days_regex
 
     @staticmethod
-    def day_ranges_regex(days: dict = DAYS_EN, delimiters: list[str] = DELIMITERS_EN) -> list[str]:
+    def day_ranges_regex(days: dict[str, str] = DAYS_EN, delimiters: list[str] = DELIMITERS_EN) -> list[str]:
         """
         Creates a list of regular expressions for capturing all
         combinations of day ranges, with wrap-around for ranges
@@ -1109,7 +1241,7 @@ class OpeningHours:
         return days_regex_parts
 
     @staticmethod
-    def named_day_ranges_regex(named_day_ranges: dict = NAMED_DAY_RANGES_EN) -> str:
+    def named_day_ranges_regex(named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN) -> str:
         """
         Creates a regular expression for capturing named day ranges
         within a string containing time information. For example, in
@@ -1125,8 +1257,8 @@ class OpeningHours:
 
     @staticmethod
     def any_day_extraction_regex(
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
         delimiters: list[str] = DELIMITERS_EN,
     ) -> str:
         """
@@ -1160,7 +1292,9 @@ class OpeningHours:
         return days_regex
 
     @staticmethod
-    def replace_named_times(hours_string: str, named_times: dict = NAMED_TIMES_EN, time_24h: bool = True) -> str:
+    def replace_named_times(
+        hours_string: str, named_times: dict[str, list[str]] = NAMED_TIMES_EN, time_24h: bool = True
+    ) -> str:
         """
         Replaces named times (e.g. Midnight) in a string with their
         12h equivalent (e.g. 12:00AM) or 24h equivalent (e.g 00:00).
@@ -1216,8 +1350,8 @@ class OpeningHours:
     @staticmethod
     def hours_extraction_regex(
         time_24h: bool = True,
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
         delimiters: list[str] = DELIMITERS_EN,
     ) -> str:
         """
@@ -1255,8 +1389,8 @@ class OpeningHours:
 
     @staticmethod
     def closed_days_extraction_regex(
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
         delimiters: list[str] = DELIMITERS_EN,
         closed: list[str] = CLOSED_EN,
     ) -> str:
@@ -1287,7 +1421,9 @@ class OpeningHours:
 
     @staticmethod
     def days_in_day_range(
-        day_range: list[str], days: dict = DAYS_EN, named_day_ranges: dict = NAMED_DAY_RANGES_EN
+        day_range: list[str],
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
     ) -> list[str]:
         """ """
         day_list = []
@@ -1308,9 +1444,9 @@ class OpeningHours:
     @staticmethod
     def extract_hours_from_string(
         ranges_string: str,
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
-        named_times: dict = NAMED_TIMES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
+        named_times: dict[str, list[str]] = NAMED_TIMES_EN,
         delimiters: list[str] = DELIMITERS_EN,
         closed: list[str] = CLOSED_EN,
     ) -> list[tuple]:
@@ -1355,10 +1491,26 @@ class OpeningHours:
         ranges_string_24h = OpeningHours.replace_named_times(ranges_string, named_times, True)
         ranges_string_12h = OpeningHours.replace_named_times(ranges_string, named_times, False)
 
-        # Execute all three regular expressions.
-        results_24h = re.findall(hours_extraction_regex_24h, ranges_string_24h, re.IGNORECASE)
-        if len(results_24h) == 0:
+        # Execute regular expressions.
+        if re.search(r"\d\s*[AP]\.?M\.?", ranges_string_24h, re.IGNORECASE):
+            # Input string contains AM/PM (or derivatives) and therefore
+            # should be treated as having 12h time format. Execute the regular
+            # expression for 12h time format only.
+            results_24h = []
             results_12h = re.findall(hours_extraction_regex_12h, ranges_string_12h, re.IGNORECASE)
+        else:
+            # Execute the regular expression for 24h time format only. There
+            # is an unlikely chance that the string is actually in 12h time
+            # format and doesn't use AM/PM (or derivatives). Unfortunately
+            # there is no way to disambiguate whether "Mo-Su 7:00-11:00" is a
+            # feature open for 5 hours of the day, or 18 hours of the day. It
+            # is however more likely that a feature is open in the morning and
+            # afternoon, so we guess 24h time format. A spider will have to
+            # provide a hint (such as adding "AM" after instances of ":00") if
+            # this assumption of 24h time format is invalid for a particular
+            # spider.
+            results_24h = re.findall(hours_extraction_regex_24h, ranges_string_24h, re.IGNORECASE)
+            results_12h = []
         results_closed = re.findall(closed_days_extraction_regex, ranges_string_24h, re.IGNORECASE)
 
         # Normalise results to 24h time.
@@ -1405,7 +1557,7 @@ class OpeningHours:
                 )
                 for time_range in time_ranges:
                     time_start_hour = time_range[0]
-                    if time_start_hour == "00":
+                    if time_start_hour == "00" or time_start_hour == "0":
                         time_start_hour = "12"
                     if time_range[1]:
                         time_start = f"{time_start_hour}:{time_range[1]}"
@@ -1419,7 +1571,7 @@ class OpeningHours:
                     time_start_24h = time.strptime(time_start, "%I:%M%p")
                     time_start_24h = time.strftime("%H:%M", time_start_24h)
                     time_end_hour = time_range[3]
-                    if time_end_hour == "00":
+                    if time_end_hour == "00" or time_end_hour == "0":
                         time_end_hour = "12"
                     if time_range[4]:
                         time_end = f"{time_end_hour}:{time_range[4]}"
@@ -1446,9 +1598,9 @@ class OpeningHours:
     def add_ranges_from_string(
         self,
         ranges_string: str,
-        days: dict = DAYS_EN,
-        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
-        named_times: dict = NAMED_TIMES_EN,
+        days: dict[str, str] = DAYS_EN,
+        named_day_ranges: dict[str, list[str]] = NAMED_DAY_RANGES_EN,
+        named_times: dict[str, list[str]] = NAMED_TIMES_EN,
         delimiters: list[str] = DELIMITERS_EN,
         closed: list[str] = CLOSED_EN,
     ) -> None:

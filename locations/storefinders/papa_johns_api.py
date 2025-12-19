@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Iterable
 
 from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import Request, TextResponse
 from unidecode import unidecode
 
 from locations.categories import PaymentMethods, apply_yes_no
@@ -37,7 +37,7 @@ class PapaJohnsApiSpider(Spider):
     item_attributes = PAPA_JOHNS_SHARED_ATTRIBUTES
     website_base = ""
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
         features = response.json().get("page", [])
         for location in features:
             self.pre_process_data(location)
@@ -74,7 +74,7 @@ class PapaJohnsApiSpider(Spider):
         if next_page := response.json()["next_page"]:
             yield Request(url=f"{self.start_urls[0]}&page={next_page}")
 
-    def parse_hours(self, location, dispatch_method: str) -> OpeningHours:
+    def parse_hours(self, location: dict, dispatch_method: str) -> OpeningHours:
         oh = OpeningHours()
         for rule in location["business_hours"]:
             if rule["dispatch_method"] != dispatch_method:
@@ -91,6 +91,6 @@ class PapaJohnsApiSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the data"""
 
-    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         """Override with any post processing on the item"""
         yield item

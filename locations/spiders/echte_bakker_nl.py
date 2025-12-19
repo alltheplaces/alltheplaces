@@ -1,41 +1,20 @@
-from typing import Any, Iterable
+from typing import Any
 
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class EchteBakkerNLSpider(Spider):
     name = "echte_bakker_nl"
     item_attributes = {"brand": "De Echte Bakker", "brand_wikidata": "Q16920716"}
-
-    def make_request(self, page: int) -> JsonRequest:
-        return JsonRequest(url="https://echtebakker.nl/api/fetch-dealers?page={}".format(page), meta={"page": page})
-
-    def start_requests(self) -> Iterable[Request]:
-        yield self.make_request(1)
+    start_urls = ["https://echtebakker.nl/api/fetch-dealers"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        if response.meta["page"] < response.json()["lastPage"]:
-            yield self.make_request(response.meta["page"] + 1)
-
-        if isinstance(response.json()["data"], list):
-            locations = response.json()["data"]
-        elif isinstance(response.json()["data"], dict):
-            locations = response.json()["data"].values()
-
-        for location in locations:
+        for location in response.json():
             item = DictParser.parse(location)
-            item["lat"] = (location["address"] or {}).get("latitude")
-            item["lon"] = (location["address"] or {}).get("longitude")
-
-            item["opening_hours"] = OpeningHours()
-            for day, times in location["opening_hours"].items():
-                if day == "exceptions":
-                    continue
-                for time in times:
-                    item["opening_hours"].add_range(day, *time.split("-"))
-
+            item["name"], item["branch"] = item.pop("name").split(" - ")
+            item["name"] = item["name"].split(", ")[0]
+            item["street_address"] = item.pop("addr_full")
             yield item

@@ -14,6 +14,11 @@ class MyflexboxSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        if "myflexbox.de" in response.url:
+            base_url = "https://customer.myflexbox.de/locations/{}"
+        else:
+            base_url = "https://customer.myflexbox.at/locations/{}"
+
         for location in response.json()["lockers"]:
             item = Feature()
             item["ref"] = "{}-{}".format(location["countryCode"], location["externalId"])
@@ -29,5 +34,7 @@ class MyflexboxSpider(Spider):
                 if day["day"] == "HOLIDAY":
                     continue
                 item["opening_hours"].add_range(day["day"], day["startTime"], day["endTime"])
+
+            item["website"] = base_url.format(location["lockerId"])
 
             yield item

@@ -1,13 +1,15 @@
-import json
 import re
+from json import dumps
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class RemaxFRSpider(scrapy.Spider):
+class RemaxFRSpider(Spider):
     name = "remax_fr"
     item_attributes = {
         "brand": "RE/MAX",
@@ -15,9 +17,9 @@ class RemaxFRSpider(scrapy.Spider):
     }
     allowed_domains = ["remax.fr", "s.maxwork.fr"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.remax.fr/Api/Office/Search?size=2000"
-        payload = json.dumps(
+        payload = dumps(
             {
                 "filters": [
                     {"field": "OfficeName", "type": 0, "fuzziness": None},
@@ -31,12 +33,12 @@ class RemaxFRSpider(scrapy.Spider):
             "languageid": "2",
             "user-agent": BROWSER_DEFAULT,
         }
-        yield scrapy.Request(url=url, headers=headers, method="POST", body=payload, callback=self.parse)
+        yield Request(url=url, headers=headers, method="POST", body=payload, callback=self.parse)
 
     def parse(self, response):
         url = "https://s.maxwork.fr/site/static/2/offices/details_V2/{}.html"
         for data in response.json().get("results"):
-            yield scrapy.Request(
+            yield Request(
                 url=url.format(data.get("officeNumber")), callback=self.parse_agence, cb_kwargs={"properties": data}
             )
 

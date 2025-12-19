@@ -37,7 +37,7 @@ class RocomamasSpider(JSONBlobSpider):
     countries = ROCOMAMAS_COUNTRIES
     brands = ROCOMAMAS_BRANDS
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             for country in self.countries:
                 yield JsonRequest(

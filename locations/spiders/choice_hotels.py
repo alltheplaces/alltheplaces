@@ -13,8 +13,10 @@ class ChoiceHotelsSpider(SitemapSpider):
     allowed_domains = ["choicehotels.com"]
     # Sitemapindex with below in it is "https://www.choicehotels.com/sitemapindex.xml"
     sitemap_urls = ["https://www.choicehotels.com/brandsearchsitemap.xml.gz"]
-    user_agent = CHROME_LATEST
-    download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
+    custom_settings = {
+        "DOWNLOAD_DELAY": 5,  # Requested by https://www.choicehotels.com/robots.txt
+        "USER_AGENT": CHROME_LATEST,
+    }
     requires_proxy = True
 
     brand_mapping = {
@@ -22,7 +24,7 @@ class ChoiceHotelsSpider(SitemapSpider):
         "BR": ("Cambria Hotel", "Q113152476"),
         "CC": ("Circus Circus", "", Categories.HOTEL),
         "CI": ("Comfort Inn", "Q113152349", Categories.HOTEL),
-        "CL": ("Clarion Hotels", "Q10454567"),
+        "CL": ("Clarion", "Q10454567"),
         "CS": ("Comfort Suites", "Q55525150"),
         "CX": ("Country", "", Categories.HOTEL),
         "EC": ("El Cid", "", Categories.HOTEL),

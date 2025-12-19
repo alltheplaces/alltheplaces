@@ -14,6 +14,7 @@ class TobyCarveryGBSpider(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["Restaurant"]
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:

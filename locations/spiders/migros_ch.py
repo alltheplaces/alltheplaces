@@ -1,6 +1,8 @@
 import json
 import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -31,11 +33,11 @@ class MigrosCHSpider(SitemapSpider):
     }
     obsolete_brands = {"mod"}
     allowed_domains = ["filialen.migros.ch"]
-    sitemap_urls = ["https://filialen.migros.ch/sitemap.xml"]
+    sitemap_urls = ["https://filialen.migros.ch/robots.txt"]
     sitemap_follow = ["/de/"]
-    sitemap_rules = [(r"https://filialen\.migros\.ch/de/", "parse")]
+    sitemap_rules = [(r"https://filialen\.migros\.ch/de/[-\w]+$", "parse")]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
 
         data = json.loads(
             re.search(
@@ -92,4 +94,4 @@ class MigrosCHSpider(SitemapSpider):
                         close_time = hours.get("time_close%d" % i)
                         if open_time and close_time:
                             oh.add_range(day, open_time, close_time)
-        return oh.as_opening_hours()
+        return oh

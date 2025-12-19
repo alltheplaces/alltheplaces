@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.hours import DAYS_DE, OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JumboCHSpider(SitemapSpider):
@@ -18,6 +19,8 @@ class JumboCHSpider(SitemapSpider):
     sitemap_urls = ["https://www.jumbo.ch/sitemap.xml"]
     sitemap_follow = ["/sitemap/STORE-de-"]
     sitemap_rules = [(r"_POS$", "parse_store")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse_store(self, response):
         # Not using StructuredDataSpider because the site supplies *two*

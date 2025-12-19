@@ -1,11 +1,12 @@
-from locations.storefinders.yext_answers import YextAnswersSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class PfChangsSpider(YextAnswersSpider):
+class PfChangsSpider(RioSeoSpider):
     name = "pf_changs"
     item_attributes = {"brand": "P.F. Chang's", "brand_wikidata": "Q5360181"}
-    endpoint = "https://prod-cdn.us.yextapis.com/v2/accounts/me/search/vertical/query"
-    api_key = "74fc62da2a16bf5d87424b94f3bfddcc"
-    experience_key = "locator"
-    feature_type = "restaurants"
-    drop_attributes = {"contact:instagram", "twitter"}
+    end_point = "https://maps.locations.pfchangs.com"
+    template = "search"
+
+    def post_process_feature(self, feature, location):
+        feature["branch"] = feature.pop("name")
+        yield feature

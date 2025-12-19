@@ -1,32 +1,36 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any, Iterable
 
-from locations.items import set_closed
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.http import JsonRequest, Request, Response
+from scrapy.spiders import Spider
+
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
 
 
-class ZaxbysUSSpider(SitemapSpider, StructuredDataSpider):
+class ZaxbysUSSpider(Spider):
     name = "zaxbys_us"
     item_attributes = {"brand": "Zaxby's", "brand_wikidata": "Q8067525"}
-    allowed_domains = ["www.zaxbys.com"]
-    sitemap_urls = ["https://www.zaxbys.com/server-sitemap.xml"]
-    sitemap_rules = [(r"\/locations\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/?$", "parse_sd")]
-    wanted_types = ["Restaurant"]
-    custom_settings = {"REDIRECT_ENABLED": False}
-    search_for_facebook = False
-    search_for_twitter = False
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            entry["loc"] = entry["loc"].rstrip("/")
-            yield entry
+    def start_requests(self) -> Iterable[Request]:
+        for lat, lon in country_iseadgg_centroids("US", 94):
+            yield JsonRequest(
+                url=f"https://zapi.zaxbys.com/v1/stores/near?latitude={lat}&longitude={lon}&radius=100&limit=100",
+            )
 
-    def post_process_item(self, item, response, ld_data):
-        if "undefined" in item["website"]:
-            return
-        if "Closed" in item["name"]:
-            set_closed(item)
-        item["branch"] = item.pop("name")
-        item.pop("image")
-        item.pop("opening_hours")
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json():
+            item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full", None)
+            item["branch"] = item.pop("name").split(" -")[0]
+            item[
+                "website"
+            ] = f'https://www.zaxbys.com/locations/{store["state"]}/{store["city"]}/{store["slug"]}'.lower().replace(
+                " ", "-"
+            )
+            apply_yes_no(Extras.DELIVERY, item, store.get("supportsDelivery"))
+            apply_yes_no(Extras.TAKEAWAY, item, store.get("supportsPickup"))
+            apply_yes_no(Extras.INDOOR_SEATING, item, store.get("supportsDineIn"))
+            apply_yes_no(Extras.DRIVE_THROUGH, item, store.get("supportsDriveThru"))
+            apply_yes_no(Extras.WIFI, item, store.get("freeWifi"))
+            yield item

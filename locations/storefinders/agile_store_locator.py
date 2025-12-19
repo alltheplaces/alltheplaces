@@ -1,8 +1,8 @@
 import json
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
@@ -28,7 +28,7 @@ class AgileStoreLocatorSpider(Spider):
 
     time_format = "%I:%M%p"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
                 yield JsonRequest(url=f"https://{domain}/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1")
@@ -36,7 +36,7 @@ class AgileStoreLocatorSpider(Spider):
             for url in self.start_urls:
                 yield JsonRequest(url=url)
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for feature in response.json():
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
@@ -54,6 +54,9 @@ class AgileStoreLocatorSpider(Spider):
             return oh
 
         for day_name, hours_ranges in hours_json.items():
+            if not hours_ranges or hours_ranges == "0":
+                oh.set_closed(day_name)
+                continue
             for hours_range in hours_ranges:
                 hours_range = hours_range.upper()
                 if not hours_range or hours_range == "0":
@@ -79,6 +82,6 @@ class AgileStoreLocatorSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

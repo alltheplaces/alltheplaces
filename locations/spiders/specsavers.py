@@ -16,6 +16,7 @@ class SpecsaversSpider(Spider):
         "www.specsavers.ca",
         "www.specsavers.com.au",
     ]
+    requires_proxy = True
 
     def start_requests(self):
         for domain in self.allowed_domains:
@@ -143,6 +144,7 @@ fragment sectionalNotification on StoreSectionalNotification {
                     continue
                 item = deepcopy(base_item)
                 item["ref"] = store[store_type]["storeNumber"]
+                item["branch"] = item.pop("name")
                 if store[store_type].get("contactInfo"):
                     item["phone"] = store[store_type]["contactInfo"].get("phone")
                     item["email"] = store[store_type]["contactInfo"].get("email")

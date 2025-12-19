@@ -1,8 +1,7 @@
 import json
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -15,13 +14,16 @@ from locations.user_agents import FIREFOX_LATEST
 class LaHalleFRSpider(Spider):
     name = "la_halle_fr"
     item_attributes = {"brand": "La Halle", "brand_wikidata": "Q100728296"}
+    start_urls = [
+        "https://www.lahalle.com/on/demandware.store/Sites-LHA_FR_SFRA-Site/fr_FR/Stores-FindStores?showMap=true&lat=48.85349504454055&long=2.3483914659676657&radius=10000"
+    ]
+    allowed_domains = ["www.lahalle.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
-    def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(
-            url="https://www.lahalle.com/on/demandware.store/Sites-LHA_FR_SFRA-Site/fr_FR/Stores-FindStores?showMap=true&lat=48.85349504454055&long=2.3483914659676657&radius=10000",
-        )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["stores"]:

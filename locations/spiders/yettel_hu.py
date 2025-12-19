@@ -2,6 +2,7 @@ from html import unescape
 
 from chompjs import parse_js_object
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_HU, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -17,6 +18,7 @@ class YettelHUSpider(JSONBlobSpider):
         return parse_js_object(locations_js)
 
     def post_process_item(self, item, response, location):
+        item["branch"] = item.pop("name").replace("Yettel ", "")
         item["ref"] = location["code"]
         item["street_address"] = item.pop("addr_full", None)
         hours_string = " ".join(
@@ -24,4 +26,5 @@ class YettelHUSpider(JSONBlobSpider):
         )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_HU)
+        apply_category(Categories.SHOP_TELECOMMUNICATION, item)
         yield item

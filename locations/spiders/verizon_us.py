@@ -4,6 +4,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -69,5 +70,7 @@ class VerizonUSSpider(SitemapSpider):
                 item["operator_wikidata"] = self.item_attributes["brand_wikidata"]
 
             item["opening_hours"] = self.parse_hours(store_data.get("openingHours"))
+
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
 
             yield item

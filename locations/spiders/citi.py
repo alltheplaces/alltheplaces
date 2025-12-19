@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -6,15 +8,15 @@ from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 
-class CitiSpider(scrapy.Spider):
+class CitiSpider(Spider):
     name = "citi"
     item_attributes = {"brand": "Citibank", "brand_wikidata": "Q857063"}
     allowed_domains = ["citi.com"]
-    download_delay = 1.5
+    custom_settings = {"DOWNLOAD_DELAY": 1.5}
 
     headers = {"client_id": "4a51fb19-a1a7-4247-bc7e-18aa56dd1c40"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         with open_searchable_points("us_centroids_100mile_radius_state.csv") as points:
             next(points)
             for point in points:

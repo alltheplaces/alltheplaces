@@ -1,34 +1,37 @@
-import json
-from urllib.parse import urljoin
+from typing import Iterable
 
-from scrapy import Selector, Spider
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
-from locations.dict_parser import DictParser
+from locations.camoufox_spider import CamoufoxSpider
+from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
 
-class YhaGBSpider(Spider):
+class YhaGBSpider(SitemapSpider, CamoufoxSpider):
     name = "yha_gb"
-    item_attributes = {"brand": "YHA", "brand_wikidata": "Q118234608"}
-    start_urls = ["https://www.yha.org.uk/hostels/all-youth-hostels"]
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    item_attributes = {"brand": "Youth Hostels Association", "brand_wikidata": "Q8059214"}
+    allowed_domains = ["www.yha.org.uk"]
+    sitemap_urls = ["https://www.yha.org.uk/sitemap.xml"]
+    sitemap_rules = [(r"^https:\/\/www\.yha\.org\.uk\/hostel\/yha-[\w\-]+", "parse")]
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"CAMOUFOX_MAX_PAGES_PER_CONTEXT": 1, "CAMOUFOX_MAX_CONTEXTS": 1}
 
-    def parse(self, response, **kwargs):
-        data = json.loads(response.xpath('//script[@data-drupal-selector="drupal-settings-json"]/text()').get())
-        for location in DictParser.get_nested_key(data, "results"):
-            item = Feature()
-            item["lat"] = location["location"]["lat"]
-            item["lon"] = location["location"]["lng"]
-
-            sel = Selector(text=location["markup"])
-
-            item["ref"] = sel.xpath("//@data-result").get()
-            item["image"] = sel.xpath("//img[@data-src]/@data-src").get()
-            item["name"] = sel.xpath('normalize-space(//h3[@class="search-teaser__title"]/text())').get()
-            item["addr_full"] = sel.xpath('//p[@class="location"]/text()').get()
-            item["website"] = urljoin(response.url, sel.xpath("//a/@href").get())
-            apply_category({"tourism": "hostel"}, item)
-            yield item
+    def parse(self, response: Response) -> Iterable[Feature]:
+        properties = {
+            "ref": response.url,
+            "branch": response.xpath("//title/text()")
+            .get()
+            .split("|", 1)[0]
+            .strip()
+            .removeprefix("YHA ")
+            .removesuffix(" Hostel"),
+            "lat": response.xpath("//@data-lat").get(),
+            "lon": response.xpath("//@data-lng").get(),
+            "addr_full": merge_address_lines(response.xpath('//div[@class="map-overlay__section"]/a/text()').getall()),
+            "phone": response.xpath('//dd/a[contains(@href, "tel:")]/@href').get(),
+            "website": response.url,
+        }
+        apply_category(Categories.TOURISM_HOSTEL, properties)
+        yield Feature(**properties)

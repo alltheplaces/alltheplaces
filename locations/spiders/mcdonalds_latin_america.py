@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -32,7 +32,7 @@ class McdonaldsLatinAmericaSpider(Spider):
         "VE",
     ]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country_code in self.country_codes:
             yield JsonRequest(url=self.start_urls[0], headers={"x-app-country": country_code}, dont_filter=True)
 

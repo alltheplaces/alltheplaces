@@ -1,56 +1,32 @@
-import html
-import json
-import re
+from typing import Any
 
-from parsel import Selector
+from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from locations.categories import Categories
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-
-HTML_TAGS = re.compile("<[^<]+?>")
-
-
-def strip_tags(s):
-    return html.unescape(HTML_TAGS.sub("", s))
+from locations.items import Feature
 
 
 class AwaySpider(Spider):
     name = "away"
-    item_attributes = {
-        "brand": "Away",
-        "brand_wikidata": "Q48743138",
-        "extras": Categories.SHOP_BAG.value,
-        "name": "Away",
-    }
-    start_urls = ["https://www.awaytravel.com/stores"]
+    item_attributes = {"brand": "Away", "brand_wikidata": "Q48743138"}
+    start_urls = ["https://www.awaytravel.com/pages/stores"]
 
-    def parse(self, response):
-        data = json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())
-        for location in data["props"]["pageProps"]["fallback"]["store-location-section-us"]["stores"]:
-            item = DictParser.parse(location)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for button in response.xpath("//button[@data-mobile-store]"):
+            location_name = button.xpath("./@data-mobile-store").get()
+            footer = response.xpath(f"//div[@data-footer-store={location_name!r}]")
+            if not footer:
+                continue
 
-            item["addr_full"] = strip_tags(item["addr_full"])
-            item["branch"] = location["homepageCity"]
-            item["website"] = response.urljoin(location["linkHref"])
-            item["image"] = location["metaImage"]["url"]
-            del item["name"]
+            item = Feature()
+            item["branch"] = location_name
+            item["ref"] = button.xpath("./@data-href").get().removeprefix("/pages/store/")
+            item["website"] = response.urljoin(button.xpath("./@data-href").get())
+            item["lat"] = button.xpath("./@data-latitude").get()
+            item["lon"] = button.xpath("./@data-longitude").get()
 
-            oh = OpeningHours()
-            oh.add_ranges_from_string(strip_tags(location["hours"]))
-            item["opening_hours"] = oh
-
-            links = Selector(text=location["description"]).xpath("//a/@href").getall()
-
-            if not item["email"]:
-                for link in links:
-                    if link.startswith("mailto:"):
-                        item["email"] = link.removeprefix("mailto:")
-
-            if not item["phone"]:
-                for link in links:
-                    if link.startswith("tel:"):
-                        item["phone"] = link.removeprefix("tel:")
+            item["image"] = response.urljoin(footer.xpath(".//div[@class='footer-store__image']/img/@src").get())
+            item["phone"] = footer.xpath(".//a[starts-with(@href, 'tel:')]/@href").get()
+            item["addr_full"] = footer.xpath(".//address/*/text()").get()
 
             yield item

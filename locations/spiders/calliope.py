@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Selector, Spider
+from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
@@ -16,7 +16,7 @@ class CalliopeSpider(Spider):
             headers={"X-Requested-With": "XMLHttpRequest"},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Request, Selector, Spider
-from scrapy.http import Response
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
@@ -17,7 +17,7 @@ class AviaEUSpider(Spider):
         "Avia": AVIA_SHARED_ATTRIBUTES,
         "Esso Express": {"brand": "Esso Express", "brand_wikidata": "Q2350336"},
         "Esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "Tamoil Express": {"brand": "Tamoil express", "brand_wikidata": "Q124658477"},
+        "Tamoil Express": {"brand": "Tamoil Express", "brand_wikidata": "Q124658477"},
         "Tamoil": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
         "Tankeasy": {"brand": "TankEasy", "brand_wikidata": "Q124608381"},
         "Truckeasy": {"brand": "TruckEasy", "brand_wikidata": "Q124608382"},
@@ -48,7 +48,7 @@ class AviaEUSpider(Spider):
             meta=dict(page=page),
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

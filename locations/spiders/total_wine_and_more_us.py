@@ -38,12 +38,6 @@ class TotalWineAndMoreUSSpider(Spider):
             item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
             item["website"] = "https://www.totalwine.com/store-info/" + item["ref"]
 
-            for social_account in location.get("socialMedia", []):
-                if social_account["socialMediaType"] == "facebook":
-                    item["facebook"] = social_account["url"]
-                elif social_account["socialMediaType"] == "instagram":
-                    item["extras"]["contact:instagram"] = social_account["url"]
-
             apply_yes_no(Extras.WIFI, item, location["wifiAvailable"], False)
 
             if location["storeHours"]["hasHours"]:

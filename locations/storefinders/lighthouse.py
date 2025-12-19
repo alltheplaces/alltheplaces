@@ -41,9 +41,9 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class LighthouseSpider(Spider):
-    days: dict = None
+    days: dict | None = None
 
-    def parse(self, response: Response):
+    def parse(self, response: Response) -> Iterable[Feature]:
         for location in response.xpath('//article[@data-control="box"]'):
             item = Feature()
             item["ref"] = location.xpath("@id").get()

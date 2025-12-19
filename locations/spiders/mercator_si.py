@@ -23,20 +23,31 @@ class MercatorSISpider(SitemapSpider, StructuredDataSpider):
         if item["website"] == "https://www.mercator.si/prodajna-mesta/page-6/":
             return
 
-        label = html.unescape(item.get("name", "")).upper()
-        if label.startswith("HIPERMARKET ") or label.startswith("SUPERMARKET "):
+        if name := item.get("name"):
+            label = html.unescape(name).upper()
+            if "HIPERMARKET" in label or "SUPERMARKET" in label:
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+                item["name"] = None
+            elif "TRGOVSKI CENTER" in label or "MERCATOR CENTER" in label:
+                apply_category(Categories.SHOP_MALL, item)
+                item["name"] = None
+            elif "MARKET" in label:
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+                item["name"] = None
+            elif "CASH" in label:
+                apply_category(Categories.SHOP_WHOLESALE, item)
+                item["name"] = "Cash & Carry"
+            elif "CENTER TEH" in label:
+                apply_category(Categories.SHOP_DOITYOURSELF, item)
+                item["name"] = "Center Tehnike"
+            elif "MAXI" in label:
+                apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+                item["name"] = "Maxi"
+            else:
+                # franchise stores under the Mercator brand
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+                item["name"] = None
+        else:
             apply_category(Categories.SHOP_SUPERMARKET, item)
             item["name"] = None
-        elif label.startswith("MARKET "):
-            apply_category(Categories.SHOP_CONVENIENCE, item)
-            item["name"] = None
-        elif label.startswith("TRGOVSKI CENTER ") or label.startswith("MERCATOR CENTER "):
-            return  # Some kind of department inside the supermarkets
-        elif label.startswith("CASH "):
-            apply_category(Categories.SHOP_WHOLESALE, item)
-            item["name"] = "Cash & Carry"
-        elif label.startswith("CENTER TEH"):
-            apply_category(Categories.SHOP_DOITYOURSELF, item)
-            item["name"] = "Center Tehnike"
-
         yield item

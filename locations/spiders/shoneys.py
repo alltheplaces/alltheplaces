@@ -14,12 +14,16 @@ class ShoneysSpider(scrapy.Spider):
 
     def parse(self, response):
         for row in response.json():
-            hours = OpeningHours()
-            for day, interval in row["acf"]["working_hours"].items():
-                if interval in ("", "CLOSED"):
-                    continue
-                open_time, close_time = re.split(" ?- ?", interval.replace("to", "-"))
-                hours.add_range(day[:2].capitalize(), open_time.strip(), close_time.strip(), "%I:%M%p")
+            try:
+                hours = OpeningHours()
+                for day, interval in row["acf"]["working_hours"].items():
+                    if interval in ("", "CLOSED"):
+                        continue
+                    open_time, close_time = re.split(" ?- ?", interval.replace("to", "-"))
+                    hours.add_range(day[:2].capitalize(), open_time.strip(), close_time.strip(), "%I:%M%p")
+            except:
+                self.logger.error("Failed to parse opening hours:  {}".format(row["acf"]["working_hours"].items()))
+
             properties = {
                 "ref": row["id"],
                 "lat": row["acf"]["address"]["lat"],

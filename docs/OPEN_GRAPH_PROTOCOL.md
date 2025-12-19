@@ -42,7 +42,7 @@ This is best illustrated by reference to some example spiders in the project:
 We can run the `scrapy og` custom tool on one of the URLs:
 
 ```
-$ pipenv run scrapy og https://www.budgens.co.uk/our-stores/praed-street
+$ uv run scrapy og https://www.budgens.co.uk/our-stores/praed-street
 {'city': 'Paddington',
  'country': 'United Kingdom',
  'email': None,

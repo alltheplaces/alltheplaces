@@ -16,7 +16,7 @@ class SevenElevenMXSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         store_keys = [key.removesuffix("_tienda") for key in response.json()["values"][0]]
         for store in response.json()["values"][1:]:
-            store = {store_keys[i]: store[i] for i in range(len(store_keys))}
+            store = {store_keys[i]: store[i] for i in range(len(store))}
             item = DictParser.parse(store)
             item["branch"] = item.pop("name").title()
             item["street_address"] = item.pop("addr_full")

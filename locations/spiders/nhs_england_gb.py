@@ -8,12 +8,11 @@ from locations.structured_data_spider import StructuredDataSpider
 class NhsEnglandGBSpider(SitemapSpider, StructuredDataSpider):
     name = "nhs_england_gb"
     sitemap_urls = [
-        # The following is an enormous general service file, too fiddly to pick things out for now!
-        # "https://www.nhs.uk/sitemaps/sitemap-GDOSprofile.xml",
         # Dentists and GPs get their own sitemap files, with structured data, great:
-        "https://www.nhs.uk/sitemaps/sitemap-DENprofile.xml",
-        "https://www.nhs.uk/sitemaps/sitemap-GPBprofile.xml",
+        "https://www.nhs.uk/sitemap-profiles-dentist.xml",
+        "https://www.nhs.uk/sitemap-profiles-gp.xml",
         # TODO: opticians, pharmacies and hospitals are exposed via a search interface
+        # All available services: https://www.nhs.uk/nhs-services/
     ]
     wanted_types = ["Dentist", "Physician", "LocalBusiness"]
 
@@ -25,8 +24,7 @@ class NhsEnglandGBSpider(SitemapSpider, StructuredDataSpider):
         item["website"] = item["website"].replace("http://", "https://")
         if not item["website"].startswith("https://"):
             item["website"] = response.url
-        item["addr_full"] = item["street_address"]
-        item["street_address"] = None
+        item["addr_full"] = item.pop("street_address")
         if "/services/gp-surgery/" in response.url:
             apply_category(Categories.DOCTOR_GP, item)
         elif "/services/dentist/" in response.url:
