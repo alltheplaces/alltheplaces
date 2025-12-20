@@ -22,6 +22,6 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
             item["located_in"] = MilliesGBSpider.item_attributes["brand"]
             item["located_in_wikidata"] = MilliesGBSpider.item_attributes["brand_wikidata"]
             item["name"] = item["name"].replace("(Millies Cookies)", "").strip()
-        item["branch"]=item.pop("name")
-        
+        item["branch"] = item.pop("name")
+
         yield item
