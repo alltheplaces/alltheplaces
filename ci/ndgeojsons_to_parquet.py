@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 import duckdb
 
 logger = getLogger(__name__)
-logging.basicConfig(level=logging.INFO, filename="geojson_to_parquet.log", filemode="a", encoding="utf-8")
+logging.basicConfig(level=logging.INFO, filename="ndgeojson_to_parquet.log", filemode="a", encoding="utf-8")
 
 
 def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
