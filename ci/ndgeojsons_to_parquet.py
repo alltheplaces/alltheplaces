@@ -72,7 +72,7 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
 
 
 def main() -> None:
-    parser = ArgumentParser(description="Pack collection of NdGeoJSON files to Parquet format.")
+    parser = ArgumentParser(description="Pack collection of NdGeoJSON files to Parquet format")
     parser.add_argument(
         "-d", "--directory", type=str, required=True, nargs="?", help="Directory containing NdGeoJSON files"
     )
