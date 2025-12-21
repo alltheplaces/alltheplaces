@@ -171,14 +171,14 @@ do
 
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
-    PARQUETFILE="${SPIDER_RUN_DIR}/output.parquet"
+    NDGEOJSON="${SPIDER_RUN_DIR}/output.ndgeojson"
     STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
     timeout -k 1m 150s \
     uv run scrapy runspider \
         -o "file://${OUTFILE}:geojson" \
-        -o "file://${PARQUETFILE}:parquet" \
+        -o "file://${NDGEOJSON}:ndgeojson" \
         --loglevel=INFO \
         --logfile="${LOGFILE}" \
         -s CLOSESPIDER_TIMEOUT=120 \
@@ -206,7 +206,7 @@ do
 
     if [ -f "${OUTFILE}" ]; then
         upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
-        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
+        upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         if [ -f "${STATSFILE}" ]; then
