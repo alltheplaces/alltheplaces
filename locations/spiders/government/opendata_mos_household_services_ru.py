@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories, apply_category
@@ -60,7 +62,7 @@ CATEGORY_MAPPING = {
 }
 
 
-class OpendataMosSpider(scrapy.Spider):
+class OpendataMosSpider(Spider):
     """
     A spider for Open Data Portal of Moscow Government.
         Documentation: https://data.mos.ru/developers
@@ -89,7 +91,7 @@ class OpendataMosSpider(scrapy.Spider):
     def filter_function(self, row):
         return row
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for name, id in self.datasets.items():
             yield Request(
                 url=f"https://apidata.mos.ru/v1/datasets/{id}/count?api_key={self.api_key}",

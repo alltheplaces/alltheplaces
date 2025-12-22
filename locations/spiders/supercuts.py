@@ -1,17 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class SupercutsSpider(scrapy.Spider):
+class SupercutsSpider(Spider):
     name = "supercuts"
     item_attributes = {"brand": "Supercuts", "brand_wikidata": "Q7643239"}
     allowed_domains = ["api.regiscorp.com"]
 
-    def start_requests(self):
-        yield scrapy.http.JsonRequest(
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
             "https://api.regiscorp.com/sis/api/salon/get-states-by-brand?brand=sc",
             callback=self.parse_index,
         )
@@ -20,14 +23,14 @@ class SupercutsSpider(scrapy.Spider):
         for country in response.json().values():
             for state in country:
                 st = state["state_abbreviation"].lower()
-                yield scrapy.http.JsonRequest(
+                yield JsonRequest(
                     "https://api.regiscorp.com/sis/api/salon/search-by-location?brand=sc&state={}".format(st),
                     callback=self.parse_state,
                 )
 
     def parse_state(self, response):
         for salon in response.json():
-            yield scrapy.Request(
+            yield Request(
                 url="https://api.regiscorp.com/sis/api/salon?salon-number={}".format(int(salon["salonId"])),
                 callback=self.parse_salon,
             )

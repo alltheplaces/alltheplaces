@@ -1,20 +1,23 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 
 
-class TwoMenAndATruckSpider(scrapy.Spider):
+class TwoMenAndATruckSpider(Spider):
     name = "two_men_and_a_truck"
     item_attributes = {"brand": "Two Men and a Truck", "brand_wikidata": "Q7859087"}
     allowed_domains = ["twomenandatruck.com", "twomenandatruck.ca"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         urls = [
             "https://twomenandatruck.com/feed/locations",
             "https://twomenandatruck.ca/feed/locations",
         ]
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield Request(url=url, callback=self.parse)
 
     def parse(self, response):
         data = response.json()

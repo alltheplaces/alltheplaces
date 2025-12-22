@@ -1,5 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
 from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 
@@ -8,8 +10,8 @@ class WyconCosmeticsSpider(Spider):
     name = "wycon_cosmetics"
     item_attributes = {"brand": "Wycon Cosmetics", "brand_wikidata": "Q55831243"}
 
-    def start_requests(self):
-        yield scrapy.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://www.wyconcosmetics.com/index.php",
             formdata={
                 "extension": "geo",
