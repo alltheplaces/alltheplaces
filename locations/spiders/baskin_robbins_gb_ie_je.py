@@ -11,14 +11,21 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
     name = "baskin_robbins_gb_ie_je"
-    item_attributes = {"brand": "Baskin-Robbins", "brand_wikidata": "Q584601"}
+    brands = {
+        "baskin-robbins":{"brand": "Baskin-Robbins", "brand_wikidata": "Q584601"},
+        "wraps":{"brand": "Wraps & Wings", "brand_wikidata": "Q137537572"}
+    }
     allowed_domains = ["baskinrobbins.co.uk"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if "Wraps & Wings" in item["name"]:
-            item["brand"] = "Wraps & Wings"
-            item["brand_wikidata"] = "Q137537572"
+            brand = self.BRANDS.get("wraps")
+            item.update(brand)
             apply_category(Categories.FAST_FOOD, item)
+        else:
+            brand = self.BRANDS.get("baskin-robbins")
+            item.update(brand)
+            apply_category(Categories.ICE_CREAM, item)
         if "(Cineworld)" in item["name"]:
             item["located_in"] = CineworldGBJESpider.item_attributes["brand"]
             item["located_in_wikidata"] = CineworldGBJESpider.item_attributes["brand_wikidata"]
