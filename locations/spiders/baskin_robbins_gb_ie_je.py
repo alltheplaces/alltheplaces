@@ -19,11 +19,11 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if "Wraps & Wings" in item["name"]:
-            brand = self.BRANDS.get("wraps")
+            brand = self.brands.get("wraps")
             item.update(brand)
             apply_category(Categories.FAST_FOOD, item)
         else:
-            brand = self.BRANDS.get("baskin-robbins")
+            brand = self.brands.get("baskin-robbins")
             item.update(brand)
             apply_category(Categories.ICE_CREAM, item)
         if "(Cineworld)" in item["name"]:
