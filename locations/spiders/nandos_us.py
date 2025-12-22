@@ -126,6 +126,7 @@ class NandosUSSpider(StructuredDataSpider):
 
                 # Re-parse opening hours with fixed times
                 from locations.hours import OpeningHours
+
                 item["opening_hours"] = OpeningHours()
                 for rule in oh_spec:
                     day = rule.get("dayOfWeek")
