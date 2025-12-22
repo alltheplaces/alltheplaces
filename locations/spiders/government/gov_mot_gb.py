@@ -27,9 +27,7 @@ class GovMotGBSpider(CSVFeedSpider):
         )
 
     def get_dataset(self, response, **kwargs):
-        ld = loads(
-            response.xpath('//script[@type="application/ld+json"][contains(text(), "Dataset")]/text()').get()
-        )
+        ld = loads(response.xpath('//script[@type="application/ld+json"][contains(text(), "Dataset")]/text()').get())
         for dist in ld["distribution"]:
             if dist["encodingFormat"] == "text/csv" and dist["name"] == "Active MOT test stations":
                 yield Request(url=dist["contentUrl"])

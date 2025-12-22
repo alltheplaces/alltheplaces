@@ -2,7 +2,6 @@ from copy import deepcopy
 from typing import AsyncIterator
 
 import pycountry
-from scrapy import Spider
 from scrapy.http import Request
 
 from locations.categories import Categories, apply_category

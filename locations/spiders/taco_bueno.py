@@ -1,8 +1,8 @@
 from typing import AsyncIterator
 
+from geonamescache import GeonamesCache
 from scrapy import Spider
 from scrapy.http import Request
-from geonamescache import GeonamesCache
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature

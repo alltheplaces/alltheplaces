@@ -1,7 +1,7 @@
 from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category

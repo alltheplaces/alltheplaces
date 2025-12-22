@@ -1,4 +1,3 @@
-from json import dumps, loads
 from typing import AsyncIterator
 
 from scrapy import Spider

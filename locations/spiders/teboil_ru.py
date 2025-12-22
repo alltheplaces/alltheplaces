@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import FormRequest, Request
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
