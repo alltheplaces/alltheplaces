@@ -31,5 +31,5 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
             del item["phone"]
         item["branch"] = item.pop("name")
         if not item["name"]:
-            item["name"]="Wraps & Wings"
+            item["name"] = "Wraps & Wings"
         yield item
