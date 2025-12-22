@@ -13,6 +13,6 @@ class HollandAndBarrettSpider(WoosmapSpider):
         item["name"] = re.sub(r"\(\d+\)", "", item["name"]).strip()
         item["website"] = "https://www.hollandandbarrett.com" + feature["properties"]["user_properties"]["storePath"]
         item["branch"] = item.pop("name")
-        if item["phone"] == "+44 330 058 2640":
+        if "330 058 2640" in item["phone"]:
             del item["phone"]
         yield item
