@@ -1,9 +1,8 @@
 import re
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.items import Feature
 
@@ -13,15 +12,15 @@ class TrussellTrustGBSpider(Spider):
     item_attributes = {"operator_wikidata": "Q15621299"}
     start_urls = ["https://www.trussell.org.uk/emergency-food/i-have-a-food-voucher/choose-a-foodbank?lat=&lng=&page=1"]
 
-    def make_request(self, page: int):
-        return scrapy.Request(
+    def make_request(self, page: int) -> Request:
+        return Request(
             url="https://www.trussell.org.uk/emergency-food/i-have-a-food-voucher/choose-a-foodbank?lat=&lng=&page={}".format(
                 page
             ),
             cb_kwargs={"page": page},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

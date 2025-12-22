@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -12,7 +13,7 @@ class WilliamPennINSpider(Spider):
     item_attributes = {"brand": "William Penn", "brand_wikidata": "Q122439152"}
     allowed_domains = ["engine.kartmax.in"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         headers = {"Origin": "https://www.williampenn.net"}
         yield JsonRequest(url="https://engine.kartmax.in/api/cart/v1/store-locator/list?site=null", headers=headers)
 

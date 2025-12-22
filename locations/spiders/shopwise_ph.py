@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -14,7 +15,7 @@ class ShopwisePHSpider(Spider):
     allowed_domains = ["api.shopwise.com.ph"]
     start_urls = ["https://api.shopwise.com.ph/api/web/our-stores?site_id=2"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

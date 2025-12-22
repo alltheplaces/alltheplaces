@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 from geonamescache import GeonamesCache
 
 from locations.hours import DAYS, OpeningHours
@@ -6,13 +9,13 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class TacoBuenoSpider(scrapy.Spider):
+class TacoBuenoSpider(Spider):
     name = "taco_bueno"
     item_attributes = {"brand": "Taco Bueno", "brand_wikidata": "Q7673958"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for state in GeonamesCache().get_us_states():
-            yield scrapy.Request(f"https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?stateCode='{state}'")
+            yield Request(f"https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?stateCode='{state}'")
 
     @staticmethod
     def convert_hours(times: dict) -> OpeningHours:

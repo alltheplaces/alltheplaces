@@ -1,7 +1,9 @@
 from copy import deepcopy
+from typing import AsyncIterator
 
 import pycountry
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -60,11 +62,11 @@ class ToyotaEUSpider(JSONBlobSpider):
         "zw",  # toyota_africa
     ]
 
-    async def start(self):
+    async def start(self) -> AsyncIterator[Request]:
         available_countries = [c for c in self.all_countries if c not in self.exclude_countries]
         for brand in ["toyota", "lexus"]:
             for country in available_countries:
-                yield scrapy.Request(
+                yield Request(
                     f"https://kong-proxy-intranet.toyota-europe.com/dxp/dealers/api/{brand}/{country}/en/all",
                     callback=self.parse,
                 )

@@ -1,6 +1,8 @@
-import json
+from json import dumps, loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -8,7 +10,7 @@ from locations.items import Feature
 DAY_MAPPING = {2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa", 1: "Su"}
 
 
-class VictoriassecretSpider(scrapy.Spider):
+class VictoriassecretSpider(Spider):
     name = "victoriassecret"
     item_attributes = {"brand": "Victoria's Secret", "brand_wikidata": "Q332477"}
     allowed_domains = ["victoriassecret.com"]
@@ -16,14 +18,14 @@ class VictoriassecretSpider(scrapy.Spider):
         "https://www.victoriassecret.com/store-locator#storeList/US",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         template = "https://api.victoriassecret.com/stores/v1/search?countryCode=US"
 
         headers = {
             "Accept": "application/json",
         }
 
-        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
+        yield FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         jsonresponse = response.json()

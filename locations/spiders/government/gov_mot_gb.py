@@ -1,4 +1,5 @@
-import json
+from json import loads
+from typing import AsyncIterator
 
 from scrapy import Request
 from scrapy.spiders import CSVFeedSpider
@@ -20,13 +21,13 @@ class GovMotGBSpider(CSVFeedSpider):
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
     }  # https://www.whatdotheyknow.com/request/re_use_of_active_mot_test_statio
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url="https://www.gov.uk/government/publications/active-mot-test-stations", callback=self.get_dataset
         )
 
     def get_dataset(self, response, **kwargs):
-        ld = json.loads(
+        ld = loads(
             response.xpath('//script[@type="application/ld+json"][contains(text(), "Dataset")]/text()').get()
         )
         for dist in ld["distribution"]:

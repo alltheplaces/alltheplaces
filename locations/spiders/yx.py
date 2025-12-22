@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
@@ -15,7 +15,7 @@ YX = {"brand": "YX", "brand_wikidata": "Q4580519"}
 class YxSpider(Spider):
     name = "yx"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://meilisearch.yx.no/indexes/stations/search",
             headers={"X-Meili-API-Key": "cda56406d550585ce01807040c54ad1614aca7bc81e42d9872633b3c194eeabe"},

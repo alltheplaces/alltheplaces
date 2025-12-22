@@ -1,15 +1,17 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import apply_category
 from locations.dict_parser import DictParser
 
 
-class WiseUpBRSpider(scrapy.Spider):
+class WiseUpBRSpider(Spider):
     name = "wise_up_br"
     item_attributes = {"brand": "Wise Up", "brand_wikidata": "Q123166153"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://api.wiseup.com/v1/franchises/regions?brand=Wise%20Up&country=BR")
 
     def parse(self, response, **kwargs):

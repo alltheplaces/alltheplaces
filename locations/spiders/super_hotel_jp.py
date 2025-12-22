@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -17,7 +17,7 @@ class SuperHotelJPSpider(Spider):
             "https://pkg.navitime.co.jp/superhotel-map/api/proxy2/shop/list?offset={}&limit={}".format(offset, count)
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
