@@ -1,7 +1,9 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, Extras, Fuel, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -23,12 +25,11 @@ class SasolZASpider(Spider):
     item_attributes = {
         "brand": "Sasol",
         "brand_wikidata": "Q905998",
-        "extras": Categories.FUEL_STATION.value,
     }
     allowed_domains = ["locator.sasol.com"]
     start_urls = ["https://locator.sasol.com/api/station.json"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -82,6 +83,7 @@ class SasolZASpider(Spider):
             item["opening_hours"] = oh.as_opening_hours()
 
         # Products available at https://locator.sasol.com/api/product.json
+        apply_category(Categories.FUEL_STATION, item)
         for product in location["products"]:
             if product["product_name"] == "Cash":
                 apply_yes_no(Extras.ATM, item, len(product["subproducts"]) > 0)

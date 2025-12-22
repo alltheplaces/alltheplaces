@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.categories import Extras, apply_yes_no
@@ -12,7 +12,7 @@ class ZaxbysUSSpider(Spider):
     name = "zaxbys_us"
     item_attributes = {"brand": "Zaxby's", "brand_wikidata": "Q8067525"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in country_iseadgg_centroids("US", 94):
             yield JsonRequest(
                 url=f"https://zapi.zaxbys.com/v1/stores/near?latitude={lat}&longitude={lon}&radius=100&limit=100",

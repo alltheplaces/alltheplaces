@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.geo import point_locations
 from locations.hours import OpeningHours
@@ -6,7 +9,7 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TractorSupplySpider(scrapy.Spider):
+class TractorSupplySpider(Spider):
     name = "tractor_supply"
     item_attributes = {"brand": "Tractor Supply Company", "brand_wikidata": "Q15109925"}
     allowed_domains = ["tractorsupply.com"]
@@ -17,12 +20,12 @@ class TractorSupplySpider(scrapy.Spider):
         "USER_AGENT": BROWSER_DEFAULT,
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         base_url = "https://www.tractorsupply.com/wcs/resources/store/10151/zipcode/fetchstoredetails?responseFormat=json&latitude={lat}&longitude={lng}"
 
         for lat, lon in point_locations("us_centroids_25mile_radius.csv"):
             url = base_url.format(lat=lat, lng=lon)
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield Request(url=url, callback=self.parse)
 
     def parse_hours(self, hours):
         day_hour = hours.split("|")

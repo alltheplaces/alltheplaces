@@ -1,17 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
 
-class SantaLollaBRSpider(scrapy.Spider):
+class SantaLollaBRSpider(Spider):
     name = "santa_lolla_br"
     item_attributes = {"brand": "Santa Lolla", "brand_wikidata": "Q28680413"}
     no_refs = True
 
-    def start_requests(self):
-        yield scrapy.http.JsonRequest(
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
             url="https://www.santalolla.com.br/api/dataentities/SL/search?_fields=isKiosk,business_hours,city,closed,email,hour_Friday,hour_holiday,hour_Monday,hour_Saturday,hour_Sunday,hour_Thursday,hour_Tuesday,hour_Wednesday,latitude,longitude,name,number,phone,phone2,photo,postal_code,state,street,whatsapp",
             headers={
                 "REST-Range": "resources=0-1000",

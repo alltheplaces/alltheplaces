@@ -1,23 +1,25 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class ZeelabPharmacyINSpider(scrapy.Spider):
+class ZeelabPharmacyINSpider(Spider):
     name = "zeelab_pharmacy_in"
     item_attributes = {"brand": "Zeelab Pharmacy", "brand_wikidata": "Q123015627"}
     no_refs = True
 
-    def make_requests(self, page: int):
+    def make_requests(self, page: int) -> JsonRequest:
         return JsonRequest(
             url="https://app.zeelabgeneric.com/api/query/stores/web",
             data={"query": "", "page_id": page},
             cb_kwargs={"page": page},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_requests(1)
 
     def parse(self, response, **kwargs):
