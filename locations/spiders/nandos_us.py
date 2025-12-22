@@ -111,7 +111,7 @@ class NandosUSSpider(StructuredDataSpider):
             else:
                 item["ref"] = None
 
-            # Fix opening hours: convert ISO datetimes to just HH:MM for each rule
+            # Fix opening hours: convert ISO datetimes to just HH:MM for each rule, and adjust closes by +12h if needed
             if isinstance(ld_item, dict) and "openingHoursSpecification" in ld_item:
                 oh_spec = ld_item["openingHoursSpecification"]
                 for rule in oh_spec:
@@ -124,7 +124,18 @@ class NandosUSSpider(StructuredDataSpider):
                             except Exception:
                                 pass
 
-                # Re-parse opening hours with fixed times
+                # Adjust closes by +12h if closes <= opens (i.e., closes in AM, but should be PM)
+                def add_12h_if_needed(opens, closes):
+                    try:
+                        o_h, o_m = map(int, opens.split(":"))
+                        c_h, c_m = map(int, closes.split(":"))
+                        # If closes hour is less than or equal to opens, assume PM close (add 12h)
+                        if c_h <= o_h:
+                            c_h = (c_h + 12) % 24
+                        return f"{c_h:02d}:{c_m:02d}"
+                    except Exception:
+                        return closes
+
                 from locations.hours import OpeningHours
 
                 item["opening_hours"] = OpeningHours()
@@ -134,7 +145,8 @@ class NandosUSSpider(StructuredDataSpider):
                     closes = rule.get("closes")
                     if not (day and opens and closes):
                         continue
+                    closes_adj = add_12h_if_needed(opens, closes)
                     days = [day] if isinstance(day, str) else day
                     for d in days:
-                        item["opening_hours"].add_range(d, opens, closes, "%H:%M")
+                        item["opening_hours"].add_range(d, opens, closes_adj, "%H:%M")
         yield item
