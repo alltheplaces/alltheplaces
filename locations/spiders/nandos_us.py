@@ -12,22 +12,16 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class NandosUSSpider(StructuredDataSpider, CamoufoxSpider):
+class NandosUSSpider(StructuredDataSpider):
     name = "nandos_us"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
+    requires_proxy = True
     time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-    # Camoufox provides a stealth browser context which helps bypass bot
-    # protections. Use the Camoufox settings that allow scripts to run so
-    # dynamically-rendered links on the /all-locations page are available.
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {
+    custom_settings = {
         "ROBOTSTXT_OBEY": False,
-        "CAMOUFOX_MAX_PAGES_PER_CONTEXT": 1,
-        "CAMOUFOX_MAX_CONTEXTS": 1,
         "USER_AGENT": BROWSER_DEFAULT,
         "DOWNLOAD_DELAY": 3,
         "RANDOMIZE_DOWNLOAD_DELAY": True,
-        "RETRY_TIMES": 6,
-        "RETRY_HTTP_CODES": [429],
         "DOWNLOAD_TIMEOUT": 30,
         "DEFAULT_REQUEST_HEADERS": {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
