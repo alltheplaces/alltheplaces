@@ -14,6 +14,9 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
     allowed_domains = ["baskinrobbins.co.uk"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if "Wraps & Wings" in item["name"]:
+            item["brand"] = "Wraps & Wings"
+            item["brand_wikidata"] = "Q137537572"
         if "(Cineworld)" in item["name"]:
             item["located_in"] = CineworldGBJESpider.item_attributes["brand"]
             item["located_in_wikidata"] = CineworldGBJESpider.item_attributes["brand_wikidata"]
@@ -22,6 +25,7 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
             item["located_in"] = MilliesGBSpider.item_attributes["brand"]
             item["located_in_wikidata"] = MilliesGBSpider.item_attributes["brand_wikidata"]
             item["name"] = item["name"].replace("(Millies Cookies)", "").strip()
+            
         item["branch"] = item.pop("name")
 
         yield item
