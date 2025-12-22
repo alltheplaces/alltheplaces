@@ -110,4 +110,30 @@ class NandosUSSpider(StructuredDataSpider):
                     item["ref"] = ref
             else:
                 item["ref"] = None
+
+            # Fix opening hours: convert ISO datetimes to just HH:MM for each rule
+            if isinstance(ld_item, dict) and "openingHoursSpecification" in ld_item:
+                oh_spec = ld_item["openingHoursSpecification"]
+                for rule in oh_spec:
+                    for key in ("opens", "closes"):
+                        val = rule.get(key)
+                        if isinstance(val, str) and "T" in val:
+                            # Extract just HH:MM from e.g. 2025-12-22T11:00:00.000Z
+                            try:
+                                rule[key] = val.split("T")[1][:5]
+                            except Exception:
+                                pass
+
+                # Re-parse opening hours with fixed times
+                from locations.hours import OpeningHours
+                item["opening_hours"] = OpeningHours()
+                for rule in oh_spec:
+                    day = rule.get("dayOfWeek")
+                    opens = rule.get("opens")
+                    closes = rule.get("closes")
+                    if not (day and opens and closes):
+                        continue
+                    days = [day] if isinstance(day, str) else day
+                    for d in days:
+                        item["opening_hours"].add_range(d, opens, closes, "%H:%M")
         yield item
