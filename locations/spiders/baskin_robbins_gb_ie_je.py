@@ -33,7 +33,7 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
             brand = self.brands.get("wraps")
             item.update(brand)
             item["name"] = "Wraps & Wings"
-            item["branch"] = item["branch"].replace("(Wraps & Wings)").strip()
+            item["branch"] = item["branch"].replace("(Wraps & Wings)","").strip()
             apply_category(Categories.FAST_FOOD, item)
         else:
             brand = self.brands.get("baskin-robbins")
