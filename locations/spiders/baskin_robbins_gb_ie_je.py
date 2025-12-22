@@ -27,7 +27,8 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
             item["located_in"] = MilliesGBSpider.item_attributes["brand"]
             item["located_in_wikidata"] = MilliesGBSpider.item_attributes["brand_wikidata"]
             item["name"] = item["name"].replace("(Millies Cookies)", "").strip()
-
+        if "333 003 3444" in item["phone"]:
+            del item["phone"]
         item["branch"] = item.pop("name")
 
         yield item
