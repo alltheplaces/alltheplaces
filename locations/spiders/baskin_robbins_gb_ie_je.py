@@ -12,8 +12,8 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
     name = "baskin_robbins_gb_ie_je"
     brands = {
-        "baskin-robbins":{"brand": "Baskin-Robbins", "brand_wikidata": "Q584601"},
-        "wraps":{"brand": "Wraps & Wings", "brand_wikidata": "Q137537572"}
+        "baskin-robbins": {"brand": "Baskin-Robbins", "brand_wikidata": "Q584601"},
+        "wraps": {"brand": "Wraps & Wings", "brand_wikidata": "Q137537572"},
     }
     allowed_domains = ["baskinrobbins.co.uk"]
 
