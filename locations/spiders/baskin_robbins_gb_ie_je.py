@@ -18,14 +18,6 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
     allowed_domains = ["baskinrobbins.co.uk"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if "Wraps & Wings" in item["name"]:
-            brand = self.brands.get("wraps")
-            item.update(brand)
-            apply_category(Categories.FAST_FOOD, item)
-        else:
-            brand = self.brands.get("baskin-robbins")
-            item.update(brand)
-            apply_category(Categories.ICE_CREAM, item)
         if "(Cineworld)" in item["name"]:
             item["located_in"] = CineworldGBJESpider.item_attributes["brand"]
             item["located_in_wikidata"] = CineworldGBJESpider.item_attributes["brand_wikidata"]
@@ -37,6 +29,14 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
         if item["phone"] and "333 003 3444" in item["phone"]:
             del item["phone"]
         item["branch"] = item.pop("name")
-        if not item.get("name"):
+        if "Wraps & Wings" in item["branch"]:
+            brand = self.brands.get("wraps")
+            item.update(brand)
             item["name"] = "Wraps & Wings"
+            item["branch"] = item["branch"].replace("(Wraps & Wings)").strip()
+            apply_category(Categories.FAST_FOOD, item)
+        else:
+            brand = self.brands.get("baskin-robbins")
+            item.update(brand)
+            apply_category(Categories.ICE_CREAM, item)
         yield item
