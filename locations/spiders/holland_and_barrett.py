@@ -12,4 +12,5 @@ class HollandAndBarrettSpider(WoosmapSpider):
     def parse_item(self, item, feature):
         item["name"] = re.sub(r"\(\d+\)", "", item["name"]).strip()
         item["website"] = "https://www.hollandandbarrett.com" + feature["properties"]["user_properties"]["storePath"]
+        item["branch"] = item.pop("name")
         yield item
