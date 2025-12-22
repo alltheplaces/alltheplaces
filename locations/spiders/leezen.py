@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -15,7 +15,7 @@ class LeezenSpider(Spider):
     }
     skip_auto_cc_domain = True
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for location_type in [0, 1]:  # 0: TW, 1: Overseas
             yield JsonRequest(
                 url="https://ec-app.leezen.com.tw/api/v1/store/list",

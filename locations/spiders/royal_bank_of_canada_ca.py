@@ -11,7 +11,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class RoyalBankOfCanadaCASpider(JSONBlobSpider):
     name = "royal_bank_of_canada_ca"
-    item_attributes = {"brand_wikidata": "Q735261"}
+    item_attributes = {"brand": "RBC", "brand_wikidata": "Q735261"}
     locations_key = "locations"
 
     async def start(self):
@@ -21,15 +21,15 @@ class RoyalBankOfCanadaCASpider(JSONBlobSpider):
             )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name")
-        if item.get("addr_full"):
-            item["street_address"] = item.pop("addr_full")
-        item["lat"], item["lon"] = feature.pop("location")
-        if feature["branch"] and feature["atm"]:
+        item["street_address"] = item.pop("addr_full", None)
+        item["lat"], item["lon"] = feature.get("location")
+
+        if feature["branch"]:
+            item.pop("name")
             apply_category(Categories.BANK, item)
-            apply_yes_no(Extras.ATM, item, True)
-        elif feature["branch"] and not feature["atm"]:
-            apply_category(Categories.BANK, item)
+            apply_yes_no(Extras.ATM, item, feature["atm"])
         else:
+            item["located_in"] = item.pop("name")
             apply_category(Categories.ATM, item)
+
         yield item

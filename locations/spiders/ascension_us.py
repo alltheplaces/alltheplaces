@@ -1,4 +1,5 @@
-from scrapy import Request
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 from scrapy.spiders import Spider
 
@@ -33,13 +34,13 @@ class AscensionUSSpider(Spider):
     }
 
     @staticmethod
-    def make_request(page: int, page_size: int = 100) -> Request:
+    def make_request(page: int, page_size: int = 100) -> JsonRequest:
         return JsonRequest(
             url="https://healthcare.ascension.org/api/locations/search",
             data={"geoDistanceOptions": {"location": "AL", "radius": 50000}, "page": page, "pageSize": page_size},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response, **kwargs):
