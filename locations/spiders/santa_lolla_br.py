@@ -14,7 +14,7 @@ class SantaLollaBRSpider(Spider):
     no_refs = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield scrapy.http.JsonRequest(
+        yield JsonRequest(
             url="https://www.santalolla.com.br/api/dataentities/SL/search?_fields=isKiosk,business_hours,city,closed,email,hour_Friday,hour_holiday,hour_Monday,hour_Saturday,hour_Sunday,hour_Thursday,hour_Tuesday,hour_Wednesday,latitude,longitude,name,number,phone,phone2,photo,postal_code,state,street,whatsapp",
             headers={
                 "REST-Range": "resources=0-1000",

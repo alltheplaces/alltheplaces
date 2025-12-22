@@ -1,3 +1,4 @@
+from json import dumps, loads
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -29,8 +30,8 @@ class VictoriassecretSpider(Spider):
     def parse(self, response):
         jsonresponse = response.json()
         for stores in jsonresponse:
-            store = json.dumps(stores)
-            store_data = json.loads(store)
+            store = dumps(stores)
+            store_data = loads(store)
             properties = {}
 
             if store_data["latitudeDegrees"] == "":
@@ -62,8 +63,8 @@ class VictoriassecretSpider(Spider):
         opening_hours = OpeningHours()
 
         for hour in hours:
-            hr = json.dumps(hour)
-            hrs = json.loads(hr)
+            hr = dumps(hour)
+            hrs = loads(hr)
             day = hrs["day"]
             open_time = hrs["open"]
             close_time = hrs["close"]
