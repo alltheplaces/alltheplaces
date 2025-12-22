@@ -4,25 +4,19 @@ from typing import Any
 from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
+from locations.hours import OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class NandosUSSpider(StructuredDataSpider):
     name = "nandos_us"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
     requires_proxy = True
-    time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": BROWSER_DEFAULT,
-        "DOWNLOAD_DELAY": 3,
-        "RANDOMIZE_DOWNLOAD_DELAY": True,
-        "DOWNLOAD_TIMEOUT": 30,
     }
-    allowed_domains = ["nandosperiperi.com"]
     start_urls = ["https://www.nandosperiperi.com/all-locations"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -52,19 +46,17 @@ class NandosUSSpider(StructuredDataSpider):
                     continue
 
                 for element in elements:
-                    if isinstance(element, dict):
-                        item_obj = element.get("item") or element.get("mainEntity")
-                        if isinstance(item_obj, dict):
-                            item = LinkedDataParser.parse_ld(item_obj, time_format=self.time_format)
-                            yield from self.post_process_item(item, response, item_obj)
-                            continue
-                        url = element.get("url") or element.get("@id")
-                        if url:
-                            yield response.follow(response.urljoin(url), callback=self.parse_sd)
-                            continue
+                    if not isinstance(element, dict):
+                        continue
 
-                    if isinstance(element, str) and element.startswith("http"):
-                        yield response.follow(response.urljoin(element), callback=self.parse_sd)
+                    item_obj = element.get("item") or element.get("mainEntity")
+
+                    if not isinstance(item_obj, dict):
+                        continue
+
+                    item = LinkedDataParser.parse_ld(item_obj, time_format=self.time_format)
+                    yield from self.post_process_item(item, response, item_obj)
+                    continue
 
                 return  # Early exit after first valid ItemList
         # If no ItemList found, do nothing
@@ -88,65 +80,44 @@ class NandosUSSpider(StructuredDataSpider):
         if "name" in item:
             item["branch"] = item.pop("name")
 
-        item["website"] = ld_item.get("mainEntityOfPage")
+        item["ref"] = item["website"] = ld_item.get("mainEntityOfPage")
 
-        # Ensure a unique ref for duplicates pipeline: prefer existing ref,
-        # then linked-data @id or url, then website path segment, then response url.
-        if not item.get("ref"):
-            ref = None
-            if isinstance(ld_item, dict):
-                ref = ld_item.get("branchCode") or ld_item.get("@id") or ld_item.get("url")
-            if not ref and item.get("website"):
-                ref = item["website"]
-            if not ref and response and response.url:
-                ref = response.url
+        # Fix opening hours: convert ISO datetimes to just HH:MM for each rule, and adjust closes by +12h if needed
+        if isinstance(ld_item, dict) and "openingHoursSpecification" in ld_item:
+            oh_spec = ld_item["openingHoursSpecification"]
+            for rule in oh_spec:
+                for key in ("opens", "closes"):
+                    val = rule.get(key)
+                    if isinstance(val, str) and "T" in val:
+                        # Extract just HH:MM from e.g. 2025-12-22T11:00:00.000Z
+                        try:
+                            rule[key] = val.split("T")[1][:5]
+                        except Exception:
+                            pass
 
-            if isinstance(ref, str):
-                # normalize to last non-empty path segment
-                parts = [p for p in ref.split("/") if p]
-                if parts:
-                    item["ref"] = parts[-1]
-                else:
-                    item["ref"] = ref
-            else:
-                item["ref"] = None
+            # Adjust closes by +12h if closes <= opens (i.e., closes in AM, but should be PM)
+            def add_12h_if_needed(opens, closes):
+                try:
+                    o_h, o_m = map(int, opens.split(":"))
+                    c_h, c_m = map(int, closes.split(":"))
+                    # If closes hour is less than or equal to opens, assume PM close (add 12h)
+                    if c_h <= o_h:
+                        c_h = (c_h + 12) % 24
+                    return f"{c_h:02d}:{c_m:02d}"
+                except Exception:
+                    return closes
 
-            # Fix opening hours: convert ISO datetimes to just HH:MM for each rule, and adjust closes by +12h if needed
-            if isinstance(ld_item, dict) and "openingHoursSpecification" in ld_item:
-                oh_spec = ld_item["openingHoursSpecification"]
-                for rule in oh_spec:
-                    for key in ("opens", "closes"):
-                        val = rule.get(key)
-                        if isinstance(val, str) and "T" in val:
-                            # Extract just HH:MM from e.g. 2025-12-22T11:00:00.000Z
-                            try:
-                                rule[key] = val.split("T")[1][:5]
-                            except Exception:
-                                pass
+            item["opening_hours"] = OpeningHours()
+            for rule in oh_spec:
+                day = rule.get("dayOfWeek")
+                opens = rule.get("opens")
+                closes = rule.get("closes")
 
-                # Adjust closes by +12h if closes <= opens (i.e., closes in AM, but should be PM)
-                def add_12h_if_needed(opens, closes):
-                    try:
-                        o_h, o_m = map(int, opens.split(":"))
-                        c_h, c_m = map(int, closes.split(":"))
-                        # If closes hour is less than or equal to opens, assume PM close (add 12h)
-                        if c_h <= o_h:
-                            c_h = (c_h + 12) % 24
-                        return f"{c_h:02d}:{c_m:02d}"
-                    except Exception:
-                        return closes
+                if not (day and opens and closes):
+                    continue
 
-                from locations.hours import OpeningHours
+                closes_adj = add_12h_if_needed(opens, closes)
 
-                item["opening_hours"] = OpeningHours()
-                for rule in oh_spec:
-                    day = rule.get("dayOfWeek")
-                    opens = rule.get("opens")
-                    closes = rule.get("closes")
-                    if not (day and opens and closes):
-                        continue
-                    closes_adj = add_12h_if_needed(opens, closes)
-                    days = [day] if isinstance(day, str) else day
-                    for d in days:
-                        item["opening_hours"].add_range(d, opens, closes_adj, "%H:%M")
+                item["opening_hours"].add_range(day, opens, closes_adj, "%H:%M")
+
         yield item
