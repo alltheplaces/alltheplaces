@@ -3,10 +3,8 @@ from typing import Any
 
 from scrapy.http import Response
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Extras, apply_yes_no
 from locations.linked_data_parser import LinkedDataParser
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
