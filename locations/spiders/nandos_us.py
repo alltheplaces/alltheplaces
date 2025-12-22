@@ -1,16 +1,15 @@
-from typing import Any
 import json
-
-from locations.linked_data_parser import LinkedDataParser
+from typing import Any
 
 from scrapy.http import Response
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Extras, apply_yes_no
+from locations.linked_data_parser import LinkedDataParser
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
-from locations.camoufox_spider import CamoufoxSpider
 
 
 class NandosUSSpider(StructuredDataSpider, CamoufoxSpider):
@@ -99,7 +98,9 @@ class NandosUSSpider(StructuredDataSpider, CamoufoxSpider):
             elif isinstance(f, str):
                 features.append(f)
 
-        apply_yes_no(Extras.INDOOR_SEATING, item, any("Dine In" in f or "Dine-In" in f or "Dine in" in f for f in features))
+        apply_yes_no(
+            Extras.INDOOR_SEATING, item, any("Dine In" in f or "Dine-In" in f or "Dine in" in f for f in features)
+        )
         apply_yes_no(Extras.OUTDOOR_SEATING, item, any("Patio" in f or "Outdoor" in f for f in features))
 
     def post_process_item(self, item, response: Response, ld_item: dict, **kwargs: Any):
