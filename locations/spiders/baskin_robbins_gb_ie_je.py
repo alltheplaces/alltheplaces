@@ -30,5 +30,6 @@ class BaskinRobbinsGBIEJESpider(AgileStoreLocatorSpider):
         if item["phone"] and "333 003 3444" in item["phone"]:
             del item["phone"]
         item["branch"] = item.pop("name")
-
+        if not item["name"]:
+            item["name"]="Wraps & Wings"
         yield item
