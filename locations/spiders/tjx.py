@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import FormRequest
 
@@ -41,7 +43,7 @@ class TjxSpider(Spider):
         "US": 48,
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for country_code, search_radius in self.iseadgg_search_config.items():
             chains = [k for k in self.chains.keys() if country_code in self.chains[k][1]]
             for lat, lon in country_iseadgg_centroids([country_code], search_radius):

@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Request, Response
@@ -24,10 +24,10 @@ class FdsnSeismicStationsSpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], callback=self.parse_datacenters)
 
-    def parse_datacenters(self, response: Response) -> Iterable[JsonRequest]:
+    def parse_datacenters(self, response: Response) -> Iterable[Request]:
         for datacenter in response.json()["datacenters"]:
             for repository in datacenter["repositories"]:
                 for service in repository["services"]:

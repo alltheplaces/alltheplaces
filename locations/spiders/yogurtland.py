@@ -1,7 +1,9 @@
-import json
 import re
+from json import loads
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
@@ -11,13 +13,13 @@ class YogurtlandSpider(Spider):
     name = "yogurtland"
     item_attributes = {"brand": "Yogurtland", "brand_wikidata": "Q8054428"}
 
-    def _make_request(self, page=1):
+    def _make_request(self, page: int = 1) -> Request:
         return Request(
             f"https://www.yogurtland.com/api/1.1/locations/search.json?page={page}",
             headers={"X-Api-Key": "QeKEiECfiACR"},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield self._make_request()
 
     def repair_times(self, time_str):
@@ -31,7 +33,7 @@ class YogurtlandSpider(Spider):
             item["website"] = f"https://www.yogurtland.com/locations/view/{location['Location']['id']}"
             item["image"] = location["Image"]["uri"]
 
-            hours = json.loads(location["Location"]["hours_json"])
+            hours = loads(location["Location"]["hours_json"])
             oh = OpeningHours()
             for day, times in zip(DAYS_3_LETTERS_FROM_SUNDAY, hours):
                 if times["isActive"]:
