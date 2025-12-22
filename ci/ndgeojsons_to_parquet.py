@@ -30,7 +30,7 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             con.execute(
                 f"""
             CREATE TABLE geojson_data AS
-                SELECT 
+                SELECT
                     id,
                     type,
                     dataset_attributes,
@@ -41,14 +41,14 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
                     columns={{
                         'type': 'VARCHAR' ,
                         'id': 'VARCHAR',
-                        'dataset_attributes': 'MAP(VARCHAR, VARCHAR)', 
+                        'dataset_attributes': 'MAP(VARCHAR, VARCHAR)',
                         'properties' : 'MAP(VARCHAR, VARCHAR)',
                         'geometry': 'JSON',
                         }}
                     );
 
             COPY (
-                SELECT 
+                SELECT
                     id,
                     type,
                     dataset_attributes,
