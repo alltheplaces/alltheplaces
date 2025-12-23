@@ -23,8 +23,8 @@ class HyundaiAUSpider(JSONBlobSpider):
         if feature.get("closed"):
             return
 
-        item["ref"] = feature.get("code", feature.get("dealerCode"))
-        item["branch"] = feature.get("tradingName")
+        item["ref"] = feature.get("latitude")
+        item["branch"] = feature.get("tradingName", "dealerCode")
 
         if "testDriveModels" in feature.keys():
             apply_category(Categories.SHOP_CAR, item)
