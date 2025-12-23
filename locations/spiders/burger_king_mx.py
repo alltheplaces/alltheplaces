@@ -4,6 +4,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -47,6 +48,7 @@ class BurgerKingMXSpider(Spider):
                 for day in rule["days"]:
                     item["opening_hours"].add_range(DAYS[day - 1], rule["time_from"], rule["time_to"])
 
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def slugify(self, s: str) -> str:
