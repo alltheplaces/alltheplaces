@@ -9,7 +9,7 @@ from locations.structured_data_spider import clean_facebook
 class AttUSSpider(Where2GetItSpider):
     name = "att_us"
     item_attributes = {"brand": "AT&T", "brand_wikidata": "Q298594"}
-    api_endpoint = "https://www.att.com/stores/rest/getlist"
+    api_brand_name = "attstore"
     api_key = "2F8B3130-66C5-11ED-9608-26F2C42605F6"
     api_filter_admin_level = 2
 
