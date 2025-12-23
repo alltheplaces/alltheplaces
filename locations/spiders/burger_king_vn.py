@@ -14,9 +14,7 @@ class BurgerKingVNSpider(JSONBlobSpider):
     stored_items = {}
 
     def extract_json(self, response):
-        return parse_js_object(
-            response.xpath('//script[contains(text(), "var listStoreJson = ")]/text()').get()
-        )
+        return parse_js_object(response.xpath('//script[contains(text(), "var listStoreJson = ")]/text()').get())
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace("BURGER KING ", "")
