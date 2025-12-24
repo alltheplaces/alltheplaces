@@ -1,17 +1,10 @@
-import json
 from typing import Iterable
 from urllib.parse import urlencode
 
 import scrapy
 from scrapy.http import Response
 
-from locations.categories import (
-    Categories,
-    Extras,
-    FuelCards,
-    apply_category,
-    apply_yes_no,
-)
+from locations.categories import Categories, Extras, FuelCards, apply_category, apply_yes_no
 from locations.geo import point_locations
 from locations.items import Feature
 
