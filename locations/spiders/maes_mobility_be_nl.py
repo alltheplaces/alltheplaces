@@ -2,17 +2,9 @@ import json
 from typing import Iterable
 
 import scrapy
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
-from locations.categories import (
-    Categories,
-    Extras,
-    Fuel,
-    FuelCards,
-    PaymentMethods,
-    apply_category,
-    apply_yes_no,
-)
+from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -178,7 +170,7 @@ class MaesMobilityBENLSpider(scrapy.Spider):
             self.crawler.stats.inc_value(f"atp/{self.name}/unmapped_brand/{title.split()[-1]}")
 
     def apply_fuel_types(self, item: Feature, response: Response):
-        fuel_headings = response.xpath('//h4/text()').getall()
+        fuel_headings = response.xpath("//h4/text()").getall()
         for fuel_text in fuel_headings:
             fuel_text_upper = fuel_text.upper()
             for keyword, fuel_type in self.FUEL_TYPE_MAPPING.items():
