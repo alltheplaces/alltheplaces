@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -44,4 +45,5 @@ class BurgerKingSGSpider(Spider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string("Mo-Su " + hours.replace("Operation Hours", ""))
 
+        apply_category(Categories.FAST_FOOD, item)
         yield item

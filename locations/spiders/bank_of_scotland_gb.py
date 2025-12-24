@@ -3,7 +3,7 @@ import re
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -13,7 +13,6 @@ class BankOfScotlandGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Bank of Scotland",
         "brand_wikidata": "Q627381",
-        "extras": Categories.BANK.value,
     }
     sitemap_urls = ["https://branches.bankofscotland.co.uk/sitemap.xml"]
     sitemap_rules = [
@@ -34,3 +33,7 @@ class BankOfScotlandGBSpider(SitemapSpider, StructuredDataSpider):
 
         has_atm = any(re.search(r"cashpoint|cash machine", name or "", re.IGNORECASE) for name in amenities)
         apply_yes_no(Extras.ATM, item, has_atm)
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        apply_category(Categories.BANK, item)
+        yield item

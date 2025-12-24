@@ -1,6 +1,6 @@
-import scrapy
+from scrapy import Spider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -11,7 +11,7 @@ FEATURES_MAPPING = {
 }
 
 
-class BurgerKingFISpider(scrapy.Spider):
+class BurgerKingFISpider(Spider):
     name = "burger_king_fi"
     allowed_domains = ["burgerking.fi"]
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
@@ -28,4 +28,5 @@ class BurgerKingFISpider(scrapy.Spider):
                     if tags := FEATURES_MAPPING.get(feature):
                         apply_yes_no(tags, item, value, True)
             # TODO: parse opening hours
+            apply_category(Categories.FAST_FOOD, item)
             yield item

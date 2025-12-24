@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -91,6 +91,8 @@ class BurgerKingCZSpider(Spider):
             )
             item["operator"] = location["operator"]
             item["website"] = urljoin(self.base, location["ref"])
+
+            apply_category(Categories.FAST_FOOD, item)
             apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"] is True)
             apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"] is True)
             apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"] is True)

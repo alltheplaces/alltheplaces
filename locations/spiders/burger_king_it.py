@@ -1,16 +1,16 @@
-import json
+from json import loads
 from typing import Any
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_IT, OpeningHours
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingITSpider(scrapy.Spider):
+class BurgerKingITSpider(Spider):
     name = "burger_king_it"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://burgerking.it/trova-un-ristorante"]
@@ -18,7 +18,7 @@ class BurgerKingITSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         blob = response.xpath('//script[contains(text(), "dati_pagina")]/text()').re_first(r"JSON.parse\('(.+)'\);")
-        data = json.loads(bytes(blob, "utf-8").decode("unicode_escape"))
+        data = loads(bytes(blob, "utf-8").decode("unicode_escape"))
 
         for store in data["stores"]:
             if not store["storeId"]:
@@ -30,6 +30,7 @@ class BurgerKingITSpider(scrapy.Spider):
             item["city"] = store["name"]
             item["country"] = "IT"
 
+            apply_category(Categories.FAST_FOOD, item)
             apply_yes_no(Extras.DELIVERY, item, "HomeDelivery" in store["servizi"])
             apply_yes_no(Extras.DRIVE_THROUGH, item, "KingDrive" in store["servizi"])
             apply_yes_no(Extras.WIFI, item, "WIFI" in store["servizi"])

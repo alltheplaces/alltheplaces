@@ -1,5 +1,6 @@
 import chompjs
 
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -16,4 +17,5 @@ class BurgerKingCYSpider(JSONBlobSpider):
         item["ref"] = location["nid"]
         item["branch"] = item.pop("name").replace("Burger King ", "")
         item["addr_full"] = item.pop("street")
+        apply_category(Categories.FAST_FOOD, item)
         yield item

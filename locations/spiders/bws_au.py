@@ -4,14 +4,14 @@ from urllib.parse import urljoin
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class BwsAUSpider(Spider):
     name = "bws_au"
-    item_attributes = {"brand": "BWS", "brand_wikidata": "Q4836848", "extras": Categories.SHOP_ALCOHOL.value}
+    item_attributes = {"brand": "BWS", "brand_wikidata": "Q4836848"}
     allowed_domains = ["api.bws.com.au"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "AU"
@@ -51,4 +51,5 @@ class BwsAUSpider(Spider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
 
+            apply_category(Categories.SHOP_ALCOHOL, item)
             yield item

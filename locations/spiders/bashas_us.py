@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
@@ -13,7 +13,6 @@ class BashasUSSpider(WPStoreLocatorSpider):
     item_attributes = {
         "brand": "Bashas'",
         "brand_wikidata": "Q4866786",
-        "extras": Categories.SHOP_SUPERMARKET.value,
     }
     allowed_domains = ["www.bashas.com"]
     iseadgg_countries_list = ["US"]
@@ -31,4 +30,5 @@ class BashasUSSpider(WPStoreLocatorSpider):
                 item["branch"] = branch_name.removeprefix("Bashas’ Supermarket").removeprefix(": ")
             if not item["branch"].strip():
                 item.pop("branch", None)
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

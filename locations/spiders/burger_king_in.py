@@ -1,5 +1,8 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -13,3 +16,7 @@ class BurgerKingINSpider(SitemapSpider, StructuredDataSpider):
     search_for_twitter = False
     search_for_facebook = False
     wanted_types = ["Restaurant"]  # Duplicate items in SD on each page
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        apply_category(Categories.FAST_FOOD, item)
+        yield item

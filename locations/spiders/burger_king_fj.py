@@ -4,7 +4,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -26,6 +26,7 @@ class BurgerKingFJSpider(CrawlSpider):
         item["street"] = location.xpath(".//p/text()").get()
         item["opening_hours"] = self.parse_opening_hours(response)
         services = response.xpath('//h2[contains(text(), "Services")]/following-sibling::ul/p').get("")
+        apply_category(Categories.FAST_FOOD, item)
         apply_yes_no(Extras.INDOOR_SEATING, item, "Dine-In" in services)
         apply_yes_no(Extras.TAKEAWAY, item, "Takeaway" in services)
         yield item

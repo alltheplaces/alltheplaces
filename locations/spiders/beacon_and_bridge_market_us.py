@@ -2,7 +2,7 @@ import re
 
 from scrapy import Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -12,7 +12,6 @@ class BeaconAndBridgeMarketUSSpider(Spider):
     item_attributes = {
         "brand": "Beacon & Bridge Market",
         "brand_wikidata": "Q122209684",
-        "extras": Categories.FUEL_STATION.value,
     }
     start_urls = ["https://beaconandbridge.com/locations/"]
 
@@ -41,5 +40,6 @@ class BeaconAndBridgeMarketUSSpider(Spider):
                 "phone": store.xpath(".//p/text()[1]").get().replace("PHONE: ", ""),
                 "opening_hours": oh.as_opening_hours(),
             }
+            apply_category(Categories.FUEL_STATION, properties)
 
             yield Feature(**properties)
