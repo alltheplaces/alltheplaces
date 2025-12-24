@@ -9,7 +9,7 @@ from locations.geo import point_locations
 from locations.items import Feature
 
 
-class MaesDKVSpider(scrapy.Spider):
+class MaesDkvSpider(scrapy.Spider):
     name = "maes_dkv"
     allowed_domains = ["www.maesmobility.be"]
 
