@@ -1,4 +1,3 @@
-from importlib.metadata import requires
 from typing import Iterable
 
 import scrapy
@@ -32,27 +31,19 @@ FUEL_TYPES_MAPPING = {
 
 class PetroCanadaCASpider(scrapy.Spider):
     name = "petro_canada_ca"
-    item_attributes = {"brand": "Petro-Canada", "brand_wikidata": "Q1208279"}
     requires_proxy = True
+    item_attributes = {"brand": "Petro-Canada", "brand_wikidata": "Q1208279"}
     start_urls = [
         "https://www.petro-canada.ca/en/api/petrocanada/locations?limit=10000000&range=10000000",
-        "https://www.petro-canada.ca/api/petrocanadabusiness/getCardlockLocations?fuel&hours&limit=10000000&place&province&range=10000000&service",
     ]
 
-    def parse(self, response: Response) -> Iterable[Request | Feature]:
+    def parse(self, response: Response) -> Iterable[Request]:
         data = response.json()
-        # Check if this is the business endpoint (cardlock) or regular endpoint
-        if "petrocanadabusiness" in response.url:
-            # Business endpoint - stores already have full details
-            for store in data:
-                yield from self.parse_store_data(store)
-        else:
-            # Regular endpoint - need to fetch individual store details
-            for store in data:
-                yield scrapy.Request(
-                    "https://www.petro-canada.ca/en/api/petrocanada/locations/{}".format(store["Id"]),
-                    callback=self.parse_store,
-                )
+        for store in data:
+            yield scrapy.Request(
+                "https://www.petro-canada.ca/en/api/petrocanada/locations/{}".format(store["Id"]),
+                callback=self.parse_store,
+            )
 
     def parse_store(self, response: Response) -> Iterable[Feature]:
         yield from self.parse_store_data(response.json())
@@ -63,10 +54,6 @@ class PetroCanadaCASpider(scrapy.Spider):
         item["street"] = store["CrossStreet"]
         item["city"] = store["PrimaryCity"]
         item["state"] = store["Subdivision"]
-        item["website"] = "https://www.petro-canada.ca/en/personal/gas-station-locations/{}-{}".format(
-            "".join(char for char in item["street_address"] if char.isalnum()),
-            "".join(char for char in item["city"] if char.isalnum()),
-        )
 
         oh = OpeningHours()
         if opening_hours := store.get("Hours"):
@@ -77,9 +64,9 @@ class PetroCanadaCASpider(scrapy.Spider):
                     oh.add_range(day, start, end, time_format="%H%M")
         item["opening_hours"] = oh
 
+        self.apply_website(item)
         self.parse_fuel_types(item, store)
         apply_category(Categories.FUEL_STATION, item)
-        # TODO: there are many more services available in the "Services"
         yield item
 
     def parse_fuel_types(self, item: Feature, store: dict) -> None:
@@ -90,3 +77,9 @@ class PetroCanadaCASpider(scrapy.Spider):
                         apply_yes_no(fuel_enum, item, True)
                     else:
                         self.crawler.stats.inc_value(f"atp/{self.name}/fuel/unknown/{fuel_key}")
+
+    def apply_website(self, item: Feature) -> None:
+        item["website"] = "https://www.petro-canada.ca/en/personal/gas-station-locations/{}-{}".format(
+            "".join(char for char in item["street_address"] if char.isalnum()),
+            "".join(char for char in item["city"] if char.isalnum()),
+        )
