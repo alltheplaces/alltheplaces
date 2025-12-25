@@ -7,7 +7,7 @@ import re
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import IO, Iterable, Tuple
+from typing import IO, Iterable
 from zipfile import ZipFile
 
 import ijson
@@ -136,7 +136,11 @@ def get_brand_name(item_tags: dict) -> str | None:
     return None
 
 
-def collect_records_for_file(args_tuple: tuple[str, dict, list[str]]) -> dict:
+def collect_wikidata_for_file(args_tuple: tuple[str, dict, list[str]]) -> dict:
+    """
+    Collect wikidata code information from a single ATP output GeoJSON file.
+    This function is intended to be called in parallel from multiple processes.
+    """
     file_path, nsi_id_to_brand, ignore_spiders = args_tuple
 
     wikidata_dict = {}
@@ -178,17 +182,23 @@ def collect_records_for_file(args_tuple: tuple[str, dict, list[str]]) -> dict:
 def merge_wikidata_dicts(dest: dict, src: dict):
     for q_code, src_record in src.items():
         dest_record = lookup_code(q_code, dest)
-        dest_record["osm_count"] = src_record["osm_count"]
         dest_record["nsi_brand"] = src_record["nsi_brand"]
-        dest_record["q_title"] = src_record["q_title"]
-        dest_record["q_description"] = src_record["q_description"]
-
+        dest_record["atp_brand"] = src_record["atp_brand"]
         dest_record["atp_count"] = (dest_record.get("atp_count") or 0) + (src_record.get("atp_count") or 0)
-        dest_record["atp_splits"].update(src_record["atp_splits"])
         dest_record["atp_supplier_count"].update(src_record["atp_supplier_count"])
 
+        # Merge the atp_splits structure.
+        dest_splits = dest_record["atp_splits"]
+        for country, src_splits in src_record["atp_splits"].items():
+            if country not in dest_splits:
+                dest_splits[country] = src_splits
+            else:
+                dest_split = dest_splits[country]
+                for spider, count in src_splits.items():
+                    dest_split[spider] = dest_split.get(spider, 0) + count
 
-def build_wikidata_and_nsi_dicts() -> Tuple[dict, dict]:
+
+def build_wikidata_dict() -> dict:
     # A dict keyed by wikidata code.
     wikidata_dict = {}
 
@@ -215,13 +225,17 @@ def build_wikidata_and_nsi_dicts() -> Tuple[dict, dict]:
         r["q_title"] = v.get("label", "NO NSI LABEL!")
         r["q_description"] = v.get("description", "NO NSI DESC!")
 
+    return wikidata_dict
+
+
+def build_nsi_id_to_brand() -> dict:
     # Build a lookup table from NSI id's to associated brand name if any.
+    nsi = NSI()
     nsi_id_to_brand = {}
     for item in nsi.iter_nsi():
         if brand := get_brand_name(item.get("tags", {})):
             nsi_id_to_brand[item["id"]] = brand
-
-    return wikidata_dict, nsi_id_to_brand
+    return nsi_id_to_brand
 
 
 # Some utilities that help with the analysis of project GeoJSON output files.
@@ -339,25 +353,27 @@ class InsightsCommand(ScrapyCommand):
         :param args: ATP output GeoJSON files / directories to load
         :param outfile: JSON result file name to write
         """
-        workers = opts.workers or multiprocessing.cpu_count()
 
-        file_list = build_file_list(args, opts.filter_spiders)
-        result_wikidata_dict, nsi_id_to_brand = build_wikidata_and_nsi_dicts()
+        files = build_file_list(args, opts.filter_spiders)
+
+        nsi_id_to_brand = build_nsi_id_to_brand()
+        result_wikidata_dict = build_wikidata_dict()
 
         # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
         #       which would be written over if a matching POI had been scraped by the code below.
         #       If not then that would be a possible problem to highlight.
 
-        # Make tasks for each file to be processed in parallel. We pass a copy of the result dict
-        # to each process so they can build up their own partial results.
-        tasks = [(file_path, nsi_id_to_brand, opts.filter_spiders) for file_path in file_list]
+        # Spawn a pool to process each ATP output file in parallel.
+        tasks = [(file, nsi_id_to_brand, opts.filter_spiders) for file in files]
+        num_workers = opts.workers or multiprocessing.cpu_count()
+        with multiprocessing.Pool(num_workers) as pool:
+            results = pool.map(collect_wikidata_for_file, tasks)
 
-        with multiprocessing.Pool(workers) as pool:
-            results = pool.map(collect_records_for_file, tasks)
-
+        # Merge wikidata dicts from each file into our result.
         for wikidata_dict in results:
             merge_wikidata_dicts(result_wikidata_dict, wikidata_dict)
 
+        # Finalize atp_country_count and atp_supplier_count values.
         for record in result_wikidata_dict.values():
             record["atp_country_count"] = len(record["atp_splits"])
             record["atp_supplier_count"] = len(record["atp_supplier_count"])

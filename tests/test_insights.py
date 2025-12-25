@@ -7,8 +7,8 @@ from locations.exporters.geojson import GeoJsonExporter
 from locations.items import Feature
 
 
-def _create_feature(ref, name, spider, country=None, brand_wikidata=None, lat=0.0, lon=0.0):
-    feature_data = {"ref": ref, "name": name, "lat": lat, "lon": lon, "extras": {"@spider": spider}}
+def _create_feature(ref, spider, country=None, brand_wikidata=None, lat=0.0, lon=0.0):
+    feature_data = {"ref": ref, "lat": lat, "lon": lon, "extras": {"@spider": spider}}
     if country:
         feature_data["country"] = country
     if brand_wikidata:
@@ -30,7 +30,6 @@ def _generate_spider_file(spider_name: str, q_code: str, count: int, country: st
     for i in range(count):
         feature = _create_feature(
             ref=f"{spider_name}_{i}",
-            name=f"Test Place {i}",
             spider=spider_name,
             country=country,
             brand_wikidata=q_code,
@@ -40,7 +39,7 @@ def _generate_spider_file(spider_name: str, q_code: str, count: int, country: st
     _export_features_to_file(features, file_dir / file_path)
 
 
-def _get_record_by_code(data, code):
+def _get_record_by_code(data: dict, code: str) -> dict | None:
     matching = [r for r in data["data"] if r["code"] == code]
     return matching[0] if matching else None
 
@@ -76,6 +75,7 @@ def test_atp_nsi_osm(tmp_path):
     assert mcdonalds["atp_country_count"] == 2
     assert mcdonalds["atp_supplier_count"] == 2
     assert mcdonalds["atp_splits"] == {"US": {"mcdonalds": poi_count}, "FR": {"mcdonalds_fr": poi_count}}
+    assert mcdonalds["osm_count"] > 0
 
     burger_king = _get_record_by_code(actual, "Q177054")
     assert burger_king is not None
@@ -83,19 +83,4 @@ def test_atp_nsi_osm(tmp_path):
     assert burger_king["atp_country_count"] == 1
     assert burger_king["atp_supplier_count"] == 1
     assert burger_king["atp_splits"] == {"US": {"burger_king": poi_count}}
-
-
-"""
-Experiments:
-
-### 1
-Number of POIs: 1M per spider (5 spiders)
-Number of processes: 1
-Time taken: 12.085577964782715
-
-### 2
-Number of POIs: 1M per spider (5 spiders)
-Number of processes: 5
-Time taken: 5.676903009414673
-
-"""
+    assert burger_king["osm_count"] > 0
