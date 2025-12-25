@@ -1,5 +1,6 @@
 import argparse
 import json
+from pathlib import Path
 
 from locations.commands.insights import InsightsCommand
 from locations.exporters.geojson import GeoJsonExporter
@@ -15,12 +16,28 @@ def _create_feature(ref, name, spider, country=None, brand_wikidata=None, lat=0.
     return Feature(feature_data)
 
 
-def _export_feature_to_file(feature, path):
+def _export_features_to_file(features: list[Feature], path: str):
     with open(path, "wb") as f:
         exporter = GeoJsonExporter(f, encoding="utf-8")
-        exporter.spider_name = feature["extras"]["@spider"]
-        exporter.export_item(feature)
+        exporter.spider_name = features[0]["extras"]["@spider"]
+        for feature in features:
+            exporter.export_item(feature)
         exporter.finish_exporting()
+
+
+def _generate_spider_file(spider_name: str, q_code: str, count: int, country: str, file_dir: Path) -> str:
+    features = []
+    for i in range(count):
+        feature = _create_feature(
+            ref=f"{spider_name}_{i}",
+            name=f"Test Place {i}",
+            spider=spider_name,
+            country=country,
+            brand_wikidata=q_code,
+        )
+        features.append(feature)
+    file_path = f"{spider_name}.geojson"
+    _export_features_to_file(features, file_dir / file_path)
 
 
 def _get_record_by_code(data, code):
@@ -29,23 +46,25 @@ def _get_record_by_code(data, code):
 
 
 def test_atp_nsi_osm(tmp_path):
+    poi_count = 1000
     test_cases = [
-        (_create_feature("1", "Mcdonalds", "mcdonalds", "US", "Q38076"), "mcdonalds.geojson"),
-        (_create_feature("2", "Burger King", "burger_king", "US", "Q177054"), "burger_king.geojson"),
+        ("mcdonalds", "Q38076", poi_count, "US"),
+        ("mcdonalds_fr", "Q38076", poi_count, "FR"),
+        ("burger_king", "Q177054", poi_count, "US"),
         # No wikidata
-        (_create_feature("3", "Subway", "subway", "US"), "subway.geojson"),
+        ("subway", None, poi_count, "US"),
         # No country, no wikidata
-        (_create_feature("4", "KFC", "kfc_de"), "kfc_de.geojson"),
+        ("kfc_de", None, poi_count, None),
         # No country
-        (_create_feature("5", "Pizza Hut", "pizza_hut_gb", brand_wikidata="Q191615"), "pizza_hut_gb.geojson"),
+        ("pizza_hut_gb", "Q191615", poi_count, None),
     ]
 
-    for feature, filename in test_cases:
-        _export_feature_to_file(feature, tmp_path / filename)
+    for case in test_cases:
+        _generate_spider_file(*case, file_dir=tmp_path)
 
     outfile = tmp_path / "_insights.json"
     command = InsightsCommand()
-    opts = argparse.Namespace(outfile=outfile, filter_spiders=[])
+    opts = argparse.Namespace(outfile=outfile, filter_spiders=[], workers=1)
     command.analyze_atp_nsi_osm([tmp_path], opts)
 
     with open(outfile) as f:
@@ -53,14 +72,30 @@ def test_atp_nsi_osm(tmp_path):
 
     mcdonalds = _get_record_by_code(actual, "Q38076")
     assert mcdonalds is not None
-    assert mcdonalds["atp_count"] == 1
-    assert mcdonalds["atp_country_count"] == 1
-    assert mcdonalds["atp_supplier_count"] == 1
-    assert mcdonalds["atp_splits"] == {"US": {"mcdonalds": 1}}
+    assert mcdonalds["atp_count"] == poi_count * 2
+    assert mcdonalds["atp_country_count"] == 2
+    assert mcdonalds["atp_supplier_count"] == 2
+    assert mcdonalds["atp_splits"] == {"US": {"mcdonalds": poi_count}, "FR": {"mcdonalds_fr": poi_count}}
 
     burger_king = _get_record_by_code(actual, "Q177054")
     assert burger_king is not None
-    assert burger_king["atp_count"] == 1
+    assert burger_king["atp_count"] == poi_count
     assert burger_king["atp_country_count"] == 1
     assert burger_king["atp_supplier_count"] == 1
-    assert burger_king["atp_splits"] == {"US": {"burger_king": 1}}
+    assert burger_king["atp_splits"] == {"US": {"burger_king": poi_count}}
+
+
+"""
+Experiments:
+
+### 1
+Number of POIs: 1M per spider (5 spiders)
+Number of processes: 1
+Time taken: 12.085577964782715
+
+### 2
+Number of POIs: 1M per spider (5 spiders)
+Number of processes: 5
+Time taken: 5.676903009414673
+
+"""
