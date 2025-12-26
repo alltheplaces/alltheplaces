@@ -6,6 +6,7 @@ import pprint
 import re
 import time
 from collections import Counter, defaultdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import IO, Iterable
 from zipfile import ZipFile
@@ -18,6 +19,38 @@ from scrapy.exceptions import UsageError
 
 from locations.name_suggestion_index import NSI
 from locations.user_agents import BOT_USER_AGENT_REQUESTS
+
+
+def _make_int_defaultdict():
+    return defaultdict(int)
+
+
+@dataclass
+class WikidataRecord:
+    code: str
+    osm_count: int = 0
+    nsi_brand: str | None = None
+    q_title: str | None = None
+    q_description: str | None = None
+    atp_count: int = 0
+    atp_brand: str | None = None
+    atp_country_count: int = 0
+    atp_supplier_count: set[str] = field(default_factory=set)
+    atp_splits: dict[str, dict[str, int]] = field(default_factory=lambda: defaultdict(_make_int_defaultdict))
+
+    def to_dict(self) -> dict:
+        return {
+            "code": self.code,
+            "osm_count": self.osm_count,
+            "nsi_brand": self.nsi_brand,
+            "q_title": self.q_title,
+            "q_description": self.q_description,
+            "atp_count": self.atp_count,
+            "atp_brand": self.atp_brand,
+            "atp_country_count": len(self.atp_splits),
+            "atp_supplier_count": len(self.atp_supplier_count),
+            "atp_splits": self.atp_splits,
+        }
 
 
 def iter_json(stream: IO[bytes] | IO[str], file_name: str) -> Iterable[dict]:
@@ -107,22 +140,11 @@ def build_file_list(paths: list[str], ignore_spiders: list[str]) -> list[str]:
     return file_list
 
 
-def lookup_code(wikidata_code: str, wikidata_dict: dict) -> dict:
+def lookup_code(wikidata_code: str, wikidata_dict: dict) -> WikidataRecord:
     # Return record for a wikidata code, adding it to dict if not already present.
     if record := wikidata_dict.get(wikidata_code):
         return record
-    record = {
-        "code": wikidata_code,
-        "osm_count": 0,
-        "nsi_brand": None,
-        "q_title": None,
-        "q_description": None,
-        "atp_count": None,
-        "atp_brand": None,
-        "atp_country_count": 0,
-        "atp_supplier_count": set(),
-        "atp_splits": {},
-    }
+    record = WikidataRecord(wikidata_code)
     wikidata_dict[wikidata_code] = record
     return record
 
@@ -136,14 +158,18 @@ def get_brand_name(item_tags: dict) -> str | None:
     return None
 
 
-def collect_wikidata_for_file(args_tuple: tuple[str, dict, list[str]]) -> dict:
+def collect_wikidata_for_file(args_tuple: tuple[str, dict, list[str]]) -> dict[str, WikidataRecord]:
     """
-    Collect wikidata code information from a single ATP output GeoJSON file.
+    Collect brand wikidata information from a single ATP output GeoJSON file.
     This function is intended to be called in parallel from multiple processes.
     """
     file_path, nsi_id_to_brand, ignore_spiders = args_tuple
 
-    wikidata_dict = {}
+    wikidata_dict: dict[str, WikidataRecord] = {}
+
+    # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
+    #       which would be written over if a matching POI had been scraped by the code below.
+    #       If not then that would be a possible problem to highlight.
 
     # Walk through the referenced ATP downloads, if they have wikidata codes then update our output table.
     for feature in iter_features([file_path], ignore_spiders):
@@ -158,47 +184,36 @@ def collect_wikidata_for_file(args_tuple: tuple[str, dict, list[str]]) -> dict:
             # If we have found the brand in NSI then show the NSI brand name in the
             # output JSON to help highlight where a spider brand name differs from
             # the NSI brand name.
-            r["nsi_brand"] = nsi_id_to_brand.get(nsi_id)
+            r.nsi_brand = nsi_id_to_brand.get(nsi_id)
 
-        count = r.get("atp_count") or 0
-        r["atp_count"] = count + 1
+        r.atp_count += 1
         if brand:
-            r["atp_brand"] = brand
+            r.atp_brand = brand
 
-        splits = r["atp_splits"]
         country = properties.get("addr:country")
-        if country not in splits:
-            splits[country] = {}
-        split = splits[country]
-
         spider = properties.get("@spider")
-        r["atp_supplier_count"].add(spider)
-        spider_count = split.get(spider) or 0
-        split[spider] = spider_count + 1
+
+        r.atp_supplier_count.add(spider)
+        r.atp_splits[country][spider] += 1
 
     return wikidata_dict
 
 
-def merge_wikidata_dicts(dest: dict, src: dict):
+def merge_wikidata_dicts(dest: dict[str, WikidataRecord], src: dict[str, WikidataRecord]):
     for q_code, src_record in src.items():
         dest_record = lookup_code(q_code, dest)
-        dest_record["nsi_brand"] = src_record["nsi_brand"]
-        dest_record["atp_brand"] = src_record["atp_brand"]
-        dest_record["atp_count"] = (dest_record.get("atp_count") or 0) + (src_record.get("atp_count") or 0)
-        dest_record["atp_supplier_count"].update(src_record["atp_supplier_count"])
+        dest_record.nsi_brand = src_record.nsi_brand
+        dest_record.atp_brand = src_record.atp_brand
+        dest_record.atp_count += src_record.atp_count
+        dest_record.atp_supplier_count.update(src_record.atp_supplier_count)
 
         # Merge the atp_splits structure.
-        dest_splits = dest_record["atp_splits"]
-        for country, src_splits in src_record["atp_splits"].items():
-            if country not in dest_splits:
-                dest_splits[country] = src_splits
-            else:
-                dest_split = dest_splits[country]
-                for spider, count in src_splits.items():
-                    dest_split[spider] = dest_split.get(spider, 0) + count
+        for country, src_splits in src_record.atp_splits.items():
+            for spider, count in src_splits.items():
+                dest_record.atp_splits[country][spider] += count
 
 
-def build_wikidata_dict() -> dict:
+def build_wikidata_dict() -> dict[str, WikidataRecord]:
     # A dict keyed by wikidata code.
     wikidata_dict = {}
 
@@ -216,14 +231,14 @@ def build_wikidata_dict() -> dict:
             break
         for r in entries:
             if re_qcode.match(r["value"]):
-                lookup_code(r["value"], wikidata_dict)["osm_count"] = r["count"]
+                lookup_code(r["value"], wikidata_dict).osm_count += r["count"]
 
     # Now load each wikidata entry in the NSI dataset and merge into our wikidata table.
     nsi = NSI()
     for k, v in nsi.iter_wikidata():
         r = lookup_code(k, wikidata_dict)
-        r["q_title"] = v.get("label", "NO NSI LABEL!")
-        r["q_description"] = v.get("description", "NO NSI DESC!")
+        r.q_title = v.get("label", "NO NSI LABEL!")
+        r.q_description = v.get("description", "NO NSI DESC!")
 
     return wikidata_dict
 
@@ -355,17 +370,13 @@ class InsightsCommand(ScrapyCommand):
         """
 
         files = build_file_list(args, opts.filter_spiders)
-
         nsi_id_to_brand = build_nsi_id_to_brand()
         result_wikidata_dict = build_wikidata_dict()
-
-        # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
-        #       which would be written over if a matching POI had been scraped by the code below.
-        #       If not then that would be a possible problem to highlight.
 
         # Spawn a pool to process each ATP output file in parallel.
         tasks = [(file, nsi_id_to_brand, opts.filter_spiders) for file in files]
         num_workers = opts.workers or multiprocessing.cpu_count()
+
         with multiprocessing.Pool(num_workers) as pool:
             results = pool.map(collect_wikidata_for_file, tasks)
 
@@ -373,13 +384,8 @@ class InsightsCommand(ScrapyCommand):
         for wikidata_dict in results:
             merge_wikidata_dicts(result_wikidata_dict, wikidata_dict)
 
-        # Finalize atp_country_count and atp_supplier_count values.
-        for record in result_wikidata_dict.values():
-            record["atp_country_count"] = len(record["atp_splits"])
-            record["atp_supplier_count"] = len(record["atp_supplier_count"])
-
         # Write a JSON format output file which is datatables friendly.
-        for_datatables = {"data": list(result_wikidata_dict.values())}
+        for_datatables = {"data": [record.to_dict() for record in result_wikidata_dict.values()]}
         with open(opts.outfile, "w") as f:
             json.dump(for_datatables, f)
 
