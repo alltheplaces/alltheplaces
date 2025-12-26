@@ -4,7 +4,6 @@ import multiprocessing
 import os
 import pprint
 import re
-import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -313,9 +312,7 @@ class InsightsCommand(ScrapyCommand):
             self.check_wikidata_codes(args, opts)
             return
         if opts.atp_nsi_osm:
-            start_time = time.time()
             self.analyze_atp_nsi_osm(args, opts)
-            print("ATP-NSI-OSM analysis took {:.2f} seconds".format(time.time() - start_time))
             return
         if opts.nsi_overrides:
             self.nsi_overrides(args, opts)
