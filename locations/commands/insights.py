@@ -80,19 +80,7 @@ def iter_features(files_and_dirs: list[str], ignore_spiders: list[str]) -> Itera
     :return: a GeoJSON feature iterator
     """
 
-    file_list = []
-    for file_or_dir in files_and_dirs:
-        if os.path.isfile(file_or_dir):
-            file_list.append(file_or_dir)
-        elif os.path.isdir(file_or_dir):
-            for file_name in os.listdir(file_or_dir):
-                file_list.append(os.path.abspath(os.path.join(file_or_dir, file_name)))
-        else:
-            raise UsageError("no such file or directory: " + file_or_dir)
-
-    file_list = list(filter(lambda x: not ignore_file(x, ignore_spiders) and os.path.getsize(x) > 0, file_list))
-    if len(file_list) == 0:
-        raise UsageError("no non-empty JSON/ZIP files found")
+    file_list = build_file_list(files_and_dirs, ignore_spiders)
 
     for file_path in file_list:
         if file_path.endswith(".zip"):
@@ -107,7 +95,7 @@ def iter_features(files_and_dirs: list[str], ignore_spiders: list[str]) -> Itera
 
 
 def ignore_file(s: str, ignore_spiders: list[str]) -> bool:
-    if s.endswith("json") or s.endswith(".zip"):
+    if s.endswith(("json", ".zip")):
         for ignore_spider in ignore_spiders:
             if ignore_spider in s:
                 return True
@@ -120,7 +108,7 @@ def ignore_file(s: str, ignore_spiders: list[str]) -> bool:
 def build_file_list(paths: list[str], ignore_spiders: list[str]) -> list[str]:
     """
     Given a list of file and directory paths, traverse it and build a flat list of files.
-    Zero length files are skipped. Files from ignore_spiders list are skipped.
+    Zero length files and files from ignore_spiders list are skipped.
     """
     file_list: list[Path] = []
     for p in [Path(path) for path in paths]:
@@ -134,19 +122,15 @@ def build_file_list(paths: list[str], ignore_spiders: list[str]) -> list[str]:
             raise UsageError(f"no such file or directory: {p}")
 
     file_list = list(filter(lambda x: not ignore_file(x, ignore_spiders) and os.path.getsize(x) > 0, file_list))
-    if not file_list:
+    if len(file_list) == 0:
         raise UsageError("no non-empty JSON/ZIP files found")
 
     return file_list
 
 
-def lookup_code(wikidata_code: str, wikidata_dict: dict) -> WikidataRecord:
+def lookup_code(wikidata_code: str, wikidata_dict: dict[str, WikidataRecord]) -> WikidataRecord:
     # Return record for a wikidata code, adding it to dict if not already present.
-    if record := wikidata_dict.get(wikidata_code):
-        return record
-    record = WikidataRecord(wikidata_code)
-    wikidata_dict[wikidata_code] = record
-    return record
+    return wikidata_dict.setdefault(wikidata_code, WikidataRecord(wikidata_code))
 
 
 def get_brand_name(item_tags: dict) -> str | None:
@@ -199,7 +183,12 @@ def collect_wikidata_for_file(args_tuple: tuple[str, dict, list[str]]) -> dict[s
     return wikidata_dict
 
 
-def merge_wikidata_dicts(dest: dict[str, WikidataRecord], src: dict[str, WikidataRecord]):
+def merge_wikidata_dicts(dest: dict[str, WikidataRecord], src: dict[str, WikidataRecord]) -> None:
+    """
+    Merge wikidata records from src dict into dest dict.
+    :param dest: destination wikidata dict
+    :param src: source wikidata dict
+    """
     for q_code, src_record in src.items():
         dest_record = lookup_code(q_code, dest)
         dest_record.nsi_brand = src_record.nsi_brand
@@ -374,9 +363,8 @@ class InsightsCommand(ScrapyCommand):
         result_wikidata_dict = build_wikidata_dict()
 
         # Spawn a pool to process each ATP output file in parallel.
-        tasks = [(file, nsi_id_to_brand, opts.filter_spiders) for file in files]
         num_workers = opts.workers or multiprocessing.cpu_count()
-
+        tasks = [(file, nsi_id_to_brand, opts.filter_spiders) for file in files]
         with multiprocessing.Pool(num_workers) as pool:
             results = pool.map(collect_wikidata_for_file, tasks)
 
