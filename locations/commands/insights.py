@@ -299,7 +299,7 @@ class InsightsCommand(ScrapyCommand):
             dest="workers",
             type=int,
             default=None,
-            help="Number of parallel workers to use when analyzing atp-nsi-osm",
+            help="Number of CPUs to use when analyzing atp-nsi-osm",
         )
 
     def run(self, args: list[str], opts: argparse.Namespace) -> None:
