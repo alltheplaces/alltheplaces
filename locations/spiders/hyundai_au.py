@@ -12,7 +12,7 @@ class HyundaiAUSpider(JSONBlobSpider):
     name = "hyundai_au"
     item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["www.hyundai.com"]
-    no_ref = True
+    no_refs = True
     start_urls = ["https://www.hyundai.com/content/api/au/hyundai/v3/findadealer?postcode=0"]
 
     def parse(self, response: Response) -> Iterable[Feature]:
