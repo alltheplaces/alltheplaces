@@ -363,6 +363,7 @@ class InsightsCommand(ScrapyCommand):
         result_wikidata_dict = build_wikidata_dict()
 
         # Spawn a pool to process each ATP output file in parallel.
+        # TODO: revisit default number of workers?
         num_workers = opts.workers or multiprocessing.cpu_count()
         tasks = [(file, nsi_id_to_brand, opts.filter_spiders) for file in files]
         with multiprocessing.Pool(num_workers) as pool:
