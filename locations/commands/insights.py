@@ -21,7 +21,7 @@ from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
 @dataclass
-class AtpNsiWikidataRecord:
+class WikidataRecord:
     code: str
     osm_count: int = 0
     nsi_brand: str | None = None
@@ -29,10 +29,9 @@ class AtpNsiWikidataRecord:
     q_description: str | None = None
     atp_count: int = 0
     atp_brand: str | None = None
-    atp_country_count: int = 0
     atp_supplier_count: set[str] = field(default_factory=set)
-    # (country, spider) -> count
-    atp_splits: dict[tuple[str, str], int] = field(default_factory=lambda: defaultdict(int))
+    # country -> spider -> count
+    atp_splits: dict[str, dict[str, int]] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -43,31 +42,22 @@ class AtpNsiWikidataRecord:
             "q_description": self.q_description,
             "atp_count": self.atp_count,
             "atp_brand": self.atp_brand,
-            "atp_country_count": len({country for country, _ in self.atp_splits.keys()}),
+            "atp_country_count": len(self.atp_splits),
             "atp_supplier_count": len(self.atp_supplier_count),
-            "atp_splits": self.splits_to_nested_dict(),
+            "atp_splits": self.atp_splits,
         }
-
-    def splits_to_nested_dict(self) -> dict[str, dict[str, int]]:
-        result = defaultdict(dict)
-        for (country, spider), count in self.atp_splits.items():
-            result[country][spider] = count
-        return result
 
 
 def iter_json(stream: IO[bytes] | IO[str], file_name: str) -> Iterable[dict]:
     try:
         if file_name.endswith("ndgeojson"):
-            # New line delimited GeoJSON is to be read a line at a time.
             while True:
                 if line := stream.readline():
                     yield json.loads(line)
                     continue
                 return
-        # Assume the file is GeoJSON format, further assume many features and stream read the features.
         yield from ijson.items(stream, "features.item", use_float=True)
     except Exception as e:
-        # Fail hard (for this file) on the first JSON error we come across.
         print("Failed to decode: " + file_name)
         print(e)
 
@@ -101,7 +91,7 @@ def build_file_list(paths: list[str], ignore_spiders: list[str]) -> list[str]:
     Given a list of file and directory paths, traverse it and build a flat list of files.
     Zero length files and files from ignore_spiders list are skipped.
     """
-    file_list: list[Path] = []
+    file_list: list[str] = []
     for p in [Path(path) for path in paths]:
         if p.is_file():
             file_list.append(str(p))
@@ -112,8 +102,8 @@ def build_file_list(paths: list[str], ignore_spiders: list[str]) -> list[str]:
         else:
             raise UsageError(f"no such file or directory: {p}")
 
-    file_list = list(filter(lambda x: not ignore_file(x, ignore_spiders) and os.path.getsize(x) > 0, file_list))
-    if len(file_list) == 0:
+    file_list = [f for f in file_list if not ignore_file(f, ignore_spiders) and os.path.getsize(f) > 0]
+    if not file_list:
         raise UsageError("no non-empty JSON/ZIP files found")
 
     return file_list
@@ -121,129 +111,115 @@ def build_file_list(paths: list[str], ignore_spiders: list[str]) -> list[str]:
 
 def ignore_file(s: str, ignore_spiders: list[str]) -> bool:
     if s.endswith(("json", ".zip")):
-        for ignore_spider in ignore_spiders:
-            if ignore_spider in s:
-                return True
-        # It's a JSON or ZIP file whose name does not trigger any ignore filter, it's good to process.
-        return False
-    else:
-        return True
+        return any(ignore_spider in s for ignore_spider in ignore_spiders)
+    return True
 
 
-def build_nsi_id_to_brand() -> dict:
-    # Build a lookup table from NSI id's to associated brand name if any.
-    nsi = NSI()
-    nsi_id_to_brand = {}
-    for item in nsi.iter_nsi():
-        if brand := get_brand_name(item.get("tags", {})):
-            nsi_id_to_brand[item["id"]] = brand
-    return nsi_id_to_brand
+def get_brand_name(tags: dict) -> str | None:
+    """Extract brand name, preferring English."""
+    return tags.get("brand:en") or tags.get("brand")
 
 
-def load_osm_and_nsi_reference_data() -> dict[str, AtpNsiWikidataRecord]:
-    # A dict keyed by wikidata code.
-    wikidata_dict = {}
-
-    # First data set to merge into the output table is wikidata tag count info from OSM.
-    # There are a lot of unique wikidata codes so use paging on the taginfo service.
-    re_qcode = re.compile(r"^Q\d+")
-    osm_url_template = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page={}&rp=999&qtype=value"
-    for page in range(1, 1000):
-        response = requests.get(osm_url_template.format(page), headers={"User-Agent": BOT_USER_AGENT_REQUESTS})
-        if not response.status_code == 200:
-            raise Exception("Failed to load OSM wikidata tag statistics")
-        entries = response.json()["data"]
-        if len(entries) == 0:
-            # We've run of the end of OSM wikidata entries.
-            break
-        for r in entries:
-            if re_qcode.match(r["value"]):
-                get_or_create_record(r["value"], wikidata_dict).osm_count += r["count"]
-
-    # Now load each wikidata entry in the NSI dataset and merge into our wikidata table.
-    nsi = NSI()
-    for k, v in nsi.iter_wikidata():
-        r = get_or_create_record(k, wikidata_dict)
-        r.q_title = v.get("label", "NO NSI LABEL!")
-        r.q_description = v.get("description", "NO NSI DESC!")
-
-    return wikidata_dict
-
-
-def get_or_create_record(wikidata_code: str, wikidata_dict: dict[str, AtpNsiWikidataRecord]) -> AtpNsiWikidataRecord:
-    return wikidata_dict.setdefault(wikidata_code, AtpNsiWikidataRecord(wikidata_code))
-
-
-def get_brand_name(item_tags: dict) -> str | None:
-    # Prefer English brand name for insights application (https://www.alltheplaces.xyz/wikidata.html).
-    if brand_en := item_tags.get("brand:en"):
-        return str(brand_en)
-    if brand := item_tags.get("brand"):
-        return str(brand)
-    return None
-
-
-def count_atp_brands_in_file(args_tuple: tuple[str, dict, list[str]]) -> dict[str, AtpNsiWikidataRecord]:
+def count_brands_in_file(args_tuple: tuple[str, dict, list[str]]) -> dict[str, WikidataRecord]:
     """
-    Counts brand occurrences in a single ATP output file. Designed to be called in a multiprocessing pool.
-    :param args_tuple: tuple of (file_path, nsi_id_to_brand, ignore_spiders)
-    :return: a dict of wikidata code to WikidataRecord
+    Count brand occurrences in a single file (worker function for multiprocessing).
+    Returns dict of wikidata code -> WikidataRecord.
     """
     file_path, nsi_brands, ignore_spiders = args_tuple
+    records: dict[str, WikidataRecord] = {}
 
-    wikidata_dict: dict[str, AtpNsiWikidataRecord] = {}
-
-    # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
-    #       which would be written over if a matching POI had been scraped by the code below.
-    #       If not then that would be a possible problem to highlight.
-
-    # Walk through the referenced ATP downloads, if they have wikidata codes then update our output table.
     for feature in iter_features([file_path], ignore_spiders):
         properties = feature["properties"]
-        brand_wikidata = properties.get("brand:wikidata")
-        if not brand_wikidata:
+        wikidata_code = properties.get("brand:wikidata")
+        if not wikidata_code:
             continue
-        brand = get_brand_name(properties)
-        r = get_or_create_record(brand_wikidata, wikidata_dict)
 
+        # Get or create record for this wikidata code
+        record = records.setdefault(wikidata_code, WikidataRecord(wikidata_code))
+
+        # Update NSI brand if available
         if nsi_id := properties.get("nsi_id"):
-            # If we have found the brand in NSI then show the NSI brand name in the
-            # output JSON to help highlight where a spider brand name differs from
-            # the NSI brand name.
-            r.nsi_brand = nsi_brands.get(nsi_id)
+            record.nsi_brand = nsi_brands.get(nsi_id)
 
-        r.atp_count += 1
-        if brand:
-            r.atp_brand = brand
+        # Update counts and brand
+        record.atp_count += 1
+        if brand := get_brand_name(properties):
+            record.atp_brand = brand
 
+        # Update country/spider breakdown - using nested dict directly!
         country = properties.get("addr:country")
         spider = properties.get("@spider")
+        record.atp_supplier_count.add(spider)
 
-        r.atp_supplier_count.add(spider)
-        r.atp_splits[(country, spider)] += 1
+        if country not in record.atp_splits:
+            record.atp_splits[country] = {}
+        record.atp_splits[country][spider] = record.atp_splits[country].get(spider, 0) + 1
 
-    return wikidata_dict
+    return records
 
 
-def merge_record_dicts(dest: dict[str, AtpNsiWikidataRecord], src: dict[str, AtpNsiWikidataRecord]) -> None:
-    """
-    Merge wikidata records from src dict into dest dict.
-    :param dest: destination wikidata dict
-    :param src: source wikidata dict
-    """
-    for q_code, src_record in src.items():
-        dest_record = get_or_create_record(q_code, dest)
+def merge_records(dest: dict[str, WikidataRecord], src: dict[str, WikidataRecord]) -> None:
+    """Merge wikidata records from src into dest."""
+    for code, src_record in src.items():
+        if code not in dest:
+            dest[code] = src_record
+            continue
+
+        dest_record = dest[code]
+        # Copy brand info (last one wins, all should be same)
         dest_record.nsi_brand = src_record.nsi_brand
         dest_record.atp_brand = src_record.atp_brand
+
+        # Merge counts
         dest_record.atp_count += src_record.atp_count
         dest_record.atp_supplier_count.update(src_record.atp_supplier_count)
 
-        # Merge the atp_splits structure.
-        for key, count in src_record.atp_splits.items():
-            dest_record.atp_splits[key] += count
+        # Merge nested atp_splits
+        for country, spiders in src_record.atp_splits.items():
+            if country not in dest_record.atp_splits:
+                dest_record.atp_splits[country] = {}
+            for spider, count in spiders.items():
+                dest_record.atp_splits[country][spider] = dest_record.atp_splits[country].get(spider, 0) + count
 
 
-# Some utilities that help with the analysis of project GeoJSON output files.
+def load_osm_and_nsi_data() -> dict[str, WikidataRecord]:
+    """Load reference data from OSM taginfo and NSI."""
+    records: dict[str, WikidataRecord] = {}
+
+    # Load OSM brand:wikidata tag counts
+    re_qcode = re.compile(r"^Q\d+")
+    osm_url = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page={}&rp=999&qtype=value"
+
+    for page in range(1, 1000):
+        response = requests.get(osm_url.format(page), headers={"User-Agent": BOT_USER_AGENT_REQUESTS})
+        if response.status_code != 200:
+            raise Exception("Failed to load OSM wikidata tag statistics")
+
+        entries = response.json()["data"]
+        if not entries:
+            break
+
+        for entry in entries:
+            if re_qcode.match(entry["value"]):
+                code = entry["value"]
+                records.setdefault(code, WikidataRecord(code)).osm_count = entry["count"]
+
+    # Load NSI wikidata labels/descriptions
+    nsi = NSI()
+    for code, data in nsi.iter_wikidata():
+        record = records.setdefault(code, WikidataRecord(code))
+        record.q_title = data.get("label", "NO NSI LABEL!")
+        record.q_description = data.get("description", "NO NSI DESC!")
+
+    return records
+
+
+def build_nsi_id_to_brand() -> dict:
+    """Build lookup from NSI ID to brand name."""
+    nsi = NSI()
+    return {item["id"]: brand for item in nsi.iter_nsi() if (brand := get_brand_name(item.get("tags", {})))}
+
+
 class InsightsCommand(ScrapyCommand):
     requires_project = True
     default_settings = {"LOG_ENABLED": False}
@@ -354,28 +330,29 @@ class InsightsCommand(ScrapyCommand):
         """
         Trawl ATP, NSI and OSM for per wikidata code information.
         :param args: ATP output GeoJSON files / directories to load
+        :param workers: number of parallel workers to use
         :param outfile: JSON result file name to write
         """
+        # Load reference data
         nsi_brands = build_nsi_id_to_brand()
-        all_records = load_osm_and_nsi_reference_data()
+        all_records = load_osm_and_nsi_data()
 
-        # Spawn a pool to process each ATP output file in parallel.
-        # TODO: revisit default number of workers?
+        # Process ATP files in parallel
         workers = opts.workers or multiprocessing.cpu_count()
         files = build_file_list(args, opts.filter_spiders)
         tasks = [(file, nsi_brands, opts.filter_spiders) for file in files]
 
         with multiprocessing.Pool(workers) as pool:
-            results = pool.map(count_atp_brands_in_file, tasks)
+            results = pool.map(count_brands_in_file, tasks)
 
-        # Merge wikidata dicts from each file into our result.
+        # Merge results from all workers
         for file_records in results:
-            merge_record_dicts(all_records, file_records)
+            merge_records(all_records, file_records)
 
-        # Write a JSON format output file which is datatables friendly.
-        for_datatables = {"data": [record.to_dict() for record in all_records.values()]}
+        # Write output
+        output = {"data": [record.to_dict() for record in all_records.values()]}
         with open(opts.outfile, "w") as f:
-            json.dump(for_datatables, f)
+            json.dump(output, f)
 
     def nsi_overrides(self, args: list[str], opts: argparse.Namespace) -> None:
         nsi = NSI()
