@@ -50,7 +50,7 @@ class WikidataRecord:
 
 def iter_json(stream: IO[bytes] | IO[str], file_name: str) -> Iterable[dict]:
     try:
-        if file_name.endswith("ndgeojson"):
+        if file_name.endswith("ndgeojson", "ndgeojson.gz"):
             while True:
                 if line := stream.readline():
                     yield json.loads(line)
