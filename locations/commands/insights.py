@@ -150,7 +150,7 @@ def count_brands_in_file(args_tuple: tuple[str, dict, list[str]]) -> dict[str, W
         if brand := get_brand_name(properties):
             record.atp_brand = brand
 
-        # Update country/spider breakdown - using nested dict directly!
+        # Update country/spider breakdown
         country = properties.get("addr:country")
         spider = properties.get("@spider")
         record.atp_supplier_count.add(spider)
@@ -223,7 +223,7 @@ def build_nsi_id_to_brand() -> dict:
     nsi = NSI()
     return {item["id"]: brand for item in nsi.iter_nsi() if (brand := get_brand_name(item.get("tags", {})))}
 
-
+# Some utilities that help with the analysis of project GeoJSON output files.
 class InsightsCommand(ScrapyCommand):
     requires_project = True
     default_settings = {"LOG_ENABLED": False}
@@ -341,7 +341,7 @@ class InsightsCommand(ScrapyCommand):
         nsi_brands = build_nsi_id_to_brand()
         all_records = load_osm_and_nsi_data()
 
-        # Process ATP files in parallel
+        # Process ATP files in parallel, counting brands per wikidata code and country/spider
         workers = opts.workers or multiprocessing.cpu_count()
         files = build_file_list(args, opts.filter_spiders)
         tasks = [(file, nsi_brands, opts.filter_spiders) for file in files]
@@ -349,7 +349,7 @@ class InsightsCommand(ScrapyCommand):
         with multiprocessing.Pool(workers) as pool:
             results = pool.map(count_brands_in_file, tasks)
 
-        # Merge results from all workers
+        # Merge results from individual files into output table
         for file_records in results:
             merge_records(all_records, file_records)
 
