@@ -65,19 +65,3 @@ class FifthThirdBankSpider(CrawlSpider):
         item["opening_hours"] = oh
         yield item
 
-    # def parse(self, response):
-    #     MicrodataParser.convert_to_json_ld(response.selector)
-    #     for obj in LinkedDataParser.iter_linked_data(response):
-    #         # Page includes nearby locations; find the one that's the subject
-    #         # of this page. We're going to crawl all the pages anyway, so take
-    #         # the one that also includes the yext itemid.
-    #         if obj["@type"] == "BankOrCreditUnion" and "@id" in obj:
-    #             break
-    #     else:
-    #         return
-    #     if obj:
-    #         item = LinkedDataParser.parse_ld(obj)
-    #         apply_category(Categories.BANK, item)
-    #         if atm_info := response.xpath('//*[@class="CoreHero-atmNumber"]//text()').get():
-    #             apply_yes_no(Extras.ATM, item, True if "ATM" in atm_info else False)
-    #         yield item
