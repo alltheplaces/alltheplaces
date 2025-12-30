@@ -64,4 +64,3 @@ class FifthThirdBankSpider(CrawlSpider):
                     oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M%p")
         item["opening_hours"] = oh
         yield item
-
