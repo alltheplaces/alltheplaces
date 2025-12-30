@@ -1,4 +1,5 @@
 import argparse
+import gzip
 import json
 import multiprocessing
 import os
@@ -50,7 +51,7 @@ class WikidataRecord:
 
 def iter_json(stream: IO[bytes] | IO[str], file_name: str) -> Iterable[dict]:
     try:
-        if file_name.endswith("ndgeojson", "ndgeojson.gz"):
+        if file_name.endswith((".ndgeojson", ".ndgeojson.gz")):
             while True:
                 if line := stream.readline():
                     yield json.loads(line)
@@ -81,6 +82,9 @@ def iter_features(files_and_dirs: list[str], ignore_spiders: list[str]) -> Itera
                     if not ignore_file(name, ignore_spiders):
                         with zip_file.open(name) as f:
                             yield from iter_json(f, name)
+        elif file_path.endswith(".gz"):
+            with gzip.open(file_path) as f:
+                yield from iter_json(f, file_path)
         else:
             with open(file_path) as f:
                 yield from iter_json(f, file_path)
@@ -110,7 +114,7 @@ def build_file_list(paths: list[str], ignore_spiders: list[str]) -> list[str]:
 
 
 def ignore_file(s: str, ignore_spiders: list[str]) -> bool:
-    if s.endswith(("json", ".zip")):
+    if s.endswith((".zip", ".geojson", ".geojson.gz", ".json", ".json.gz", ".ndgeojson", ".ndgeojson.gz")):
         return any(ignore_spider in s for ignore_spider in ignore_spiders)
     return True
 

@@ -1,86 +1,95 @@
 import argparse
+import gzip
 import json
+import shutil
 from pathlib import Path
+
+import pytest
 
 from locations.commands.insights import InsightsCommand
 from locations.exporters.geojson import GeoJsonExporter
+from locations.exporters.ld_geojson import LineDelimitedGeoJsonExporter
 from locations.items import Feature
 
 
-def _create_feature(ref, spider, country=None, brand_wikidata=None, lat=0.0, lon=0.0):
-    feature_data = {"ref": ref, "lat": lat, "lon": lon, "extras": {"@spider": spider}}
-    if country:
-        feature_data["country"] = country
-    if brand_wikidata:
-        feature_data["brand_wikidata"] = brand_wikidata
-    return Feature(feature_data)
+def _export_features(features: list[Feature], path: Path, compress: bool, format: str) -> None:
+    exporter_class = GeoJsonExporter if format == "geojson" else LineDelimitedGeoJsonExporter
 
-
-def _export_features_to_file(features: list[Feature], path: str):
     with open(path, "wb") as f:
-        exporter = GeoJsonExporter(f, encoding="utf-8")
-        exporter.spider_name = features[0]["extras"]["@spider"]
+        exporter = exporter_class(f)
+        if format == "geojson":
+            exporter.spider_name = features[0]["extras"]["@spider"]
         for feature in features:
             exporter.export_item(feature)
         exporter.finish_exporting()
 
+    if compress:
+        with open(path, "rb") as f_in, gzip.open(f"{path}.gz", "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+        path.unlink()
 
-def _generate_spider_file(spider_name: str, q_code: str, count: int, country: str, file_dir: Path) -> str:
-    features = []
-    for i in range(count):
-        feature = _create_feature(
-            ref=f"{spider_name}_{i}",
-            spider=spider_name,
+
+def _generate_spider_file(
+    spider: str, q_code: str, count: int, country: str, output_dir: Path, compress: bool, format: str
+) -> None:
+    features = [
+        Feature(
+            ref=f"{spider}_{i}",
             country=country,
             brand_wikidata=q_code,
+            extras={"@spider": spider},
         )
-        features.append(feature)
-    file_path = f"{spider_name}.geojson"
-    _export_features_to_file(features, file_dir / file_path)
+        for i in range(count)
+    ]
+    _export_features(features, output_dir / f"{spider}.{format}", compress, format)
 
 
-def _get_record_by_code(data: dict, code: str) -> dict | None:
-    matching = [r for r in data["data"] if r["code"] == code]
-    return matching[0] if matching else None
+@pytest.mark.parametrize(
+    "compress,format",
+    [
+        (False, "geojson"),
+        (True, "geojson"),
+        (False, "ndgeojson"),
+        (True, "ndgeojson"),
+    ],
+)
+def test_atp_nsi_osm_geojson(tmp_path, compress: bool, format: str):
+    count = 1000
 
-
-def test_atp_nsi_osm(tmp_path):
-    poi_count = 1000
-    test_cases = [
-        ("mcdonalds", "Q38076", poi_count, "US"),
-        ("mcdonalds_fr", "Q38076", poi_count, "FR"),
-        ("burger_king", "Q177054", poi_count, "US"),
-        # No wikidata
-        ("subway", None, poi_count, "US"),
-        # No country, no wikidata
-        ("kfc_de", None, poi_count, None),
-        # No country
-        ("pizza_hut_gb", "Q191615", poi_count, None),
+    test_spiders = [
+        ("mcdonalds", "Q38076", count, "US"),
+        ("mcdonalds_fr", "Q38076", count, "FR"),
+        ("burger_king", "Q177054", count, "US"),
+        ("subway", None, count, "US"),  # No wikidata
+        ("kfc_de", None, count, None),  # No country, no wikidata
+        ("pizza_hut_gb", "Q191615", count, None),  # No country
     ]
 
-    for case in test_cases:
-        _generate_spider_file(*case, file_dir=tmp_path)
+    for spider, q_code, cnt, country in test_spiders:
+        _generate_spider_file(spider, q_code, cnt, country, tmp_path, compress, format)
 
     outfile = tmp_path / "_insights.json"
     command = InsightsCommand()
-    opts = argparse.Namespace(outfile=outfile, filter_spiders=[], workers=1)
-    command.analyze_atp_nsi_osm([tmp_path], opts)
+    command.analyze_atp_nsi_osm([tmp_path], argparse.Namespace(outfile=outfile, filter_spiders=[], workers=1))
 
     with open(outfile) as f:
-        actual = json.load(f)
+        results = json.load(f)
 
-    mcdonalds = _get_record_by_code(actual, "Q38076")
+    def get_record(code: str) -> dict:
+        return next((r for r in results["data"] if r["code"] == code), None)
+
+    mcdonalds = get_record("Q38076")
     assert mcdonalds is not None
-    assert mcdonalds["atp_count"] == poi_count * 2
+    assert mcdonalds["atp_count"] == count * 2
     assert mcdonalds["atp_country_count"] == 2
     assert mcdonalds["atp_supplier_count"] == 2
-    assert mcdonalds["atp_splits"] == {"US": {"mcdonalds": poi_count}, "FR": {"mcdonalds_fr": poi_count}}
+    assert mcdonalds["atp_splits"] == {"US": {"mcdonalds": count}, "FR": {"mcdonalds_fr": count}}
     assert mcdonalds["osm_count"] > 0
 
-    burger_king = _get_record_by_code(actual, "Q177054")
+    burger_king = get_record("Q177054")
     assert burger_king is not None
-    assert burger_king["atp_count"] == poi_count
+    assert burger_king["atp_count"] == count
     assert burger_king["atp_country_count"] == 1
     assert burger_king["atp_supplier_count"] == 1
-    assert burger_king["atp_splits"] == {"US": {"burger_king": poi_count}}
+    assert burger_king["atp_splits"] == {"US": {"burger_king": count}}
     assert burger_king["osm_count"] > 0
