@@ -86,6 +86,9 @@ fi
 OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
+uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
+(>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
+
 tippecanoe --cluster-distance=25 \
            --drop-rate=1 \
            --maximum-zoom=15 \
@@ -120,9 +123,6 @@ fi
 rm "${SPIDER_RUN_DIR}"/output/*.ndgeojson
 
 (>&2 echo "Done creating parquet file")
-
-uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
-(>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
 (>&2 echo "Writing out summary JSON")
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"
