@@ -12,16 +12,20 @@ from locations.exporters.ld_geojson import LineDelimitedGeoJsonExporter
 from locations.items import Feature
 
 
-def _export_features(features: list[Feature], path: Path, compress: bool, format: str) -> None:
-    exporter_class = GeoJsonExporter if format == "geojson" else LineDelimitedGeoJsonExporter
+def _make_features(spider: str, q_code: str, count: int, country: str) -> list[Feature]:
+    return [
+        Feature(ref=f"{spider}_{i}", country=country, brand_wikidata=q_code, extras={"@spider": spider})
+        for i in range(count)
+    ]
 
-    with open(path, "wb") as f:
-        exporter = exporter_class(f)
-        if format == "geojson":
-            exporter.spider_name = features[0]["extras"]["@spider"]
-        for feature in features:
-            exporter.export_item(feature)
-        exporter.finish_exporting()
+
+def _to_file(features: list[Feature], path: Path, format: str = "ndgeojson", compress: bool = False) -> None:
+    exporter = (GeoJsonExporter if format == "geojson" else LineDelimitedGeoJsonExporter)(open(path, "wb"))
+    if format == "geojson":
+        exporter.spider_name = features[0]["extras"]["@spider"]
+    for feature in features:
+        exporter.export_item(feature)
+    exporter.finish_exporting()
 
     if compress:
         with open(path, "rb") as f_in, gzip.open(f"{path}.gz", "wb") as f_out:
@@ -29,19 +33,10 @@ def _export_features(features: list[Feature], path: Path, compress: bool, format
         path.unlink()
 
 
-def _generate_spider_file(
-    spider: str, q_code: str, count: int, country: str, output_dir: Path, compress: bool, format: str
-) -> None:
-    features = [
-        Feature(
-            ref=f"{spider}_{i}",
-            country=country,
-            brand_wikidata=q_code,
-            extras={"@spider": spider},
-        )
-        for i in range(count)
-    ]
-    _export_features(features, output_dir / f"{spider}.{format}", compress, format)
+def _analyze_atp_nsi_osm(tmp_path: Path) -> dict:
+    outfile = tmp_path / "_insights.json"
+    InsightsCommand().analyze_atp_nsi_osm([tmp_path], argparse.Namespace(outfile=outfile, filter_spiders=[], workers=1))
+    return json.load(outfile.open())
 
 
 @pytest.mark.parametrize(
@@ -53,43 +48,59 @@ def _generate_spider_file(
         (True, "ndgeojson"),
     ],
 )
-def test_atp_nsi_osm_geojson(tmp_path, compress: bool, format: str):
-    count = 1000
+def test_format_and_compression(tmp_path, compress: bool, format: str):
+    _to_file(_make_features("mcdonalds", "Q38076", 10, "US"), tmp_path / f"mcdonalds.{format}", format, compress)
 
-    test_spiders = [
-        ("mcdonalds", "Q38076", count, "US"),
-        ("mcdonalds_fr", "Q38076", count, "FR"),
-        ("burger_king", "Q177054", count, "US"),
-        ("subway", None, count, "US"),  # No wikidata
-        ("kfc_de", None, count, None),  # No country, no wikidata
-        ("pizza_hut_gb", "Q191615", count, None),  # No country
-    ]
+    results = _analyze_atp_nsi_osm(tmp_path)
+    brand = next(r for r in results["data"] if r["code"] == "Q38076")
 
-    for spider, q_code, cnt, country in test_spiders:
-        _generate_spider_file(spider, q_code, cnt, country, tmp_path, compress, format)
+    assert brand["atp_count"] == 10
+    assert brand["atp_splits"] == {"US": {"mcdonalds": 10}}
 
-    outfile = tmp_path / "_insights.json"
-    command = InsightsCommand()
-    command.analyze_atp_nsi_osm([tmp_path], argparse.Namespace(outfile=outfile, filter_spiders=[], workers=1))
 
-    with open(outfile) as f:
-        results = json.load(f)
+def test_multiple_spiders_same_brand(tmp_path):
+    _to_file(_make_features("mcdonalds", "Q38076", 10, "US"), tmp_path / "mcdonalds.ndgeojson")
+    _to_file(_make_features("mcdonalds_fr", "Q38076", 10, "FR"), tmp_path / "mcdonalds_fr.ndgeojson")
 
-    def get_record(code: str) -> dict:
-        return next((r for r in results["data"] if r["code"] == code), None)
+    results = _analyze_atp_nsi_osm(tmp_path)
+    brand = next(r for r in results["data"] if r["code"] == "Q38076")
 
-    mcdonalds = get_record("Q38076")
-    assert mcdonalds is not None
-    assert mcdonalds["atp_count"] == count * 2
-    assert mcdonalds["atp_country_count"] == 2
-    assert mcdonalds["atp_supplier_count"] == 2
-    assert mcdonalds["atp_splits"] == {"US": {"mcdonalds": count}, "FR": {"mcdonalds_fr": count}}
-    assert mcdonalds["osm_count"] > 0
+    assert brand["atp_count"] == 20
+    assert brand["atp_country_count"] == 2
+    assert brand["atp_supplier_count"] == 2
+    assert brand["atp_splits"] == {"US": {"mcdonalds": 10}, "FR": {"mcdonalds_fr": 10}}
+    assert brand["osm_count"] > 0
 
-    burger_king = get_record("Q177054")
-    assert burger_king is not None
-    assert burger_king["atp_count"] == count
-    assert burger_king["atp_country_count"] == 1
-    assert burger_king["atp_supplier_count"] == 1
-    assert burger_king["atp_splits"] == {"US": {"burger_king": count}}
-    assert burger_king["osm_count"] > 0
+
+def test_multiple_brands_same_spider(tmp_path):
+    features = (
+        _make_features("renault", "Q6686", 10, "FR")
+        + _make_features("renault", "Q6686", 10, "TR")
+        + _make_features("renault", "Q27460", 10, "TR")
+    )
+    _to_file(features, tmp_path / "renault.ndgeojson")
+
+    results = _analyze_atp_nsi_osm(tmp_path)
+
+    renault = next(r for r in results["data"] if r["code"] == "Q6686")
+    assert renault["atp_count"] == 20
+    assert renault["atp_country_count"] == 2
+    assert renault["atp_supplier_count"] == 1
+    assert renault["atp_splits"] == {"FR": {"renault": 10}, "TR": {"renault": 10}}
+    assert renault["osm_count"] > 0
+
+    dacia = next(r for r in results["data"] if r["code"] == "Q27460")
+    assert dacia["atp_count"] == 10
+    assert dacia["atp_country_count"] == 1
+    assert dacia["atp_supplier_count"] == 1
+    assert dacia["atp_splits"] == {"TR": {"renault": 10}}
+    assert dacia["osm_count"] > 0
+
+
+def test_missing_wikidata_and_country(tmp_path):
+    _to_file(_make_features("mcdonalds", None, 10, "US"), tmp_path / "mcdonalds.geojson", "geojson")
+    _to_file(_make_features("burger_king", None, 10, None), tmp_path / "burger_king.geojson", "geojson")
+
+    results = _analyze_atp_nsi_osm(tmp_path)
+
+    assert "data" in results

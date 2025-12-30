@@ -127,7 +127,8 @@ def get_brand_name(tags: dict) -> str | None:
 def count_brands_in_file(args_tuple: tuple[str, dict, list[str]]) -> dict[str, WikidataRecord]:
     """
     Count brand occurrences in a single file (worker function for multiprocessing).
-    Returns dict of wikidata code -> WikidataRecord.
+    :param args_tuple: tuple of (file_path, nsi_brands, ignore_spiders)
+    :return: dict of WikidataRecord objects keyed by wikidata code
     """
     file_path, nsi_brands, ignore_spiders = args_tuple
     records: dict[str, WikidataRecord] = {}
@@ -222,6 +223,7 @@ def build_nsi_id_to_brand() -> dict:
     """Build lookup from NSI ID to brand name."""
     nsi = NSI()
     return {item["id"]: brand for item in nsi.iter_nsi() if (brand := get_brand_name(item.get("tags", {})))}
+
 
 # Some utilities that help with the analysis of project GeoJSON output files.
 class InsightsCommand(ScrapyCommand):
@@ -353,10 +355,10 @@ class InsightsCommand(ScrapyCommand):
         for file_records in results:
             merge_records(all_records, file_records)
 
-        # Write output
-        output = {"data": [record.to_dict() for record in all_records.values()]}
+        # Write a JSON format output file which is datatables friendly.
+        for_datatables = {"data": [record.to_dict() for record in all_records.values()]}
         with open(opts.outfile, "w") as f:
-            json.dump(output, f)
+            json.dump(for_datatables, f)
 
     def nsi_overrides(self, args: list[str], opts: argparse.Namespace) -> None:
         nsi = NSI()
