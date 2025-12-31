@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -30,4 +31,5 @@ class BurgerKingQASpider(Spider):
             days = location.xpath('.//*[contains(@class, "opening-days")]/text()').get()
             timing = " ".join(location.xpath('.//*[contains(@class, "hours-timing")]/text()').getall())
             item["opening_hours"].add_ranges_from_string(f"{days} {timing}")
+            apply_category(Categories.FAST_FOOD, item)
             yield item
