@@ -1,35 +1,35 @@
 import re
 from typing import Any, Iterable
 
-from scrapy import Spider, Request
+from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from scrapy.http import Response
-
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.ikea import IkeaSpider
 
 
 class IkeaTRSpider(Spider):
     name = "ikea_tr"
-    item_attributes = {"brand": "IKEA", "brand_wikidata": "Q54078"}
+    item_attributes = IkeaSpider.item_attributes
     start_urls = ["https://www.ikea.com.tr/magazalar"]
     HOURS_PATTERN = re.compile(r"Haftanın\s+7\s+[gG]ün[uü]:\s*(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})")
 
     def parse(self, response: Response) -> Iterable[Request]:
         for store in response.xpath('//div[@class="malls-city-item"]'):
             item = Feature()
-            item["ref"] = store.xpath('.//h4/a/@href').get().split("/")[-1]
-            item["branch"] = store.xpath('.//h4/a/text()').get().replace("IKEA", "")
-            item["website"] = response.urljoin(store.xpath('.//h4/a/@href').get())
+            item["ref"] = store.xpath(".//h4/a/@href").get().split("/")[-1]
+            item["branch"] = store.xpath(".//h4/a/text()").get().replace("IKEA", "")
+            item["website"] = response.urljoin(store.xpath(".//h4/a/@href").get())
 
             # Inaccurate coordinates, more accurate ones are extracted from the store page, but still not ideal data.
             # lat = store.xpath(".//@data-latitude").get()
             # lon = store.xpath(".//@data-longitude").get()
 
-            addr_parts = store.xpath('.//p//text()').getall()
+            addr_parts = store.xpath(".//p//text()").getall()
             item["addr_full"] = merge_address_lines(addr_parts)
 
             yield Request(
@@ -50,12 +50,11 @@ class IkeaTRSpider(Spider):
         store["opening_hours"] = self.parse_hours(store_hours, store["ref"])
         apply_category(Categories.SHOP_FURNITURE, store)
         yield store
-            
 
     def parse_restaurant(self, response: Response, item: Feature) -> Feature | None:
         restaurant_hours_section = response.xpath(
-                '//h3[contains(text(), "Restoranı Çalışma Saatleri")]/following-sibling::p//text()'
-            ).getall()
+            '//h3[contains(text(), "Restoranı Çalışma Saatleri")]/following-sibling::p//text()'
+        ).getall()
         if restaurant_hours_section:
             ref = f"{item['ref']}-restaurant"
             restaurant_hours = self.parse_hours(restaurant_hours_section, ref)
@@ -79,5 +78,5 @@ class IkeaTRSpider(Spider):
                     return oh
         except Exception as e:
             self.logger.error(f"Error parsing hours for {ref}: {e}")
-            self.crawler.stats.inc_value('atp/hours/failed')
+            self.crawler.stats.inc_value("atp/hours/failed")
         return None
