@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
 from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_EN, OpeningHours
@@ -19,7 +20,7 @@ class BurgerKingSESpider(Spider):
 
     def parse(self, response):
         for store in response.json().get("data"):
-            yield scrapy.Request(
+            yield Request(
                 url=urljoin(self.restaurants_url, store.get("slug")),
                 callback=self.parse_store,
             )
