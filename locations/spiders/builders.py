@@ -3,14 +3,14 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import FormRequest, JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class BuildersSpider(Spider):
     name = "builders"
-    item_attributes = {"brand": "Builders", "brand_wikidata": "Q116819137", "extras": Categories.SHOP_HARDWARE.value}
+    item_attributes = {"brand": "Builders", "brand_wikidata": "Q116819137"}
     allowed_domains = ["www.builders.co.za"]
     start_urls = [
         "https://www.builders.co.za/web/v2/builders/channel/web/zone/B14/stores?query=&latitude=-26.1328705&longitude=27.9114834&radius=10000000&fields=FULL"
@@ -79,4 +79,5 @@ class BuildersSpider(Spider):
                         "%I:%M %p",
                     )
 
+            apply_category(Categories.SHOP_HARDWARE, item)
             yield item
