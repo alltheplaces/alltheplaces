@@ -1,4 +1,4 @@
-from typing import Any, AsyncIterator, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -6,7 +6,6 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
-from locations.items import Feature
 
 
 class GreenwayPLSKSpider(Spider):
