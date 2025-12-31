@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 from enum import Enum
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -31,9 +32,55 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "V-Power Diesel": Fuel.GTL_DIESEL,
         "Hi-Q Diesel": Fuel.GTL_DIESEL,
         "Diesel Shell V Power": Fuel.GTL_DIESEL,
-        "Blue Diesel": Fuel.ADBLUE,
-        # no official tag
-        "Benzina": "fuel:petrol",
+        # sold by Eni fuel stations, is probably a premium diesel and not the adblue liquid
+        "Blue Diesel": Fuel.GTL_DIESEL,
+        # "Benzina" means petrol/gasoline in Italian which is always "Benzina verde", that is octane 95 petrol
+        "Benzina": Fuel.OCTANE_95,
+        # other values contained in source dataset sorted by number of occurrences
+        "HVOlution": Fuel.BIODIESEL,
+        "Blue Super": Fuel.OCTANE_100,
+        "Supreme Diesel": Fuel.GTL_DIESEL,
+        "HVO": Fuel.BIODIESEL,
+        "Gasolio speciale": Fuel.GTL_DIESEL,
+        "Gasolio Premium": Fuel.GTL_DIESEL,
+        "HiQ Perform+": Fuel.OCTANE_100,
+        "Benzina speciale": Fuel.OCTANE_100,
+        "Benzina WR 100": Fuel.OCTANE_100,
+        "GNL": Fuel.LNG,
+        "L-GNC": Fuel.LNG,
+        "DieselMax": Fuel.GTL_DIESEL,
+        "S-Diesel": Fuel.GTL_DIESEL,
+        "HVO100": Fuel.BIODIESEL,
+        "Excellium Diesel": Fuel.GTL_DIESEL,
+        "Benzina Shell V Power": Fuel.OCTANE_100,
+        "Gasolio Oro Diesel": Fuel.GTL_DIESEL,
+        "F101": Fuel.OCTANE_100,
+        "REHVO": Fuel.BIODIESEL,
+        "E-DIESEL": Fuel.HGV_DIESEL,
+        "GP DIESEL": Fuel.GTL_DIESEL,
+        "Gasolio Energy D": Fuel.HGV_DIESEL,
+        "Gasolio Gelo": Fuel.COLD_WEATHER_DIESEL,
+        "BCHVO": Fuel.BIODIESEL,
+        "Benzina Plus 98": Fuel.OCTANE_98,
+        "Diesel HVO": Fuel.BIODIESEL,
+        "Gasolio HVO": Fuel.BIODIESEL,
+        "Benzina Energy 98 ottani": Fuel.OCTANE_98,
+        "Gasolio Bio HVO": Fuel.BIODIESEL,
+        "Blu Diesel Alpino": Fuel.COLD_WEATHER_DIESEL,
+        "V-Power": Fuel.OCTANE_100,
+        "HVO Future": Fuel.BIODIESEL,
+        "Excellium diesel": Fuel.GTL_DIESEL,
+        "HVOvolution": Fuel.BIODIESEL,
+        "HVO eco diesel": Fuel.BIODIESEL,
+        "Gasolio Plus": Fuel.GTL_DIESEL,
+        "Diesel HVO Energy": Fuel.BIODIESEL,
+        "Gasolio Prestazionale": Fuel.GTL_DIESEL,
+        "Verde speciale": Fuel.OCTANE_100,
+        "F-101": Fuel.OCTANE_100,
+        "GASOLIO HVO": Fuel.BIODIESEL,
+        "Benzina Speciale 98 Ottani": Fuel.OCTANE_98,
+        "Benzina 102 Ottani": Fuel.OCTANE_102,
+        "Benzina 100 ottani": Fuel.OCTANE_100,
     }
 
     BRANDS = {
@@ -59,7 +106,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
             fuel_tag = fuel_tag.value
         return re.sub(r"^fuel:", "charge:", fuel_tag)
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in point_locations("italy_grid_10km.csv"):
             yield JsonRequest(
                 "https://carburanti.mise.gov.it/ospzApi/search/zone",

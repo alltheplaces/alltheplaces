@@ -13,7 +13,7 @@ class FortysevenStreetARSpider(JSONBlobSpider):
     item_attributes = {"brand": "47 Street", "brand_wikidata": "Q4638513"}
     locations_key = ["data", "getStores", "items"]
 
-    def start_requests(self):
+    async def start(self):
         yield JsonRequest(
             url="https://www.47street.com.ar/_v/private/graphql/v1",
             data={

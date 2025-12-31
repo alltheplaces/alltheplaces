@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator
 
 from scrapy import Request, Selector
 
@@ -22,7 +22,7 @@ class YithSpider(JSONBlobSpider):
         # )
     ]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=yith_sl_get_results&context=frontend&filters[radius][]=500"
         )

@@ -192,6 +192,7 @@ class Categories(Enum):
     SHOP_PRINTER_INK = {"shop": "printer_ink"}
     SHOP_PYROTECHNICS = {"shop": "pyrotechnics"}
     SHOP_RENTAL = {"shop": "rental"}
+    SHOP_SAFETY_EQUIPMENT = {"shop": "safety_equipment"}
     SHOP_SEAFOOD = {"shop": "seafood"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOE_REPAIR = {"shop": "shoe_repair"}
@@ -384,6 +385,12 @@ class Categories(Enum):
         "utility": "sewerage",
         "substance": "sewage",
     }
+    PUMPING_STATION_STORMWATER = {
+        "man_made": "pumping_station",
+        "pumping_station": "stormwater",
+        "utility": "stormwater",
+        "substance": "rainwater",
+    }
     PUMPING_STATION_WASTEWATER = {
         "man_made": "pumping_station",
         "pumping_station": "wastewater",
@@ -396,6 +403,7 @@ class Categories(Enum):
         "utility": "water",
         "substance": "water",
     }
+    SEWER_VENT = {"man_made": "sewer_vent", "utility": "sewerage"}
     STREET_CABINET_LIGHTING = {"man_made": "street_cabinet", "utility": "street_lighting"}
     STREET_CABINET_POWER = {"man_made": "street_cabinet", "utility": "power"}
     STREET_CABINET_TRAFFIC_CONTROL = {"man_made": "street_cabinet", "street_cabinet": "traffic_control"}
@@ -409,13 +417,14 @@ class Categories(Enum):
     SUBSTATION_ZONE = {"power": "substation", "substation": "distribution"}
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
     TRANSFORMER = {"power": "transformer"}
+    WASTEWATER_PLANT = {"man_made": "wastewater_plant", "utility": "sewerage", "substance": "sewage;wastewater"}
     WATER_WELL = {"man_made": "water_well"}
 
     NATURAL_BASIN = {"natural": "water", "water": "basin"}
     NATURAL_TREE = {"natural": "tree"}
 
 
-def apply_category(category, item: Feature):
+def apply_category(category: dict | Enum, item: Feature | dict) -> None:
     """
     Apply categories to a Feature, where categories can be supplied as a
     single Enum, or dictionary of key-value strings. If a value for the
@@ -504,7 +513,7 @@ def get_category_tags(source: Feature | Enum | dict) -> dict:
             categories[top_level_tag] = v
     if len(categories.keys()) > 1 and categories.get("shop") == "yes":
         categories.pop("shop")
-    return categories or None
+    return categories
 
 
 class Fuel(Enum):
@@ -535,6 +544,7 @@ class Fuel(Enum):
     OCTANE_98 = "fuel:octane_98"
     OCTANE_99 = "fuel:octane_99"
     OCTANE_100 = "fuel:octane_100"
+    OCTANE_102 = "fuel:octane_102"
     # Formulas
     E5 = "fuel:e5"
     E10 = "fuel:e10"
@@ -825,21 +835,32 @@ class Clothes(Enum):
     WOMEN = "women"
 
 
-def apply_clothes(clothes: [Clothes], item: Feature):
+def apply_clothes(clothes: type[Clothes] | list[type[Clothes]], item: Feature | dict) -> None:
     """
-    Apply clothing categories to a Feature. If the Feature already has
+    Apply clothing categories to a feature. If the feature already has
     clothing categories defined, this function will append to the list of
     clothing categories rather than overwriting existing clothing categories.
     When appending, the list of clothing categories is sorted and then each
     value is separated with a semi-colon. Duplication of clothing categories
     is avoided by ignoring subsequent attempts to add an already existing
     clothing category.
-    :param clothes: array of Clothes Enum members
-    :param item: Feature which should have clothing categories applied.
+
+    :param clothes: single Clothes Enum member or array of Clothes Enum members.
+    :param item: feature which should have clothing categories applied.
     """
-    for c in clothes:
-        apply_yes_no(f"clothes:{c.value}", item, True)
-        apply_category({"clothes": c.value}, item)
+    if item["extras"].get("clothes"):
+        current = item["extras"]["clothes"].split(";")
+    else:
+        current = []
+
+    for v in clothes if isinstance(clothes, list) else [clothes]:
+        if v.value not in current:
+            current.append(v.value)
+            apply_yes_no(f"clothes:{v.value}", item, True)
+
+    current.sort()
+    if current:
+        item["extras"]["clothes"] = ";".join(current)
 
 
 class Vending(Enum):
@@ -858,7 +879,19 @@ class Vending(Enum):
     WATER = "water"
 
 
-def add_vending(vending: Vending | list[Vending], item: Feature):
+def add_vending(vending: type[Vending] | list[type[Vending]], item: Feature | dict) -> None:
+    """
+    Apply vending tags to a feature. If the feature already has
+    vending tags defined, this function will append to the list of
+    vending tags rather than overwriting existing vending tags.
+    When appending, the list of vending tags is sorted and then each
+    value is separated with a semi-colon. Duplication of vending tags
+    is avoided by ignoring subsequent attempts to add an already existing
+    vending tag.
+
+    :param vending: single Vending Enum member or array of Vending Enum members.
+    :param item: feature which should have vending tags applied.
+    """
     if item["extras"].get("vending"):
         current = item["extras"]["vending"].split(";")
     else:
@@ -868,7 +901,9 @@ def add_vending(vending: Vending | list[Vending], item: Feature):
         if v.value not in current:
             current.append(v.value)
 
-    item["extras"]["vending"] = ";".join(current)
+    current.sort()
+    if current:
+        item["extras"]["vending"] = ";".join(current)
 
 
 class Sport(Enum):
@@ -886,7 +921,19 @@ class Sport(Enum):
     CRICKET = "cricket"
 
 
-def add_sport(sport: Sport | list[Sport], item: Feature):
+def add_sport(sport: Sport | list[type[Sport]], item: Feature | dict) -> None:
+    """
+    Apply sport tags to a feature. If the feature already has
+    sport tags defined, this function will append to the list of
+    sport tags rather than overwriting existing sport tags.
+    When appending, the list of sport tags is sorted and then each
+    value is separated with a semi-colon. Duplication of sport tags
+    is avoided by ignoring subsequent attempts to add an already existing
+    sport tag.
+
+    :param sport: single Sport Enum member or array of Sport Enum members.
+    :param item: feature which should have sport tags applied.
+    """
     if item["extras"].get("sport"):
         current = item["extras"]["sport"].split(";")
     else:
@@ -896,7 +943,9 @@ def add_sport(sport: Sport | list[Sport], item: Feature):
         if v.value not in current:
             current.append(v.value)
 
-    item["extras"]["sport"] = ";".join(current)
+    current.sort()
+    if current:
+        item["extras"]["sport"] = ";".join(current)
 
 
 class HealthcareSpecialities(Enum):
@@ -1000,20 +1049,33 @@ class HealthcareSpecialities(Enum):
     WOUND_TREATMENT = "wound_treatment"
 
 
-def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
+def apply_healthcare_specialities(
+    speciality: HealthcareSpecialities | list[HealthcareSpecialities], item: Feature | dict
+) -> None:
     """
-    Apply healthcare specialities to a Feature. If the Feature already has
-    healthcare specialities defined, this function will append to the list of
-    healthcare specialities rather than overwriting existing healthcare
-    specialities. When appending, the list of healthcare specialities is
-    sorted and then each value is separated with a semi-colon. Duplication of
-    healthcare specialities is avoided by ignoring subsequent attempts to add
-    an already existing healthcare speciality.
-    :param specialities: array of HealthcareSpecialities Enum members
-    :param item: Feature which should have healthcare specialities applied.
+    Apply healthcare speciality tags to a feature. If the feature already has
+    healthcare speciality tags defined, this function will append to the list of
+    healthcare speciality tags rather than overwriting existing healthcare speciality tags.
+    When appending, the list of healthcare speciality tags is sorted and then each
+    value is separated with a semi-colon. Duplication of healthcare speciality tags
+    is avoided by ignoring subsequent attempts to add an already existing
+    healthcare speciality tag.
+
+    :param speciality: single HealthcareSpecialities Enum member or array of HealthcareSpecialities Enum members.
+    :param item: feature which should have healthcare speciality tags applied.
     """
-    for s in specialities:
-        apply_category({"healthcare:speciality": s.value}, item)
+    if item["extras"].get("healthcare:speciality"):
+        current = item["extras"]["healthcare:speciality"].split(";")
+    else:
+        current = []
+
+    for v in speciality if isinstance(speciality, list) else [speciality]:
+        if v.value not in current:
+            current.append(v.value)
+
+    current.sort()
+    if current:
+        item["extras"]["healthcare:speciality"] = ";".join(current)
 
 
 class MonitoringTypes(Enum):
@@ -1109,10 +1171,24 @@ class Sells(Enum):
 
 
 # TODO: something similar for fuel types
-def map_payment(item: Feature, source_payment_method_name: str, enum: PaymentMethods | FuelCards):
-    """Apply appropriate payment method tag to an item if given string is found in an enum."""
+def map_payment(
+    item: Feature | dict, source_payment_method_name: str, enum: type[PaymentMethods] | type[FuelCards]
+) -> bool:
+    """
+    Apply appropriate payment method tag to an item if given string is found
+    in an enum.
+    :param item: item which should have a payment method tag added to it
+    :param source_payment_method_name: payment method as a string which may
+           include examples of "Master Card", "Mastercard", "MASTERCARD", etc.
+    :param enum: Either the PaymentMethods or FuelCards enumeration class
+                 which supplies the known payment methods to check against.
+    :return: True if the source payment method name was found to match an
+             entry in the PaymentMethods or FuelCards enum, or False if no
+             match could be made. If a match was made, the supplied item will
+             have a payment method tag added (if it wasn't already existing).
+    """
     if not source_payment_method_name:
-        return
+        return False
     payment_method_names: list[str] = [pm.name for pm in enum] + list(payment_method_aliases.keys())
     mapping = {}
     for payment_method_name in payment_method_names:

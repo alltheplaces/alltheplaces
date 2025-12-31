@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -17,7 +18,7 @@ class YardHouseSpider(Spider):
     item_attributes = {"brand": "Yard House", "brand_wikidata": "Q21189156"}
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://www.yardhouse.com/api/restaurants", headers={"x-source-channel": "WEB"})
 
     def parse(self, response):

@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import FormRequest, Request, Response
 
@@ -16,7 +16,7 @@ class SigmaITSpider(JSONBlobSpider):
     start_urls = ["https://www.supersigma.com/wp-admin/admin-ajax.php"]
     locations_key = ["map_args", "locations"]
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "action": "gmw_form_ajax_submission",
             "submitted": "true",

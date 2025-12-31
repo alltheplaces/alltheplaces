@@ -1,12 +1,14 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SimonmedSpider(scrapy.Spider):
+class SimonmedSpider(Spider):
     name = "simonmed"
     item_attributes = {"brand": "SimonMed"}
     allowed_domains = ["www.simonmed.com"]
@@ -59,7 +61,7 @@ class SimonmedSpider(scrapy.Spider):
 
             yield Feature(**properties)
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
             "Accept-Language": "en-US,en;q=0.8,ru;q=0.6",
             "Origin": "www.simonmed.com",
@@ -77,7 +79,7 @@ class SimonmedSpider(scrapy.Spider):
             "location_lng": "-111.9224398",
         }
 
-        yield scrapy.http.FormRequest(
+        yield FormRequest(
             self.start_urls[0],
             method="POST",
             formdata=form_data,

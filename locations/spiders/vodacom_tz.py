@@ -13,7 +13,7 @@ class VodacomTZSpider(JSONBlobSpider):
     }
     start_urls = ["https://myvodacom.vodacom.co.tz/app/myvodacom/web/vodacom/shop/get-region"]
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_regions)
 

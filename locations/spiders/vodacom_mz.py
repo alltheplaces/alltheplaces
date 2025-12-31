@@ -16,7 +16,7 @@ class VodacomMZSpider(JSONBlobSpider):
     start_urls = ["https://www.vm.co.mz/lojas"]
     locations_key = "data"
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse_provinces)
 

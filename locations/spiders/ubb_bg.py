@@ -1,7 +1,8 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
 from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
@@ -14,9 +15,9 @@ class UbbBGSpider(Spider):
     start_urls = ["https://www.ubb.bg/offices/pins"]
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
-            yield scrapy.Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
+            yield Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
 
     def parse(self, response, **kwargs):
         markers = response.json()["markers"]

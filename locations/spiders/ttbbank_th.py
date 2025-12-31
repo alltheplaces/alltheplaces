@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,7 +13,7 @@ class TtbbankTHSpider(Spider):
     name = "ttbbank_th"
     item_attributes = {"brand": "ธนาคารทหารไทย", "brand_wikidata": "Q1527826"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for key in ["location_branch", "location_atm"]:
             yield JsonRequest(
                 url="https://www.ttbbank.com/api/location",

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -10,7 +12,7 @@ class UbitricitySpider(Spider):
     name = "ubitricity"
     item_attributes = {"brand": "ubitricity", "brand_wikidata": "Q113699692"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://portal-api.mobilstrom.de/v1/external_ssos/search?sso_types%5B%5D=ubitricity&bounds=-90,-180,90,180",
             headers={"X-API-TOKEN": "WEB_1049d590-d150-4f39-8240-3484a64dcc4c"},

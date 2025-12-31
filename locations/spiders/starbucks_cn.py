@@ -27,7 +27,7 @@ class StarbucksCNSpider(JSONBlobSpider):
     locations_key = "data"
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self):
         for lat, lon in country_iseadgg_centroids(["CN"], 79):
             yield JsonRequest(
                 url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={lat}&lon={lon}&limit=1000&locale=EN&features=&radius=100000",

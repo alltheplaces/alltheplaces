@@ -1,18 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class SportclubARSpider(scrapy.Spider):
+class SportclubARSpider(Spider):
     name = "sportclub_ar"
     item_attributes = {"brand": "SportClub", "brand_wikidata": "Q118314171"}
     custom_settings = {
         "DOWNLOAD_TIMEOUT": 120,
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://vhzfd7sis7qzlcy63dcjgc2cqa0lovrs.lambda-url.sa-east-1.on.aws/v1/sedes?limit=1000",
             headers={

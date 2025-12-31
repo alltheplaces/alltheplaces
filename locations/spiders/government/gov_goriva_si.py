@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
@@ -30,7 +30,7 @@ class GovGorivaSISpider(Spider):
         "lng": "lng",
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://goriva.si/api/v1/search/?format=json")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

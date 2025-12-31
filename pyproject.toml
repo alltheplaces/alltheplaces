@@ -9,6 +9,7 @@ dependencies = [
     "brotli",
     "chompjs",
     "cryptography",
+    "duckdb",
     "geonamescache",
     "geopandas",
     "ijson",
@@ -60,4 +61,5 @@ dev = [
     "pre-commit",
     "pylint",
     "pytest",
+    "ty",
 ]

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -32,7 +34,7 @@ class SnapFitnessSpider(Spider):
         "us",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country_code in self.country_codes:
             yield JsonRequest(url=f"https://www.snapfitness.com/{country_code}/api/location-finder-edge")
 

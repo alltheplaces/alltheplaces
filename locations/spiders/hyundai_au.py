@@ -12,6 +12,7 @@ class HyundaiAUSpider(JSONBlobSpider):
     name = "hyundai_au"
     item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["www.hyundai.com"]
+    no_refs = True
     start_urls = ["https://www.hyundai.com/content/api/au/hyundai/v3/findadealer?postcode=0"]
 
     def parse(self, response: Response) -> Iterable[Feature]:
@@ -23,17 +24,13 @@ class HyundaiAUSpider(JSONBlobSpider):
         if feature.get("closed"):
             return
 
-        item["ref"] = feature.get("code", feature.get("dealerCode"))
-        item["branch"] = feature.get("tradingName")
+        item["branch"] = feature.get("tradingName") or feature.get("dealerCode")
 
         if "testDriveModels" in feature.keys():
             apply_category(Categories.SHOP_CAR, item)
-            item["ref"] = item["ref"] + "_Sales"
         elif "newWinBkAServiceMobile" in feature.keys():
             apply_category(Categories.SHOP_CAR_REPAIR, item)
-            item["ref"] = item["ref"] + "_Service"
         else:
             apply_category(Categories.SHOP_CAR_PARTS, item)
-            item["ref"] = item["ref"] + "_Parts"
 
         yield item

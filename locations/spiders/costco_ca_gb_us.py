@@ -18,7 +18,7 @@ COSTCO_SHARED_ATTRIBUTES = {"brand_wikidata": "Q715583"}
 
 class CostcoCAGBUSSpider(JSONBlobSpider, CamoufoxSpider):
     name = "costco_ca_gb_us"
-    item_attributes = COSTCO_SHARED_ATTRIBUTES
+    item_attributes = {"brand": "Costco"} | COSTCO_SHARED_ATTRIBUTES
     allowed_domains = ["ecom-api.costco.com"]
     start_urls = [
         "https://ecom-api.costco.com/warehouseLocatorMobile/v1/warehouses.json?client_id=45823696-9189-482d-89c3-0c067e477ea1&latitude=0&longitude=0&limit=5000&distanceUnit=km"
@@ -55,6 +55,7 @@ class CostcoCAGBUSSpider(JSONBlobSpider, CamoufoxSpider):
             )
         else:
             # Costco allowing retail customers
+            item["name"] = "Costco"
             if item["country"] == "US":
                 item["website"] = "https://www.costco.com/warehouse-locations/{}-{}-{}.html".format(
                     slug_branch_name, slug_state_code, item["ref"]

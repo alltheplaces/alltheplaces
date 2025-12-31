@@ -1,5 +1,5 @@
-import json
-from typing import Any
+from json import loads
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -14,7 +14,7 @@ class TerstalNLSpider(Spider):
     name = "terstal_nl"
     item_attributes = {"brand": "terStal", "brand_wikidata": "Q114905394"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.terstal.nl/rest/V1/stores/store_id/1")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -24,7 +24,7 @@ class TerstalNLSpider(Spider):
             item["website"] = urljoin("https://www.terstal.nl/winkels/", store["identifier"])
 
             try:
-                item["opening_hours"] = self.parse_opening_hours(json.loads(store["opening_hours"])["opening_hours"])
+                item["opening_hours"] = self.parse_opening_hours(loads(store["opening_hours"])["opening_hours"])
             except:
                 self.logger.error("Error parsing opening hours")
 
