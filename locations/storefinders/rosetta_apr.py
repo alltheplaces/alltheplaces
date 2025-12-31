@@ -119,7 +119,7 @@ class RosettaAPRSpider(Spider):
         if (not self.key or not self.iv) and True in [x[2] for x in self.data_files]:
             yield Request(url=self.start_urls[0], callback=self.parse_decryption_params)
         else:
-            async for request in self.request_data_files():
+            for request in self.request_data_files():
                 yield request
 
     def parse_decryption_params(self, response: Response) -> Iterable[Request]:
@@ -154,12 +154,12 @@ class RosettaAPRSpider(Spider):
             return
         yield from self.request_data_files()
 
-    async def request_data_files(self) -> AsyncIterator[Request]:
+    def request_data_files(self) -> Iterable[Request]:
         for data_file in self.data_files:
-            async for request in self.request_data_file(data_file=data_file):
+            for request in self.request_data_file(data_file=data_file):
                 yield request
 
-    async def request_data_file(self, data_file: RosettaAPRDataFile, meta: dict = {}) -> AsyncIterator[Request]:
+    def request_data_file(self, data_file: RosettaAPRDataFile, meta: dict = {}) -> Iterable[Request]:
         new_meta = meta.copy()
         new_meta.update({"data_file": data_file})
         if data_file.url.startswith("https://") or data_file.url.startswith("http://"):
