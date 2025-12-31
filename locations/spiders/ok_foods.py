@@ -43,7 +43,6 @@ class OkFoodsSpider(Spider):
         "ESWATINI": "https://www.okfoods.co.za/content/okfoods/sz/en_SZ/find-a-store.html",
         "SOUTH AFRICA": "https://www.okfoods.co.za/find-a-store.html",
     }
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
