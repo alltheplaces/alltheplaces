@@ -65,7 +65,6 @@ class StateCodeCleanUpPipeline:
 
         if not state:  # geocode state
             if location := get_lat_lon(item):
-                print(location)
                 if result := reverse_geocoder.get((location[0], location[1]), mode=1, verbose=False):
                     if spider.crawler.stats:
                         spider.crawler.stats.inc_value("atp/field/state/from_reverse_geocoding")
