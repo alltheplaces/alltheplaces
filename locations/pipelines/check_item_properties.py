@@ -6,7 +6,7 @@ from geonamescache import GeonamesCache
 from scrapy import Spider
 
 from locations.hours import OpeningHours
-from locations.items import Feature, get_lat_lon, set_lat_lon
+from locations.items import Feature, set_lat_lon
 
 
 def check_field(
@@ -93,7 +93,13 @@ class CheckItemPropertiesPipeline:
                             if len(coords) == 2:
                                 lat_untyped = coords[1]
                                 lon_untyped = coords[0]
-                    elif geometry.get("type") in ["MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]:
+                    elif geometry.get("type") in [
+                        "MultiPoint",
+                        "LineString",
+                        "MultiLineString",
+                        "Polygon",
+                        "MultiPolygon",
+                    ]:
                         # Other geometry types are currently not validated by
                         # ATP so this pipeline will assume they're correct.
                         item.pop("lat", None)
