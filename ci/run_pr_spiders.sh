@@ -235,18 +235,16 @@ do
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
             fi
 
-            # Warn if items are missing a lat/lon
-            missing_lat=$(jq '."atp/field/lat/missing" // 0' "${STATSFILE}")
-            missing_lon=$(jq '."atp/field/lon/missing" // 0' "${STATSFILE}")
-            if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
+            # Warn if items are missing geometry
+            missing_geometry=$(jq '."atp/field/geometry/missing" // 0' "${STATSFILE}")
+            if [ $missing_geometry -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️  Geometry is missing on ${missing_geometry} items</li>"
             fi
 
-            # Error if items have invalid lat/lon
-            invalid_lat=$(jq '."atp/field/lat/invalid" // 0' "${STATSFILE}")
-            invalid_lon=$(jq '."atp/field/lon/invalid" // 0' "${STATSFILE}")
-            if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
-                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
+            # Error if items have invalid geometry
+            invalid_geometry=$(jq '."atp/field/geometry/invalid" // 0' "${STATSFILE}")
+            if [ $invalid_geometry -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Geometry is invalid on ${invalid_geometry} items</li>"
             fi
 
             # Error if items have invalid website
@@ -258,35 +256,35 @@ do
             # Warn if items were fetched using Zyte
             zyte_fetched=$(jq '."scrapy-zyte-api/success" // 0' "${STATSFILE}")
             if [ $zyte_fetched -gt 0 ]; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${zyte_fetched} requests were made using Zyte</li>"
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️  ${zyte_fetched} requests were made using Zyte</li>"
             fi
 
             # Warn if more than 30% of the items scraped were dropped by the dupe filter
             dupe_dropped=$(jq '."atp/duplicate_count" // 0' "${STATSFILE}")
             dupe_percent=$(awk -v dd="${dupe_dropped}" -v fc="${FEATURE_COUNT}" 'BEGIN { printf "%.2f", (dd / fc) * 100 }')
             if awk -v dp="${dupe_percent}" 'BEGIN { exit !(dp > 30) }'; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️  ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
             fi
 
             # Warn if the image URL is not very unique across all the outputs
             unique_image_urls=$(jq '.features | map(.properties.image) | map(select(. != null)) | unique | length' ${OUTFILE})
             unique_image_url_rate=$(awk -v uiu="${unique_image_urls}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && uiu > 0) { printf "%.2f", (uiu / fc) * 100 } else { printf "0.00" } }')
             if awk -v uiu="${unique_image_urls}" -v uir="${unique_image_url_rate}" 'BEGIN { exit !(uir < 50 && uiu > 0) }'; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️  Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
             fi
 
             # Warn if the phone number is not very unique across all the outputs
             unique_phones=$(jq '.features | map(.properties.phone) | map(select(. != null)) | unique | length' ${OUTFILE})
             unique_phone_rate=$(awk -v up="${unique_phones}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && up > 0) { printf "%.2f", (up / fc) * 100 } else { printf "0.00" } }')
             if awk -v up="${unique_phones}" -v upr="${unique_phone_rate}" 'BEGIN { exit !(upr < 90 && up > 0) }'; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️  Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
             fi
 
             # Warn if the email is not very unique across all the outputs
             unique_emails=$(jq '.features | map(.properties.email) | map(select(. != null)) | unique | length' ${OUTFILE})
             unique_email_rate=$(awk -v ue="${unique_emails}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && ue > 0) { printf "%.2f", (ue / fc) * 100 } else { printf "0.00" } }')
             if awk -v ue="${unique_emails}" -v uer="${unique_email_rate}" 'BEGIN { exit !(uer < 90 && ue > 0) }'; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️  Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
             fi
 
             num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
