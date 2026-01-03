@@ -25,17 +25,22 @@ class AgileStoreLocatorSpider(Spider):
     (an ATP "Feature" class) and feature (a dict which is returned from the
     store locator JSON response for a particular feature).
     """
+
     allowed_domains: list[str] = []
     start_urls: list[str] = []
     time_format: str = "%I:%M%p"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield JsonRequest(url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1")
+            yield JsonRequest(
+                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1"
+            )
         elif len(self.start_urls) == 1:
             yield JsonRequest(url=self.start_urls[0])
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for feature in response.json():

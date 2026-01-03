@@ -21,7 +21,7 @@ class NomNomSpider(Spider):
     NomNom is an "accelerator technology" by Bounteous for restaurants and
     retailers with an official website of:
     https://www.bounteous.com/industries/restaurant-convenience/nomnom/
-    
+
     There are two ways this storefinder may be used.
 
     1. NomNom API with observed API requests to:
@@ -35,6 +35,7 @@ class NomNomSpider(Spider):
        with a single URL, for example,
        "https://api.storefinder.example.net/custom-path/restaurants"
     """
+
     domain: str | None = None
     start_urls: list[str] = []
     use_calendar: bool = True

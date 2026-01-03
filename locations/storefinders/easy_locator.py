@@ -17,6 +17,7 @@ class EasyLocatorSpider(JSONBlobSpider):
     Example source URL: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
     Example api_brand_name from source URL: gigiscupcakesusa
     """
+
     dataset_attributes: dict = {"source": "api", "api": "easylocator.net"}
     api_brand_name: str
     loations_key: str | list[str] = "physical"

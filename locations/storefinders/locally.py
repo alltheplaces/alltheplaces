@@ -17,6 +17,7 @@ class LocallySpider(Spider):
     of either www.locally.com or examplebrandname.locally.com, and with a path
     of "/stores/conversion_data". Include all query parameters in the URL.
     """
+
     start_urls: list[str] = []
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

@@ -34,6 +34,7 @@ class MapsMarkerProSpider(Spider):
          Override this method to clean up extracted data such as location
          names with unwanted suffixes.
     """
+
     allowed_domains: list[str] = []
     start_urls: list[str] = []
     days: dict | None = None
@@ -44,11 +45,15 @@ class MapsMarkerProSpider(Spider):
             "type": "map",
         }
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield FormRequest(url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php", method="POST", formdata=formdata)
+            yield FormRequest(
+                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php", method="POST", formdata=formdata
+            )
         elif len(self.start_urls) == 1:
             yield FormRequest(url=self.start_urls[0], method="POST", formdata=formdata)
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def parse(self, response: TextResponse) -> Iterable[FormRequest]:
         # Response is a GeoJSON object

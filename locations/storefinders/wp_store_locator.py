@@ -71,6 +71,7 @@ class WPStoreLocatorSpider(Spider):
       location: a dictionary which is returned from the store locator JSON
                 response for a particular location.
     """
+
     allowed_domains: list[str] = []
     start_urls: list[str] = []
     days: dict | None = None
@@ -100,11 +101,15 @@ class WPStoreLocatorSpider(Spider):
         geographic radius search method to be used instead.
         """
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield JsonRequest(url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&autoload=1")
+            yield JsonRequest(
+                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&autoload=1"
+            )
         elif len(self.start_urls) == 1:
             yield JsonRequest(url=self.start_urls[0])
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def start_requests_geo_search_iseadgg_method(self) -> Iterable[JsonRequest]:
         """
@@ -112,7 +117,9 @@ class WPStoreLocatorSpider(Spider):
         PREFERRED ISEADGG method of specifying centroids.
         """
         if self.max_results == 0 or self.search_radius == 0:
-            raise ValueError("The max_results and search_radius attributes must be specified to each be more than 0 if iseadgg_countries_list is specified.")
+            raise ValueError(
+                "The max_results and search_radius attributes must be specified to each be more than 0 if iseadgg_countries_list is specified."
+            )
             return
         if self.search_radius >= 458:
             iseadgg_radius = 458
@@ -142,7 +149,9 @@ class WPStoreLocatorSpider(Spider):
                     url=f"{self.start_urls[0]}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
                 )
             else:
-                raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+                raise ValueError(
+                    "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+                )
 
     def start_requests_geo_search_manual_method(self) -> Iterable[JsonRequest]:
         """
@@ -151,7 +160,9 @@ class WPStoreLocatorSpider(Spider):
         specifying centroids.
         """
         if self.max_results == 0 or self.search_radius == 0:
-            raise ValueError("The max_results and search_radius attributes must be specified to each be more than 0 if searchable_points_file is specified.")
+            raise ValueError(
+                "The max_results and search_radius attributes must be specified to each be more than 0 if searchable_points_file is specified."
+            )
             return
         for searchable_points_file in self.searchable_points_files:
             for lat, lon in point_locations(searchable_points_file, self.area_field_filter):
@@ -164,7 +175,9 @@ class WPStoreLocatorSpider(Spider):
                         url=f"{self.start_urls[0]}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
                     )
                 else:
-                    raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+                    raise ValueError(
+                        "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+                    )
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         if response.text.strip():

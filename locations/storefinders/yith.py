@@ -20,11 +20,11 @@ class YithSpider(JSONBlobSpider):
 
     allowed_domains: list[str] = []
     locations_key: str | list[str] = "markers"
-    #detection_rules = [
+    # detection_rules = [
     #    DetectionRequestRule(
     #        url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?action=yith_sl_get_results(.*)$"
     #    )
-    #]
+    # ]
 
     async def start(self) -> AsyncIterator[Request]:
         if len(self.allowed_domains) != 1:

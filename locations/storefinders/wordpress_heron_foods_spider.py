@@ -17,6 +17,7 @@ class WordpressHeronFoodsSpider(Spider):
 
     TODO: Rename this spider when we identify the storelocator.
     """
+
     domain: str
     radius: int = 600
     lat: float

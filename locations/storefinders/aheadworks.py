@@ -22,6 +22,7 @@ class AheadworksSpider(Spider):
     changes to extracted data is necessary, for example, to clean up location
     names.
     """
+
     start_urls: list[str] = []
 
     async def start(self) -> AsyncIterator[Request]:

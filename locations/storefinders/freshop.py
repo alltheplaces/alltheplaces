@@ -25,6 +25,7 @@ class FreshopSpider(Spider):
     location data and to make corrections to automatically extracted location
     data.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "freshop.com"}
     app_key: str
     location_type_ids: list[str] = ["1567647"]

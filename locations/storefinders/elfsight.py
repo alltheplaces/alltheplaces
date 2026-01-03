@@ -55,7 +55,9 @@ class ElfsightSpider(JSONBlobSpider):
                 yield JsonRequest(f"https://{self.host}/p/boot/?w={self.api_key}")
             elif self.host == "shy.elfsight.com":
                 if self.shop is None:
-                    raise ValueError("The 'shop' attribute must be specified if the 'host' attribute is specified to be 'shy.elfsight.com'.")
+                    raise ValueError(
+                        "The 'shop' attribute must be specified if the 'host' attribute is specified to be 'shy.elfsight.com'."
+                    )
                     return
                 yield JsonRequest(f"https://{self.host}/p/boot/?callback=a&shop={self.shop}&w={self.api_key}")
             else:

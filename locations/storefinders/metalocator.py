@@ -17,6 +17,7 @@ class MetaLocatorSpider(Spider):
     the `Itemid` query attribute in API request URLs that may be observed on
     storefinder pages.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "metalocator.com"}
     allowed_domains: list[str] = ["code.metalocator.com"]
     brand_id: str

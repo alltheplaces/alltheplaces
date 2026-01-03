@@ -25,6 +25,7 @@ class LimesharpStoreLocatorSpider(Spider):
         location: a dictionary which is returned from the store locator JSON
                   response for a particular location.
     """
+
     allowed_domains: list[str] = []
     start_urls: list[str] = []
 
@@ -34,7 +35,9 @@ class LimesharpStoreLocatorSpider(Spider):
         elif len(self.start_urls) == 1:
             yield JsonRequest(url=self.start_urls[0])
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():

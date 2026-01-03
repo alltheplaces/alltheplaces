@@ -20,6 +20,7 @@ class StoreLocatorPlusCloudSpider(Spider):
     If you need to parse additional fields or clean any data returned,
     override the `parse_item` function.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "storelocatorplus.com"}
     slp_dataset: str
     slp_key: str

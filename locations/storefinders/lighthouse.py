@@ -43,6 +43,7 @@ class LighthouseSpider(Spider):
        Override this method to clean up extracted data such as location names
        with unwanted suffixes.
     """
+
     start_urls: list[str] = []
     days: dict | None = None
 

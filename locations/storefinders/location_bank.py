@@ -23,6 +23,7 @@ class LocationBankSpider(Spider):
     Set the include_images attribute to True if the brand provides images of
     each feature in the storefinder. By default, include_images is False.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "api.locationbank.net"}
     allowed_domains: list[str] = ["api.locationbank.net"]
     client_id: str

@@ -57,7 +57,7 @@ class StoreLocatorPlusSelfSpider(Spider):
       item: an ATP "Feature" class
       location: a dictionary which is returned from the store locator JSON
                 response for a particular location.
-"""
+    """
 
     allowed_domains: list[str] = []
     start_urls: list[str] = []
@@ -72,7 +72,9 @@ class StoreLocatorPlusSelfSpider(Spider):
         elif len(self.start_urls) == 1:
             url = self.start_urls[0]
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
             return
         if url and len(self.iseadgg_countries_list) > 0 and self.search_radius != 0 and self.max_results != 0:
             # PREFERRED geographic radius search method using ISEADGG
@@ -117,7 +119,9 @@ class StoreLocatorPlusSelfSpider(Spider):
                     }
                     yield FormRequest(url=url, formdata=formdata, method="POST")
         else:
-            raise ValueError("Either iseadgg_countries_list or searchable_points_files must be specified with one or more values. The search_radius attribute must also be specified.")
+            raise ValueError(
+                "Either iseadgg_countries_list or searchable_points_files must be specified with one or more values. The search_radius attribute must also be specified."
+            )
             return
 
     def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:

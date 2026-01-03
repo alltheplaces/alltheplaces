@@ -29,6 +29,7 @@ class StockInStoreSpider(Spider):
     API call. This will be the URL (without path) of the site where the widget
     is hosted e.g. https://brand.example.net
     """
+
     dataset_attributes: dict = {"source": "api", "api": "stockinstore.com"}
     api_site_id: str
     api_widget_id: str

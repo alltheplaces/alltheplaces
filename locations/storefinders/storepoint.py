@@ -15,6 +15,7 @@ class StorepointSpider(Spider):
 
     To use this storefinder, specify a value for the `key` attribute.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "storepoint.co"}
     custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 

@@ -32,6 +32,7 @@ class TravelIQWebCamerasSpider(Spider):
     To use, specify:
      - 'allowed_domains': mandatory parameter
     """
+
     allowed_domains: list[str] = []
 
     async def start(self) -> AsyncIterator[JsonRequest]:

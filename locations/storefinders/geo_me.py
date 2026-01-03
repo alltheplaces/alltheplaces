@@ -69,6 +69,7 @@ class GeoMeSpider(Spider):
     common for locations to be present in more than one nearby cluster of
     locations that the "nearest to" search iterates through.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "geoapp.me"}
     api_key: str
     api_version: str = "2"

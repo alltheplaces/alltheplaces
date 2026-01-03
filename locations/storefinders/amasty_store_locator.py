@@ -48,11 +48,17 @@ class AmastyStoreLocatorSpider(Spider):
         if self.pagination_mode:
             pagination_attribute = "?p=1"
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield Request(url=f"https://{self.allowed_domains[0]}/amlocator/index/ajax/{pagination_attribute}", headers=headers, method="POST")
+            yield Request(
+                url=f"https://{self.allowed_domains[0]}/amlocator/index/ajax/{pagination_attribute}",
+                headers=headers,
+                method="POST",
+            )
         elif len(self.start_urls) == 1:
             yield Request(url=f"https://{self.start_urls[0]}{pagination_attribute}", headers=headers, method="POST")
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
         json_blob = re.search(r"items\":(\[.*\]),\"", response.text)
@@ -107,6 +113,8 @@ class AmastyStoreLocatorSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector | None = None) -> Iterable[Feature | Request]:
+    def post_process_item(
+        self, item: Feature, feature: dict, popup_html: Selector | None = None
+    ) -> Iterable[Feature | Request]:
         """Override with any post-processing on the item."""
         yield item

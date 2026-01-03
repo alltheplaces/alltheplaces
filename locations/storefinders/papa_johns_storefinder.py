@@ -29,6 +29,7 @@ class PapaJohnsStorefinderSpider(Spider):
                           locations/hours.py
     - `delimiters`: DELIMITERS_xx list defined in locations/hours.py
     """
+
     item_attributes: dict = PAPA_JOHNS_SHARED_ATTRIBUTES
     start_urls: list[str] = []
     languages: list[str] = []

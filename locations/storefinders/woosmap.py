@@ -19,6 +19,7 @@ class WoosmapSpider(Spider):
     HTTP 'Origin' header value, typically similar to
     'https://www.brandname.example'.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "woosmap.com"}
 
     key: str

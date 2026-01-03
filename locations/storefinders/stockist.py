@@ -30,6 +30,7 @@ class StockistSpider(Spider):
     supplied to this store finder. Just note that some additional requests
     will be required for this store finder to return all locations.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "stockist.co"}
     key: str
     max_distance: int = 50000
@@ -60,7 +61,8 @@ class StockistSpider(Spider):
                     if "error" in response.json().keys():
                         if response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
                             yield Request(
-                                url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
+                                url=f"https://stockist.co/api/v1/{self.key}/widget.js",
+                                callback=self.parse_search_config,
                             )
 
     def parse_search_config(self, response: TextResponse) -> Iterable[JsonRequest]:

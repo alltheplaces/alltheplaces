@@ -25,6 +25,7 @@ class YextSpider(Spider):
     to define a parse_item function to extract additional location data and to
     make corrections to automatically extracted location data.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "yext"}
 
     api_key: str = ""

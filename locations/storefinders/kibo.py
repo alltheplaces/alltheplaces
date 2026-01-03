@@ -29,6 +29,7 @@ class KiboSpider(Spider):
     query parameter of the API request URL, should it be beneficial to use
     filtering.
     """
+
     start_urls: list[str] = []
     page_size: int = 1000
     api_filter: str | None = None

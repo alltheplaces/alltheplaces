@@ -1,7 +1,7 @@
 from base64 import b64encode
 from json import dumps
-from zlib import compress
 from typing import Any, AsyncIterator, Iterable
+from zlib import compress
 
 from scrapy import Request, Spider
 from scrapy.http import TextResponse
@@ -32,6 +32,7 @@ class WpGoMapsSpider(Spider):
     If clean-up to extracted data is required, or additional data fields need
     to be extracted, override the `post_process_item` method.
     """
+
     allowed_domains: list[str] = []
     start_urls: list[str] = []
     map_id: int | None = None
@@ -43,7 +44,9 @@ class WpGoMapsSpider(Spider):
         elif len(self.start_urls) == 1:
             api_endpoint = self.start_urls[0]
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
             return
         if api_endpoint:
             if isinstance(self.map_id, int):

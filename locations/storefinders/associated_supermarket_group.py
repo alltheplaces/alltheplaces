@@ -7,7 +7,7 @@ Compare Foods, and Pioneer Supermarket.
 """
 
 import re
-from json import loads, JSONDecodeError
+from json import JSONDecodeError, loads
 from typing import AsyncIterator, Iterable
 
 from scrapy import Spider

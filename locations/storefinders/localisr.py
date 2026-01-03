@@ -62,6 +62,7 @@ class LocalisrSpider(Spider):
 
     If you need to clean up data returned, override the parse_item function.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "localisr.io"}
     api_key: str
     api_version: str = "2.1.0"  # Use the latest observed API version by default

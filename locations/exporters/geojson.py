@@ -171,7 +171,9 @@ class GeoJsonExporter(JsonItemExporter):
             self.write_geojson_header()
 
         if not self.spider_name:
-            raise RuntimeError("Exporter expected a spider name but none was available. Check the spider has a 'name' attribute specified and is not None.")
+            raise RuntimeError(
+                "Exporter expected a spider name but none was available. Check the spider has a 'name' attribute specified and is not None."
+            )
         if spider_name != self.spider_name:
             # It really should not happen that a single exporter instance
             # handles output from different spiders. If it does happen,

@@ -1,7 +1,7 @@
 from typing import AsyncIterator, Iterable
 
-from scrapy.http import Request, TextResponse
 from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.http import Request, TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.country_utils import CountryUtils

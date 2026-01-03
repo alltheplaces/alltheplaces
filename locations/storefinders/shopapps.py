@@ -16,6 +16,7 @@ class ShopAppsSpider(Spider):
     brand. If additional fields need to be parsed, or some data needing to be
     cleaned, override the parse_item function.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "shopapps.site"}
     key: str
     custom_settings: dict = {"ROBOTSTXT_OBEY": False}

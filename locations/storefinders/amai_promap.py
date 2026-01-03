@@ -19,6 +19,7 @@ class AmaiPromapSpider(JSONBlobSpider):
     To use this spider, simply specify a store page URL as a single item
     within the `start_urls` list attribute.
     """
+
     start_urls: list[str] = []
     _locators: list[str] = ["amaicdn", "roseperl"]  # Amai ProMap is same as Rose Perl ProMap
 

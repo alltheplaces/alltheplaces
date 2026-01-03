@@ -69,6 +69,7 @@ class Where2GetItSpider(Spider):
     function to use a more granular form of querying, for example, by city of
     each location.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "where2getit.com"}
     custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 

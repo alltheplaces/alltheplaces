@@ -18,6 +18,7 @@ class SylinderSpider(Spider):
     If required, override the 'parse_item' method to extract additional
     location data or to clean up and modify extracted data.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "api.ngadata.no"}
 
     app_key: str

@@ -30,16 +30,21 @@ class SuperStoreFinderSpider(Spider):
     https://flippinpizza.com/wp-content/uploads/ssf-wp-uploads/ssf-data.json
     is available.
     """
+
     allowed_domains: list[str] = []
     start_urls: list[str] = []
 
     async def start(self) -> AsyncIterator[Request]:
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield Request(url=f"https://{self.allowed_domains[0]}/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php")
+            yield Request(
+                url=f"https://{self.allowed_domains[0]}/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php"
+            )
         elif len(self.start_urls) == 1:
             yield Request(url=self.start_urls[0])
         else:
-            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.xpath("//store/item"):

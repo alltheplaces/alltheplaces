@@ -18,6 +18,7 @@ class StoreifySpider(JSONBlobSpider):
     for individual store/feature webpages at the brand's website (e.g.
     "stores.example.net/stores/example-location").
     """
+
     dataset_attributes: dict = {"source": "api", "api": "storeify.app"}
     api_key: str
     domain: str

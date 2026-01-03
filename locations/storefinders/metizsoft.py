@@ -22,6 +22,7 @@ class MetizsoftSpider(Spider):
     You may need to override the `parse_item` function to adjust extracted
     field values.
     """
+
     dataset_attributes: dict = {"source": "api", "api": "storelocator.metizapps.com"}
     allowed_domains: list[str] = ["storelocator.metizapps.com"]
     shopify_url: str

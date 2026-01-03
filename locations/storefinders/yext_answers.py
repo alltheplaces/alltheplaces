@@ -71,9 +71,7 @@ class YextAnswersSpider(Spider):
                         "version": self.environment,
                         "locale": self.locale,
                         "verticalKey": self.feature_type,
-                        "filters": dumps(
-                            {"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}
-                        ),
+                        "filters": dumps({"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}),
                         "limit": str(self.page_limit),
                         "offset": str(offset),
                         "source": "STANDARD",

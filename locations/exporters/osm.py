@@ -26,11 +26,7 @@ class OSMExporter(XmlItemExporter):
 
     def start_exporting(self):
         self.xg.startDocument()
-        attrs = {
-            "version": "0.6",
-            "upload": "never",
-            "generator": "All the Places"
-        }
+        attrs = {"version": "0.6", "upload": "never", "generator": "All the Places"}
         self.xg.startElement("osm", AttributesImpl(attrs))
         self._beautify_newline(new_item=True)
 
@@ -39,11 +35,7 @@ class OSMExporter(XmlItemExporter):
         if not coords:
             coords = (0, 0)
         self._beautify_indent(depth=1)
-        attrs = {
-            "id": str(self.next_id),
-            "lat": str(coords[0]),
-            "lon": str(coords[1])
-        }
+        attrs = {"id": str(self.next_id), "lat": str(coords[0]), "lon": str(coords[1])}
         self.xg.startElement(self.item_element, AttributesImpl(attrs))
         self.next_id -= 1
         self._beautify_newline()
@@ -64,10 +56,7 @@ class OSMExporter(XmlItemExporter):
         self._beautify_indent(depth=depth)
         if not isinstance(serialized_value, str):
             raise Exception("{} is {} not str".format(name, type(serialized_value).__name__))
-        attrs = {
-            "k": name,
-            "v": serialized_value
-        }
+        attrs = {"k": name, "v": serialized_value}
         self.xg.startElement("tag", AttributesImpl(attrs))
         self.xg.endElement("tag")
         self._beautify_newline()

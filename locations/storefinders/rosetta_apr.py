@@ -110,6 +110,7 @@ class RosettaAPRSpider(Spider):
     There is no guarantee provided for the order in which data files are
     downloaded and the callback function called.
     """
+
     start_urls: list[str] = []
     data_files: list[RosettaAPRDataFile] = []
     key: str | None = None
@@ -248,7 +249,9 @@ class RosettaAPRSpider(Spider):
     ) -> list[dict]:
         if encrypted:
             if self.key is None or self.iv is None:
-                raise ValueError("Encrypted file encountered however the key and IV could not be extracted automatically and they were not specified manually. Specify the key and iv attributes manually for this spider.")
+                raise ValueError(
+                    "Encrypted file encountered however the key and IV could not be extracted automatically and they were not specified manually. Specify the key and iv attributes manually for this spider."
+                )
                 return []
             ciphertext = b64decode(raw_data_file.decode("utf-8"))
             unpadded_plaintext = decrypt_aes256cbc_pkcs7(ciphertext=ciphertext, key=self.key, iv=self.iv)

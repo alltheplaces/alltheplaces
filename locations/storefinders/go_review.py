@@ -20,6 +20,7 @@ class GoReviewSpider(CrawlSpider):
 
     Override 'days' if a language other than DAYS_EN is required.
     """
+
     start_urls: list[str] = []
     custom_settings: dict = {"ROBOTSTXT_OBEY": False}  # robots.txt disallows everything
     rules: list[Rule] = [

@@ -40,7 +40,9 @@ class GoReviewApiSpider(JSONBlobSpider):
                     return
                 yield JsonRequest(url=self.start_urls[0], method="POST", data=data_raw)
         else:
-            raise ValueError("Either the GoReview 'domain' attribute must be set, or the 'domain_list' attribute must set to a list of 'domain' values.")
+            raise ValueError(
+                "Either the GoReview 'domain' attribute must be set, or the 'domain_list' attribute must set to a list of 'domain' values."
+            )
 
     def parse_feature_array(self, response: TextResponse, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
