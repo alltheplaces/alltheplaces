@@ -10,70 +10,70 @@ from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Source code for the WP Store Locator API call used by this spider:
-# https://github.com/wp-plugins/wp-store-locator/blob/master/frontend/wpsl-ajax-functions.php
-#
-# There are two ways to use this spider:
-#
-# PREFERRED
-# 1. Attempt to return all locations with a single query.
-#
-#      Specify allowed_domains = [x, y, ..] (either one or more
-#      domains such as example.net) and the default path for the WP
-#      Store Locator API endpoint will be used. In the event the
-#      default path is different, you can alternatively specify one
-#      or more start_urls = [x, y, ..].
-#
-#      This method is sometimes restricted by the configuration of
-#      the API endpoint, requiring the aforesaid geographic radius
-#      search method to be used instead.
-#
-# NONPREFERRED
-# 2. Perform a geographic radius search with multiple queries.
-#
-#      In addition to method (1), also supply either:
-#
-#          PREFERRED
-#          a. A list of ISO-3166 alpha-2 country codes as the
-#             iseadgg_countries_list parameter and a suitable
-#             non-zero search_radius value in kilometres.
-#
-#             Example:
-#               iseadgg_countries_list = ["US", "CA"]
-#               search_radius = 100
-#
-#               In this example, a 94km ISEADGG centroid grid will
-#               automatically be selected as the most appropriate to
-#               use against a 100km search radius accepted by the
-#               API endpoint.
-#
-#          NONPREFERRED
-#          b. A list of searchable_points_files = [x, y..] suitable
-#             for use with the point_locations function of
-#             locations.geo and a suitable non-zero search_radius
-#             value in kilometres.
-#
-#      The max_results parameter is hard-coded in server
-#      configuration and cannot be changed. No radius search
-#      should return max_results locations because this is a sign
-#      that some locations are being truncated.
-#
-#      An exception will be raised if max_results (or more)
-#      locations are returned in any given radius search, as this
-#      indicates some locations have been truncated. If this occurs,
-#      more granular searchable points files need to be supplied,
-#      and search_raidus needs to be selected carefully to ensure
-#      that max_results (or more) locations are never returned for
-#      any radius search.
-#
-# If clean ups or additional field extraction is required from the
-# source data, override the parse_item function. Two parameters are
-# passed, item (an ATP "Feature" class) and location (a dict which
-# is returned from the store locator JSON response for a particular
-# location).
-
 
 class WPStoreLocatorSpider(Spider):
+    """
+    Source code for the WP Store Locator API call used by this spider:
+    https://github.com/wp-plugins/wp-store-locator/blob/master/frontend/wpsl-ajax-functions.php
+
+    There are two ways to use this spider:
+
+    PREFERRED
+    1. Attempt to return all locations with a single query.
+
+    Specify allowed_domains = ["example.net"] and the default path for the WP
+    Store Locator API endpoint will be used. In the event the default path is
+    different, you can alternatively specify start_urls =
+    ["https://www.example.net/custom-path/wp-admin/admin-ajax.php?action=
+      store_search&autoload=1"]
+
+    This method is sometimes restricted by the configuration of the API
+    endpoint, requiring the aforesaid geographic radius search method to be
+    used instead.
+
+    NONPREFERRED
+    2. Perform a geographic radius search with multiple queries.
+
+    In addition to method (1), also supply either:
+
+        PREFERRED
+        a. A list of ISO-3166 alpha-2 country codes as the
+           iseadgg_countries_list parameter and a suitable non-zero
+           search_radius value in kilometres.
+
+           Example:
+             iseadgg_countries_list = ["US", "CA"]
+             search_radius = 100
+
+           In this example, a 94km ISEADGG centroid grid will automatically be
+           selected as the most appropriate to use against a 100km search
+           radius accepted by the API endpoint.
+
+        NONPREFERRED
+        b. A list of searchable_points_files = [x, y..] suitable for use with
+           the point_locations function of locations.geo and a suitable
+           non-zero search_radius value in kilometres.
+
+    The max_results parameter is hard-coded in server configuration and cannot
+    be changed. No radius search should return max_results locations because
+    this is a sign that some locations are being truncated.
+
+    An exception will be raised if max_results (or more) locations are
+    returned in any given radius search, as this indicates some locations have
+    been truncated. If this occurs, more granular searchable points files need
+    to be supplied, and search_raidus needs to be selected carefully to ensure
+    that max_results (or more) locations are never returned for any radius
+    search.
+
+    If clean ups or additional field extraction is required from the source
+    data, override the parse_item function. Two parameters are passed:
+      item: an ATP "Feature" class
+      location: a dictionary which is returned from the store locator JSON
+                response for a particular location.
+    """
+
+    allowed_domains: list[str] = []
+    start_urls: list[str] = []
     days: dict | None = None
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
@@ -100,18 +100,27 @@ class WPStoreLocatorSpider(Spider):
         by some API endpoints, requiring the NONPREFERRED
         geographic radius search method to be used instead.
         """
-        if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
-            for domain in self.allowed_domains:
-                yield JsonRequest(url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&autoload=1")
-        elif len(self.start_urls) != 0:
-            for url in self.start_urls:
-                yield JsonRequest(url=url)
+        if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
+            yield JsonRequest(
+                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&autoload=1"
+            )
+        elif len(self.start_urls) == 1:
+            yield JsonRequest(url=self.start_urls[0])
+        else:
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def start_requests_geo_search_iseadgg_method(self) -> Iterable[JsonRequest]:
         """
         NONPREFERRED geographic radius search method with
         PREFERRED ISEADGG method of specifying centroids.
         """
+        if self.max_results == 0 or self.search_radius == 0:
+            raise ValueError(
+                "The max_results and search_radius attributes must be specified to each be more than 0 if iseadgg_countries_list is specified."
+            )
+            return
         if self.search_radius >= 458:
             iseadgg_radius = 458
         elif self.search_radius >= 315:
@@ -131,16 +140,18 @@ class WPStoreLocatorSpider(Spider):
                 "A minimum search_radius of 24 (kilometres) is required to be used for the ISEADGG geographic radius search method."
             )
         for lat, lon in country_iseadgg_centroids(self.iseadgg_countries_list, iseadgg_radius):
-            if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
-                for domain in self.allowed_domains:
-                    yield JsonRequest(
-                        url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
-                    )
-            elif len(self.start_urls) != 0:
-                for url in self.start_urls:
-                    yield JsonRequest(
-                        url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
-                    )
+            if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
+                yield JsonRequest(
+                    url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                )
+            elif len(self.start_urls) == 1:
+                yield JsonRequest(
+                    url=f"{self.start_urls[0]}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                )
+            else:
+                raise ValueError(
+                    "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+                )
 
     def start_requests_geo_search_manual_method(self) -> Iterable[JsonRequest]:
         """
@@ -148,18 +159,25 @@ class WPStoreLocatorSpider(Spider):
         NONPREFERRED searchable_points_file method of
         specifying centroids.
         """
+        if self.max_results == 0 or self.search_radius == 0:
+            raise ValueError(
+                "The max_results and search_radius attributes must be specified to each be more than 0 if searchable_points_file is specified."
+            )
+            return
         for searchable_points_file in self.searchable_points_files:
             for lat, lon in point_locations(searchable_points_file, self.area_field_filter):
-                if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
-                    for domain in self.allowed_domains:
-                        yield JsonRequest(
-                            url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
-                        )
-                elif len(self.start_urls) != 0:
-                    for url in self.start_urls:
-                        yield JsonRequest(
-                            url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
-                        )
+                if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
+                    yield JsonRequest(
+                        url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                    )
+                elif len(self.start_urls) == 1:
+                    yield JsonRequest(
+                        url=f"{self.start_urls[0]}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                    )
+                else:
+                    raise ValueError(
+                        "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+                    )
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         if response.text.strip():
@@ -170,11 +188,12 @@ class WPStoreLocatorSpider(Spider):
             features = []
 
         if self.max_results > 0:
-            if len(features) > 0:
-                self.crawler.stats.inc_value("atp/geo_search/hits")
-            else:
-                self.crawler.stats.inc_value("atp/geo_search/misses")
-            self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
+            if self.crawler.stats:
+                if len(features) > 0:
+                    self.crawler.stats.inc_value("atp/geo_search/hits")
+                else:
+                    self.crawler.stats.inc_value("atp/geo_search/misses")
+                self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
 
             if len(features) >= self.max_results:
                 self.logger.error(

@@ -154,7 +154,8 @@ class InsightsCommand(ScrapyCommand):
             print(counter)
 
     def check_value_types(self, args: list[str], opts: argparse.Namespace) -> None:
-        stats = scrapy.statscollectors.StatsCollector(self)
+        crawler = scrapy.Crawler(scrapy.Spider)
+        stats = scrapy.statscollectors.StatsCollector(crawler)
         for feature in iter_features(args, opts.filter_spiders):
             spider_name = feature["properties"].get("@spider")
             for k, v in feature["properties"].items():

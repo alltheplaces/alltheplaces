@@ -43,10 +43,10 @@ class SocrataSpider(Spider):
     higher value.
     """
 
-    dataset_attributes = {"source": "api", "api": "socrata"}
+    dataset_attributes: dict = {"source": "api", "api": "socrata"}
 
-    host: str = ""
-    resource_id: str = ""
+    host: str
+    resource_id: str
     page_size: int = 50000
     field_names: list[str] = []
 

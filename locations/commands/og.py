@@ -77,11 +77,17 @@ class OgCommand(BaseRunSpiderCommand):
         if opts.spider_name:
             MySpider.name = opts.spider_name
 
-        crawler = self.crawler_process.create_crawler(MySpider, **opts.spargs)
-        self.crawler_process.crawl(crawler)
-        self.crawler_process.start()
-        stats_dict = crawler.stats.get_stats()
-        if stats_dict.get("item_scraped_count", 0) == 0:
-            print("failed to decode open graph data")
-        if opts.stats:
-            pprint.pprint(stats_dict)
+        if crawler_process := self.crawler_process:
+            crawler = crawler_process.create_crawler(MySpider, **opts.spargs)
+            crawler_process.crawl(crawler)
+            crawler_process.start()
+            if crawler.stats:
+                stats_dict = crawler.stats.get_stats()
+                if stats_dict.get("item_scraped_count", 0) == 0:
+                    print("failed to decode open graph data")
+                if opts.stats:
+                    pprint.pprint(stats_dict)
+            else:
+                raise RuntimeError("Statistics collector not defined for crawler process")
+        else:
+            raise RuntimeError("Crawler process not defined")

@@ -27,7 +27,7 @@ class VirtualEarthSpider(Spider):
       - `page_size`: optional parameter, default value is 250
     """
 
-    dataset_attributes = {"source": "api", "api": "virtualearth.net"}
+    dataset_attributes: dict = {"source": "api", "api": "virtualearth.net"}
 
     dataset_id: str
     dataset_name: str

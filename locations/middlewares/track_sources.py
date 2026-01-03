@@ -13,8 +13,6 @@ class TrackSourcesMiddleware:
     """
 
     def _process_item(self, response: Response, item: Item, spider: Spider) -> None:
-        if not isinstance(item, Item):
-            return
         if not isinstance(item.get("extras"), dict):
             item["extras"] = {}
 
@@ -32,15 +30,17 @@ class TrackSourcesMiddleware:
             spider.crawler.stats.inc_value("atp/parse_error/@source_uri")
 
     def process_spider_output(
-        self, response: Response, result: Iterable[Request | Item], spider: Spider
-    ) -> Iterable[Item]:
-        for item in result:
-            self._process_item(response, item, spider)
-            yield item
+        self, response: Response, result: Iterable[Item | Request], spider: Spider
+    ) -> Iterable[Item | Request]:
+        for x in result:
+            if isinstance(x, Item):
+                self._process_item(response, x, spider)
+            yield x
 
     async def process_spider_output_async(
-        self, response: Response, result: AsyncIterator[Request | Item], spider: Spider
-    ) -> AsyncIterator[Item]:
-        async for item in result:
-            self._process_item(response, item, spider)
-            yield item
+        self, response: Response, result: AsyncIterator[Item | Request], spider: Spider
+    ) -> AsyncIterator[Item | Request]:
+        async for x in result:
+            if isinstance(x, Item):
+                self._process_item(response, x, spider)
+            yield x

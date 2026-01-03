@@ -16,8 +16,20 @@ class AmrestEUSpider(Spider):
     https://en.wikipedia.org/wiki/AmRest
 
     This spider is specifically for the common functionality across all child brands.
+
+    To use this storefinder, specify:
+    - `api_brand_key`: mandatory parameter
+    - `api_brand_country_key`: mandatory parameter
+    - `api_source`: optional parameter, include if you observe a `Source`
+                    HTTP header being sent in Amrest storefinder requests on a
+                    brand storefinder page
+    - `api_auth_source`: mandatory parameter
+    - `api_channel`: optional parameter, include if you observe an identifier
+                     after the restaurant ID in Amrest storefinder requests
+                     on a brand storefinder page
     """
 
+    dataset_attributes: dict = {"source": "api", "api": "amrest.eu"}
     api_brand_key: str
     api_brand_country_key: str
     api_source: str | None = None

@@ -16,7 +16,7 @@ class UberallSpider(Spider):
     Use by specifying the `key`, and optional filtering via `business_id_filter`
     """
 
-    dataset_attributes = {"source": "api", "api": "uberall.com"}
+    dataset_attributes: dict = {"source": "api", "api": "uberall.com"}
 
     key: str
     business_id_filter: int | None = None

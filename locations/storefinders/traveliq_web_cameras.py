@@ -33,7 +33,12 @@ class TravelIQWebCamerasSpider(Spider):
      - 'allowed_domains': mandatory parameter
     """
 
+    allowed_domains: list[str] = []
+
     async def start(self) -> AsyncIterator[JsonRequest]:
+        if len(self.allowed_domains) != 1:
+            raise ValueError("Specify one domain name in the allowed_domains list attribute.")
+            return
         yield JsonRequest(
             url="https://"
             + self.allowed_domains[0]

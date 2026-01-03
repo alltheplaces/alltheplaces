@@ -27,6 +27,9 @@ class FilenameCommand(ScrapyCommand):
         if len(args) != 1:
             raise UsageError()
 
+        if not self.crawler_process:
+            raise RuntimeError("Crawler process not defined")
+
         try:
             spidercls = self.crawler_process.spider_loader.load(args[0])
         except KeyError:

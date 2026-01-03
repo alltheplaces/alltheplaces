@@ -20,7 +20,7 @@ class ApplyNSICategoriesPipeline:
             # The key thing is that we don't have to call nsi.iter_nsi on every process_item
             self.wikidata_cache[code] = list(self.nsi.iter_nsi(code))
 
-        matches = self.wikidata_cache.get(code)
+        matches = self.wikidata_cache.get(code, [])
 
         if len(matches) == 0 and item.get("brand_wikidata"):
             spider.crawler.stats.inc_value("atp/nsi/brand_missing")

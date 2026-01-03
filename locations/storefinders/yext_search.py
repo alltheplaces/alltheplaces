@@ -11,10 +11,10 @@ from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class YextSearchSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "yext"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    dataset_attributes: dict = {"source": "api", "api": "yext"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
-    host: str = "https://locator.chick-fil-a.com.yext-cdn.com"
+    host: str = "https://locator.example-brand.yext-cdn.com"
     page_size: int = 50
 
     def make_request(self, offset: int) -> JsonRequest:
@@ -71,7 +71,7 @@ class YextSearchSpider(Spider):
             if profile.get("googlePlaceId"):
                 item["extras"]["ref:google"] = profile.get("googlePlaceId")
 
-            YextAnswersSpider.parse_payment_methods(self, profile, item)
+            YextAnswersSpider.parse_payment_methods(profile, item)
 
             item["opening_hours"] = self.parse_opening_hours(profile.get("hours"))
             if oh := self.parse_opening_hours(profile.get("deliveryHours")).as_opening_hours():

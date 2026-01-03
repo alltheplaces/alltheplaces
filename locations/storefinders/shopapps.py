@@ -6,18 +6,20 @@ from scrapy.http import JsonRequest, TextResponse
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
-# This is an undocumented application forming part of the ShopApps
-# suite of Shopify apps mentioned at https://shopapps.in/
-#
-# To use this spider, specify the "key" parameter that is unique
-# to the brand. If additional fields need to be parsed, or some
-# data needing to be cleaned, override the parse_item function.
-
 
 class ShopAppsSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "shopapps.site"}
+    """
+    This is an undocumented application forming part of the ShopApps suite of
+    Shopify apps mentioned at https://shopapps.in/
+
+    To use this spider, specify the "key" parameter that is unique to the
+    brand. If additional fields need to be parsed, or some data needing to be
+    cleaned, override the parse_item function.
+    """
+
+    dataset_attributes: dict = {"source": "api", "api": "shopapps.site"}
     key: str
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(

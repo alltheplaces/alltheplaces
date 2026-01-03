@@ -6,33 +6,27 @@ from scrapy.http import JsonRequest, TextResponse
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
-# Official website for Storemapper:
-# https://storemapper.com/
-#
-# To use this store finder, specify a company_id as a string. This company_id
-# if usually a single integer, but can sometimes also have a suffix (separated
-# with a hyphen) that contains word characters (e.g. a-zA-Z0-9 observed to be
-# used if a suffix is included).
-#
-# If clean ups or additional field extraction is required from the
-# source data, override the parse_item function. Two parameters are
-# passed, item (an ATP "Feature" class) and location (a dict which
-# is returned from the store locator JSON response for a particular
-# location).
-
 
 class StoremapperSpider(Spider):
     """
-    Storemapper (https://www.storemapper.com/) is an embedded map based store locator.
+    Storemapper (https://www.storemapper.com/) is an embedded map based store
+    locator. API documentation is available at:
+    https://help.storemapper.com/category/4313-advanced-settings-and-customisation
 
-    API docs are available via https://help.storemapper.com/category/4313-advanced-settings-and-customisation
+    To use this store finder, specify a company_id as a string. This
+    company_id is usually a single integer, but can sometimes also have a
+    suffix (separated with a hyphen) that contains word characters (e.g.
+    a-zA-Z0-9 observed to be used if a suffix is included).
 
-    To use, specify:
-      - `company_id`: mandatory parameter
+    If clean ups or additional field extraction is required from the source
+    data, override the parse_item function. Two parameters are passed:
+    - item: an ATP "Feature" class
+    - location: a dictionary which is returned from the store locator JSON
+    response for a particular location
     """
 
-    dataset_attributes = {"source": "api", "api": "storemapper.com"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    dataset_attributes: dict = {"source": "api", "api": "storemapper.com"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
     company_id: str
 

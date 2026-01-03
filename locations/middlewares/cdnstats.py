@@ -9,6 +9,8 @@ class CDNStatsMiddleware(BaseSpiderMiddleware):
     """
 
     def process_response(self, request: Request, response: Response, spider: Spider):
+        if not self.crawler or not self.crawler.stats:
+            return response
         if response.headers.get(b"Server") == b"cloudflare":
             self.crawler.stats.inc_value("atp/cdn/cloudflare/response_count")
             self.crawler.stats.inc_value(f"atp/cdn/cloudflare/response_status_count/{response.status}")

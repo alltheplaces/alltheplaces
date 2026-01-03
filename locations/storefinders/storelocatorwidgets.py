@@ -18,7 +18,7 @@ class StoreLocatorWidgetsSpider(Spider):
     To use, specify a `key`
     """
 
-    dataset_attributes = {"source": "api", "api": "storelocatorwidgets.com"}
+    dataset_attributes: dict = {"source": "api", "api": "storelocatorwidgets.com"}
     key: str
 
     async def start(self) -> AsyncIterator[Request]:

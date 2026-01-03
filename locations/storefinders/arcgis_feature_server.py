@@ -65,7 +65,7 @@ class ArcGISFeatureServerSpider(Spider):
          schema of the feature layer to omit, rename or replace a field.
     """
 
-    dataset_attributes = {"source": "api", "api": "arcgis"}
+    dataset_attributes: dict = {"source": "api", "api": "arcgis"}
 
     host: str
     context_path: str

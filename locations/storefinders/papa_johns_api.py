@@ -34,8 +34,8 @@ class PapaJohnsApiSpider(Spider):
     Paginated JSON response, initial call to something like https://api.new.papajohns.es/v1/stores?latitude=0&longitude=0
     """
 
-    item_attributes = PAPA_JOHNS_SHARED_ATTRIBUTES
-    website_base = ""
+    item_attributes: dict = PAPA_JOHNS_SHARED_ATTRIBUTES
+    website_base: str = ""
 
     def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
         features = response.json().get("page", [])
@@ -58,14 +58,14 @@ class PapaJohnsApiSpider(Spider):
                 for method in payment_methods:
                     if tag := PAYMENT_OPTIONS_MAP.get(method):
                         apply_yes_no(tag, item, True)
-                    else:
+                    elif self.crawler.stats:
                         self.crawler.stats.inc_value(f"atp/{self.name}/unknown_payment/{method}")
 
             item["opening_hours"] = self.parse_hours(location, "in_store")
             item["extras"]["opening_hours:delivery"] = self.parse_hours(location, "pj_delivery").as_opening_hours()
 
             for rule in location["business_hours"]:
-                if rule["dispatch_method"] not in ["in_store", "pj_delivery"]:
+                if rule["dispatch_method"] not in ["in_store", "pj_delivery"] and self.crawler.stats:
                     self.crawler.stats.inc_value(f"atp/{self.name}/unknown_hours_type/{rule['dispatch_method']}")
 
             yield from self.post_process_item(item, response, location) or []

@@ -20,8 +20,7 @@ class AlgoliaSpider(Spider):
     page.
     """
 
-    dataset_attributes = {"source": "api", "api": "algolia"}
-
+    dataset_attributes: dict = {"source": "api", "api": "algolia"}
     api_key: str
     app_id: str
     index_name: str

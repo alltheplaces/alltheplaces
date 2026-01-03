@@ -400,9 +400,15 @@ class SitemapCommand(BaseRunSpiderCommand):
         MySitemapSpider.requires_proxy = opts.requires_proxy
         MySitemapSpider.pages = opts.pages
 
-        crawler = self.crawler_process.create_crawler(MySitemapSpider, **opts.spargs)
-        self.crawler_process.crawl(crawler)
-        self.crawler_process.start()
-        if opts.stats:
-            for k, v in crawler.stats.get_stats().items():
-                print(k + ": " + str(v))
+        if crawler_process := self.crawler_process:
+            crawler = crawler_process.create_crawler(MySitemapSpider, **opts.spargs)
+            crawler_process.crawl(crawler)
+            crawler_process.start()
+            if opts.stats:
+                if crawler.stats:
+                    for k, v in crawler.stats.get_stats().items():
+                        print(k + ": " + str(v))
+                else:
+                    raise RuntimeError("Statistics collector not defined for crawler process")
+        else:
+            raise RuntimeError("Crawler process not defined")

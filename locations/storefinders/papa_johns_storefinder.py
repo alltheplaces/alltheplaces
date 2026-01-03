@@ -9,26 +9,40 @@ from locations.hours import DAYS_EN, DELIMITERS_EN, NAMED_DAY_RANGES_EN, NAMED_T
 from locations.items import Feature
 from locations.spiders.papa_johns import PAPA_JOHNS_SHARED_ATTRIBUTES
 
-"""
-A common storefinder for Papa Johns in a number of countries.
-
-To use this storefinder simply specify the storefinder url in start_urls and also a list of language codes
-for which there is available data, with the primary language listed first.
-
-If en is not available or suitable for 'hours_text" then override hours_language, days, named_times, named_day_ranges and delimiters as required
-"""
-
 
 class PapaJohnsStorefinderSpider(Spider):
-    item_attributes = PAPA_JOHNS_SHARED_ATTRIBUTES
-    languages = []
-    hours_language = "en"
-    days = DAYS_EN
-    delimiters = DELIMITERS_EN
-    named_times = NAMED_TIMES_EN
-    named_day_ranges = NAMED_DAY_RANGES_EN
+    """
+    A common storefinder for Papa Johns in a number of countries.
+
+    To use this storefinder specify one storefinder url in `start_urls`. Also
+    specify a list of language codes for which there is available data within
+    the `languages` list attribute, placing the primary language code first in
+    the list.
+
+    If langauge code "en" is not available or suitable (observe the
+    "hours_text" field in raw API data returned) then override the following
+    attributes:
+    - `hours_language`: alternative language code other than "en"
+    - `days`: DAYS_xx dictionary defined in locations/hours.py
+    - `named_times`: NAMED_TIMES_xx dictionary defined in locations/hours.py
+    - `named_day_ranges`: NAMED_DAY_RANGES_xx dictionary defined in
+                          locations/hours.py
+    - `delimiters`: DELIMITERS_xx list defined in locations/hours.py
+    """
+
+    item_attributes: dict = PAPA_JOHNS_SHARED_ATTRIBUTES
+    start_urls: list[str] = []
+    languages: list[str] = []
+    hours_language: str = "en"
+    days: dict = DAYS_EN
+    delimiters: list[str] = DELIMITERS_EN
+    named_times: dict = NAMED_TIMES_EN
+    named_day_ranges: dict = NAMED_DAY_RANGES_EN
 
     async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
         url = urlparse(self.start_urls[0])
         yield JsonRequest(
             url=url._replace(path="/api/outlet/list/", query="all=true").geturl(),
@@ -67,7 +81,7 @@ class PapaJohnsStorefinderSpider(Spider):
 
             storefinder_url = urlparse(self.start_urls[0])
             path = storefinder_url.path.strip("/").split("/")[0] + "/" + str(item["ref"]) + "/"
-            item["website"] = storefinder_url._replace(path=path, query=None).geturl()
+            item["website"] = storefinder_url._replace(path=path, query="").geturl()
 
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(
@@ -82,7 +96,8 @@ class PapaJohnsStorefinderSpider(Spider):
                 and location.get("hours_text", {}).get(self.hours_language) is not None
             ):
                 self.logger.warning(f"Error parsing hours: {location.get('hours_text', {}).get(self.hours_language)}")
-                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
+                if self.crawler.stats:
+                    self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
 
             yield from self.post_process_item(item, response, location) or []
 

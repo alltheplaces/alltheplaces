@@ -10,7 +10,7 @@ from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class YextLocationsSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "yext"}
+    dataset_attributes: dict = {"source": "api", "api": "yext"}
 
     endpoint: str = "https://cdn.yextapis.com/v2/accounts/me/content/locations"
     api_key: str
