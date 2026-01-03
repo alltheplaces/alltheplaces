@@ -14,7 +14,6 @@ from scrapy.utils.spider import iter_spider_classes
 
 from locations.extensions.add_lineage import spider_class_to_lineage
 from locations.geo import extract_geojson_point_geometry
-from locations.items import get_lat_lon, set_lat_lon
 from locations.settings import SPIDER_MODULES
 
 mapping = (

@@ -82,7 +82,7 @@ class CheckItemPropertiesPipeline:
 
         return item
 
-    def check_geom(self, item: Feature, spider: Spider) -> None: # noqa: C901
+    def check_geom(self, item: Feature, spider: Spider) -> None:  # noqa: C901
         lat_untyped = None
         lon_untyped = None
         if geometry := item.get("geometry"):
