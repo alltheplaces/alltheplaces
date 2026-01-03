@@ -76,8 +76,8 @@ def get_lat_lon(item: Feature) -> tuple[float, float] | None:
                 if coords := geometry.get("coordinates"):
                     if isinstance(coords, list):
                         if len(coords) == 2:
-                            lat_untyped = coords[0]
-                            lon_untyped = coords[1]
+                            lat_untyped = coords[1]
+                            lon_untyped = coords[0]
     else:
         lat_untyped = item.get("lat")
         lon_untyped = item.get("lon")

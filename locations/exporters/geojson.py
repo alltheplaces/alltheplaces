@@ -14,6 +14,7 @@ from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
 from locations.extensions.add_lineage import spider_class_to_lineage
+from locations.items import get_lat_lon, set_lat_lon
 from locations.settings import SPIDER_MODULES
 
 mapping = (
@@ -76,28 +77,20 @@ def item_to_geometry(item: Item) -> dict | None:
     :param item: The scraped item.
     :return: The GeoJSON geometry object.
     """
-
-    lat = item.get("lat")
-    lon = item.get("lon")
-    geometry = item.get("geometry")
-
-    if lat and lon and not geometry:
-        try:
-            geometry = {
-                "type": "Point",
-                "coordinates": [float(item["lon"]), float(item["lat"])],
-            }
-        except ValueError:
-            logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
-
-    # Check for empty or missing coordinates list in geometry
-    if geometry and isinstance(geometry, dict):
-        coordinates = geometry.get("coordinates")
-        if not coordinates:
-            logging.warning("Invalid geometry coordinates: %s", geometry)
-            return None
-
-    return geometry
+    if coords := get_lat_lon(item):
+        lat = coords[0]
+        lon = coords[1]
+        set_lat_lon(item, lat, lon)
+        return item["geometry"]
+    item.pop("lat", None)
+    item.pop("lon", None)
+    if geometry := item.get("geometry"):
+        if geometry.get("type") in ["MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]:
+            # Return non-point geometry as-is without validation as ATP does
+            # not yet handle/validate GeoJSON geometry other than Point.
+            return geometry
+    item.pop("geometry", None)
+    return None
 
 
 def item_to_geojson_feature(item: Item) -> dict:
