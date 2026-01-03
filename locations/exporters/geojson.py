@@ -13,6 +13,7 @@ from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
 from locations.extensions.add_lineage import spider_class_to_lineage
+from locations.geo import extract_geojson_point_geometry
 from locations.items import get_lat_lon, set_lat_lon
 from locations.settings import SPIDER_MODULES
 
@@ -69,27 +70,48 @@ def item_to_properties(item: Item) -> dict[str, Any]:
 
 def item_to_geometry(item: Item) -> dict | None:
     """
-    Convert the item to a GeoJSON geometry object. If the item has lat and lon fields,
-    but no geometry field, then a Point geometry will be created. Otherwise the
-    geometry field will be returned as is.
+    Extract a GeoJSON geometry object from an Item. Point geometry and
+    MultiPoint geometry with a single coordinate pair are both validated.
+    Other GeoJSON geometry types (e.g. Polygon) are not validated and are
+    returned as-is.
 
-    :param item: The scraped item.
-    :return: The GeoJSON geometry object.
+    If the Item has lat and lon attributes defined instead of a geometry
+    attribute, this function will return the GeoJSON Point geometry
+    equivalent.
+
+    If point geometry is validated and found to be invalid (e.g. lat of 700)
+    then this function returns None.
+
+    :param item: Item which may have geometry defined either in the geometry
+                 field, or as lat/lon fields.
+    :return: GeoJSON geometry dictionary or None if no such geometry could be
+             extracted.
     """
-    if coords := get_lat_lon(item):
-        lat = coords[0]
-        lon = coords[1]
-        set_lat_lon(item, lat, lon)
-        return item["geometry"]
-    item.pop("lat", None)
-    item.pop("lon", None)
     if geometry := item.get("geometry"):
-        if geometry.get("type") in ["MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]:
-            # Return non-point geometry as-is without validation as ATP does
-            # not yet handle/validate GeoJSON geometry other than Point.
-            return geometry
-    item.pop("geometry", None)
-    return None
+        if geojson_point := extract_geojson_point_geometry(geometry):
+            return geojson_point
+        else:
+            if geometry.get("type") in ["MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]:
+                return geometry
+            else:
+                return None
+    else:
+        lat_untyped = item.get("lat", None)
+        lon_untyped = item.get("lon", None)
+        if lat_untyped is None or lon_untyped is None:
+            return None
+        try:
+            lat_typed = float(lat_untyped)
+            lon_typed = float(lon_untyped)
+        except (TypeError, ValueError):
+            return None
+        if lat_typed < -90.0 or lat_typed > 90.0 or lon_typed < -180.0 or lon_typed > 180.0:
+            return None
+        geojson_point = {
+            "type": "Point",
+            "coordinates": [lon_typed, lat_typed],
+        }
+        return geojson_point
 
 
 def item_to_geojson_feature(item: Item) -> dict:

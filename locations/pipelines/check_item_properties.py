@@ -82,7 +82,7 @@ class CheckItemPropertiesPipeline:
 
         return item
 
-    def check_geom(self, item: Feature, spider: Spider) -> None:
+    def check_geom(self, item: Feature, spider: Spider) -> None: # noqa: C901
         lat_untyped = None
         lon_untyped = None
         if geometry := item.get("geometry"):
@@ -109,7 +109,7 @@ class CheckItemPropertiesPipeline:
                         # Invalid geometry type. Refer to RFC 7946 for valid
                         # types.
                         if spider.crawler.stats:
-                            spider.crawler.stats.inc_valid("atp/field/geometry/invalid")
+                            spider.crawler.stats.inc_value("atp/field/geometry/invalid")
                         item.pop("lat", None)
                         item.pop("lon", None)
                         item.pop("geometry", None)
@@ -117,7 +117,7 @@ class CheckItemPropertiesPipeline:
             else:
                 # Invalid geometry type.
                 if spider.crawler.stats:
-                    spider.crawler.stats.inc_valid("atp/field/geometry/invalid")
+                    spider.crawler.stats.inc_value("atp/field/geometry/invalid")
                 item.pop("lat", None)
                 item.pop("lon", None)
                 item.pop("geometry", None)
