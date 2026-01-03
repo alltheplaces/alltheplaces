@@ -6,30 +6,31 @@ from chompjs import parse_js_object
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, TextResponse
 from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.python.failure import Failure
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Documentation for this Stockist store finder is available at:
-# https://help.stockist.co/
-#
-# To use this store finder, specify the API key using the "key"
-# attribute of this class. You may need to define a parse_item
-# function to extract additional location data and to make
-# corrections to automatically extracted location data.
-#
-# Note that some brands may have disabled the ability for clients to
-# list all locations in a single query. This store finder will
-# automatically detect this situation and will use an alternative
-# approach of searching for locations by radius searches. No
-# additional parameters need to be supplied to this store finder.
-# Just note that some additional requests will be required for this
-# store finder to return all locations.
-
 
 class StockistSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "stockist.co"}
+    """
+    Documentation for this Stockist store finder is available at:
+    https://help.stockist.co/
+
+    To use this store finder, specify the API key using the "key" attribute of
+    this class. You may need to define a parse_item function to extract
+    additional location data and to make corrections to automatically
+    extracted location data.
+
+    Note that some brands may have disabled the ability for clients to list
+    all locations in a single query. This store finder will automatically
+    detect this situation and will use an alternative approach of searching
+    for locations by radius searches. No additional parameters need to be
+    supplied to this store finder. Just note that some additional requests
+    will be required for this store finder to return all locations.
+    """
+    dataset_attributes: dict = {"source": "api", "api": "stockist.co"}
     key: str
     max_distance: int = 50000
     coordinates_pending: list[tuple[float, float]] = []
@@ -51,14 +52,16 @@ class StockistSpider(Spider):
         item["street_address"] = merge_address_lines([location.get("address_line_1"), location.get("address_line_2")])
         return item
 
-    def parse_all_locations_error(self, failure) -> Iterable[Request]:
-        if failure.check(HttpError):
-            if failure.value.response.status == 400:
-                if "error" in failure.value.response.json().keys():
-                    if failure.value.response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
-                        yield Request(
-                            url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
-                        )
+    def parse_all_locations_error(self, failure: Failure) -> Iterable[Request]:
+        if failure.check(HttpError) and hasattr(failure.value, "response"):
+            response = failure.value.response
+            if isinstance(response, TextResponse):
+                if response.status == 400:
+                    if "error" in response.json().keys():
+                        if response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
+                            yield Request(
+                                url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
+                            )
 
     def parse_search_config(self, response: TextResponse) -> Iterable[JsonRequest]:
         config = parse_js_object(response.text.split("(", 1)[1].split(");", 1)[0])
@@ -93,5 +96,5 @@ class StockistSpider(Spider):
         if len(self.coordinates_pending) > 0:
             yield from self.make_next_search_request()
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

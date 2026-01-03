@@ -153,27 +153,32 @@ def get_dataset_attributes(spider_name: str) -> dict:
 
 
 class GeoJsonExporter(JsonItemExporter):
+    spider_name: str | None = None
+
     def __init__(self, file: BytesIO, **kwargs):
         super().__init__(file, **kwargs)
-        self.spider_name = None
 
     def start_exporting(self) -> None:
         pass
 
     def export_item(self, item: Item) -> None:
         spider_name = item.get("extras", {}).get("@spider")
+        if not spider_name:
+            raise RuntimeError("Spider should have a 'name' attribute specified.")
 
         if self.first_item:
             self.spider_name = spider_name
             self.write_geojson_header()
 
+        if not self.spider_name:
+            raise RuntimeError("Exporter expected a spider name but none was available. Check the spider has a 'name' attribute specified and is not None.")
         if spider_name != self.spider_name:
             # It really should not happen that a single exporter instance
             # handles output from different spiders. If it does happen,
             # we rather crash than emit GeoJSON with the wrong dataset
             # properties, which may include legally relevant license tags.
             raise ValueError(
-                f"harvest from multiple spiders ({spider_name, self.spider_name}) cannot be written to same GeoJSON file"
+                f"Extracted data from multiple spiders ({spider_name, self.spider_name}) cannot be written to same GeoJSON file"
             )
 
         super().export_item(item)
@@ -191,6 +196,8 @@ class GeoJsonExporter(JsonItemExporter):
         return feature
 
     def write_geojson_header(self) -> None:
+        if not self.spider_name:
+            raise RuntimeError("Spider should have a 'name' attribute specified.")
         header = StringIO()
         header.write('{"type":"FeatureCollection","dataset_attributes":')
         json.dump(

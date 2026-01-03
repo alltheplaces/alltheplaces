@@ -9,8 +9,14 @@ from locations.items import Feature
 
 
 class StorepointSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "storepoint.co"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    """
+    Storepoint is a cloud-hosted storefinder service with an official website
+    of https://storepoint.co/
+
+    To use this storefinder, specify a value for the `key` attribute.
+    """
+    dataset_attributes: dict = {"source": "api", "api": "storepoint.co"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
     key: str
 

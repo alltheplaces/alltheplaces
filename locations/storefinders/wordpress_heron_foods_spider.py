@@ -6,15 +6,17 @@ from scrapy.http import TextResponse
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
-# A less common wordpress based storefinder, characterised by
-# - POST of search params to "action": "get_stores",
-# - Two letter variables in the results, like "na"
-#
-# To use, specify `domain` and `lat`, `lon` as the start point.
-# TODO: Rename this spider when we identify the storelocator
-
 
 class WordpressHeronFoodsSpider(Spider):
+    """
+    A less common wordpress based storefinder, characterised by:
+    - POST of search params to "action": "get_stores"
+    - Two letter variables in the results, e.g. "na"
+
+    To use, specify `domain` and `lat`, `lon` as the start point.
+
+    TODO: Rename this spider when we identify the storelocator.
+    """
     domain: str
     radius: int = 600
     lat: float
@@ -58,7 +60,8 @@ class WordpressHeronFoodsSpider(Spider):
                 item["opening_hours"] = self.pares_opening_hours(store)
             except:
                 self.logger.error("Error parsing opening hours")
-                self.crawler.stats.inc_value("{}/opening_hours/parse_error".format(self.name))
+                if self.crawler.stats:
+                    self.crawler.stats.inc_value("{}/opening_hours/parse_error".format(self.name))
 
             yield from self.post_process_item(item, response, store)
 

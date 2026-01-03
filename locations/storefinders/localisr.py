@@ -35,8 +35,35 @@ from locations.items import Feature
 
 
 class LocalisrSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "localisr.io"}
-    api_key: str = ""
+    """
+    The archived official home page of this Localisr store finder is:
+    https://web.archive.org/web/20231021142419/https://matterdesign.com.au/localisr-a-geolocation-powered-store-finder-for-bigcommerce/
+
+    It appears this store finder may be deprecated and is in the process of
+    being replaced as some brands previously making API calls to
+    app.localisr.io are now making different API calls to
+    <brand_key>.matter.design. The brand store locator pages still pull in
+    Javascript from app.localisr.io and the app.localisr.io API calls still
+    work, so for these brands, LocalisrSpider still appears to work, but
+    probably should be replaced.
+
+    Documentation does not appear to be publicly available, however the
+    observed behaviour is that coordinates are supplied for searching with a
+    given radius. Often this radius appears to be ignored and all locations
+    are returned at once.
+
+    To use this spider, specify the api_key. Then add to the
+    search_coordinates array one or more tuples of coordinates as (lat, lon)
+    which will be searched with the provided value of search_radius
+    (default is 400). If for some reason you find a consumer of this API with
+    a small allowed search_radius or many coordinates needing to be searched,
+    override the start function to populate the search_coordinates array and
+    then call super().start() to start the scraping.
+
+    If you need to clean up data returned, override the parse_item function.
+    """
+    dataset_attributes: dict = {"source": "api", "api": "localisr.io"}
+    api_key: str
     api_version: str = "2.1.0"  # Use the latest observed API version by default
     search_coordinates: list[tuple[float, float]] = []
     search_radius: int = 400

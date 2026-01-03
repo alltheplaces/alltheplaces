@@ -1,5 +1,6 @@
 import sys
 from enum import Enum
+from typing import Self
 
 from scrapy import Spider
 from scrapy.crawler import Crawler
@@ -46,7 +47,7 @@ def spider_class_to_lineage(spider: Spider) -> Lineage:
 class AddLineageExtension:
 
     @classmethod
-    def from_crawler(cls, crawler: Crawler) -> type[Spider]:
+    def from_crawler(cls, crawler: Crawler) -> Self:
         ext = cls()
         crawler.signals.connect(ext.spider_opened, signal=spider_opened)
         return ext

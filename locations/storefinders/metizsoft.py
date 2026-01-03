@@ -13,8 +13,18 @@ from locations.items import Feature
 
 
 class MetizsoftSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "storelocator.metizapps.com"}
-    shopify_url: str = ""
+    """
+    Metizsoft store locator app for Shopify sites, with an official website of
+    https://www.metizsoft.com/product/store-locator-app
+
+    To use this storefinder, specify the `shopify_url` attribute as observed
+    on storefinder pages as having the format of "examplebrand.myshopify.com".
+    You may need to override the `parse_item` function to adjust extracted
+    field values.
+    """
+    dataset_attributes: dict = {"source": "api", "api": "storelocator.metizapps.com"}
+    allowed_domains: list[str] = ["storelocator.metizapps.com"]
+    shopify_url: str
 
     async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(

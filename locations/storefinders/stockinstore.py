@@ -7,34 +7,34 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# To use this store locator, you need to determine whether the brand
-# is using:
-# 1. Widget to locate stores on a map
-#    * Calls https://stockinstore.net/stores/getAllStoresLimited
-#    * or calls https://stockinstore.net/stores/getAllStores
-# 2. Widget to find stock available in nearby stores
-#    * Calls https://stockinstore.net/stores/getStoresForWidget
-#    * or calls https://stockinstore.net/stores/getStoresStock
-#
-# Once you've found a relevant API call, you can then check the
-# submitted form data for values to use for the mandatory API
-# parameters "api_site_id" (5 digit number), "api_widget_id"
-# (2 digit number) and "api_widget_type" (short string usually
-# either "storelocator", "cnc", "sis" or "product").
-#
-# You also need to supply the mandatory API parameter "api_origin"
-# which can be found be checking the submitted "Origin" HTTP header
-# to the relevant API call. This will be the URL (without path) of
-# the site where the widget is hosted e.g. https://brandexample.com
-
 
 class StockInStoreSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "stockinstore.com"}
+    """
+    To use this store locator, you need to determine whether the brand is
+    using:
+      1. Widget to locate stores on a map
+         * Calls https://stockinstore.net/stores/getAllStoresLimited
+         * or calls https://stockinstore.net/stores/getAllStores
+      2. Widget to find stock available in nearby stores
+         * Calls https://stockinstore.net/stores/getStoresForWidget
+         * or calls https://stockinstore.net/stores/getStoresStock
+
+    Once you've found a relevant API call, you can then check the submitted
+    form data for values to use for the mandatory API parameters "api_site_id"
+    (5 digit number), "api_widget_id" (2 digit number) and "api_widget_type"
+    (short string usually either "storelocator", "cnc", "sis" or "product").
+
+    You also need to supply the mandatory API parameter "api_origin" which can
+    be found be checking the submitted "Origin" HTTP header to the relevant
+    API call. This will be the URL (without path) of the site where the widget
+    is hosted e.g. https://brand.example.net
+    """
+    dataset_attributes: dict = {"source": "api", "api": "stockinstore.com"}
     api_site_id: str
     api_widget_id: str
     api_widget_type: str
     api_origin: str
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[FormRequest]:
         data = {

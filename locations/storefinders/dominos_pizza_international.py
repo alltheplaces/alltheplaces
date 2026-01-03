@@ -12,19 +12,19 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class DominosPizzaInternationalSpider(JSONBlobSpider):
-    dataset_attributes = {"source": "api", "api": "dominos_pizza"}
+    dataset_attributes: dict = {"source": "api", "api": "dominos_pizza"}
 
-    item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    locations_key = "Stores"
+    item_attributes: dict = {"brand": "Domino's", "brand_wikidata": "Q839466"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    locations_key: str | list[str] = "Stores"
 
-    domain = "order.golo03.dominos.com"
+    domain: str = "order.golo03.dominos.com"
     region_code: str
     dpz_market: str
-    dpz_language = "en"
-    days = DAYS_EN
-    city_search = False  # JM needs this
-    additional_headers = {}  # AE needs this
+    dpz_language: str = "en"
+    days: dict = DAYS_EN
+    city_search: bool = False  # JM needs this
+    additional_headers: dict = {}  # AE needs this
     search_radius: int | None = None  # HR and SK need this, at least MX must not have this
 
     async def start(self) -> AsyncIterator[JsonRequest]:

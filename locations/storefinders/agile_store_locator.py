@@ -14,27 +14,28 @@ class AgileStoreLocatorSpider(Spider):
     Official documentation for Agile Store Locator:
     https://agilestorelocator.com/documentation/
 
-    To use this store finder, specify allowed_domains = [x, y, ..] (either one
-    or more domains such as example.net) and the default path for the Agile
-    Store Locator API endpoint will be used. In the event the default path is
-    different, you can alternatively specify one or more
-    start_urls = [x, y, ..].
+    To use this store finder, specify allowed_domains = ["example.net"] and
+    the default path for the Agile Store Locator API endpoint will be used. In
+    the event the default path is different, you can alternatively specify
+    start_urls = ["https://example.net/custom-path/wp-admin/admin-ajax.php?
+                   action=asl_load_stores&load_all=1"].
 
     If clean ups or additional field extraction is required from the source
     data, override the parse_item function. Two parameters are passed, item
     (an ATP "Feature" class) and feature (a dict which is returned from the
     store locator JSON response for a particular feature).
     """
-
-    time_format = "%I:%M%p"
+    allowed_domains: list[str] = []
+    start_urls: list[str] = []
+    time_format: str = "%I:%M%p"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
-            for domain in self.allowed_domains:
-                yield JsonRequest(url=f"https://{domain}/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1")
-        elif len(self.start_urls) != 0:
-            for url in self.start_urls:
-                yield JsonRequest(url=url)
+        if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
+            yield JsonRequest(url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1")
+        elif len(self.start_urls) == 1:
+            yield JsonRequest(url=self.start_urls[0])
+        else:
+            raise ValueError("Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute.")
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for feature in response.json():

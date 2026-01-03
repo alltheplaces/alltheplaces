@@ -7,17 +7,18 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# To use this store finder, specify the brand/application key using the
-# "app_key" attribute of this class. Also specify a 'base_url' value which
-# is prefixed to store identifiers to generate a website field value for each
-# extracted feature.
-#
-# If required, override the 'parse_item' method to extract additional location
-# data or to clean up and modify extracted data.
-
 
 class SylinderSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "api.ngadata.no"}
+    """
+    To use this store finder, specify the brand/application key using the
+    'app_key' attribute of this class. Also specify a 'base_url' value which
+    is prefixed to store identifiers to generate a website field value for
+    each extracted feature.
+
+    If required, override the 'parse_item' method to extract additional
+    location data or to clean up and modify extracted data.
+    """
+    dataset_attributes: dict = {"source": "api", "api": "api.ngadata.no"}
 
     app_key: str
     base_url: str | None = None

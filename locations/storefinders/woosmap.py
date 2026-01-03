@@ -8,16 +8,18 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Documentation available at https://developers.woosmap.com/products/search-api/get-started/
-#
-# To use this spider, supply the API 'key' which typically starts
-# with 'woos-' followed by a UUID. Also supply a value for 'origin'
-# which is the HTTP 'Origin' header value, typically similar to
-# 'https://www.brandname.example'.
-
 
 class WoosmapSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "woosmap.com"}
+    """
+    Documentation available at:
+    https://developers.woosmap.com/products/search-api/get-started/
+
+    To use this spider, supply the API 'key' which typically starts with
+    'woos-' followed by a UUID. Also supply a value for 'origin' which is the
+    HTTP 'Origin' header value, typically similar to
+    'https://www.brandname.example'.
+    """
+    dataset_attributes: dict = {"source": "api", "api": "woosmap.com"}
 
     key: str
     origin: str

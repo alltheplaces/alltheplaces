@@ -12,21 +12,28 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class AmaiPromapSpider(JSONBlobSpider):
     """
-    To use this spider, simply specify a store page URL with `start_urls`.
-    """
+    Amai ProMap or Rose Perl (RP) ProMap are self-hosted Shopify plugin
+    storefinders, with an official website of:
+    https://apps.shopify.com/store-locator-4
 
-    locators = ["amaicdn", "roseperl"]  # Amai ProMap is same as Roseperl ProMap
+    To use this spider, simply specify a store page URL as a single item
+    within the `start_urls` list attribute.
+    """
+    start_urls: list[str] = []
+    _locators: list[str] = ["amaicdn", "roseperl"]  # Amai ProMap is same as Rose Perl ProMap
 
     async def start(self) -> AsyncIterator[Request]:
-        for url in self.start_urls:
-            yield Request(url=url, callback=self.fetch_js)
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0], callback=self.fetch_js)
 
     def fetch_js(self, response: TextResponse) -> Iterable[JsonRequest]:
         urls = parse_js_object(
             response.xpath('.//script[contains(text(), "var urls =")]/text()').get().split("var urls =")[1]
         )
         js_url = [
-            u for u in urls if any(f"{locator}.com/storelocator-prod/wtb/" in u for locator in self.locators)
+            u for u in urls if any(f"{locator}.com/storelocator-prod/wtb/" in u for locator in self._locators)
         ]  # should be only one
         for url in js_url:
             yield JsonRequest(url=url, callback=self.parse)

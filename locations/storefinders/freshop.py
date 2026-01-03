@@ -8,15 +8,25 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# To use this store finder, specify the brand/application key using
-# the "app_key" attribute of this class. You may need to define a
-# parse_item function to extract additional location data and to
-# make corrections to automatically extracted location data.
-
 
 class FreshopSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "freshop.com"}
-    app_key: str = ""
+    """
+    Freshop is a cloud-hosted storefinder service with an official website of
+    https://www.freshop.com/
+
+    To use this store finder, specify the brand/application key using the
+    "app_key" attribute of this class.
+
+    The 'location_type_ids' attribute allows specification of feature type IDs
+    other than the default of "1567646" which is currently the only observed
+    value in the wild.
+
+    You may need to define a "parse_item" function to extract additional
+    location data and to make corrections to automatically extracted location
+    data.
+    """
+    dataset_attributes: dict = {"source": "api", "api": "freshop.com"}
+    app_key: str
     location_type_ids: list[str] = ["1567647"]
 
     def start_requests(self) -> Iterable[JsonRequest]:

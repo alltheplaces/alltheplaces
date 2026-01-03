@@ -7,18 +7,36 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
-# Documentation for the Kibo Commerce Storefront Location API is available at
-# https://apidocs.kibocommerce.com/?spec=location_storefront#get-/commerce/storefront/locationUsageTypes/DL/locations
-#
-# To use this spider, specify a single start URL which is the location of the store's API path of:
-# /commerce/storefront/locationUsageTypes/DL/locations
-
 
 class KiboSpider(Spider):
+    """
+    Kibo Commerce Storefront Location API is a self-hosted storefinder.
+
+    Documentation for the Kibo Commerce Storefront Location API is available
+    at:
+    https://apidocs.kibocommerce.com/?spec=location_storefront#get-/commerce/storefront/locationUsageTypes/DL/locations
+
+    To use this spider, specify a single URL for the 'start_urls' list
+    attribute which is the location of the store's API path of
+    "/commerce/storefront/locationUsageTypes/DL/locations".
+
+    The 'page_size' attribute defaults to 1000 and usually doesn't need to be
+    modified.
+
+    The 'api_filter' attribute defaults to None (no filtering applied). If a
+    storefinder page is observed to use filtering to only obtain features of
+    interest from the API, 'api_filter' can be set to match the '&filter=...'
+    query parameter of the API request URL, should it be beneficial to use
+    filtering.
+    """
+    start_urls: list[str] = []
     page_size: int = 1000
     api_filter: str | None = None
 
     async def start(self) -> AsyncIterator[JsonRequest]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
         if self.api_filter:
             yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&filter={self.api_filter}")
         else:

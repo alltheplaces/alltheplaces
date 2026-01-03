@@ -17,12 +17,26 @@ def slugify(s: str) -> str:
 
 
 class NomNomSpider(Spider):
-    """NomNom is an "accelerator technology" by Bounteous for restaurants and
-    retailers:
+    """
+    NomNom is an "accelerator technology" by Bounteous for restaurants and
+    retailers with an official website of:
     https://www.bounteous.com/industries/restaurant-convenience/nomnom/
-    To use, specify "domain" as the base domain of the website."""
+    
+    There are two ways this storefinder may be used.
 
+    1. NomNom API with observed API requests to:
+       https://nomnom-prod-api.example.net/restaurants/
+
+       Specify the `domain` attribute of class to be "example.net".
+
+    2. NomNom API with observed API requests to a custom URL.
+
+       Specify the `start_urls` list attribute of this class to be a list
+       with a single URL, for example,
+       "https://api.storefinder.example.net/custom-path/restaurants"
+    """
     domain: str | None = None
+    start_urls: list[str] = []
     use_calendar: bool = True
 
     def _append_calendar_param(self, url: str) -> str:
@@ -39,11 +53,12 @@ class NomNomSpider(Spider):
             return url
 
     async def start(self) -> AsyncIterator[Request]:
-        if self.start_urls:
-            for url in self.start_urls:
-                yield Request(self._append_calendar_param(url), dont_filter=True)
-        elif self.domain:
+        if len(self.start_urls) == 1:
+            yield Request(self._append_calendar_param(self.start_urls[0]), dont_filter=True)
+        elif len(self.start_urls) == 0 and self.domain:
             yield Request(self._append_calendar_param(f"https://nomnom-prod-api.{self.domain}/restaurants/"))
+        else:
+            raise ValueError("Specify a 'domain' value or alternatively one URL in the 'start_urls' list attribute.")
 
     @staticmethod
     def parse_opening_hours(calendar: dict) -> OpeningHours:
