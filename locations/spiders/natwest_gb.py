@@ -60,7 +60,7 @@ class NatwestGBSpider(Spider):
                 else None
             )
 
-            if location.get("entityType") in ("location","ce_mobileBranches"):
+            if location.get("entityType") in ("location", "ce_mobileBranches"):
                 apply_category(Categories.BANK, item)
                 apply_yes_no(
                     Extras.ATM, item, location.get("c_externalATM") == "1" or location.get("c_internalATM") == "1"
