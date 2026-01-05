@@ -211,7 +211,7 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
             specialities = [
                 DEPARTMENT_TYPE_MAP.get(department["medicalSpecialty"]) for department in ld_data["department"]
             ]
-            apply_healthcare_specialities(filter(None, specialities), item)
+            apply_healthcare_specialities(list(filter(None, specialities)), item)
 
             for department in ld_data["department"]:
                 specialty = department["medicalSpecialty"]
