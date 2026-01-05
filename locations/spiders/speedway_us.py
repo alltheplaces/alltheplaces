@@ -1,9 +1,8 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -14,8 +13,8 @@ class SpeedwayUSSpider(Spider):
     item_attributes = {"brand": "Speedway", "brand_wikidata": "Q7575683"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 210}
 
-    def start_requests(self) -> Iterable[Request]:
-        yield scrapy.Request(url="https://www.speedway.com/locations", callback=self.parse_cookies)
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(url="https://www.speedway.com/locations", callback=self.parse_cookies)
 
     def parse_cookies(self, response, **kwargs):
         for token_string in response.headers.getlist("Set-Cookie"):

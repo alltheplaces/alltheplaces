@@ -5,7 +5,7 @@ import scrapy
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Extras, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -40,6 +40,7 @@ class BurgerKingHRSpider(Spider):
                 [response.xpath("//p/text()").get(), item["street_address"], response.xpath("//p[3]/text()").get()]
             )
 
+        apply_category(Categories.FAST_FOOD, item)
         properties = response.xpath('//*[@class="modal-list"]//*[@class="lista"]').xpath("normalize-space()").getall()
         apply_yes_no(Extras.WIFI, item, "Wifi" in properties)
         apply_yes_no(PaymentMethods.CARDS, item, "Kartično plaćanje" in properties)

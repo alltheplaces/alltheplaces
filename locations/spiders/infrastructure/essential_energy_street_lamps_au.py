@@ -12,14 +12,14 @@ class EssentialEnergyStreetLampsAUSpider(ArcGISFeatureServerSpider):
     item_attributes = {"operator": "Essential Energy", "operator_wikidata": "Q17003842"}
     host = "services-ap1.arcgis.com"
     context_path = "3o0vFs4fJRsuYuBO/ArcGIS"
-    service_id = "streetlight__STLT_"
-    layer_id = "40"
+    service_id = "Streetlights_"
+    layer_id = "1"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["WACS_ID_A"]
+        item["ref"] = str(feature["WACS_ID"])
         item["addr_full"] = feature["VICINITY"]
         apply_category(Categories.STREET_LAMP, item)
-        item["extras"]["alt_ref"] = feature["W_LABEL_A"]
+        item["extras"]["alt_ref"] = str(feature["ASSET_ID"])
         if model := feature["PL_CAT_TAB"]:
             item["extras"]["model"] = model
         yield item

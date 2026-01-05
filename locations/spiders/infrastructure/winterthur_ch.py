@@ -1,14 +1,15 @@
-import logging
+from typing import AsyncIterator
 
 import pyproj
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 # Open Data of the City of Winterthur, Switzerland
-class WinterthurCHSpider(scrapy.Spider):
+class WinterthurCHSpider(Spider):
     name = "winterthur_ch"
     allowed_domains = ["stadtplan.winterthur.ch"]
     dataset_attributes = {
@@ -25,12 +26,12 @@ class WinterthurCHSpider(scrapy.Spider):
     # Swiss LV95 (https://epsg.io/2056) -> lat/lon (https://epsg.io/4326)
     coord_transformer = pyproj.Transformer.from_crs(2056, 4326)
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             "https://stadtplan.winterthur.ch/stadtgruen/spielplatzkontrolle-service/Collections/Playgrounds/Items/",
             callback=self.parse_playgrounds,
         )
-        yield scrapy.Request(
+        yield Request(
             "https://stadtplan.winterthur.ch/wfs/SitzbankWfs?service=wfs"
             + "&version=2.0.0&request=GetFeature&format=json"
             + "&typeNames=ms:SitzbankWfs",
@@ -112,7 +113,7 @@ class WinterthurCHSpider(scrapy.Spider):
         }
         if btype in backrests:
             return backrests[btype]
-        logging.error(f'cannot determine backrest for "{btype}"')
+        self.logger.error(f'cannot determine backrest for "{btype}"')
         return None
 
     def parse_bench_colour(self, btype):
@@ -128,7 +129,7 @@ class WinterthurCHSpider(scrapy.Spider):
             if col := colours.get(word):
                 return col
         if btype not in {"", "undefiniert"}:
-            logging.error(f'cannot determine color for "{btype}"')
+            self.logger.error(f'cannot determine color for "{btype}"')
         return None
 
     def parse_bench_material(self, btype):
