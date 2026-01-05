@@ -1,5 +1,5 @@
 import json
-from typing import Iterable
+from typing import Any, Iterable
 
 import scrapy
 from scrapy.http import Response
@@ -125,7 +125,7 @@ class MaesMobilityBENLSpider(scrapy.Spider):
             },
         )
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
 
         for station in data:
@@ -160,7 +160,7 @@ class MaesMobilityBENLSpider(scrapy.Spider):
         item["housenumber"] = station.get("nr")
         item["city"] = station.get("city")
         item["postcode"] = station.get("postalcode")
-        item["country"] = self.normalize_country(station.get("country"))
+        item["country"] = self.normalize_country(station)
         item["phone"] = station.get("phone")
         item["website"] = website_url
         item["name"] = station.get("title", "").strip()
@@ -212,7 +212,11 @@ class MaesMobilityBENLSpider(scrapy.Spider):
 
         return None
 
-    def normalize_country(self, country: str | None) -> str:
+    def normalize_country(self, station: dict) -> str:
+        if not station.get("postalcode").isalnum():
+            return "NL"
+
+        country = station.get("country")
         if not country:
             return "BE"
 
