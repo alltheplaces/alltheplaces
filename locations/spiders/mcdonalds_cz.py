@@ -16,11 +16,11 @@ class McdonaldsCZSpider(scrapy.Spider):
     )
 
     def parse_hours(self, item, poi, brand):
-        if brand == 'mcdonalds':
+        if brand == "mcdonalds":
             opening_hours = poi.get("worktime")
-        elif brand == 'mccafe':  
+        elif brand == "mccafe":
             opening_hours = poi.get("mccafe_worktime")
-            
+
         if opening_hours:
             oh = OpeningHours()
             try:
@@ -30,7 +30,6 @@ class McdonaldsCZSpider(scrapy.Spider):
                 item["opening_hours"] = oh
             except:
                 self.logger.warning(f"Couldn't parse opening hours: {opening_hours}")
-
 
     def parse(self, response):
         pois = response.json().get("restaurants")
@@ -43,7 +42,7 @@ class McdonaldsCZSpider(scrapy.Spider):
             item["branch"] = item.pop("name")
             item["website"] = response.urljoin(poi["slug"])
             item["postcode"] = str(item["postcode"])
-            self.parse_hours(item, poi, 'mcdonalds')
+            self.parse_hours(item, poi, "mcdonalds")
             apply_yes_no(Extras.WIFI, item, "wifi" in poi["categories"])
             apply_yes_no(Extras.DRIVE_THROUGH, item, "mcdrive" in poi["categories"])
             apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "amex" in poi["categories"])
@@ -58,7 +57,7 @@ class McdonaldsCZSpider(scrapy.Spider):
                 mccafe["brand"] = "McCafé"
                 mccafe["brand_wikidata"] = "Q3114287"
                 apply_category(Categories.CAFE, mccafe)
-                self.parse_hours(mccafe, poi, 'mccafe')
+                self.parse_hours(mccafe, poi, "mccafe")
                 yield mccafe
 
             yield item
