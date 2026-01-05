@@ -1,7 +1,8 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
 from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
@@ -10,13 +11,13 @@ from locations.items import Feature
 
 class UbbBGSpider(Spider):
     name = "ubb_bg"
-    item_attributes = {"brand": "Обединена Българска Банка", "brand_wikidata": "Q7887555"}
+    item_attributes = {"brand": "ОББ", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
-            yield scrapy.Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
+            yield Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
 
     def parse(self, response, **kwargs):
         markers = response.json()["markers"]
@@ -31,11 +32,6 @@ class UbbBGSpider(Spider):
 
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.WHEELCHAIR, item, location["data"]["has_accessibility"])
-
-            for feature in location["data"]["features"]:
-                if feature["slug"] == "branch-of-former-kbc-bank":
-                    item["brand"] = "ОББ*"
-                    item["brand_wikidata"] = "Q7283808"
 
             item["opening_hours"] = OpeningHours()
             worktimes = (
@@ -98,10 +94,11 @@ class UbbBGSpider(Spider):
             apply_yes_no(Extras.WHEELCHAIR, item, location["data"]["has_accessibility"])
 
             has_cash_in = False
-            for feature in location["data"]["features"]:
-                if feature["slug"] == "kbc-bank-atm":
-                    item["brand"] = "ОББ*"
-                    item["brand_wikidata"] = "Q7283808"
+            if location["data"]["features"] == []:
+                yield item
+                continue
+
+            for _, feature in location["data"]["features"].items():
                 if feature["slug"] == "atm-money-deposit":
                     has_cash_in = True
                 if feature["slug"] == "day-and-night-access":

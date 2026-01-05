@@ -1,6 +1,9 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, DAYS_CZ, DAYS_EN, DAYS_SK, OpeningHours, sanitise_day
 
@@ -15,7 +18,7 @@ class BillaSpider(Spider):
         "https://www.billa.cz/api/stores",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -48,4 +51,5 @@ class BillaSpider(Spider):
                     item["opening_hours"].add_range(day, day_hours["times"][0], day_hours["times"][1])
             if "parking" in location and "spotCount" in location["parking"]:
                 item["extras"]["capacity:motorcar"] = str(location["parking"]["spotCount"])
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item

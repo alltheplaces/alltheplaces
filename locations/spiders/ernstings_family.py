@@ -1,6 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
@@ -11,7 +12,7 @@ class ErnstingsFamilySpider(Spider):
     name = "ernstings_family"
     item_attributes = {"brand": "Ernsting's family", "brand_wikidata": "Q1361016"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", ["DE", "AT"]):
             yield Request(f"https://filialen.ernstings-family.de/api/stores/nearby/{lat}/{lon}/120/3000")
 
@@ -25,7 +26,7 @@ class ErnstingsFamilySpider(Spider):
                 location["phone"] = location.pop("primaryPhone")
                 item = DictParser.parse(location)
                 item["opening_hours"] = self.format_opening_hours(location["regularHours"]["periods"])
-                item["extras"]["ref:google"] = location["placeid"]
+                item["extras"]["ref:google:place_id"] = location["placeid"]
 
                 yield item
 

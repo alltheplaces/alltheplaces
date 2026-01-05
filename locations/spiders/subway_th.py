@@ -1,11 +1,12 @@
-import json
-from typing import Iterable
+from json import dumps
+from typing import AsyncIterator, Iterable
 from urllib.parse import urlencode
 
 import chompjs
 from scrapy import Selector, Spider
 from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.country_utils import CountryUtils, get_locale
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
@@ -23,7 +24,7 @@ class SubwayWorldwideSpider(Spider):
     item_attributes = SubwaySpider.item_attributes
     country_utils = CountryUtils()
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         country = self.country_utils.country_code_from_spider_name(self.name)
         language = get_locale(country) or "en-US"
         for city in city_locations(country, 1000):
@@ -53,7 +54,7 @@ class SubwayWorldwideSpider(Spider):
             "RecentStores": None,
             "Stats": {"abc": "geo,A", "src": "geocode", "act": "enter", "c": "subwayLocator", "pac": "8,2"},
         }
-        q = json.dumps(q)
+        q = dumps(q)
         url = "https://locator-svc.subway.com/v3/GetLocations.ashx?" + urlencode({"q": q})
         return Request(
             url,
@@ -86,6 +87,9 @@ class SubwayWorldwideSpider(Spider):
             item["street_address"] = clean_address(
                 [address.get("Address1"), address.get("Address2"), address.get("Address3")]
             )
+            apply_category(Categories.FAST_FOOD, item)
+            item["extras"]["cuisine"] = "sandwich"
+            item["extras"]["takeaway"] = "yes"
             yield item
 
         if int(current) < int(total):

@@ -1,7 +1,9 @@
 import json
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -16,7 +18,7 @@ BRANDS = {
 }
 
 
-class SignetJewelersSpider(scrapy.Spider):
+class SignetJewelersSpider(Spider):
     name = "signet_jewelers"
     allowed_domains = [
         "www.jared.com",
@@ -26,7 +28,6 @@ class SignetJewelersSpider(scrapy.Spider):
         "www.ernestjones.co.uk",
         "www.hsamuel.co.uk",
     ]
-    download_delay = 0.5  # limit the delay to avoid 403 errors
 
     ca_prov = [
         "Alberta",
@@ -92,7 +93,7 @@ class SignetJewelersSpider(scrapy.Spider):
         "Wyoming",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         # Pagoda has changed site to banter.com
         north_america_brands = ["banter", "jared", "peoplesjewellers", "zales"]
 
@@ -102,7 +103,7 @@ class SignetJewelersSpider(scrapy.Spider):
         ]
 
         for url in uk_urls:
-            yield scrapy.Request(url=url, callback=self.parse_cities)
+            yield Request(url=url, callback=self.parse_cities)
 
         # Kay no longer use this store finder form, migrated to separate spider
         template = "https://www.{brand}.com/store-finder/view-stores/{region}"
@@ -111,16 +112,16 @@ class SignetJewelersSpider(scrapy.Spider):
             if brand == "peoplesjewellers":
                 for prov in SignetJewelersSpider.ca_prov:
                     url = template.format(brand=brand, region=prov)
-                    yield scrapy.Request(url, callback=self.parse_cities)
+                    yield Request(url, callback=self.parse_cities)
             else:
                 for state in SignetJewelersSpider.states:
                     url = template.format(brand=brand, region=state)
-                    yield scrapy.Request(url, callback=self.parse_cities)
+                    yield Request(url, callback=self.parse_cities)
 
     def parse_cities(self, response):
         cities = response.xpath('//*[@class="viewstoreslist"]/a/@href').extract()
         for i in cities:
-            yield scrapy.Request(response.urljoin(i), callback=self.parse)
+            yield Request(response.urljoin(i), callback=self.parse)
 
     def parse(self, response):
         script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').extract())

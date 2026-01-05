@@ -1,7 +1,10 @@
 import re
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
+from locations.categories import Access, Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -12,29 +15,21 @@ class RoadRangerUSSpider(scrapy.Spider):
 
     start_urls = ("https://www.roadrangerusa.com/locations-amenities/find-a-road-ranger",)
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.css(".store-location-row"):
+            item = Feature()
             if m := re.search(r"Coordinates:\s+(-?\d+\.\d+), (-?\d+\.\d+)", location.get()):
-                lat, lon = m.groups()
-            else:
-                lat, lon = None
+                item["lat"], item["lon"] = m.groups()
 
-            address = location.css(".store-location-teaser__address::text").extract_first().strip()
+            item["addr_full"] = item["ref"] = (
+                location.css(".store-location-teaser__address::text").extract_first().strip()
+            )
 
             amenities = location.css(".store-location-teaser__amenities").get()
 
-            yield Feature(
-                ref=address,
-                name="Road Ranger",
-                addr_full=address,
-                country="US",
-                lat=lat,
-                lon=lon,
-                extras={
-                    "amenity": "fuel",
-                    "fuel:diesel": "yes",
-                    "fuel:propane": "yes" if "Propane" in amenities else "",
-                    "fuel:HGV_diesel": "yes",
-                    "hgv": "yes",
-                },
-            )
+            apply_category(Categories.FUEL_STATION, item)
+            apply_yes_no(Access.HGV, item, True)
+            apply_yes_no(Fuel.DIESEL, item, True)
+            apply_yes_no(Fuel.HGV_DIESEL, item, True)
+            apply_yes_no(Fuel.PROPANE, item, "Propane" in amenities)
+            yield item

@@ -1,8 +1,11 @@
+import argparse
 import os
 import pathlib
+from typing import Iterable
 
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
+from scrapy.http import Response
 
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -116,11 +119,10 @@ class MySpider(StructuredDataSpider):
     name = "my_spider"
     start_urls = None
     item_attributes = {}
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     matching_links = []
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs) -> Iterable[None]:
         for label in LABELS:
             # XPath 2 supports matches(), but we don't have access to it
             # print(response.xpath('//a[matches(text(), "' + label + '", "i")]').get())
@@ -147,16 +149,16 @@ class LinksCommand(BaseRunSpiderCommand):
     requires_project = True
     default_settings = {"LOG_LEVEL": "WARNING"}
 
-    def syntax(self):
+    def syntax(self) -> str:
         return "[options] <URL to inspect>"
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Decode a web page or file for structured data with ATP scrapy library code"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         super().add_options(parser)
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         if len(args) != 1:
             raise UsageError("Please specify URL to load")
 

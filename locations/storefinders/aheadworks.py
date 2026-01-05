@@ -6,7 +6,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -44,7 +44,8 @@ class AheadworksSpider(Spider):
             item["opening_hours"] = OpeningHours()
             if hours_dict := loads(feature["hoursofoperation"])["hoursofoperation"]:
                 for day, hours in hours_dict.items():
-                    item["opening_hours"].add_range(day, hours[0], hours[1])
+                    if day in DAYS_FULL:
+                        item["opening_hours"].add_range(day, hours[0], hours[1])
 
             yield from self.post_process_item(item, response, feature) or []
 

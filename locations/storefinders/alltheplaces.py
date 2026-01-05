@@ -1,7 +1,7 @@
 from typing import Any, Iterable
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
 from locations.exporters.geojson import mapping
 from locations.items import Feature
@@ -13,7 +13,7 @@ class AllThePlacesSpider(Spider):
     to allow for the data to be processed through different exporters or pipelines.
     """
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: TextResponse, **kwargs: Any) -> Any:
         for feature in response.json().get("features", []):
             properties = feature.get("properties", {})
 
@@ -30,6 +30,6 @@ class AllThePlacesSpider(Spider):
             yield from self.post_process_feature(item, feature, response) or []
 
     def post_process_feature(
-        self, item: Feature, source_feature: dict, response: Response, **kwargs
+        self, item: Feature, source_feature: dict, response: TextResponse, **kwargs
     ) -> Iterable[Feature]:
         yield item

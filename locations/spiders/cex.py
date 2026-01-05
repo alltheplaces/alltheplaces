@@ -32,7 +32,7 @@ class CexSpider(scrapy.Spider):
         item["city"] = store["city"]
         item["state"] = store["county"]
         item["postcode"] = store["postcode"]
-        item["website"] = "https://uk.webuy.com/site/storeDetail/?branchId=" + ref
+        item["website"] = "https://uk.webuy.com/site/storeDetail?branchId=" + ref
         item["ref"] = ref
         item["image"] = ";".join(store["storeImageUrls"])
 

@@ -13,7 +13,7 @@ class VodacomCDSpider(JSONBlobSpider):
     }
     locations_key = ["response", "stores"]
 
-    def start_requests(self):
+    async def start(self):
         yield JsonRequest(
             url="https://www.vodacom.cd/integration/drcportal/store_locator/portal",
             data={"method": "findNearestStore", "longitude": 0, "latitude": 0, "source": "portal"},

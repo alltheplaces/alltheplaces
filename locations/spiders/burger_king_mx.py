@@ -1,9 +1,10 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -14,7 +15,7 @@ class BurgerKingMXSpider(Spider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api-lac.menu.app/api/venues?per_page=1000&include=brand_id,address,city,code,latitude,longitude,name,phone,state,zip,available_payment_methods,country,serving_times|type_id;reference_type;date;date_to;days;time_from;time_to;working",
             headers={"Application": "4160ef94dff50c0ea5067b489653eae0"},
@@ -47,6 +48,7 @@ class BurgerKingMXSpider(Spider):
                 for day in rule["days"]:
                     item["opening_hours"].add_range(DAYS[day - 1], rule["time_from"], rule["time_to"])
 
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def slugify(self, s: str) -> str:

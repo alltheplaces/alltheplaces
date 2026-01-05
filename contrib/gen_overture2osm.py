@@ -7,6 +7,8 @@ import re
 import requests
 from scrapy import Selector
 
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
+
 
 def main():
     mapping = parse_wiki()
@@ -21,14 +23,17 @@ def main():
                 mapping[key] = inherited
                 break
 
-    json.dump(mapping, open("overture2osm.json", mode="w"), sort_keys=True, indent=1)
+    with open("overture2osm.json", mode="w") as f:
+        json.dump(mapping, f, sort_keys=True, indent="\t")
     pprint.pp(mapping)
 
 
 def parse_wiki() -> dict:
     table = {}
     data = requests.get(
-        "https://wiki.openstreetmap.org/w/api.php", {"action": "parse", "page": "Overture_Categories", "format": "json"}
+        "https://wiki.openstreetmap.org/w/api.php",
+        {"action": "parse", "page": "Overture_Categories", "format": "json"},
+        headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
     ).json()
     page_html = Selector(text=data["parse"]["text"]["*"])
     for row in page_html.xpath('//table[@id="mapping_table"]//tr')[1:]:

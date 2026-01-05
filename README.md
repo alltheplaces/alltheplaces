@@ -2,6 +2,37 @@
 
 A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [from websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to execute individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) that retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials on the Internet and [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
 
+## Data users
+
+All the Places is used many places, including some of the most popular maps.
+Having high quality, fresh, first party data here helps help brands be accurately listed in many apps.
+
+```mermaid
+---
+sources:
+      overture: https://docs.overturemaps.org/blog/2025/11/19/release-notes/#places
+      foursquare: https://docs.foursquare.com/data-products/docs/fsq-os-places-release-notes#november-2025
+---
+flowchart
+   Spiders(["Thousands of first party datasets"])
+   ATP(["All the Places"])
+   click ATP "https://alltheplaces.xyz/"
+   OSM(["OpenStreetMap"])
+   click OSM "https://www.openstreetmap.org/"
+   TT(["TomTom"])
+   click TT "https://www.tomtom.com/"
+   Overture(["Overture"])
+   click Overture "https://overturemaps.org/"
+   Foursquare(["Foursquare OS Places"])
+   click Foursquare "https://opensource.foursquare.com/os-places/"
+
+   Spiders --> ATP
+   ATP --> TT
+   ATP --> OSM
+   ATP --> Overture
+   Overture --> Foursquare
+```
+
 ## Getting started
 
 ### Development setup
@@ -10,37 +41,13 @@ Windows users may need to follow some extra steps, please follow the [scrapy doc
 
 #### Ubuntu
 
-These instructions were tested with Ubuntu 22.04.1 LTS on 2024-02-21.
+These instructions were tested with Ubuntu 24.04 LTS on 2024-02-21.
 
-1. Install Python 3 and `pip`:
-
-   ```
-   sudo apt-get update
-   sudo apt-get install -y python3 python3-pip python-is-python3
-   ```
-
-1. Install `pyenv` and ensure the correct version of Python is available. The following is a summary of the steps, please refer to the [pyenv documentation](https://github.com/pyenv/pyenv#installation) for the most up-to-date instructions.
+1. Install `uv`:
 
    ```
-   sudo apt-get install -y build-essential libssl-dev zlib1g-dev \
-         libbz2-dev libreadline-dev libsqlite3-dev curl git \
-         libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
-         libffi-dev liblzma-dev
-   curl https://pyenv.run | bash
-   echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
-   echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
-   echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-   exec "$SHELL"
-   pyenv install 3.11
-   ```
-
-1. Install `pipenv` and check that it runs:
-
-   ```
-   pip install --user pipenv
-   pipenv --version
-   # Expected Output:
-   # pipenv, version 2023.12.1
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   source $HOME/.local/bin/env
    ```
 
 1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
@@ -49,48 +56,29 @@ These instructions were tested with Ubuntu 22.04.1 LTS on 2024-02-21.
    git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
-1. Use `pipenv` to install the project dependencies:
+1. Use `uv` to install the project dependencies:
 
    ```
    cd alltheplaces
-   pipenv sync
+   uv sync
    ```
 
 1. Test for successful project installation:
 
    ```
-   pipenv run scrapy
+   uv run scrapy
    ```
 
    If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
 
 #### macOS
 
-These instructions were tested with macOS 14.3.1 on 2024-02-21.
+These instructions were tested with macOS 15.3.2 on 2025-04-01.
 
-1. Install Python 3 and `pip`:
-
-   ```
-   brew install python@3
-   ```
-
-1. Install `pyenv` and ensure the correct version of Python is available. The following is a summary of the steps, please refer to the [pyenv documentation](https://github.com/pyenv/pyenv#installation) for the most up-to-date instructions.
+1. Install `uv`:
 
    ```
-   brew install pyenv
-   echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
-   echo 'eval "$(pyenv init -)"' >> ~/.zshrc
-   exec "$SHELL"
-   pyenv install 3.11
-   ```
-
-1. Install `pipenv` and check that it runs:
-
-   ```
-   brew install pipenv
-   pipenv --version
-   # Expected output:
-   # pipenv, version 2023.12.1
+   brew install uv
    ```
 
 1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
@@ -99,17 +87,17 @@ These instructions were tested with macOS 14.3.1 on 2024-02-21.
    git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
-1. Use `pipenv` to install the project dependencies:
+1. Use `uv` to install the project dependencies:
 
    ```
    cd alltheplaces
-   pipenv sync
+   uv sync
    ```
 
 1. Test for successful project installation:
 
    ```
-   pipenv run scrapy
+   uv run scrapy
    ```
 
    If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
@@ -140,7 +128,7 @@ You can use Docker to run the project. This is a container-based development env
 1. Run the Docker container:
 
    ```
-   docker run -it alltheplaces
+   docker run --rm -it alltheplaces
    ```
 
 ### Contributing code
@@ -154,13 +142,15 @@ Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA
 * [What is expected in a pull request?](docs/PULL_REQUEST.md)
 * [What we do behind the scenes](docs/PIPELINES.md)
 
+Spiders are typically written by map makers who want the data, however we welcome [brands to be involved](docs/MY_BRAND.md).
+
 ### The weekly run
 
 The output from running the project is [published on a regular cadence](docs/WEEKLY_RUN.md) to our website: [alltheplaces.xyz](https://www.alltheplaces.xyz/). You should not run all the spiders to pick up the output: the less the project "bothers" a website the more we will be tolerated.
 
 ## Contact us
 
-Communication is primarily through tickets on the project GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues). Many contributors are also present on [OSM US Slack](https://slack.openstreetmap.us/), in particular we watch the [#poi](https://osmus.slack.com/archives/CDJ4LKA2Y) channel.
+Communication is primarily through tickets on the project GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues). Many contributors are also present on [OSM US Slack](https://slack.openstreetmap.us/), which has an [#alltheplaces](https://osmus.slack.com/archives/C07EY4Y3M6F) channel.
 
 ## License
 

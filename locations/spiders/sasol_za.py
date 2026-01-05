@@ -1,7 +1,9 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, Extras, Fuel, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -23,12 +25,11 @@ class SasolZASpider(Spider):
     item_attributes = {
         "brand": "Sasol",
         "brand_wikidata": "Q905998",
-        "extras": Categories.FUEL_STATION.value,
     }
     allowed_domains = ["locator.sasol.com"]
     start_urls = ["https://locator.sasol.com/api/station.json"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -67,11 +68,22 @@ class SasolZASpider(Spider):
         location = response.json()
 
         oh = OpeningHours()
-        for days_hours in location["opening_times"]:
-            oh.add_ranges_from_string(days_hours["days"] + " " + days_hours["times"])
-        item["opening_hours"] = oh.as_opening_hours()
+        if opening_times := location.get("opening_times"):
+            for days_hours in opening_times:
+                days = days_hours.get("days")
+                if days is None:
+                    continue
+                if "Closed" in days_hours["times"]:
+                    continue
+                else:
+                    day_times = days_hours["times"]
+                    if day_times == "00:00 to 00:00" or day_times == "00:00 to 00:01":
+                        day_times = "00:00 to 23:59"
+                    oh.add_ranges_from_string(days + " " + day_times)
+            item["opening_hours"] = oh.as_opening_hours()
 
         # Products available at https://locator.sasol.com/api/product.json
+        apply_category(Categories.FUEL_STATION, item)
         for product in location["products"]:
             if product["product_name"] == "Cash":
                 apply_yes_no(Extras.ATM, item, len(product["subproducts"]) > 0)

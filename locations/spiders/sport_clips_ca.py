@@ -1,19 +1,25 @@
 import json
+import re
+from typing import Any
 
-from locations.json_blob_spider import JSONBlobSpider
+import scrapy
+from scrapy.http import Response
+
+from locations.dict_parser import DictParser
 
 
-class SportClipsCASpider(JSONBlobSpider):
+class SportClipsCASpider(scrapy.Spider):
     name = "sport_clips_ca"
     item_attributes = {"brand": "Sport Clips", "brand_wikidata": "Q7579310"}
     start_urls = ["https://sportclips.ca/store-locator"]
 
-    def extract_json(self, response):
-        script = response.xpath("//script[contains(text(), 'var data = ')]/text()").get().strip().splitlines()[0]
-        return json.loads(script[script.find("[") : script.rfind("]") + 1])
-
-    def post_process_item(self, item, response, feature):
-        item["branch"] = feature["SiteName"].removeprefix("Sport Clips ")
-        item["street_address"] = item.pop("addr_full")
-        item["website"] = item["ref"] = feature["Web"]
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in json.loads(
+            re.search(
+                r"locations\":(\[.*\])};", response.xpath('//*[contains(text(),"location_map_data")]/text()').get()
+            ).group(1)
+        ):
+            location.update(location.pop("location"))
+            item = DictParser.parse(location)
+            item["ref"] = item["website"] = location["permalink"]
+            yield item

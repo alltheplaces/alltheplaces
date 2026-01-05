@@ -1,46 +1,51 @@
-import re
-from typing import Any, Iterable
+import json
+from typing import Any, AsyncIterator
+from urllib.parse import urljoin
 
-from scrapy import FormRequest, Request
-from scrapy.http import Response
+from scrapy.http import FormRequest, Response
 from scrapy.spiders import Spider
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.structured_data_spider import extract_phone
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class GoOutdoorsGBSpider(Spider):
     name = "go_outdoors_gb"
     item_attributes = {"brand": "Go Outdoors", "brand_wikidata": "Q75293941"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.gooutdoors.co.uk/google/store-locator",
             formdata={"ac_store_limit": "300"},
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        coords_map = {}
-        for lat, lon, ref in re.findall(
-            r"LatLng\((-?\d+\.\d+), (-?\d+\.\d+)\);.+?markers\[(\d+)]", response.text, re.DOTALL
-        ):
-            coords_map[ref] = (lat, lon)
+    def find_between(self, text, first, last):
+        start = text.index(first) + len(first)
+        end = text.index(last, start)
+        return text[start:end]
 
-        for location in response.xpath("//li[@data-id]"):
-            item = Feature()
-            item["ref"] = location.xpath("@data-id").get()
-            item["lat"], item["lon"] = coords_map.get(item["ref"], (None, None))
-            item["name"] = location.xpath(".//h3/a/text()").get()
-            item["street_address"] = location.xpath('.//p[@class="storeAddress"][1]/text()').get()
-            item["postcode"] = location.xpath('.//p[@class="storeAddress"][2]/text()').get()
-            extract_phone(item, location)
-            item["website"] = response.urljoin(location.xpath('.//a[text()="View store details"]/@href').get())
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        data = self.find_between(response.text, ",stores = ", ",smarty_postcode =")
+        json_data = json.loads(data)
+        for store in json_data:
+            item = DictParser.parse(store)
+            item["addr_full"].replace("<br />", ",")
+            item["website"] = urljoin("https://www.gooutdoors.co.uk/stores/", store["filename"])
 
             item["opening_hours"] = OpeningHours()
-            for rule in location.xpath(".//tr/td/text()").getall():
-                day, times = rule.split(" ", 1)
-                start_time, end_time = times.split(" - ")
-                item["opening_hours"].add_range(day, start_time, end_time, "%H%M")
+            for rule in store["opening_times_data"].split(","):
+                day, ohour, omin, chour, cmin = rule.split(":")
+                day = int(day)
+                open = ohour + ":" + omin
+                close = chour + ":" + cmin
+                DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
+                item["opening_hours"].add_range(DAYS_FROM_SUNDAY[day], open, close)
+
+            if item["name"].startswith("GO Express "):
+                item["branch"] = item.pop("name").removeprefix("GO Express ")
+                item["name"] = "Go Outdoors Express"
+            else:
+                item["branch"] = item.pop("name").removeprefix("GO Outdoors ")
+                item["name"] = "Go Outdoors"
 
             yield item

@@ -1,4 +1,7 @@
+from typing import Any
+
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
@@ -53,7 +56,7 @@ class Q8ItaliaSpider(Spider):
         # All others Q8
     }
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             # Note more? details available at:
             # https://www.q8.it/geolocalizzatore/pv/00PV000158
@@ -67,11 +70,13 @@ class Q8ItaliaSpider(Spider):
             item["lat"] = location["latitudine"]
             item["lon"] = location["longitudine"]
 
-            b = location["tipologie"][0]["tipologia"]
-            if b == "TANGO":
+            location_type = location["tipologia"]
+            if location_type == "TANGO":
                 continue  # Throw away Tango POIs as duplicates data from TangoSpider
+            elif location_type == "IMPIANTO FITTIZIO":
+                continue
 
-            if brand := self.BRANDS.get(b):
+            if brand := self.BRANDS.get(location_type):
                 item.update(brand)
 
             # TODO: payments

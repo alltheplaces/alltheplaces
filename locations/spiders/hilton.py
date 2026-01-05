@@ -8,13 +8,15 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import CHROME_LATEST
 
 
 class HiltonSpider(Spider):
     name = "hilton"
     start_urls = ["https://www.hilton.com/en/locations/hilton-hotels/"]
-    custom_settings = {
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "User-Agent": CHROME_LATEST,
@@ -24,7 +26,8 @@ class HiltonSpider(Spider):
             "Connection": "keep-alive",
         },
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 2,
+        "DOWNLOAD_DELAY": 5,
+        "RETRY_TIMES": 5,
     }
     token = None
     requires_proxy = "US"
@@ -43,7 +46,7 @@ class HiltonSpider(Spider):
         "HW": ("Homewood Suites", "Q5890701"),
         "LX": ("Small Luxury Hotels of the World", None),
         "ND": ("NoMad", None),
-        "OL": ("LXR Hotels & Resorts", "Q64605184"),
+        "OL": ("LXR", "Q64605184"),
         "OU": ("AutoCamp", None),
         "PE": ("Spark by Hilton", None),
         "PO": ("Tempo", "Q112144357"),
@@ -133,31 +136,34 @@ class HiltonSpider(Spider):
             yield from self.parse_hotels(quadrant["id"])
 
     def parse_hotels(self, quadrant_id):
-        response = self.get_hotels(quadrant_id)
+        try:
+            response = self.get_hotels(quadrant_id)
 
-        for poi in response.json()["data"]["hotelSummaryOptions"]["hotels"]:
-            poi.update(poi.pop("address"))
-            poi.update(poi.pop("contactInfo"))
-            item = DictParser.parse(poi)
-            item["ref"] = poi["ctyhocn"]
-            item["website"] = poi.get("facilityOverview", {}).get("homeUrlTemplate")
-            item["lat"] = poi.get("localization", {}).get("coordinate", {}).get("latitude")
-            item["lon"] = poi.get("localization", {}).get("coordinate", {}).get("longitude")
+            for poi in response.json()["data"]["hotelSummaryOptions"]["hotels"]:
+                poi.update(poi.pop("address"))
+                poi.update(poi.pop("contactInfo"))
+                item = DictParser.parse(poi)
+                item["ref"] = poi["ctyhocn"]
+                item["website"] = poi.get("facilityOverview", {}).get("homeUrlTemplate")
+                item["lat"] = poi.get("localization", {}).get("coordinate", {}).get("latitude")
+                item["lon"] = poi.get("localization", {}).get("coordinate", {}).get("longitude")
 
-            if brand_code := poi.get("brandCode"):
-                if match := self.BRANDS_MAPPING.get(brand_code):
-                    item["brand"], item["brand_wikidata"] = match
-                else:
-                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand_code}")
+                if brand_code := poi.get("brandCode"):
+                    if match := self.BRANDS_MAPPING.get(brand_code):
+                        item["brand"], item["brand_wikidata"] = match
+                    else:
+                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand_code}")
 
-            for service in poi.get("amenityIds", []):
-                if match := self.SERVICES_MAPPING.get(service):
-                    apply_yes_no(match, item, True)
-                else:
-                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
+                for service in poi.get("amenityIds", []):
+                    if match := self.SERVICES_MAPPING.get(service):
+                        apply_yes_no(match, item, True)
+                    else:
+                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
 
-            apply_category(Categories.HOTEL, item)
-            yield item
+                apply_category(Categories.HOTEL, item)
+                yield item
+        except:
+            self.logger.error(f"Request failed for quadrantId: {quadrant_id}")
 
     def get_hotels(self, quadrant_id):
         # TODO: we should use JsonRequest here, but it doesn't work with this endpoint for some reason!

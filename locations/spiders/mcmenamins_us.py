@@ -85,7 +85,7 @@ class McmenaminsUSSpider(scrapy.Spider):
         content = response.xpath('//div[@id="property_bar_address_no_button" or @id="property_bar_address"]')
         info = content.xpath("(nobr|.)/a/@href").extract()
 
-        address_parts = re.match(r"^http:\/\/maps.google.com\/\?q=(.*),([^,]*),\s+(.*),\s+(\d{5})$", info[0])
+        address_parts = re.match(r"^https?:\/\/maps.google.com\/\?q=(.*),([^,]*),\s+(.*),\s+(\d{5})$", info[0])
 
         properties = {
             "ref": response.meta.get("ref"),

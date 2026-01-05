@@ -1,19 +1,19 @@
 from typing import Iterable
 
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class HsbcUkGBSpider(SitemapSpider, StructuredDataSpider):
+class HsbcUkGBSpider(CrawlSpider, StructuredDataSpider):
     name = "hsbc_uk_gb"
     item_attributes = {"brand": "HSBC UK", "brand_wikidata": "Q64767453"}
     start_urls = ["https://www.hsbc.co.uk/branch-list/"]
-    sitemap_urls = ["https://www.hsbc.co.uk/sitemaps-pages.xml"]
-    sitemap_rules = [(r"/branch-list/(.+)/$", "parse_sd")]
+    rules = [Rule(LinkExtractor(allow="/branch-list/"), callback="parse_sd")]
 
     def iter_linked_data(self, response: Response) -> Iterable[dict]:
         for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):

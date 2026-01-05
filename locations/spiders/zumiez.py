@@ -13,11 +13,13 @@ class ZumiezSpider(JSONBlobSpider):
     name = "zumiez"
     item_attributes = {"brand": "Zumiez", "brand_wikidata": "Q8075252"}
     start_urls = ["https://www.zumiez.com/graphql?hash=505530338"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def extract_json(self, response: Response) -> dict | list[dict]:
         return response.json()["data"]["getStores"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
         if feature.get("has_store_page"):
             item["website"] = f"https://www.zumiez.com/stores/{feature.get('identifier')}"
         try:

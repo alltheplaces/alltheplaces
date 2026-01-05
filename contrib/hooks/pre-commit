@@ -3,8 +3,8 @@
 FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep ".py")
 
 if ! [ -z "${FILES}" ]; then
-    pipenv run autoflake8 --in-place $FILES
-    pipenv run isort $FILES
-    pipenv run black $FILES
-    pipenv run python ci/check_spider_naming_consistency.py $FILES
+    uv run autoflake8 --in-place $FILES
+    uv run isort $FILES
+    uv run black $FILES
+    uv run python ci/check_spider_naming_consistency.py $FILES
 fi

@@ -41,6 +41,9 @@ def test_times():
     o = OpeningHours()
     o.add_range("Mo", time.strptime("07:00", "%H:%M"), time.strptime("17:00", "%H:%M"))
     o.add_range("Tu", "09:00", "19:00")
+    # Invalid ranges which should be ignored (single times, not ranges).
+    o.add_range("We", "00:00", "00:00")
+    o.add_range("Th", "15:55", "15:55")
 
     assert o.as_opening_hours() == "Mo 07:00-17:00; Tu 09:00-19:00"
 
@@ -128,6 +131,85 @@ def test_multiple_times():
     assert o3.as_opening_hours() == "Tu 09:00-12:00,15:00-17:00"
 
 
+def test_simple_over_midnight():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    assert o.as_opening_hours() == "Mo 07:00-24:00; Tu 00:00-02:00"
+
+
+def test_hours_over_midnight_overide_closed_days_on_next_day():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    o.set_closed("Tu")
+    assert o.as_opening_hours() == "Mo 07:00-24:00; Tu 00:00-02:00"
+
+
+def test_hours_over_midnight_removed_when_start_day_set_to_closed():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    o.set_closed("Mo")
+    assert o.as_opening_hours() == "Mo closed"
+
+
+def test_over_midnight():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "02:00")
+    o.add_range("Tu", "07:00", "02:00")
+    o.add_range("We", "07:00", "02:00")
+    o.add_range("Th", "07:00", "02:00")
+    o.add_range("Fr", "07:00", "02:00")
+    o.add_range("Sa", "07:00", "02:00")
+    o.add_range("Su", "05:00", "03:00")
+
+    assert (
+        o.as_opening_hours() == "Mo 00:00-03:00,07:00-24:00; Tu-Sa 00:00-02:00,07:00-24:00; Su 00:00-02:00,05:00-24:00"
+    )
+
+
+def test_till_midnight():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "23:00")
+    o.add_range("Tu", "11:00", "23:00")
+    o.add_range("We", "11:00", "23:00")
+    o.add_range("Th", "11:00", "23:00")
+    o.add_range("Fr", "11:00", "24:00")
+    o.add_range("Sa", "11:00", "24:00")
+    o.add_range("Su", "11:00", "23:00")
+
+    assert o.as_opening_hours() == "Mo-Th 11:00-23:00; Fr-Sa 11:00-24:00; Su 11:00-23:00"
+
+
+def test_till_midnight_formatted_as_zero_hour():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "0:00")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+
+def test_till_midnight_formatted_as_twenty_four_hour():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00", "24:00")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+
+def test_till_midnight_formatted_in_other_unusual_formats():
+    o = OpeningHours()
+    o.add_range("Mo", "11:00:00", "00:00:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+    o = OpeningHours()
+    o.add_range("Mo", "11:00:00", "0:00:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+    o = OpeningHours()
+    o.add_range("Mo", "11:00:00", "24:00:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == "Mo 11:00-24:00"
+
+
 def test_sanitise_days():
     assert sanitise_day("Mo") == "Mo"
     assert sanitise_day("Mon") == "Mo"
@@ -171,6 +253,10 @@ def test_add_ranges_from_string():
     assert o.as_opening_hours() == "Mo-Th 07:00-19:00; Fr 00:00-24:00; Sa-Su closed"
 
     o = OpeningHours()
+    o.add_ranges_from_string("Monday to Tuesday 0:45 AM to 11:45 PM")
+    assert o.as_opening_hours() == "Mo-Tu 00:45-23:45"
+
+    o = OpeningHours()
     o.add_ranges_from_string("Sunday to Thursday 0800-1400, Wed-Sat 1300-1800")
     assert o.as_opening_hours() == "Mo-Tu 08:00-14:00; We-Th 08:00-14:00,13:00-18:00; Fr-Sa 13:00-18:00; Su 08:00-14:00"
 
@@ -185,6 +271,12 @@ def test_add_ranges_from_string():
     o = OpeningHours()
     o.add_ranges_from_string("Wed 2am-3am, 11am-1pm, 6pm-7pm, Thu midday-3:30pm 4:30pm-5:15pm")
     assert o.as_opening_hours() == "We 02:00-03:00,11:00-13:00,18:00-19:00; Th 12:00-15:30,16:30-17:15"
+
+    o = OpeningHours()
+    o.add_ranges_from_string(
+        "MON-THU: 8:00 - 8:00 PM FRI: 8:00 AM - 10:00 PM SAT: 9:00 AM - 10:00 PM SUN: 9:00 AM - 8:00 PM"
+    )
+    assert o.as_opening_hours() == "Mo-Th 08:00-20:00; Fr 08:00-22:00; Sa 09:00-22:00; Su 09:00-20:00"
 
     o = OpeningHours()
     o.add_ranges_from_string(

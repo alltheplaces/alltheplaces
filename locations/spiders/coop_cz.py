@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class CoopCZSpider(Spider):
     name = "coop_cz"
-    item_attributes = {"brand": "COOP", "brand_wikidata": "Q52851660"}
+    item_attributes = {"brand": "Coop", "brand_wikidata": "Q52851660"}
     start_urls = [
         "https://www.skupina.coop/cooperative/list/",
     ]

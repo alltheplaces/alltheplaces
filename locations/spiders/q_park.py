@@ -1,8 +1,9 @@
-import json
 import re
-from typing import Iterable
+from json import loads
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -33,7 +34,7 @@ class QParkSpider(Spider):
     name = "q_park"
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for country, info in COUNTRIES.items():
             yield Request(
                 url=f"https://www.q-park.{country}/{info['lang']}/{info['uri_path']}/",
@@ -72,7 +73,7 @@ class QParkSpider(Spider):
     def parse_facility(self, response):
         ld_jsons = response.xpath("//script[@type='application/ld+json']/text()").getall()
         for ld_json in ld_jsons:
-            facility_info = json.loads(ld_json)
+            facility_info = loads(ld_json)
             if facility_info.get("@type") == "ParkingFacility":
                 continue
         item = DictParser.parse(facility_info)
@@ -105,7 +106,7 @@ class QParkSpider(Spider):
 
         match = re.search(r"const customGtmEventsToPush = (\[.*?\]);", response.text, re.DOTALL)
         try:
-            match_json = json.loads(match.group(1).strip())
+            match_json = loads(match.group(1).strip())
             for element in match_json:
                 if "productDetail" in element:
                     item["extras"]["capacity"] = element["productDetail"].get("totalSpots")

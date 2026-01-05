@@ -1,7 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -15,8 +14,10 @@ from locations.user_agents import FIREFOX_LATEST
 class SuperdrugSpider(Spider):
     name = "superdrug"
     item_attributes = {"brand": "Superdrug", "brand_wikidata": "Q7643261"}
-    user_agent = FIREFOX_LATEST
-    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"}}
+    custom_settings = {
+        "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
+        "USER_AGENT": FIREFOX_LATEST,
+    }
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
@@ -25,7 +26,7 @@ class SuperdrugSpider(Spider):
             callback=self.parse_api,
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse_api(self, response: Response, **kwargs: Any) -> Any:

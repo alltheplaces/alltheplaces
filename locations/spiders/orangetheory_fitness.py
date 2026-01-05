@@ -1,6 +1,8 @@
 import json
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.items import Feature
 
@@ -34,9 +36,8 @@ class OrangetheoryFitnessSpider(scrapy.Spider):
         "https://api.orangetheory.co/partners/studios/v2?country=United+Arab+Emirates",
         "https://api.orangetheory.co/partners/studios/v2?country=United+Kingdom",
     ]
-    download_delay = 0.3
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         location_data = json.loads(response.text)
         locations = location_data["data"]
 

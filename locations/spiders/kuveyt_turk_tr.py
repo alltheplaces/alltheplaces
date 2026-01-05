@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy.http import JsonRequest, Request
@@ -12,7 +13,7 @@ class KuveytTurkTRSpider(JSONBlobSpider):
     allowed_domains = ["kuveytturk.com.tr"]
     base_url = "https://www.kuveytturk.com.tr/"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(urljoin(self.base_url, "/en/branches-and-atms"), callback=self.parse_branch_page)
 
     def parse_branch_page(self, response, **kwargs):

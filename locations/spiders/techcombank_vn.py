@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -9,9 +11,9 @@ from locations.user_agents import BROWSER_DEFAULT
 class TechcombankVNSpider(Spider):
     name = "techcombank_vn"
     item_attributes = {"brand": "Techcombank", "brand_wikidata": "Q10541776"}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://techcombank.com/api/data/apmt/list-branch", data={"serviceid": 111})
 
     def parse(self, response, **kwargs):

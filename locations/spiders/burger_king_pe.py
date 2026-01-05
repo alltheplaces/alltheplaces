@@ -4,6 +4,7 @@ from typing import Any
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -17,16 +18,28 @@ class BurgerKingPESpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
     api_token = ""
+    start_urls = ["https://www.burgerking.pe/"]
+    requires_proxy = True
 
-    def start_requests(self):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Search for the desired JavaScript file
+        yield response.follow(
+            url=response.xpath("//script/@src").re(r"/_next/static/chunks/app/global-error-\w+\.js")[-1],
+            callback=self.parse_action_token,
+        )
+
+    def parse_action_token(self, response: Response, **kwargs: Any) -> Any:
+        matches = re.findall(r"[a-z][\s=]+\(0,\s*o.\$\)\(\"([a-f0-9]{40})\"\)", response.text)
+        action_token = matches[1] if len(matches) > 1 else matches[0]
         yield Request(
             url="https://www.burgerking.pe/",
             body='["accessToken"]',
-            headers={"next-action": "946e2ad932606b1dca3d9e1ba67a60713e79a6e6"},
+            headers={"next-action": action_token},
             method="POST",
+            callback=self.parse_request,
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse_request(self, response: Response, **kwargs: Any) -> Any:
         self.api_token = re.search(r"1:\s*\"(.+)\"", response.text).group(1)
         yield JsonRequest(
             url="https://apiprod.pidelo.digital/api.stores/v1/stores/get-district?brandId=41",
@@ -57,4 +70,5 @@ class BurgerKingPESpider(Spider):
                 close_time = shift.get("endHour")
                 if open_time and close_time:
                     item["opening_hours"].add_days_range(DAYS, open_time, close_time)
+            apply_category(Categories.FAST_FOOD, item)
             yield item

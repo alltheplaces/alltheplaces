@@ -1,5 +1,6 @@
-import chompjs
+from chompjs import parse_js_object
 
+from locations.categories import Categories, apply_category
 from locations.items import get_merged_item
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -13,9 +14,7 @@ class BurgerKingVNSpider(JSONBlobSpider):
     stored_items = {}
 
     def extract_json(self, response):
-        return chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "var listStoreJson = ")]/text()').get()
-        )
+        return parse_js_object(response.xpath('//script[contains(text(), "var listStoreJson = ")]/text()').get())
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace("BURGER KING ", "")
@@ -24,6 +23,7 @@ class BurgerKingVNSpider(JSONBlobSpider):
         if item["email"] == "test@gmail.com":
             item.pop("email")
         item["website"] = location["store_view_url"]
+        apply_category(Categories.FAST_FOOD, item)
         if item["ref"] in self.stored_items:
             other_item = self.stored_items[item["ref"]]
             if response.url.endswith("en"):

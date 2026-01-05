@@ -1,6 +1,8 @@
-import json
+from json import loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -35,14 +37,14 @@ CATEGORY_MAP = {
 }
 
 
-class WellstarUSSpider(scrapy.Spider):
+class WellstarUSSpider(Spider):
     name = "wellstar_us"
     item_attributes = {"brand": "WellStar Health System", "brand_wikidata": "Q7981073"}
     allowed_domains = ["www.wellstar.org"]
     start_urls = ("https://www.wellstar.org/locations",)
     requires_proxy = "US"  # Cloudflare geoblocking in use
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.wellstar.org/api/LocationSearchApi/GetLocations"
 
         headers = {
@@ -85,7 +87,7 @@ class WellstarUSSpider(scrapy.Spider):
 
         body = '{"searchTerm":"","searchFilter":""}'
 
-        yield scrapy.Request(
+        yield Request(
             url=url,
             method="POST",
             dont_filter=True,
@@ -127,7 +129,7 @@ class WellstarUSSpider(scrapy.Spider):
         return address_attributes
 
     def parse(self, response):
-        hdata = json.loads(response.text)
+        hdata = loads(response.text)
 
         hdata = hdata["matchingItems"]
 

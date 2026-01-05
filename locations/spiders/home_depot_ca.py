@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -31,7 +32,7 @@ class HomeDepotCASpider(SitemapSpider, StructuredDataSpider):
         hours = self.parse_hours(ld_data.get("openingHours"))
         if hours:
             item["opening_hours"] = hours
-
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item
 
     # NOTE: This appears to have a higher success rate than the standard one from cursory review, so have left this behaviour
@@ -40,6 +41,9 @@ class HomeDepotCASpider(SitemapSpider, StructuredDataSpider):
         location_hours = re.findall(r"([a-zA-Z]*)\s(.*?)\s-\s(.*?)\s", open_hours)
 
         for weekday in location_hours:
-            opening_hours.add_range(day=weekday[0], open_time=weekday[1], close_time=weekday[2])
+            if "closed" in weekday[1]:
+                opening_hours.set_closed(weekday[0])
+            else:
+                opening_hours.add_range(day=weekday[0], open_time=weekday[1], close_time=weekday[2])
 
         return opening_hours.as_opening_hours()

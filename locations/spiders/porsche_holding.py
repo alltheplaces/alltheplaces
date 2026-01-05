@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 import pycountry
 from scrapy.http import Request, Response
@@ -8,7 +8,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.volkswagen import VolkswagenSpider
+from locations.spiders.volkswagen import VOLKSWAGEN_SHARED_ATTRIBUTES
 
 
 class PorscheHoldingSpider(JSONBlobSpider):
@@ -20,7 +20,7 @@ class PorscheHoldingSpider(JSONBlobSpider):
 
     name = "porsche_holding"
     brands = {
-        "V": VolkswagenSpider.item_attributes,
+        "V": VOLKSWAGEN_SHARED_ATTRIBUTES,
         # TODO: Apart of Volkswagen API covers some other brands:
         # https://github.com/alltheplaces/alltheplaces/issues/10156#issuecomment-2336428610
         # A for Audi
@@ -44,7 +44,7 @@ class PorscheHoldingSpider(JSONBlobSpider):
         "RETRY_TIMES": 5,
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.get_countries)
 

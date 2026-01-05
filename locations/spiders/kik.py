@@ -1,7 +1,10 @@
+from typing import AsyncIterator
+
 from chompjs import parse_js_object
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -13,7 +16,7 @@ class KikSpider(Spider):
     start_urls = ["https://www.kik.de/storefinderAssets/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse_country_list)
 
@@ -46,4 +49,5 @@ class KikSpider(Spider):
             item["country"] = response.meta["country_code"].upper()
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location["opening_times"], delimiters=["-", "*"])
+            apply_category(Categories.SHOP_CLOTHES, item)
             yield item

@@ -16,8 +16,21 @@ BRANDS_AND_COUNTRIES = {
         "brand_wikidata": "Q168238",
     },
     "PETROM": {"countries": ["ROU", "MDA"], "brand": "Petrom", "brand_wikidata": "Q1755034"},
-    "AVANTI": {"countries": ["AUT"], "brand": "Avanti", "brand_wikidata": "Q168238"},
+    "AVANTI": {"countries": ["AUT"], "brand": "Avanti", "brand_wikidata": "Q124350461"},
     "HOFER": {"countries": ["AUT"], "brand": "Hofer Diskont", "brand_wikidata": "Q107803455"},
+}
+
+# Map country codes used by source data to ISO 3166 alpha-2 country codes used
+# by ATP.
+COUNTRY_CODE_MAP = {
+    "AUT": "AT",  # Austria
+    "BGR": "BG",  # Bulgaria
+    "CZE": "CZ",  # Czech Republic
+    "HUN": "HU",  # Hungary
+    "MDA": "MD",  # Moldova
+    "ROU": "RO",  # Romania
+    "SRB": "RS",  # Serbia
+    "SVK": "SK",  # Slovakia
 }
 
 SITE_FEATURES_MAP = {
@@ -90,7 +103,6 @@ PAYMENT_METHODS_MAP = {
 class OmvSpider(scrapy.Spider):
     name = "omv"
     start_urls = ["https://app.wigeogis.com/kunden/omv/data/getconfig.php"]
-    download_delay = 0.10
     api_url = "https://app.wigeogis.com/kunden/omv/data/getresults.php"
     details_url = "https://app.wigeogis.com/kunden/omv/data/details.php"
     hash = ""
@@ -146,7 +158,7 @@ class OmvSpider(scrapy.Spider):
         item["phone"] = details.get("telnr") if details.get("telnr") != "NO TELEPHONE" else None
         item["brand"] = response.meta["brand"]
         item["brand_wikidata"] = response.meta["brand_wikidata"]
-        item["country"] = response.meta["country"]
+        item["country"] = COUNTRY_CODE_MAP[response.meta["country"]]
         self.parse_hours(item, details.get("opening_hours"))
         self.parse_attribute(item, data, "siteFeatures", SITE_FEATURES_MAP)
         self.parse_attribute(item, data, "paymentDetails", PAYMENT_METHODS_MAP)
@@ -163,7 +175,10 @@ class OmvSpider(scrapy.Spider):
         oh = OpeningHours()
         try:
             if opening_hours:
-                for rule_str in opening_hours.split("#"):
+                # Per https://app.wigeogis.com/kunden/omv/webcomponent/js/app.js
+                # the 8th day of week listed in source data is never used and is
+                # ignored by the client JavaScript that renders opening hours.
+                for rule_str in opening_hours.split("#")[0:7]:
                     rule = {}
                     for prop in rule_str.split(","):
                         k, v = prop.split("=")

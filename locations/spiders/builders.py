@@ -1,20 +1,22 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import FormRequest, JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class BuildersSpider(Spider):
     name = "builders"
-    item_attributes = {"brand": "Builders", "brand_wikidata": "Q116819137", "extras": Categories.SHOP_HARDWARE.value}
+    item_attributes = {"brand": "Builders", "brand_wikidata": "Q116819137"}
     allowed_domains = ["www.builders.co.za"]
     start_urls = [
         "https://www.builders.co.za/web/v2/builders/channel/web/zone/B14/stores?query=&latitude=-26.1328705&longitude=27.9114834&radius=10000000&fields=FULL"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "client_id": "builders",
             # client_secret appears to be obfuscated within main.???.js and
@@ -66,14 +68,16 @@ class BuildersSpider(Spider):
             item.pop("website", None)
 
             item["opening_hours"] = OpeningHours()
-            for day_hours in location["openingHours"]["weekDayOpeningList"]:
-                if day_hours["closed"]:
-                    continue
-                item["opening_hours"].add_range(
-                    day_hours["weekDay"],
-                    day_hours["openingTime"]["formattedHour"],
-                    day_hours["closingTime"]["formattedHour"],
-                    "%I:%M %p",
-                )
+            if location_hours := location.get("openingHours"):
+                for day_hours in location_hours.get("weekDayOpeningList"):
+                    if day_hours["closed"]:
+                        continue
+                    item["opening_hours"].add_range(
+                        day_hours["weekDay"],
+                        day_hours["openingTime"]["formattedHour"],
+                        day_hours["closingTime"]["formattedHour"],
+                        "%I:%M %p",
+                    )
 
+            apply_category(Categories.SHOP_HARDWARE, item)
             yield item

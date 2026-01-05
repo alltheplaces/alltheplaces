@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import FormRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -28,13 +30,13 @@ from locations.items import Feature
 
 class StockInStoreSpider(Spider):
     dataset_attributes = {"source": "api", "api": "stockinstore.com"}
-    api_site_id: str = None
-    api_widget_id: str = None
-    api_widget_type: str = None
-    api_origin: str = None
+    api_site_id: str
+    api_widget_id: str
+    api_widget_type: str
+    api_origin: str
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         data = {
             "site": self.api_site_id,
             "storeid": "",
@@ -52,7 +54,7 @@ class StockInStoreSpider(Spider):
             formdata=data,
         )
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["response"]["stores_list"]:
             item = DictParser.parse(location)
             item["ref"] = location["code"]
@@ -64,5 +66,5 @@ class StockInStoreSpider(Spider):
                 item["opening_hours"].add_range(day_name, hours["open"], hours["close"], "%I:%M%p")
             yield from self.parse_item(item, location)
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

@@ -1,41 +1,17 @@
-import re
+from typing import AsyncIterator
 
-from scrapy.spiders import SitemapSpider
+from scrapy.http import JsonRequest
 
-from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+from locations.geo import city_locations
+from locations.spiders.dominos_pizza_au import DominosPizzaAUSpider
 
 
-class DominosPizzaJPSpider(SitemapSpider):
+class DominosPizzaJPSpider(DominosPizzaAUSpider):
     name = "dominos_pizza_jp"
-    item_attributes = {
-        "brand_wikidata": "Q839466",
-        "country": "JP",
-    }
-    allowed_domains = ["dominos.jp"]
-    sitemap_urls = [
-        "https://www.dominos.jp/sitemap.aspx",
-    ]
-    sitemap_rules = [(r"/store", "parse_store")]
-    user_agent = BROWSER_DEFAULT
+    item_attributes = {"brand_wikidata": "Q839466"}
 
-    def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-
-        properties = {
-            "ref": ref,
-            "name": response.xpath('normalize-space(//h1[@class="storetitle"][1]/text())').extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//span[@id="store-address-info"]/p/text()[4])'
-            ).extract_first(),
-            "postcode": re.search(
-                r"([\d-]*)$",
-                response.xpath('normalize-space(//div[@class="store-details-text"]/span/p/text()[2])').extract_first(),
-            ).group(1),
-            "lat": response.xpath('normalize-space(//input[@id="store-lat"]/@value)').extract_first(),
-            "lon": response.xpath('normalize-space(//input[@id="store-lon"]/@value)').extract_first(),
-            "phone": response.xpath('//div[@id="store-tel"]/a/text()').extract_first(),
-            "website": response.url,
-        }
-
-        yield Feature(**properties)
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for city in city_locations("JP", 10000):
+            yield JsonRequest(
+                url=f"https://www.dominos.jp/dynamicstoresearchapi/getstoresfromquery?lon={city['longitude']}&lat={city['latitude']}"
+            )

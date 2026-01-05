@@ -1,8 +1,11 @@
 import re
+from typing import AsyncIterator
+from urllib.parse import urljoin
 
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DK, NAMED_DAY_RANGES_DK, OpeningHours
 
@@ -16,7 +19,7 @@ class TelenorDKSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 
@@ -33,4 +36,7 @@ class TelenorDKSpider(Spider):
             item["opening_hours"].add_ranges_from_string(
                 hours_string, days=DAYS_DK, named_day_ranges=NAMED_DAY_RANGES_DK
             )
+            if website := item.get("website"):
+                item["website"] = urljoin("https://telenor.dk", website)
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
             yield item

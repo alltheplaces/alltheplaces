@@ -12,7 +12,7 @@ class WoolworthsZASpider(JSONBlobSpider):
     item_attributes = {"brand": "Woolworths", "brand_wikidata": "Q8033997"}
     locations_key = "stores"
 
-    def start_requests(self):
+    async def start(self):
         yield JsonRequest(
             url="https://www.woolworths.co.za/server/storelocatorByArea?suburbId=3041&distance=100000",
             headers={"Referer": "https://www.woolworths.co.za/storelocator"},

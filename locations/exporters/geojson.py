@@ -1,10 +1,10 @@
 import base64
 import datetime
 import hashlib
-import io
 import json
 import logging
 import uuid
+from io import BytesIO, StringIO
 from typing import Any, Generator, Type
 
 from scrapy import Item, Spider
@@ -13,6 +13,7 @@ from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
+from locations.extensions.add_lineage import spider_class_to_lineage
 from locations.settings import SPIDER_MODULES
 
 mapping = (
@@ -66,7 +67,7 @@ def item_to_properties(item: Item) -> dict[str, Any]:
     return props
 
 
-def item_to_geometry(item: Item) -> dict:
+def item_to_geometry(item: Item) -> dict | None:
     """
     Convert the item to a GeoJSON geometry object. If the item has lat and lon fields,
     but no geometry field, then a Point geometry will be created. Otherwise the
@@ -79,6 +80,7 @@ def item_to_geometry(item: Item) -> dict:
     lat = item.get("lat")
     lon = item.get("lon")
     geometry = item.get("geometry")
+
     if lat and lon and not geometry:
         try:
             geometry = {
@@ -87,6 +89,14 @@ def item_to_geometry(item: Item) -> dict:
             }
         except ValueError:
             logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
+
+    # Check for empty or missing coordinates list in geometry
+    if geometry and isinstance(geometry, dict):
+        coordinates = geometry.get("coordinates")
+        if not coordinates:
+            logging.warning("Invalid geometry coordinates: %s", geometry)
+            return None
+
     return geometry
 
 
@@ -114,26 +124,28 @@ def compute_hash(item: Item) -> str:
 def find_spider_class(spider_name: str):
     if not spider_name:
         return None
-    for spider_class in iter_spider_classes_in_all_modules():
+    for spider_class in iter_spider_classes_in_modules():
         if spider_name == spider_class.name:
             return spider_class
     return None
 
 
-def iter_spider_classes_in_all_modules() -> Generator[Type[Spider], Any, None]:
-    for mod in SPIDER_MODULES:
+def iter_spider_classes_in_modules(modules=SPIDER_MODULES) -> Generator[Type[Spider], Any, None]:
+    for mod in modules:
         for module in walk_modules(mod):
             for spider_class in iter_spider_classes(module):
                 yield spider_class
 
 
-def get_dataset_attributes(spider_name) -> {}:
+def get_dataset_attributes(spider_name: str) -> dict:
     spider_class = find_spider_class(spider_name)
     dataset_attributes = getattr(spider_class, "dataset_attributes", {})
     settings = getattr(spider_class, "custom_settings", {}) or {}
     if not settings.get("ROBOTSTXT_OBEY", True):
         # See https://github.com/alltheplaces/alltheplaces/issues/4537
         dataset_attributes["spider:robots_txt"] = "ignored"
+    if not dataset_attributes.get("lineage"):
+        dataset_attributes["spider:lineage"] = spider_class_to_lineage(spider_class).value
     dataset_attributes["@spider"] = spider_name
     dataset_attributes["spider:collection_time"] = datetime.datetime.now().isoformat()
 
@@ -141,14 +153,14 @@ def get_dataset_attributes(spider_name) -> {}:
 
 
 class GeoJsonExporter(JsonItemExporter):
-    def __init__(self, file, **kwargs):
+    def __init__(self, file: BytesIO, **kwargs):
         super().__init__(file, **kwargs)
         self.spider_name = None
 
-    def start_exporting(self):
+    def start_exporting(self) -> None:
         pass
 
-    def export_item(self, item):
+    def export_item(self, item: Item) -> None:
         spider_name = item.get("extras", {}).get("@spider")
 
         if self.first_item:
@@ -166,7 +178,9 @@ class GeoJsonExporter(JsonItemExporter):
 
         super().export_item(item)
 
-    def _get_serialized_fields(self, item, default_value=None, include_empty=None):
+    def _get_serialized_fields(
+        self, item: Item, default_value: Any = None, include_empty: bool | None = None
+    ) -> list[tuple]:
         feature = [
             ("type", "Feature"),
             ("id", compute_hash(item)),
@@ -176,8 +190,8 @@ class GeoJsonExporter(JsonItemExporter):
 
         return feature
 
-    def write_geojson_header(self):
-        header = io.StringIO()
+    def write_geojson_header(self) -> None:
+        header = StringIO()
         header.write('{"type":"FeatureCollection","dataset_attributes":')
         json.dump(
             get_dataset_attributes(self.spider_name), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True
@@ -185,6 +199,6 @@ class GeoJsonExporter(JsonItemExporter):
         header.write(',"features":[\n')
         self.file.write(to_bytes(header.getvalue(), self.encoding))
 
-    def finish_exporting(self):
+    def finish_exporting(self) -> None:
         if not self.first_item:
             self.file.write(b"\n]}\n")

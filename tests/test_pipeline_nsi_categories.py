@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.categories import Categories, apply_category, get_category_tags
@@ -7,7 +7,7 @@ from locations.pipelines.apply_nsi_categories import ApplyNSICategoriesPipeline
 
 
 def get_objects():
-    spider = Spider(name="test")
+    spider = DefaultSpider()
     spider.crawler = get_crawler()
     return Feature(), ApplyNSICategoriesPipeline(), spider
 
@@ -15,7 +15,7 @@ def get_objects():
 def test_no_categories():
     item, pipeline, _ = get_objects()
 
-    assert get_category_tags(item) is None
+    assert get_category_tags(item) == {}
 
 
 def test_categories_apply():

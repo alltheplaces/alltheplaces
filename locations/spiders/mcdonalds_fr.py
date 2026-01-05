@@ -1,4 +1,4 @@
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.storefinders.woosmap import WoosmapSpider
 
@@ -24,5 +24,13 @@ class McdonaldsFRSpider(WoosmapSpider):
         apply_yes_no(Extras.SELF_CHECKOUT, item, "terminal" in feature["properties"]["tags"])
         apply_yes_no(Extras.OUTDOOR_SEATING, item, "terrace" in feature["properties"]["tags"])
         apply_yes_no(Extras.WIFI, item, "wireless" in feature["properties"]["tags"])
+
+        if "mccafe" in feature["properties"]["tags"]:
+            mccafe = item.deepcopy()
+            mccafe["ref"] = "{}-mccafe".format(item["ref"])
+            mccafe["brand"] = "McCafé"
+            mccafe["brand_wikidata"] = "Q3114287"
+            apply_category(Categories.CAFE, mccafe)
+            yield mccafe
 
         yield item

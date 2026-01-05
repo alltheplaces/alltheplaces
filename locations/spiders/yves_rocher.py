@@ -41,6 +41,6 @@ class YvesRocherSpider(CrawlSpider):
 
             item["website"] = urljoin(response.url, location["uri"])
 
-            apply_category(Categories.SHOP_BEAUTY, item)
+            apply_category(Categories.SHOP_COSMETICS, item)
 
             yield item

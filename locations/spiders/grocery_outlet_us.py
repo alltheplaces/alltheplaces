@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import FormRequest
 
@@ -9,7 +11,7 @@ class GroceryOutletUSSpider(Spider):
     name = "grocery_outlet_us"
     item_attributes = {"brand": "Grocery Outlet", "brand_wikidata": "Q5609934"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             "https://www.groceryoutlet.com/wp-admin/admin-ajax.php", formdata={"action": "get_store_list"}
         )
@@ -17,8 +19,8 @@ class GroceryOutletUSSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["street_address"] = item.pop("addr_full")
+            item["branch"] = item.pop("name", None)
+            item["street_address"] = item.pop("addr_full", None)
             item["ref"] = location["store_number"]
             item["extras"]["start_date"] = location["open_date"]
             item["facebook"] = location["fb_url"]

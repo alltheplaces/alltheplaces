@@ -1,4 +1,5 @@
-import json
+from json import loads
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
@@ -20,9 +21,9 @@ class WesternUnionSpider(Spider):
     allowed_domains = ["www.westernunion.com"]
     # start_urls[0] is a GraphQL endpoint.
     start_urls = ["https://www.westernunion.com/router/"]
-    download_delay = 0.2
+    custom_settings = {"DOWNLOAD_DELAY": 0.2}
 
-    def request_page(self, latitude, longitude, page_number):
+    def request_page(self, latitude: float, longitude: float, page_number: int) -> JsonRequest:
         # An access code for querying the GraphQL endpoint is
         # required, This is constant across different browser
         # sessions and the same for all users of the website.
@@ -52,14 +53,14 @@ class WesternUnionSpider(Spider):
                 }
             },
         }
-        yield JsonRequest(url=self.start_urls[0], method="POST", headers=headers, data=data)
+        return JsonRequest(url=self.start_urls[0], method="POST", headers=headers, data=data)
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # The GraphQL query searches for locations within a 350km
         # radius of supplied coordinates, then returns locations in
         # pages of 15 locations each page.
         for lat, lon in point_locations("earth_centroids_iseadgg_346km_radius.csv"):
-            yield from self.request_page(lat, lon, 1)
+            yield self.request_page(lat, lon, 1)
 
     def parse(self, response):
         # If crawling too fast, the server responds with a JSON
@@ -89,12 +90,12 @@ class WesternUnionSpider(Spider):
         # On the first response per radius search of a coordinate,
         # generate requests for all subsequent pages of results
         # found by the API within the 350km search radius.
-        request_data = json.loads(response.request.body)
+        request_data = loads(response.request.body)
         current_page = int(request_data["variables"]["req"]["pageNumber"])
         total_pages = response.json()["data"]["locations"]["pageCount"]
         if current_page == 1 and total_pages > 1:
             for page_number in range(2, total_pages, 1):
-                yield from self.request_page(
+                yield self.request_page(
                     request_data["variables"]["req"]["latitude"],
                     request_data["variables"]["req"]["longitude"],
                     page_number,

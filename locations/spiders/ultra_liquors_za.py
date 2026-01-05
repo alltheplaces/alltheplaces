@@ -1,19 +1,21 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class UltraLiquorsZASpider(scrapy.Spider):
+class UltraLiquorsZASpider(Spider):
     name = "ultra_liquors_za"
     item_attributes = {"brand": "Ultra Liquors", "brand_wikidata": "Q116620602"}
     allowed_domains = ["greenpoint.ultraliquors.co.za"]
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
-        yield scrapy.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://greenpoint.ultraliquors.co.za/UltraCityStoreSelector/ListData",
             formdata={"length": "1000"},
         )

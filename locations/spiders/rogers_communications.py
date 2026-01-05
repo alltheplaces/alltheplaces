@@ -1,18 +1,20 @@
-import datetime
+from datetime import datetime
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class RogersCommunicationsSpider(scrapy.Spider):
+class RogersCommunicationsSpider(Spider):
     name = "rogers_communications"
-    item_attributes = {"brand": "Rogers Communications", "brand_wikidata": "Q165684"}
+    item_attributes = {"brand": "Rogers", "brand_wikidata": "Q3439663"}
     allowed_domains = ["1-dot-rogers-store-finder.appspot.com", "rogers.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://1-dot-rogers-store-finder.appspot.com/searchRogersStoresService"
 
         headers = {
@@ -29,7 +31,7 @@ class RogersCommunicationsSpider(scrapy.Spider):
             "channelID": "ROGERS",
         }
 
-        yield scrapy.FormRequest(
+        yield FormRequest(
             url=url,
             method="POST",
             formdata=form_data,
@@ -51,8 +53,8 @@ class RogersCommunicationsSpider(scrapy.Spider):
 
                 open_time = time[0].replace(" ", "")
                 close_time = time[1].replace(" ", "")
-                open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime("%H:%M")
-                close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime("%H:%M")
+                open_time = datetime.strptime(open_time, "%I:%M%p").strftime("%H:%M")
+                close_time = datetime.strptime(close_time, "%I:%M%p").strftime("%H:%M")
 
                 opening_hours.add_range(
                     day=day,
@@ -61,24 +63,13 @@ class RogersCommunicationsSpider(scrapy.Spider):
                     time_format="%H:%M",
                 )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
-    def parse(self, response):
-        stores = response.json()
-
-        for store in stores["features"]:
-            name = store["properties"]["Address2"]
-            if name == "":
-                name = store["properties"]["LocationName"]
-
-            addr = store["properties"]["AddressOrIntersection"]
-            if addr[-1] == ",":
-                addr = addr[:-1]
-
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["features"]:
             properties = {
                 "ref": store["properties"]["Record_ID"],
-                "name": name,
-                "street_address": addr,
+                "street_address": store["properties"]["AddressOrIntersection"],
                 "city": store["properties"]["City"],
                 "state": store["properties"]["StateOrProvince"],
                 "postcode": store["properties"]["ZIPOrPostalCode"],
@@ -106,5 +97,5 @@ class RogersCommunicationsSpider(scrapy.Spider):
             except:
                 pass
 
-            apply_category(Categories.SHOP_TELECOMMUNICATION, properties)
+            apply_category(Categories.SHOP_MOBILE_PHONE, properties)
             yield Feature(**properties)

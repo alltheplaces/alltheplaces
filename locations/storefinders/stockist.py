@@ -1,14 +1,15 @@
 import random
+from typing import AsyncIterator, Iterable
 
 import pygeohash
 from chompjs import parse_js_object
 from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 from scrapy.spidermiddlewares.httperror import HttpError
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # Documentation for this Stockist store finder is available at:
 # https://help.stockist.co/
@@ -29,56 +30,56 @@ from locations.pipelines.address_clean_up import clean_address
 
 class StockistSpider(Spider):
     dataset_attributes = {"source": "api", "api": "stockist.co"}
-    key: str = ""
+    key: str
     max_distance: int = 50000
     coordinates_pending: list[tuple[float, float]] = []
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://stockist.co/api/v1/{self.key}/locations/all",
             callback=self.parse_all_locations,
             errback=self.parse_all_locations_error,
         )
 
-    def parse_all_locations(self, response: Response):
+    def parse_all_locations(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():
             yield from self.parse_item(self.parse_location(location), location) or []
 
     @staticmethod
-    def parse_location(location):
+    def parse_location(location: dict) -> Feature:
         item = DictParser.parse(location)
-        item["street_address"] = clean_address([location.get("address_line_1"), location.get("address_line_2")])
+        item["street_address"] = merge_address_lines([location.get("address_line_1"), location.get("address_line_2")])
         return item
 
-    def parse_all_locations_error(self, failure):
+    def parse_all_locations_error(self, failure) -> Iterable[Request]:
         if failure.check(HttpError):
             if failure.value.response.status == 400:
                 if "error" in failure.value.response.json().keys():
-                    if failure.value.response.json()["error"] == "Method unavailable.":
+                    if failure.value.response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
                         yield Request(
                             url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
                         )
 
-    def parse_search_config(self, response: Response):
+    def parse_search_config(self, response: TextResponse) -> Iterable[JsonRequest]:
         config = parse_js_object(response.text.split("(", 1)[1].split(");", 1)[0])
         self.max_distance = config["max_distance"]
         yield JsonRequest(
             url=f"https://stockist.co/api/v1/{self.key}/locations/overview.js", callback=self.parse_geohashes
         )
 
-    def parse_geohashes(self, response: Response):
+    def parse_geohashes(self, response: TextResponse) -> Iterable[JsonRequest]:
         self.coordinates_pending = [pygeohash.decode(geohash[:-1]) for geohash in response.json()["i"]]
         if len(self.coordinates_pending) > 0:
             yield from self.make_next_search_request()
 
-    def make_next_search_request(self):
+    def make_next_search_request(self) -> Iterable[JsonRequest]:
         next_coordinates = random.choice(self.coordinates_pending)
         yield JsonRequest(
             url=f"https://stockist.co/api/v1/{self.key}/locations/search?latitude={next_coordinates[0]}&longitude={next_coordinates[1]}&distance={self.max_distance}",
             callback=self.parse_search_results,
         )
 
-    def parse_search_results(self, response: Response):
+    def parse_search_results(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["locations"]:
             yield from self.parse_item(self.parse_location(location), location) or []
 

@@ -6,6 +6,7 @@ from scrapy.http import Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -17,8 +18,8 @@ class WoolworthsAUSpider(scrapy.Spider):
     start_urls = [
         "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=10000&Division=SUPERMARKETS&Facility=&postcode=*"
     ]
-    user_agent = BROWSER_DEFAULT
-    requires_proxy = "AU"
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Stores"]:

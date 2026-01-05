@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -16,8 +17,9 @@ class SpecsaversSpider(Spider):
         "www.specsavers.ca",
         "www.specsavers.com.au",
     ]
+    requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for domain in self.allowed_domains:
             country_code = domain[-2:].upper()
             if country_code == "UK":
@@ -143,6 +145,7 @@ fragment sectionalNotification on StoreSectionalNotification {
                     continue
                 item = deepcopy(base_item)
                 item["ref"] = store[store_type]["storeNumber"]
+                item["branch"] = item.pop("name")
                 if store[store_type].get("contactInfo"):
                     item["phone"] = store[store_type]["contactInfo"].get("phone")
                     item["email"] = store[store_type]["contactInfo"].get("email")

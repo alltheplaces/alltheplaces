@@ -1,8 +1,7 @@
 import json
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import FormRequest, Request
-from scrapy.http import JsonRequest
+from scrapy import FormRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
@@ -10,12 +9,12 @@ from locations.json_blob_spider import JSONBlobSpider
 
 
 class BurgerKingKRSpider(JSONBlobSpider):
-    download_timeout = 60
     name = "burger_king_kr"
     item_attributes = {"brand_wikidata": "Q177054"}
     locations_key = ["body", "storInfo"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.burgerking.co.kr/burgerking/BKR0343.json",
             headers={"accept": "*/*"},
@@ -63,7 +62,8 @@ class BurgerKingKRSpider(JSONBlobSpider):
 
         item["opening_hours"] = OpeningHours()
         for days_key, days_val in [("storTimeDays", DAYS_WEEKDAY), ("storTimeWeekend", DAYS_WEEKEND)]:
-            item["opening_hours"].add_days_range(days_val, *location[days_key].split("~"))
+            if location[days_key]:
+                item["opening_hours"].add_days_range(days_val, *location[days_key].split("~"))
 
         item["website"] = "https://www.burgerking.co.kr/store/{}".format(item["ref"])
 
