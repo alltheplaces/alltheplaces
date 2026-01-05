@@ -1,18 +1,19 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
-from scrapy import Selector
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class TiendasNetoMXSpider(scrapy.Spider):
+class TiendasNetoMXSpider(Spider):
     name = "tiendas_neto_mx"
     item_attributes = {"brand": "Neto", "brand_wikidata": "Q113205593"}
 
-    def start_requests(self):
-        yield scrapy.http.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://tiendasneto.com.mx/amlocator/index/ajax/",
             formdata={
                 "lat": "19.414388",

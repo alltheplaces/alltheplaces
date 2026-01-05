@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -22,6 +22,7 @@ class BurgerKingTHSpider(Spider):
             item["extras"]["addr:full:en"] = location["address_en"]
             item["state"] = None
 
+            apply_category(Categories.FAST_FOOD, item)
             services = [service["name"] for service in location["services"]]
             apply_yes_no(Extras.DELIVERY, item, "Delivery" in services)
             apply_yes_no(Extras.WIFI, item, "Wifi" in services)

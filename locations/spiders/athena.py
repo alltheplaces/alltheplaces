@@ -7,7 +7,7 @@ from locations.storefinders.storerocket import StoreRocketSpider
 
 class AthenaSpider(StoreRocketSpider):
     name = "athena"
-    item_attributes = {"brand": "Athena", "brand_wikidata": "Q135280046"}
+    item_attributes = {"brand": "Athena Bitcoin", "brand_wikidata": "Q135280046"}
     storerocket_id = "vZ4v6A94Qd"
     time_hours_format = 12
     iseadgg_countries_list = ["US", "SV", "CO", "AR"]

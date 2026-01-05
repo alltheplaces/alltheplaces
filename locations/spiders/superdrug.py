@@ -1,7 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -27,7 +26,7 @@ class SuperdrugSpider(Spider):
             callback=self.parse_api,
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse_api(self, response: Response, **kwargs: Any) -> Any:

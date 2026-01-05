@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
@@ -12,7 +14,7 @@ class A1HRSpider(Spider):
         "https://www.a1.hr/prodajna-mjesta?p_p_id=pos_WAR_pos&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=searchPos&p_p_cacheability=cacheLevelPage"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(
                 url=url,

@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -25,4 +26,5 @@ class BurgerKingCOSpider(Spider):
             item["branch"] = item.pop("name")
             # hours =location.get("schedules")
             # opening_hours don't match with Google Maps data, hence skipped.
+            apply_category(Categories.FAST_FOOD, item)
             yield item

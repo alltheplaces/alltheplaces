@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy import Selector, Spider
@@ -18,7 +19,7 @@ class TelenorDKSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 

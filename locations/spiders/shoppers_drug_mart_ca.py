@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -20,7 +20,7 @@ SHOPPERS_SIMPLY_PHARMACY = {
 class ShoppersDrugMartCASpider(Spider):
     name = "shoppers_drug_mart_ca"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for store_type in ["pharmaprix", "shoppersdrugmart"]:
             for city in city_locations("CA", 90000):
                 yield JsonRequest(

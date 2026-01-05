@@ -1,16 +1,17 @@
-import json
 from base64 import b64encode
-from typing import Iterable
+from json import dumps
+from typing import AsyncIterator
 
-import scrapy
 from pygeohash import encode
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
 
 
-class A101TRSpider(scrapy.Spider):
+class A101TRSpider(Spider):
     # TODO: due to a hard limit of 20 locations per request
     #       the spider is giving an incomplete output,
     #       5k locations instead of 13k.
@@ -23,13 +24,13 @@ class A101TRSpider(scrapy.Spider):
         "ROBOTSTXT_OBEY": False,
     }
 
-    def start_requests(self) -> Iterable[scrapy.Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in country_iseadgg_centroids("TR", 24):
             data = {"geoHash": encode(lat, lon, precision=9)}
-            data = b64encode(json.dumps(data).encode("utf-8"))
+            data = b64encode(dumps(data).encode("utf-8"))
             data = data.decode("utf-8")  # convert bytes back to string
             url_template = "https://rio.a101.com.tr/dbmk89vnr/CALL/StoreContentManager/nearestStores/default?__culture=tr-TR&__platform=web&data={}&__isbase64=true"
-            yield scrapy.Request(url=url_template.format(data), callback=self.parse)
+            yield Request(url=url_template.format(data), callback=self.parse)
 
     def parse(self, response):
         for poi in response.json().get("stores", []):
