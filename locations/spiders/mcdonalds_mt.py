@@ -39,7 +39,7 @@ class McdonaldsMTSpider(Spider):
                 apply_yes_no(Extras.DRIVE_THROUGH, item, "drive-thru" in services)
                 apply_yes_no(Extras.SELF_CHECKOUT, item, "self-ordering-kiosk" in services)
                 apply_yes_no(Extras.WHEELCHAIR, item, "wheel-chair-accessibility" in services)
-                            
+
             if "mccafe" in location["terms"]:
                 mccafe = item.deepcopy()
                 mccafe["ref"] = "{}-mccafe".format(item["ref"])
@@ -47,5 +47,5 @@ class McdonaldsMTSpider(Spider):
                 mccafe["brand_wikidata"] = "Q3114287"
                 apply_category(Categories.CAFE, mccafe)
                 yield mccafe
-            
+
             yield item
