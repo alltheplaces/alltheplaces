@@ -40,7 +40,7 @@ class MaesMobilityBENLSpider(scrapy.Spider):
         # Rebranded on 2 June 2025 from International Diesel Services to Q8Truck: https://www.q8truck.com/en/news/ids-becomes-q8truck
         "IDS": {"brand": "Q8Truck", "brand_wikidata": "Q125462248"},
         "GULF": {"brand": "Gulf", "brand_wikidata": "Q5617505"},
-        "PUMPY": {"brand": "Pumpy"}
+        "PUMPY": {"brand": "Pumpy"},
     }
 
     # Payment method mapping
