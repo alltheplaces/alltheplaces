@@ -60,8 +60,16 @@ class NatwestGBSpider(Spider):
                 else None
             )
 
-            if location.get("entityType") in ("location", "ce_mobileBranches"):
-                apply_category(Categories.BANK, item)
+            if location.get("entityType") == "location":
+                if item["name"].endswith("Banking Hub"):
+                    item["branch"] = item.pop("name").removesuffix("Banking Hub")
+                    item["name"] = "Banking Hub"
+                    apply_category(Categories.BANK, item)
+                else:
+                    item["branch"] = item.pop("name").removeprefix("NatWest")
+                    item["name"] = "NatWest"
+                    apply_category(Categories.BANK, item)
+
                 apply_yes_no(
                     Extras.ATM, item, location.get("c_externalATM") == "1" or location.get("c_internalATM") == "1"
                 )
@@ -72,10 +80,11 @@ class NatwestGBSpider(Spider):
                 item["extras"]["ref:facebook"] = location.get("facebookPageUrl", "").split("/")[-1]
                 item["extras"]["ref:google:place_id"] = location.get("googlePlaceId")
 
-                if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
-                    # not a phone number specific to given branch
-                    item["phone"] = None
-
+                item["phone"] = None
+            elif location.get("entityType") == "ce_mobileBranches":
+                item["branch"] = item.pop("name").removesuffix(" Mobile Branch")
+                item["name"] = "NatWest Mobile Branch"
+                apply_category(Categories.BANK, item)
             elif location.get("entityType") == "atm":
                 apply_category(Categories.ATM, item)
                 apply_yes_no(Extras.CASH_IN, item, location.get("c_cashdepositMachine") == "1")
