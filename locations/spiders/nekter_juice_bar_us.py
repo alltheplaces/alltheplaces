@@ -7,5 +7,5 @@ class NekterJuiceBarUSSpider(Where2GetItSpider):
         "brand_wikidata": "Q112826281",
         "brand": "Nékter Juice Bar",
     }
-    api_endpoint = "https://locations.nekterjuicebar.com/rest/getlist"
-    api_key = "1B5DBC6C-2A2B-11EE-843A-8413326043C3"
+    api_brand_name = "nektersites"
+    api_key = "AF0813FE-43DA-11EE-B2BD-FA7C2CD69500"

@@ -1,19 +1,20 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 
 
-class XlPartsSpider(scrapy.Spider):
+class XlPartsSpider(Spider):
     name = "xl_parts"
     item_attributes = {"brand": "XL Parts", "brand_wikidata": "Q123188576", "country": "US"}
     allowed_domains = ["www.xlparts.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.xlparts.com/en/locations"
-
-        yield scrapy.http.FormRequest(url=url, method="POST", callback=self.parse)
+        yield FormRequest(url=url, method="POST", callback=self.parse)
 
     def parse(self, response):
         stores = response.xpath('//div[contains(@id, "store")]')

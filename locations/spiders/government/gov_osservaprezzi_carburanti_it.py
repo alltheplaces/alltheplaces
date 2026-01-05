@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 from enum import Enum
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -105,7 +106,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
             fuel_tag = fuel_tag.value
         return re.sub(r"^fuel:", "charge:", fuel_tag)
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in point_locations("italy_grid_10km.csv"):
             yield JsonRequest(
                 "https://carburanti.mise.gov.it/ospzApi/search/zone",

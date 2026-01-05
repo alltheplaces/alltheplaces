@@ -1,9 +1,11 @@
 import csv
 import math
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -30,21 +32,21 @@ def calculate_offset_point(x, y, d, b):
     return math.degrees(new_x), math.degrees(new_y)
 
 
-class ScotiabankSpider(scrapy.Spider):
+class ScotiabankSpider(Spider):
     name = "scotiabank"
     allowed_domains = ["scotiabank.com"]
-    item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476", "extras": Categories.BANK.value}
+    item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476"}
     base_url = "https://mapsms.scotiabank.com/branches?1=1&latitude={lat}&longitude={lon}&recordlimit=20&locationtypes=1&options=&languagespoken=any&language=en&address=&province=&city="
     refs = set()
 
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         with open_searchable_points("ca_centroids_100mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for row in reader:
                 lat, lon = row["latitude"], row["longitude"]
-                yield scrapy.Request(
+                yield Request(
                     self.base_url.format(lat=lat, lon=lon),
                     meta={"request_x": lon, "request_y": lat},
                 )
@@ -78,7 +80,7 @@ class ScotiabankSpider(scrapy.Spider):
                         d=float(max_distance),
                         b=b,
                     )
-                    yield scrapy.Request(
+                    yield Request(
                         self.base_url.format(lat=new_y, lon=new_x),
                         meta={"request_x": new_x, "request_y": new_y},
                     )
@@ -107,4 +109,5 @@ class ScotiabankSpider(scrapy.Spider):
                 if hours:
                     properties["opening_hours"] = hours
 
+                apply_category(Categories.BANK, properties)
                 yield Feature(**properties)

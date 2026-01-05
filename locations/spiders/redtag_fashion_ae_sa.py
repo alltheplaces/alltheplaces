@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -15,7 +15,7 @@ class RedtagFashionAESASpider(Spider):
         "brand_wikidata": "Q132891092",
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         countries = ["Saudi Arabia", "UAE"]
         for country in countries:
             yield Request(
@@ -30,9 +30,8 @@ class RedtagFashionAESASpider(Spider):
             item["street_address"] = item.pop("addr_full")
 
             if hours := store.get("timming"):  # Note the misspelling in the API
-                oh = OpeningHours()
-                oh.add_ranges_from_string(hours)
-                item["opening_hours"] = oh
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(hours)
 
             apply_category(Categories.SHOP_CLOTHES, item)
 

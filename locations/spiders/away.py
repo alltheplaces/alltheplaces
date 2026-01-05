@@ -1,5 +1,4 @@
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
@@ -13,14 +12,21 @@ class AwaySpider(Spider):
     start_urls = ["https://www.awaytravel.com/pages/stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.xpath('//*[contains(@class,"flex md:justify-end w-full gap-md md:gap-lg")]'):
+        for button in response.xpath("//button[@data-mobile-store]"):
+            location_name = button.xpath("./@data-mobile-store").get()
+            footer = response.xpath(f"//div[@data-footer-store={location_name!r}]")
+            if not footer:
+                continue
+
             item = Feature()
-            item["addr_full"] = store.xpath(".//address/span/text()").get()
-            item["branch"] = store.xpath('.//*[@class="flex flex-col gap-sm"]/p/a[1]/text()').get()
-            item["phone"] = store.xpath('.//*[@class="flex flex-col gap-sm"]/p/a[2]/text()').get()
-            item["ref"] = item["website"] = urljoin(
-                "https://www.awaytravel.com", store.xpath('.//*[@class="flex flex-col gap-sm"]/p/a/@href').get()
-            )
-            item["lat"] = response.xpath(f"""//*[contains(@value,"{(item["branch"])}")]/@data-latitude""").get()
-            item["lon"] = response.xpath(f"""//*[contains(@value,"{item["branch"]}")]/@data-longitude""").get()
+            item["branch"] = location_name
+            item["ref"] = button.xpath("./@data-href").get().removeprefix("/pages/store/")
+            item["website"] = response.urljoin(button.xpath("./@data-href").get())
+            item["lat"] = button.xpath("./@data-latitude").get()
+            item["lon"] = button.xpath("./@data-longitude").get()
+
+            item["image"] = response.urljoin(footer.xpath(".//div[@class='footer-store__image']/img/@src").get())
+            item["phone"] = footer.xpath(".//a[starts-with(@href, 'tel:')]/@href").get()
+            item["addr_full"] = footer.xpath(".//address/*/text()").get()
+
             yield item

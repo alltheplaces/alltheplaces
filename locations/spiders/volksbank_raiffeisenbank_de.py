@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -14,7 +14,7 @@ class VolksbankRaiffeisenbankDESpider(Spider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"token": "2MEN71Lg25DxWLysCqC94b2H"}}
     template_url = "https://api.geno-datenhub.de/places?_latitude={lat}&_longitude={lon}&kind[]={category}&_per_page=1000&_page={page}&_radius=5000000"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in [(53.3964452, 10.4589624), (48.0927718, 10.5688257)]:
             for category in ["bank", "atm"]:
                 yield JsonRequest(

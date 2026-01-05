@@ -1,18 +1,20 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_IT, OpeningHours
 
 
 class TodisITSpider(Spider):
     name = "todis_it"
-    item_attributes = {"brand": "Todis", "brand_wikidata": "Q3992174", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Todis", "brand_wikidata": "Q3992174"}
     allowed_domains = ["www.todis.it"]
     start_urls = ["https://www.todis.it/wp-json/todis-stores/v1/stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, method="POST", callback=self.parse_store_list)
 
@@ -44,4 +46,5 @@ class TodisITSpider(Spider):
             if day_hours["a_2"] and day_hours["c_2"]:
                 item["opening_hours"].add_range(DAYS_IT[day_hours["g"]], day_hours["a_2"], day_hours["c_2"])
 
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
