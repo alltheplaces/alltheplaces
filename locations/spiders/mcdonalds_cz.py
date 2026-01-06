@@ -15,12 +15,7 @@ class McdonaldsCZSpider(scrapy.Spider):
         "https://restaurace.mcdonalds.cz/api?token=7983978c4175e5a88b9a58e5b5c6d105217fbc625b6c20e9a8eef3b8acc6204f",
     )
 
-    def parse_hours(self, item, poi, brand):
-        if brand == "mcdonalds":
-            opening_hours = poi.get("worktime")
-        elif brand == "mccafe":
-            opening_hours = poi.get("mccafe_worktime")
-
+    def parse_hours(self, item, opening_hours):
         if opening_hours:
             oh = OpeningHours()
             try:
@@ -28,8 +23,10 @@ class McdonaldsCZSpider(scrapy.Spider):
                     open, close = times.split(" - ")
                     oh.add_range(day, open.strip(), close.strip())
                 item["opening_hours"] = oh
+                return
             except:
                 self.logger.warning(f"Couldn't parse opening hours: {opening_hours}")
+        item["opening_hours"] = None
 
     def parse(self, response):
         pois = response.json().get("restaurants")
@@ -42,7 +39,7 @@ class McdonaldsCZSpider(scrapy.Spider):
             item["branch"] = item.pop("name")
             item["website"] = response.urljoin(poi["slug"])
             item["postcode"] = str(item["postcode"])
-            self.parse_hours(item, poi, "mcdonalds")
+            self.parse_hours(item, poi.get("worktime"))
             apply_yes_no(Extras.WIFI, item, "wifi" in poi["categories"])
             apply_yes_no(Extras.DRIVE_THROUGH, item, "mcdrive" in poi["categories"])
             apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "amex" in poi["categories"])
@@ -57,7 +54,7 @@ class McdonaldsCZSpider(scrapy.Spider):
                 mccafe["brand"] = "McCafé"
                 mccafe["brand_wikidata"] = "Q3114287"
                 apply_category(Categories.CAFE, mccafe)
-                self.parse_hours(mccafe, poi, "mccafe")
+                self.parse_hours(mccafe, poi.get("mccafe_worktime"))
                 yield mccafe
 
             yield item
