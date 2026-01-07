@@ -3,7 +3,7 @@ from typing import Iterable
 
 from chompjs import parse_js_object
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -20,7 +20,7 @@ class KlierHairGroupSpider(Spider):
     This class contains the common code to scrape all their brands.
     """
 
-    def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
         locations_re = re.compile(r"locations\.push\(\s*({.*?})\);", re.DOTALL)
         locations_javascript = response.xpath('//script/text()[contains(., "locations.push")]').re(locations_re)
         for location_javascript in locations_javascript:

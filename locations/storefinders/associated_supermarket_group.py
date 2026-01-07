@@ -6,12 +6,12 @@ Supermarket Group brands, including Met Foodmarket, Associated Supermarket,
 Compare Foods, and Pioneer Supermarket.
 """
 
-import json
 import re
-from typing import Iterable, List
+from json import JSONDecodeError, loads
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -32,16 +32,24 @@ class AssociatedSupermarketGroupSpider(Spider):
     """
 
     # Default values can be overridden by child classes
-    allowed_domains: List[str] = [
+    allowed_domains: list[str] = [
         "www.metfoods.com",
         "www.shopassociated.com",
         "www.shopcomparefoods.com",
         "www.pioneersupermarkets.com",
     ]
 
+    start_urls: list[str] = []
+
     # Set default operator information - can be overridden
-    operator = "Associated Supermarket Group"
-    operator_wikidata = "Q4809251"
+    operator: str = "Associated Supermarket Group"
+    operator_wikidata: str = "Q4809251"
+
+    async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0])
 
     def parse(self, response: Response) -> Iterable[Feature]:
         """Extract store information from the store locator page.
@@ -61,7 +69,7 @@ class AssociatedSupermarketGroupSpider(Spider):
             locations_json = re.search(r"var locations = (\[.*?\]);", js_data, re.DOTALL)
             if locations_json:
                 try:
-                    locations_data = json.loads(locations_json.group(1))
+                    locations_data = loads(locations_json.group(1))
                     # Create a dictionary to map store_id to coordinates
                     for location in locations_data:
                         store_id = location.get("storeID")
@@ -70,7 +78,7 @@ class AssociatedSupermarketGroupSpider(Spider):
                                 "lat": float(location["latitude"]),
                                 "lon": float(location["longitude"]),
                             }
-                except json.JSONDecodeError as e:
+                except JSONDecodeError as e:
                     self.logger.error(f"Failed to parse locations JSON data: {e}")
 
         stores = response.css("li.locator-store-item")
