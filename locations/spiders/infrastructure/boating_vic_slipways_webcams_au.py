@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
+
 class BoatingVicSlipwaysWebcamsAUSpider(ArcGISFeatureServerSpider):
     name = "boating_vic_slipways_webcams_au"
     host = "services8.arcgis.com"
@@ -18,7 +19,11 @@ class BoatingVicSlipwaysWebcamsAUSpider(ArcGISFeatureServerSpider):
         item["ref"] = feature["RampExID"]
         item["name"] = feature["RampName"]
         item["website"] = "https://www.boating.vic.gov.au/ramps/" + feature["Location_ID"]
-        yield JsonRequest(url="https://www.boating.vic.gov.au/api/v1/facilityDetails/" + feature["Location_ID"], meta={"item": item}, callback=self.parse_facility_details)
+        yield JsonRequest(
+            url="https://www.boating.vic.gov.au/api/v1/facilityDetails/" + feature["Location_ID"],
+            meta={"item": item},
+            callback=self.parse_facility_details,
+        )
 
     def parse_facility_details(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         facility = response.json()[0]
@@ -51,7 +56,11 @@ class BoatingVicSlipwaysWebcamsAUSpider(ArcGISFeatureServerSpider):
             yield ramp_item
 
         if facility["atleastOneActiveCamera"] or facility["atleastOneActiveCarparkCamera"]:
-            yield JsonRequest(url="https://www.boating.vic.gov.au/api/v1/cameraImages/" + facility["facilityId"], meta={"item": facility_item}, callback=self.parse_webcams)
+            yield JsonRequest(
+                url="https://www.boating.vic.gov.au/api/v1/cameraImages/" + facility["facilityId"],
+                meta={"item": facility_item},
+                callback=self.parse_webcams,
+            )
 
     def parse_webcams(self, response: TextResponse) -> Iterable[Feature]:
         # Note: webcam image URLs contain a timestamp and digital signature
@@ -70,8 +79,10 @@ class BoatingVicSlipwaysWebcamsAUSpider(ArcGISFeatureServerSpider):
             if m := re.search(r"\/(?:live|set)\/([^.]+)\.", camera["cameraliveimage"]):
                 camera_item["ref"] = m.group(1)
             else:
-                self.logger.warning("Could not locate camera ID in live image URL: {}".format(camera["cameraliveimage"]))
+                self.logger.warning(
+                    "Could not locate camera ID in live image URL: {}".format(camera["cameraliveimage"])
+                )
                 continue
-            camera_item["extras"]["contact:webcam"] = facility_item["website"],
+            camera_item["extras"]["contact:webcam"] = (facility_item["website"],)
             apply_category(Categories.SURVEILLANCE_CAMERA, camera_item)
             yield camera_item
