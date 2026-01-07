@@ -40,86 +40,93 @@ class UnoXNOSpider(Spider):
             item = DictParser.parse(location)
 
             item["ref"] = location.get("UnoxStationID")
-
             item["lat"] = location.get("Latitude")
             item["lon"] = location.get("Longitude")
             item["street_address"] = location.get("Address")
             item["postcode"] = location.get("Zip")
             item["city"] = location.get("City")
 
-            # Parse opening hours
-            if opening_hours_data := location.get("OpeningHours"):
-                oh = OpeningHours()
-                for rule in opening_hours_data:
-                    day = rule.get("Day")
-                    opens = rule.get("Opens")
-                    closes = rule.get("Closes")
-                    if day and opens and closes:
-                        day_normalized = sanitise_day(day, DAYS_EN)
-                        if day_normalized:
-                            # Format time strings (0600 -> 06:00)
-                            if len(opens) == 4 and opens.isdigit():
-                                opens = f"{opens[:2]}:{opens[2:]}"
-                            if len(closes) == 4 and closes.isdigit():
-                                closes = f"{closes[:2]}:{closes[2:]}"
-                            oh.add_range(day_normalized, opens, closes)
-                item["opening_hours"] = oh.as_opening_hours()
-            elif location.get("IsAlwaysOpen"):
-                item["opening_hours"] = "24/7"
-
-            # Parse fuel types from GasDetails string
-            if gas_details := location.get("GasDetails"):
-                gas_details_lower = gas_details.lower()
-                if "95" in gas_details_lower or "blyfri" in gas_details_lower:
-                    apply_yes_no(Fuel.OCTANE_95, item, True)
-                if "diesel" in gas_details_lower:
-                    apply_yes_no(Fuel.DIESEL, item, True)
-
-            # Parse services
-            if location.get("HasElectric"):
-                apply_yes_no(Fuel.ELECTRIC, item, True)
-            if location.get("HasWash"):
-                apply_yes_no(Extras.CAR_WASH, item, True)
-            if location.get("Has7Eleven"):
-                apply_yes_no("food", item, True)
-            if location.get("IsTruckFriendly") or location.get("IsPureTruckStop"):
-                apply_yes_no(Access.HGV, item, True)
-
-            # Parse truck products
-            if truck_products := location.get("TruckProductList"):
-                for product in truck_products:
-                    product_lower = product.lower()
-                    if "diesel" in product_lower:
-                        apply_yes_no(Fuel.HGV_DIESEL, item, True)
-                    if "avgfridiesel" in product_lower:
-                        apply_yes_no(Fuel.UNTAXED_DIESEL, item, True)
-                    if "adblue" in product_lower:
-                        apply_yes_no(Fuel.ADBLUE, item, True)
-                    if "hvo100" in product_lower:
-                        apply_yes_no(Fuel.BIODIESEL, item, True)
-
-            if truck_services := location.get("TruckServiceList"):
-                for service in truck_services:
-                    service_lower = service.lower()
-                    if "matservering" in service_lower:
-                        apply_yes_no("food", item, True)
-
-            # Determine category based on services provided
-            has_gas = location.get("HasGas")
-            has_electric = location.get("HasElectric")
-            has_wash = location.get("HasWash")
-
-            if has_gas:
-                # Has fuel (gas) - always a fuel station
-                apply_category(Categories.FUEL_STATION, item)
-            elif has_electric and not has_gas:
-                # Only electric charging, no fuel
-                apply_category(Categories.CHARGING_STATION, item)
-            elif has_wash and not has_gas and not has_electric:
-                # Only car wash, no fuel or charging
-                apply_category(Categories.CAR_WASH, item)
-            else:
-                # Default fallback
-                apply_category(Categories.FUEL_STATION, item)
+            self.parse_opening_hours(location, item)
+            self.parse_fuel_types(location, item)
+            self.parse_services(location, item)
+            self.parse_truck_products(location, item)
+            self.parse_truck_services(location, item)
+            self.apply_category(location, item)
 
             yield item
+
+    def parse_opening_hours(self, location: dict, item: Feature):
+        if opening_hours_data := location.get("OpeningHours"):
+            oh = OpeningHours()
+            for rule in opening_hours_data:
+                day = rule.get("Day")
+                opens = rule.get("Opens")
+                closes = rule.get("Closes")
+                if day and opens and closes:
+                    day_normalized = sanitise_day(day, DAYS_EN)
+                    if day_normalized:
+                        # Format time strings (0600 -> 06:00)
+                        if len(opens) == 4 and opens.isdigit():
+                            opens = f"{opens[:2]}:{opens[2:]}"
+                        if len(closes) == 4 and closes.isdigit():
+                            closes = f"{closes[:2]}:{closes[2:]}"
+                        oh.add_range(day_normalized, opens, closes)
+            item["opening_hours"] = oh.as_opening_hours()
+        elif location.get("IsAlwaysOpen"):
+            item["opening_hours"] = "24/7"
+
+    def parse_fuel_types(self, location: dict, item: Feature):
+        if gas_details := location.get("GasDetails"):
+            gas_details_lower = gas_details.lower()
+            if "95" in gas_details_lower or "blyfri" in gas_details_lower:
+                apply_yes_no(Fuel.OCTANE_95, item, True)
+            if "diesel" in gas_details_lower:
+                apply_yes_no(Fuel.DIESEL, item, True)
+
+    def parse_services(self, location: dict, item: Feature):
+        if location.get("HasElectric"):
+            apply_yes_no(Fuel.ELECTRIC, item, True)
+        if location.get("HasWash"):
+            apply_yes_no(Extras.CAR_WASH, item, True)
+        if location.get("Has7Eleven"):
+            apply_yes_no("food", item, True)
+        if location.get("IsTruckFriendly") or location.get("IsPureTruckStop"):
+            apply_yes_no(Access.HGV, item, True)
+
+    def parse_truck_products(self, location: dict, item: Feature):
+        if truck_products := location.get("TruckProductList"):
+            for product in truck_products:
+                product_lower = product.lower()
+                if "diesel" in product_lower:
+                    apply_yes_no(Fuel.HGV_DIESEL, item, True)
+                if "avgfridiesel" in product_lower:
+                    apply_yes_no(Fuel.UNTAXED_DIESEL, item, True)
+                if "adblue" in product_lower:
+                    apply_yes_no(Fuel.ADBLUE, item, True)
+                if "hvo100" in product_lower:
+                    apply_yes_no(Fuel.BIODIESEL, item, True)
+
+    def parse_truck_services(self, location: dict, item: Feature):
+        if truck_services := location.get("TruckServiceList"):
+            for service in truck_services:
+                service_lower = service.lower()
+                if "matservering" in service_lower:
+                    apply_yes_no("food", item, True)
+
+    def apply_category(self, location: dict, item: Feature):
+        has_gas = location.get("HasGas")
+        has_electric = location.get("HasElectric")
+        has_wash = location.get("HasWash")
+
+        if has_gas:
+            # Has fuel (gas) - always a fuel station
+            apply_category(Categories.FUEL_STATION, item)
+        elif has_electric and not has_gas:
+            # Only electric charging, no fuel
+            apply_category(Categories.CHARGING_STATION, item)
+        elif has_wash and not has_gas and not has_electric:
+            # Only car wash, no fuel or charging
+            apply_category(Categories.CAR_WASH, item)
+        else:
+            # Default fallback
+            apply_category(Categories.FUEL_STATION, item)
