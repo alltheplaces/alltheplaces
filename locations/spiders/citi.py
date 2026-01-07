@@ -14,6 +14,8 @@ class CitiSpider(Spider):
     allowed_domains = ["citi.com"]
     custom_settings = {"DOWNLOAD_DELAY": 1.5}
 
+    MONEY_PASS_BRAND = {"brand": "MoneyPass", "brand_wikidata": "Q28447513"}
+
     headers = {"client_id": "4a51fb19-a1a7-4247-bc7e-18aa56dd1c40"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -72,8 +74,11 @@ class CitiSpider(Spider):
                 "extras": {"type": feature["properties"]["type"]},
             }
 
-            if feature["properties"]["type"] in ["atm", "moneypassatm"]:
+            if feature["properties"]["type"] in ["atm"]:
                 apply_category(Categories.ATM, properties)
+            elif feature["properties"]["type"] in ["moneypassatm"]:
+                apply_category(Categories.ATM, properties)
+                properties.update(self.MONEY_PASS_BRAND)
             elif feature["properties"]["type"] == "branch":
                 apply_category(Categories.BANK, properties)
             elif feature["properties"]["type"] == "citifinancial":
