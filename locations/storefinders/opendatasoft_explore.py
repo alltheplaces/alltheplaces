@@ -39,10 +39,10 @@ class OpendatasoftExploreSpider(Spider):
          the schema of the dataset to omit, rename or replace a field.
     """
 
-    dataset_attributes = {"source": "api", "api": "opendatasoft"}
+    dataset_attributes: dict = {"source": "api", "api": "opendatasoft"}
 
-    api_endpoint: str = ""
-    dataset_id: str = ""
+    api_endpoint: str
+    dataset_id: str
     field_names: list[str] = []
 
     # ATP is not a robot in the way that robots.txt intends.
@@ -80,7 +80,9 @@ class OpendatasoftExploreSpider(Spider):
                     )
                     continue
                 output_field_names.append(field_name)
-            output_fields = ",".join(map(quote_plus, output_field_names))
+            output_fields = ""
+            for output_field_name in output_field_names:
+                output_fields = "{},{}".format(output_fields, quote_plus(output_field_name))
             url_parameters = f"?select={output_fields}"
 
         self.logger.info(

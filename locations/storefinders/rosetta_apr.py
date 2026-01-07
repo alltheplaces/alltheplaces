@@ -111,15 +111,19 @@ class RosettaAPRSpider(Spider):
     downloaded and the callback function called.
     """
 
+    start_urls: list[str] = []
     data_files: list[RosettaAPRDataFile] = []
     key: str | None = None
     iv: str | None = None
 
     async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
         if (not self.key or not self.iv) and True in [x[2] for x in self.data_files]:
             yield Request(url=self.start_urls[0], callback=self.parse_decryption_params)
         else:
-            async for request in self.request_data_files():
+            for request in self.request_data_files():
                 yield request
 
     def parse_decryption_params(self, response: Response) -> Iterable[Request]:
@@ -148,18 +152,18 @@ class RosettaAPRSpider(Spider):
                 if self.key and self.iv:
                     break
         if not self.key or not self.iv:
-            raise Exception(
+            raise RuntimeError(
                 "Could not automatically locate required AES256-CBC key and IV values for decrypting data files."
             )
             return
         yield from self.request_data_files()
 
-    async def request_data_files(self) -> AsyncIterator[Request]:
+    def request_data_files(self) -> Iterable[Request]:
         for data_file in self.data_files:
-            async for request in self.request_data_file(data_file=data_file):
+            for request in self.request_data_file(data_file=data_file):
                 yield request
 
-    async def request_data_file(self, data_file: RosettaAPRDataFile, meta: dict = {}) -> AsyncIterator[Request]:
+    def request_data_file(self, data_file: RosettaAPRDataFile, meta: dict = {}) -> Iterable[Request]:
         new_meta = meta.copy()
         new_meta.update({"data_file": data_file})
         if data_file.url.startswith("https://") or data_file.url.startswith("http://"):
@@ -207,7 +211,7 @@ class RosettaAPRSpider(Spider):
                     items, data_file = callback_function(features, response.meta["existing_features"])
                     yield from self.request_data_file(data_file=data_file, meta={"existing_features": items})
                 else:
-                    raise Exception(
+                    raise TypeError(
                         'Invalid callback function signature for callback function "{}".'.format(callback_function_name)
                     )
             else:
@@ -226,11 +230,11 @@ class RosettaAPRSpider(Spider):
                     items, data_file = callback_function(features)
                     yield from self.request_data_file(data_file=data_file, meta={"existing_features": items})
                 else:
-                    raise Exception(
+                    raise TypeError(
                         'Invalid callback function signature for callback function "{}".'.format(callback_function_name)
                     )
         else:
-            raise Exception(
+            raise TypeError(
                 'Invalid callback function signature for callback function "{}".'.format(callback_function_name)
             )
 
@@ -244,6 +248,11 @@ class RosettaAPRSpider(Spider):
         column_headings: list[str] | None = None,
     ) -> list[dict]:
         if encrypted:
+            if self.key is None or self.iv is None:
+                raise ValueError(
+                    "Encrypted file encountered however the key and IV could not be extracted automatically and they were not specified manually. Specify the key and iv attributes manually for this spider."
+                )
+                return []
             ciphertext = b64decode(raw_data_file.decode("utf-8"))
             unpadded_plaintext = decrypt_aes256cbc_pkcs7(ciphertext=ciphertext, key=self.key, iv=self.iv)
             if archive_format == "zip" and archive_filename is not None:
@@ -255,7 +264,7 @@ class RosettaAPRSpider(Spider):
         elif archive_format == "zip" and archive_filename is not None:
             data_file_bytes = unzip_file_from_archive(compressed_data=raw_data_file, file_path=archive_filename)
         elif archive_format:
-            raise Exception("Unknown archive format for data file: {}.".format(archive_format))
+            raise ValueError("Unknown archive format for data file: {}.".format(archive_format))
             return []
         else:
             data_file_bytes = raw_data_file
@@ -275,6 +284,6 @@ class RosettaAPRSpider(Spider):
                     feature.update(feature["properties"])
                     del feature["properties"]
             case _:
-                raise Exception("Unknown file type for data file: {}.".format(file_type))
+                raise ValueError("Unknown file type for data file: {}.".format(file_type))
 
         return features
