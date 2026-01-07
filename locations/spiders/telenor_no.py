@@ -9,7 +9,7 @@ from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 
 
-class TelenorNoSpider(Spider):
+class TelenorNOSpider(Spider):
     name = "telenor_no"
     allowed_domains = ["store.telenor.no"]
     item_attributes = {
