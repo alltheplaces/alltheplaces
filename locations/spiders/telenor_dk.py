@@ -44,9 +44,7 @@ class TelenorDKSpider(Spider):
             html = Selector(text=store.get("html"))
 
             address_lines = [
-                line.strip()
-                for line in html.xpath("//div/div/div[1]/div/p/text()").getall()
-                if line and line.strip()
+                line.strip() for line in html.xpath("//div/div/div[1]/div/p/text()").getall() if line and line.strip()
             ]
             if address_lines:
                 item["addr_full"] = re.sub(r"\s+", " ", ", ".join(address_lines))
@@ -56,7 +54,9 @@ class TelenorDKSpider(Spider):
 
             if hours_string := " ".join(html.xpath("//div/div/div[3]/div//text()").getall()).strip():
                 item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_DK, named_day_ranges=NAMED_DAY_RANGES_DK)
+                item["opening_hours"].add_ranges_from_string(
+                    hours_string, days=DAYS_DK, named_day_ranges=NAMED_DAY_RANGES_DK
+                )
 
             if website := item.get("website"):
                 item["website"] = urljoin("https://telenor.dk", website)

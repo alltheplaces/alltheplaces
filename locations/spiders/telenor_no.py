@@ -5,12 +5,11 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 
 
-class TelenorNoSpider(  Spider):
+class TelenorNoSpider(Spider):
     name = "telenor_no"
     allowed_domains = ["store.telenor.no"]
     item_attributes = {
@@ -32,7 +31,7 @@ class TelenorNoSpider(  Spider):
             # Get branch name by removing common store prefix
             item["branch"] = store.get("name").removeprefix("Telenorbutikken ").strip()
 
-            # Add city and shopping centre info 
+            # Add city and shopping centre info
             if address := store.get("address"):
                 item["city"] = address.get("postalArea")
                 if shopping_centre := address.get("shoppingCentre"):
@@ -45,7 +44,6 @@ class TelenorNoSpider(  Spider):
                 slug = slug.translate(str.maketrans({"ø": "o", "æ": "ae", "å": "aa"}))
                 slug = "-".join(slug.split())
                 item["website"] = f"https://www.telenor.no/telenorbutikken/{slug}"
-
 
             # Get and format opening hours
             if opening_hours := store.get("openingHours"):
