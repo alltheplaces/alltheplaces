@@ -83,6 +83,6 @@ class BoatingVicSlipwaysWebcamsAUSpider(ArcGISFeatureServerSpider):
                     "Could not locate camera ID in live image URL: {}".format(camera["cameraliveimage"])
                 )
                 continue
-            camera_item["extras"]["contact:webcam"] = (facility_item["website"],)
+            camera_item["extras"]["contact:webcam"] = facility_item["website"]
             apply_category(Categories.SURVEILLANCE_CAMERA, camera_item)
             yield camera_item
