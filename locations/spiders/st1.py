@@ -164,17 +164,17 @@ class St1Spider(Spider):
 
                     item["opening_hours"] = oh.as_opening_hours()
 
-                # Shared collections with safe defaults
-                self.parse_attribute(item, station.get("fuels") or [], "fuels", CATEGORIES_MAPPING)
-                self.parse_attribute(item, station.get("chargings") or [], "chargings", CATEGORIES_MAPPING)
-                self.parse_attribute(item, station.get("services") or [], "services", CATEGORIES_MAPPING)
-                self.parse_attribute(item, station.get("trucks") or [], "trucks", CATEGORIES_MAPPING)
+                # Additional attributes from categories mapping
+                self.parse_attribute(item, station.get("fuels") or [], CATEGORIES_MAPPING)
+                self.parse_attribute(item, station.get("chargings") or [], CATEGORIES_MAPPING)
+                self.parse_attribute(item, station.get("services") or [], CATEGORIES_MAPPING)
+                self.parse_attribute(item, station.get("trucks") or [], CATEGORIES_MAPPING)
 
                 apply_category(Categories.FUEL_STATION, item)
 
                 yield item
 
-    def parse_attribute(self, item, values: list, attribute_name, mapping: dict):
+    def parse_attribute(self, item, values: list, mapping: dict):
         for value in values:
             if tags := mapping.get(value):
                 if isinstance(tags, (list, tuple)):
