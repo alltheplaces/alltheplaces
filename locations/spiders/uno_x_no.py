@@ -1,8 +1,8 @@
-import json
-from typing import Iterable
+from typing import Any
 
+import chompjs
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 
 from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -13,24 +13,11 @@ from locations.items import Feature
 class UnoXNOSpider(Spider):
     name = "uno_x_no"
     allowed_domains = ["unox.no"]
-    item_attributes = {
-        "brand": "Uno-X",
-        "brand_wikidata": "Q3362746",
-    }
+    item_attributes = {"brand": "Uno-X", "brand_wikidata": "Q3362746"}
+    start_urls = ["https://unox.no/umbraco/surface/MapData/Locations"]
 
-    def start_requests(self):
-        yield JsonRequest(url="https://unox.no/umbraco/surface/MapData/Locations")
-
-    def parse(self, response) -> Iterable[Feature]:
-        data = response.text
-
-        # Remove the JavaScript variable assignment
-        if data.startswith("var mapLocations = "):
-            data = data[len("var mapLocations = ") :]
-        if data.endswith(";"):
-            data = data[:-1]
-
-        locations = json.loads(data)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        locations = chompjs.parse_js_object(response.text)
 
         for location in locations:
             # Filter out other brand networks
@@ -38,13 +25,10 @@ class UnoXNOSpider(Spider):
                 continue
 
             item = DictParser.parse(location)
+            item["street_address"] = item.pop("addr_full")
+            item["branch"] = item.pop("name").removeprefix("Uno-X ")
 
             item["ref"] = location.get("UnoxStationID")
-            item["lat"] = location.get("Latitude")
-            item["lon"] = location.get("Longitude")
-            item["street_address"] = location.get("Address")
-            item["postcode"] = location.get("Zip")
-            item["city"] = location.get("City")
 
             self.parse_opening_hours(location, item)
             self.parse_fuel_types(location, item)
@@ -71,7 +55,7 @@ class UnoXNOSpider(Spider):
                         if len(closes) == 4 and closes.isdigit():
                             closes = f"{closes[:2]}:{closes[2:]}"
                         oh.add_range(day_normalized, opens, closes)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         elif location.get("IsAlwaysOpen"):
             item["opening_hours"] = "24/7"
 
