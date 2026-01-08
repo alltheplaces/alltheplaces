@@ -49,7 +49,7 @@ BRANDS_MAPPING = {
     "EX-OMV": ("MOL", "Q549181"),
     "TIFON": ("Tifon", None),
     "ENERGOPETROL": ("Energopetrol", "Q120433"),
-    "SHELL": ("Shell", "Q110716465")
+    "SHELL": ("Shell", "Q110716465"),
 }
 
 FUEL_MAPPING = {
