@@ -26,7 +26,10 @@ class UnoXNOSpider(Spider):
 
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full")
-            item["branch"] = item.pop("name").removeprefix("Uno-X ")
+            item["branch"] = item.pop("name").removeprefix("Uno-X ").removeprefix("Truck ").removeprefix("EL ")
+            if item["branch"].startswith("7-Eleven "):
+                item["located_in"] = "7-Eleven"
+                item["branch"] = item["branch"].removeprefix("7-Eleven ")
 
             item["ref"] = location.get("UnoxStationID")
 
@@ -105,9 +108,12 @@ class UnoXNOSpider(Spider):
         if has_gas:
             # Has fuel (gas) - always a fuel station
             apply_category(Categories.FUEL_STATION, item)
+            apply_yes_no(Fuel.ELECTRIC, item, has_electric)
+            apply_yes_no(Extras.CAR_WASH, item, has_wash)
         elif has_electric and not has_gas:
             # Only electric charging, no fuel
             apply_category(Categories.CHARGING_STATION, item)
+            apply_yes_no(Extras.CAR_WASH, item, has_wash)
         elif has_wash and not has_gas and not has_electric:
             # Only car wash, no fuel or charging
             apply_category(Categories.CAR_WASH, item)
