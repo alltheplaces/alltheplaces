@@ -1,5 +1,4 @@
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import quote
 
 from scrapy.http import JsonRequest, Response
 
@@ -11,15 +10,41 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
 
 
-class CostcoAUSpider(JSONBlobSpider):
-    name = "costco_au"
+class CostcoSpider(JSONBlobSpider):
+    name = "costco"
     item_attributes = COSTCO_SHARED_ATTRIBUTES
-    allowed_domains = ["www.costco.com.au"]
     locations_key = "stores"
 
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(
             url="https://www.costco.com.au/rest/v2/australia/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.es/rest/v2/spain/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.is/rest/v2/iceland/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.fr/rest/v2/france/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.co.jp/rest/v2/japan/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.co.kr/rest/v2/korea/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.com.mx/rest/v2/mexico/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.co.nz/rest/v2/newzealand/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.se/rest/v2/sweden/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
+        )
+        yield JsonRequest(
+            url="https://www.costco.com.tw/rest/v2/taiwan/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
         )
 
     def pre_process_data(self, feature: dict) -> None:
@@ -28,9 +53,11 @@ class CostcoAUSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["warehouseCode"]
         item["branch"] = feature["displayName"]
+        if isinstance(item.get("state"), dict):
+            item["state"] = item.get("state")["name"]
         item.pop("name", None)
+        item.pop("website", None)
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
-        item["website"] = f'https://www.costco.com.au/store-finder/{quote(item["branch"])}'
 
         warehouse = item.deepcopy()
 
