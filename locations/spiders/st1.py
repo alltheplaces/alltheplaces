@@ -1,13 +1,12 @@
-from typing import AsyncIterator, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
-from locations.items import Feature
 
 CATEGORIES_MAPPING = {
     # Octane 95
@@ -89,10 +88,8 @@ CATEGORIES_MAPPING = {
 class St1Spider(Spider):
     name = "st1"
     allowed_domains = ["st1.fi", "st1.no", "st1.se"]
-    item_attributes = {
-        "brand": "St1",
-        "brand_wikidata": "Q7592214",
-    }
+    ST1 = {"brand": "St1", "brand_wikidata": "Q7592214"}
+    HELMISIMPUKKA = {"brand": "HelmiSimpukka"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         configs = [
@@ -120,7 +117,7 @@ class St1Spider(Spider):
                 meta={"base_url": cfg["base_url"]},
             )
 
-    def parse(self, response) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
         base_url = response.meta.get("base_url", "")
 
@@ -141,6 +138,17 @@ class St1Spider(Spider):
 
                 # Parse basic fields
                 item = DictParser.parse(station)
+                item["street_address"] = item.pop("street")
+
+                if item["name"].startswith("HelmiSimpukka Express"):
+                    item.update(self.HELMISIMPUKKA)
+                    apply_category(Categories.FAST_FOOD, item)
+                    item["branch"] = item.pop("name").removeprefix("HelmiSimpukka Express")
+                    item["name"] = "HelmiSimpukka Express"
+                elif item["name"].strip().startswith("St1 ") or item["name"].startswith("ST1 "):
+                    item.update(self.ST1)
+                    apply_category(Categories.FUEL_STATION, item)
+                    item["branch"] = item.pop("name").removeprefix("St1 ").removeprefix("ST1 ")
 
                 # Website
                 if path := entry.get("path"):
@@ -169,8 +177,6 @@ class St1Spider(Spider):
                 self.parse_attribute(item, station.get("chargings") or [], CATEGORIES_MAPPING)
                 self.parse_attribute(item, station.get("services") or [], CATEGORIES_MAPPING)
                 self.parse_attribute(item, station.get("trucks") or [], CATEGORIES_MAPPING)
-
-                apply_category(Categories.FUEL_STATION, item)
 
                 yield item
 
