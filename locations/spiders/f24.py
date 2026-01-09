@@ -3,7 +3,7 @@ from typing import Iterable
 import chompjs
 from scrapy.http import TextResponse
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -42,6 +42,15 @@ class F24Spider(JSONBlobSpider):
             item.update(brand)
 
         apply_category(Categories.FUEL_STATION, item)
+
+        services = [service["specificTag"] for service in feature.get("allServices", [])]
+        apply_yes_no(Extras.CAR_WASH, item, any("CAR_WASH" in service for service in services))
+        apply_yes_no(Fuel.OCTANE_95, item, "FUEL_GO_EASY_95" in services)
+        apply_yes_no(Fuel.OCTANE_98, item, "FUEL_GO_EASY_98_EXTRA" in services)
+        apply_yes_no(Fuel.BIODIESEL, item, "FUEL_DIESEL_BIO_HVO_100" in services)
+        apply_yes_no(Fuel.ADBLUE, item, any("FUEL_AD_BLUE" in service for service in services))
+        apply_yes_no(Fuel.DIESEL, item, any("FUEL_GO_EASY_DIESEL" in service for service in services))
+        apply_yes_no(Fuel.ELECTRIC, item, any("CHARGE_QUICK_CHARGE" in service for service in services))
 
         yield item
 
