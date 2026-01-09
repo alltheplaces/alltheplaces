@@ -10,7 +10,7 @@ from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
-from locations.structured_data_spider import extract_email, extract_phone, extract_facebook
+from locations.structured_data_spider import extract_email, extract_facebook, extract_phone
 
 
 class RedcrossGBSpider(SitemapSpider):
