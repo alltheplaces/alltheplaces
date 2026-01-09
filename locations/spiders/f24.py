@@ -31,6 +31,7 @@ class F24Spider(JSONBlobSpider):
         if "https://test." in feature["stationPageUrl"]:
             return
         item["street_address"] = item.pop("street")
+        item["branch"] = item.pop("name").split(",")[0]
         item["website"] = feature["stationPageUrl"]
 
         item["opening_hours"] = OpeningHours()
