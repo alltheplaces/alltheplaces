@@ -27,7 +27,7 @@ class HongkongPostPostboxesHKSpider(ArcGISFeatureServerSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.POST_BOX, item)
-        ref = self.postbox_ref_regex.match(feature["NAME_EN"].lower)
+        ref = self.postbox_ref_regex.match(feature["NAME_EN"].lower())
         if ref is None:
             self.logger.warning("Ref not found for postbox: {}".format(feature["NAME_EN"]))
         else:
