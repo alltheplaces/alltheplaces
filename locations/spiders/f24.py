@@ -33,13 +33,9 @@ class F24Spider(JSONBlobSpider):
         item["street_address"] = item.pop("street")
         item["website"] = feature["stationPageUrl"]
 
-        if feature.get("openingHours"):
-            if feature["openingHours"]["AlwaysOpen"]:
-                item["opening_hours"] = "24/7"
-            else:
-                item["opening_hours"] = OpeningHours()
-                for rule in ["WeekDays", "Saturday", "Sunday"]:
-                    self.add_rule(item["opening_hours"], rule, feature["openingHours"].get(rule))
+        item["opening_hours"] = OpeningHours()
+        for rule in ["Weekday", "Saturday", "Sunday"]:
+            self.add_rule(item["opening_hours"], rule, feature.get(f"openHours{rule}"))
 
         if brand := self.BRANDS.get(feature["network"]):
             item.update(brand)
@@ -49,10 +45,11 @@ class F24Spider(JSONBlobSpider):
         yield item
 
     @staticmethod
-    def add_rule(oh: OpeningHours, day: str, rule: dict):
-        if rule.get("Closed"):
-            return
-        if day == "WeekDays":
-            oh.add_days_range(DAYS[:5], rule["From"], rule["To"])
-        else:
-            oh.add_range(day, rule["From"], rule["To"])
+    def add_rule(oh: OpeningHours, day: str, rule: dict) -> None:
+        if rule.get("open") and rule.get("close"):
+            open_time, close_time = [hours.replace(".", ":") for hours in [rule["open"], rule["close"]]]
+            close_time = close_time.replace("00:00", "23:59")
+            if day == "Weekday":
+                oh.add_days_range(DAYS[:5], open_time, close_time)
+            else:
+                oh.add_range(day, open_time, close_time)
