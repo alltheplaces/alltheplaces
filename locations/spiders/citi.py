@@ -23,6 +23,7 @@ from locations.spiders.giant_eagle_us import GiantEagleUSSpider
 from locations.spiders.giant_food_us import GiantFoodUSSpider
 from locations.spiders.h_e_b_us import HEBUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
+from locations.spiders.kwik_trip import BRANDS as KWIK_TRIP_BRANDS
 from locations.spiders.mapco_us import MapcoUSSpider
 from locations.spiders.marcs import MarcsSpider
 from locations.spiders.market_basket_us import MarketBasketUSSpider
@@ -41,9 +42,8 @@ from locations.spiders.target_us import TargetUSSpider
 from locations.spiders.united_dairy_farmers_us import UnitedDairyFarmersUSSpider
 from locations.spiders.walgreens import WalgreensSpider
 from locations.spiders.wawa import WawaSpider
-from locations.spiders.winn_dixie_us import WinnDixieUSSpider
 from locations.spiders.wegmans_us import WegmansUSSpider
-from locations.spiders.kwik_trip import BRANDS as KWIK_TRIP_BRANDS
+from locations.spiders.winn_dixie_us import WinnDixieUSSpider
 
 
 class CitiSpider(Spider):
