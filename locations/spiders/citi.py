@@ -290,9 +290,7 @@ class CitiSpider(Spider):
             properties["located_in"] = KWIK_TRIP_BRANDS["KWIK TRIP"]["brand"]
             properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["KWIK TRIP"]["brand_wikidata"]
         elif "STOP N GO" in name_upper:
-            properties["located_in"] = KWIK_TRIP_BRANDS["STOP N GO"].get(
-                "brand", KWIK_TRIP_BRANDS["STOP N GO"]["name"]
-            )
+            properties["located_in"] = KWIK_TRIP_BRANDS["STOP N GO"].get("brand", KWIK_TRIP_BRANDS["STOP N GO"]["name"])
             properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["STOP N GO"].get("brand_wikidata")
 
     async def start(self) -> AsyncIterator[JsonRequest]:
