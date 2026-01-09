@@ -28,7 +28,7 @@ class F24Spider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        if "https://test." in feature["stationPageUrl"]:
+        if "test." in feature["stationPageUrl"]:
             return
         item["street_address"] = item.pop("street")
         item["branch"] = item.pop("name").split(",")[0]
