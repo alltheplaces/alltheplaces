@@ -23,11 +23,11 @@ class HongkongPostPostboxesHKSpider(ArcGISFeatureServerSpider):
     context_path = "server"
     service_id = "common/hkpo_rcd_1638773801007_13653"
     layer_id = "0"
-    postbox_ref_regex = re.compile(r"(?:^Street Posting Box No. )(.*$)")
+    postbox_ref_regex = re.compile(r"(?:(?:^street posting box)(?:es)? no.? ?)(.*$)")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.POST_BOX, item)
-        ref = self.postbox_ref_regex.match(feature["NAME_EN"])
+        ref = self.postbox_ref_regex.match(feature["NAME_EN"].lower)
         if ref is None:
             self.logger.warning("Ref not found for postbox: {}".format(feature["NAME_EN"]))
         else:
