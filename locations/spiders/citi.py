@@ -57,27 +57,27 @@ class CitiSpider(Spider):
     BANK_OPERATORS = {
         "PNC BANK": {
             "brand": PncBankUSSpider.item_attributes["brand"],
-            "brand_wikdata": PncBankUSSpider.item_attributes["brand_wikidata"],
+            "brand_wikidata": PncBankUSSpider.item_attributes["brand_wikidata"],
         },
         "PNC AT WAWA": {
             "brand": PncBankUSSpider.item_attributes["brand"],
-            "brand_wikdata": PncBankUSSpider.item_attributes["brand_wikidata"],
+            "brand_wikidata": PncBankUSSpider.item_attributes["brand_wikidata"],
         },
         "PNC AT SHEETZ": {
             "brand": PncBankUSSpider.item_attributes["brand"],
-            "brand_wikdata": PncBankUSSpider.item_attributes["brand_wikidata"],
+            "brand_wikidata": PncBankUSSpider.item_attributes["brand_wikidata"],
         },
         "PNC AT QUICKCHEK": {
             "brand": PncBankUSSpider.item_attributes["brand"],
-            "brand_wikdata": PncBankUSSpider.item_attributes["brand_wikidata"],
+            "brand_wikidata": PncBankUSSpider.item_attributes["brand_wikidata"],
         },
         "PNC AT UDF": {
             "brand": PncBankUSSpider.item_attributes["brand"],
-            "brand_wikdata": PncBankUSSpider.item_attributes["brand_wikidata"],
+            "brand_wikidata": PncBankUSSpider.item_attributes["brand_wikidata"],
         },
         "PEOPLES BANK": {
             "brand": PeoplesBankUSSpider.item_attributes["brand"],
-            "brand_wikdata": PeoplesBankUSSpider.item_attributes["brand_wikidata"],
+            "brand_wikidata": PeoplesBankUSSpider.item_attributes["brand_wikidata"],
         },
         "CAPITAL CITY BANK": {"brand": "Capital City Bank", "brand_wikidata": "Q5035079"},
         "FIRST INTERSTATE BANK 09": {"brand": "First Interstate Bank", "brand_wikidata": "Q5453107"},
@@ -105,7 +105,7 @@ class CitiSpider(Spider):
         "FIRSTBANK": {"brand": "First Bank", "brand_wikidata": "Q5452332"},
         "CAPITAL ONE": {
             "brand": CapitalOneSpider.item_attributes["brand"],
-            "brand_wikidata": CapitalOneSpider.item_attributes["brand"],
+            "brand_wikidata": CapitalOneSpider.item_attributes["brand_wikidata"],
         },
     }
 
@@ -282,14 +282,18 @@ class CitiSpider(Spider):
             properties["located_in"] = KWIK_TRIP_BRANDS["KWIK STAR"]["brand"]
             properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["KWIK STAR"]["brand_wikidata"]
         elif "KWIK TRIP TOBACCO OUTLET" in name_upper:
-            properties["located_in"] = KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"]["brand"]
-            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"]["brand_wikidata"]
+            properties["located_in"] = KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"].get(
+                "brand", KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"]["name"]
+            )
+            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"].get("brand_wikidata")
         elif "KWIK TRIP" in name_upper:
             properties["located_in"] = KWIK_TRIP_BRANDS["KWIK TRIP"]["brand"]
             properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["KWIK TRIP"]["brand_wikidata"]
         elif "STOP N GO" in name_upper:
-            properties["located_in"] = KWIK_TRIP_BRANDS["STOP N GO"]["brand"]
-            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["STOP N GO"]["brand_wikidata"]
+            properties["located_in"] = KWIK_TRIP_BRANDS["STOP N GO"].get(
+                "brand", KWIK_TRIP_BRANDS["STOP N GO"]["name"]
+            )
+            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["STOP N GO"].get("brand_wikidata")
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         with open_searchable_points("us_centroids_100mile_radius_state.csv") as points:
