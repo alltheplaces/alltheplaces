@@ -109,6 +109,59 @@ class CitiSpider(Spider):
         },
     }
 
+    LOCATED_IN_MAPPINGS = [
+        (["KWIK TRIP TOBACCO OUTLET"], KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"]),
+        (["KWIK STAR"], KWIK_TRIP_BRANDS["KWIK STAR"]),
+        (["KWIK TRIP"], KWIK_TRIP_BRANDS["KWIK TRIP"]),
+        (["STOP N GO"], KWIK_TRIP_BRANDS["STOP N GO"]),
+        (["GIANT FOOD"], GiantFoodUSSpider.item_attributes),
+        (["GIANT EAGLE"], GiantEagleUSSpider.GIANT_EAGLE),
+        (["WAWA"], WawaSpider.item_attributes),
+        (["SHEETZ"], SheetzSpider.item_attributes),
+        (["UDF"], UnitedDairyFarmersUSSpider.item_attributes),
+        (["QUICKCHEK"], QuickchekUSSpider.item_attributes),
+        (["7ELEVEN", "7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["WALGREENS"], WalgreensSpider.WALGREENS),
+        (["CVS"], CVS_BRANDS["CVS Pharmacy"]),
+        (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
+        (["SPEEDWAY"], SpeedwayUSSpider.item_attributes),
+        (["TARGET"], TargetUSSpider.item_attributes),
+        (["CASEY"], CaseysGeneralStoreSpider.item_attributes),
+        (["COSTCO"], {"brand": "Costco", "brand_wikidata": COSTCO_SHARED_ATTRIBUTES["brand_wikidata"]}),
+        (["AMPM"], AmpmUSSpider.item_attributes),
+        (["MAPCO"], MapcoUSSpider.item_attributes),
+        (["CERTIFIED"], {"brand": "Certified", "brand_wikidata": "Q100148356"}),
+        (["HARRIS TEETER", "HARRISTEETER"], KROGER_BRANDS["https://www.harristeeter.com/"]),
+        (["FRED MEYER", "FREDMEYER"], KROGER_BRANDS["https://www.fredmeyer.com/"]),
+        (["FOOD 4 LESS", "FOOD4LESS"], KROGER_BRANDS["https://www.food4less.com/"]),
+        (["CITY MARKET", "CITYMARKET"], KROGER_BRANDS["https://www.citymarket.com/"]),
+        (["KROGER"], KROGER_BRANDS["https://www.kroger.com/"]),
+        (["RALPH"], KROGER_BRANDS["https://www.ralphs.com/"]),
+        (["FRY"], KROGER_BRANDS["https://www.frysfood.com/"]),
+        (["SMITH"], KROGER_BRANDS["https://www.smithsfoodanddrug.com/"]),
+        (["DILLONS"], KROGER_BRANDS["https://www.dillons.com/"]),
+        (["QFC"], KROGER_BRANDS["https://www.qfc.com/"]),
+        (["ROYAL FARMS"], RoyalFarmsSpider.item_attributes),
+        (["HEB", "H-E-B"], HEBUSSpider.item_attributes),
+        (["SAFEWAY"], SafewaySpider.item_attributes),
+        (["WEGMANS"], WegmansUSSpider.item_attributes),
+        (["GETGO", "GET GO"], GiantEagleUSSpider.GET_GO),
+        (["MARCS"], MarcsSpider.item_attributes),
+        (["FOOD CITY", "FOODCITY"], FoodCitySoutheastUSSpider.item_attributes),
+        (["QUIK STOP", "QUIKSTOP"], EgAmericaUSSpider.brands[11]),
+        (["KWIK SHOP", "KWIKSHOP"], EgAmericaUSSpider.brands[18]),
+        (["LOAF 'N JUG", "LOAF N JUG", "LOAFNJUG"], EgAmericaUSSpider.brands[19]),
+        (["EXXON"], ExxonMobilSpider.brands["Exxon"]),
+        (["RACETRAC", "RACE TRAC"], RaceTracUSSpider.item_attributes),
+        (["WINN DIXIE", "WINNDIXIE", "WINN-DIXIE"], WinnDixieUSSpider.item_attributes),
+        (["TOM THUMB", "TOMTHUMB"], AlbertsonsSpider.brands["tomthumb"]),
+        (["CHEVRON"], CHEVRON_BRANDS["Chevron"][0]),
+        (["SUNOCO"], SunocoUSSpider.item_attributes),
+        (["MARKET BASKET", "MARKETBASKET"], MarketBasketUSSpider.item_attributes),
+        (["VONS"], AlbertsonsSpider.brands["vons"]),
+        (["BROOKSHIRES"], BrookshiresUSSpider.item_attributes),
+    ]
+
     headers = {"client_id": "4a51fb19-a1a7-4247-bc7e-18aa56dd1c40"}
 
     def set_atm_operator(self, properties: dict, name: str) -> None:
@@ -139,159 +192,11 @@ class CitiSpider(Spider):
 
     def set_atm_located_in(self, properties: dict, name: str) -> None:
         name_upper = name.upper()
-
-        if "WAWA" in name_upper:
-            properties["located_in"] = WawaSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = WawaSpider.item_attributes["brand_wikidata"]
-        elif "SHEETZ" in name_upper:
-            properties["located_in"] = SheetzSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = SheetzSpider.item_attributes["brand_wikidata"]
-        elif "UDF" in name_upper:
-            properties["located_in"] = UnitedDairyFarmersUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = UnitedDairyFarmersUSSpider.item_attributes["brand_wikidata"]
-        elif "QUICKCHEK" in name_upper:
-            properties["located_in"] = QuickchekUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = QuickchekUSSpider.item_attributes["brand_wikidata"]
-        elif "7ELEVEN" in name_upper or "7-ELEVEN" in name_upper:
-            properties["located_in"] = SevenElevenCAUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = SevenElevenCAUSSpider.item_attributes["brand_wikidata"]
-        elif "WALGREENS" in name_upper:
-            properties["located_in"] = WalgreensSpider.WALGREENS["brand"]
-            properties["located_in_wikidata"] = WalgreensSpider.WALGREENS["brand_wikidata"]
-        elif "CVS" in name_upper:
-            properties["located_in"] = CVS_BRANDS["CVS Pharmacy"]["brand"]
-            properties["located_in_wikidata"] = CVS_BRANDS["CVS Pharmacy"]["brand_wikidata"]
-        elif "CIRCLE K" in name_upper or "CIRCLEK" in name_upper:
-            properties["located_in"] = CircleKSpider.CIRCLE_K["brand"]
-            properties["located_in_wikidata"] = CircleKSpider.CIRCLE_K["brand_wikidata"]
-        elif "SPEEDWAY" in name_upper:
-            properties["located_in"] = SpeedwayUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = SpeedwayUSSpider.item_attributes["brand_wikidata"]
-        elif "TARGET" in name_upper:
-            properties["located_in"] = TargetUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = TargetUSSpider.item_attributes["brand_wikidata"]
-        elif "CASEY" in name_upper:
-            properties["located_in"] = CaseysGeneralStoreSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = CaseysGeneralStoreSpider.item_attributes["brand_wikidata"]
-        elif "COSTCO" in name_upper:
-            properties["located_in"] = "Costco"
-            properties["located_in_wikidata"] = COSTCO_SHARED_ATTRIBUTES["brand_wikidata"]
-        elif "AMPM" in name_upper:
-            properties["located_in"] = AmpmUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = AmpmUSSpider.item_attributes["brand_wikidata"]
-        elif "MAPCO" in name_upper:
-            properties["located_in"] = MapcoUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = MapcoUSSpider.item_attributes["brand_wikidata"]
-        elif "CERTIFIED" in name_upper:
-            properties["located_in"] = "Certified"
-            properties["located_in_wikidata"] = "Q100148356"
-        elif "KROGER" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.kroger.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.kroger.com/"]["brand_wikidata"]
-        elif "HARRIS TEETER" in name_upper or "HARRISTEETER" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.harristeeter.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.harristeeter.com/"]["brand_wikidata"]
-        elif "ROYAL FARMS" in name_upper:
-            properties["located_in"] = RoyalFarmsSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = RoyalFarmsSpider.item_attributes["brand_wikidata"]
-        elif "HEB" in name_upper or "H-E-B" in name_upper:
-            properties["located_in"] = HEBUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = HEBUSSpider.item_attributes["brand_wikidata"]
-        elif "SAFEWAY" in name_upper:
-            properties["located_in"] = SafewaySpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = SafewaySpider.item_attributes["brand_wikidata"]
-        elif "WEGMANS" in name_upper:
-            properties["located_in"] = WegmansUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = WegmansUSSpider.item_attributes["brand_wikidata"]
-        elif "GIANT EAGLE" in name_upper:
-            properties["located_in"] = GiantEagleUSSpider.GIANT_EAGLE["brand"]
-            properties["located_in_wikidata"] = GiantEagleUSSpider.GIANT_EAGLE["brand_wikidata"]
-        elif "GETGO" in name_upper or "GET GO" in name_upper:
-            properties["located_in"] = GiantEagleUSSpider.GET_GO["brand"]
-            properties["located_in_wikidata"] = GiantEagleUSSpider.GET_GO["brand_wikidata"]
-        elif "MARCS" in name_upper:
-            properties["located_in"] = MarcsSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = MarcsSpider.item_attributes["brand_wikidata"]
-        elif "FRED MEYER" in name_upper or "FREDMEYER" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.fredmeyer.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.fredmeyer.com/"]["brand_wikidata"]
-        elif "QFC" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.qfc.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.qfc.com/"]["brand_wikidata"]
-        elif "FOOD 4 LESS" in name_upper or "FOOD4LESS" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.food4less.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.food4less.com/"]["brand_wikidata"]
-        elif "RALPH" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.ralphs.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.ralphs.com/"]["brand_wikidata"]
-        elif "FRY" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.frysfood.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.frysfood.com/"]["brand_wikidata"]
-        elif "SMITH" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.smithsfoodanddrug.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.smithsfoodanddrug.com/"]["brand_wikidata"]
-        elif "CITY MARKET" in name_upper or "CITYMARKET" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand_wikidata"]
-        elif "DILLONS" in name_upper:
-            properties["located_in"] = KROGER_BRANDS["https://www.dillons.com/"]["brand"]
-            properties["located_in_wikidata"] = KROGER_BRANDS["https://www.dillons.com/"]["brand_wikidata"]
-        elif "FOOD CITY" in name_upper or "FOODCITY" in name_upper:
-            properties["located_in"] = FoodCitySoutheastUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = FoodCitySoutheastUSSpider.item_attributes["brand_wikidata"]
-        elif "QUIK STOP" in name_upper or "QUIKSTOP" in name_upper:
-            properties["located_in"] = EgAmericaUSSpider.brands[11]["brand"]
-            properties["located_in_wikidata"] = EgAmericaUSSpider.brands[11]["brand_wikidata"]
-        elif "GIANT FOOD" in name_upper:
-            properties["located_in"] = GiantFoodUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = GiantFoodUSSpider.item_attributes["brand_wikidata"]
-        elif "EXXON" in name_upper:
-            properties["located_in"] = ExxonMobilSpider.brands["Exxon"]["brand"]
-            properties["located_in_wikidata"] = ExxonMobilSpider.brands["Exxon"]["brand_wikidata"]
-        elif "RACETRAC" in name_upper or "RACE TRAC" in name_upper:
-            properties["located_in"] = RaceTracUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = RaceTracUSSpider.item_attributes["brand_wikidata"]
-        elif "WINN DIXIE" in name_upper or "WINNDIXIE" in name_upper or "WINN-DIXIE" in name_upper:
-            properties["located_in"] = WinnDixieUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = WinnDixieUSSpider.item_attributes["brand_wikidata"]
-        elif "TOM THUMB" in name_upper or "TOMTHUMB" in name_upper:
-            properties["located_in"] = AlbertsonsSpider.brands["tomthumb"]["brand"]
-            properties["located_in_wikidata"] = AlbertsonsSpider.brands["tomthumb"]["brand_wikidata"]
-        elif "CHEVRON" in name_upper:
-            properties["located_in"] = CHEVRON_BRANDS["Chevron"][0]["brand"]
-            properties["located_in_wikidata"] = CHEVRON_BRANDS["Chevron"][0]["brand_wikidata"]
-        elif "KWIK SHOP" in name_upper or "KWIKSHOP" in name_upper:
-            properties["located_in"] = EgAmericaUSSpider.brands[18]["brand"]
-            properties["located_in_wikidata"] = EgAmericaUSSpider.brands[18]["brand_wikidata"]
-        elif "LOAF 'N JUG" in name_upper or "LOAF N JUG" in name_upper or "LOAFNJUG" in name_upper:
-            properties["located_in"] = EgAmericaUSSpider.brands[19]["brand"]
-            properties["located_in_wikidata"] = EgAmericaUSSpider.brands[19]["brand_wikidata"]
-        elif "SUNOCO" in name_upper:
-            properties["located_in"] = SunocoUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = SunocoUSSpider.item_attributes["brand_wikidata"]
-        elif "MARKET BASKET" in name_upper or "MARKETBASKET" in name_upper:
-            properties["located_in"] = MarketBasketUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = MarketBasketUSSpider.item_attributes["brand_wikidata"]
-        elif "VONS" in name_upper:
-            properties["located_in"] = AlbertsonsSpider.brands["vons"]["brand"]
-            properties["located_in_wikidata"] = AlbertsonsSpider.brands["vons"]["brand_wikidata"]
-        elif "BROOKSHIRES" in name_upper:
-            properties["located_in"] = BrookshiresUSSpider.item_attributes["brand"]
-            properties["located_in_wikidata"] = BrookshiresUSSpider.item_attributes["brand_wikidata"]
-        elif "KWIK STAR" in name_upper:
-            properties["located_in"] = KWIK_TRIP_BRANDS["KWIK STAR"]["brand"]
-            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["KWIK STAR"]["brand_wikidata"]
-        elif "KWIK TRIP TOBACCO OUTLET" in name_upper:
-            properties["located_in"] = KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"].get(
-                "brand", KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"]["name"]
-            )
-            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["TOBACCO OUTLET PLUS"].get("brand_wikidata")
-        elif "KWIK TRIP" in name_upper:
-            properties["located_in"] = KWIK_TRIP_BRANDS["KWIK TRIP"]["brand"]
-            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["KWIK TRIP"]["brand_wikidata"]
-        elif "STOP N GO" in name_upper:
-            properties["located_in"] = KWIK_TRIP_BRANDS["STOP N GO"].get("brand", KWIK_TRIP_BRANDS["STOP N GO"]["name"])
-            properties["located_in_wikidata"] = KWIK_TRIP_BRANDS["STOP N GO"].get("brand_wikidata")
+        for keywords, brand_data in self.LOCATED_IN_MAPPINGS:
+            if any(keyword in name_upper for keyword in keywords):
+                properties["located_in"] = brand_data.get("brand", brand_data.get("name"))
+                properties["located_in_wikidata"] = brand_data.get("brand_wikidata")
+                break
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         with open_searchable_points("us_centroids_100mile_radius_state.csv") as points:
