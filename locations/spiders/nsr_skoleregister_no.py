@@ -30,7 +30,6 @@ class NsrSkoleregisterNOSpider(Spider):
         return JsonRequest(
             url=url,
             cb_kwargs={"page": page},
-            headers={"Accept": "application/json"},
         )
 
     def parse(self, response: TextResponse, page: int) -> Iterable[Feature | JsonRequest]:
@@ -49,7 +48,6 @@ class NsrSkoleregisterNOSpider(Spider):
                 url=f"{self.api_base_url}/v4/enhet/{orgnr}",
                 callback=self.parse_enhet,
                 cb_kwargs={"summary": enhet},
-                headers={"Accept": "application/json"},
             )
 
         total_pages = payload.get("AntallSider")
