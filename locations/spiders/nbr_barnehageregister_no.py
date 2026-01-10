@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import re
 from typing import AsyncIterator, Iterable
+from urllib.parse import urlparse
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
@@ -72,12 +74,10 @@ class NbrBarnehageregisterNOSpider(Spider):
         item["ref"] = data.get("Organisasjonsnummer") or summary.get("Organisasjonsnummer")
 
         # Website
-        if website := item.get("website"):
-            website = website.strip()
-            if website and not website.startswith(("http://", "https://")):
-                website = "https://" + website.lstrip("/")
-            if website:
-                item["website"] = website
+        if website := normalize_website(item.get("website")):
+            item["website"] = website
+        else:
+            item.pop("website", None)
 
         # State
         if fylke := data.get("Fylke"):
@@ -106,3 +106,40 @@ class NbrBarnehageregisterNOSpider(Spider):
         apply_category(Categories.KINDERGARTEN, item)
 
         yield item
+
+
+def is_valid_url(url: str) -> bool:
+    try:
+        result = urlparse(url)
+
+        # Check against check_item_properties.py URL regex
+        url_regex = re.compile(
+            r"^(?:http)s?://"  # http:// or https://
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
+            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|"  # ...or ipv4
+            r"\[?[A-F0-9]*:[A-F0-9:]+\]?)"  # ...or ipv6
+            r"(?::\d+)?"  # optional port
+            r"(?:/?|[/?]\S+)$",
+            re.IGNORECASE,
+        )
+
+        return all([result.scheme, result.netloc]) and url_regex.match(url) is not None
+    except ValueError:
+        return False
+
+
+def normalize_website(raw: str | None) -> str | None:
+    if not raw:
+        return None
+
+    website = raw.strip()
+    if not website:
+        return None
+
+    if not website.startswith(("http://", "https://")):
+        website = "https://" + website.lstrip("/")
+
+    if not is_valid_url(website):
+        return None
+
+    return website
