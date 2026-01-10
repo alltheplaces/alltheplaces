@@ -7,6 +7,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
@@ -71,52 +72,26 @@ class NbrBarnehageregisterNOSpider(Spider):
         if data.get("ErAktiv") is not True or data.get("ErBarnehage") is not True:
             return
 
-        item = Feature()
+        item = DictParser.parse(data)
         item["ref"] = data.get("Organisasjonsnummer") or summary.get("Organisasjonsnummer")
-        item["name"] = data.get("Navn") or data.get("FulltNavn") or summary.get("Navn")
-
-        # Set short name if full name differs from name
-        if full_name := data.get("FulltNavn"):
-            if full_name != item["name"]:
-                item["short_name"] = item["name"]
-                item["name"] = full_name
 
         # Website
-        if website := data.get("Internettadresse"):
+        if website := item.get("website"):
             website = website.strip()
             if website and not website.startswith(("http://", "https://")):
                 website = "https://" + website.lstrip("/")
-            item["website"] = website
+            if website:
+                item["website"] = website
 
-        # Operator
+        # State
+        if fylke := data.get("Fylke"):
+            item["state"] = fylke.get("Navn")
+
+        # Operator type
         if data.get("ErOffentligBarnehage") is True:
             item["extras"]["operator:type"] = "government"
         elif data.get("ErPrivatBarnehage") is True:
             item["extras"]["operator:type"] = "private"
-
-        # Address
-        if address := data.get("Beliggenhetsadresse"):
-            item["street_address"] = address.get("Adresse")
-            item["postcode"] = address.get("Postnummer")
-            item["city"] = address.get("Poststed")
-            item["country"] = address.get("Land")
-        if fylke := data.get("Fylke"):
-            item["state"] = fylke.get("Navn")
-
-        # Geolocation
-        if koordinat := data.get("Koordinat"):
-            lat = koordinat.get("Breddegrad")
-            lon = koordinat.get("Lengdegrad")
-            if lat is not None and lon is not None:
-                try:
-                    lat_f = float(lat)
-                    lon_f = float(lon)
-                except (TypeError, ValueError):
-                    lat_f = lon_f = 0.0
-                # Filter out invalid placeholder coordinates
-                if abs(lat_f) > 0.0001 or abs(lon_f) > 0.0001:
-                    item["lat"] = lat_f
-                    item["lon"] = lon_f
 
         # ISCED level 0: early childhood education.
         item["extras"]["isced:level"] = "0"
