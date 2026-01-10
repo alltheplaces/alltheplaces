@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import AsyncIterator, Iterable
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
@@ -65,12 +65,10 @@ class NsrSkoleregisterNOSpider(Spider):
         item["ref"] = data.get("Organisasjonsnummer") or summary.get("Organisasjonsnummer")
 
         # Website
-        if website := item.get("website"):
-            website = website.strip()
-            if website and not website.startswith(("http://", "https://")):
-                website = "https://" + website.lstrip("/")
-            if website:
-                item["website"] = website
+        if website := normalize_website(item.get("website")):
+            item["website"] = website
+        else:
+            item.pop("website", None)
 
         # State
         if fylke := data.get("Fylke"):
@@ -119,3 +117,28 @@ def is_valid_school(data: dict) -> bool:
     if data.get("ErEkskludert") or not data.get("ErAktiv") or not data.get("ErSkole"):
         return False
     return data.get("ErGrunnskole") is True or data.get("ErVideregaaendeSkole") is True
+
+
+def is_valid_url(url: str) -> bool:
+    try:
+        result = urlparse(url)
+        return bool(result.scheme and result.netloc)
+    except ValueError:
+        return False
+
+
+def normalize_website(raw: str | None) -> str | None:
+    if not raw:
+        return None
+
+    website = raw.strip()
+    if not website:
+        return None
+
+    if not website.startswith(("http://", "https://")):
+        website = "https://" + website.lstrip("/")
+
+    if not is_valid_url(website):
+        return None
+
+    return website
