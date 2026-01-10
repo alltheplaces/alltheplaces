@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from typing import AsyncIterator, Iterable
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlparse
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
@@ -20,19 +20,21 @@ class NsrSkoleregisterNOSpider(Spider):
     page_size = 1000
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.make_entity_request(page=1)
-
-    def make_entity_request(self, page: int) -> JsonRequest:
-        url = "{}{}".format(
-            f"{self.api_base_url}/v4/enheter",
-            "?" + urlencode({"sidenummer": page, "antallperside": self.page_size}),
-        )
-        return JsonRequest(
-            url=url,
-            cb_kwargs={"page": page},
+        yield JsonRequest(
+            url=f"{self.api_base_url}/v4/enheter?sidenummer=1&antallperside={self.page_size}",
+            callback=self.get_pages,
         )
 
-    def parse(self, response: TextResponse, page: int) -> Iterable[Feature | JsonRequest]:
+    def get_pages(self, response: TextResponse) -> Iterable[JsonRequest]:
+        payload = response.json()
+        total_pages = payload.get("AntallSider", 1)
+
+        for page in range(1, total_pages + 1):
+            yield JsonRequest(
+                url=f"{self.api_base_url}/v4/enheter?sidenummer={page}&antallperside={self.page_size}",
+            )
+
+    def parse(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         payload = response.json()
 
         for enhet in payload.get("EnhetListe") or []:
@@ -49,10 +51,6 @@ class NsrSkoleregisterNOSpider(Spider):
                 callback=self.parse_enhet,
                 cb_kwargs={"summary": enhet},
             )
-
-        total_pages = payload.get("AntallSider")
-        if isinstance(total_pages, int) and page < total_pages:
-            yield self.make_entity_request(page=page + 1)
 
     def parse_enhet(self, response: TextResponse, summary: dict) -> Iterable[Feature]:
         data = response.json()
