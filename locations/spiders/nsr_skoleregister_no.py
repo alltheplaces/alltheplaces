@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+from typing import AsyncIterator, Iterable
+from urllib.parse import urlencode
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, TextResponse
+
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.items import Feature
+
+
+class NsrSkoleregisterNOSpider(Spider):
+    name = "nsr_skoleregister_no"
+    allowed_domains = ["data-nsr.udir.no"]
+
+    api_base_url = "https://data-nsr.udir.no"
+    page_size = 1000
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_entity_request(page=1)
+
+    def make_entity_request(self, page: int) -> JsonRequest:
+        url = "{}{}".format(
+            f"{self.api_base_url}/v4/enheter",
+            "?" + urlencode({"sidenummer": page, "antallperside": self.page_size}),
+        )
+        return JsonRequest(
+            url=url,
+            cb_kwargs={"page": page},
+            headers={"Accept": "application/json"},
+        )
+
+    def parse(self, response: TextResponse, page: int) -> Iterable[Feature | JsonRequest]:
+        payload = response.json()
+
+        for enhet in payload.get("EnhetListe") or []:
+            # Ensure we have an organization number.
+            orgnr = enhet.get("Organisasjonsnummer")
+            if not orgnr:
+                continue
+
+            if not is_valid_school(enhet):
+                continue
+
+            yield JsonRequest(
+                url=f"{self.api_base_url}/v4/enhet/{orgnr}",
+                callback=self.parse_enhet,
+                cb_kwargs={"summary": enhet},
+                headers={"Accept": "application/json"},
+            )
+
+        total_pages = payload.get("AntallSider")
+        if isinstance(total_pages, int) and page < total_pages:
+            yield self.make_entity_request(page=page + 1)
+
+    def parse_enhet(self, response: TextResponse, summary: dict) -> Iterable[Feature]:
+        data = response.json()
+
+        if not is_valid_school(data):
+            return
+
+        item = DictParser.parse(data)
+        item["ref"] = data.get("Organisasjonsnummer") or summary.get("Organisasjonsnummer")
+
+        # Website
+        if website := item.get("website"):
+            website = website.strip()
+            if website and not website.startswith(("http://", "https://")):
+                website = "https://" + website.lstrip("/")
+            if website:
+                item["website"] = website
+
+        # State
+        if fylke := data.get("Fylke"):
+            item["state"] = fylke.get("Navn")
+
+        # Operator type
+        if data.get("ErOffentligSkole") is True:
+            item["extras"]["operator:type"] = "government"
+        elif data.get("ErPrivatskole") is True:
+            item["extras"]["operator:type"] = "private"
+
+        # Grades
+        self.derive_grades(item, data)
+
+        # Special education needs
+        if data.get("ErSpesialskole") is True:
+            item["extras"]["school"] = "special_education_needs"
+
+        # Capacity / staff
+        if (elevtall := data.get("Elevtall")) not in (None, 0):
+            item["extras"]["students"] = elevtall
+        if (ansatte := data.get("AntallAnsatte")) not in (None, 0):
+            item["extras"]["employees"] = ansatte
+
+        apply_category(Categories.SCHOOL, item)
+
+        yield item
+
+    def derive_grades(self, item: Feature, data: dict) -> None:
+        gs_from = data.get("SkoletrinnGSFra")
+        gs_to = data.get("SkoletrinnGSTil")
+        vgs_from = data.get("SkoletrinnVGSFra")
+        vgs_to = data.get("SkoletrinnVGSTil")
+
+        grades: list[str] = []
+        if isinstance(gs_from, int) and isinstance(gs_to, int):
+            grades.append(f"{gs_from}-{gs_to}")
+        if isinstance(vgs_from, int) and isinstance(vgs_to, int):
+            grades.append(f"{vgs_from}-{vgs_to}")
+
+        if grades:
+            item["extras"]["grades"] = ";".join(grades)
+
+
+def is_valid_school(data: dict) -> bool:
+    if data.get("ErEkskludert") or not data.get("ErAktiv") or not data.get("ErSkole"):
+        return False
+    return data.get("ErGrunnskole") is True or data.get("ErVideregaaendeSkole") is True
