@@ -16,10 +16,8 @@ class CostcoAUSpider(JSONBlobSpider):
     item_attributes = COSTCO_SHARED_ATTRIBUTES
     allowed_domains = ["www.costco.com.au"]
     locations_key = "stores"
+    stores_url = "https://www.costco.com.au/rest/v2/australia/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999"
 
-    stores_url = (
-        "https://www.costco.com.au/rest/v2/australia/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999"
-    )
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(url=self.stores_url)
 
