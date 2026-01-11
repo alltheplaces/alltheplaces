@@ -375,7 +375,7 @@ class TestSuccessfulGeocoding:
         mock_response.raise_for_status = MagicMock()
 
         with patch.object(pipeline.session, "get", return_value=mock_response) as mock_get:
-            result = pipeline.process_item(item, spider)
+            pipeline.process_item(item, spider)
 
         call_params = mock_get.call_args.kwargs["params"]
         # Should use specific fields, not addr_full
