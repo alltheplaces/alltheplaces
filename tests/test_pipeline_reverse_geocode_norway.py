@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
-from locations.items import Feature, get_lat_lon
+from locations.items import Feature
 from locations.pipelines.reverse_geocode_norway import ReverseGeocodeNorwayPipeline
 
 
