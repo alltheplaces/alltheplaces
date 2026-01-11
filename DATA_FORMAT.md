@@ -12,7 +12,11 @@ Data consumers might use the `id` field to determine if new objects show up or d
 
 In most cases, the feature will include a `geometry` field following [the GeoJSON spec](https://tools.ietf.org/html/rfc7946#section-3.1). There are some spiders that aren't able to recover a position from the venue's website. In those cases, the geometry is set to `null` and only the properties are included.
 
-Although it's not supported at the time of this writing, we hope to include a geocoding step in the pipeline so that these feature will get a position added.
+### Geocoding
+
+Geocoding is not globally supported at the time of this writing, we hope to include a geocoding step in the pipeline so that these feature will get a position added.
+
+- **Norway (NO)**: Uses the [Kartverket Address API](https://ws.geonorge.no/adresser/v1/) to geocode Norwegian addresses based on street name, house number, postcode, and city.
 
 ## Properties
 
