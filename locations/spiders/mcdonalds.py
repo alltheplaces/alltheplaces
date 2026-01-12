@@ -136,7 +136,11 @@ class McdonaldsSpider(Spider):
             if hours := store_hours.get("hours" + day):
                 try:
                     start_time, end_time = hours.split(" - ")
-                    oh.add_range(day, start_time.replace("24:00", "00:00"), end_time)
+                    if start_time.count(":") == 2:
+                        time_format = "%H:%M:%S"
+                    else:
+                        time_format = "%H:%M"
+                    oh.add_range(day, start_time.replace("24:00", "00:00"), end_time, time_format)
                 except:
                     self.logger.debug(f"Couldn't process opening hours: {hours}")
         return oh
