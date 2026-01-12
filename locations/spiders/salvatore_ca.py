@@ -26,7 +26,6 @@ class SalvatoreCASpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
-        item["addr_full"] = item.pop("street_address")
         item["lat"], item["lon"] = item["lon"], item["lat"]
 
         item["website"] = response.xpath('//link[@rel="canonical"]/@href').get()

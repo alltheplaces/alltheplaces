@@ -40,6 +40,8 @@ class Feature(scrapy.Item):
     brand_wikidata = scrapy.Field()
     operator = scrapy.Field()
     operator_wikidata = scrapy.Field()
+    network = scrapy.Field()
+    network_wikidata = scrapy.Field()
     located_in = scrapy.Field()
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()
@@ -214,6 +216,8 @@ KEYS_THAT_SHOULD_MATCH = [
     "brand_wikidata",
     "operator",
     "operator_wikidata",
+    "network",
+    "network_wikidata",
     "located_in",
     "located_in_wikidata",
     "nsi_id",

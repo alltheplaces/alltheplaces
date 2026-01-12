@@ -38,6 +38,8 @@ mapping = (
     ("brand_wikidata", "brand:wikidata"),
     ("operator", "operator"),
     ("operator_wikidata", "operator:wikidata"),
+    ("network", "network"),
+    ("network_wikidata", "network:wikidata"),
     ("located_in", "located_in"),
     ("located_in_wikidata", "located_in:wikidata"),
     ("nsi_id", "nsi_id"),
