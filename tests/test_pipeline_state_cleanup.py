@@ -6,9 +6,9 @@ from locations.spiders.greggs_gb import GreggsGBSpider
 
 
 def get_objects():
-    spider = GreggsGBSpider()
-    spider.crawler = get_crawler()
-    return Feature(), StateCodeCleanUpPipeline(spider.crawler), spider
+    crawler = get_crawler(GreggsGBSpider)
+    crawler.spider = crawler._create_spider()
+    return Feature(), StateCodeCleanUpPipeline(crawler), crawler.spider
 
 
 def test_state_name_to_code():
