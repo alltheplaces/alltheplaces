@@ -34,12 +34,6 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
     TESCO_METRO = {"brand": "Tesco Metro", "brand_wikidata": "Q57551648"}
     item_attributes = TESCO
     sitemap_urls = ["https://www.tesco.com/store-locator/sitemap.xml"]
-    sitemap_rules = [
-        (r"/pharmacy$", "parse_sd"),
-        (r"/petrol-filling-station$", "parse_sd"),
-        (r"/cafe$", "parse_sd"),
-        (r"/store-locator/[-\w]+/[-\w]+$", "parse_sd"),
-    ]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
     requires_proxy = True
     strip_names = [
@@ -53,6 +47,14 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
         "Metro",
     ]
     drop_attributes = {"email", "image"}
+
+    def pre_process_data(self, ld_data: dict, **kwargs) -> None:
+        if "openingHours" in ld_data and isinstance(ld_data["openingHours"], list):
+            # Clean up some non-standard coding of being open all hours.
+            ld_data["openingHours"] = [
+                hours.replace("All Day", "00:00-23:59") if isinstance(hours, str) else hours
+                for hours in ld_data["openingHours"]
+            ]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category_from_ld(item, ld_data)
@@ -73,6 +75,10 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
             elif store_details["storeformat"] == "Metro":
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 item.update(self.TESCO_METRO)
+        else:
+            # This is skipping ClothingStore (obvious) and LocalBusiness (Travel Money) types
+            self.crawler.stats.inc_value(f'atp/ld_type/{ld_data["@type"]}/ignore')
+            return
 
         if branch := item.pop("name"):
             if self.name == "tesco_ie":
