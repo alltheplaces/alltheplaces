@@ -1,9 +1,21 @@
+from scrapy.crawler import Crawler
+
+
 class ApplySpiderLevelAttributesPipeline:
-    def process_item(self, item, spider):
-        if not hasattr(spider, "item_attributes"):
+    crawler: Crawler
+
+    def __init__(self, crawler):
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item):
+        if not hasattr(self.crawler.spider, "item_attributes"):
             return item
 
-        item_attributes = spider.item_attributes
+        item_attributes = self.crawler.spider.item_attributes
 
         for key, value in item_attributes.items():
             if key == "extras":

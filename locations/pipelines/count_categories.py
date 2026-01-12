@@ -1,14 +1,26 @@
+from scrapy.crawler import Crawler
+
 from locations.categories import get_category_tags
+from locations.items import Feature
 
 
 class CountCategoriesPipeline:
-    def process_item(self, item, spider):
+    crawler: Crawler
+
+    def __init__(self, crawler):
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature):
         if categories := get_category_tags(item):
             for k, v in sorted(categories.items()):
-                spider.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))
+                self.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))
                 break
             if len(categories) > 1:
-                spider.crawler.stats.inc_value("atp/category/multiple")
+                self.crawler.stats.inc_value("atp/category/multiple")
         else:
-            spider.crawler.stats.inc_value("atp/category/missing")
+            self.crawler.stats.inc_value("atp/category/missing")
         return item
