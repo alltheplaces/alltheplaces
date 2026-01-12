@@ -57,7 +57,7 @@ class CheckItemPropertiesPipeline:
     min_lon = -180.0
     max_lon = 180.0
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod
