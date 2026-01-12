@@ -30,6 +30,8 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
     TESCO = {"brand": "Tesco", "brand_wikidata": "Q487494"}
     TESCO_EXTRA = {"brand": "Tesco Extra", "brand_wikidata": "Q25172225"}
     TESCO_EXPRESS = {"brand": "Tesco Express", "brand_wikidata": "Q98456772"}
+    # Tesco Metro is only in Ireland
+    TESCO_METRO = {"brand": "Tesco Metro", "brand_wikidata": "Q57551648"}
     item_attributes = TESCO
     sitemap_urls = ["https://www.tesco.com/store-locator/sitemap.xml"]
     sitemap_rules = [
@@ -38,8 +40,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
         (r"/cafe$", "parse_sd"),
         (r"/store-locator/[-\w]+/[-\w]+$", "parse_sd"),
     ]
-    wanted_types = ["Pharmacy", "GasStation", "CafeOrCoffeeShop", "GroceryStore"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
     requires_proxy = True
     strip_names = [
         "Tesco Café",
@@ -49,6 +50,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
         "Superstore",
         "Express",
         "Esso",
+        "Metro",
     ]
     drop_attributes = {"email", "image"}
 
@@ -68,11 +70,17 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
             elif store_details["storeformat"] == "Extra":
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 item.update(self.TESCO_EXTRA)
+            elif store_details["storeformat"] == "Metro":
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+                item.update(self.TESCO_METRO)
 
-        branch = item.pop("name")
-        for suffix in self.strip_names:
-            branch = branch.removesuffix(suffix).removesuffix(" ")
-        item["branch"] = branch
+        if branch := item.pop("name"):
+            if self.name == "tesco_ie":
+                # The Irish site has tagged on extra compared to GB site, see tesco_ie.py
+                branch = branch.split("  ")[0]
+            for suffix in self.strip_names:
+                branch = branch.strip().removesuffix(suffix)
+            item["branch"] = branch.strip()
 
         yield item
 
