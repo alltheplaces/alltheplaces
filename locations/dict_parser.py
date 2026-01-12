@@ -1,5 +1,17 @@
+from typing import Any
+
 from locations.geo import extract_geojson_point_geometry
 from locations.items import Feature
+
+
+class KeyVariations:
+    _cache = {}
+
+    @classmethod
+    def get_variations(cls, key: str) -> set[str]:
+        if key not in cls._cache:
+            cls._cache[key] = DictParser.get_variations(key)
+        return cls._cache[key]
 
 
 class DictParser:
@@ -375,15 +387,15 @@ class DictParser:
         return item
 
     @staticmethod
-    def get_first_key(obj, keys):
+    def get_first_key(obj: dict, keys: list[str]) -> Any:
         for key in keys:
-            variations = DictParser.get_variations(key)
+            variations = KeyVariations.get_variations(key)
             for variation in variations:
                 if obj.get(variation):
                     return obj[variation]
 
     @staticmethod
-    def get_variations(key):
+    def get_variations(key: str) -> set[str]:
         results = set()
         results.add(key)
 
