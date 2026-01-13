@@ -1,5 +1,10 @@
-import scrapy
+from typing import Iterable
 
+import scrapy
+from scrapy.http import TextResponse
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.spiders.best_buy import BestBuySpider
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -24,3 +29,7 @@ class BestBuyCASpider(StructuredDataSpider):
         else:
             for location in locations:
                 yield scrapy.Request(url=response.urljoin(location), callback=self.parse)
+
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_ELECTRONICS, item)
+        yield item
