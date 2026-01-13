@@ -29,6 +29,7 @@ class StatensVegvesenParkingNOSpider(scrapy.Spider):
     dataset_attributes = Licenses.NO_NLODv2.value | {
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Statens vegvesen"
     }
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     def parse(self, response):
         for parking_area in response.json():
