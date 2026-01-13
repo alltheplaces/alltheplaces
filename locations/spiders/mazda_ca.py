@@ -1,5 +1,5 @@
-from copy import deepcopy
 import re
+from copy import deepcopy
 
 import scrapy
 
@@ -18,7 +18,7 @@ class MazdaCASpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for dealer in response.json()["data"]:
             item = DictParser.parse(dealer)
-            
+
             item["ref"] = dealer["dealer_code"]
             item["street_address"] = merge_address_lines([dealer["address_line_1"], dealer["address_line_2"]])
             item["email"] = dealer["oca_email"]
