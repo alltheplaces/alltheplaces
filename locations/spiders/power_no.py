@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class PowerNO(Spider):
+class PowerNOSpider(Spider):
     name = "power_no"
     item_attributes = {"brand": "POWER", "brand_wikidata": "Q137773608"}
 
