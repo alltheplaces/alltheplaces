@@ -53,5 +53,6 @@ class DominosPizzaNOSpider(Spider):
     def parse_hours(hours):
         oh = OpeningHours()
         for entry in hours:
-            oh.add_range(entry.get("weekDay"), entry.get("openingHours"), entry.get("closingHours"))
+            if day := entry.get("weekDay"):
+                oh.add_range(day, entry.get("openingHours"), entry.get("closingHours"))
         return oh
