@@ -4,7 +4,6 @@ from parsel import Selector
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
 from locations.hours import CLOSED_NO, DAYS_NO, OpeningHours
 from locations.items import Feature
 
