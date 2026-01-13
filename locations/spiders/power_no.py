@@ -19,10 +19,10 @@ class PowerNOSpider(Spider):
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for store in response.json():
             item = DictParser.parse(store)
+            item["street_address"] = item.pop("addr_full")
 
             item["ref"] = store["storeId"]
             item["branch"] = store["name"].removeprefix("POWER ")
-            item["street_address"] = store["address"]
             item["website"] = urljoin("https://www.power.no", store["storeUrl"])
             item["extras"]["ref:google:place_id"] = store.get("googleMapsPlaceId")
 
