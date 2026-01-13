@@ -19,7 +19,7 @@ class PowerNO(Spider):
         yield JsonRequest("https://www.power.no/api/v2/stores/header-stores?postalCode=1482&amount=500")
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
-        for store in response.json():  
+        for store in response.json():
             item = DictParser.parse(store)
 
             item["ref"] = store["storeId"]
