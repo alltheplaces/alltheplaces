@@ -22,7 +22,7 @@ class EmailCleanUpPipeline:
             return item
 
         if not isinstance(emails, str):
-            self.crawler.stats.inc_value("atp/field/email/wrong_type")
+            self.crawler.stats.inc_value("atp/field/email/wrong_type")  # ty: ignore[possibly-missing-attribute]
             return item
 
         normalized_emails = []

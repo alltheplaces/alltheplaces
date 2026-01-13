@@ -17,7 +17,7 @@ class ApplySpiderLevelAttributesPipeline:
 
         item_attributes = self.crawler.spider.item_attributes
 
-        for key, value in item_attributes.items():
+        for key, value in item_attributes.items():  # ty: ignore [unresolved-attribute]
             if key == "extras":
                 extras = item.get("extras", {})
                 for k, v in value.items():

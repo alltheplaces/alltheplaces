@@ -27,15 +27,21 @@ class CountryCodeCleanUpPipeline:
 
         if not getattr(self.crawler.spider, "skip_auto_cc_spider_name", False):
             # No country set, see if it can be cleanly deduced from the spider name
-            if country := self.country_utils.country_code_from_spider_name(self.crawler.spider.name):
-                self.crawler.stats.inc_value("atp/field/country/from_spider_name")
+            if country := self.country_utils.country_code_from_spider_name(
+                self.crawler.spider.name  # ty: ignore[possibly-missing-attribute]
+            ):
+                self.crawler.stats.inc_value(  # ty: ignore[possibly-missing-attribute]
+                    "atp/field/country/from_spider_name"
+                )
                 item["country"] = country
                 return item
 
         if not getattr(self.crawler.spider, "skip_auto_cc_domain", False):
             # Still no country set, see if it can be cleanly deduced from a website URL if present
             if country := self.country_utils.country_code_from_url(item.get("website")):
-                self.crawler.stats.inc_value("atp/field/country/from_website_url")
+                self.crawler.stats.inc_value(  # ty: ignore[possibly-missing-attribute]
+                    "atp/field/country/from_website_url"
+                )
                 item["country"] = country
                 return item
 
@@ -43,7 +49,9 @@ class CountryCodeCleanUpPipeline:
             # Still no country set, try an offline reverse geocoder.
             if location := get_lat_lon(item):
                 if result := reverse_geocoder.get((location[0], location[1]), mode=1, verbose=False):
-                    self.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
+                    self.crawler.stats.inc_value(  # ty: ignore[possibly-missing-attribute]
+                        "atp/field/country/from_reverse_geocoding"
+                    )
                     item["country"] = result["cc"]
 
                     if not item.get("state"):

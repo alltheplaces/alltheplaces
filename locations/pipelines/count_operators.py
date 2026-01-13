@@ -15,7 +15,7 @@ class CountOperatorsPipeline:
 
     def process_item(self, item: Feature):
         if operator := item.get("operator"):
-            self.crawler.stats.inc_value(f"atp/operator/{operator}")
+            self.crawler.stats.inc_value(f"atp/operator/{operator}")  # ty: ignore[possibly-missing-attribute]
         if wikidata := item.get("operator_wikidata"):
-            self.crawler.stats.inc_value(f"atp/operator_wikidata/{wikidata}")
+            self.crawler.stats.inc_value(f"atp/operator_wikidata/{wikidata}")  # ty: ignore[possibly-missing-attribute]
         return item

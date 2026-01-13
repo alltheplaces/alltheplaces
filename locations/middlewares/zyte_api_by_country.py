@@ -46,6 +46,6 @@ class ZyteApiByCountryMiddleware:
     def process_request(self, request: Request):
         # Calculate zyte_api_automap on the first request
         if self.zyte_api_automap is None:
-            self._load_config(self.crawler.spider)
+            self._load_config(self.crawler.spider)  # ty: ignore [invalid-argument-type]
 
         request.meta["zyte_api_automap"] = self.zyte_api_automap

@@ -23,7 +23,7 @@ class DuplicatesPipeline:
         if getattr(self.crawler.spider, "no_refs", False):
             return item
 
-        ref = (self.crawler.spider.name, item["ref"])
+        ref = (self.crawler.spider.name, item["ref"])  # ty: ignore[possibly-missing-attribute]
         if ref in self.ids_seen:
             if self.crawler.stats:
                 self.crawler.stats.inc_value("atp/duplicate_count")
