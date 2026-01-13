@@ -10,12 +10,15 @@ from scrapy.http import JsonRequest, TextResponse
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.licenses import Licenses
 
 
 class NbrBarnehageregisterNOSpider(Spider):
     name = "nbr_barnehageregister_no"
     allowed_domains = ["data-nbr.udir.no"]
-
+    dataset_attributes = Licenses.NO_NLODv2.value | {
+        "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Utdanningsdirektoratet"
+    }
     api_base_url = "https://data-nbr.udir.no"
     page_size = 1000
 
