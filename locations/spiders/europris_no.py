@@ -41,4 +41,4 @@ class EuroprisNOSpider(Spider):
             oh.set_closed(days)
         else:
             open_time, close_time = hours.split("-")
-            oh.add_days_range(days, open_time, close_time, "%H")
+            oh.add_days_range(days, open_time.strip(), close_time.strip(), "%H")
