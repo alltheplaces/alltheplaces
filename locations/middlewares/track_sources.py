@@ -14,7 +14,7 @@ class TrackSourcesMiddleware:
 
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod

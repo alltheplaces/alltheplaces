@@ -7,7 +7,7 @@ from locations.items import Feature
 class CountCategoriesPipeline:
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod

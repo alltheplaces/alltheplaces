@@ -8,7 +8,7 @@ from locations.items import Feature, get_lat_lon
 class CountryCodeCleanUpPipeline:
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
         self.country_utils = CountryUtils()
 

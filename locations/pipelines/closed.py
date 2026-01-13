@@ -8,7 +8,7 @@ class ClosePipeline:
 
     closed_labels = ["closed", "coming soon"]
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod

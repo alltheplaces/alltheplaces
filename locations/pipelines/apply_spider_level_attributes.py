@@ -4,7 +4,7 @@ from scrapy.crawler import Crawler
 class ApplySpiderLevelAttributesPipeline:
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod

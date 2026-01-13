@@ -12,7 +12,7 @@ from locations.playwright_spider import PlaywrightSpider
 class PlaywrightMiddleware:
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod

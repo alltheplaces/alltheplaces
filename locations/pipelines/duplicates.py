@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class DuplicatesPipeline:
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.ids_seen = set()
         self.crawler = crawler
 

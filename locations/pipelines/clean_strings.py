@@ -15,7 +15,7 @@ class CleanStringsPipeline:
     skipped_keys = {"nsi_id", "twitter", "facebook"}
     url_keys = {"ref", "website", "image"}
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod

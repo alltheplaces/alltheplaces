@@ -40,7 +40,7 @@ STATE_OVERRIDES = {"Washington, D.C.": "DC"}
 class StateCodeCleanUpPipeline:
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod

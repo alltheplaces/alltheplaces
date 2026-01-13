@@ -8,7 +8,7 @@ from locations.items import Feature
 class EmailCleanUpPipeline:
     crawler: Crawler
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     @classmethod
