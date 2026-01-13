@@ -26,6 +26,7 @@ class PowerNOSpider(Spider):
             item["branch"] = store["name"].removeprefix("POWER ")
             item["street_address"] = store["address"]
             item["website"] = urljoin("https://www.power.no", store["storeUrl"])
+            item["extras"]["ref:google:place_id"] = store.get("googleMapsPlaceId")
 
             item["opening_hours"] = OpeningHours()
             for schedule in store.get("workingSchedule", []):
