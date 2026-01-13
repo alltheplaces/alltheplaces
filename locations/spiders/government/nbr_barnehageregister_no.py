@@ -12,6 +12,8 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.licenses import Licenses
 
+# https://data.norge.no/nb/datasets/af15237b-c5d7-421d-bb29-ca05f3c458ff/nasjonalt-barnehageregister-nbr
+
 
 class NbrBarnehageregisterNOSpider(Spider):
     name = "nbr_barnehageregister_no"

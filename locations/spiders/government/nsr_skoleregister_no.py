@@ -10,11 +10,17 @@ from scrapy.http import JsonRequest, TextResponse
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.licenses import Licenses
+
+# https://data.norge.no/nb/datasets/d8431635-2ae6-40af-b0ec-8869a2fa3f89/nasjonalt-skoleregister-nsr
 
 
 class NsrSkoleregisterNOSpider(Spider):
     name = "nsr_skoleregister_no"
     allowed_domains = ["data-nsr.udir.no"]
+    dataset_attributes = Licenses.NO_NLODv2.value | {
+        "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Utdanningsdirektoratet"
+    }
 
     api_base_url = "https://data-nsr.udir.no"
     page_size = 1000
