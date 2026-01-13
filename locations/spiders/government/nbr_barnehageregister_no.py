@@ -10,13 +10,18 @@ from scrapy.http import JsonRequest, TextResponse
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.licenses import Licenses
+
+# https://data.norge.no/nb/datasets/af15237b-c5d7-421d-bb29-ca05f3c458ff/nasjonalt-barnehageregister-nbr
 
 
-class NsrSkoleregisterNOSpider(Spider):
-    name = "nsr_skoleregister_no"
-    allowed_domains = ["data-nsr.udir.no"]
-
-    api_base_url = "https://data-nsr.udir.no"
+class NbrBarnehageregisterNOSpider(Spider):
+    name = "nbr_barnehageregister_no"
+    allowed_domains = ["data-nbr.udir.no"]
+    dataset_attributes = Licenses.NO_NLODv2.value | {
+        "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Utdanningsdirektoratet"
+    }
+    api_base_url = "https://data-nbr.udir.no"
     page_size = 1000
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -26,6 +31,7 @@ class NsrSkoleregisterNOSpider(Spider):
         )
 
     def get_pages(self, response: TextResponse) -> Iterable[JsonRequest]:
+        """Yield all page requests upfront for parallel execution."""
         payload = response.json()
         total_pages = payload.get("AntallSider", 1)
 
@@ -43,9 +49,15 @@ class NsrSkoleregisterNOSpider(Spider):
             if not orgnr:
                 continue
 
-            if not is_valid_school(enhet):
+            # Only fetch details for active kindergartens.
+            if enhet.get("ErAktiv") is not True:
                 continue
 
+            # Filter out non-kindergarten entities.
+            if enhet.get("ErBarnehage") is not True:
+                continue
+
+            # Fetch detailed information for each entity.
             yield JsonRequest(
                 url=f"{self.api_base_url}/v4/enhet/{orgnr}",
                 callback=self.parse_enhet,
@@ -55,7 +67,12 @@ class NsrSkoleregisterNOSpider(Spider):
     def parse_enhet(self, response: TextResponse, summary: dict) -> Iterable[Feature]:
         data = response.json()
 
-        if not is_valid_school(data):
+        # Exclude excluded kindergartens.
+        if data.get("ErEkskludert") is True:
+            return
+
+        # If entity somehow is inactive or not a kindergarten after filtering, exclude it.
+        if data.get("ErAktiv") is not True or data.get("ErBarnehage") is not True:
             return
 
         item = DictParser.parse(data)
@@ -74,48 +91,28 @@ class NsrSkoleregisterNOSpider(Spider):
             item["state"] = fylke.get("Navn")
 
         # Operator type
-        if data.get("ErOffentligSkole") is True:
+        if data.get("ErOffentligBarnehage") is True:
             item["extras"]["operator:type"] = "government"
-        elif data.get("ErPrivatskole") is True:
+        elif data.get("ErPrivatBarnehage") is True:
             item["extras"]["operator:type"] = "private"
 
-        # Grades
-        self.derive_grades(item, data)
+        # ISCED level 0: early childhood education.
+        item["extras"]["isced:level"] = "0"
 
-        # Special education needs
-        if data.get("ErSpesialskole") is True:
-            item["extras"]["school"] = "special_education_needs"
+        # Age range
+        if (min_age := data.get("AlderstrinnFra")) is not None:
+            item["extras"]["min_age"] = str(min_age)
+        if (max_age := data.get("AlderstrinnTil")) is not None:
+            item["extras"]["max_age"] = str(max_age)
 
-        # Capacity / staff
-        if (elevtall := data.get("Elevtall")) not in (None, 0):
-            item["extras"]["students"] = elevtall
-        if (ansatte := data.get("AntallAnsatte")) not in (None, 0):
-            item["extras"]["employees"] = ansatte
+        # Capacity
+        if (antall_barn := data.get("AntallBarn")) not in (None, 0):
+            item["extras"]["capacity"] = antall_barn
 
-        apply_category(Categories.SCHOOL, item)
+        # Category
+        apply_category(Categories.KINDERGARTEN, item)
 
         yield item
-
-    def derive_grades(self, item: Feature, data: dict) -> None:
-        gs_from = data.get("SkoletrinnGSFra")
-        gs_to = data.get("SkoletrinnGSTil")
-        vgs_from = data.get("SkoletrinnVGSFra")
-        vgs_to = data.get("SkoletrinnVGSTil")
-
-        grades: list[str] = []
-        if isinstance(gs_from, int) and isinstance(gs_to, int):
-            grades.append(f"{gs_from}-{gs_to}")
-        if isinstance(vgs_from, int) and isinstance(vgs_to, int):
-            grades.append(f"{vgs_from}-{vgs_to}")
-
-        if grades:
-            item["extras"]["grades"] = ";".join(grades)
-
-
-def is_valid_school(data: dict) -> bool:
-    if data.get("ErEkskludert") or not data.get("ErAktiv") or not data.get("ErSkole"):
-        return False
-    return data.get("ErGrunnskole") is True or data.get("ErVideregaaendeSkole") is True
 
 
 def is_valid_url(url: str) -> bool:
