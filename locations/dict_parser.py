@@ -50,6 +50,9 @@ class DictParser:
         "nombre",
         # IT
         "nome",
+        # NO
+        "navn",
+        "fulltnavn",
     ]
 
     house_number_keys = [
@@ -71,6 +74,8 @@ class DictParser:
         "formattedAddress",
         # ES
         "direccion",  # "address"
+        # NO
+        "beliggenhetsadresse",
     ]
 
     street_keys = [
@@ -119,6 +124,8 @@ class DictParser:
         "citta",
         # DE
         "ort",  # location
+        # NO
+        "poststed",
     ]
 
     region_keys = [
@@ -148,6 +155,8 @@ class DictParser:
         "country",
         "country-name",
         "store-country",
+        # NO
+        "land",
     ]
 
     isocode_keys = [
@@ -179,6 +188,8 @@ class DictParser:
         "postleitzahl",
         # IT
         "cap",
+        # NO
+        "postnummer",
     ]
 
     email_keys = [
@@ -227,6 +238,8 @@ class DictParser:
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
+        # NO
+        "breddegrad",
     ]
 
     lon_keys = [
@@ -247,6 +260,8 @@ class DictParser:
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",
+        # NO
+        "lengdegrad",
     ]
 
     website_keys = [
@@ -261,6 +276,9 @@ class DictParser:
         "location-url",
         "web-address",
         "WebSiteURL",
+        # NO
+        "internettadresse",
+        "nettside",
     ]
 
     hours_keys = [
@@ -325,6 +343,8 @@ class DictParser:
                     "positions",
                     "display-coordinate",
                     "yextDisplayCoordinate",
+                    # NO
+                    "koordinat",
                 ],
             )
             if location and isinstance(location, dict):

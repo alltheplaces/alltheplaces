@@ -14,8 +14,11 @@ class MagasinVertFRSpider(JSONBlobSpider):
         "www.monmagasinvert.fr",
     ]
     BRANDS = {
+        "cv": {"brand": "Cultivert", "brand_wikidata": "Q16661975"},
         "mv": {"brand": "Magasin Vert", "brand_wikidata": "Q16661975"},
+        "mv-ext": {"brand": "Magasin Vert", "brand_wikidata": "Q16661975"},
         "pv": {"brand": "Point Vert", "brand_wikidata": "Q16661975"},
+        "pv-ext": {"brand": "Point Vert", "brand_wikidata": "Q16661975"},
     }
     start_urls = [
         "https://www.monmagasinvert.fr/rest/mon_magasin_vert_lot1/V1/inventory/in-store-pickup/pickup-locations/?searchRequest[scopeCode]=mon_magasin_vert_lot1"
