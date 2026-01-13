@@ -8,7 +8,7 @@ from locations.hours import CLOSED_NO, DAYS_NO, OpeningHours
 from locations.items import Feature
 
 
-class PizzabakernenNOSpider(Spider):
+class PizzabakerenNOSpider(Spider):
     name = "pizzabakeren_no"
     item_attributes = {"brand": "Pizzabakeren", "brand_wikidata": "Q11995777"}
     start_urls = ["https://www.pizzabakeren.no/box_search.php?search=#"]
