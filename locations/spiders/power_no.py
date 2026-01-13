@@ -3,7 +3,7 @@ from typing import Iterable
 from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, TextResponse
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
