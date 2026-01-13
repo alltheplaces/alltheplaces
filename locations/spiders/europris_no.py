@@ -26,10 +26,14 @@ class EuroprisNOSpider(Spider):
             item.pop("state")  # Invalid field
 
             if attributes := store.get("extension_attributes"):
-                item["opening_hours"] = OpeningHours()
-                self.parse_hours(item["opening_hours"], attributes.get("open_hours_workdays"), DAYS_WEEKDAY)
-                self.parse_hours(item["opening_hours"], attributes.get("open_hours_saturday"), ["Sa"])
-                self.parse_hours(item["opening_hours"], attributes.get("open_hours_sunday"), ["Su"])
+                try:
+                    oh = OpeningHours()
+                    self.parse_hours(oh, attributes.get("open_hours_workdays"), DAYS_WEEKDAY)
+                    self.parse_hours(oh, attributes.get("open_hours_saturday"), ["Sa"])
+                    self.parse_hours(oh, attributes.get("open_hours_sunday"), ["Su"])
+                    item["opening_hours"] = oh
+                except:
+                    self.logger.error("Error parsing opening hours")
 
             apply_category(Categories.SHOP_GENERAL, item)
             yield item
