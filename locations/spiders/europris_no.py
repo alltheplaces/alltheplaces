@@ -40,5 +40,6 @@ class EuroprisNOSpider(Spider):
         if hours.lower() in CLOSED_NO:
             oh.set_closed(days)
         elif "-" in hours:
-            open_time, close_time = hours.split("-")
-            oh.add_days_range(days, open_time.strip(), close_time.strip(), "%H")
+            open_time, close_time = hours.split("-", 1)
+            if open_time.strip().isdigit() and close_time.strip().isdigit():
+                oh.add_days_range(days, open_time.strip(), close_time.strip(), "%H")
