@@ -99,8 +99,6 @@ class DictParser:
         "町域以下住所",  # "address below town limits"
         # IT
         "indirizzo",
-        # NO
-        "adresse",
     ]
 
     city_keys = [
