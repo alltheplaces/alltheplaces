@@ -79,7 +79,9 @@ class NbrBarnehageregisterNOSpider(Spider):
         else:
             item.pop("website", None)
 
-        # State
+        # Location
+        if postadresse := data.get("Postadresse"):
+            item["street_address"] = postadresse.get("Adresse")
         if fylke := data.get("Fylke"):
             item["state"] = fylke.get("Navn")
 
