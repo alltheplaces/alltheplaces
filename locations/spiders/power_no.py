@@ -14,9 +14,7 @@ from locations.items import Feature
 class PowerNOSpider(Spider):
     name = "power_no"
     item_attributes = {"brand": "POWER", "brand_wikidata": "Q137773608"}
-
-    def start_requests(self):
-        yield JsonRequest("https://www.power.no/api/v2/stores/header-stores?postalCode=1482&amount=500")
+    start_urls = ["https://www.power.no/api/v2/stores/header-stores?postalCode=1482&amount=500"]
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for store in response.json():
