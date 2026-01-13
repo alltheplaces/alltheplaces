@@ -39,6 +39,6 @@ class EuroprisNOSpider(Spider):
             return
         if hours.lower() in CLOSED_NO:
             oh.set_closed(days)
-        else:
+        elif "-" in hours:
             open_time, close_time = hours.split("-")
             oh.add_days_range(days, open_time.strip(), close_time.strip(), "%H")
