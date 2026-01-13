@@ -77,7 +77,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         missing = {}  # dict to filter out duplicates
 
         if crawler_process := self.crawler_process:
-            codes = DuplicateWikidataCommand.wikidata_spiders(crawler_process)
+            codes = DuplicateWikidataCommand.wikidata_spiders(crawler_process)  # ty: ignore[invalid-argument-type]
 
             # Fetch the category from NSI's github, and try to match to wikidata.
             # TODO: This assumes you are going for only one category, by wikidata ID.

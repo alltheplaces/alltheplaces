@@ -15,7 +15,7 @@ class ApplySpiderNamePipeline:
 
     def process_item(self, item: Feature):
         existing_extras = item.get("extras", {})
-        existing_extras["@spider"] = self.crawler.spider.name
+        existing_extras["@spider"] = self.crawler.spider.name  # ty: ignore [possibly-missing-attribute]
         item["extras"] = existing_extras
 
         return item
