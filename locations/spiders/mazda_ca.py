@@ -42,7 +42,7 @@ class MazdaCASpider(scrapy.Spider):
                 parts = deepcopy(item)
                 parts["ref"] = f"{item['ref']}_parts"
                 self.parse_hours(parts, dealer["hours"]["parts"])
-                apply_category(Categories.SHOP_CAR_REPAIR, parts)
+                apply_category(Categories.SHOP_CAR_PARTS, parts)
                 yield parts
 
     def parse_hours(self, item, opening_hours):
