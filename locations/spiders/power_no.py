@@ -13,7 +13,7 @@ from locations.items import Feature
 
 class PowerNOSpider(Spider):
     name = "power_no"
-    item_attributes = {"brand": "POWER", "brand_wikidata": "Q137773608"}
+    item_attributes = {"brand": "Power", "brand_wikidata": "Q137773608"}
     start_urls = ["https://www.power.no/api/v2/stores/header-stores?postalCode=1482&amount=500"]
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
@@ -22,7 +22,7 @@ class PowerNOSpider(Spider):
             item["street_address"] = item.pop("addr_full")
 
             item["ref"] = store["storeId"]
-            item["branch"] = store["name"].removeprefix("POWER ")
+            item["branch"] = item.pop("name").removeprefix("POWER ")
             item["website"] = urljoin("https://www.power.no", store["storeUrl"])
             item["extras"]["ref:google:place_id"] = store.get("googleMapsPlaceId")
 
