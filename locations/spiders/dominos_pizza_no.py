@@ -1,10 +1,13 @@
 import json
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.spiders.jysk import urljoin
 
 
@@ -14,17 +17,16 @@ class DominosPizzaNOSpider(Spider):
     allowed_domains = ["www.dominos.no"]
     start_urls = ["https://www.dominos.no/butikker"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         location_data = json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())
         for store in location_data["props"]["pageProps"]["stores"]:
             yield self.parse_store(store)
 
-    def parse_store(self, store):
+    def parse_store(self, store: dict) -> Feature:
         item = DictParser.parse(store)
 
         item["ref"] = store.get("externalId")
-        item["name"] = "Domino's " + store["name"]
-        item["branch"] = store.get("name")
+        item["branch"] = item.pop("name")
         item["phone"] = store.get("localPhoneNumber")
         item["website"] = urljoin("https://www.dominos.no/no/butikker/", store.get("slug"))
 
@@ -50,7 +52,7 @@ class DominosPizzaNOSpider(Spider):
         return item
 
     @staticmethod
-    def parse_hours(hours):
+    def parse_hours(hours: list[dict]) -> OpeningHours:
         oh = OpeningHours()
         for entry in hours:
             if day := entry.get("weekDay"):
