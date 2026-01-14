@@ -86,7 +86,7 @@ def extract_located_in(
                 return located_in, located_in_wikidata
 
     if spider and name_upper:
-        spider.crawler.stats.inc_value(f"atp/located_in/{name_upper}/unmapped")
+        spider.crawler.stats.inc_value(f"atp/{spider.name}/located_in_failed/{name_upper}")
 
     # Don't set located_in properties if they can't be mapped.
     return None, None
