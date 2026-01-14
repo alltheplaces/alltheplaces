@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 BRANDS = {
     "KWIK SPIRITS": {"name": "Kwik Spirits"},
     "KWIK STAR": {"name": "Kwik Star", "brand": "Kwik Star", "brand_wikidata": "Q123269534"},
-    "KWIK TRIP": {"name": "Kwik Trip"},
+    "KWIK TRIP": {"name": "Kwik Trip", "brand": "Kwik Trip", "brand_wikidata": "Q6450420"},
     "STOP N GO": {"name": "Stop N Go"},
     "TOBACCO OUTLET PLUS": {"name": "Tobacco Outlet Plus"},
     "TOBACCO OUTLET PLUS GROCERY": {"name": "Tobacco Outlet Plus Grocery"},

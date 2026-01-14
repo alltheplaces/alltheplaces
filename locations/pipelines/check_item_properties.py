@@ -6,7 +6,7 @@ from geonamescache import GeonamesCache
 from scrapy import Spider
 
 from locations.hours import OpeningHours
-from locations.items import Feature, get_lat_lon, set_lat_lon
+from locations.items import Feature, set_lat_lon
 
 
 def check_field(
@@ -82,38 +82,90 @@ class CheckItemPropertiesPipeline:
 
         return item
 
-    def check_geom(self, item: Feature, spider: Spider) -> None:
-        if coords := get_lat_lon(item):
-            lat, lon = coords
-
-            if not (self.min_lat < lat < self.max_lat):
-                if spider.crawler.stats:
-                    spider.crawler.stats.inc_value("atp/field/lat/invalid")
-                lat = None
-
-            if not (self.min_lon < lon < self.max_lon):
-                if spider.crawler.stats:
-                    spider.crawler.stats.inc_value("atp/field/lon/invalid")
-                lon = None
-
-            if isinstance(lat, float) and isinstance(lon, float):
-                if math.fabs(lat) < 3 and math.fabs(lon) < 3:
-                    if spider.crawler.stats:
-                        spider.crawler.stats.inc_value("atp/geometry/null_island")
-                    lat = None
-                    lon = None
-
-            if lat and lon:
-                set_lat_lon(item, lat, lon)
+    def check_geom(self, item: Feature, spider: Spider) -> None:  # noqa: C901
+        lat_untyped = None
+        lon_untyped = None
+        if geometry := item.get("geometry"):
+            if isinstance(geometry, dict):
+                if geometry.get("type") == "Point":
+                    if coords := geometry.get("coordinates"):
+                        if isinstance(coords, list):
+                            if len(coords) == 2:
+                                lat_untyped = coords[1]
+                                lon_untyped = coords[0]
+                    elif geometry.get("type") in [
+                        "MultiPoint",
+                        "LineString",
+                        "MultiLineString",
+                        "Polygon",
+                        "MultiPolygon",
+                    ]:
+                        # Other geometry types are currently not validated by
+                        # ATP so this pipeline will assume they're correct.
+                        item.pop("lat", None)
+                        item.pop("lon", None)
+                        return
+                    else:
+                        # Invalid geometry type. Refer to RFC 7946 for valid
+                        # types.
+                        if spider.crawler.stats:
+                            spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+                        item.pop("lat", None)
+                        item.pop("lon", None)
+                        item.pop("geometry", None)
+                        return
             else:
+                # Invalid geometry type.
+                if spider.crawler.stats:
+                    spider.crawler.stats.inc_value("atp/field/geometry/invalid")
                 item.pop("lat", None)
                 item.pop("lon", None)
                 item.pop("geometry", None)
+                return
+        else:
+            lat_untyped = item.get("lat")
+            lon_untyped = item.get("lon")
 
-        if not (item.get("geometry") or get_lat_lon(item)):
+        if lat_untyped is None or lon_untyped is None:
             if spider.crawler.stats:
-                spider.crawler.stats.inc_value("atp/field/lat/missing")
-                spider.crawler.stats.inc_value("atp/field/lon/missing")
+                spider.crawler.stats.inc_value("atp/field/geometry/missing")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return
+
+        # At this point, lat_untyped and lon_untyped were either extracted
+        # from the geometry attribute, or lat/lon attributes. They could be
+        # invalidly typed (e.g. strings) or have invalid values (e.g. 700).
+
+        try:
+            lat_typed = float(lat_untyped)
+            lon_typed = float(lon_untyped)
+        except (TypeError, ValueError):
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return
+
+        if lat_typed < -90.0 or lat_typed > 90.0 or lon_typed < -180.0 or lon_typed > 180.0:
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return None
+
+        if math.fabs(lat_typed) < 3 and math.fabs(lon_typed) < 3:
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/geometry/null_island")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return
+
+        set_lat_lon(item, lat_typed, lon_typed)
 
     def check_twitter(self, item: Feature, spider: Spider) -> None:
         if twitter := item.get("twitter"):

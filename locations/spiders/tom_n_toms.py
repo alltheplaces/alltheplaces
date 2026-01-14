@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -24,6 +24,7 @@ class TomNTomsSpider(JSONBlobSpider):
             open_time, close_time = [t.replace(":0", ":00") if t.endswith(":0") else t for t in [open_time, close_time]]
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_days_range(DAYS, open_time, close_time)
+        apply_category(Categories.CAFE, item)
         if services := feature.get("services"):
             service_ids = [service["id"] for service in services]
             apply_yes_no(Extras.WIFI, item, 3 in service_ids)
