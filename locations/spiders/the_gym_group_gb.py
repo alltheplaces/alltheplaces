@@ -22,7 +22,8 @@ class TheGymGroupGBSpider(Spider):
         for location in parse_js_object(locations_js)["props"]["pageProps"]["gymMapData"]:
             properties = {
                 "ref": location["gym"]["branchId"],
-                "name": location["gym"]["gymName"],
+                "branch": location["gym"]["gymName"],
+                "name": "The Gym Group",
                 "lat": location["position"]["lat"],
                 "lon": location["position"]["lng"],
                 "addr_full": re.sub(r"\s+", " ", location["gym"]["gymAddress"]),

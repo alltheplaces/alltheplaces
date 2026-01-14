@@ -24,7 +24,7 @@ class RioSeoSpider(Spider):
       - `limit`: optional parameter, default value is 10000
     """
 
-    dataset_attributes = {"source": "api", "api": "rio_seo"}
+    dataset_attributes: dict = {"source": "api", "api": "rio_seo"}
 
     end_point: str | None = None
     limit: int = 10000
@@ -32,6 +32,12 @@ class RioSeoSpider(Spider):
     template: str = "domain"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
+        if self.end_point is None:
+            raise ValueError("The 'end_point' attribute must be specified.")
+            return
+        if self.template not in ["domain", "search"]:
+            raise ValueError("The 'template' attribute must be specified as either 'domain' or 'search'.")
+            return
         yield JsonRequest(
             f"{self.end_point}/api/getAutocompleteData?template={self.template}&level={self.template}",
             callback=self.parse_autocomplete,

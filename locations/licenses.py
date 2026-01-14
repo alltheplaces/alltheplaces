@@ -22,3 +22,12 @@ class Licenses(Enum):
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
         "use:commercial": "permit",
     }
+    NO_NLODv2 = {
+        "license": "Norwegian Licence for Open Government Data 2.0",
+        "license:website": "https://data.norge.no/nlod/no",
+        "license:website:no": "https://data.norge.no/nlod/no",
+        "license:website:en": "https://data.norge.no/nlod/en/2.0",
+        "license:wikidata": "Q106835855",
+        "attribution": "required",
+        "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD).",
+    }
