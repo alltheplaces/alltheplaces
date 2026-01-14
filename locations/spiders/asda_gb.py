@@ -19,6 +19,7 @@ class AsdaGBSpider(VirtualEarthSpider):
     api_key = "AtAs6PiQ3e0HE187rJgUEqvoKcKfTklRKTvCN1X1mpumYE-Z4VQFvx62X7ff13t6"
     dataset_filter = "country Eq 'United Kingdom'"
 
+
     def parse_item(self, item: Feature, feature: dict, **kwargs):
         if feature["asda_store_type"] == "Collection Point":
             return
@@ -45,9 +46,82 @@ class AsdaGBSpider(VirtualEarthSpider):
         if feature["asda_service_24_hour"]:
             item["opening_hours"] = "24/7"
 
+        if feature["asda_service_pharmacy"]:
+            pharmacy_poi = self.create_pharmacy_poi(item)
+            if pharmacy_poi:
+                yield pharmacy_poi
+
+        if feature["asda_service_cafe"]:
+            cafe_poi = self.create_cafe_poi(item)
+            if cafe_poi:
+                yield cafe_poi
+
+        if feature["asda_service_opticians"]:
+            optician_poi = self.create_optician_poi(item)
+            if optician_poi:
+                yield optician_poi
+
+        if feature["asda_service_petrol_station"]:
+            petrol_poi = self.create_petrol_station_poi(item)
+            if petrol_poi:
+                yield self.create_petrol_station_poi(item)
+
         apply_yes_no(Extras.TOILETS, item, feature["asda_service_customer_wc"])
         apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, feature["asda_service_disabled_facilities"])
         apply_yes_no(Extras.BABY_CHANGING_TABLE, item, feature["asda_service_baby_changing"])
         apply_yes_no(Extras.ATM, item, feature["asda_service_cash_machine"])
 
         yield item
+
+    def create_department_poi(self, store_item, poi_type, name_suffix, category):
+        """Create separate POI for a department (pharmacy, café, etc.)
+        """
+        poi = store_item.copy()
+
+        # Create unique ref
+        poi["ref"] = f"{store_item['ref']}_{poi_type}"
+
+        # Clear store-specific fields
+        poi.pop("shop", None)
+
+        # Clear opening hours
+        poi.pop("opening_hours", None)
+
+        # Clear store amenity extras
+        if "extras" in poi:
+            poi.pop("extras", None)
+
+        # Set POI-specific fields
+        apply_category(category, poi)
+        poi["name"] = f"Asda {name_suffix}"
+        poi.update(self.item_attributes)
+
+        return poi
+
+    def create_pharmacy_poi(self, store_item):
+        """Create separate POI for pharmacy"""
+        return self.create_department_poi(store_item, "pharmacy", "Pharmacy", Categories.PHARMACY)
+
+    def create_cafe_poi(self, store_item):
+        """Create separate POI for café"""
+        return self.create_department_poi(store_item, "cafe", "Café", Categories.CAFE)
+
+    def create_optician_poi(self, store_item):
+        """Create separate POI for optician"""
+        return self.create_department_poi(store_item, "optician", "Optician", Categories.SHOP_OPTICIAN)
+
+    def create_petrol_station_poi(self, store_item):
+        """Create separate POI for petrol station"""
+        petrol = store_item.copy()
+
+        # Clear store-specific fields
+        petrol.pop("shop", None)
+
+        # Clear store amenity extras
+        if "extras" in petrol:
+            petrol.pop("extras", None)
+
+        # Set petrol station-specific fields
+        apply_category(Categories.FUEL_STATION, petrol)
+        petrol["name"] = "Asda Petrol Station"
+        return petrol
