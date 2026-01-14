@@ -1,4 +1,4 @@
-import json
+from json import dumps
 from typing import Any, AsyncIterator, Iterable
 from urllib.parse import urlencode
 
@@ -47,7 +47,7 @@ GOOGLE_WHEELCHAIR_KEYS = [
 
 
 class YextAnswersSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "yext"}
+    dataset_attributes: dict = {"source": "api", "api": "yext"}
 
     endpoint: str = "https://liveapi.yext.com/v2/accounts/me/answers/vertical/query"
     api_key: str
@@ -71,13 +71,11 @@ class YextAnswersSpider(Spider):
                         "version": self.environment,
                         "locale": self.locale,
                         "verticalKey": self.feature_type,
-                        "filters": json.dumps(
-                            {"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}
-                        ),
+                        "filters": dumps({"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}),
                         "limit": str(self.page_limit),
                         "offset": str(offset),
                         "source": "STANDARD",
-                        "facetFilters": json.dumps(self.facet_filters),
+                        "facetFilters": dumps(self.facet_filters),
                     }
                 ),
             ),
@@ -182,7 +180,8 @@ class YextAnswersSpider(Spider):
                     oh.add_range(day, time["start"], time["end"])
         return oh
 
-    def parse_payment_methods(self, location: dict, item: Feature) -> None:
+    @staticmethod
+    def parse_payment_methods(location: dict, item: Feature) -> None:
         if payment_methods := location.get("paymentOptions"):
             payment_methods = [p.lower().replace(" ", "") for p in payment_methods]
             apply_yes_no(PaymentMethods.ALIPAY, item, "alipay" in payment_methods)
@@ -200,7 +199,8 @@ class YextAnswersSpider(Spider):
             apply_yes_no(PaymentMethods.VISA, item, "visa" in payment_methods)
             apply_yes_no(PaymentMethods.WECHAT, item, "wechatpay" in payment_methods)
 
-    def parse_google_attributes(self, location: dict, item: Feature) -> None:
+    @staticmethod
+    def parse_google_attributes(location: dict, item: Feature) -> None:
         if google_attributes := location.get("googleAttributes"):
             for key, attribute in GOOGLE_ATTRIBUTES_MAP.items():
                 if key in google_attributes:

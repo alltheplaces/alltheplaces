@@ -117,7 +117,7 @@ LABELS = [
 
 class MySpider(StructuredDataSpider):
     name = "my_spider"
-    start_urls = None
+    start_urls = []
     item_attributes = {}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     matching_links = []
@@ -136,7 +136,7 @@ class MySpider(StructuredDataSpider):
         if len(self.matching_links) > 0:
             print("Possible storefinder links")
             for link in set(self.matching_links):
-                if "http" not in link:
+                if "http" not in link and self.start_urls:
                     print(self.start_urls[0] + link)
                 else:
                     print(link)
@@ -168,6 +168,9 @@ class LinksCommand(BaseRunSpiderCommand):
             path = os.path.abspath(args[0])
             MySpider.start_urls = [pathlib.Path(path).as_uri()]
 
-        crawler = self.crawler_process.create_crawler(MySpider, **opts.spargs)
-        self.crawler_process.crawl(crawler)
-        self.crawler_process.start()
+        if crawler_process := self.crawler_process:
+            crawler = crawler_process.create_crawler(MySpider, **opts.spargs)
+            crawler_process.crawl(crawler)
+            crawler_process.start()
+        else:
+            raise RuntimeError("Crawler process not defined")

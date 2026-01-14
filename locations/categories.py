@@ -72,6 +72,7 @@ class Categories(Enum):
     LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
+    LEISURE_SLIPWAY = {"leisure": "slipway"}
     LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}

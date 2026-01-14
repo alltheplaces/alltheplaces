@@ -1,10 +1,13 @@
-import chompjs
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest
+from typing import AsyncIterator, Iterable
+
+from chompjs import parse_js_object
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.categories import PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class SweetIQSpider(Spider):
@@ -15,16 +18,19 @@ class SweetIQSpider(Spider):
     Provide `start_urls`, which will then automatically extract API keys and other data.
     """
 
-    dataset_attributes = {"source": "api", "api": "sweetiq.com"}
-    request_batch_size = 10
+    start_urls: list[str] = []
+    dataset_attributes: dict = {"source": "api", "api": "sweetiq.com"}
+    request_batch_size: int = 10
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield Request(url=url, callback=self.parse_locations_list)
+    async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0], callback=self.parse_locations_list)
 
-    def parse_locations_list(self, response):
+    def parse_locations_list(self, response: TextResponse) -> Iterable[JsonRequest]:
         js_blob = response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]/text()').get()
-        locations_data = chompjs.parse_js_object(js_blob)
+        locations_data = parse_js_object(js_blob)
         api_url_base = locations_data["env"]["presBaseUrl"]
         api_store_locator_id = locations_data["dataSettings"]["storeLocatorId"]
         api_client_id = locations_data["dataSettings"]["clientId"]
@@ -40,7 +46,7 @@ class SweetIQSpider(Spider):
             url = f"{api_url_base}/{api_store_locator_id}/locations-details?locale=en_US&ids={location_ids_batch_string}&clientId={api_client_id}&cname={api_client_name}"
             yield JsonRequest(url=url)
 
-    def parse(self, response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["features"]:
             self.pre_process_data(location)
 
@@ -80,8 +86,8 @@ class SweetIQSpider(Spider):
 
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         yield item
 
-    def pre_process_data(self, location, **kwargs):
+    def pre_process_data(self, location: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""

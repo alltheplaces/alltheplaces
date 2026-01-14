@@ -1,5 +1,17 @@
+from typing import Any
+
 from locations.geo import extract_geojson_point_geometry
 from locations.items import Feature
+
+
+class KeyVariations:
+    _cache = {}
+
+    @classmethod
+    def get_variations(cls, key: str) -> set[str]:
+        if key not in cls._cache:
+            cls._cache[key] = DictParser.get_variations(key)
+        return cls._cache[key]
 
 
 class DictParser:
@@ -50,6 +62,9 @@ class DictParser:
         "nombre",
         # IT
         "nome",
+        # NO
+        "navn",
+        "fulltnavn",
     ]
 
     house_number_keys = [
@@ -71,6 +86,8 @@ class DictParser:
         "formattedAddress",
         # ES
         "direccion",  # "address"
+        # NO
+        "beliggenhetsadresse",
     ]
 
     street_keys = [
@@ -119,6 +136,8 @@ class DictParser:
         "citta",
         # DE
         "ort",  # location
+        # NO
+        "poststed",
     ]
 
     region_keys = [
@@ -148,6 +167,8 @@ class DictParser:
         "country",
         "country-name",
         "store-country",
+        # NO
+        "land",
     ]
 
     isocode_keys = [
@@ -179,6 +200,8 @@ class DictParser:
         "postleitzahl",
         # IT
         "cap",
+        # NO
+        "postnummer",
     ]
 
     email_keys = [
@@ -227,6 +250,8 @@ class DictParser:
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
+        # NO
+        "breddegrad",
     ]
 
     lon_keys = [
@@ -247,6 +272,8 @@ class DictParser:
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",
+        # NO
+        "lengdegrad",
     ]
 
     website_keys = [
@@ -261,6 +288,9 @@ class DictParser:
         "location-url",
         "web-address",
         "WebSiteURL",
+        # NO
+        "internettadresse",
+        "nettside",
     ]
 
     hours_keys = [
@@ -325,6 +355,8 @@ class DictParser:
                     "positions",
                     "display-coordinate",
                     "yextDisplayCoordinate",
+                    # NO
+                    "koordinat",
                 ],
             )
             if location and isinstance(location, dict):
@@ -375,15 +407,15 @@ class DictParser:
         return item
 
     @staticmethod
-    def get_first_key(obj, keys):
+    def get_first_key(obj: dict, keys: list[str]) -> Any:
         for key in keys:
-            variations = DictParser.get_variations(key)
+            variations = KeyVariations.get_variations(key)
             for variation in variations:
                 if obj.get(variation):
                     return obj[variation]
 
     @staticmethod
-    def get_variations(key):
+    def get_variations(key: str) -> set[str]:
         results = set()
         results.add(key)
 
