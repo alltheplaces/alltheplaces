@@ -93,6 +93,34 @@ class NorOpplaeringskontorerNOSpider(Spider):
         if (ansatte := data.get("AntallAnsatte")) not in (None, 0):
             item["extras"]["employees"] = ansatte
 
+        # Operator information from ForeldreRelasjoner
+        # See: https://data-nor.udir.no/v4/relasjonstyper
+        for relasjon in data.get("ForeldreRelasjoner") or []:
+            relasjonstype = relasjon.get("Relasjonstype") or {}
+            # 22 (Eierstruktur) = ownership structure, i.e. who owns/operates the entity
+            if relasjonstype.get("Id") == "22":
+                if enhet := relasjon.get("Enhet"):
+                    if navn := enhet.get("Navn"):
+                        item["operator"] = navn
+                break
+
+        # Operator type based on Organisasjonsform
+        # See: https://data-nor.udir.no/v4/organisasjonsformer
+        if organisasjonsform := data.get("Organisasjonsform"):
+            org_id = organisasjonsform.get("Id")
+            if org_id in ("KOMM", "FYLK", "STAT"):
+                item["extras"]["operator:type"] = "government"
+            elif org_id in ("ADOS", "FKF", "KF", "SF", "IKS"):
+                item["extras"]["operator:type"] = "public"
+            elif org_id == "KIRK":
+                item["extras"]["operator:type"] = "religious"
+            elif org_id in ("SA", "BBL", "BRL", "GFS"):
+                item["extras"]["operator:type"] = "cooperative"
+            elif org_id in ("FLI", "ORGL", "STI"):
+                item["extras"]["operator:type"] = "association"
+            elif org_id in ("AS", "ASA", "BA", "ENK", "DA", "ANS", "KS", "NUF", "SE", "PRE"):
+                item["extras"]["operator:type"] = "private"
+
         # Category: training office
         apply_category({"office": "educational_institution", "education": "training"}, item)
 
