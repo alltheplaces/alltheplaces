@@ -114,23 +114,6 @@ class AsdaGBSpider(VirtualEarthSpider):
 
     def create_petrol_station_poi(self, store_item):
         """Create separate POI for petrol station"""
-        petrol = store_item.copy()
+        return self.create_department_poi(store_item, "fuel", "Petrol Station", Categories.FUEL_STATION)
 
-        # Clear store-specific fields
-        petrol.pop("shop", None)
 
-        # Clear opening hours
-        petrol.pop("opening_hours", None)
-
-        # Clear phone and website
-        petrol.pop("phone", None)
-        petrol.pop("website", None)
-
-        # Clear store amenity extras
-        if "extras" in petrol:
-            petrol.pop("extras", None)
-
-        # Set petrol station-specific fields
-        apply_category(Categories.FUEL_STATION, petrol)
-        petrol["name"] = "Asda Petrol Station"
-        return petrol
