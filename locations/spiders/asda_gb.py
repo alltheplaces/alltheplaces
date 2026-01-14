@@ -85,6 +85,10 @@ class AsdaGBSpider(VirtualEarthSpider):
         # Clear opening hours
         poi.pop("opening_hours", None)
 
+        # Clear phone and website
+        poi.pop("phone", None)
+        poi.pop("website", None)
+
         # Clear store amenity extras
         if "extras" in poi:
             poi.pop("extras", None)
@@ -114,6 +118,13 @@ class AsdaGBSpider(VirtualEarthSpider):
 
         # Clear store-specific fields
         petrol.pop("shop", None)
+        
+        # Clear opening hours
+        poi.pop("opening_hours", None)
+
+        # Clear phone and website
+        poi.pop("phone", None)
+        poi.pop("website", None)
 
         # Clear store amenity extras
         if "extras" in petrol:
