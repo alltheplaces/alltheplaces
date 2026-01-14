@@ -958,6 +958,8 @@ CLOSED_ES = ["cerrado"]
 
 CLOSED_SE = ["stängd", "stangd"]
 
+CLOSED_NO = ["stengt"]
+
 CLOSED_FR = ["fermée", "fermé", "fermee", "ferme"]
 
 logger = logging.getLogger(__name__)

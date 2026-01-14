@@ -59,7 +59,9 @@ class Century21Spider(scrapy.Spider):
         if response.json()["result"]:
             for location in response.json()["result"]:
                 item = DictParser.parse(location)
-
+                item["branch"] = (
+                    item.pop("name").replace("CENTURY 21", "").replace("Century 21", "").lstrip("®").lstrip()
+                )
                 item["street_address"] = item.pop("street")
 
                 # Without 'description' they are in lower case
