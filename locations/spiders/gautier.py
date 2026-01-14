@@ -13,7 +13,8 @@ class GautierSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
-        item.pop("image")
+        if item.get("image"):
+            item.pop("image")
         apply_category(Categories.SHOP_FURNITURE, item)
         item["branch"] = item.pop("name").replace("Meubles ", "").replace("Gautier ", "")
         yield item
