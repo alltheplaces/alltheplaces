@@ -21,9 +21,9 @@ class KartverketAddressesNOSpider(AddressSpider):
     allowed_domains = ["nedlasting.geonorge.no"]
     dataset_attributes = Licenses.CC4.value | {
         "attribution:website": "https://kartkatalog.geonorge.no/metadata/matrikkelen-adresse/f7df7a18-b30f-4745-bd64-d0863812350c",
-        "attribution:name": "Contains data from Matrikkelen - Adresse distributed by Kartverket"
+        "attribution:name": "Contains data from Matrikkelen - Adresse distributed by Kartverket",
     }
-    custom_settings = {"DOWNLOAD_TIMEOUT": 300, "CONCURRENT_REQUESTS": 4}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 300}
 
     # File format: Basisdata_<areaCode>_<areaName>_<projection>_MatrikkelenAdresse_CSV.zip
     csv_url = "https://nedlasting.geonorge.no/geonorge/Basisdata/MatrikkelenAdresse/CSV/Basisdata_0000_Norge_4258_MatrikkelenAdresse_CSV.zip"
