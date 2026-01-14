@@ -94,10 +94,12 @@ class NfrSkolefritidsordningenNOSpider(Spider):
         if (ansatte := data.get("AntallAnsatte")) not in (None, 0):
             item["extras"]["employees"] = ansatte
 
-        # Operator information 
+        # Operator information
         for relasjon in data.get("ForeldreRelasjoner") or []:
             relasjonstype = relasjon.get("Relasjonstype") or {}
-            if relasjonstype.get("Id") == "51":  #  51 (Eierstruktur) = ownership structure, i.e. who owns/operates the SFO
+            if (
+                relasjonstype.get("Id") == "51"
+            ):  #  51 (Eierstruktur) = ownership structure, i.e. who owns/operates the SFO
                 if enhet := relasjon.get("Enhet"):
                     if navn := enhet.get("Navn"):
                         item["operator"] = navn
