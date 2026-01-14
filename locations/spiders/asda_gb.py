@@ -115,5 +115,3 @@ class AsdaGBSpider(VirtualEarthSpider):
     def create_petrol_station_poi(self, store_item):
         """Create separate POI for petrol station"""
         return self.create_department_poi(store_item, "fuel", "Petrol Station", Categories.FUEL_STATION)
-
-
