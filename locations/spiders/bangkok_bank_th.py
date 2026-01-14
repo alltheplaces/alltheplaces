@@ -4,8 +4,14 @@ from urllib.parse import urljoin
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.spiders.big_c_th import BigCTHSpider
+from locations.spiders.lotuss_th import LotussTHSpider
+from locations.spiders.makro_th import MakroTHSpider
+from locations.spiders.ptt_th import PttTHSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.user_agents import CHROME_LATEST
 
 
@@ -22,6 +28,18 @@ class BangkokBankTHSpider(Spider):
         "USER_AGENT": CHROME_LATEST,
     }
     base_url = "https://www.bangkokbank.com/api/locationsearchservice/"
+
+    # Located_in wikidata mapping for ATMs in retail stores
+    # Branch names contain Thai and/or English retail brand names
+    LOCATED_IN_MAPPINGS = [
+        (["7-11", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
+        (["โลตัส", "LOTUS"], {"brand": LotussTHSpider.LOTUSS[0], "brand_wikidata": LotussTHSpider.LOTUSS[1]}),
+        (["บิ๊กซี", "BIG C"], BigCTHSpider.item_attributes),
+        (["ปตท", "PTT"], PttTHSpider.item_attributes),
+        (["แม็คโคร", "MAKRO"], MakroTHSpider.item_attributes),
+        (["บางจาก", "BANGCHAK"], {"brand": "Bangchak", "brand_wikidata": "Q6579719"}),
+        (["ท็อปส์", "TOPS"], {"brand": "Tops", "brand_wikidata": "Q7825140"}),
+    ]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(urljoin(self.base_url, "GetProvinceTh"), callback=self.parse_thailand_province)
@@ -50,4 +68,7 @@ class BangkokBankTHSpider(Spider):
                 apply_yes_no(Extras.ATM, item, poi.get("ATM") == "x")
             else:
                 apply_category(Categories.ATM, item)
+                item["located_in"], item["located_in_wikidata"] = extract_located_in(
+                    item.get("branch", ""), self.LOCATED_IN_MAPPINGS, self
+                )
             yield item
