@@ -118,7 +118,7 @@ class AsdaGBSpider(VirtualEarthSpider):
 
         # Clear store-specific fields
         petrol.pop("shop", None)
-        
+
         # Clear opening hours
         poi.pop("opening_hours", None)
 
