@@ -1,8 +1,7 @@
-import json
 from typing import Any, Iterable
 
 import scrapy
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.items import Feature
@@ -102,26 +101,20 @@ class MaesMobilityBENLSpider(scrapy.Spider):
 
     async def start(self):
         # Single API call with bounds covering all of Belgium and Netherlands
-        payload = {
-            "fuelTypes": [],
-            "networks": [],
-            "paymentMethods": [],
-            "carwash": False,
-            "shop": False,
-            "bounds": {
-                "ne": {"lat": 55.816686773322274, "lng": 10.286890351562516},
-                "sw": {"lat": 47.20833949858102, "lng": -3.8854729296874835},
-                "center": {"latitude": 51.716787802978565, "longitude": 3.2007087109375165},
-            },
-        }
-
-        yield scrapy.Request(
+        yield JsonRequest(
             url="https://www.maesmobility.be/api/filter-stations",
             method="POST",
-            body=json.dumps(payload),
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "*/*",
+            data={
+                "fuelTypes": [],
+                "networks": [],
+                "paymentMethods": [],
+                "carwash": False,
+                "shop": False,
+                "bounds": {
+                    "ne": {"lat": 55.816686773322274, "lng": 10.286890351562516},
+                    "sw": {"lat": 47.20833949858102, "lng": -3.8854729296874835},
+                    "center": {"latitude": 51.716787802978565, "longitude": 3.2007087109375165},
+                },
             },
         )
 
