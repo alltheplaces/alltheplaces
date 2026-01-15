@@ -1623,7 +1623,7 @@ class GtfsSpider(CSVFeedSpider):
         apply_yes_no("bus", item, "3" in route_types)
         apply_yes_no("ferry", item, "4" in route_types)
         apply_yes_no("tram", item, "5" in route_types)
-        apply_yes_no("aerialway", item, "6" in route_types)
+        apply_yes_no("aerialway", item, "6" in route_types and row.get("location_type") == "2")
         apply_yes_no("trolleybus", item, "11" in route_types)
         apply_yes_no("monorail", item, "12" in route_types)
 
