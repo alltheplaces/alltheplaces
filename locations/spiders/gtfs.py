@@ -1515,9 +1515,9 @@ class GtfsSpider(CSVFeedSpider):
         if "operator:wikidata" in brand_tags:
             feed_attributes["operator_wikidata"] = brand_tags["operator:wikidata"]
         if "network" in brand_tags:
-            feed_attributes["extras"]["network"] = brand_tags["network"]
+            feed_attributes["network"] = brand_tags["network"]
         if "network:wikidata" in brand_tags:
-            feed_attributes["extras"]["network:wikidata"] = brand_tags["network:wikidata"]
+            feed_attributes["network_wikidata"] = brand_tags["network:wikidata"]
 
         url = row["urls.latest"] or row["urls.direct_download"]
         self.logger.info("Provider: %s URL: %s", row["provider"], url)
@@ -1534,10 +1534,10 @@ class GtfsSpider(CSVFeedSpider):
             for row in csviter(z.read("agency.txt")):
                 if agency_name := row.get("agency_name"):
                     if agency_id := row.get("agency_id"):
-                        agencies[agency_id] = {"extras": {"network": agency_name}, "operator": agency_name}
+                        agencies[agency_id] = {"network": agency_name, "operator": agency_name}
                     else:
-                        feed_attributes["extras"]["network"] = agency_name
-                        feed_attributes["extras"]["operator"] = agency_name
+                        feed_attributes["network"] = agency_name
+                        feed_attributes["operator"] = agency_name
 
         # Feed publisher is sometimes the transit agency, but more often the publishing service they use
         if 0 and "feed_info.txt" in z.namelist():
