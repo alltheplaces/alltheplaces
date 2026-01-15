@@ -12,7 +12,7 @@ from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 from locations.spiders.avia_eu import AviaEUSpider
 from locations.spiders.bp import BpSpider
 from locations.spiders.bricomarche_pl import BricomarchePLSpider
-from locations.spiders.carrefour_fr import CARREFOUR_SUPERMARKET, CARREFOUR_MARKET
+from locations.spiders.carrefour_fr import CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.conad_it import ConadITSpider
 from locations.spiders.cora_be_lu import CoraBELUSpider
@@ -22,7 +22,7 @@ from locations.spiders.elinoil_gr import ElinoilGRSpider
 from locations.spiders.europam_it import EuropamITSpider
 from locations.spiders.f24 import F24Spider
 from locations.spiders.fieten_nl import FietenNLSpider
-from locations.spiders.gabriels_be import POWER, GABRIELS
+from locations.spiders.gabriels_be import GABRIELS, POWER
 from locations.spiders.globus_baumarkt_de import GlobusBaumarktDESpider
 from locations.spiders.gnp_it import GnpITSpider
 from locations.spiders.government.gov_osservaprezzi_carburanti_it import GovOsservaprezziCarburantiITSpider
@@ -50,7 +50,7 @@ from locations.spiders.tango import TangoSpider
 from locations.spiders.teboil_ru import TeboilRUSpider
 from locations.spiders.texaco_co import TEXACO_SHARED_ATTRIBUTES
 from locations.spiders.total_energies import TotalEnergiesSpider
-from locations.spiders.yx import UNOX, YX, PREEM
+from locations.spiders.yx import PREEM, UNOX, YX
 
 
 def remove_key(d, key):
