@@ -1,10 +1,14 @@
 import re
 
+from scrapy import Spider
+
+from locations.items import Feature
+
 
 class EmailCleanUpPipeline:
     MAILTO_PATTERN = re.compile(r"mailto:", re.IGNORECASE)
 
-    def process_item(self, item, spider):
+    def process_item(self, item: Feature, spider: Spider) -> Feature:
         emails = item.get("email")
 
         if not emails:
@@ -24,7 +28,7 @@ class EmailCleanUpPipeline:
             item["email"] = ";".join(normalized_emails)
         return item
 
-    def normalize(self, email, spider):
+    def normalize(self, email: str, spider: Spider) -> str | None:
         email = self.MAILTO_PATTERN.sub("", email).strip()
         if not email:
             return None
