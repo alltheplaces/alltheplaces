@@ -1633,9 +1633,9 @@ class GtfsSpider(CSVFeedSpider):
             for k, v in agency.items():
                 item[k] = ";".join(filter(None, set((item.get(k, "").split(";")) + [v])))
 
-        route_types = {route.get("route_type") for route in routes}
-        location_type: str = row.get("location_type") or "0"
+        self.apply_categories(item, row.get("location_type") or "0", {route.get("route_type") for route in routes})
 
+    def apply_categories(self, item, location_type, route_types):
         if location_type == "0":
             apply_category({"public_transport": "platform"}, item)
             if not route_types.isdisjoint({"0", "1", "2", "7", "12"}):
