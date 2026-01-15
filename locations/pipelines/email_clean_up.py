@@ -2,6 +2,8 @@ import re
 
 
 class EmailCleanUpPipeline:
+    MAILTO_PATTERN = re.compile(r"mailto:", re.IGNORECASE)
+
     def process_item(self, item, spider):
         emails = item.get("email")
 
@@ -23,11 +25,10 @@ class EmailCleanUpPipeline:
         return item
 
     def normalize(self, email, spider):
-        email = re.sub(r"mailto:", "", email, flags=re.IGNORECASE)
-        email = email.strip()
+        email = self.MAILTO_PATTERN.sub("", email).strip()
         if not email:
             return None
         if "@" not in email:
             spider.crawler.stats.inc_value("atp/field/email/invalid")
             return None
-        return email.strip()
+        return email
