@@ -12,5 +12,6 @@ class VirginMoneyGBSpider(WoosmapSpider):
     origin = "https://uk.virginmoney.com"
 
     def parse_item(self, item, feature, **kwargs):
+        item["branch"] = item.pop("name")
         apply_category(Categories.BANK, item)
         yield item

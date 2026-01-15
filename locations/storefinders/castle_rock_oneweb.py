@@ -28,7 +28,7 @@ class CastleRockOneWebSpider(JSONBlobSpider):
     """
 
     api_endpoint: str
-    locations_key: list[str] = ["data", "mapFeaturesQuery", "mapFeatures"]
+    locations_key: str | list[str] = ["data", "mapFeaturesQuery", "mapFeatures"]
     video_url_template: str | None = None
 
     async def start(self) -> AsyncIterator[JsonRequest]:

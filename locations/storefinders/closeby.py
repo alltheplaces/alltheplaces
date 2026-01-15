@@ -17,7 +17,7 @@ class ClosebySpider(Spider):
     hexadecimal value (regex: "[\\da-f]{32}").
     """
 
-    dataset_attributes = {"source": "api", "api": "closeby.co"}
+    dataset_attributes: dict = {"source": "api", "api": "closeby.co"}
     api_key: str
 
     async def start(self) -> AsyncIterator[JsonRequest]:

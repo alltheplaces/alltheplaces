@@ -5,7 +5,7 @@ import tempfile
 from locations.exporters.geojson import GeoJsonExporter, item_to_properties
 from locations.exporters.geoparquet import GeoparquetExporter
 from locations.exporters.ld_geojson import LineDelimitedGeoJsonExporter
-from locations.items import Feature, add_social_media
+from locations.items import Feature, add_social_media, set_lat_lon
 
 
 def test_item_to_properties():
@@ -78,10 +78,9 @@ def test_item_socials():
 def test_geoparquet_exporter_with_file_path():
     """Test that geoparquet exporter works with file paths"""
     item = Feature()
-    item["lat"] = 40.7128
-    item["lon"] = -74.0060
     item["name"] = "Test Location"
     item["ref"] = "test_ref_1"
+    set_lat_lon(item, 40.7128, -74.0060)
 
     with tempfile.NamedTemporaryFile(suffix=".parquet", delete=False) as f:
         temp_file = f.name
@@ -108,10 +107,9 @@ def test_geoparquet_exporter_with_file_path():
 def test_geoparquet_exporter_with_file_handle():
     """Test that geoparquet exporter works with file handles (as Scrapy uses them)"""
     item = Feature()
-    item["lat"] = 40.7128
-    item["lon"] = -74.0060
     item["name"] = "Test Location"
     item["ref"] = "test_ref_1"
+    set_lat_lon(item, 40.7128, -74.0060)
 
     with tempfile.NamedTemporaryFile(suffix=".parquet", delete=False) as f:
         temp_file = f.name
@@ -139,10 +137,9 @@ def test_geoparquet_exporter_with_file_handle():
 def test_geoparquet_exporter_with_bytesio():
     """Test that geoparquet exporter works with BytesIO"""
     item = Feature()
-    item["lat"] = 40.7128
-    item["lon"] = -74.0060
     item["name"] = "Test Location"
     item["ref"] = "test_ref_1"
+    set_lat_lon(item, 40.7128, -74.0060)
 
     output = io.BytesIO()
     exporter = GeoparquetExporter(output)
