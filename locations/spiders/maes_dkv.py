@@ -377,7 +377,10 @@ class MaesDkvSpider(scrapy.Spider):
         # Generic/unbranded (empty brand - skip branding)
         "DIVERSE / OTHERS": None,
         "DIVERSE/OTHERS": None,
+        "DIVERS / OTHERS": None,
         "DIV_ROAD SOLUTION": None,
+        "EASY FUEL": None,
+        "OTHERS": None,
         "SUPERMARKT": None,
         "#NV": None,
         "OIL": None,
