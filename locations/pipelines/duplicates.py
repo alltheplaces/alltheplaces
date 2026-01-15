@@ -1,6 +1,6 @@
 import logging
 
-from scrapy import Spider
+from scrapy.crawler import Crawler
 from scrapy.exceptions import DropItem
 
 from locations.items import Feature
@@ -9,22 +9,29 @@ logger = logging.getLogger(__name__)
 
 
 class DuplicatesPipeline:
-    def __init__(self):
-        self.ids_seen = set()
+    crawler: Crawler
 
-    def process_item(self, item: Feature, spider: Spider) -> Feature:
-        if getattr(spider, "no_refs", False):
+    def __init__(self, crawler: Crawler):
+        self.ids_seen = set()
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature) -> Feature:
+        if getattr(self.crawler.spider, "no_refs", False):
             return item
 
-        ref = (spider.name, item["ref"])
+        ref = (self.crawler.spider.name, item["ref"])  # ty: ignore[possibly-missing-attribute]
         if ref in self.ids_seen:
-            if spider.crawler.stats:
-                spider.crawler.stats.inc_value("atp/duplicate_count")
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/duplicate_count")
             raise DropItem("Duplicate item: {}".format(item["ref"]))
         else:
             self.ids_seen.add(ref)
             return item
 
-    def close_spider(self, spider: Spider) -> None:
-        if spider.crawler.stats:
-            logger.info("Dropped {} duplicate items".format(spider.crawler.stats.get_value("atp/duplicate_count", 0)))
+    def close_spider(self) -> None:
+        if self.crawler.stats:
+            logger.info("Dropped {} duplicate items".format(self.crawler.stats.get_value("atp/duplicate_count", 0)))

@@ -1,8 +1,10 @@
 import re
 
+from locations.items import Feature
+
 
 class ExtractGBPostcodePipeline:
-    def process_item(self, item, spider):
+    def process_item(self, item: Feature):
         if item.get("country") == "GB":
             if item.get("addr_full") and not item.get("postcode"):
                 item["postcode"] = extract_gb_postcode(item["addr_full"])

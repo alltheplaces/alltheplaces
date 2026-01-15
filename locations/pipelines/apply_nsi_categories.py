@@ -1,13 +1,25 @@
+from scrapy.crawler import Crawler
+
 from locations.categories import get_category_tags
+from locations.items import Feature
 from locations.name_suggestion_index import NSI
 
 
 class ApplyNSICategoriesPipeline:
+    crawler: Crawler
+
     nsi = NSI()
 
     wikidata_cache = {}
 
-    def process_item(self, item, spider):
+    def __init__(self, crawler: Crawler):
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature):
         if item.get("nsi_id"):
             return item
 
@@ -23,31 +35,31 @@ class ApplyNSICategoriesPipeline:
         matches = self.wikidata_cache.get(code, [])
 
         if len(matches) == 0 and item.get("brand_wikidata"):
-            spider.crawler.stats.inc_value("atp/nsi/brand_missing")
+            self.crawler.stats.inc_value("atp/nsi/brand_missing")  # ty: ignore [possibly-missing-attribute]
             return item
         elif len(matches) == 0 and item.get("operator_wikidata"):
-            spider.crawler.stats.inc_value("atp/nsi/operator_missing")
+            self.crawler.stats.inc_value("atp/nsi/operator_missing")  # ty: ignore [possibly-missing-attribute]
             return item
 
         if len(matches) == 1:
-            spider.crawler.stats.inc_value("atp/nsi/perfect_match")
+            self.crawler.stats.inc_value("atp/nsi/perfect_match")  # ty: ignore [possibly-missing-attribute]
             return self.apply_tags(matches[0], item)
 
         if cc := item.get("country"):
             matches = self.filter_cc(matches, cc.lower(), get_category_tags(item))
 
             if len(matches) == 1:
-                spider.crawler.stats.inc_value("atp/nsi/cc_match")
+                self.crawler.stats.inc_value("atp/nsi/cc_match")  # ty: ignore [possibly-missing-attribute]
                 return self.apply_tags(matches[0], item)
 
         if categories := get_category_tags(item):
             matches = self.filter_categories(matches, categories)
 
             if len(matches) == 1:
-                spider.crawler.stats.inc_value("atp/nsi/category_match")
+                self.crawler.stats.inc_value("atp/nsi/category_match")  # ty: ignore [possibly-missing-attribute]
                 return self.apply_tags(matches[0], item)
 
-        spider.crawler.stats.inc_value("atp/nsi/match_failed")
+        self.crawler.stats.inc_value("atp/nsi/match_failed")  # ty: ignore [possibly-missing-attribute]
         return item
 
     def filter_cc(self, matches: list[dict], cc: str, categories: dict | None = None) -> list[dict]:

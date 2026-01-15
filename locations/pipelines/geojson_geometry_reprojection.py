@@ -1,12 +1,10 @@
-from scrapy import Spider
-
 from locations.geo import convert_gj2008_to_rfc7946_point_geometry
 from locations.items import Feature
 
 
 class GeoJSONGeometryReprojectionPipeline:
 
-    def process_item(self, item: Feature, spider: Spider):
+    def process_item(self, item: Feature):
         """
         If the `geometry` field of an item contains GeoJSON geometry with a
         coordinate reference system (CRS) projection other than EPSG:4326,
