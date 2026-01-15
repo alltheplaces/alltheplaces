@@ -367,9 +367,7 @@ class MaesDkvSpider(scrapy.Spider):
         if not result.get("success"):
             return
 
-        stations = result.get("data", [])
-
-        for station in stations:
+        for station in result.get("data", []):
             item = Feature()
 
             self.populate_basic_fields(item, station)
@@ -413,10 +411,8 @@ class MaesDkvSpider(scrapy.Spider):
 
     def apply_facilities(self, item: Feature, station: dict):
         # DKV API uses car_washing_facility and shop_refreshments
-        if station.get("car_washing_facility"):
-            apply_yes_no(Extras.CAR_WASH, item, True)
-        if station.get("shop_refreshments"):
-            apply_yes_no("shop", item, True)
+        apply_yes_no(Extras.CAR_WASH, item, station.get("car_washing_facility"))
+        apply_yes_no("shop", item, station.get("shop_refreshments"))
 
     def extract_brand(self, title: str) -> dict | None:
         """Extract brand information from station title using direct key lookup."""
