@@ -18,8 +18,8 @@ class WholeFoodsGBSpider(Spider):
         for location in response.xpath("//@data-context").getall():
             location = json.loads(location)["location"]
             item = Feature()
-            item["lat"] = location["markerLat"]
-            item["lon"] = location["markerLng"]
+            item["lat"] = location.get("markerLat")
+            item["lon"] = location.get("markerLng")
             item["name"] = location["addressTitle"]
             item["addr_full"] = merge_address_lines([location["addressLine1"], location["addressLine2"]])
             item["country"] = location["addressCountry"]
