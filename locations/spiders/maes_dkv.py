@@ -7,6 +7,56 @@ from scrapy.http import Response
 from locations.categories import Categories, Extras, FuelCards, apply_category, apply_yes_no
 from locations.geo import point_locations
 from locations.items import Feature
+from locations.spiders.auchan_fr import AuchanFRSpider
+from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
+from locations.spiders.avia_eu import AviaEUSpider
+from locations.spiders.bp import BpSpider
+from locations.spiders.bricomarche_pl import BricomarchePLSpider
+from locations.spiders.carrefour_fr import CARREFOUR_SUPERMARKET, CARREFOUR_MARKET
+from locations.spiders.circle_k import CircleKSpider
+from locations.spiders.conad_it import ConadITSpider
+from locations.spiders.cora_be_lu import CoraBELUSpider
+from locations.spiders.e_leclerc import ELeclercSpider
+from locations.spiders.eko_gr import EkoGRSpider
+from locations.spiders.elinoil_gr import ElinoilGRSpider
+from locations.spiders.europam_it import EuropamITSpider
+from locations.spiders.f24 import F24Spider
+from locations.spiders.fieten_nl import FietenNLSpider
+from locations.spiders.gabriels_be import POWER, GABRIELS
+from locations.spiders.globus_baumarkt_de import GlobusBaumarktDESpider
+from locations.spiders.gnp_it import GnpITSpider
+from locations.spiders.government.gov_osservaprezzi_carburanti_it import GovOsservaprezziCarburantiITSpider
+from locations.spiders.ingo_dk import IngoDKSpider
+from locations.spiders.intermarche import IntermarcheSpider
+from locations.spiders.jet_de_at import JetDEATSpider
+from locations.spiders.lagerhaus_at import LagerhausATSpider
+from locations.spiders.loro_it import LoroITSpider
+from locations.spiders.lukoil import LUKOIL_BRAND
+from locations.spiders.markant_de import MarkantDESpider
+from locations.spiders.maxol_ie import MaxolIESpider
+from locations.spiders.mol import BRANDS_MAPPING as MOL_BRANDS_MAPPING
+from locations.spiders.moya_pl import MoyaPLSpider
+from locations.spiders.ok_dk import OkDKSpider
+from locations.spiders.okq8 import Okq8Spider
+from locations.spiders.omv import BRANDS_AND_COUNTRIES
+from locations.spiders.orlen import OrlenSpider
+from locations.spiders.petrol import PetrolSpider
+from locations.spiders.q8_italia import Q8ItaliaSpider
+from locations.spiders.repsol import RepsolSpider
+from locations.spiders.rompetrol import RompetrolSpider
+from locations.spiders.shell import ShellSpider
+from locations.spiders.systeme_u import SystemeUSpider
+from locations.spiders.tango import TangoSpider
+from locations.spiders.teboil_ru import TeboilRUSpider
+from locations.spiders.texaco_co import TEXACO_SHARED_ATTRIBUTES
+from locations.spiders.total_energies import TotalEnergiesSpider
+from locations.spiders.yx import UNOX, YX, PREEM
+
+
+def remove_key(d, key):
+    r = dict(d)
+    del r[key]
+    return r
 
 
 class MaesDkvSpider(scrapy.Spider):
@@ -22,139 +72,150 @@ class MaesDkvSpider(scrapy.Spider):
         "BFT": {"brand": "bft", "brand_wikidata": "Q1009104"},
         "BFT / SHELL": {"brand": "bft", "brand_wikidata": "Q1009104"},
         "BFT (NUR DIESEL)": {"brand": "bft", "brand_wikidata": "Q1009104"},
-        "ENGIE": {"brand": "Engie", "brand_wikidata": "Q1178147"},
-        "RAIFFEISEN": {"brand": "Raiffeisen", "brand_wikidata": "Q1232873"},
-        "WESTFALEN": {"brand": "Westfalen", "brand_wikidata": "Q1411209"},
+        "ENGIE": {"brand": "Engie", "brand_wikidata": "Q13416787"},
+        "RAIFFEISEN": LagerhausATSpider.item_attributes,
+        "WESTFALEN": TotalEnergiesSpider.BRANDS["westfalen"],
         "TURMOEL": {"brand": "Turmöl", "brand_wikidata": "Q1473279"},
-        "BP": {"brand": "BP", "brand_wikidata": "Q152057"},
-        "BP STATION": {"brand": "BP", "brand_wikidata": "Q152057"},
-        "TOTAL": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
-        "TOTALENERGIES": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
-        "ACCESS": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
-        "ELF": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
+        "BP": BpSpider.brands["bp"],
+        "BP STATION": BpSpider.brands["bp"],
+        "TOTAL": TotalEnergiesSpider.BRANDS["tot"],
+        "TOTALENERGIES": TotalEnergiesSpider.BRANDS["tot"],
+        "ACCESS": TotalEnergiesSpider.BRANDS["tot"],
+        "ELF": TotalEnergiesSpider.BRANDS["tot"],
         "WALTHER": {"brand": "Walther", "brand_wikidata": "Q15808406"},
         "HOYER": {"brand": "Hoyer", "brand_wikidata": "Q1606119"},
         "HOYER (NUR DIESEL)": {"brand": "Hoyer", "brand_wikidata": "Q1606119"},
         "HOYER (NUR LKW))": {"brand": "Hoyer", "brand_wikidata": "Q1606119"},
         "HOYER (NUR LKW)": {"brand": "Hoyer", "brand_wikidata": "Q1606119"},
-        "SLOVNAFT": {"brand": "Slovnaft", "brand_wikidata": "Q1587563"},
-        "INA": {"brand": "INA", "brand_wikidata": "Q1662137"},
-        "DYNEFF": {"brand": "Dyneff", "brand_wikidata": "Q16630266"},
-        "OMV": {"brand": "OMV", "brand_wikidata": "Q168238"},
+        "SLOVNAFT": TotalEnergiesSpider.BRANDS["slovnaft"],
+        "INA": {"brand": MOL_BRANDS_MAPPING["INA"][0], "brand_wikidata": MOL_BRANDS_MAPPING["INA"][1]},
+        "DYNEFF": TotalEnergiesSpider.BRANDS["dyn"],
+        "OMV": TotalEnergiesSpider.BRANDS["omv"],
         "PETRONOR": {"brand": "Petronor", "brand_wikidata": "Q1726547"},
-        "PETROL": {"brand": "Petrol", "brand_wikidata": "Q174824"},
-        "REPSOL": {"brand": "Repsol", "brand_wikidata": "Q174747"},
-        "CAMPSA": {"brand": "Repsol", "brand_wikidata": "Q174747"},
-        "INGO": {"brand": "Ingo", "brand_wikidata": "Q17048617"},
-        "ROMPETROL": {"brand": "Rompetrol", "brand_wikidata": "Q1788862"},
-        "ROMPETROL PARTENER": {"brand": "Rompetrol", "brand_wikidata": "Q1788862"},
-        "ROMPETROL EXPRES": {"brand": "Rompetrol", "brand_wikidata": "Q1788862"},
-        "PARTENER ROMPETROL": {"brand": "Rompetrol", "brand_wikidata": "Q1788862"},
-        "MAKPETROL": {"brand": "Makpetrol", "brand_wikidata": "Q1886438"},
+        "PETROL": PetrolSpider.PETROL,
+        "REPSOL": RepsolSpider.item_attributes,
+        "CAMPSA": RepsolSpider.item_attributes,
+        "INGO": IngoDKSpider.item_attributes,
+        "ROMPETROL": RompetrolSpider.item_attributes,
+        "ROMPETROL PARTENER": RompetrolSpider.item_attributes,
+        "ROMPETROL EXPRES": RompetrolSpider.item_attributes,
+        "PARTENER ROMPETROL": RompetrolSpider.item_attributes,
+        "MAKPETROL": {"brand": "Макпетрол", "brand_wikidata": "Q1886438"},
         "GALP": {"brand": "Galp", "brand_wikidata": "Q1492739"},
         "SOCAR": {"brand": "SOCAR", "brand_wikidata": "Q1622293"},
         "OIL!": {"brand": "OIL!", "brand_wikidata": "Q2007561"},
-        "CEPSA": {"brand": "Moeve", "brand_wikidata": "Q2113006"},
+        "CEPSA": TotalEnergiesSpider.BRANDS["cepsa"],
         "Q1": {"brand": "Q1", "brand_wikidata": "Q2121146"},
         "TINQ": {"brand": "TinQ", "brand_wikidata": "Q2132028"},
         "OCTA+": {"brand": "Octa+", "brand_wikidata": "Q2179978"},
-        "U": {"brand": "Système U", "brand_wikidata": "Q2529029"},
-        "CARREFOUR": {"brand": "Carrefour", "brand_wikidata": "Q217599"},
-        "CARREFOUR MARKET": {"brand": "Carrefour Market", "brand_wikidata": "Q217599"},
-        "SHELL": {"brand": "Shell", "brand_wikidata": "Q110716465"},
+        "U": SystemeUSpider.item_attributes,
+        "CARREFOUR": remove_key(CARREFOUR_SUPERMARKET, "category"),
+        "CARREFOUR MARKET": remove_key(CARREFOUR_MARKET, "category"),
+        "SHELL": ShellSpider.item_attributes,
         "SHELL EXPRESS": {"brand": "Shell Express", "brand_wikidata": "Q2289188"},
-        "DIVERSE SHELL": {"brand": "Shell", "brand_wikidata": "Q110716465"},
-        "MOBILITY": {"brand": "Shell", "brand_wikidata": "Q110716465"},
-        "PM / SHELL": {"brand": "Shell", "brand_wikidata": "Q110716465"},
+        "DIVERSE SHELL": ShellSpider.item_attributes,
+        "MOBILITY": ShellSpider.item_attributes,
+        "PM / SHELL": ShellSpider.item_attributes,
         "OKTAN": {"brand": "Oktan", "brand_wikidata": "Q2316754"},
         "AVIN": {"brand": "Avin", "brand_wikidata": "Q22979634"},
-        "ESSO EXPRESS": {"brand": "Esso Express", "brand_wikidata": "Q2350336"},
-        "ONO": {"brand": "Ono", "brand_wikidata": "Q2392813"},
+        "ESSO EXPRESS": AviaEUSpider.BRANDS_MAPPING["Esso Express"],
+        "ONO": {"brand": "Tank Ono", "brand_wikidata": "Q2392813"},
         "ALLGUTH": {"brand": "Allguth", "brand_wikidata": "Q2649018"},
-        "OKQ8": {"brand": "OKQ8", "brand_wikidata": "Q2789310"},
+        "OKQ8": Okq8Spider.BRANDS["OKQ8"],
         "AEGEAN": {"brand": "Aegean", "brand_wikidata": "Q28146598"},
         "AFRIQUIA": {"brand": "Afriquia", "brand_wikidata": "Q2829178"},
-        "AVIA": {"brand": "Avia", "brand_wikidata": "Q300147"},
-        "AVIA XPRESS": {"brand": "Avia Xpress", "brand_wikidata": "Q300147"},
-        "AVIA STATION": {"brand": "Avia", "brand_wikidata": "Q300147"},
-        "INTERMARCHE": {"brand": "Intermarché", "brand_wikidata": "Q3153200"},
-        "EKO": {"brand": "EKO", "brand_wikidata": "Q31283948"},
-        "LUKOIL": {"brand": "Lukoil", "brand_wikidata": "Q329347"},
-        "CIRCLE K": {"brand": "Circle K", "brand_wikidata": "Q3268010"},
-        "K": {"brand": "Circle K", "brand_wikidata": "Q3268010"},
-        "CIRKLE K": {"brand": "Circle K", "brand_wikidata": "Q3268010"},
+        "AVIA": AVIA_SHARED_ATTRIBUTES,
+        "AVIA XPRESS": AVIA_SHARED_ATTRIBUTES,
+        "AVIA STATION": AVIA_SHARED_ATTRIBUTES,
+        "INTERMARCHE": IntermarcheSpider.INTERMARCHE,
+        "EKO": EkoGRSpider.item_attributes,
+        "LUKOIL": LUKOIL_BRAND,
+        "CIRCLE K": CircleKSpider.CIRCLE_K,
+        "K": CircleKSpider.CIRCLE_K,
+        "CIRKLE K": CircleKSpider.CIRCLE_K,
         "CLASSIC": {"brand": "CLASSIC", "brand_wikidata": "Q33127117"},
-        "UNO-X": {"brand": "Uno-X", "brand_wikidata": "Q3362746"},
-        "IP": {"brand": "IP", "brand_wikidata": "Q3788748"},
-        "IP MATIC": {"brand": "IP", "brand_wikidata": "Q3788748"},
-        "TOTALERG / IP": {"brand": "IP", "brand_wikidata": "Q3788748"},
+        "UNO-X": UNOX,
+        "IP": TotalEnergiesSpider.BRANDS["totalerg"],
+        "IP MATIC": TotalEnergiesSpider.BRANDS["totalerg"],
+        "TOTALERG / IP": TotalEnergiesSpider.BRANDS["totalerg"],
         "AIRLIQUIDE": {"brand": "Air Liquide", "brand_wikidata": "Q407448"},
-        "Q8": {"brand": "Q8", "brand_wikidata": "Q4119207"},
-        "GLOBUS": {"brand": "Globus", "brand_wikidata": "Q457503"},
+        "Q8": Q8ItaliaSpider.item_attributes,
+        "GLOBUS": GlobusBaumarktDESpider.item_attributes,
         "STATOIL 1-2-3": {"brand": "1-2-3", "brand_wikidata": "Q4545742"},
-        "YX": {"brand": "YX", "brand_wikidata": "Q4580519"},
+        "YX": YX,
         "ALEXELA": {"brand": "Alexela", "brand_wikidata": "Q4721301"},
         "ARGOS": {"brand": "Argos", "brand_wikidata": "Q4750477"},
-        "COSTANTIN": {"brand": "Costantin", "brand_wikidata": "Q48800790"},
-        "MOL": {"brand": "MOL", "brand_wikidata": "Q549181"},
-        "MOLGAS": {"brand": "MOL", "brand_wikidata": "Q549181"},
-        "JET": {"brand": "Jet", "brand_wikidata": "Q568940"},
-        "ARAL": {"brand": "Aral", "brand_wikidata": "Q565734"},
-        "AGIP": {"brand": "Agip", "brand_wikidata": "Q565594"},
-        "ENI": {"brand": "Eni", "brand_wikidata": "Q565594"},
-        "GIAP-ENI": {"brand": "Eni", "brand_wikidata": "Q565594"},
+        "COSTANTIN": GovOsservaprezziCarburantiITSpider.BRANDS["Costantin"],
+        "MOL": TotalEnergiesSpider.BRANDS["mol"],
+        "MOLGAS": TotalEnergiesSpider.BRANDS["mol"],
+        "JET": JetDEATSpider.item_attributes,
+        "ARAL": BpSpider.brands["aral"],
+        "AGIP": GovOsservaprezziCarburantiITSpider.BRANDS["AgipEni"],
+        "ENI": GovOsservaprezziCarburantiITSpider.BRANDS["AgipEni"],
+        "GIAP-ENI": GovOsservaprezziCarburantiITSpider.BRANDS["AgipEni"],
         "SPRINT": {"brand": "Sprint", "brand_wikidata": "Q57588452"},
-        "ELAN": {"brand": "Elan", "brand_wikidata": "Q57980752"},
-        "PREEM": {"brand": "Preem", "brand_wikidata": "Q598835"},
-        "CEPSA MOEVE": {"brand": "Moeve", "brand_wikidata": "Q608819"},
+        "ELAN": TotalEnergiesSpider.BRANDS["ela"],
+        "PREEM": PREEM,
+        "CEPSA MOEVE": TotalEnergiesSpider.BRANDS["cepsa"],
         "NESTE": {"brand": "Neste", "brand_wikidata": "Q616376"},
-        "CORA": {"brand": "Cora", "brand_wikidata": "Q686643"},
-        "TAMOIL": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
-        "TAMOIL-OILONE": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
-        "AUCHAN": {"brand": "Auchan", "brand_wikidata": "Q758603"},
-        "TEXACO": {"brand": "Texaco", "brand_wikidata": "Q775060"},
+        "CORA": CoraBELUSpider.item_attributes,
+        "TAMOIL": AviaEUSpider.BRANDS_MAPPING["Tamoil"],
+        "TAMOIL-OILONE": AviaEUSpider.BRANDS_MAPPING["Tamoil"],
+        "AUCHAN": AuchanFRSpider.item_attributes,
+        "TEXACO": TEXACO_SHARED_ATTRIBUTES,
         "BAYWA": {"brand": "BayWa", "brand_wikidata": "Q812055"},
-        "ESSO": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "STAR": {"brand": "star", "brand_wikidata": "Q89432390"},
-        "ORLEN": {"brand": "Orlen", "brand_wikidata": "Q971649"},
-        "LOTOS": {"brand": "Orlen", "brand_wikidata": "Q971649"},
+        "ESSO": TotalEnergiesSpider.BRANDS["ess"],
+        "STAR": OrlenSpider.brand_mappings["Star"],
+        "ORLEN": OrlenSpider.brand_mappings["ORLEN"],
+        "LOTOS": OrlenSpider.brand_mappings["ORLEN"],
         "HAAN": {"brand": "Haan", "brand_wikidata": "Q92553521"},
         "DE HAAN": {"brand": "Haan", "brand_wikidata": "Q92553521"},
         "BALTIC PETROLEUM": {"brand": "Baltic Petroleum", "brand_wikidata": "Q96591447"},
-        "POWER": {"brand": "Power", "brand_wikidata": "Q98380874"},
-        "FIETEN": {"brand": "Fieten", "brand_wikidata": "Q98837500"},
-        "DISKONT": {"brand": "Hofer Diskont", "brand_wikidata": "Q107803455"},
+        "POWER": POWER,
+        "FIETEN": FietenNLSpider.item_attributes,
+        "DISKONT": remove_key(BRANDS_AND_COUNTRIES["HOFER"], "countries"),
         "PITPOINT": {"brand": "PitPoint", "brand_wikidata": "Q109923423"},
         "HEM": {"brand": "HEM", "brand_wikidata": "Q109930239"},
         "EUROOIL": {"brand": "EuroOil", "brand_wikidata": "Q110219457"},
         "RUEDI RUESSEL": {"brand": "Ruedi Rüssel", "brand_wikidata": "Q111725154"},
-        "GNP": {"brand": "GNP", "brand_wikidata": "Q113950825"},
-        "EUROPAM": {"brand": "Europam", "brand_wikidata": "Q115268198"},
+        "GNP": GnpITSpider.item_attributes,
+        "EUROPAM": EuropamITSpider.item_attributes,
         "SARNI": {"brand": "Sarni", "brand_wikidata": "Q115567801"},
         "ED": {"brand": "ED", "brand_wikidata": "Q118111469"},
         "BERKMAN": {"brand": "Berkman", "brand_wikidata": "Q121742717"},
-        "F24": {"brand": "F24", "brand_wikidata": "Q12310853"},
-        "OK": {"brand": "OK", "brand_wikidata": "Q12329785"},
-        "AVANTI": {"brand": "Avanti", "brand_wikidata": "Q124350461"},
+        "F24": F24Spider.BRANDS["F24"],
+        "OK": OkDKSpider.item_attributes,
+        "AVANTI": remove_key(BRANDS_AND_COUNTRIES["AVANTI"], "countries"),
         "BP EXPRESS": {"brand": "BP Express", "brand_wikidata": "Q124630740"},
         "ADRIA OIL": {"brand": "Adria Oil", "brand_wikidata": "Q125366355"},
-        "TANGO": {"brand": "Tango", "brand_wikidata": "Q125867683"},
-        "FLEET - TANGO": {"brand": "Tango", "brand_wikidata": "Q125867683"},
-        "E.LECLERC": {"brand": "E.Leclerc", "brand_wikidata": "Q1273376"},
-        "LECLERC": {"brand": "E.Leclerc", "brand_wikidata": "Q1273376"},
+        "TANGO": TangoSpider.item_attributes,
+        "FLEET - TANGO": TangoSpider.item_attributes,
+        "E.LECLERC": ELeclercSpider.item_attributes,
+        "LECLERC": ELeclercSpider.item_attributes,
         "VIADA": {"brand": "Viada", "brand_wikidata": "Q12663942"},
         "TANKPOOL": {"brand": "tankpool24", "brand_wikidata": "Q126895471"},
-        "GABRIELS": {"brand": "Gabriëls", "brand_wikidata": "Q127602028"},
+        "GABRIELS": GABRIELS,
         "BEST": {"brand": "Best", "brand_wikidata": "Q127592740"},
-        "LORO": {"brand": "Loro", "brand_wikidata": "Q131832194"},
-        "FIREZONE": {"brand": "Firezone", "brand_wikidata": "Q14628080"},
-        "MAXOL": {"brand": "Maxol", "brand_wikidata": "Q3302837"},
-        "GULF": {"brand": "Gulf", "brand_wikidata": "Q5617505"},
-        "MARKANT": {"brand": "Markant", "brand_wikidata": "Q57523365"},
+        "LORO": LoroITSpider.item_attributes,
+        "FIREZONE": AviaEUSpider.BRANDS_MAPPING["Firezone"],
+        "MAXOL": MaxolIESpider.item_attributes,
+        "GULF": TotalEnergiesSpider.BRANDS["gul"],
+        "MARKANT": MarkantDESpider.item_attributes,
         "VITO": {"brand": "Vito", "brand_wikidata": "Q62536473"},
-        "MOYA": {"brand": "Moya", "brand_wikidata": "Q62297700"},
-        "TEBOIL": {"brand": "Teboil", "brand_wikidata": "Q7692079"},
+        "MOYA": MoyaPLSpider.item_attributes,
+        "TEBOIL": TeboilRUSpider.item_attributes,
         "SMART DIESEL": {"brand": "Smart Diesel", "brand_wikidata": "Q134679450"},
+        "BLISKA": OrlenSpider.brand_mappings["BLISKA"],
+        "BEYFIN": GovOsservaprezziCarburantiITSpider.BRANDS["Beyfin"],
+        "BRICOMARCHE": BricomarchePLSpider.item_attributes,
+        "CONAD": ConadITSpider.brands["CONAD"],
+        "CONAD SELF": ConadITSpider.brands["CONAD SELF 24h"],
+        "ELIN": ElinoilGRSpider.item_attributes,
+        "ENERGAS": GovOsservaprezziCarburantiITSpider.BRANDS["Energas"],
+        "IDS": AviaEUSpider.BRANDS_MAPPING["Ids"],
+        "TANKEASY": AviaEUSpider.BRANDS_MAPPING["Tankeasy"],
+        "TANKPOINT": AviaEUSpider.BRANDS_MAPPING["Tankpoint"],
+        "TRUCKEASY": AviaEUSpider.BRANDS_MAPPING["Truckeasy"],
         # ═══════════════════════════════════════════════════════════════════
         # BRANDS WITHOUT WIKIDATA (alphabetically ordered)
         # ═══════════════════════════════════════════════════════════════════
@@ -174,21 +235,16 @@ class MaesDkvSpider(scrapy.Spider):
         "BELL OIL": {"brand": "Bell Oil"},
         "BEMOL": {"brand": "Bemol"},
         "BENZINOL": {"brand": "Benzinol"},
-        "BEYFIN": {"brand": "Beyfin"},
         "BK": {"brand": "BK"},
-        "BLISKA": {"brand": "Bliska"},
         "BOGONI": {"brand": "Bogoni"},
         "BONAREA": {"brand": "Bonarea"},
         "BONETT": {"brand": "Bonett"},
         "BONUS": {"brand": "Bonus"},
         "BRAND OIL": {"brand": "Brand Oil"},
-        "BRICOMARCHE": {"brand": "Bricomarche"},
         "CALPAM": {"brand": "Calpam"},
         "CERTAS": {"brand": "Certas"},
         "CLEANCAR": {"brand": "Cleancar"},
         "COIL": {"brand": "Coil"},
-        "CONAD": {"brand": "Conad"},
-        "CONAD SELF": {"brand": "Conad"},
         "DIESEL 24": {"brand": "Diesel 24"},
         "DIS-CAR": {"brand": "Dis-Car"},
         "DISK": {"brand": "Disk"},
@@ -199,11 +255,9 @@ class MaesDkvSpider(scrapy.Spider):
         "ECODROM": {"brand": "Ecodrom"},
         "ECOSTOP": {"brand": "Ecostop"},
         "EGO": {"brand": "Ego"},
-        "ELIN": {"brand": "Elin"},
         "EMSI": {"brand": "EMSI"},
         "ENDESA": {"brand": "Endesa"},
         "ENERCOOP": {"brand": "Enercoop"},
-        "ENERGAS": {"brand": "Energas"},
         "ENERGYCA": {"brand": "Energyca"},
         "ENERPETROLI": {"brand": "Enerpetroli"},
         "ENOVIA": {"brand": "Enovia"},
@@ -235,7 +289,6 @@ class MaesDkvSpider(scrapy.Spider):
         "HIT": {"brand": "HIT"},
         "HONSEL": {"brand": "Honsel"},
         "HPLUS": {"brand": "Hplus"},
-        "IDS": {"brand": "IDS"},
         "IQ": {"brand": "IQ"},
         "JOISS": {"brand": "Joiss"},
         "KEROPETROL": {"brand": "Keropetrol"},
@@ -302,8 +355,6 @@ class MaesDkvSpider(scrapy.Spider):
         "STAROIL": {"brand": "Staroil"},
         "STATOIL": {"brand": "Statoil"},
         "TANK PLUS": {"brand": "Tank Plus"},
-        "TANKEASY": {"brand": "Tankeasy"},
-        "TANKPOINT": {"brand": "Tankpoint"},
         "TAOIL": {"brand": "Taoil"},
         "TAP": {"brand": "TAP"},
         "TAS": {"brand": "TAS"},
@@ -312,7 +363,6 @@ class MaesDkvSpider(scrapy.Spider):
         "TIBER": {"brand": "Tiber"},
         "TIFON": {"brand": "Tifon"},
         "TOIL": {"brand": "Toil"},
-        "TRUCKEASY": {"brand": "Truckeasy"},
         "TURMOELQUICK": {"brand": "Turmöl Quick"},
         "TURMOEL QUICK": {"brand": "Turmöl Quick"},
         "UK FUELS": {"brand": "UK Fuels"},
@@ -413,6 +463,9 @@ class MaesDkvSpider(scrapy.Spider):
         # DKV API uses car_washing_facility and shop_refreshments
         apply_yes_no(Extras.CAR_WASH, item, station.get("car_washing_facility"))
         apply_yes_no("shop", item, station.get("shop_refreshments"))
+
+        if station.get("open_24_hours"):
+            item["opening_hours"] = "24/7"
 
     def extract_brand(self, title: str) -> dict | None:
         """Extract brand information from station title using direct key lookup."""
