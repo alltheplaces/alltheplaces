@@ -1,7 +1,9 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -11,12 +13,11 @@ class ThirstyCamelAUSpider(Spider):
     item_attributes = {
         "brand": "Thirsty Camel",
         "brand_wikidata": "Q113503937",
-        "extras": Categories.SHOP_ALCOHOL.value,
     }
     allowed_domains = ["api.beta.thirstycamel.com.au"]
     start_urls = ["https://api.beta.thirstycamel.com.au/stores/all"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -36,4 +37,5 @@ class ThirstyCamelAUSpider(Spider):
                 close_time = day_hours[1]
                 hours_string = f"{hours_string} {day_name}: {open_time} - {close_time}"
             item["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category(Categories.SHOP_ALCOHOL, item)
             yield item

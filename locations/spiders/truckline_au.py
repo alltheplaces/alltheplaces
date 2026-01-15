@@ -1,9 +1,9 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -15,12 +15,11 @@ class TrucklineAUSpider(Spider):
     item_attributes = {
         "brand": "Truckline",
         "brand_wikidata": "Q126179590",
-        "extras": Categories.SHOP_TRUCK_PARTS.value,
     }
     allowed_domains = ["api-v3.partsb2.com.au"]
     start_urls = ["https://api-v3.partsb2.com.au/api/Stores/GetStoresForClient"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         headers = {
             "Abp-TenantId": "23",
             "Abp-CustomerId": "cae27e66-79fc-481a-abac-95edf8a652e4",
@@ -36,4 +35,5 @@ class TrucklineAUSpider(Spider):
             item["street_address"] = clean_address([feature.get("address1"), feature.get("address2")])
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(feature.get("openingHours", ""))
+            apply_category(Categories.SHOP_TRUCK_PARTS, item)
             yield item

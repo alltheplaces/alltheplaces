@@ -1,8 +1,7 @@
-import logging
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
@@ -14,7 +13,7 @@ class TediSpider(Spider):
     item_attributes = {"brand": "TEDi", "brand_wikidata": "Q1364603"}
     countries = ["AT", "BG", "CZ", "DE", "ES", "HR", "HU", "IT", "PL", "PT", "RO", "SI", "SK"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for country in self.countries:
             for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", country):
                 culture = country.lower()
@@ -29,7 +28,7 @@ class TediSpider(Spider):
             item = DictParser.parse(store)
             if item["country"] != country:
                 if item["country"] not in self.countries:
-                    logging.info(f"Missing country {item['country']} in country array")
+                    self.logger.info(f"Missing country {item['country']} in country array")
                 continue
             item["opening_hours"] = OpeningHours()
             for oh in store["openingHour"]["intervals"]:

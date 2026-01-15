@@ -11,7 +11,7 @@ from locations.items import Feature
 class CashBESpider(Spider):
     name = "cash_be"
     item_attributes = {
-        "brand": "Bancontact CASH",
+        "brand": "Cash",
         "brand_wikidata": "Q112875867",
         "operator": "Batopin",
         "operator_wikidata": "Q97142699",

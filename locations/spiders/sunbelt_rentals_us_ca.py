@@ -1,23 +1,23 @@
-# -*- coding: utf-8 -*-
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class SunbeltRentalsUSCASpider(scrapy.Spider):
+class SunbeltRentalsUSCASpider(Spider):
     name = "sunbelt_rentals_us_ca"
     item_attributes = {
         "brand": "Sunbelt Rentals",
         "brand_wikidata": "Q102396721",
-        "extras": Categories.SHOP_TOOL_HIRE.value,
     }
     allowed_domains = ["sunbeltrentals.com"]
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             "https://api.sunbeltrentals.com/web/api/v1/locations?latitude=39.0171368&longitude=-94.5985613&distance=5000",
             headers={
                 "Client_id": "0oa56ipgl8SAfB1kE5d7",
@@ -60,4 +60,5 @@ class SunbeltRentalsUSCASpider(scrapy.Spider):
             if hours:
                 item["opening_hours"] = hours
 
+            apply_category(Categories.SHOP_TOOL_HIRE, item)
             yield item

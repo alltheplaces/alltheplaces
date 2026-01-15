@@ -26,6 +26,7 @@ class ClearRouteSpider(Spider):
                    type of feature that it not available for the customer.
     """
 
+    dataset_attributes: dict = {"source": "api", "api": "iteris-atis.com"}
     customer_id: str
     features: list[str] = ["cameras", "rwis"]
 

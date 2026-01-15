@@ -51,7 +51,7 @@ class StoreRocketSpider(Spider):
        search radius values.
     """
 
-    dataset_attributes = {"source": "api", "api": "storerocket.io"}
+    dataset_attributes: dict = {"source": "api", "api": "storerocket.io"}
 
     storerocket_id: str
     base_url: str | None = None
@@ -86,7 +86,7 @@ class StoreRocketSpider(Spider):
             elif self.search_radius >= 15:
                 iseadgg_radius = 24
             else:
-                raise RuntimeError(
+                raise ValueError(
                     "A minimum search_radius of 15 (miles) is required to be used for the ISEADGG geographic radius search method."
                 )
             for lat, lon in country_iseadgg_centroids(self.iseadgg_countries_list, iseadgg_radius):
@@ -114,11 +114,12 @@ class StoreRocketSpider(Spider):
                     "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use a smaller search_radius."
                 )
 
-            if len(locations) > 0:
-                self.crawler.stats.inc_value("atp/geo_search/hits")
-            else:
-                self.crawler.stats.inc_value("atp/geo_search/misses")
-            self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+            if self.crawler.stats:
+                if len(locations) > 0:
+                    self.crawler.stats.inc_value("atp/geo_search/hits")
+                else:
+                    self.crawler.stats.inc_value("atp/geo_search/misses")
+                self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
 
         for location in locations:
             self.pre_process_data(location)

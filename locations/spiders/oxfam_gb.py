@@ -1,3 +1,6 @@
+from typing import Iterable
+
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category, apply_yes_no
@@ -38,7 +41,7 @@ class OxfamGBSpider(SitemapSpider):
         "music": "recycling:cds",
     }
 
-    def parse_shop(self, response):
+    def parse_shop(self, response: TextResponse) -> Iterable[Feature]:
         item = Feature()
         item["website"] = item["ref"] = response.url
         item["name"] = response.xpath('normalize-space(//h1[@class="t t--h1  t--h1-pushed"]/text())').get()
@@ -46,9 +49,9 @@ class OxfamGBSpider(SitemapSpider):
         item["city"] = response.xpath('//*[@class="shop-address"]/li[2]/text()').get()
         item["postcode"] = response.xpath('//*[@class="shop-address"]/li[3]/text()').get()
 
-        extract_google_position(item, response)
-        extract_email(item, response)
-        extract_phone(item, response)
+        extract_google_position(item, response.selector)
+        extract_email(item, response.selector)
+        extract_phone(item, response.selector)
 
         for url, brand in self.brands.items():
             if url in response.url:

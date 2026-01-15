@@ -12,7 +12,7 @@ class KbcBESpider(Spider):
     name = "kbc_be"
     item_attributes = {"brand": "KBC", "brand_wikidata": "Q941020"}
 
-    CASHPOINT_BRAND = {"brand": "Bancontact CASH", "brand_wikidata": "Q112875867"}
+    CASHPOINT_BRAND = {"brand": "Cash", "brand_wikidata": "Q112875867"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("BE"):
