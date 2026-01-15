@@ -12,7 +12,7 @@ class ExtractGBPostcodePipeline:
                 item["postcode"] = extract_gb_postcode(item["addr_full"])
         elif item.get("country") == "IE":
             if item.get("addr_full") and not item.get("postcode"):
-                if postcode := re.search(IE_POSTCODE_PATTERN, item["addr_full"].upper()):
+                if postcode := IE_POSTCODE_PATTERN.search(item["addr_full"].upper()):
                     item["postcode"] = "{} {}".format(postcode.group(1), postcode.group(2))
         return item
 
@@ -24,8 +24,8 @@ def extract_gb_postcode(s: str):
     :return: the first candidate postcode instance, None if not present
     """
     s = s.upper()
-    if postcode := re.search(GB_POSTCODE_PATTERN, s):
+    if postcode := GB_POSTCODE_PATTERN.search(s):
         return postcode.group(1)
-    if postcode := re.search(GB_POSTCODE_0_PATTERN, s):
+    if postcode := GB_POSTCODE_0_PATTERN.search(s):
         return postcode.group(1) + " 0" + postcode.group(2)
     return None
