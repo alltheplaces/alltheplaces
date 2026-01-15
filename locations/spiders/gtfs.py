@@ -1489,6 +1489,19 @@ BRAND_MAPPING = {
     },
 }
 
+TRANSIT_MODES = {
+    "0": "light_rail",
+    "1": "subway",
+    "2": "train",
+    "3": "bus",
+    "4": "ferry",
+    "5": "tram",
+    "6": "gondola",
+    "7": "funicular",
+    "11": "trolleybus",
+    "12": "monorail",
+}
+
 
 class GtfsSpider(CSVFeedSpider):
     name = "gtfs"
@@ -1586,8 +1599,9 @@ class GtfsSpider(CSVFeedSpider):
         if not row.get("stop_lat") or not row.get("stop_lon"):
             return
 
-        if row.get("location_type") == "3":
+        if row.get("location_type") in ("3", "4"):
             # "Generic Node," only used for pathways
+            # "Boarding Area," a specific location on a platform
             return
 
         item = Feature(copy.deepcopy(feed_attributes))
@@ -1620,29 +1634,9 @@ class GtfsSpider(CSVFeedSpider):
                 item[k] = ";".join(filter(None, set((item.get(k, "").split(";")) + [v])))
 
         route_types = {route.get("route_type") for route in routes}
-        apply_yes_no("light_rail", item, "0" in route_types)
-        apply_yes_no("subway", item, "1" in route_types)
-        apply_yes_no("train", item, "2" in route_types)
-        apply_yes_no("bus", item, "3" in route_types)
-        apply_yes_no("ferry", item, "4" in route_types)
-        apply_yes_no("tram", item, "5" in route_types)
-        apply_yes_no("aerialway", item, "6" in route_types and row.get("location_type") == "2")
-        apply_yes_no("trolleybus", item, "11" in route_types)
-        apply_yes_no("monorail", item, "12" in route_types)
+        location_type: str = row.get("location_type") or "0"
 
-        if row.get("location_type") == "1":
-            apply_category({"public_transport": "station"}, item)
-            if not route_types.isdisjoint({"0", "1", "2", "5", "7", "12"}):
-                apply_category({"railway": "station"}, item)
-            if not route_types.isdisjoint({"3", "11"}):
-                apply_category({"amenity": "bus_station"}, item)
-        elif row.get("location_type") == "2":
-            apply_category({"entrance": "yes"}, item)
-            if "1" in route_types:
-                apply_category({"railway": "subway_entrance"}, item)
-            if not route_types.isdisjoint({"0", "2", "5", "7", "12"}):
-                apply_category({"railway": "train_station_entrance"}, item)
-        else:
+        if location_type == "0":
             apply_category({"public_transport": "platform"}, item)
             if not route_types.isdisjoint({"0", "1", "2", "7", "12"}):
                 apply_category({"railway": "halt"}, item)
@@ -1650,21 +1644,27 @@ class GtfsSpider(CSVFeedSpider):
                 apply_category({"highway": "bus_stop"}, item)
             if "5" in route_types:
                 apply_category({"railway": "tram_stop"}, item)
-
-        if row.get("location_type") != "2":
-            if "0" in route_types:
-                apply_category({"station": "light_rail"}, item)
+        elif location_type == "1":
+            apply_category({"public_transport": "station"}, item)
+            if not route_types.isdisjoint({"0", "1", "2", "5", "7", "12"}):
+                apply_category({"railway": "station"}, item)
+            if not route_types.isdisjoint({"3", "11"}):
+                apply_category({"amenity": "bus_station"}, item)
+            for route_type in route_types:
+                if route_type in TRANSIT_MODES:
+                    apply_category({"station": TRANSIT_MODES[route_type]}, item)
+        elif location_type == "2":
+            apply_category({"entrance": "yes"}, item)
             if "1" in route_types:
-                apply_category({"station": "subway"}, item)
-            if "2" in route_types:
-                apply_category({"station": "train"}, item)
+                apply_category({"railway": "subway_entrance"}, item)
+            if not route_types.isdisjoint({"0", "2", "5", "7", "12"}):
+                apply_category({"railway": "train_station_entrance"}, item)
+
+        if location_type in ("0", "1"):
             if "4" in route_types:
                 apply_category({"amenity": "ferry_terminal"}, item)
-            if "5" in route_types:
-                apply_category({"station": "tram"}, item)
             if "6" in route_types:
                 apply_category({"aerialway": "station"}, item)
-            if "7" in route_types:
-                apply_category({"station": "funicular"}, item)
-            if "12" in route_types:
-                apply_category({"station": "monorail"}, item)
+
+            for route_type, transit_mode in TRANSIT_MODES.items():
+                apply_yes_no(transit_mode, item, route_type in route_types)
