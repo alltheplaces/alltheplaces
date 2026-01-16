@@ -6,6 +6,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MitsubishiNZSpider(Spider):
@@ -19,8 +20,10 @@ class MitsubishiNZSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json():
             item = DictParser.parse(dealer)
-            item["street_address"] = dealer["addressOne"]
-            item["city"] = dealer["addressTwo"]
+            item["addr_full"] = merge_address_lines(
+                [dealer["addressOne"], dealer["addressTwo"], dealer["addressThree"]]
+            )
+            item["city"] = dealer["area"]
             item["state"] = dealer["location"]
             item["website"] = "https://www.mmnz.co.nz/" + dealer["link"]
             item["lat"] = dealer["locationY"]
