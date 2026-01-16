@@ -1221,6 +1221,101 @@ BRAND_MAPPING = {
         "network": "BC Transit",
         "network:wikidata": "Q4179186",
     },
+    "mdb-2551": {
+        # BC Transit (Kamloops Transit System)
+        "network": "Kamloops Transit System",
+        "network:wikidata": "Q6358786",
+    },  
+    "mdb-2555": {
+        # BC Transit (Kelowna Regional Transit System)
+        "network": "Kelowna Regional Transit System",
+        "network:wikidata": "Q6386439",
+    },  
+    "mdb-2563": {
+        # BC Transit (Squamish)
+        "network": "BC Transit", "network:wikidata": "Q4179186"},  
+    "mdb-2571": {
+        # BC Transit (Victoria Regional Transit System)
+        "network": "Victoria Regional Transit System",
+        "network:wikidata": "Q7926999",
+        "operator": "BC Transit",
+        "operator:wikidata": "Q4179186",
+    },  
+    "mdb-2575": {
+        # BC Transit (West Coast)
+        "network": "BC Transit", "network:wikidata": "Q4179186"},  
+    "mdb-2583": {
+        # BC Transit (Whistler Transit System)
+        "network": "Whistler Transit System",
+        "network:wikidata": "Q7994064",
+    },  
+    "mdb-2595": {
+        # Bangalore Metropolitan Transport Corporation (BMTC)
+        "network": "BMTC",
+        "network:wikidata": "Q3345039",
+    },  
+    "mdb-2650": {
+        "network": "Gloversville Transit System",
+        "network:wikidata": "Q130312364",
+        "operator": "City of Gloversville",
+        "operator:wikidata": "Q1380511",
+    },
+    "mdb-2684": {
+        # Altamont Corridor Express
+        "network": "ACE",
+        "network:wikidata": "Q434302",
+        "operator": "San Joaquin Regional Rail Commission",
+    },
+    "mdb-2706": {
+        # South Metro Area Regional Transit (SMART)
+        "network": "SMART",
+        "network:wikidata": "Q7567940",
+        "operator": "South Metro Area Regional Transit",
+        "operator:wikidata": "Q7567940",
+    },  
+    "mdb-2708": {
+        "network": "SamTrans",
+        "network:wikidata": "Q7407040",
+        "operator": "San Mateo County Transit District",
+    },
+    "mdb-2852": {
+        # Redding Area Bus Authority
+        "network": "RABA", "network:wikidata": "Q7305617"},  
+    "mdb-2854": {"network": "Metra", "network:wikidata": "Q1814208"},
+    "mdb-2871": {
+        # Donan Bus
+        "network": "道南バス", "network:wikidata": "Q11641639"},  
+    "mdb-2880": {
+        # Mountain View Transportation Management Association (MVgo)
+        "network": "MVgo",
+        "network:wikidata": "Q110544414",
+        "operator": "Mountain View Transportation Management Association",
+        "operator:wikidata": "Q110544427",
+    },  
+    "mdb-2886": {
+        # San Francisco Municipal Transportation Agency (SFMTA - Muni)
+        "network": "Muni",
+        "network:wikidata": "Q1140138",
+        "operator": "San Francisco Municipal Transportation Agency",
+        "operator:wikidata": "Q7414072",
+    },  
+    "mdb-2890": {"network": "Trinity Metro", "network:wikidata": "Q5472408"},
+    "mdb-2894": {
+        "network": "Stageline",
+        "network:wikidata": "Q130391671",
+        "operator": "Clovis Transit",
+        "operator:wikidata": "Q113396103",
+    },
+    "mdb-2900": {
+        # Flixbus GB
+        "network": "Flixbus", "network:wikidata": "Q15712258"},  
+    "mdb-2907": {
+        # Bluestar Bus
+        "network": "Bluestar", "network:wikidata": "Q4930564"},  
+    "mdb-2925": {
+        # Beograd Prigrad
+        "network": "БГ Превоз", "operator": "ГСП Београд", "operator:wikidata": "Q8227578"},  
+    "mdb-2937": {"network": "Marin Transit", "network:wikidata": "Q6763758"},
     "ntd-41": {
         # Alaska Railroad Corporation
         "network": "ARR",
@@ -1259,6 +1354,7 @@ BRAND_MAPPING = {
         "network:wikidata": "Q7744015",
         "operator": "County of Kauaʻi",
     },
+    "ntd-50060": {"network": "MTD", "network:wikidata": "Q5069909"},  # Champaign-Urbana Mass Transit District
     "tld-89": {
         # Chapel Hill Transit
         "network": "CHT",
