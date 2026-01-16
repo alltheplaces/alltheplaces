@@ -40,7 +40,8 @@ class OldNationalBankUSSpider(SitemapSpider, StructuredDataSpider):
         return oh
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").removeprefix("Old National Bank ")
+        item["image"] = None
 
         # Check for ATM availability
         if response.xpath('//div[@class="Teaser-service" and contains(text(), "ATM")]'):
