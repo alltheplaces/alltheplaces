@@ -1225,35 +1225,39 @@ BRAND_MAPPING = {
         # BC Transit (Kamloops Transit System)
         "network": "Kamloops Transit System",
         "network:wikidata": "Q6358786",
-    },  
+    },
     "mdb-2555": {
         # BC Transit (Kelowna Regional Transit System)
         "network": "Kelowna Regional Transit System",
         "network:wikidata": "Q6386439",
-    },  
+    },
     "mdb-2563": {
         # BC Transit (Squamish)
-        "network": "BC Transit", "network:wikidata": "Q4179186"},  
+        "network": "BC Transit",
+        "network:wikidata": "Q4179186",
+    },
     "mdb-2571": {
         # BC Transit (Victoria Regional Transit System)
         "network": "Victoria Regional Transit System",
         "network:wikidata": "Q7926999",
         "operator": "BC Transit",
         "operator:wikidata": "Q4179186",
-    },  
+    },
     "mdb-2575": {
         # BC Transit (West Coast)
-        "network": "BC Transit", "network:wikidata": "Q4179186"},  
+        "network": "BC Transit",
+        "network:wikidata": "Q4179186",
+    },
     "mdb-2583": {
         # BC Transit (Whistler Transit System)
         "network": "Whistler Transit System",
         "network:wikidata": "Q7994064",
-    },  
+    },
     "mdb-2595": {
         # Bangalore Metropolitan Transport Corporation (BMTC)
         "network": "BMTC",
         "network:wikidata": "Q3345039",
-    },  
+    },
     "mdb-2650": {
         "network": "Gloversville Transit System",
         "network:wikidata": "Q130312364",
@@ -1272,7 +1276,7 @@ BRAND_MAPPING = {
         "network:wikidata": "Q7567940",
         "operator": "South Metro Area Regional Transit",
         "operator:wikidata": "Q7567940",
-    },  
+    },
     "mdb-2708": {
         "network": "SamTrans",
         "network:wikidata": "Q7407040",
@@ -1280,25 +1284,29 @@ BRAND_MAPPING = {
     },
     "mdb-2852": {
         # Redding Area Bus Authority
-        "network": "RABA", "network:wikidata": "Q7305617"},  
+        "network": "RABA",
+        "network:wikidata": "Q7305617",
+    },
     "mdb-2854": {"network": "Metra", "network:wikidata": "Q1814208"},
     "mdb-2871": {
         # Donan Bus
-        "network": "道南バス", "network:wikidata": "Q11641639"},  
+        "network": "道南バス",
+        "network:wikidata": "Q11641639",
+    },
     "mdb-2880": {
         # Mountain View Transportation Management Association (MVgo)
         "network": "MVgo",
         "network:wikidata": "Q110544414",
         "operator": "Mountain View Transportation Management Association",
         "operator:wikidata": "Q110544427",
-    },  
+    },
     "mdb-2886": {
         # San Francisco Municipal Transportation Agency (SFMTA - Muni)
         "network": "Muni",
         "network:wikidata": "Q1140138",
         "operator": "San Francisco Municipal Transportation Agency",
         "operator:wikidata": "Q7414072",
-    },  
+    },
     "mdb-2890": {"network": "Trinity Metro", "network:wikidata": "Q5472408"},
     "mdb-2894": {
         "network": "Stageline",
@@ -1308,13 +1316,20 @@ BRAND_MAPPING = {
     },
     "mdb-2900": {
         # Flixbus GB
-        "network": "Flixbus", "network:wikidata": "Q15712258"},  
+        "network": "Flixbus",
+        "network:wikidata": "Q15712258",
+    },
     "mdb-2907": {
         # Bluestar Bus
-        "network": "Bluestar", "network:wikidata": "Q4930564"},  
+        "network": "Bluestar",
+        "network:wikidata": "Q4930564",
+    },
     "mdb-2925": {
         # Beograd Prigrad
-        "network": "БГ Превоз", "operator": "ГСП Београд", "operator:wikidata": "Q8227578"},  
+        "network": "БГ Превоз",
+        "operator": "ГСП Београд",
+        "operator:wikidata": "Q8227578",
+    },
     "mdb-2937": {"network": "Marin Transit", "network:wikidata": "Q6763758"},
     "ntd-41": {
         # Alaska Railroad Corporation
@@ -1708,8 +1723,8 @@ class GtfsSpider(CSVFeedSpider):
     def apply_basic_stop_info(self, item, row, levels, stop_id_names):
         item["ref"] = row.get("stop_code")
         item["name"] = row.get("stop_name")
-        item["lat"] = float(row.get("stop_lat"))
-        item["lon"] = float(row.get("stop_lon"))
+        item["lat"] = row.get("stop_lat")
+        item["lon"] = row.get("stop_lon")
         item["website"] = row.get("stop_url")
         item["located_in"] = stop_id_names.get(row.get("parent_station"))
         item["extras"]["gtfs_id"] = row.get("stop_id")
@@ -1717,7 +1732,6 @@ class GtfsSpider(CSVFeedSpider):
         item["extras"]["description"] = row.get("stop_desc")
         item["extras"]["loc_ref"] = row.get("platform_code")
         item["extras"].update(levels.get(row.get("level_id"), {}))
-        item["extras"] = {k: v for k, v in item["extras"].items() if v}
         apply_yes_no(
             Extras.WHEELCHAIR, item, row.get("wheelchair_boarding") == "1", row.get("wheelchair_boarding") != "2"
         )
@@ -1733,34 +1747,49 @@ class GtfsSpider(CSVFeedSpider):
 
     def apply_categories(self, item, location_type, route_types):
         if location_type == "0":
+            # All platforms get public_transport=platform.
             apply_category({"public_transport": "platform"}, item)
+
+            # Then additionally add a legacy (pre-PTv2) tag if there is one for this transit mode.
             if not route_types.isdisjoint({"0", "1", "2", "7", "12"}):
                 apply_category({"railway": "halt"}, item)
             if not route_types.isdisjoint({"3", "11"}):
                 apply_category({"highway": "bus_stop"}, item)
+            if "4" in route_types:
+                apply_category({"amenity": "ferry_terminal"}, item)
             if "5" in route_types:
                 apply_category({"railway": "tram_stop"}, item)
+            if "6" in route_types:
+                apply_category({"aerialway": "station"}, item)
+
         elif location_type == "1":
+            # All stations get public_transport=station and station=*.
             apply_category({"public_transport": "station"}, item)
+            for route_type in route_types:
+                if route_type in TRANSIT_MODES:
+                    apply_category({"station": TRANSIT_MODES[route_type]}, item)
+
+            # Then additionally add a legacy tag if there is one for this transit mode.
             if not route_types.isdisjoint({"0", "1", "2", "5", "7", "12"}):
                 apply_category({"railway": "station"}, item)
             if not route_types.isdisjoint({"3", "11"}):
                 apply_category({"amenity": "bus_station"}, item)
-            for route_type in route_types:
-                if route_type in TRANSIT_MODES:
-                    apply_category({"station": TRANSIT_MODES[route_type]}, item)
+            if "4" in route_types:
+                apply_category({"amenity": "ferry_terminal"}, item)
+            if "6" in route_types:
+                apply_category({"aerialway": "station"}, item)
+
         elif location_type == "2":
+            # All entrances get entrance=yes.
             apply_category({"entrance": "yes"}, item)
+
+            # Then additionally add a legacy tag if there is one for this transit mode.
             if "1" in route_types:
                 apply_category({"railway": "subway_entrance"}, item)
             if not route_types.isdisjoint({"0", "2", "5", "7", "12"}):
                 apply_category({"railway": "train_station_entrance"}, item)
 
         if location_type in ("0", "1"):
-            if "4" in route_types:
-                apply_category({"amenity": "ferry_terminal"}, item)
-            if "6" in route_types:
-                apply_category({"aerialway": "station"}, item)
-
+            # For stations and platforms, but not entrances, add [mode]=yes (e.g. bus=yes)
             for route_type, transit_mode in TRANSIT_MODES.items():
                 apply_yes_no(transit_mode, item, route_type in route_types)
