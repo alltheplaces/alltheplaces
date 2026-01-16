@@ -1,3 +1,4 @@
+from json import loads
 from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
@@ -35,7 +36,8 @@ class ForestreeSpider(Spider):
         )
 
     def parse_species_list(self, response: TextResponse) -> Iterable[JsonRequest]:
-        for species in response.json()["features"]:
+        fixed_json = loads(response.text.replace('\\\\"', ""))
+        for species in fixed_json["features"]:
             self._species[species["id"]] = {
                 "protected": "yes",
                 "genus": species["properties"]["genus"],
@@ -48,7 +50,8 @@ class ForestreeSpider(Spider):
         )
 
     def parse_trees_list(self, response: TextResponse) -> Iterable[Feature]:
-        for tree in response.json()["features"]:
+        fixed_json = loads(response.text.replace('\\\\"', ""))
+        for tree in fixed_json["features"]:
             item = Feature()
             item["ref"] = str(tree["id"])
             item["geometry"] = tree["geometry"]
