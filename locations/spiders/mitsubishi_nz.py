@@ -19,7 +19,7 @@ class MitsubishiNZSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json():
             item = DictParser.parse(dealer)
-            item["street"] = dealer["addressOne"]
+            item["street_address"] = dealer["addressOne"]
             item["city"] = dealer["addressTwo"]
             item["state"] = dealer["location"]
             item["website"] = "https://www.mmnz.co.nz/" + dealer["link"]
