@@ -58,8 +58,9 @@ class OldNationalBankUSSpider(SitemapSpider, StructuredDataSpider):
                 except (json.JSONDecodeError, KeyError, TypeError, ValueError):
                     pass
 
-        apply_yes_no(Extras.DRIVE_THROUGH, item,
-                     response.xpath('//div[@class="Teaser-service" and contains(text(), "Drive")]'))
+        apply_yes_no(
+            Extras.DRIVE_THROUGH, item, response.xpath('//div[@class="Teaser-service" and contains(text(), "Drive")]')
+        )
 
         apply_category(Categories.BANK, item)
 
