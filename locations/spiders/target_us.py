@@ -14,7 +14,7 @@ class TargetUSSpider(SitemapSpider):
     item_attributes = {"brand": "Target", "brand_wikidata": "Q1046951"}
     allowed_domains = ["target.com"]
     sitemap_urls = ["https://www.target.com/sitemap_stores-index.xml.gz"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 0.5}
     api_key = "c661e81f01c77ef088bfea0cea9242ad30f02858"
 
     def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
