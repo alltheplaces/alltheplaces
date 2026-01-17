@@ -1,20 +1,21 @@
-from typing import Any
+from typing import Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class SuperdrySpider(scrapy.spiders.SitemapSpider):
+class SuperdrySpider(SitemapSpider, StructuredDataSpider):
     name = "superdry"
     item_attributes = {"brand": "Superdry", "brand_wikidata": "Q1684445"}
     sitemap_urls = ["https://stores.superdry.com/sitemap.xml"]
+    wanted_types = ["ClothingStore"]
     drop_attributes = {"image"}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        MicrodataParser.convert_to_json_ld(response.selector)
-        item = LinkedDataParser.parse(response, "ClothingStore")
-        if item:
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Superdry").strip().removeprefix("™").strip()
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item
