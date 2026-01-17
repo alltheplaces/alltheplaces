@@ -1716,7 +1716,7 @@ class GtfsSpider(CSVFeedSpider):
             # "Boarding Area," a specific location on a platform
             return
         elif location_type and location_type not in ("0", "1", "2"):
-            self.logger.warning(f"Unknown location_type: {location_type!r}")
+            self.crawler.stats.inc_value(f"atp/gtfs/unmapped_location_type/{location_type}")
             return
 
         item = Feature(copy.deepcopy(feed_attributes))
