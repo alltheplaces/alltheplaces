@@ -470,6 +470,7 @@ top_level_tags = [
     "craft",
     "dark_store",
     "emergency",
+    "entrance",
     "healthcare",
     "highway",
     "landuse",

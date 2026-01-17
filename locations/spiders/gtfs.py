@@ -1710,9 +1710,13 @@ class GtfsSpider(CSVFeedSpider):
         if not row.get("stop_lat") or not row.get("stop_lon"):
             return
 
-        if row.get("location_type") in ("3", "4"):
+        location_type = row.get("location_type")
+        if location_type in ("3", "4"):
             # "Generic Node," only used for pathways
             # "Boarding Area," a specific location on a platform
+            return
+        elif location_type and location_type not in ("0", "1", "2"):
+            self.logger.warning(f"Unknown location_type: {location_type!r}")
             return
 
         item = Feature(copy.deepcopy(feed_attributes))
