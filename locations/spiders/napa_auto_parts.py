@@ -8,6 +8,7 @@ class NapaAutoPartsSpider(SitemapSpider, StructuredDataSpider):
     name = "napa_auto_parts"
     custom_settings = {"DOWNLOAD_DELAY": 5}
     requires_proxy = True
+    user_agent = None
     item_attributes = {"brand": "NAPA Auto Parts", "brand_wikidata": "Q6970842"}
     sitemap_urls = ["https://www.napaonline.com/nol_store_sitemap_https.xml"]
     sitemap_rules = [
