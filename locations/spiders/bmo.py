@@ -45,6 +45,7 @@ from locations.storefinders.where2getit import Where2GetItSpider
 class BmoSpider(Where2GetItSpider):
     name = "bmo"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
+    api_brand_name = "BMO"
     api_endpoint = "https://branchlocator.bmo.com/rest/getlist"
     api_key = [
         "343095D0-C235-11E6-93AB-1BF70C70A832",  # CA
