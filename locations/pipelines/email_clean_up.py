@@ -1,7 +1,7 @@
 import re
 
-from scrapy.crawler import Crawler
 from scrapy import Spider
+from scrapy.crawler import Crawler
 
 from locations.items import Feature
 

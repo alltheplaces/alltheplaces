@@ -584,9 +584,9 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict | None:  # 
             lat = geometry["coordinates"][1]
             lon = geometry["coordinates"][0]
         else:
-                lat, lon = Transformer.from_crs(original_projection, 4326).transform(
-                    geometry["coordinates"][0], geometry["coordinates"][1]
-                )
+            lat, lon = Transformer.from_crs(original_projection, 4326).transform(
+                geometry["coordinates"][0], geometry["coordinates"][1]
+            )
     else:
         lat = geometry["coordinates"][1]
         lon = geometry["coordinates"][0]
