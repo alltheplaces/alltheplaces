@@ -26,7 +26,7 @@ class EmailCleanUpPipeline:
 
         if not isinstance(emails, str):
             if self.crawler.stats:
-                self.crawler.stats.inc_value("atp/field/email/wrong_type")  # ty: ignore[possibly-missing-attribute]
+                self.crawler.stats.inc_value("atp/field/email/wrong_type")
             return item
 
         normalized_emails = []
@@ -39,12 +39,12 @@ class EmailCleanUpPipeline:
             item["email"] = ";".join(normalized_emails)
         return item
 
-    def normalize(self, email: str, spider: Spider) -> str | None:
+    def normalize(self, email: str, spider: Spider | None) -> str | None:
         email = self.MAILTO_PATTERN.sub("", email).strip()
         if not email:
             return None
         if "@" not in email:
-            if spider.crawler.stats:
+            if spider and spider.crawler.stats:
                 spider.crawler.stats.inc_value("atp/field/email/invalid")
             return None
         return email
