@@ -1,12 +1,15 @@
 import re
 
 from scrapy.crawler import Crawler
+from scrapy import Spider
 
 from locations.items import Feature
 
 
 class EmailCleanUpPipeline:
     crawler: Crawler
+
+    MAILTO_PATTERN = re.compile(r"mailto:", re.IGNORECASE)
 
     def __init__(self, crawler: Crawler):
         self.crawler = crawler
@@ -22,7 +25,8 @@ class EmailCleanUpPipeline:
             return item
 
         if not isinstance(emails, str):
-            self.crawler.stats.inc_value("atp/field/email/wrong_type")  # ty: ignore[possibly-missing-attribute]
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/field/email/wrong_type")  # ty: ignore[possibly-missing-attribute]
             return item
 
         normalized_emails = []
@@ -35,12 +39,12 @@ class EmailCleanUpPipeline:
             item["email"] = ";".join(normalized_emails)
         return item
 
-    def normalize(self, email, spider):
-        email = re.sub(r"mailto:", "", email, flags=re.IGNORECASE)
-        email = email.strip()
+    def normalize(self, email: str, spider: Spider) -> str | None:
+        email = self.MAILTO_PATTERN.sub("", email).strip()
         if not email:
             return None
         if "@" not in email:
-            spider.crawler.stats.inc_value("atp/field/email/invalid")
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/field/email/invalid")
             return None
-        return email.strip()
+        return email

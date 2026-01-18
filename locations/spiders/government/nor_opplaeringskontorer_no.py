@@ -7,16 +7,21 @@ from urllib.parse import urlparse
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.licenses import Licenses
+
+# https://data.norge.no/data-services/325d8445-6868-3986-afd5-bb58ae34dd01
 
 
-class NbrBarnehageregisterNOSpider(Spider):
-    name = "nbr_barnehageregister_no"
-    allowed_domains = ["data-nbr.udir.no"]
-
-    api_base_url = "https://data-nbr.udir.no"
+class NorOpplaeringskontorerNOSpider(Spider):
+    name = "nor_opplaeringskontorer_no"
+    allowed_domains = ["data-nor.udir.no"]
+    dataset_attributes = Licenses.NO_NLODv2.value | {
+        "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Utdanningsdirektoratet"
+    }
+    api_base_url = "https://data-nor.udir.no"
     page_size = 1000
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -25,12 +30,13 @@ class NbrBarnehageregisterNOSpider(Spider):
             callback=self.get_pages,
         )
 
-    def get_pages(self, response: TextResponse) -> Iterable[JsonRequest]:
-        """Yield all page requests upfront for parallel execution."""
+    def get_pages(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         payload = response.json()
         total_pages = payload.get("AntallSider", 1)
 
-        for page in range(1, total_pages + 1):
+        yield from self.parse(response)
+
+        for page in range(2, total_pages + 1):
             yield JsonRequest(
                 url=f"{self.api_base_url}/v4/enheter?sidenummer={page}&antallperside={self.page_size}",
             )
@@ -44,12 +50,12 @@ class NbrBarnehageregisterNOSpider(Spider):
             if not orgnr:
                 continue
 
-            # Only fetch details for active kindergartens.
+            # Only fetch details for active Apprenticeship Office.
             if enhet.get("ErAktiv") is not True:
                 continue
 
-            # Filter out non-kindergarten entities.
-            if enhet.get("ErBarnehage") is not True:
+            # Filter out non-apprenticeship Office.
+            if enhet.get("ErOpplaeringskontor") is not True:
                 continue
 
             # Fetch detailed information for each entity.
@@ -62,12 +68,8 @@ class NbrBarnehageregisterNOSpider(Spider):
     def parse_enhet(self, response: TextResponse, summary: dict) -> Iterable[Feature]:
         data = response.json()
 
-        # Exclude excluded kindergartens.
-        if data.get("ErEkskludert") is True:
-            return
-
-        # If entity somehow is inactive or not a kindergarten after filtering, exclude it.
-        if data.get("ErAktiv") is not True or data.get("ErBarnehage") is not True:
+        # If entity somehow is inactive or not a Apprenticeship Office after filtering, exclude it.
+        if data.get("ErAktiv") is not True or data.get("ErOpplaeringskontor") is not True:
             return
 
         item = DictParser.parse(data)
@@ -85,27 +87,42 @@ class NbrBarnehageregisterNOSpider(Spider):
         if fylke := data.get("Fylke"):
             item["state"] = fylke.get("Navn")
 
-        # Operator type
-        if data.get("ErOffentligBarnehage") is True:
-            item["extras"]["operator:type"] = "government"
-        elif data.get("ErPrivatBarnehage") is True:
-            item["extras"]["operator:type"] = "private"
+        # Number of apprentices if available
+        if (antall_laerlinger := data.get("AntallLaerlinger")) not in (None, 0):
+            item["extras"]["capacity"] = str(antall_laerlinger)
+        if (ansatte := data.get("AntallAnsatte")) not in (None, 0):
+            item["extras"]["employees"] = ansatte
 
-        # ISCED level 0: early childhood education.
-        item["extras"]["isced:level"] = "0"
+        # Operator information from ForeldreRelasjoner
+        # See: https://data-nor.udir.no/v4/relasjonstyper
+        for relasjon in data.get("ForeldreRelasjoner") or []:
+            relasjonstype = relasjon.get("Relasjonstype") or {}
+            # 22 (Eierstruktur) = ownership structure, i.e. who owns/operates the entity
+            if relasjonstype.get("Id") == "22":
+                if enhet := relasjon.get("Enhet"):
+                    if navn := enhet.get("Navn"):
+                        item["operator"] = navn
+                break
 
-        # Age range
-        if (min_age := data.get("AlderstrinnFra")) is not None:
-            item["extras"]["min_age"] = str(min_age)
-        if (max_age := data.get("AlderstrinnTil")) is not None:
-            item["extras"]["max_age"] = str(max_age)
+        # Operator type based on Organisasjonsform
+        # See: https://data-nor.udir.no/v4/organisasjonsformer
+        if organisasjonsform := data.get("Organisasjonsform"):
+            org_id = organisasjonsform.get("Id")
+            if org_id in ("KOMM", "FYLK", "STAT"):
+                item["extras"]["operator:type"] = "government"
+            elif org_id in ("ADOS", "FKF", "KF", "SF", "IKS"):
+                item["extras"]["operator:type"] = "public"
+            elif org_id == "KIRK":
+                item["extras"]["operator:type"] = "religious"
+            elif org_id in ("SA", "BBL", "BRL", "GFS"):
+                item["extras"]["operator:type"] = "cooperative"
+            elif org_id in ("FLI", "ORGL", "STI"):
+                item["extras"]["operator:type"] = "association"
+            elif org_id in ("AS", "ASA", "BA", "ENK", "DA", "ANS", "KS", "NUF", "SE", "PRE"):
+                item["extras"]["operator:type"] = "private"
 
-        # Capacity
-        if (antall_barn := data.get("AntallBarn")) not in (None, 0):
-            item["extras"]["capacity"] = antall_barn
-
-        # Category
-        apply_category(Categories.KINDERGARTEN, item)
+        # Category: training office
+        apply_category({"office": "educational_institution", "education": "training"}, item)
 
         yield item
 
