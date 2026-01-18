@@ -10,7 +10,7 @@ IE_POSTCODE_PATTERN = re.compile(r"([AC-FHKNPRTV-Y][0-9]{2}|D6W)[ -]?([0-9AC-FHK
 
 
 class ExtractGBPostcodePipeline:
-    def process_item(self, item: Feature, spider: Spider) -> Feature:
+    def process_item(self, item: Feature, spider: Spider | None = None) -> Feature:
         if item.get("country") == "GB":
             if item.get("addr_full") and not item.get("postcode"):
                 item["postcode"] = extract_gb_postcode(item["addr_full"])
