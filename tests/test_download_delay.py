@@ -31,6 +31,5 @@ def test_spiders_do_not_use_lower_download_delay_than_default():
     unexpected = set(violators) - ALLOWED_LOW_DOWNLOAD_DELAY
     assert not unexpected, (
         "Unexpected spiders with DOWNLOAD_DELAY < default: %s.\n"
-        "If this is intentional, add the spider name to ALLOWED_LOW_DOWNLOAD_DELAY."
-        % sorted(unexpected)
+        "If this is intentional, add the spider name to ALLOWED_LOW_DOWNLOAD_DELAY." % sorted(unexpected)
     )
