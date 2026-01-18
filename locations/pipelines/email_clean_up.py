@@ -15,7 +15,8 @@ class EmailCleanUpPipeline:
             return item
 
         if not isinstance(emails, str):
-            spider.crawler.stats.inc_value("atp/field/email/wrong_type")
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/field/email/wrong_type")
             return item
 
         normalized_emails = []
@@ -33,6 +34,7 @@ class EmailCleanUpPipeline:
         if not email:
             return None
         if "@" not in email:
-            spider.crawler.stats.inc_value("atp/field/email/invalid")
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/field/email/invalid")
             return None
         return email
