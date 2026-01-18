@@ -55,7 +55,7 @@ class ArkNOSpider(Spider):
                         opening_hours.set_closed(day)
                         continue
                     opening_hours.add_range(day, day_hours.get("openFrom"), day_hours.get("openTo"), "%H:%M:%S")
-                
+
                 item["opening_hours"] = opening_hours
 
                 yield item
