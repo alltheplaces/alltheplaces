@@ -584,14 +584,25 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict | None:  # 
             lat = geometry["coordinates"][1]
             lon = geometry["coordinates"][0]
         else:
-            lat, lon = Transformer.from_crs(original_projection, 4326).transform(
-                geometry["coordinates"][0], geometry["coordinates"][1]
-            )
+                lat, lon = Transformer.from_crs(original_projection, 4326).transform(
+                    geometry["coordinates"][0], geometry["coordinates"][1]
+                )
     else:
         lat = geometry["coordinates"][1]
         lon = geometry["coordinates"][0]
     if not (isinstance(lat, float) or isinstance(lat, int)) or not (isinstance(lon, float) or isinstance(lon, int)):
         return None
+    # Normalize near-integer results to ints to avoid floating point precision
+    # artifacts from reprojection libraries (e.g.  -35.00000000000001 -> -35).
+    if isinstance(lat, float):
+        lat_rounded = round(lat)
+        if abs(lat - lat_rounded) < 1e-9:
+            lat = int(lat_rounded)
+    if isinstance(lon, float):
+        lon_rounded = round(lon)
+        if abs(lon - lon_rounded) < 1e-9:
+            lon = int(lon_rounded)
+
     new_geometry = {
         "type": "Point",
         "coordinates": [lon, lat],
