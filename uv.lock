@@ -161,9 +161,9 @@ requires-dist = [
     { name = "requests" },
     { name = "requests-cache" },
     { name = "reverse-geocoder" },
-    { name = "scrapy" },
+    { name = "scrapy", specifier = ">=2.14.0" },
     { name = "scrapy-camoufox" },
-    { name = "scrapy-playwright" },
+    { name = "scrapy-playwright", specifier = ">=0.0.45" },
     { name = "scrapy-zyte-api" },
     { name = "shapely" },
     { name = "twisted", extras = ["http2"] },
@@ -1885,15 +1885,15 @@ wheels = [
 
 [[package]]
 name = "scrapy-playwright"
-version = "0.0.44"
+version = "0.0.45"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "playwright" },
     { name = "scrapy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7c/77/3f21ca2a4a68f83b2ae097be4d57bc8665f4946456e6541dd21b21ed261c/scrapy_playwright-0.0.44.tar.gz", hash = "sha256:e2200610d5619cc08c747484810efc55bc88de00324e2ccf5a1f74942295243e", size = 47975, upload-time = "2025-08-13T18:17:14.166Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/67/24/8487be51b9c0b22bfded18bbf26f0e1d98d9da9a2b512b88af24cc038c41/scrapy_playwright-0.0.45.tar.gz", hash = "sha256:958d530d8dcfa4a4751998e35367ac50e1a2eed43fa66266507a4b63d637e760", size = 48122, upload-time = "2026-01-16T21:26:42.447Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/a5/177926d45a37b71a579cb79ca61085e504321e380b3266576056c765f578/scrapy_playwright-0.0.44-py3-none-any.whl", hash = "sha256:ac030c6ccf9b6f20c899795b48d5552bad3a25772f5a5441759fde99a127da00", size = 27165, upload-time = "2025-08-13T18:17:12.115Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/8c/e4d62d910c16d7e6f0ed7ea25aca8443b7ba225e6d9b3e7f723adb30bfc8/scrapy_playwright-0.0.45-py3-none-any.whl", hash = "sha256:da11217bd246337a79c16db6c4d87f616384d2663ed29feb473f15a2087b09d2", size = 27419, upload-time = "2026-01-16T21:26:41.159Z" },
 ]
 
 [[package]]
