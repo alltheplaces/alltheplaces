@@ -553,7 +553,7 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict | None:  # 
         return None
     if len(geometry["coordinates"]) != 2:
         return None
-    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][1], int)) or not (
+    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][0], int)) or not (
         isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
     ):
         return None
