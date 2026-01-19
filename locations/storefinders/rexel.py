@@ -14,14 +14,23 @@ class RexelSpider(Spider):
 
     This spider is for all common functionality across subsidiary brands.
 
-    To use, specify a `base_url`, `search_lat` and `search_lon`
+    To use, specify:
+    - `base_url`: domain name hosting the storefinder, for example,
+                  "storefinderapi.example.net"
+    - `search_lat`: mandatory paramater, floating point number between -90.0
+                    and 90.0
+    - `search_lon`: mandatory parameter, floating point number between -180.0
+                    and 180.0
     """
 
-    base_url = ""
-    search_lat = ""
-    search_lon = ""
+    base_url: str = ""
+    search_lat: float | None = None
+    search_lon: float | None = None
 
     async def start(self) -> AsyncIterator[JsonRequest]:
+        if not self.base_url or self.search_lat is None or self.search_lon is None:
+            raise ValueError("base_url, search_lat and search_lon attributes all need to be specified.")
+            return
         # This seems to return all stores regardless of lat-long; as long as it's in the right country/area?
         yield JsonRequest(
             url=f"https://{self.base_url}/store-finder/findNearbyStores?latitude={self.search_lat}&longitude={self.search_lon}"

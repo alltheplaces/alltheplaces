@@ -40,6 +40,8 @@ class WaffleHouseUSSpider(Spider):
         for day, times in zip(DAYS, rules):
             if not times:
                 oh.set_closed(day)
+            elif "Closed" in times[0]:
+                oh.set_closed(day)
             else:
                 oh.add_range(day, times[0], times[1].replace("00:00", "24:00"))
         return oh

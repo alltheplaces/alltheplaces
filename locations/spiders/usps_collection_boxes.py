@@ -30,7 +30,6 @@ class UspsCollectionBoxesSpider(Spider):
     name = "usps_collection_boxes"
     item_attributes = {"operator": "United States Postal Service", "operator_wikidata": "Q668687"}
     allowed_domains = ["usps.com"]
-    custom_settings = {"DOWNLOAD_DELAY": 0.1}
 
     async def start(self) -> AsyncIterator[Request]:
         with open_searchable_points("us_centroids_100mile_radius.csv") as points:

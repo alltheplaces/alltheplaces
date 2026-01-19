@@ -17,6 +17,10 @@ from locations.items import Feature
 class DiscoverSwissSpider(Spider):
     name = "discover_swiss"
     allowed_domains = ["api.discover.swiss"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "URLLENGTH_LIMIT": 4096,
+    }
     dataset_attributes = {
         # Mandatory attribution as per CC-BY 4.0, waived for OpenStreetMap
         # via standard template. Negotiations took place in January 2025

@@ -1,4 +1,7 @@
+from typing import Iterable
+
 from locations.hours import DAYS_PL, OpeningHours
+from locations.items import Feature
 from locations.storefinders.wp_go_maps import WpGoMapsSpider
 
 
@@ -7,11 +10,11 @@ class GrycanPLSpider(WpGoMapsSpider):
     item_attributes = {"brand": "Grycan", "brand_wikidata": "Q97372889"}
     allowed_domains = ["grycan.pl"]
 
-    def post_process_item(self, item, location):
+    def post_process_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         custom_field_data = location["custom_field_data"]
 
         if custom_field_data == []:
-            return item
+            yield item
 
         if "Telefon" in custom_field_data.keys():
             item["phone"] = custom_field_data["Telefon"]
@@ -34,7 +37,7 @@ class GrycanPLSpider(WpGoMapsSpider):
             self.logger.error("Error parsing opening hours")
 
         item.pop("name", None)
-        return item
+        yield item
 
     def parse_opening_hours(self, custom_field_data) -> OpeningHours:
         oh = OpeningHours()
