@@ -1,7 +1,7 @@
 from typing import Any, AsyncIterator
 
 import scrapy
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
@@ -14,15 +14,11 @@ class JeanCoutuCASpider(JSONBlobSpider):
     locations_key = "LoadStoreInfosBHResult"
 
     async def start(self) -> AsyncIterator[scrapy.Request]:
-        yield scrapy.Request(
-            url="https://www.jeancoutu.com/StoreLocator/StoreLocator.svc/LoadStoreInfosBH",
-            method="POST",
-            headers={"content-type": "application/json; charset=utf-8"},
-        )
+        yield JsonRequest(url="https://www.jeancoutu.com/StoreLocator/StoreLocator.svc/LoadStoreInfosBH", method="POST")
 
     def post_process_item(self, item: dict[str, Any], response: Response, feature: dict[str, Any]) -> Any:
         item["ref"] = feature["Store"]
-        item["name"] = feature.get("DisplayName") or feature.get("Store_Name")
+        item["name"] = None
 
         item["street_address"] = feature.get("Address_e")
         item["city"] = feature.get("City")
