@@ -17,6 +17,7 @@ class GrandOpticalSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["website"] = response.url
+        item["branch"] = item.pop("name").replace("GRANDOPTICAL", "").replace("Opticien", "")
 
         data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
         store = data["props"]["initialProps"]["pageProps"]["storeData"]
