@@ -14,8 +14,7 @@ class ServiceApotheekNLSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://gate.serviceapotheek.nl/graphql",
-            data={
-                "query": """
+            data={"query": """
             query GetLocators {
                 locators {
                     type
@@ -37,8 +36,7 @@ class ServiceApotheekNLSpider(Spider):
                         }
                     }
                 }
-            }"""
-            },
+            }"""},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
