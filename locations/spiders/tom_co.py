@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.storefinders.uberall import UberallSpider
 
 
-class TomCoSpider(UberallSpider):
+class TomCOSpider(UberallSpider):
     name = "tom_co"
     item_attributes = {"brand": "Tom & Co", "brand_wikidata": "Q98380763"}
     key = "Aq5TVOtajZTxBQhZuFv34qsoWaXGKN"
