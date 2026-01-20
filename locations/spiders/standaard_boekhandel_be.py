@@ -6,11 +6,12 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 STANDAARD_BOEKHANDEL = {"brand": "Standaard Boekhandel", "brand_wikidata": "Q3496554"}
-CLUB = {"brand": "Club"}
+CLUB = {"name": "Club", "brand": "Club"}
 
 
 class StandaardBoekhandelBESpider(JSONBlobSpider):
@@ -32,13 +33,22 @@ class StandaardBoekhandelBESpider(JSONBlobSpider):
 
         item = DictParser.parse(shop)
         item["branch"] = item.pop("name")
+        item["website"] = urljoin("https://www.standaardboekhandel.be/", feature["url"])
+
+        item["opening_hours"] = self.parse_opening_hours(feature["openingDays"])
 
         if "sb" in shop["brands"]:
             item.update(STANDAARD_BOEKHANDEL)
-            item["website"] = urljoin("https://www.standaardboekhandel.be/", feature["url"])
         elif "club" in shop["brands"]:
             item.update(CLUB)
-            item["website"] = urljoin("https://www.librairieclub.be/", feature["url"])
 
         apply_category(Categories.SHOP_BOOKS, item)
+
         yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for day in rules:
+            for rule in day["openingSlots"]:
+                oh.add_range(DAYS[day["dayOfWeek"] - 1], rule["from"], rule["to"])
+        return oh
