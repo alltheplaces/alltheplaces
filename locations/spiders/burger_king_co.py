@@ -20,6 +20,7 @@ class BurgerKingCOSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["ref"] = item.pop("name").split("-")[-1]
         item["street_address"] = item.pop("street")
+        item["postcode"] = str(item["postcode"])
         if store_hours := feature.get("storeHours"):
             item["opening_hours"] = self.parse_opening_hours(store_hours[0].get("weekHours", []))
         apply_category(Categories.FAST_FOOD, item)
