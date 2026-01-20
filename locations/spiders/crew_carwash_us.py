@@ -1,9 +1,10 @@
 import re
+
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.categories import Categories, apply_category
 
 
 class CrewCarwashUSSpider(scrapy.Spider):
@@ -22,7 +23,9 @@ class CrewCarwashUSSpider(scrapy.Spider):
         s = re.sub(r"^[A-Za-z\s]+:\s*", "", s)
 
         # look for a 12h time range like '7am to 8pm' or '7:00am - 8:00pm'
-        m = re.search(r"(\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM)?)\s*(?:to|-|–|—)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM)?)", s)
+        m = re.search(
+            r"(\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM)?)\s*(?:to|-|–|—)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM)?)", s
+        )
         if not m:
             return None
 
