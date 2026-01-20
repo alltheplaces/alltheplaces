@@ -18,6 +18,9 @@ class BeobankBESpider(SitemapSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = (
+            item.pop("name").removeprefix("BEOBANK AG ").removeprefix("BEOBANK BR ").removeprefix("BEOBANK PRO CENTER ")
+        )
         item["ref"] = response.url.split("/")[-1].replace(".html", "")
         item["country"] = "BE"
 
