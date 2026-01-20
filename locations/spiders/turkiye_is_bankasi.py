@@ -1,20 +1,21 @@
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
-import scrapy
-from scrapy import FormRequest, Request
+from scrapy import Spider
+from scrapy.http import FormRequest, Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class TurkiyeIsBankasiSpider(scrapy.Spider):
+class TurkiyeIsBankasiSpider(Spider):
     name = "turkiye_is_bankasi"
     item_attributes = {"brand": "Türkiye İş Bankası", "brand_wikidata": "Q909613"}
     allowed_domains = ["www.isbank.com.tr"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     base_url = "https://www.isbank.com.tr/_layouts/15/DV.Isbank.Web/ATMBranchLocatorHandler.ashx"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url=urljoin(self.base_url, "?MethodName=getAllDomesticCities&lang=tr"), callback=self.parse_cities
         )

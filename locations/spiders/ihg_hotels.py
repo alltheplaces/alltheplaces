@@ -43,7 +43,8 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data):
         if not item.get("street_address"):
             return
-        item["name"] = html.unescape(item["name"].strip())
+        if name := item.get("name"):
+            item["name"] = html.unescape(name.strip())
 
         if (hotel_type := response.url.split("/")[3]) in self.my_brands:
             item["brand"], item["brand_wikidata"] = self.my_brands.get(hotel_type)

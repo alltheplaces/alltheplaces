@@ -4,12 +4,16 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class PeugeotSECZESSpider(scrapy.Spider):
-    name = "peugeot_se_cz_es"
+class PeugeotSpider(scrapy.Spider):
+    name = "peugeot"
     start_urls = [
         "https://www.peugeot.se/apps/atomic/DealersServlet?distance=30000&latitude=59.33257&longitude=18.06682&maxResults=4000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvc3dlZGVuL3Nl&searchType=latlong",
         "https://www.peugeot.cz/apps/atomic/DealersServlet?distance=300&latitude=50.07914&longitude=14.43299&maxResults=40000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvY3plY2hfcmVwdWJsaWMvY3o%3D&searchType=latlong",
         "https://www.peugeot.es/apps/atomic/DealersServlet?distance=300&latitude=40.41955&longitude=-3.69197&maxResults=40&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvc3BhaW4vZXM%3D&searchType=latlong",
+        "https://www.peugeot.nl/apps/atomic/DealersServlet?distance=30000&latitude=52.36993&longitude=4.90787&maxResults=40000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvbmV0aGVybGFuZHMvbmw%3D&searchType=latlong",
+        "https://www.peugeot.fr/apps/atomic/DealersServlet?path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvZnJhbmNlL2ZyX2Zy&searchType=latlong",
+        "https://www.peugeot.com.my/apps/atomic/DealersServlet?path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvbWFsYXlzaWEvZW4%3D&searchType=latlong",
+        "https://www.peugeot-eg.com/apps/atomic/DealersServlet?path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvZWd5cHQvZW4%3D&searchType=latlong",
     ]
 
     item_attributes = {"brand": "Peugeot", "brand_wikidata": "Q6742"}
@@ -34,38 +38,35 @@ class PeugeotSECZESSpider(scrapy.Spider):
                     "lon": float(coordinates.get("longitude")),
                 }
             )
-
-            service_names = []
-            for service in store.get("services", []):
-                service_names.append(service.get("name"))
-
-            if any(
-                s in service_names
-                for s in (
+            for service_type in store["services"]:
+                if service_type["name"] in [
                     "New Vehicles",
                     "Prodej nových vozů",
-                    "Venta de Vehículos Comerciales",
                     "Venta de Vehículos Turismos",
-                )
-            ):
-                apply_category(Categories.SHOP_CAR, item)
-            elif any(
-                s in service_names
-                for s in (
+                    "Nieuwe auto's",
+                    "Venta de Vehículos Turismos",
+                    "VENTES DE VÉHICULES NEUFS",
+                ]:
+                    sales_item = item.deepcopy()
+                    sales_item["ref"] = sales_item["ref"] + "-SALES"
+                    apply_category(Categories.SHOP_CAR, sales_item)
+                    yield sales_item
+                elif service_type["name"] in [
                     "Aftersales",
                     "Autorizovaný servis",
                     "Servicio Oficial Turismos",
-                )
-            ):
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            elif any(
-                s in service_names
-                for s in (
+                    "Après-vente",
+                ]:
+                    service_item = item.deepcopy()
+                    service_item["ref"] = service_item["ref"] + "-SERVICE"
+                    apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                    yield service_item
+                elif service_type["name"] in [
                     "Parts",
                     "dílů",
                     "Pieza de recambio",
-                )
-            ):
-                apply_category(Categories.SHOP_CAR_PARTS, item)
-
-            yield item
+                ]:
+                    spare_parts_item = item.deepcopy()
+                    spare_parts_item["ref"] = spare_parts_item["ref"] + "-SPARE_PARTS"
+                    apply_category(Categories.SHOP_CAR_PARTS, spare_parts_item)
+                    yield spare_parts_item

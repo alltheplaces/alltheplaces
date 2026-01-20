@@ -1,8 +1,8 @@
 import datetime
 from copy import deepcopy
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
@@ -14,14 +14,14 @@ from locations.spiders.toyota_eu import LEXUS_SHARED_ATTRIBUTES
 current_day = (datetime.datetime.now()).strftime("%A")
 
 
-class ToyotaCASpider(scrapy.Spider):
+class ToyotaCASpider(Spider):
     name = "toyota_ca"
     BRAND_MAPPING = {
         "toyota": TOYOTA_SHARED_ATTRIBUTES,
         "lexus": LEXUS_SHARED_ATTRIBUTES,
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for brand in self.BRAND_MAPPING:
             yield Request(
                 f"https://www.toyota.ca/bin/find_a_dealer/dealersList?brand={brand}&language=en&userInput=vancover&latitude=49.2827291&longitude=-123.1207375&scenario=proximity&dayOfWeek={current_day}",

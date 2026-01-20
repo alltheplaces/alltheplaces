@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Iterable
 
 from scrapy.http import Response
@@ -19,23 +20,33 @@ class HyundaiBWLSNASZZASpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = feature.get("Description")
+
         if hours := feature.get("OperatingHours"):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours)
+
         if slug := feature.get("Slug"):
             item["website"] = "https://www.hyundai.co.za/dealers/" + slug
+
         if feature.get("Sales") or feature.get("CommercialSales"):
-            apply_category(Categories.SHOP_CAR, item)
+            shop = deepcopy(item)
+            apply_category(Categories.SHOP_CAR, shop)
             if feature.get("Service") or feature.get("CommercialService"):
-                apply_yes_no(Extras.CAR_REPAIR, item, True)
+                apply_yes_no(Extras.CAR_REPAIR, shop, True)
             if feature.get("Parts") or feature.get("CommercialParts"):
-                apply_yes_no(Extras.CAR_PARTS, item, True)
-        elif feature.get("Service") or feature.get("CommercialService"):
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
+                apply_yes_no(Extras.CAR_PARTS, shop, True)
+            yield shop
+
+        if feature.get("Service") or feature.get("CommercialService"):
+            service = deepcopy(item)
+            service["ref"] = f"{item['ref']}_service"
+            apply_category(Categories.SHOP_CAR_REPAIR, service)
             if feature.get("Parts") or feature.get("CommercialParts"):
-                apply_yes_no(Extras.CAR_PARTS, item, True)
-        elif feature.get("Parts") or feature.get("CommercialParts"):
-            apply_category(Categories.SHOP_CAR_PARTS, item)
-        else:
-            apply_category(Categories.SHOP_CAR, item)
-        yield item
+                apply_yes_no(Extras.CAR_PARTS, service, True)
+            yield service
+
+        if feature.get("Parts") or feature.get("CommercialParts"):
+            parts = deepcopy(item)
+            parts["ref"] = f"{item['ref']}_parts"
+            apply_category(Categories.SHOP_CAR_PARTS, parts)
+            yield parts

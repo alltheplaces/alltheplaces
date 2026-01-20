@@ -19,11 +19,9 @@ class FustCHSpider(JSONBlobSpider):
     start_urls = ["https://www.fust.ch/store-finder"]
 
     def extract_json(self, response: Response) -> list[dict]:
-        location_data = response.xpath('//script[contains(text(), "pointOfService")]/text()').get()
-        return [
-            chompjs.parse_js_object(location, unicode_escape=True)
-            for location in location_data.split(r"{\"pointOfService\":")[1:]
-        ]
+        scripts = response.xpath('//script[contains(text(), "pointOfService")]/text()').getall()
+        location_data = "".join(scripts).split(r"{\"pointOfService\":")[1:]
+        return [chompjs.parse_js_object(location, unicode_escape=True) for location in location_data]
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))

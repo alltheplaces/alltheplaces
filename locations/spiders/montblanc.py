@@ -13,8 +13,7 @@ class MontblancSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://stores.montblanc.com/graphql",
-            data={
-                "query": """
+            data={"query": """
                 query PublicBoutiques {
                     publicBoutiques {
                         id
@@ -42,8 +41,7 @@ class MontblancSpider(Spider):
                             defaultName
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

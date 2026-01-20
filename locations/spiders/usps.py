@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -7,11 +9,11 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class UspsSpider(scrapy.Spider):
+class UspsSpider(Spider):
     name = "usps"
     item_attributes = {"operator": "United States Postal Service", "operator_wikidata": "Q668687"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in point_locations("us_centroids_25mile_radius.csv"):
             yield JsonRequest(
                 url="https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations",

@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -12,7 +12,7 @@ class X2oBESpider(Spider):
     name = "x2o_be"
     item_attributes = {"name": "X2O", "brand": "X2O", "brand_wikidata": "Q126165101"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.x2o.be/graphql",
             data={

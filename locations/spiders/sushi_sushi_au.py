@@ -1,18 +1,20 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
 
 class SushiSushiAUSpider(Spider):
     name = "sushi_sushi_au"
-    item_attributes = {"brand": "Sushi Sushi", "brand_wikidata": "Q122915060", "extras": Categories.RESTAURANT.value}
+    item_attributes = {"brand": "Sushi Sushi", "brand_wikidata": "Q122915060"}
     allowed_domains = ["kwefa302.api.sanity.io"]
     start_urls = ['https://kwefa302.api.sanity.io/v2021-08-31/data/query/production?query=*[_type == "storeData"]']
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -40,4 +42,5 @@ class SushiSushiAUSpider(Spider):
             item["lat"] = None
             item["lon"] = None
 
+            apply_category(Categories.RESTAURANT, item)
             yield item

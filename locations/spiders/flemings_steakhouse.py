@@ -21,7 +21,7 @@ class FlemingsSteakhouseSpider(scrapy.Spider):
         address_element = list(filter(None, [a.strip() for a in address_element]))
         address = address_element[0]
         city_state_postal_element = address_element[1]
-        (city, state, postcode) = re.search(r"^(.*), ([A-Z]{2}) (\d{5})$", city_state_postal_element).groups()
+        city, state, postcode = re.search(r"^(.*), ([A-Z]{2}) (\d{5})$", city_state_postal_element).groups()
 
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),

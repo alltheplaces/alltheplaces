@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.geo import point_locations
@@ -27,14 +30,14 @@ BRAND_MAPPING = {
 }
 
 
-class RuralviaAtmESSpider(scrapy.Spider):
+class RuralviaAtmESSpider(Spider):
     name = "ruralvia_atm_es"
     allowed_domains = ["ruralvia.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "ES"):
             url = f"https://www.ruralvia.com/rviaoperations/rest/locator/cashier?codigoEntidad=3187&longitud={lon}&latitud={lat}&radio=20"
-            yield scrapy.Request(url, callback=self.parse)
+            yield Request(url, callback=self.parse)
 
     def parse(self, response):
         data = response.json()

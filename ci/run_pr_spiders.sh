@@ -171,14 +171,14 @@ do
 
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
-    PARQUETFILE="${SPIDER_RUN_DIR}/output.parquet"
+    NDGEOJSON="${SPIDER_RUN_DIR}/output.ndgeojson"
     STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
     timeout -k 1m 150s \
     uv run scrapy runspider \
         -o "file://${OUTFILE}:geojson" \
-        -o "file://${PARQUETFILE}:parquet" \
+        -o "file://${NDGEOJSON}:ndgeojson" \
         --loglevel=INFO \
         --logfile="${LOGFILE}" \
         -s CLOSESPIDER_TIMEOUT=120 \
@@ -206,7 +206,7 @@ do
 
     if [ -f "${OUTFILE}" ]; then
         upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
-        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
+        upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         if [ -f "${STATSFILE}" ]; then
@@ -235,18 +235,16 @@ do
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
             fi
 
-            # Warn if items are missing a lat/lon
-            missing_lat=$(jq '."atp/field/lat/missing" // 0' "${STATSFILE}")
-            missing_lon=$(jq '."atp/field/lon/missing" // 0' "${STATSFILE}")
-            if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
+            # Warn if items are missing geometry
+            missing_geometry=$(jq '."atp/field/geometry/missing" // 0' "${STATSFILE}")
+            if [ $missing_geometry -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Geometry is missing on ${missing_geometry} items</li>"
             fi
 
-            # Error if items have invalid lat/lon
-            invalid_lat=$(jq '."atp/field/lat/invalid" // 0' "${STATSFILE}")
-            invalid_lon=$(jq '."atp/field/lon/invalid" // 0' "${STATSFILE}")
-            if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
-                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
+            # Error if items have invalid geometry
+            invalid_geometry=$(jq '."atp/field/geometry/invalid" // 0' "${STATSFILE}")
+            if [ $invalid_geometry -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Geometry is invalid on ${invalid_geometry} items</li>"
             fi
 
             # Error if items have invalid website

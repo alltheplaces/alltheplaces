@@ -8,17 +8,65 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.spiders.alior_bank_pl import AliorBankPLSpider
+from locations.spiders.millennium_bank_pl import MillenniumBankPLSpider
+from locations.spiders.santander_pl import SantanderPLSpider
 
 BRAND_MAPPING = {
-    "Alior Bank Poland ADT Recycler": {"brand": "Alior Bank", "brand_wikidata": "Q9148395"},
-    "Bank Millennium Poland ADT Recycler": {"brand": "Millennium Bank", "brand_wikidata": "Q4855947"},
-    "Euronet Poland ADT Recycler": {"brand": "Euronet", "brand_wikidata": "Q5412010"},
-    "mBank Poland ADT Recycler": {"brand": "mBank", "brand_wikidata": "Q1160928"},
-    "Santander Bank Poland ADT Dual": {"brand": "Santander", "brand_wikidata": "Q806653"},
-    "Santander Bank Poland ADT Recycler": {"brand": "Santander", "brand_wikidata": "Q806653"},
-    "Santander Bank Poland Off-Branch ADT Dual": {"brand": "Santander", "brand_wikidata": "Q806653"},
-    "Santander Bank Poland Off-Branch ADT Recycler": {"brand": "Santander", "brand_wikidata": "Q806653"},
-    "SKOK Stefczyka Poland ADT Recycler": {"brand": "SKOK Stefczyka", "brand_wikidata": "Q57624461"},
+    "Alior Bank Poland ADT Recycler": {
+        "brand": AliorBankPLSpider.item_attributes["brand"],
+        "brand_wikidata": AliorBankPLSpider.item_attributes["brand_wikidata"],
+        "operator": AliorBankPLSpider.item_attributes["brand"],
+        "operator:wikidata": AliorBankPLSpider.item_attributes["brand_wikidata"],
+    },
+    "Bank Millennium Poland ADT Recycler": {
+        "brand": MillenniumBankPLSpider.item_attributes["brand"],
+        "brand_wikidata": MillenniumBankPLSpider.item_attributes["brand_wikidata"],
+        "operator": MillenniumBankPLSpider.item_attributes["brand"],
+        "operator:wikidata": MillenniumBankPLSpider.item_attributes["brand_wikidata"],
+    },
+    "Euronet Poland ADT Recycler": {
+        "brand": "Euronet",
+        "brand_wikidata": "Q5412010",
+        "operator": "Euronet",
+        "operator:wikidata": "Q5412010",
+    },
+    "mBank Poland ADT Recycler": {
+        "brand": "mBank",
+        "brand_wikidata": "Q1160928",
+        "operator": "mBank",
+        "operator:wikidata": "Q1160928",
+    },
+    "Santander Bank Poland ADT Dual": {
+        "brand": SantanderPLSpider.item_attributes["brand"],
+        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+        "operator": SantanderPLSpider.item_attributes["brand"],
+        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+    },
+    "Santander Bank Poland ADT Recycler": {
+        "brand": SantanderPLSpider.item_attributes["brand"],
+        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+        "operator": SantanderPLSpider.item_attributes["brand"],
+        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+    },
+    "Santander Bank Poland Off-Branch ADT Dual": {
+        "brand": SantanderPLSpider.item_attributes["brand"],
+        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+        "operator": SantanderPLSpider.item_attributes["brand"],
+        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+    },
+    "Santander Bank Poland Off-Branch ADT Recycler": {
+        "brand": SantanderPLSpider.item_attributes["brand"],
+        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+        "operator": SantanderPLSpider.item_attributes["brand"],
+        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+    },
+    "SKOK Stefczyka Poland ADT Recycler": {
+        "brand": "SKOK Stefczyka",
+        "brand_wikidata": "Q57624461",
+        "operator": "SKOK Stefczyka",
+        "operator:wikidata": "Q57624461",
+    },
 }
 
 
@@ -41,7 +89,7 @@ def parse_hours(hours_str: str) -> str | OpeningHours | None:
 
 class EuronetPLSpider(Spider):
     name = "euronet_pl"
-    item_attributes = {"operator": "Euronet", "operator_wikidata": "Q5412010"}
+    item_attributes = {"network": "Euronet", "network_wikidata": "Q5412010"}
     start_urls = ["https://euronet.pl/Lista_wplatomatow_sieci_Euronet.xlsx"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 

@@ -1,5 +1,5 @@
-import json
-from typing import Iterable
+from json import dumps
+from typing import AsyncIterator, Iterable
 from urllib.parse import urlencode
 
 import chompjs
@@ -24,7 +24,7 @@ class SubwayWorldwideSpider(Spider):
     item_attributes = SubwaySpider.item_attributes
     country_utils = CountryUtils()
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         country = self.country_utils.country_code_from_spider_name(self.name)
         language = get_locale(country) or "en-US"
         for city in city_locations(country, 1000):
@@ -54,7 +54,7 @@ class SubwayWorldwideSpider(Spider):
             "RecentStores": None,
             "Stats": {"abc": "geo,A", "src": "geocode", "act": "enter", "c": "subwayLocator", "pac": "8,2"},
         }
-        q = json.dumps(q)
+        q = dumps(q)
         url = "https://locator-svc.subway.com/v3/GetLocations.ashx?" + urlencode({"q": q})
         return Request(
             url,

@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -13,7 +13,7 @@ class TravisPerkinsGBSpider(Spider):
     item_attributes = {"brand": "Travis Perkins", "brand_wikidata": "Q2450664"}
     BENCHMARX = {"brand": "Benchmarx", "brand_wikidata": "Q102181127"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.travisperkins.co.uk/graphql?op=getAllBranches",
             data={

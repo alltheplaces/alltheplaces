@@ -16,8 +16,7 @@ class AlbertCZSpider(JSONBlobSpider):
         for url in self.start_urls:
             yield JsonRequest(
                 url,
-                data={
-                    "query": """query GetStoreSearch {
+                data={"query": """query GetStoreSearch {
                     storeSearch(lang: "en", pageSize: 5000) {
                         stores {
                             address {
@@ -47,8 +46,7 @@ class AlbertCZSpider(JSONBlobSpider):
                         }
                     }
                 }
-                """
-                },
+                """},
                 dont_filter=True,
             )
 
