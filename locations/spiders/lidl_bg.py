@@ -20,7 +20,7 @@ class LidlBGSpider(VirtualEarthSpider):
 
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
-            r"(\w+) (\d{2}:\d{2})-(\d{2}:\d{2})",
+            r"(\w+)\s+(\d{2}:\d{2})-(\d{2}:\d{2})",
             feature["OpeningTimes"],
         ):
             if day := sanitise_day(day, DAYS_BG):
