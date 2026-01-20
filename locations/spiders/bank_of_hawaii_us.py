@@ -20,6 +20,10 @@ class BankOfHawaiiUSSpider(scrapy.Spider):
             item["lat"] = location["geocode"]["latitude"]
             item["lon"] = location["geocode"]["longitude"]
             if "Branch" in location["type"]:
+                if "In-Store Branch" in item["name"]:
+                    item["located_in"] = item.pop("name").removesuffix(" In-Store Branch")
+                else:
+                    item["branch"] = item.pop("name").removesuffix(" Branch")
                 apply_category(Categories.BANK, item)
                 apply_yes_no(Extras.ATM, item, "Atm" in location["type"])
                 item["opening_hours"] = self.parse_opening_hours(location["operationalHours"])
