@@ -1,6 +1,6 @@
 from typing import AsyncIterator
 
-from scrapy.http import Request
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.geo import country_iseadgg_centroids
@@ -21,16 +21,19 @@ class CapitecBankZASpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "ZA"
 
-    async def start(self) -> AsyncIterator[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # Maximum returned is 100, even with larger "Take"
         # Even with 48km radius, not all locations are returned, and it is making over 260 requests
         for lat, lon in country_iseadgg_centroids("ZA", 48):
-            yield Request(
+            yield JsonRequest(
                 url="https://www.capitecbank.co.za/api/Branch",
-                body=f"Latitude={lat}&Longitude={lon}&Take=100",
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
-                method="POST",
+                data={"Latitude": lat, "Longitude": lon, "Take": 100},
             )
+
+    def pre_process_data(self, feature: dict) -> None:
+        # API returns full address in AddressLine1 - rename to Address
+        # so DictParser maps it to addr_full instead of street_address
+        feature["Address"] = feature.pop("AddressLine1")
 
     def post_process_item(self, item, response, location):
         if location["IsClosed"]:
