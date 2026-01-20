@@ -1,6 +1,5 @@
 from typing import Iterable
 
-from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.yext_answers import YextAnswersSpider
 
