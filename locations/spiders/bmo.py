@@ -46,6 +46,7 @@ class BmoSpider(Where2GetItSpider):
     name = "bmo"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
     api_endpoint = "https://branchlocator.bmo.com/rest/getlist"
+    api_brand_name = "bmo"
     api_key = [
         "343095D0-C235-11E6-93AB-1BF70C70A832",  # CA
         "D07C1CB0-80A3-11ED-BCB3-F57F326043C3",  # US
