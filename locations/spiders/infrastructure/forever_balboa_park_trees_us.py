@@ -1,5 +1,3 @@
-
-
 from locations.storefinders.treeplotter import TreePlotterSpider
 
 
