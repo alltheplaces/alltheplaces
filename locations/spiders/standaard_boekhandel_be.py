@@ -1,4 +1,5 @@
 from typing import Iterable
+from urllib.parse import urljoin
 
 import chompjs
 from scrapy.http import Response
@@ -34,8 +35,10 @@ class StandaardBoekhandelBESpider(JSONBlobSpider):
 
         if "sb" in shop["brands"]:
             item.update(STANDAARD_BOEKHANDEL)
+            item["website"] = urljoin("https://www.standaardboekhandel.be/", feature["url"])
         elif "club" in shop["brands"]:
             item.update(CLUB)
+            item["website"] = urljoin("https://www.librairieclub.be/", feature["url"])
 
         apply_category(Categories.SHOP_BOOKS, item)
         yield item
