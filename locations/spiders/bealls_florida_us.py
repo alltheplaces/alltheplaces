@@ -13,5 +13,4 @@ class BeallsFloridaUSSpider(YextAnswersSpider):
     feature_type = "bealls-florida-locations"
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
         yield item
