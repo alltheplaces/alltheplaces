@@ -60,5 +60,4 @@ class SunbeltRentalsUSCASpider(Spider):
             if hours:
                 item["opening_hours"] = hours
 
-            apply_category(Categories.SHOP_TOOL_HIRE, item)
             yield item
