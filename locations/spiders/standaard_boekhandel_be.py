@@ -8,10 +8,12 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
+STANDAARD_BOEKHANDEL = {"brand": "Standaard Boekhandel", "brand_wikidata": "Q3496554"}
+CLUB = {"brand": "Club"}
+
 
 class StandaardBoekhandelBESpider(JSONBlobSpider):
     name = "standaard_boekhandel_be"
-    item_attributes = {"brand": "Standaard Boekhandel", "brand_wikidata": "Q3496554"}
     start_urls = ["https://www.standaardboekhandel.be/winkels"]
 
     def extract_json(self, response: Response) -> list[dict]:
@@ -29,6 +31,11 @@ class StandaardBoekhandelBESpider(JSONBlobSpider):
 
         item = DictParser.parse(shop)
         item["branch"] = item.pop("name")
+
+        if "sb" in shop["brands"]:
+            item.update(STANDAARD_BOEKHANDEL)
+        elif "club" in shop["brands"]:
+            item.update(CLUB)
 
         apply_category(Categories.SHOP_BOOKS, item)
         yield item
