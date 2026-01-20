@@ -1,8 +1,5 @@
-from typing import Iterable
 
-from scrapy.http import TextResponse
 
-from locations.items import Feature
 from locations.storefinders.treeplotter import TreePlotterSpider
 
 

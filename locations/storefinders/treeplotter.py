@@ -113,7 +113,9 @@ class TreePlotterSpider(Spider):
                 args = "[args]"
             formdata[f"params{args}[filtersPkg][layerFilters][organization][layerName]"] = "organization"
             formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterFilters][pid][fieldName]"] = "pid"
-            formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterFilters][pid][hasSpecifics]"] = str(self.organisation_id)
+            formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterFilters][pid][hasSpecifics]"] = (
+                str(self.organisation_id)
+            )
             formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterFilters][pid][type]"] = "range"
             formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterOptions]"] = ""
 
