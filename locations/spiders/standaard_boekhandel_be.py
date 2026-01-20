@@ -28,7 +28,7 @@ class StandaardBoekhandelBESpider(JSONBlobSpider):
         shop["housenumber"] = shop.pop("number")
 
         item = DictParser.parse(shop)
-        item["branch"] = shop.get("displayName")
+        item["branch"] = item.pop("name")
 
         apply_category(Categories.SHOP_BOOKS, item)
         yield item
