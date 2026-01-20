@@ -178,6 +178,7 @@ class DictParser:
     postcode_keys = [
         # EN
         "postal-code",
+        "postalcode",
         "post-code",
         "postcode",
         "zip",
