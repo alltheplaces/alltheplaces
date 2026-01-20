@@ -36,6 +36,7 @@ class TreePlotterSpider(Spider):
     layer_name: str
 
     _species: dict = {}
+    _tree_count: int = 0
 
     # Cookies required to maintain a PHPSESSIONID across requests.
     # robots.txt does not exist and returns a 404 HTML error page.
@@ -73,6 +74,30 @@ class TreePlotterSpider(Spider):
                 self._species[species_id]["taxon:en"] = common_name
             # elif alias := species_details.get("alias"):
             #    self._species[species_id]["taxon:en"] = species["alias"]
+        yield from self.request_tree_count()
+
+    def request_tree_count(self) -> Iterable[FormRequest]:
+        formdata = {
+            "action": "getShowingData",
+            "params[folder]": self.folder,
+            "params[layerName]": self.layer_name,
+            "params[args][extent][]": ["-100000000", "-100000000", "100000000", "100000000"],
+            "params[args][mustTurnOn]": "",
+            "params[args][geom_field]": "geom",
+            "params[bulkCountLayer]": "",
+            "params[bulkCountField]": "",
+            "params[filtersPkg][settings][andor]": "AND",
+            "params[filtersPkg][settings][boundToResults]": "",
+        }
+        yield FormRequest(
+            url=f"https://{self.host}/main/server/db.php",
+            formdata=formdata,
+            method="POST",
+            callback=self.parse_tree_count,
+        )
+
+    def parse_tree_count(self, response: TextResponse) -> Iterable[FormRequest]:
+        self._tree_count = int(response.json()["total"])
         yield from self.request_tree_ids()
 
     def request_tree_ids(self) -> Iterable[FormRequest]:
@@ -103,10 +128,13 @@ class TreePlotterSpider(Spider):
 
     def parse_tree_ids(self, response: TextResponse) -> Iterable[FormRequest]:
         tree_ids = response.json()["results"]["pids"]
-        if len(tree_ids) != response.json()["results"]["total"]["count"]:
+        if len(tree_ids) != self._tree_count:
+            # At present, this storefinder does not support geographic search
+            # or filtering of trees to request individual tree IDs in batches.
+            # All individual tree IDs are instead requested in a single query.
             raise RuntimeError(
                 "Requested up to 1000000 features (of a total of {}) but only received {} features.".format(
-                    response.json()["results"]["total"]["count"], len(tree_ids)
+                    self._tree_count, len(tree_ids)
                 )
             )
         for offset in range(0, len(tree_ids), 1000):
