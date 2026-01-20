@@ -79,9 +79,7 @@ class CrewCarwashUSSpider(scrapy.Spider):
 
             item = Feature(**properties)
             # move the title into branch
-            if item.get("name"):
-                item["branch"] = item.get("name")
-                item["name"] = None
+            item["branch"] = item.pop("branch", None)
 
             apply_category(Categories.CAR_WASH, item)
             yield item
