@@ -1,30 +1,23 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
-"""
-https://api-mena.menu.app/api/directory/search is not properly working for Burger King CO.
-Alternate API found on the website's order page https://pideenlinea.bk.com.co/pide-a-domicilio , is being utilized.
-"""
 
-
-class BurgerKingCOSpider(Spider):
+class BurgerKingCOSpider(JSONBlobSpider):
     name = "burger_king_co"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    start_urls = ["https://api01.inoutdelivery.com.co/v1/point-sales?business=burgerking.inoutdelivery.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = [
+        "https://api-bk-co-a.tillster.com/mobilem8-web-service/rest/storeinfo/distance?latitude=4.0&longitude=-72.0&maxResults=100&radius=1200&radiusUnit=km&statuses=ACTIVE&tenant=bk-co"
+    ]
+    locations_key = ["getStoresResult", "stores"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full")
-            item["branch"] = item.pop("name")
-            # hours =location.get("schedules")
-            # opening_hours don't match with Google Maps data, hence skipped.
-            apply_category(Categories.FAST_FOOD, item)
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = item.pop("name").split("-")[-1]
+        item["street_address"] = item.pop("street")
+        apply_category(Categories.FAST_FOOD, item)
+        yield item
