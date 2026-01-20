@@ -15,6 +15,12 @@ class AldiSudAUSpider(UberallSpider):
     key = "Lbio8mFv9Ysxu1YhX4ARiQTNKOHNlE"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
-        item["website"] = "https://www.aldi.com.au/storelocator/l/{}/{}/{}".format(location["city"].lower().replace(" ", "-"), re.sub(r"-+", "-", location["streetAndNumber"].lower().replace("/", "-").replace(",", "-").replace(" ", "-")), location["identifier"].lower())
+        item["website"] = "https://www.aldi.com.au/storelocator/l/{}/{}/{}".format(
+            location["city"].lower().replace(" ", "-"),
+            re.sub(
+                r"-+", "-", location["streetAndNumber"].lower().replace("/", "-").replace(",", "-").replace(" ", "-")
+            ),
+            location["identifier"].lower(),
+        )
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
