@@ -11,7 +11,7 @@ from locations.storefinders.uberall import UberallSpider
 class AldiSudAUSpider(UberallSpider):
     name = "aldi_sud_au"
     item_attributes = {"brand_wikidata": "Q41171672"}
-    drop_attributes = {"phone"}
+    drop_attributes = {"name", "phone"}
     key = "Lbio8mFv9Ysxu1YhX4ARiQTNKOHNlE"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
