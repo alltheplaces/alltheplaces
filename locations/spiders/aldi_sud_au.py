@@ -10,7 +10,7 @@ from locations.storefinders.uberall import UberallSpider
 
 class AldiSudAUSpider(UberallSpider):
     name = "aldi_sud_au"
-    item_attributes = {"brand_wikidata": "Q41171373"}
+    item_attributes = {"brand_wikidata": "Q41171672"}
     drop_attributes = {"phone"}
     key = "Lbio8mFv9Ysxu1YhX4ARiQTNKOHNlE"
 
