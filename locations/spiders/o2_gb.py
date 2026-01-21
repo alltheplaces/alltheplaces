@@ -1,7 +1,7 @@
 from typing import Iterable
 
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
-from scrapy.http import Response, TextResponse
 
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
