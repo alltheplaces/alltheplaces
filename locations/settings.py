@@ -73,17 +73,16 @@ SPIDER_MIDDLEWARES = {
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {}
 
-# Disabling Zyte until https://github.com/scrapy-plugins/scrapy-zyte-api/pull/269 is released.
-# if os.environ.get("ZYTE_API_KEY"):
-#     DOWNLOAD_HANDLERS = {
-#         "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
-#         "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
-#     }
-#     DOWNLOADER_MIDDLEWARES = {
-#         "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
-#         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
-#     }
-#     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
+if os.environ.get("ZYTE_API_KEY"):
+    DOWNLOAD_HANDLERS = {
+        "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+        "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+    }
+    DOWNLOADER_MIDDLEWARES = {
+        "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
+        "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
+    }
+    REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
 
 DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
