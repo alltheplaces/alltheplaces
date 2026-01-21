@@ -1,8 +1,9 @@
+from typing import Iterable
 from urllib.parse import urljoin
 
 import scrapy
-from typing import Iterable
-from scrapy.http import Response, TextResponse
+from scrapy.http import TextResponse
+
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -21,5 +22,5 @@ class FHindsGBSpider(StructuredDataSpider):
             yield scrapy.Request(url=url, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"]=item.pop("name")
+        item["branch"] = item.pop("name")
         yield item
