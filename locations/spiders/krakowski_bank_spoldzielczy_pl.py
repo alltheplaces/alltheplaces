@@ -14,14 +14,14 @@ class KrakowskiBankSpoldzielczyPLSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         if "oddzialy" in response.url:
-            data = response.xpath('//*[@data-all-departments]/@data-all-departments').get()
+            data = response.xpath("//*[@data-all-departments]/@data-all-departments").get()
             for bank in json.loads(data):
                 item = DictParser.parse(bank)
                 item["branch"] = item.pop("name")
                 apply_category(Categories.BANK, item)
                 yield item
         elif "bankomaty" in response.url:
-            data = response.xpath('//*[@data-locations]/@data-locations').get()
+            data = response.xpath("//*[@data-locations]/@data-locations").get()
             for atm in json.loads(data):
                 if atm.get("operator") == "KBS":
                     item = DictParser.parse(atm)
