@@ -38,8 +38,11 @@ class StBankSpider(Spider):
             apply_yes_no(Extras.ATM, item, "ATM" in location_type)
 
         hours_data = location.get("hours") or []
-        apply_yes_no(Extras.DRIVE_THROUGH, item, any(
-            "drive" in h.get("entry", {}).get("text", {}).get("textEntry", "").lower() for h in hours_data))
+        apply_yes_no(
+            Extras.DRIVE_THROUGH,
+            item,
+            any("drive" in h.get("entry", {}).get("text", {}).get("textEntry", "").lower() for h in hours_data),
+        )
 
         try:
             item["opening_hours"] = self.parse_opening_hours(hours_data)
@@ -55,5 +58,7 @@ class StBankSpider(Spider):
                 continue
             for day_select in entry.get("daySelect", []):
                 if day_select.get("storeOpen", True):
-                    oh.add_days_range(day_select.get("days", []), day_select["startTime"], day_select["endTime"], "%I:%M %p")
+                    oh.add_days_range(
+                        day_select.get("days", []), day_select["startTime"], day_select["endTime"], "%I:%M %p"
+                    )
         return oh
