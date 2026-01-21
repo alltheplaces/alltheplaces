@@ -10,8 +10,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class StBankSpider(Spider):
-    name = "st_bank"
+class StBankUSSpider(Spider):
+    name = "st_bank_us"
     item_attributes = {"brand": "S&T Bank", "brand_wikidata": "Q122170137"}
     allowed_domains = ["stbank.com"]
     start_urls = ["https://www.stbank.com/locations/"]
@@ -34,6 +34,7 @@ class StBankSpider(Spider):
         if location_type == "ATM":
             apply_category(Categories.ATM, item)
         else:
+            item["branch"] = item.pop("name")
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.ATM, item, "ATM" in location_type)
 
