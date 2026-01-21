@@ -22,5 +22,5 @@ class FHindsGBSpider(StructuredDataSpider):
             yield scrapy.Request(url=url, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").replace("F.Hinds the Jewellers, ","")
         yield item
