@@ -20,4 +20,6 @@ class SkechersSpider(Where2GetItSpider):
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         item["lat"] = location["latitude"]
         item["lon"] = location["longitude"]
+        if item["website"] == "/":
+            item.pop("website")
         yield item
