@@ -15,6 +15,7 @@ class SkechersSpider(Where2GetItSpider):
     ]
     api_key = "8C3F989C-6D95-11E1-9DE0-BB3690553863"
     api_filter_admin_level = 1
+    api_brand_name = "skechers"
 
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         item["lat"] = location["latitude"]
