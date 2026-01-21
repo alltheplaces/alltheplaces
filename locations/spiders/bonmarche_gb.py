@@ -28,7 +28,6 @@ class BonmarcheGBSpider(JSONBlobSpider):
         item["branch"] = feature["name"]
         item.pop("name", None)
         item["street_address"] = feature["address2"]
-        item.pop("street_address", None)
         item.pop("website", None)
 
         try:
