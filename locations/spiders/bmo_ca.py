@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
-from locations.spiders.chevron_us import ChevronUSSpider
+from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
@@ -42,14 +42,11 @@ from locations.spiders.wegmans_us import WegmansUSSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class BmoSpider(Where2GetItSpider):
-    name = "bmo"
+class BmoCASpider(Where2GetItSpider):
+    name = "bmo_ca"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
-    api_endpoint = "https://branchlocator.bmo.com/rest/getlist"
-    api_key = [
-        "343095D0-C235-11E6-93AB-1BF70C70A832",  # CA
-        "D07C1CB0-80A3-11ED-BCB3-F57F326043C3",  # US
-    ]
+    api_brand_name = "bmobranch"
+    api_key = "343095D0-C235-11E6-93AB-1BF70C70A832"
     api_filter_admin_level = 2
 
     # flake8: noqa: C901
@@ -59,27 +56,21 @@ class BmoSpider(Where2GetItSpider):
         item["ref"] = location["clientkey"]
         item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
 
-        base_url = ""
-        if location["country"] == "CA":
-            item["state"] = location["province"]
-            base_url = "https://branches.bmo.com"
-        elif location["country"] == "US":
-            base_url = "https://usbranches.bmo.com"
-
-        item["website"] = f'{base_url}/{item["state"]}/{item["city"]}/{location["clientkey"]}/'.lower().replace(
-            " ", "-"
-        )
+        if isinstance(location.get("links", None), list):
+            # Sometimes multiple websites are listed in different locales.
+            # English is observed to be the first in the list, so use that.
+            item["website"] = location["links"][0]
 
         try:
             item["opening_hours"] = self.parse_opening_hours(location)
         except:
             self.logger.error("Failed to parse opening hours")
 
-        if location["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
+        if location["grouptype"].startswith("BMO") and location["grouptype"].endswith("Branches"):
             apply_category(Categories.BANK, item)
             if location.get("abmcount"):
                 apply_yes_no(Extras.ATM, item, True, False)
-        elif location["grouptype"] in ["BMOHarrisATM", "BMOATM"]:
+        elif location["grouptype"].startswith("BMO") and location["grouptype"].endswith("ATM"):
             apply_category(Categories.ATM, item)
             if item["name"] == "Alon 7-Eleven":
                 item["located_in"] = SevenElevenCAUSSpider.item_attributes["brand"]
@@ -91,8 +82,8 @@ class BmoSpider(Where2GetItSpider):
                 item["located_in"] = CaseysGeneralStoreSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CaseysGeneralStoreSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Chevron":
-                item["located_in"] = ChevronUSSpider.CHEVRON["brand"]
-                item["located_in_wikidata"] = ChevronUSSpider.CHEVRON["brand_wikidata"]
+                item["located_in"] = CHEVRON_BRANDS["Chevron"][0]["brand"]
+                item["located_in_wikidata"] = CHEVRON_BRANDS["Chevron"][0]["brand_wikidata"]
             elif item["name"] == "Circle K" or item["name"] == "Irving - Circle K":
                 item["located_in"] = CircleKSpider.CIRCLE_K["brand"]
                 item["located_in_wikidata"] = CircleKSpider.CIRCLE_K["brand_wikidata"]
