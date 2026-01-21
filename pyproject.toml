@@ -31,7 +31,7 @@ dependencies = [
     "scrapy>=2.14.0",
     "scrapy-camoufox",
     "scrapy-playwright>=0.0.45",
-    "scrapy-zyte-api",
+    "scrapy-zyte-api>=0.32.0",
     "shapely",
     "twisted[http2]",
     "tzdata",
