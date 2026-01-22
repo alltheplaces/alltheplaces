@@ -6,66 +6,55 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 from locations.spiders.alior_bank_pl import AliorBankPLSpider
 from locations.spiders.millennium_bank_pl import MillenniumBankPLSpider
 from locations.spiders.santander_pl import SantanderPLSpider
+from locations.spiders.unicredit_bank_it import UnicreditBankITSpider
 
 BRAND_MAPPING = {
-    "Alior Bank Poland ADT Recycler": {
+    "Alior Bank": {
         "brand": AliorBankPLSpider.item_attributes["brand"],
         "brand_wikidata": AliorBankPLSpider.item_attributes["brand_wikidata"],
         "operator": AliorBankPLSpider.item_attributes["brand"],
-        "operator:wikidata": AliorBankPLSpider.item_attributes["brand_wikidata"],
+        "operator_wikidata": AliorBankPLSpider.item_attributes["brand_wikidata"],
     },
-    "Bank Millennium Poland ADT Recycler": {
+    "Banku Millennium": {
         "brand": MillenniumBankPLSpider.item_attributes["brand"],
         "brand_wikidata": MillenniumBankPLSpider.item_attributes["brand_wikidata"],
         "operator": MillenniumBankPLSpider.item_attributes["brand"],
-        "operator:wikidata": MillenniumBankPLSpider.item_attributes["brand_wikidata"],
+        "operator_wikidata": MillenniumBankPLSpider.item_attributes["brand_wikidata"],
     },
-    "Euronet Poland ADT Recycler": {
-        "brand": "Euronet",
-        "brand_wikidata": "Q5412010",
-        "operator": "Euronet",
-        "operator:wikidata": "Q5412010",
-    },
-    "mBank Poland ADT Recycler": {
+    "mBank": {
         "brand": "mBank",
         "brand_wikidata": "Q1160928",
         "operator": "mBank",
-        "operator:wikidata": "Q1160928",
+        "operator_wikidata": "Q1160928",
     },
-    "Santander Bank Poland ADT Dual": {
+    "mKiosk": {
+        "brand": "mBank",
+        "brand_wikidata": "Q1160928",
+        "operator": "mBank",
+        "operator_wikidata": "Q1160928",
+    },
+    "Santander Bank Polska": {
         "brand": SantanderPLSpider.item_attributes["brand"],
         "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
         "operator": SantanderPLSpider.item_attributes["brand"],
-        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+        "operator_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
     },
-    "Santander Bank Poland ADT Recycler": {
-        "brand": SantanderPLSpider.item_attributes["brand"],
-        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
-        "operator": SantanderPLSpider.item_attributes["brand"],
-        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
-    },
-    "Santander Bank Poland Off-Branch ADT Dual": {
-        "brand": SantanderPLSpider.item_attributes["brand"],
-        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
-        "operator": SantanderPLSpider.item_attributes["brand"],
-        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
-    },
-    "Santander Bank Poland Off-Branch ADT Recycler": {
-        "brand": SantanderPLSpider.item_attributes["brand"],
-        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
-        "operator": SantanderPLSpider.item_attributes["brand"],
-        "operator:wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
-    },
-    "SKOK Stefczyka Poland ADT Recycler": {
+    "Kasa Stefczyka": {
         "brand": "SKOK Stefczyka",
         "brand_wikidata": "Q57624461",
         "operator": "SKOK Stefczyka",
-        "operator:wikidata": "Q57624461",
+        "operator_wikidata": "Q57624461",
+    },
+    "UniCredit": {
+        "brand": UnicreditBankITSpider.item_attributes["brand"],
+        "brand_wikidata": UnicreditBankITSpider.item_attributes["brand_wikidata"],
+        "operator": UnicreditBankITSpider.item_attributes["brand"],
+        "operator_wikidata": UnicreditBankITSpider.item_attributes["brand_wikidata"],
     },
 }
 
@@ -109,41 +98,21 @@ class EuronetPLSpider(Spider):
             json_data.append({headers[i]: cell for i, cell in enumerate(row)})
 
         for location in json_data:
-            # Skip non-live locations
-            if location.get("Status") != "Live":
-                continue
+            item = DictParser.parse(location)
+            item["street_address"] = item.pop("addr_full")
+            item["state"] = location.get("District")
+            item["ref"] = location.get("ATM")
 
-            item = Feature()
-
-            # Reference ID
-            item["ref"] = location.get("ID")
-
-            # Brand from the Brand column with mapping
-            if raw_brand := location.get("Brand"):
-                if brand_info := BRAND_MAPPING.get(raw_brand):
-                    item.update(brand_info)
-                else:
-                    # Fallback to raw brand if not in mapping
-                    item["brand"] = raw_brand
+            for brand_key in BRAND_MAPPING:
+                if brand_key in location["Name"]:
+                    item.update(BRAND_MAPPING[brand_key])
+                    break
 
             # Extract coordinates (replace comma with period for decimal separator)
             if lat := location.get("GPS_Latitude"):
                 item["lat"] = str(lat).replace(",", ".")
             if lon := location.get("GPS_Longitude"):
                 item["lon"] = str(lon).replace(",", ".")
-
-            # Address fields
-            item["street_address"] = location.get("Address")
-            item["city"] = location.get("City")
-            item["postcode"] = location.get("Post code")
-            item["state"] = location.get("District")
-
-            # Name/location description
-            item["name"] = location.get("Name")
-
-            # Opening date from Live Date column
-            if live_date := location.get("Live Date"):
-                item["extras"]["start_date"] = live_date.strftime("%Y-%m-%d")
 
             # Opening hours
             if hours := location.get("Client access hours"):
