@@ -13,3 +13,5 @@ class VintageInnsGBSpider(JSONBlobSpider):
         feature["lat"] = feature["gpsCoordinates"]["latitude"]
         feature["lon"] = feature["gpsCoordinates"]["longitude"]
         feature["ref"] = feature["bunCode"]
+        if feature["status"] == 'CLOSED':
+            continue
