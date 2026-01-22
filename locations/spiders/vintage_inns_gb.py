@@ -10,8 +10,8 @@ class VintageInnsGBSpider(JSONBlobSpider):
     requires_proxy = True
 
     def pre_process_data(self, feature: dict) -> None:
-        feature["lat"] = feature["gpsCoordinates"]["latitude"]
-        feature["lon"] = feature["gpsCoordinates"]["longitude"]
-        feature["ref"] = feature["bunCode"]
-        if feature["status"] == "CLOSED":
-            continue
+        if "CLOSED" not in feature["status"]:
+            feature["lat"] = feature["gpsCoordinates"]["latitude"]
+            feature["lon"] = feature["gpsCoordinates"]["longitude"]
+            feature["ref"] = feature["bunCode"]
+        
