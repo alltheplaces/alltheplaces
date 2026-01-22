@@ -7,7 +7,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.spiders.alior_bank_pl import AliorBankPLSpider
 from locations.spiders.millennium_bank_pl import MillenniumBankPLSpider
 from locations.spiders.santander_pl import SantanderPLSpider
@@ -59,17 +59,16 @@ BRAND_MAPPING = {
 }
 
 
-def parse_hours(hours_str: str) -> str | OpeningHours | None:
+def parse_hours(location: dict) -> OpeningHours | None:
     """Parse hours like '00:00-23:59' into OpeningHours format"""
-    if not hours_str or hours_str == "24/7":
-        return "24/7"
-
     try:
         oh = OpeningHours()
         # Format appears to be HH:MM-HH:MM for all days
-        if "-" in hours_str:
-            start, end = hours_str.split("-")
-            oh.add_days_range(DAYS, start.strip(), end.strip())
+        for day in DAYS_3_LETTERS:
+            if hours_str := location.get(f"Acc_Cust{day}"):
+                if "-" in hours_str:
+                    start, end = hours_str.split("-")
+                    oh.add_range(day, start.strip(), end.strip())
         return oh
     except:
         # If parsing fails, return None
@@ -116,9 +115,7 @@ class EuronetPLSpider(Spider):
             if lon := location.get("GPS_Longitude"):
                 item["lon"] = str(lon).replace(",", ".")
 
-            # Opening hours
-            if hours := location.get("Client access hours"):
-                item["opening_hours"] = parse_hours(hours)
+            item["opening_hours"] = parse_hours(location)
 
             # Apply ATM category
             apply_category(Categories.ATM, item)
