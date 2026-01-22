@@ -10,4 +10,5 @@ class VintageInnsGBSpider(JSONBlobSpider):
     requires_proxy = True
 
     def pre_process_data(self, feature: dict) -> None:
-        feature["geometry"] = feature["gpsCoordinates"]
+        feature["lat"] = feature["gpsCoordinates"]["latitude"]
+        feature["lon"] = feature["gpsCoordinates"]["longitude"]
