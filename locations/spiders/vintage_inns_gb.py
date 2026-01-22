@@ -1,5 +1,6 @@
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
+from locations.items import Feature
 
 
 class VintageInnsGBSpider(JSONBlobSpider):
@@ -10,4 +11,4 @@ class VintageInnsGBSpider(JSONBlobSpider):
     requires_proxy = True
 
     def pre_process_data(self, feature: dict) -> None:
-        features["geometry"] = features["gpsCoordinates"]
+        feature["geometry"] = feature["gpsCoordinates"]
