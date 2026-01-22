@@ -1,7 +1,6 @@
-from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
+
 
 class VintageInnsGBSpider(JSONBlobSpider):
     name = "vintage_inns_gb"
