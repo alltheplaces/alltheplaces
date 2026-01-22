@@ -94,6 +94,7 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 
 EXTENSIONS = {
     "locations.extensions.add_lineage.AddLineageExtension": 100,
+    "locations.extensions.filter_stats.FilterStatsExtension": 150,
     "locations.extensions.log_stats.LogStatsExtension": 1000,
 }
 
