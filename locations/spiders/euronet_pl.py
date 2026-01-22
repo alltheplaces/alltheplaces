@@ -5,7 +5,7 @@ from openpyxl import load_workbook
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.spiders.alior_bank_pl import AliorBankPLSpider
@@ -120,5 +120,6 @@ class EuronetPLSpider(Spider):
 
             # Apply ATM category
             apply_category(Categories.ATM, item)
+            apply_yes_no(Extras.CASH_IN, item, location.get("Typ") == "Recycler")
 
             yield item
