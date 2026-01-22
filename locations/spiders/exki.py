@@ -41,6 +41,9 @@ class ExkiSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         feature["street_address"] = feature.pop("address")
+        for key in ["street_address", "city", "zip"]:
+            if feature.get(key) == "False":
+                feature[key] = None
 
         item = DictParser.parse(feature)
         item["branch"] = feature.get("name")
