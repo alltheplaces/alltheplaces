@@ -17,7 +17,6 @@ from locations.spiders.keystore_gb import KeystoreGBSpider
 from locations.spiders.londis_gb import LondisGBSpider
 from locations.spiders.morrisons_gb import MorrisonsGBSpider
 from locations.spiders.nisalocal_gb import NisalocalGBSpider
-from locations.spiders.one_stop_gb import OneStopGBSpider
 from locations.spiders.premier_gb import PremierGBSpider
 from locations.spiders.spar_gb import SparGBSpider
 from locations.spiders.usave_gb import UsaveGBSpider
@@ -36,7 +35,7 @@ class PaypointGBSpider(Spider):
         (["BEST ONE"], BestoneGBSpider.item_attributes),
         (["BUDGENS"], BudgensGBSpider.item_attributes),
         (["NISA"], NisalocalGBSpider.item_attributes),
-        (["ONE STOP"], OneStopGBSpider.item_attributes),
+        (["ONE STOP"], {"brand": "One Stop", "brand_wikidata": "Q65954217"}),
         (["FAMILY SHOPPER"], FamilyShopperGBSpider.item_attributes),
         (["MORRISONS DAILY"], MorrisonsGBSpider.MORRISONS_DAILY),
         (["BARGAIN BOOZE"], BargainBoozeGBSpider.item_attributes),
