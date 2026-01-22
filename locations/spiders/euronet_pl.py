@@ -99,6 +99,8 @@ class EuronetPLSpider(Spider):
 
         for location in json_data:
             item = DictParser.parse(location)
+            if not location.get("Address"):
+                continue
             item["street_address"] = item.pop("addr_full")
             item["state"] = location.get("District")
             item["ref"] = location.get("ATM")
