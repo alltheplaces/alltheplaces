@@ -25,7 +25,10 @@ class KasikornBankTHSpider(Spider):
             ["LOTUS'S GO FRESH"],
             {"brand": LotussTHSpider.LOTUSS_GO_FRESH[0], "brand_wikidata": LotussTHSpider.LOTUSS_GO_FRESH[1]},
         ),
-        (["โลตัส", "LOTUS", "LOTUS'S"], {"brand": LotussTHSpider.LOTUSS[0], "brand_wikidata": LotussTHSpider.LOTUSS[1]}),
+        (
+            ["โลตัส", "LOTUS", "LOTUS'S"],
+            {"brand": LotussTHSpider.LOTUSS[0], "brand_wikidata": LotussTHSpider.LOTUSS[1]},
+        ),
         (["บิ๊กซี", "BIG C"], BigCTHSpider.item_attributes),
         (["ปตท", "PTT"], PttTHSpider.item_attributes),
         (["แม็คโคร", "MAKRO"], MakroTHSpider.item_attributes),

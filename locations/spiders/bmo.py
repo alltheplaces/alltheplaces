@@ -14,7 +14,8 @@ from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import CostcoCAGBUSSpider
-from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS, CVS
+from locations.spiders.cvs_us import CVS
+from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
 from locations.spiders.eg_america_us import EgAmericaUSSpider
 from locations.spiders.exxon_mobil import ExxonMobilSpider

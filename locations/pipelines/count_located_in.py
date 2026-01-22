@@ -18,5 +18,6 @@ class CountLocatedInPipeline:
             self.crawler.stats.inc_value(f"atp/located_in/{located_in}")  # ty: ignore[possibly-missing-attribute]
         if wikidata := item.get("located_in_wikidata"):
             self.crawler.stats.inc_value(
-                f"atp/located_in_wikidata/{wikidata}")  # ty: ignore[possibly-missing-attribute]
+                f"atp/located_in_wikidata/{wikidata}"
+            )  # ty: ignore[possibly-missing-attribute]
         return item
