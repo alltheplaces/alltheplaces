@@ -12,3 +12,5 @@ class VintageInnsGBSpider(JSONBlobSpider):
     def pre_process_data(self, feature: dict) -> None:
         feature["lat"] = feature["gpsCoordinates"]["latitude"]
         feature["lon"] = feature["gpsCoordinates"]["longitude"]
+        feature["ref"] = feature["bunCode"]
+
