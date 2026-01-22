@@ -4,7 +4,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -22,13 +22,13 @@ class ExkiSpider(JSONBlobSpider):
             return json.loads(match.group(1))
         return []
 
-    def parse_opening_hours(self, item: Feature) -> OpeningHours:
+    def parse_opening_hours(self, feature: dict) -> OpeningHours:
         oh = OpeningHours()
         try:
             for day in DAYS_FULL:
                 day_lower = day.lower()
-                open_time = item.get(f"{day_lower}_open")
-                close_time = item.get(f"{day_lower}_close")
+                open_time = feature.get(f"{day_lower}_open")
+                close_time = feature.get(f"{day_lower}_close")
 
                 if open_time and close_time:
                     # close_time format is "- HH:MM", remove the dash
@@ -44,7 +44,9 @@ class ExkiSpider(JSONBlobSpider):
 
         item = DictParser.parse(feature)
         item["branch"] = feature.get("name")
-        item["opening_hours"] = self.parse_opening_hours(item)
+        item["opening_hours"] = self.parse_opening_hours(feature)
 
+        apply_yes_no(Extras.WHEELCHAIR, item, feature.get("disabled_access") == "Disabled Access")
+        apply_yes_no(Extras.KIDS_AREA, item, feature.get("child_area") == "Child Area")
         apply_category(Categories.FAST_FOOD, item)
         yield item
