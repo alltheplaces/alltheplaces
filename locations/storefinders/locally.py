@@ -30,17 +30,20 @@ class LocallySpider(Spider):
         for location in response.json()["markers"]:
             self.pre_process_data(location)
             item = DictParser.parse(location)
-            item["opening_hours"] = OpeningHours()
-            for day in DAYS_FULL:
-                open = f"{day[:3].lower()}_time_open"
-                close = f"{day[:3].lower()}_time_close"
-                if not location.get(open) or len(str(location.get(open))) < 3:
-                    continue
-                item["opening_hours"].add_range(
-                    day=day,
-                    open_time=f"{str(location.get(open))[:-2]}:{str(location.get(open))[-2:]}",
-                    close_time=f"{str(location.get(close))[:-2]}:{str(location.get(close))[-2:]}",
-                )
+            try:
+                item["opening_hours"] = OpeningHours()
+                for day in DAYS_FULL:
+                    open = f"{day[:3].lower()}_time_open"
+                    close = f"{day[:3].lower()}_time_close"
+                    if not location.get(open) or len(str(location.get(open))) < 3:
+                        continue
+                    item["opening_hours"].add_range(
+                        day=day,
+                        open_time=f"{str(location.get(open))[:-2]}:{str(location.get(open))[-2:]}",
+                        close_time=f"{str(location.get(close))[:-2]}:{str(location.get(close))[-2:]}",
+                    )
+            except Exception as e:
+                self.logger.warning("Error parsing opening hours for {} {}".format(item.get("ref"), e))
 
             yield from self.post_process_item(item, response, location) or []
 
