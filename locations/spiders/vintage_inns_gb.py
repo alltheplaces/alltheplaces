@@ -9,5 +9,5 @@ class VintageInnsGBSpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
- def pre_process_data(self, feature: dict) -> None:
+    def pre_process_data(self, feature: dict) -> None:
         features["geometry"] = features["gpsCoordinates"]
