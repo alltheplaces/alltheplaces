@@ -1,5 +1,5 @@
-import re
 import json
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -36,7 +36,6 @@ class ExkiSpider(JSONBlobSpider):
                     oh.add_range(day, open_time, close_time)
         except:
             self.crawler.stats.inc_value("failed_parsing_hours")
-            pass
 
         return oh
 
