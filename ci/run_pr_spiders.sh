@@ -247,7 +247,7 @@ do
             if [ "${FEATURE_COUNT}" == "0" ]; then
                 echo "${spider} has no output"
                 FAILURE_REASON="no output"
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))${COMPARE_TEXT}|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) ${COMPARE_TEXT} |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
                 EXIT_CODE=1
                 continue
             fi
@@ -322,9 +322,9 @@ do
 
             if [ "${num_errors}" -gt 0 ] || [ "${num_warnings}" -gt 0 ]; then
                 # Include details in an expandable section if there are warnings or errors
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT}${COMPARE_TEXT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL})) ${COMPARE_TEXT}|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
             else
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT}${COMPARE_TEXT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL})) ${COMPARE_TEXT}|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
             fi
             continue
         else
