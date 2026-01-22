@@ -31,7 +31,7 @@ def extract_located_in(
         Tuple of (located_in, located_in_wikidata) or (None, None) if no match found
 
     Examples:
-        >>> # Contains mode (default - current behavior)
+        >>> # Contains mode (default)
         >>> mappings = [
         ...     (["7-11", "7-ELEVEN"], {"brand": "7-Eleven", "brand_wikidata": "Q259340"}),
         ...     (["LOTUS"], {"brand": "Lotus's", "brand_wikidata": "Q2647070"}),
@@ -59,7 +59,7 @@ def extract_located_in(
     name_upper = name.upper().strip()
 
     for mapping in mappings:
-        # Unpack tuple - support both 2 and 3 element tuples for backwards compatibility
+        # Unpack tuple
         if len(mapping) == 3:
             keywords, brand_data, mode = mapping
         else:
