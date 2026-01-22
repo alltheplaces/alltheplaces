@@ -1,6 +1,5 @@
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
-from locations.items import Feature
 
 
 class VintageInnsGBSpider(JSONBlobSpider):
