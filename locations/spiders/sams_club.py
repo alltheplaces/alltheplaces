@@ -15,7 +15,8 @@ class SamsClubSpider(Spider):
     def parse(self, response):
         for store in response.json():
             if store.get("clubAttributes", {}).get("isDeleted") or store.get("clubAttributes", {}).get(
-                    "isTemporarilyClosed"):
+                "isTemporarilyClosed"
+            ):
                 continue
 
             store.update(store.pop("address", {}))
