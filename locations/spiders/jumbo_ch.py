@@ -7,6 +7,7 @@ from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class JumboCHSpider(SitemapSpider, StructuredDataSpider):
@@ -20,7 +21,8 @@ class JumboCHSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.jumbo.ch/sitemap.xml"]
     sitemap_follow = ["/sitemap/STORE-de-"]
     sitemap_rules = [(r"_POS$", "parse_sd")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    custom_settings =  DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    is_playwright_spider = True
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
