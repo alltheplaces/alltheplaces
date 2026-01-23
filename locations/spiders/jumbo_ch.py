@@ -21,6 +21,7 @@ class JumboCHSpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["/sitemap/STORE-de-"]
     sitemap_rules = [(r"_POS$", "parse_sd")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["street_address"] = response.xpath('//*[@itemprop="streetAddress"]/text()').get()
