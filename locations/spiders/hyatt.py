@@ -10,7 +10,6 @@ class HyattSpider(Spider):
     name = "hyatt"
     item_attributes = {"brand": "Hyatt", "brand_wikidata": "Q1425063"}
     allowed_domains = ["hyatt.com"]
-    requires_proxy = True
 
     base_url = "https://www.hyatt.com/explore-hotels/partial?regionGroup={region}&categories=&brands="
 
