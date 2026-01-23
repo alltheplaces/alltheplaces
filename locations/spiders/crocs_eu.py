@@ -13,4 +13,3 @@ class CrocsEUSpider(LocallySpider):
     def post_process_item(self, item, response, location):
         item["street_address"] = item.pop("addr_full")
         yield item
-
