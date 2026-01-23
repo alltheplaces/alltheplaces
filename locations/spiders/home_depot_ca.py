@@ -1,7 +1,12 @@
+import re
+from typing import Iterable
+
+from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -23,7 +28,8 @@ class HomeDepotCASpider(CrawlSpider, StructuredDataSpider):
         ),
     ]
 
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["ref"] = re.search(r".+/.+?([0-9]+).html", response.url).group(1)
         item["branch"] = (
             item.pop("name")
             .replace("The Home Depot: ", "")
@@ -31,5 +37,7 @@ class HomeDepotCASpider(CrawlSpider, StructuredDataSpider):
             .replace("Home Depot : Magasin spécialisé en amélioration domiciliaire et en quincaillerie à ", "")
             .replace(".", "")
         )
+
         apply_category(Categories.SHOP_DOITYOURSELF, item)
+
         yield item
