@@ -27,7 +27,7 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
         "SSSC": ("SureStay Collection", "Q135246644"),
         "SSPL": ("SureStay Plus", "Q135246640"),
         "SSES": ("SureStay Studio", "Q135246687"),
-        "SUH": ("Sure Hotel", "Q135246620"),
+        "SUH": ("Sure Hotel", "Q135246628"),
         "SUPL": ("Sure Hotel", "Q135246628"),  # Sure Hotel Plus
         "SUSC": ("Sure Hotel Collection", "Q135246644"),
         "SUES": ("Sure Hotel Studio", "Q135246687"),
