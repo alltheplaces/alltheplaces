@@ -31,21 +31,25 @@ class LocallySpider(Spider):
             self.pre_process_data(location)
             item = DictParser.parse(location)
             try:
-                item["opening_hours"] = OpeningHours()
-                for day in DAYS_FULL:
-                    open = f"{day[:3].lower()}_time_open"
-                    close = f"{day[:3].lower()}_time_close"
-                    if not location.get(open) or len(str(location.get(open))) < 3:
-                        continue
-                    item["opening_hours"].add_range(
-                        day=day,
-                        open_time=f"{str(location.get(open))[:-2]}:{str(location.get(open))[-2:]}",
-                        close_time=f"{str(location.get(close))[:-2]}:{str(location.get(close))[-2:]}",
-                    )
+                item["opening_hours"] = self.parse_opening_hours(location)
             except Exception as e:
                 self.logger.warning("Error parsing opening hours for {} {}".format(item.get("ref"), e))
 
             yield from self.post_process_item(item, response, location) or []
+
+    def parse_opening_hours(self, location: dict, **kwargs) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            open = f"{day[:3].lower()}_time_open"
+            close = f"{day[:3].lower()}_time_close"
+            if not location.get(open) or len(str(location.get(open))) < 3:
+                continue
+            oh.add_range(
+                day=day,
+                open_time=f"{str(location.get(open))[:-2]}:{str(location.get(open))[-2:]}",
+                close_time=f"{str(location.get(close))[:-2]}:{str(location.get(close))[-2:]}",
+            )
+        return oh
 
     def pre_process_data(self, location: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""
