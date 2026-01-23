@@ -18,3 +18,4 @@ class AsicsCAUSSpider(LocallySpider):
                 item["branch"] = item["name"].removeprefix("ASICS ")
                 item["name"] = "ASICS"
             yield item
+
