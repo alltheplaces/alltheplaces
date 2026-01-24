@@ -25,7 +25,7 @@ class TelenorNOSpider(Spider):
         for store in response.json():
             item = DictParser.parse(store)
 
-            # Prefer storeId over id for ref
+            # Prefer storeId over id
             item["ref"] = store.get("storeId") or store.get("id")
 
             # Get branch name by removing common store prefix
