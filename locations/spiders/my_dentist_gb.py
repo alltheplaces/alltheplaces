@@ -62,9 +62,7 @@ class MyDentistGBSpider(StructuredDataSpider):
             # Fetch more location details like address, opening hours etc. from  the location page
             yield response.follow(url, callback=self.parse_sd, meta=dict(location_info=location_info))
 
-        if len(self.seen_refs) == self.total_count:
-            raise CloseSpider()
-        else:
+        if len(self.seen_refs) < self.total_count:
             yield self.make_request(kwargs["page"] + 1)
 
     def pre_process_data(self, ld_data: dict, **kwargs):
