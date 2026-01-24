@@ -32,6 +32,8 @@ class AbbottsFrozenCustardUSSpider(WPStoreLocatorSpider):
             item["located_in"], item["located_in_wikidata"] = extract_located_in(branch, self.LOCATED_IN_MAPPINGS)
             if not item["located_in"] or not item["located_in_wikidata"]:
                 if website := item.get("website"):
-                    item["located_in"], item["located_in_wikidata"] = extract_located_in(website, self.LOCATED_IN_MAPPINGS)
+                    item["located_in"], item["located_in_wikidata"] = extract_located_in(
+                        website, self.LOCATED_IN_MAPPINGS
+                    )
 
         yield item
