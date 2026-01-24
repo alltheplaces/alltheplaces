@@ -2,16 +2,28 @@ import re
 
 import phonenumbers
 from phonenumbers import NumberParseException
+from scrapy.crawler import Crawler
+
+from locations.items import Feature
 
 
 class PhoneCleanUpPipeline:
-    def process_item(self, item, spider):
+    crawler: Crawler
+
+    def __init__(self, crawler: Crawler):
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature):
         phone, country = item.get("phone"), item.get("country")
         extras = item.get("extras", {})
         for key in filter(self.is_phone_key, extras.keys()):
             if not extras[key]:
                 continue
-            extras[key] = self.normalize_numbers(extras[key], country, spider)
+            extras[key] = self.normalize_numbers(extras[key], country, self.crawler.spider)
 
         if not phone:
             return item
@@ -19,9 +31,9 @@ class PhoneCleanUpPipeline:
         if isinstance(phone, int):
             phone = str(phone)
         elif not isinstance(phone, str):
-            spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
+            self.crawler.stats.inc_value("atp/field/phone/wrong_type")  # ty: ignore[possibly-missing-attribute]
             return item
-        item["phone"] = self.normalize_numbers(phone, country, spider)
+        item["phone"] = self.normalize_numbers(phone, country, self.crawler.spider)
         return item
 
     @staticmethod

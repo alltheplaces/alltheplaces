@@ -2,6 +2,7 @@ import datetime
 import json
 
 from scrapy import signals
+from scrapy.crawler import Crawler
 
 
 class LogStatsExtension:
@@ -11,7 +12,7 @@ class LogStatsExtension:
     """
 
     @classmethod
-    def from_crawler(cls, crawler):
+    def from_crawler(cls, crawler: Crawler):
         ext = cls(crawler)
         # crawler.signals.connect(ext.spider_opened,
         #                         signal=signals.spider_opened)
@@ -19,7 +20,7 @@ class LogStatsExtension:
         crawler.signals.connect(ext.spider_closed, signal=signals.spider_error)
         return ext
 
-    def __init__(self, crawler):
+    def __init__(self, crawler: Crawler):
         self.crawler = crawler
 
     def spider_closed(self):
@@ -31,4 +32,11 @@ class LogStatsExtension:
 
         if filename:
             with open(filename, "w") as f:
-                f.write(json.dumps(self.crawler.stats.get_stats(), default=myconverter, sort_keys=True, indent=1))
+                f.write(
+                    json.dumps(
+                        self.crawler.stats.get_stats(),  # ty: ignore [possibly-missing-attribute]
+                        default=myconverter,
+                        sort_keys=True,
+                        indent=1,
+                    )
+                )

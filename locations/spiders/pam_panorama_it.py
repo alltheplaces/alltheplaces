@@ -57,10 +57,14 @@ class PamPanoramaITSpider(Spider):
             item["lat"] = location["metadatas"]["latitude"]
             item["lon"] = location["metadatas"]["longitude"]
 
-            if brand := BRANDS.get(location["description"]):
-                item.update(brand[0])
-                apply_category(brand[1], item)
-            else:
-                self.logger.error("Unexpected brand: {}".format(location["description"]))
+            if brand_name := location.get("description"):
+                # Meda and monti are convenience stores with description equal to street name
+                if brand_name in ["Meda", "monti"]:
+                    brand_name = "Pam Local"
+                if brand := BRANDS.get(brand_name):
+                    item.update(brand[0])
+                    apply_category(brand[1], item)
+                else:
+                    self.logger.error("Unexpected brand: {}".format(location["description"]))
 
             yield item

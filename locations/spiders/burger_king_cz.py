@@ -21,8 +21,7 @@ class BurgerKingCZSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://czqk28jt.api.sanity.io/v2023-08-01/graphql/{}/gen3".format(self.db),
-            data={
-                "query": """
+            data={"query": """
                 query AllRestaurant {
                     allRestaurant(where: { environment: { eq: "prod" }, status: { eq: "Open" } }) {
                         hasDelivery
@@ -79,8 +78,7 @@ class BurgerKingCZSpider(Spider):
                             satClose
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

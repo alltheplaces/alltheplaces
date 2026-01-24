@@ -11,6 +11,7 @@ class BatteriesPlusBulbsPRUSSpider(Where2GetItSpider):
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
     api_key = "EC1E5D98-07CF-11EF-89F1-68CFC87EF9CB"
     api_filter = {"opening_status": {"ne": "permanently_closed"}}
+    api_brand_name = "batteriesplusbulbs"
 
     def parse_item(self, item, location):
         item["branch"] = item.pop("name")

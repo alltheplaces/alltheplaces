@@ -6,7 +6,7 @@ import re
 import sys
 
 from scrapy.commands import ScrapyCommand
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerProcessBase
 
 from locations.exporters.geojson import find_spider_class
 
@@ -44,7 +44,7 @@ class DuplicateWikidataCommand(ScrapyCommand):
         )
 
     @staticmethod
-    def wikidata_spiders(crawler_process: CrawlerProcess) -> dict:
+    def wikidata_spiders(crawler_process: CrawlerProcessBase) -> dict:
         codes = {}
         for spider_name in crawler_process.spider_loader.list():
             spider = find_spider_class(spider_name)

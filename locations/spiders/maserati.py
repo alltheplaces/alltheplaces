@@ -54,8 +54,14 @@ class MaseratiSpider(scrapy.Spider):
                 return
             oh = OpeningHours()
             for day_info in hours:
-                oh.add_range(DAYS[int(day_info["day"]) - 1], day_info["amFrom"], day_info["amTo"])
-                oh.add_range(DAYS[int(day_info["day"]) - 1], day_info.get("pmFrom"), day_info.get("pmTo"))
+                am_from = day_info.get("amFrom")
+                am_to = day_info.get("amTo")
+                pm_from = day_info.get("pmFrom")
+                pm_to = day_info.get("pmTo")
+                if am_from and am_to:
+                    oh.add_range(DAYS[int(day_info["day"]) - 1], am_from, am_to)
+                if pm_from and pm_to:
+                    oh.add_range(DAYS[int(day_info["day"]) - 1], pm_from, pm_to)
             item["opening_hours"] = oh
         except Exception as e:
             self.logger.error(f"Error parsing hours {hours} for {item['ref']}: {e}")

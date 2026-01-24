@@ -19,7 +19,7 @@ FUEL_TYPES_MAPPING = {
 
 class FietenNLSpider(WPStoreLocatorSpider):
     name = "fieten_nl"
-    item_attributes = {"brand": "Fieten Olie", "brand_wikidata": "Q125968048"}
+    item_attributes = {"brand": "Fieten Olie", "brand_wikidata": "Q98837500"}
     allowed_domains = ["www.fieten.info"]
     iseadgg_countries_list = ["NL"]
     search_radius = 50

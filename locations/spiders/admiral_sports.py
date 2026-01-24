@@ -17,8 +17,7 @@ class AdmiralSportsSpider(JSONBlobSpider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://payment.admiralsports.shop/graphql",
-            data={
-                "query": """{
+            data={"query": """{
                 mc_asl_list {
                     items {
                         id
@@ -36,8 +35,7 @@ class AdmiralSportsSpider(JSONBlobSpider):
                         slug: url_key
                     }
                 }
-            }"""
-            },
+            }"""},
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

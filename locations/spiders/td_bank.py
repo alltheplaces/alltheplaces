@@ -1,7 +1,13 @@
+import re
+
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
+from locations.spiders.bjs_wholesale import BjsWholesaleSpider
+from locations.spiders.rite_aid_us import RiteAidUSSpider
+from locations.spiders.walgreens import WalgreensSpider
 
 
 class TdBankSpider(JSONBlobSpider):
@@ -15,6 +21,12 @@ class TdBankSpider(JSONBlobSpider):
     ]
     locations_key = ["markers", "marker"]
 
+    LOCATED_IN_MAPPINGS = [
+        (["WALGREENS"], WalgreensSpider.WALGREENS),
+        (["RITE AID", "RITEAID"], RiteAidUSSpider.item_attributes),
+        (["BJ'S", "BJS"], BjsWholesaleSpider.item_attributes),
+    ]
+
     def post_process_item(self, item, response, location):
         item.pop("name", None)
         item["country"] = location["coun"].upper()
@@ -26,6 +38,12 @@ class TdBankSpider(JSONBlobSpider):
 
         if location["type"] == "1":
             apply_category(Categories.ATM, item)
+            if address := location.get("address", ""):
+                if match := re.search(r"\(([^)]+)\)", address):
+                    parenthetical = match.group(1)
+                    item["located_in"], item["located_in_wikidata"] = extract_located_in(
+                        parenthetical, self.LOCATED_IN_MAPPINGS, self
+                    )
         else:
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.ATM, item, location["type"] == "3")

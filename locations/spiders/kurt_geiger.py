@@ -14,5 +14,6 @@ class KurtGeigerSpider(YextAnswersSpider):
 
     def parse_item(self, location, item, **kwargs):
         item["website"] = urljoin("https://stores.kurtgeiger.com", location["slug"])
+        item["branch"] = item.pop("name").replace("Kurt Geiger ", "")
         apply_category(Categories.SHOP_SHOES, item)
         yield item

@@ -16,10 +16,6 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     name = "gov_osservaprezzi_carburanti_it"
     dataset_attributes = {"source": "api", "api": "carburanti.mise.gov.it"}
 
-    custom_settings = {
-        "DOWNLOAD_DELAY": 0.1,
-    }
-
     FUELS = {
         "GPL": Fuel.LPG,
         "Metano": Fuel.CNG,

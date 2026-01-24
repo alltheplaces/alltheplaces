@@ -6,13 +6,9 @@ from locations.pipelines.email_clean_up import EmailCleanUpPipeline
 
 
 def get_objects(email):
-    spider = DefaultSpider()
-    spider.crawler = get_crawler()
-    return (
-        Feature(email=email),
-        EmailCleanUpPipeline(),
-        spider,
-    )
+    crawler = get_crawler(DefaultSpider)
+    crawler.spider = crawler._create_spider()
+    return Feature(email=email), EmailCleanUpPipeline(crawler)
 
 
 def test_handle_valid():
@@ -40,8 +36,8 @@ def test_handle_valid():
     ]
 
     for email in valid:
-        item, pipeline, spider = get_objects(email)
-        pipeline.process_item(item, spider)
+        item, pipeline = get_objects(email)
+        pipeline.process_item(item)
         assert item.get("email") == email
 
 
@@ -59,12 +55,12 @@ def test_handle_invalid():
     ]
 
     for email in invalid:
-        item, pipeline, spider = get_objects(email)
-        pipeline.process_item(item, spider)
+        item, pipeline = get_objects(email)
+        pipeline.process_item(item)
         assert item.get("email") is None
 
 
 def test_strip_mailto():
-    item, pipeline, spider = get_objects("mailto: test@example.com")
-    pipeline.process_item(item, spider)
+    item, pipeline = get_objects("mailto: test@example.com")
+    pipeline.process_item(item)
     assert item.get("email") == "test@example.com"

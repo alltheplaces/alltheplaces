@@ -23,7 +23,9 @@ class CoenMarketsUSSpider(Spider):
             markers[marker_id]["name"] = " ".join(
                 marker.xpath('.//h4[contains(@class, "location-title")]/text()').get().split(" ")[2:]
             )
-            markers[marker_id]["addr_full"] = marker.xpath('.//p[contains(@class, "location-address")]/text()').get()
+            markers[marker_id]["street_address"] = marker.xpath(
+                './/p[contains(@class, "location-address")]/text()'
+            ).get()
         for marker in response.xpath('.//div[contains(@class, "acf-map-popup")]'):
             marker_id = marker.xpath(".//@data-title").get()
             markers[marker_id]["phone"] = marker.xpath('.//h6[contains(@class, "phone")]/text()').get()

@@ -8,6 +8,7 @@ from locations.storefinders.yext_search import YextSearchSpider
 class ChickFilASpider(YextSearchSpider):
     name = "chick_fil_a"
     item_attributes = {"brand": "Chick-fil-A", "brand_wikidata": "Q491516"}
+    host = "https://locator.chick-fil-a.com.yext-cdn.com"
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         self.crawler.stats.inc_value("z/c_conceptCode/{}".format(location["profile"].get("c_conceptCode")))

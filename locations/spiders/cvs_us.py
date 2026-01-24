@@ -12,9 +12,9 @@ from locations.structured_data_spider import StructuredDataSpider
 CVS = {"name": "CVS Pharmacy", "brand": "CVS Pharmacy", "brand_wikidata": "Q2078880"}
 
 PHARMACY_BRANDS = {
-    "CVS Pharmacy": CVS,
     "CVS HealthHub": CVS,
     "CVS Pharmacy y más": CVS | {"name": "CVS Pharmacy y más"},
+    "CVS Pharmacy": CVS,
     "Longs Drugs": {"brand": "Longs Drugs", "brand_wikidata": "Q16931196"},
     "Navarro": {"name": "Navarro", "brand": "Navarro", "brand_wikidata": "Q6982161"},
 }

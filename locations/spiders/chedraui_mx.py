@@ -15,8 +15,7 @@ class ChedrauiMXSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.chedraui.com.mx/_v/public/graphql/v1",
-            data={
-                "query": """
+            data={"query": """
                 query @context(sender:"chedrauimx.locator@2.x",provider:"vtex.store-graphql@2.x"){
                   documents(pageSize:1000,acronym:"CS",fields:["id_store","full_name","address","postal_code","city","state","latitude","longitude","open_hour","close_hour","home_delivery","parking_bikes","parking_cars","parking_motos","parking_for_disabled","parking_pickup","store_pickup"]) {
                       fields {
@@ -24,8 +23,7 @@ class ChedrauiMXSpider(Spider):
                             value
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response, **kwargs):

@@ -27,8 +27,7 @@ class BonmarcheGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["name"]
         item.pop("name", None)
-        item["addr_full"] = feature["address2"]
-        item.pop("street_address", None)
+        item["street_address"] = feature["address2"]
         item.pop("website", None)
 
         try:

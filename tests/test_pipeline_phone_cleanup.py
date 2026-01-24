@@ -6,119 +6,119 @@ from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
 
 
 def get_objects(phone, country):
-    spider = DefaultSpider()
-    spider.crawler = get_crawler()
+    crawler = get_crawler(DefaultSpider)
+    crawler.spider = crawler._create_spider()
     return (
         Feature(phone=phone, country=country),
-        PhoneCleanUpPipeline(),
-        spider,
+        PhoneCleanUpPipeline(crawler),
+        crawler.spider,
     )
 
 
 def test_phoneword():
     item, pipeline, spider = get_objects("1-800-Flowers", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+1 800-356-9377"
 
 
 def test_handle():
     # Switzerland
     item, pipeline, spider = get_objects("0442017500", "CH")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+41 44 201 75 00"
 
     # USA
     item, pipeline, spider = get_objects("(248) 446-8015", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+1 248-446-8015"
 
     # Belgium
     item, pipeline, spider = get_objects("02/633.17.59", "BE")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+32 2 633 17 59"
 
     for key in ["fax", "operator:phone", "operator:fax", "contact:whatsapp"]:
         assert pipeline.is_phone_key(key)
         item, pipeline, spider = get_objects(None, "TR")
         item["extras"] = {key: "+904441442"}
-        pipeline.process_item(item, spider)
+        pipeline.process_item(item)
         assert item["extras"] == {key: "+90 4441442"}
 
 
 def test_handle_int():
     item, pipeline, spider = get_objects(2484468015, "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+1 248-446-8015"
 
 
 def test_handle_invalid():
     # 243 is not (yet) assigned in the North American Numbering Plan
     item, pipeline, spider = get_objects("2434577249", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "2434577249"
 
 
 def test_handle_missing():
     item, pipeline, spider = get_objects(None, "CH")
     item["extras"]["fax"] = None
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") is None
     assert item.get("extras").get("fax") is None
 
 
 def test_handle_none():
     item, pipeline, spider = get_objects(None, "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") is None
 
 
 def test_bad_data():
     item, pipeline, spider = get_objects(" ;    ", "CH")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("phone")
 
 
 def test_bad_seperator():
     item, pipeline, spider = get_objects("2484468015 / 2484468016", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+1 248-446-8015;+1 248-446-8016"
 
     item, pipeline, spider = get_objects("Fijo: 963034448 / Móvil: 604026467", "ES")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+34 963 03 44 48;+34 604 02 64 67"
 
 
 def test_drop_duplicate():
     item, pipeline, spider = get_objects("2484468015; 2484468015", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("phone") == "+1 248-446-8015"
 
 
 def test_undefined():
     item, pipeline, spider = get_objects("undefined", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("phone")
 
     item, pipeline, spider = get_objects("+undefinedundefinedundefined", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("phone")
 
 
 def test_no_number():
     item, pipeline, spider = get_objects("None", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("phone")
 
     item, pipeline, spider = get_objects("null", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("phone")
 
 
 def test_all_zeros():
     item, pipeline, spider = get_objects("0000", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("phone")
 
     item, pipeline, spider = get_objects("(000) 000-00-00", "US")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("phone")

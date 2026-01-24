@@ -15,8 +15,7 @@ class PeaveyMartCASpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.peaveymart.com/api/graphql",
-            data={
-                "query": """{
+            data={"query": """{
                     spLocations(pageSize: 200) {
                         items {
                             ref: code
@@ -85,8 +84,7 @@ class PeaveyMartCASpider(Spider):
                             }
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

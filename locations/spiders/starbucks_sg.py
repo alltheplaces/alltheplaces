@@ -21,8 +21,7 @@ class StarbucksSGSpider(JSONBlobSpider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.starbucks.com.sg/api/graphql",
-            data={
-                "query": """query{
+            data={"query": """query{
                     store(orderBy: {displayText: ASC}) {
                         name: displayText
                         ref: contentItemId
@@ -48,8 +47,7 @@ class StarbucksSGSpider(JSONBlobSpider):
                             }
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

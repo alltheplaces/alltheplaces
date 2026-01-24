@@ -55,7 +55,10 @@ class MazdaTHSpider(JSONBlobSpider):
         item["phone"] = feature.get("TelephoneSales")
         item["opening_hours"] = OpeningHours()
         hours_text = (
-            feature["SalesBusinessHours"].removeprefix("เปิด ").replace("เปิดทุกวัน", "วันจันทร์-วันอาทิตย์").replace(",", "")
+            feature["SalesBusinessHours"]
+            .removeprefix("เปิด ")
+            .replace("เปิดทุกวัน", "วันจันทร์-วันอาทิตย์")
+            .replace(",", "")
         )
         if hours_text.startswith("0"):
             hours_text = "วันจันทร์-วันอาทิตย์: " + hours_text
