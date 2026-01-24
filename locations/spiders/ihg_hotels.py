@@ -33,7 +33,7 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
         "regent": ("Regent", "Q3250375"),
         "spnd": (None, None),
         "staybridge": ("Staybridge Suites", "Q7605116"),
-        "vignettecollection": ("Vignette Collection": "Q135527452"),
+        "vignettecollection": ("Vignette Collection", "Q135527452"),
         "voco": ("voco", "Q60750454"),
     }
 
