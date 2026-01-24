@@ -2,9 +2,11 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN
 from locations.items import Feature
+from locations.spiders.tom_wahls_us import TomWahlsUSSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -14,6 +16,11 @@ class AbbottsFrozenCustardUSSpider(WPStoreLocatorSpider):
     allowed_domains = ["www.abbottscustard.com"]
     days = DAYS_EN
 
+    LOCATED_IN_MAPPINGS = [
+        (["bill-grays", "bill gray"], {"brand": "Bill Gray's", "brand_wikidata": "Q4909199"}),
+        (["tom-wahls", "tom wahl"], TomWahlsUSSpider.item_attributes),
+    ]
+
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
 
@@ -21,18 +28,10 @@ class AbbottsFrozenCustardUSSpider(WPStoreLocatorSpider):
         apply_category(Categories.ICE_CREAM, item)
 
         # Add parent venue information for locations inside other restaurants
-        self._set_located_in(item)
+        if branch := item.get("branch"):
+            item["located_in"], item["located_in_wikidata"] = extract_located_in(branch, self.LOCATED_IN_MAPPINGS)
+            if not item["located_in"] or not item["located_in_wikidata"]:
+                if website := item.get("website"):
+                    item["located_in"], item["located_in_wikidata"] = extract_located_in(website, self.LOCATED_IN_MAPPINGS)
 
         yield item
-
-    def _set_located_in(self, item):
-        """Set parent venue information for locations inside other restaurants"""
-        ref = item["website"].lower()
-        name_lower = item.get("branch", "").lower()
-
-        if "bill-grays" in ref or "bill gray" in name_lower:
-            item["located_in"] = "Bill Gray's"
-            item["located_in_wikidata"] = "Q4909199"
-        elif "tom-wahls" in ref or "tom wahl" in name_lower:
-            item["located_in"] = "Tom Wahl's"
-            item["located_in_wikidata"] = "Q7817965"
