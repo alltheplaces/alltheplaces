@@ -1,7 +1,6 @@
 from typing import Any
 
 from scrapy import FormRequest
-from scrapy.exceptions import CloseSpider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
