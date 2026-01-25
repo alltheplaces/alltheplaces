@@ -14,7 +14,7 @@ class HallAndWoodhouseGBSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["name"] = response.xpath('//meta[@property="og:title"]/@content').get()
-        item["addr_full"] = response.xpath('//*[@class="noM"]/text()').get()
+        item["addr_full"] = response.xpath('//address/text()').get()
         item["phone"] = response.xpath("//*[contains(@href, 'tel:')]/@href").get()
         item["ref"] = item["extras"]["brand:website"] = response.url
         item["website"] = response.xpath('//a[contains(text(), "Website")]/@href').get()
