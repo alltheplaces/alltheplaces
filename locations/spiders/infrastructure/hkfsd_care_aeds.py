@@ -20,7 +20,7 @@ class HKFSDCareAEDsSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["located_in"] = unescape(feature["AED_Name"])
         item["addr_full"] = feature["AED_Addres"]
-        item["extras"]["defibrillator:location"] = unescape(feature["Detailed_l"])
+        item["extras"]["defibrillator:location"] = unescape(unescape(feature["Detailed_l"]))
         item["extras"]["description"] = feature["AED_remark"]
         item["extras"]["manufacturer"] = feature["AED_brand"]
         item["extras"]["model"] = feature["AED_model"]
