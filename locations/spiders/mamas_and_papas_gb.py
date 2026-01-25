@@ -20,7 +20,9 @@ class MamasAndPapasGBSpider(Spider):
             item = DictParser.parse(store)
 
             item["website"] = store.get("web")
-
-            # TODO: Sometimes located in Next
-
+            item["branch"] = item["name"].replace(r"^[^,]+,","")
+            item["name"] = item["name"].replace(r",.*$,"")
+            if "at Next" in item["name"]:
+                item["located_in"] = "Next"
+                item["located_in_wikidata"] = "Q246655"
             yield item
