@@ -12,6 +12,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class SonicDriveinSpider(Spider):
     name = "sonic_drivein"
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     item_attributes = {"brand": "Sonic", "brand_wikidata": "Q7561808"}
 
     def make_request(self, page: int, limit: int = 500) -> JsonRequest:
