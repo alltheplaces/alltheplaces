@@ -28,6 +28,7 @@ USPS_HEADERS = {
 
 class UspsCollectionBoxesSpider(Spider):
     name = "usps_collection_boxes"
+    custom_settings = {"DOWNLOAD_DELAY": 0.1}
     item_attributes = {"operator": "United States Postal Service", "operator_wikidata": "Q668687"}
     allowed_domains = ["usps.com"]
 
