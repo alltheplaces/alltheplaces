@@ -24,7 +24,7 @@ class MamasAndPapasGBSpider(Spider):
             if "at Next" in item["name"]:
                 item["located_in"] = "Next"
                 item["located_in_wikidata"] = "Q246655"
-            if "at Next Home" in item["name"}:
+            if "at Next Home" in item["name"]:
                 item["located_in"] = "Next Home"
                 item["located_in_wikwidata"] = "Q116897680"
             yield item
