@@ -22,6 +22,7 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
         "candlewood": ("Candlewood Suites", "Q5032010"),
         "crowneplaza": ("Crowne Plaza", "Q2746220"),
         "evenhotels": ("EVEN Hotels", "Q5416522"),
+        "garner-hotels": ("Garner Hotels", "Q136125302"),
         "holidayinn": ("Holiday Inn", "Q2717882"),
         "holidayinnclubvacations": ("Holiday Inn Club Vacations", "Q111485843"),
         "holidayinnexpress": ("Holiday Inn Express", "Q5880423"),
@@ -32,7 +33,7 @@ class IhgHotelsSpider(SitemapSpider, StructuredDataSpider):
         "regent": ("Regent", "Q3250375"),
         "spnd": (None, None),
         "staybridge": ("Staybridge Suites", "Q7605116"),
-        "vignettecollection": (None, None),
+        "vignettecollection": ("Vignette Collection", "Q135527452"),
         "voco": ("voco", "Q60750454"),
     }
 
