@@ -13,6 +13,7 @@ class InnkeepersCollectionGBSpider(WoosmapSpider):
 
     def parse_item(self, item: Feature, feature: dict) -> Iterable[Feature]:
         item["website"] = feature.get("properties").get("user_properties").get("primaryWebsiteUrl")
+        item["branch"] = item.pop("name").replace("Innkeeper's Collection ","")
         oh = OpeningHours()
         try:
             for day_time in feature["properties"]["user_properties"].get("tradingHours"):
