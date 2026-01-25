@@ -15,3 +15,6 @@ class TradelinkAUSpider(LocalisrSpider):
         (-37.189167, 144.623059),  # VIC
         (-30.759026, 117.753404),  # WA
     ]
+
+    def post_process_item(self, item, response, location):
+        item["street_address"] = item.pop("addr_full", None)
