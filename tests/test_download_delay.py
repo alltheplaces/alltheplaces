@@ -26,9 +26,9 @@ def test_spiders_do_not_use_lower_download_delay_than_default():
             if val < settings.DOWNLOAD_DELAY:
                 violators.append(spider_class.name)
 
-    ALLOWED_LOW_DOWNLOAD_DELAY = set(
+    ALLOWED_LOW_DOWNLOAD_DELAY = set([
         'usps_collection_boxes',  # Need to be faster to complete within time limits
-    )
+    ])
 
     unexpected = set(violators) - ALLOWED_LOW_DOWNLOAD_DELAY
     assert not unexpected, (
