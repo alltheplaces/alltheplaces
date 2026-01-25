@@ -1,6 +1,5 @@
 from typing import Iterable
 
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.woosmap import WoosmapSpider
 
