@@ -47,11 +47,12 @@ class MbplcGBSpider(WoosmapSpider):
     }
 
     def parse_item(self, item, feature, **kwargs):
-        if match := self.brand_mapping.get(feature["properties"]["user_properties"]["brand"]):
-            item.update(match)
-            brand = item["brand"] + " "
-            if brand in item["name"]:
-                item["branch"] = item.pop("name").replace(brand, "")
+        if feature.get("properties").get("user_properties").get("brand"):
+            if match := self.brand_mapping.get(feature["properties"]["user_properties"]["brand"]):
+                item.update(match)
+                brand = item["brand"] + " "
+                if brand in item["name"]:
+                    item["branch"] = item.pop("name").replace(brand, "")
         if feature.get("properties").get("user_properties").get("websiteUrl"):
             item["website"] = feature["properties"]["user_properties"]["websiteUrl"]
         yield item
