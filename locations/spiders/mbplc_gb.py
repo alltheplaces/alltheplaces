@@ -50,7 +50,7 @@ class MbplcGBSpider(WoosmapSpider):
         if match := self.brand_mapping.get(feature["properties"]["user_properties"]["brand"]):
             item.update(match)
             brand=item["brand"]+" "
-            if old in item["name"]
+            if old in item["name"]:
                 item["branch"] = item.pop("name").replace(old,"")
         item["website"] = feature["properties"]["user_properties"]["websiteUrl"]
 
