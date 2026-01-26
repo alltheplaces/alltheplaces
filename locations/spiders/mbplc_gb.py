@@ -57,7 +57,7 @@ class MbplcGBSpider(WoosmapSpider):
             item.update("GO Mediterranean")
         elif item["name"].startswith("Orleans Smokehouse "):
             item.update("Orleans Smokehouse")
-            
+
         if feature.get("properties").get("user_properties").get("websiteUrl"):
             item["website"] = feature["properties"]["user_properties"]["websiteUrl"]
         yield item
