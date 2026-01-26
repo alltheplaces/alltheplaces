@@ -27,7 +27,6 @@ class CoopProntoCHSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_CONVENIENCE, item)
 
         page_text = response.text.lower()
-        apply_yes_no("fuel", item, "tankstelle" in page_text or "mit tanken" in page_text)
         apply_yes_no(Extras.CAR_WASH, item, "waschanlage" in page_text)
 
         yield item
