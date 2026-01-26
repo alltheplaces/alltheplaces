@@ -44,7 +44,6 @@ class CoopRestaurantCHSpider(JSONBlobSpider):
             apply_category(Categories.RESTAURANT, item)
             item["branch"] = name.removeprefix("Coop Restaurant ")
 
-        item.pop("name", None)
         yield item
 
     @staticmethod
