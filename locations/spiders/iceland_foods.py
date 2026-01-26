@@ -34,7 +34,13 @@ class IcelandFoodsSpider(Spider):
             item = DictParser.parse(store)
 
             item["branch"] = item.pop("name")
-            if "FWH" in item["branch"] or "fwh" in item["branch"] or "Food War" in item["branch"] or "FOOD WAR" in item["branch"] or "TEST2" in item["branch"]:
+            if (
+                "FWH" in item["branch"]
+                or "fwh" in item["branch"]
+                or "Food War" in item["branch"]
+                or "FOOD WAR" in item["branch"]
+                or "TEST2" in item["branch"]
+            ):
                 # The Food Warehouse, obtained via its own spider
                 # The name usually ends with FWH or has Food Warehouse, sometime truncated.
                 continue
