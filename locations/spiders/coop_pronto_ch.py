@@ -12,7 +12,7 @@ class CoopProntoCHSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://www.coop-pronto.ch/sitemap.xml"]
     sitemap_follow = ["places"]
-    sitemap_rules = [(r"/de/standorte/", "parse_sd")]
+    sitemap_rules = [("/de/standorte/", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
@@ -20,6 +20,7 @@ class CoopProntoCHSpider(SitemapSpider, StructuredDataSpider):
         if not item.get("lat"):
             return
 
+        item["branch"] = item.pop("name")
         item["ref"] = response.url.split("/")[-1]
         item["country"] = "CH"
 
