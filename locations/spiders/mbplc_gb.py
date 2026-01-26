@@ -57,6 +57,10 @@ class MbplcGBSpider(WoosmapSpider):
             item.update(self.brand_mapping.get("EGO Mediterranean"))
         elif item["name"].startswith("Orleans Smokehouse "):
             item.update(self.brand_mapping.get("Orleans Smokehouse"))
+        else:
+            continue
+        if not item.get("name"):
+            item["name"] = item["brand"]
 
         if feature.get("properties").get("user_properties").get("websiteUrl"):
             item["website"] = feature["properties"]["user_properties"]["websiteUrl"]
