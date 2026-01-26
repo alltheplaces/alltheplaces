@@ -31,18 +31,23 @@ class CoopRestaurantCHSpider(JSONBlobSpider):
         if "Take it" in name:
             apply_category(Categories.FAST_FOOD, item)
             item["branch"] = name.removeprefix("Coop Take it ")
+            item["name"] = "Coop Take it"
         elif "Ca'Puccini" in name:
             apply_category(Categories.CAFE, item)
             item["branch"] = name.removeprefix("Coop Ca'Puccini ")
+            item["name"] = "Coop Ca'Puccini"
         elif "Ristorante" in name:
             apply_category(Categories.RESTAURANT, item)
             item["branch"] = name.removeprefix("Coop Ristorante ")
+            item["name"] = "Coop Ristorante"
         elif "Bistro" in name:
             apply_category(Categories.RESTAURANT, item)
             item["branch"] = name.removeprefix("Coop Bistro ")
+            item["name"] = "Coop Bistro"
         else:
             apply_category(Categories.RESTAURANT, item)
             item["branch"] = name.removeprefix("Coop Restaurant ")
+            item["name"] = "Coop Restaurant"
 
         yield item
 
