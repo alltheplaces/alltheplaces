@@ -17,8 +17,8 @@ class CrewClothingGBSpider(CrawlSpider, StructuredDataSpider):
         if " - Now Closed" in item["name"]:
             item["name"] = item["name"].split(" - ")[0]
             set_closed(item)
-            
-        item["branch"] = item.pop("name")        
+
+        item["branch"] = item.pop("name")
 
         if not item.get("lat"):
             if m := re.search(r"dblCustomerlatitude\s*=\s*(-?\d+\.\d+);", response.text):
