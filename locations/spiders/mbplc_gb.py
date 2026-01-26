@@ -58,7 +58,7 @@ class MbplcGBSpider(WoosmapSpider):
         elif item["name"].startswith("Orleans Smokehouse "):
             item.update(self.brand_mapping.get("Orleans Smokehouse"))
         else:
-            continue
+            return
         if not item.get("name"):
             item["name"] = item["brand"]
 
