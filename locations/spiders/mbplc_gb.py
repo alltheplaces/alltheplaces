@@ -54,8 +54,10 @@ class MbplcGBSpider(WoosmapSpider):
                 if brand in item["name"]:
                     item["branch"] = item.pop("name").replace(brand, "")
         elif item["name"].startswith("EGO "):
-            item["brand"] = "Ego"
-            item["brand_wikidata"] = "Q133279746"
+            item.update("GO Mediterranean")
+        elif item["name"].startswith("Orleans Smokehouse "):
+            item.update("Orleans Smokehouse")
+            
         if feature.get("properties").get("user_properties").get("websiteUrl"):
             item["website"] = feature["properties"]["user_properties"]["websiteUrl"]
         yield item
