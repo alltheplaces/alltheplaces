@@ -1883,15 +1883,15 @@ wheels = [
 
 [[package]]
 name = "scrapy-playwright"
-version = "0.0.45"
+version = "0.0.46"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "playwright" },
     { name = "scrapy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/67/24/8487be51b9c0b22bfded18bbf26f0e1d98d9da9a2b512b88af24cc038c41/scrapy_playwright-0.0.45.tar.gz", hash = "sha256:958d530d8dcfa4a4751998e35367ac50e1a2eed43fa66266507a4b63d637e760", size = 48122, upload-time = "2026-01-16T21:26:42.447Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cb/bc/12435db52dcb0cb33698e499b35411fc2553bcddf228291083a2019036d4/scrapy_playwright-0.0.46.tar.gz", hash = "sha256:2efe31155b2bbbd13fb011f3c189c21a6f34409c7f7b958881780509ce14a6bb", size = 48429, upload-time = "2026-01-21T12:11:16.653Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/8c/e4d62d910c16d7e6f0ed7ea25aca8443b7ba225e6d9b3e7f723adb30bfc8/scrapy_playwright-0.0.45-py3-none-any.whl", hash = "sha256:da11217bd246337a79c16db6c4d87f616384d2663ed29feb473f15a2087b09d2", size = 27419, upload-time = "2026-01-16T21:26:41.159Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/6f/33fb13206fa4b93450484592cb5dbd243516b4ca63cf2ef1f641b51c3ca0/scrapy_playwright-0.0.46-py3-none-any.whl", hash = "sha256:8b20c504d773ec744ae81f5383989d04ba01dbf5e6c1991c0816e2f877398c54", size = 27749, upload-time = "2026-01-21T12:11:15.508Z" },
 ]
 
 [[package]]
