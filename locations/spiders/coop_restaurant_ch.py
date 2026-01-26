@@ -27,7 +27,7 @@ class CoopRestaurantCHSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["opening_hours"] = self.parse_hours(feature.get("openingHoursOfTheWeek", []))
 
-        name = feature["name"]
+        name = item.pop("name")
         if "Take it" in name:
             apply_category(Categories.FAST_FOOD, item)
             item["branch"] = name.removeprefix("Coop Take it ")
