@@ -27,13 +27,22 @@ class YogurtlandSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["locations"]:
-            item = DictParser.parse(location["Location"])
+            loc = location["Location"]
+
+            # Skip locations that are BOTH "COMING SOON" AND have placeholder coordinates
+            # (37.090240, -95.712891 is the geographic center of the US, used as a default)
+            is_coming_soon = "COMING SOON" in loc.get("name", "").upper()
+            has_placeholder_coords = loc.get("latitude") == "37.090240" and loc.get("longitude") == "-95.712891"
+            if is_coming_soon and has_placeholder_coords:
+                continue
+
+            item = DictParser.parse(loc)
             item["branch"] = item.pop("name")
             item["street_address"] = item.pop("addr_full")
-            item["website"] = f"https://www.yogurtland.com/locations/view/{location['Location']['id']}"
+            item["website"] = f"https://www.yogurtland.com/locations/view/{loc['id']}"
             item["image"] = location["Image"]["uri"]
 
-            hours = loads(location["Location"]["hours_json"])
+            hours = loads(loc["hours_json"])
             oh = OpeningHours()
             for day, times in zip(DAYS_3_LETTERS_FROM_SUNDAY, hours):
                 if times["isActive"]:
