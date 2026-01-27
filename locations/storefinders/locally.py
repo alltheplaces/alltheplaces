@@ -22,9 +22,8 @@ class LocallySpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Request]:
-        if len(self.start_urls) != 1:
-            raise ValueError("Specify one URL in the start_urls list attribute.")
-        yield Request(url=self.start_urls[0])
+        for url in self.start_urls:
+            yield Request(url=url)
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["markers"]:
