@@ -29,4 +29,5 @@ class SweatyBettySpider(Spider):
                 #     xpath("./@data-day").get()+ " "
                 #    xpath("./@data-open").get()+ "-"
                 #    xpath("./@data-close").get()
+                item["branch"] = item.pop("name")
                 yield item
