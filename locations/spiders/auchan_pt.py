@@ -1,5 +1,3 @@
-import re
-
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -28,14 +26,13 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
         item["addr_full"] = item.pop("street_address", "")
         item["lat"] = response.xpath('//*[@id="storeLatitude"]/@value').get()
         item["lon"] = response.xpath('//*[@id="storeLongitude"]/@value').get()
-        if item["phone"]:
-            item["phone"] = re.sub(r"(\(.+\))", "", item["phone"])
-        item["email"] = item["email"].strip()
         if response.url.endswith(".html"):
             item["ref"] = response.url.removesuffix(".html").rsplit("-", 1)[1]
         else:
             item["ref"] = response.url.rsplit("=", 1)[1]
-
+        image = item.get("image")
+        if image:
+            item.pop("image")
         store_type = response.xpath("//@data-store-type").get()
         if store_type == "Auchan":
             if item["name"].startswith("My Auchan "):
