@@ -1,19 +1,22 @@
 import re
 
-from scrapy.spiders import SitemapSpider
+from scrapy import Spider, Request
 
-from locations.categories import Categories, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Categories, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no, Extras
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import extract_phone
 
 
-class BenzaITSpider(SitemapSpider):
+class BenzaITSpider(Spider):
     name = "benza_it"
     allowed_domains = ["www.b-benza.it"]
-    sitemap_urls = ["https://www.b-benza.it/sitemap_index.xml"]
-    sitemap_rules = [("/services/.+", "parse_station")]
+    start_urls = ["https://www.b-benza.it/services-category/impianti/"]
     item_attributes = {"brand": "Benza", "brand_wikidata": "Q131781765"}
+
+    def parse(self, response):
+        for url in response.xpath('//a[contains(@href, "/services/")]/@href').getall():
+            yield Request(url, callback=self.parse_station)
 
     def parse_station(self, response):
         item = Feature()
@@ -35,7 +38,7 @@ class BenzaITSpider(SitemapSpider):
             apply_yes_no(Fuel.LPG, item, "gpl" in service)
             apply_yes_no(Fuel.DIESEL, item, "gasolio" in service)
             apply_yes_no(Fuel.ADBLUE, item, "adblue" in service)
-            apply_yes_no("car_wash", item, "wash" in service)
+            apply_yes_no(Extras.CAR_WASH, item, "wash" in service)
             apply_yes_no(PaymentMethods.CASH, item, ("contanti" in service) or ("contante" in service))
             apply_yes_no(
                 PaymentMethods.CARDS, item, ("carte di credito" in service) or ("carta di credito" in service)
