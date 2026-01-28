@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, Fuel, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -34,8 +34,11 @@ class ZEnergyNZSpider(scrapy.Spider):
             apply_yes_no(Fuel.OCTANE_95, item, any("ZX Premium" in s["name"] for s in location["fuels"]))
             apply_yes_no(Fuel.ADBLUE, item, any("AdBlue" in s["name"] for s in location["services"]))
             apply_yes_no(Fuel.ELECTRIC, item, any("evcharging" == s["code"] for s in location["services"]))
+            apply_yes_no(Fuel.LPG, item, any("LPG" in s["name"] for s in location["services"]))
 
-            apply_yes_no(Fuel.ELECTRIC, item, any("evcharging" == s["code"] for s in location["services"]))
+            apply_yes_no(Extras.TOILETS, item, any("Bathrooms" in s["name"] for s in location["services"]))
+            apply_yes_no(Extras.CAR_WASH, item, any("Z2O" in s["name"] for s in location["services"]))
+            apply_yes_no(Extras.ATM, item, any("ATM" in s["name"] for s in location["services"]))
 
             if postcode := item.get("postcode"):
                 item["postcode"] = str(postcode)
