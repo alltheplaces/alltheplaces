@@ -28,7 +28,7 @@ class BankOfCyprusCYSpider(scrapy.Spider):
             item = Feature()
             item["street_address"] = poi.xpath(".//@data-address").get()
             item["city"] = city
-            item["branch"] = html.unescape(poi.xpath(".//@data-name").get())
+            item["name"] = item["branch"] = html.unescape(poi.xpath(".//@data-name").get())
             item["lat"] = poi.xpath(".//@data-lat").get()
             item["lon"] = poi.xpath(".//@data-long").get()
             phone = poi.xpath(".//@data-tel").get()
