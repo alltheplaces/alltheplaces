@@ -33,6 +33,12 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
         image = item.get("image")
         if image:
             item.pop("image")
+        phone = item.get("phone")
+        if phone:
+            item.pop("phone")
+        email = item.get("email")
+        if email:
+            item.pop("email")
         store_type = response.xpath("//@data-store-type").get()
         if store_type == "Auchan":
             if item["name"].startswith("My Auchan "):
