@@ -1,5 +1,3 @@
-import re
-
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -20,7 +18,7 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         for rule in ld_data.get("openingHoursSpecification", []):
-            if rule.get("opens") and rule.get("opens"):
+            if rule and rule.get("opens") and rule.get("closes"):
                 rule["opens"] = rule["opens"].strip()
                 rule["closes"] = rule["closes"].strip()
 
@@ -28,14 +26,19 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
         item["addr_full"] = item.pop("street_address", "")
         item["lat"] = response.xpath('//*[@id="storeLatitude"]/@value').get()
         item["lon"] = response.xpath('//*[@id="storeLongitude"]/@value').get()
-        if item["phone"]:
-            item["phone"] = re.sub(r"(\(.+\))", "", item["phone"])
-        item["email"] = item["email"].strip()
         if response.url.endswith(".html"):
             item["ref"] = response.url.removesuffix(".html").rsplit("-", 1)[1]
         else:
             item["ref"] = response.url.rsplit("=", 1)[1]
-
+        image = item.get("image")
+        if image:
+            item.pop("image")
+        phone = item.get("phone")
+        if phone:
+            item.pop("phone")
+        email = item.get("email")
+        if email:
+            item.pop("email")
         store_type = response.xpath("//@data-store-type").get()
         if store_type == "Auchan":
             if item["name"].startswith("My Auchan "):
@@ -56,7 +59,7 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
             item.update(AUCHAN)
             apply_category(Categories.FUEL_STATION, item)
         else:
-            self.logger.error("Unexpected type: {}".format(store_type))
+            self.logger.error("Unexpected store type: {}".format(store_type))
 
         if services := response.xpath('//*[contains(@class,"services-item")]//span/text()').getall():
             services = [service.lower() for service in services]
