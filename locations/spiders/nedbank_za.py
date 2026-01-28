@@ -33,7 +33,7 @@ class NedbankZASpider(JSONBlobSpider):
         auth_token = response.xpath('.//input[@id="authorizationtoken"]/@value').get()
         yield Request(
             url="https://api.nedsecure.co.za/nedbank/channeldistribution/v2/branches?resultsize=1000&latitude=-26&longitude=28",
-            headers={"Authorization": auth_token},
+            headers={"Authorization": f"Bearer {auth_token}"},
             callback=self.parse,
             meta={"auth_token": auth_token},
         )
@@ -56,7 +56,7 @@ class NedbankZASpider(JSONBlobSpider):
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
         yield Request(
             url=f"https://api.nedsecure.co.za/nedbank/channeldistribution/v2/branches/{item['ref']}",
-            headers={"Authorization": response.meta["auth_token"]},
+            headers={"Authorization": f"Bearer {response.meta['auth_token']}"},
             meta={"item": item},
             callback=self.parse_store,
         )
