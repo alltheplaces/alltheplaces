@@ -2,7 +2,7 @@ import html
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -13,25 +13,34 @@ class BankOfCyprusCYSpider(scrapy.Spider):
     no_refs = True
 
     def parse(self, response):
-        cities = response.xpath("//li[@class='cityMap']/@data-value").getall()
+        cities = response.xpath("//option[@class='cityMap']/text()").getall()
         for city in cities:
+            if city == "Όλες οι πόλεις":  # Skip "All cities" option
+                continue
             yield scrapy.Request(
-                f"https://www.bankofcyprus.com/ajax/StoresPage/GetFilteredStores?IsATMForeignCurrency=true&IsATMWithdrawals=true&IsATMDepositWithdrawals=true&IsStore=true&IsBCS=true&IsNotesCoins=true&isCoinDeposit=true&isCoinDispenser=true&Region={city}&SearchString=&Country=CY&Language=el",
+                f"https://www.bankofcyprus.com/ajax/StoresPage/GetFilteredStores?Region={city}&SearchString=&Country=CY&Language=el",
                 callback=self.parse_pois,
                 cb_kwargs=dict(city=city),
             )
 
     def parse_pois(self, response, city):
-        for poi in response.xpath("//li/div[@class='result-item']"):
+        for poi in response.xpath("//li/button[@class='result-item']"):
             item = Feature()
             item["street_address"] = poi.xpath(".//@data-address").get()
             item["city"] = city
             item["branch"] = html.unescape(poi.xpath(".//@data-name").get())
             item["lat"] = poi.xpath(".//@data-lat").get()
             item["lon"] = poi.xpath(".//@data-long").get()
-            item["phone"] = poi.xpath(".//@data-phone").get()
+            phone = poi.xpath(".//@data-tel").get()
+            if phone:
+                item["phone"] = phone.removeprefix("Tel: ")
+
             if "ATM" in item["branch"]:
                 apply_category(Categories.ATM, item)
+                apply_yes_no(Extras.CASH_IN, item, poi.xpath(".//@data-service-atm-deposit-withdrawals").get())
             else:
                 apply_category(Categories.BANK, item)
+                apply_yes_no(Extras.ATM, item, poi.xpath(".//@data-service-atm-deposit-withdrawals").get())
+                apply_yes_no(Extras.CASH_IN, item, poi.xpath(".//@data-service-atm-deposit-withdrawals").get())
+
             yield item
