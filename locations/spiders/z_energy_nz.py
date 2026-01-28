@@ -33,6 +33,9 @@ class ZEnergyNZSpider(scrapy.Spider):
             apply_yes_no(Fuel.OCTANE_91, item, any("Z91" in s["name"] for s in location["fuels"]))
             apply_yes_no(Fuel.OCTANE_95, item, any("ZX Premium" in s["name"] for s in location["fuels"]))
             apply_yes_no(Fuel.ADBLUE, item, any("AdBlue" in s["name"] for s in location["services"]))
+            apply_yes_no(Fuel.ELECTRIC, item, any("evcharging" == s["code"] for s in location["services"]))
+
+            apply_yes_no(Fuel.ELECTRIC, item, any("evcharging" == s["code"] for s in location["services"]))
 
             if postcode := item.get("postcode"):
                 item["postcode"] = str(postcode)
@@ -45,7 +48,11 @@ class ZEnergyNZSpider(scrapy.Spider):
             if rule["hours"] == "Open 24 hours":
                 oh.add_range(rule["day"], "00:00", "24:00")
             else:
-                times = rule["hours"].split(' - ')
+                if " - " not in rule["hours"]:
+                    # fixes for silly edge cases with Z Cashmere and Z Levin respectively
+                    rule["hours"] = rule["hours"].replace(" -", " - ").replace("–", "-")
+                times = rule["hours"].split(" - ")
+                print(times)
                 try:
                     oh.add_range(rule["day"], times[0], times[1], "%I:%M%p")
                 except ValueError:
