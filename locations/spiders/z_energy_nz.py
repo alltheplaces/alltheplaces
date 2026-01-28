@@ -45,16 +45,12 @@ class ZEnergyNZSpider(scrapy.Spider):
     def parse_opening_hours(self, business_hours: list) -> OpeningHours:
         oh = OpeningHours()
         for rule in business_hours:
+            self.logger.info("Processing opening hours: {}".format(rule["hours"]))
             if rule["hours"] == "Open 24 hours":
                 oh.add_range(rule["day"], "00:00", "24:00")
             else:
-                if " - " not in rule["hours"]:
-                    # fixes for silly edge cases with Z Cashmere and Z Levin respectively
-                    rule["hours"] = rule["hours"].replace(" -", " - ").replace("–", "-")
-                times = rule["hours"].split(" - ")
-                print(times)
-                try:
-                    oh.add_range(rule["day"], times[0], times[1], "%I:%M%p")
-                except ValueError:
-                    oh.add_range(rule["day"], times[0], times[1], "%I%p")
+                # slightly hacky approach
+                hours_string = f"{rule['day']}: {rule['hours']}"
+                print(hours_string)
+                oh.add_ranges_from_string(hours_string)
         return oh
