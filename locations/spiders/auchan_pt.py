@@ -20,7 +20,7 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         for rule in ld_data.get("openingHoursSpecification", []):
-            if rule.get("opens") and rule.get("opens"):
+            if rule and rule.get("opens") and rule.get("closes"):
                 rule["opens"] = rule["opens"].strip()
                 rule["closes"] = rule["closes"].strip()
 
@@ -56,7 +56,7 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
             item.update(AUCHAN)
             apply_category(Categories.FUEL_STATION, item)
         else:
-            self.logger.error("Unexpected type: {}".format(store_type))
+            self.logger.error("Unexpected store type: {}".format(store_type))
 
         if services := response.xpath('//*[contains(@class,"services-item")]//span/text()').getall():
             services = [service.lower() for service in services]
