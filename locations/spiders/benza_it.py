@@ -1,8 +1,8 @@
 import re
 
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 
-from locations.categories import Categories, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no, Extras
+from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import extract_phone
