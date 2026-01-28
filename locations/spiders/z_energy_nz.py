@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.categories import Categories, Fuel, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
