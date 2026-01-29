@@ -15,13 +15,14 @@ class BenAndJerrysSpider(Where2GetItSpider):
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
-        # Appears to be an indicator for suppliers (not actual shops), even after api_filter above
-        if location.get("jsonshopinfo") is None:  # May be equivalent to "jsonshop"
-            return
         item["lat"] = location["latitude"]
         item["lon"] = location["longitude"]
-
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+        if website := item.get("website"):
+            if "facebook" in website:
+                item.pop("website")
+            elif "kojote" in website:
+                item["website"] = "https://www." + item["website"]
         apply_category(Categories.ICE_CREAM, item)
 
         apply_yes_no(Extras.DELIVERY, item, location["offersdelivery"] == "1")
