@@ -15,6 +15,7 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
     name = "auchan_pt"
     start_urls = ["https://www.auchan.pt/pt/lojas"]
     rules = [Rule(LinkExtractor(allow="StoreID="), callback="parse_sd")]
+    drop_attributes = {"image", "phone", "email"}
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         for rule in ld_data.get("openingHoursSpecification", []):
@@ -30,15 +31,6 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
             item["ref"] = response.url.removesuffix(".html").rsplit("-", 1)[1]
         else:
             item["ref"] = response.url.rsplit("=", 1)[1]
-        image = item.get("image")
-        if image:
-            item.pop("image")
-        phone = item.get("phone")
-        if phone:
-            item.pop("phone")
-        email = item.get("email")
-        if email:
-            item.pop("email")
         store_type = response.xpath("//@data-store-type").get()
         if store_type == "Auchan":
             if item["name"].startswith("My Auchan "):
