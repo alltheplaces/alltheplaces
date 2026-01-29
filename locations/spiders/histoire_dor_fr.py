@@ -1,9 +1,8 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
-
-from locations.hours import sanitise_day, DAYS
 
 
 class HistoireDorFRSpider(SitemapSpider, StructuredDataSpider):
