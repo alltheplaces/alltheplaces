@@ -22,10 +22,11 @@ class StewartsShopsUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Stewart's Shops", "brand_wikidata": "Q7615690"}
     sitemap_urls = ["https://locations.stewartsshops.com/sitemap.xml"]
     sitemap_rules = [(r"/[a-z]{2}/[\w-]+/\d+$", "parse_sd")]
+    search_for_amenity_features = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/")[-1]
-        item["branch"] = item.get("name", None)
+        item["branch"] = (item.pop("name") or "").split("- #",1)[0]
 
         # Parse features from HTML checkmarks
         features = response.xpath('//span[preceding-sibling::img[contains(@alt, "Check mark")]]/text()').getall()
