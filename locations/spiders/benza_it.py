@@ -1,6 +1,8 @@
 import re
+from typing import Any
 
 from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
@@ -12,13 +14,13 @@ class BenzaITSpider(Spider):
     name = "benza_it"
     allowed_domains = ["www.b-benza.it"]
     start_urls = ["https://www.b-benza.it/services-category/impianti/"]
-    item_attributes = {"brand": "Benza", "brand_wikidata": "Q131781765"}
+    item_attributes = {"name":"Benza", "brand": "Benza", "brand_wikidata": "Q131781765"}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for url in response.xpath('//a[contains(@href, "/services/")]/@href').getall():
             yield Request(url, callback=self.parse_station)
 
-    def parse_station(self, response):
+    def parse_station(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = response.url.strip("/").split("/")[-1]
         item["website"] = response.url
@@ -27,9 +29,8 @@ class BenzaITSpider(Spider):
         extract_google_position(item, response)
         extract_phone(item, article)
         apply_category(Categories.FUEL_STATION, item)
-        item["name"] = "Benza"
         item["addr_full"] = addr = [s.strip() for s in article.xpath("//p[2]/text()").getall()]
-        item["branch"] = addr[0]
+        item["branch"] = addr[0].removeprefix("Benza")
         item["street_address"] = addr[1]
         if match := re.match(r"(\d+)\s*([\w ]+)(?:\s*\((\w+)\))?", addr[2]):
             item["postcode"], item["city"], item["state"] = match.groups()
