@@ -1,8 +1,6 @@
 from typing import Iterable
 
-from chompjs import parse_js_object
-
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
@@ -20,17 +18,11 @@ class BenAndJerrysSpider(Where2GetItSpider):
         # Appears to be an indicator for suppliers (not actual shops), even after api_filter above
         if location.get("jsonshopinfo") is None:  # May be equivalent to "jsonshop"
             return
-
-        if jsonshopinfo := location.get("jsonshopinfo"):
-            shop_info = parse_js_object(jsonshopinfo)
-            try:
-                shop = shop_info[0]["ShopInfoContent"][0]["StoreDetails"]
-                if url := shop.get("WebsiteURL"):
-                    item["website"] = url
-            except (TypeError, IndexError):
-                pass
+        item["lat"] = location["latitude"]
+        item["lon"] = location["longitude"]
 
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+        apply_category(Categories.ICE_CREAM, item)
 
         apply_yes_no(Extras.DELIVERY, item, location["offersdelivery"] == "1")
 
