@@ -13,6 +13,7 @@ class BenAndJerrysSpider(Where2GetItSpider):
     item_attributes = {"brand": "Ben & Jerry's", "brand_wikidata": "Q816412"}
     api_key = "3D71930E-EC80-11E6-A0AE-8347407E493E"
     api_filter = {"icon": {"in": "default,SHOP"}}
+    api_brand_name = "benjerry"
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
