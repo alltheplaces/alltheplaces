@@ -14,7 +14,7 @@ class BenzaITSpider(Spider):
     name = "benza_it"
     allowed_domains = ["www.b-benza.it"]
     start_urls = ["https://www.b-benza.it/services-category/impianti/"]
-    item_attributes = {"name":"Benza", "brand": "Benza", "brand_wikidata": "Q131781765"}
+    item_attributes = {"name": "Benza", "brand": "Benza", "brand_wikidata": "Q131781765"}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for url in response.xpath('//a[contains(@href, "/services/")]/@href').getall():
