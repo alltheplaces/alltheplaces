@@ -42,8 +42,11 @@ class StewartsShopsUSSpider(SitemapSpider, StructuredDataSpider):
 
         # Category
         if ld_data.get("@type") == "GasStation" or "gas station" in features:
-            apply_category(Categories.FUEL_STATION, item)
-        else:
-            apply_category(Categories.SHOP_CONVENIENCE, item)
+            fuel = item.deepcopy()
+            fuel["ref"] = "{}-FUEL".format(fuel["ref"])
+            apply_category(Categories.FUEL_STATION, fuel)
+            yield fuel
+
+        apply_category(Categories.SHOP_CONVENIENCE, item)
 
         yield item
