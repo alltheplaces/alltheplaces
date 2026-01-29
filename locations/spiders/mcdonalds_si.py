@@ -14,6 +14,7 @@ class McdonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
     item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://mcdonalds.si/restavracije"]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in json.loads(re.search(r"docs = (\[.+\])\.map", response.text).group(1)):
