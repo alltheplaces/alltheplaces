@@ -35,11 +35,9 @@ class IcelandFoodsSpider(Spider):
 
             item["branch"] = item.pop("name")
             if (
-                "FWH" in item["branch"]
-                or "fwh" in item["branch"]
-                or "Food War" in item["branch"]
-                or "FOOD WAR" in item["branch"]
-                or "TEST2" in item["branch"]
+                "FWH" in item["branch"].upper()
+                or "FOOD WAR" in item["branch"].upper()
+                or "TEST2" in item["branch"].upper()
             ):
                 # The Food Warehouse, obtained via its own spider
                 # The name usually ends with FWH or has Food Warehouse, sometime truncated.
