@@ -33,7 +33,6 @@ class TechcombankVNSpider(Spider):
         for location in response.json()["data"]["branchFragmentList"]["items"]:
             item = Feature()
             item["ref"] = location["branchId"]
-            item["name"] = location["branchNm"]
             item["branch"] = location["branchNm"].removeprefix("Techcombank ")
             item["addr_full"] = location["adrLine"]["plaintext"]
             item["lat"] = location["lat"]
@@ -46,8 +45,7 @@ class TechcombankVNSpider(Spider):
         for location in response.json()["data"]["atmCdmFragmentList"]["items"]:
             item = Feature()
             item["ref"] = location["atmId"]
-            item["name"] = location["atmName"]
-            item["branch"] = location["atmName"].removeprefix("ATM Techcombank ").removeprefix("CDM Techcombank ")
+            item["name"] = location["atmName"].removeprefix("ATM ").removeprefix("CDM ")
             item["addr_full"] = location["atmAddress"]
             item["city"] = location["cityName"]
             item["state"] = location["districtName"]
