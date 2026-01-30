@@ -1,6 +1,7 @@
+import re
 from typing import Any
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -10,23 +11,27 @@ CHECKERS = {"brand": "Checkers", "brand_wikidata": "Q63919315"}
 RALLYS = {"brand": "Rally's", "brand_wikidata": "Q63919323"}
 
 
-class CheckersAndRallysUSSpider(scrapy.Spider):
+class CheckersAndRallysUSSpider(Spider):
     name = "checkers_and_rallys_us"
     start_urls = ["https://checkersandrallys.com/unified-gateway/online-ordering/v1/all-stores/8159"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores_v1"]:
-            location["address"].pop("id")
-            location["address"].pop("name")
-            location.update(location.pop("address"))
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name").replace("Checkers ", "").replace("Rally's ", "")
+            if location["name"] in ("Checkers - POS Test Store", "Checkers Drive-In Restaurants (demo)"):
+                continue
+            item = DictParser.parse(location["address"])
+            item["name"] = None
             item["street_address"] = item.pop("street")
-            item["addr_full"] = location["formatted_address"]
-            if "Checkers" in location["name"]:
-                item.update(CHECKERS)
-            elif "Rally's" in location["name"]:
-                item.update(RALLYS)
+            item["addr_full"] = location["address"]["formatted_address"]
+
+            if m := re.match(r"^(Checkers|Rally's) ?\((\d+)\)(.+)?$", location["name"]):
+                if m.group(1) == "Checkers":
+                    item.update(CHECKERS)
+                elif m.group(1) == "Rally's":
+                    item.update(RALLYS)
+                item["ref"] = m.group(2)
+            else:
+                self.logger.error("Unexpected location: {}".format(location["name"]))
 
             apply_category(Categories.FAST_FOOD, item)
 
