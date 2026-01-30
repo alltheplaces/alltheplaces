@@ -1,5 +1,8 @@
+import json
 import re
 
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.structured_data_spider import StructuredDataSpider
 
 MEDIAMARKT = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
@@ -44,11 +47,17 @@ class MediamarktSpider(StructuredDataSpider):
     }
 
     def parse(self, response, **kwargs):
-        uids = re.findall(r'"uid":"([^"]+)","storeName":"[^"]+"', response.text)
         base_path = response.url.rsplit("/", 1)[0]
-        for uid in set(uids):
-            if uid != "store-finder":
-                yield response.follow(f"{base_path}/{uid}", callback=self.parse_sd)
+
+        script = response.xpath('//script[contains(text(), "storeName")]/text()').get()
+
+        if json_match := re.search(r'JSON\.parse\("(.+?)"\)', script):
+            data = json.loads(json.loads(f'"{json_match.group(1)}"'))
+
+            for stores in DictParser.iter_matching_keys(data, "regionStores"):
+                for store in stores:
+                    if (uid := store.get("uid")) and uid != "store-finder":
+                        yield response.follow(f"{base_path}/{uid}", callback=self.parse_sd)
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/")[-1]
@@ -57,4 +66,5 @@ class MediamarktSpider(StructuredDataSpider):
         item["branch"] = item.get("name", "").removeprefix(f"{item['brand']} ")
         if phone := item.get("phone"):
             item["phone"] = re.sub(r"[^0-9+]", "", phone)
+        apply_category(Categories.SHOP_ELECTRONICS, item)
         yield item
