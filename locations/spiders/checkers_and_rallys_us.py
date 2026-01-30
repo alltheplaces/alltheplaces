@@ -6,13 +6,12 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
+CHECKERS = {"brand": "Checkers", "brand_wikidata": "Q63919315"}
+RALLYS = {"brand": "Rally's", "brand_wikidata": "Q63919323"}
+
 
 class CheckersAndRallysUSSpider(scrapy.Spider):
     name = "checkers_and_rallys_us"
-    brands = {
-        "Checkers": {"brand": "Checkers", "brand_wikidata": "Q63919315"},
-        "Rally's": {"brand": "Rally's", "brand_wikidata": "Q63919323"},
-    }
     start_urls = ["https://checkersandrallys.com/unified-gateway/online-ordering/v1/all-stores/8159"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -25,10 +24,10 @@ class CheckersAndRallysUSSpider(scrapy.Spider):
             item["street_address"] = item.pop("street")
             item["addr_full"] = location["formatted_address"]
             if "Checkers" in location["name"]:
-                item["brand"] = self.brands["Checkers"]["brand"]
-                item["brand_wikidata"] = self.brands["Checkers"]["brand_wikidata"]
+                item.update(CHECKERS)
             elif "Rally's" in location["name"]:
-                item["brand"] = self.brands["Rally's"]["brand"]
-                item["brand_wikidata"] = self.brands["Rally's"]["brand_wikidata"]
+                item.update(RALLYS)
+
             apply_category(Categories.FAST_FOOD, item)
+
             yield item
