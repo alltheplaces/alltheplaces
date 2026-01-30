@@ -11,6 +11,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class DelkoFRSpider(CrawlSpider, StructuredDataSpider):
     name = "delko_fr"
+    contacts = ["team.marketing@delko.com"]
     item_attributes = {"brand": "Delko", "brand_wikidata": "Q24934757"}
     start_urls = ["https://delko.fr/garage/"]
     rules = [Rule(LinkExtractor("r/garage/delko/[^/]+/(\d+)$"), "parse")]
