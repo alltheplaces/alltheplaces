@@ -5,7 +5,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, sanitise_day, DAYS_FR
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
