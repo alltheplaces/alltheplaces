@@ -20,6 +20,8 @@ class DelkoFRSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Delko ")
 
+        item["email"] = response.xpath('//b[contains(text(), "@delko.fr")]/text()').get()
+
         apply_category(Categories.SHOP_CAR_REPAIR, item)
 
         yield item
