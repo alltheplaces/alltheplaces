@@ -20,7 +20,6 @@ class TeremokRUSpider(Spider):
         "DOWNLOAD_TIMEOUT": 300,
         "RETRY_TIMES": 10,  # Sometimes connection refused by server, increased retry might help
     }
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for poi in response.json():
