@@ -8,7 +8,7 @@ class AldiSudUSSpider(UberallSpider):
     key = "LETA2YVm6txbe0b9lS297XdxDX4qVQ"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = None
+        item["name"] = item["phone"] = None
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
