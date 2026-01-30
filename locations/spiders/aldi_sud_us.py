@@ -9,7 +9,7 @@ class AldiSudUSSpider(UberallSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
-        
+
         apply_category(Categories.SHOP_SUPERMARKET, item)
-        
+
         yield item
