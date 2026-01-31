@@ -14,6 +14,6 @@ class VillageHotelsGBSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Hotel"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = html.unescape(item.pop("name")).replace("Village Hotel - ","")
+        item["branch"] = html.unescape(item.pop("name")).replace("Village Hotel - ", "")
         apply_category(Categories.HOTEL, item)
         yield item
