@@ -15,13 +15,14 @@ class VillageHotelsGBSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = html.unescape(item.pop("name")).replace("Village Hotel - ", "")
-        if ld_data.get("hasMap"):
+        if "," in ld_data.get("hasMap"):
             item["lat"], item["lon"] = (
                 ld_data["hasMap"].replace("https://www.google.com/maps/search/?api=1&query=", "").split(", ")
             )
         else:
             return
-        item["addr_full"] = item.pop("street_address")
+        item["addr_full"] = item.pop("street_address").replace("</br>","")
+        item["name"] = "Village Hotel"
         item.pop("twitter", None)
         apply_category(Categories.HOTEL, item)
         yield item
