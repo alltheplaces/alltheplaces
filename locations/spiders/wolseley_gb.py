@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class WolseleyGBSpider(SitemapSpider): 
+class WolseleyGBSpider(SitemapSpider):
     name = "wolseley_gb"
     item_attributes = {"brand": "Wolseley", "brand_wikidata": "Q8030423"}
     sitemap_urls = ["https://www.wolseley.co.uk/sitemap.xml"]
