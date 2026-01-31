@@ -18,5 +18,6 @@ class VillageHotelsGBSpider(SitemapSpider, StructuredDataSpider):
         item["lat"], item["lon"] = (
             ld_data["hasMap"].replace("https://www.google.com/maps/search/?api=1&query=", "").split(", ")
         )
+        item["addr_full"] = item.pop("street_address")
         apply_category(Categories.HOTEL, item)
         yield item
