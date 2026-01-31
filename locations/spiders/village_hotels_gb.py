@@ -21,7 +21,7 @@ class VillageHotelsGBSpider(SitemapSpider, StructuredDataSpider):
             )
         else:
             return
-        item["addr_full"] = item.pop("street_address").replace("</br>","")
+        item["addr_full"] = item.pop("street_address").replace("</br>", "")
         item["name"] = "Village Hotel"
         item.pop("twitter", None)
         apply_category(Categories.HOTEL, item)
