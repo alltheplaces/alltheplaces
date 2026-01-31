@@ -2,8 +2,9 @@ import json
 
 import scrapy
 
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class ZEnergyNZSpider(scrapy.Spider):
@@ -19,6 +20,7 @@ class ZEnergyNZSpider(scrapy.Spider):
             item["branch"] = item.pop("name").removeprefix("Z ")
             item["ref"] = location["site_id"]
             item["website"] = response.urljoin(location["link"])
+            item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
 
             if location["type_slug"] == "airstop":
                 apply_category({"aeroway": "fuel"}, item)
@@ -28,8 +30,28 @@ class ZEnergyNZSpider(scrapy.Spider):
                 apply_category(Categories.FUEL_STATION.value | {"hgv": "only"}, item)
 
             apply_yes_no(Fuel.DIESEL, item, any("Diesel" in s["name"] for s in location["fuels"]))
+            apply_yes_no(Fuel.OCTANE_91, item, any("Z91" in s["name"] for s in location["fuels"]))
+            apply_yes_no(Fuel.OCTANE_95, item, any("ZX Premium" in s["name"] for s in location["fuels"]))
+            apply_yes_no(Fuel.ADBLUE, item, any("AdBlue" in s["name"] for s in location["services"]))
+            apply_yes_no(Fuel.ELECTRIC, item, any("evcharging" == s["code"] for s in location["services"]))
+            apply_yes_no(Fuel.LPG, item, any("LPG" in s["name"] for s in location["services"]))
+
+            apply_yes_no(Extras.TOILETS, item, any("Bathrooms" in s["name"] for s in location["services"]))
+            apply_yes_no(Extras.CAR_WASH, item, any("Z2O" in s["name"] for s in location["services"]))
+            apply_yes_no(Extras.ATM, item, any("ATM" in s["name"] for s in location["services"]))
 
             if postcode := item.get("postcode"):
                 item["postcode"] = str(postcode)
 
             yield item
+
+    def parse_opening_hours(self, business_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in business_hours:
+            if rule["hours"] == "Open 24 hours":
+                oh.add_range(rule["day"], "00:00", "24:00")
+            else:
+                # slightly hacky approach
+                hours_string = f"{rule['day']}: {rule['hours']}"
+                oh.add_ranges_from_string(hours_string)
+        return oh
