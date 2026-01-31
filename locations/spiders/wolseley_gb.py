@@ -12,6 +12,7 @@ class WolseleyGBSpider(SitemapSpider):
     item_attributes = {"brand": "Wolseley", "brand_wikidata": "Q8030423"}
     sitemap_urls = ["https://www.wolseley.co.uk/sitemap.xml"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
