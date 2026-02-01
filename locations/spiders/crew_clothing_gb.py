@@ -18,6 +18,8 @@ class CrewClothingGBSpider(CrawlSpider, StructuredDataSpider):
             item["name"] = item["name"].split(" - ")[0]
             set_closed(item)
 
+        item["branch"] = item.pop("name")
+
         if not item.get("lat"):
             if m := re.search(r"dblCustomerlatitude\s*=\s*(-?\d+\.\d+);", response.text):
                 item["lat"] = m.group(1)

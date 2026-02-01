@@ -73,17 +73,16 @@ SPIDER_MIDDLEWARES = {
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {}
 
-# Disabling Zyte until https://github.com/scrapy-plugins/scrapy-zyte-api/pull/269 is released.
-# if os.environ.get("ZYTE_API_KEY"):
-#     DOWNLOAD_HANDLERS = {
-#         "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
-#         "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
-#     }
-#     DOWNLOADER_MIDDLEWARES = {
-#         "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
-#         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
-#     }
-#     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
+if os.environ.get("ZYTE_API_KEY"):
+    DOWNLOAD_HANDLERS = {
+        "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+        "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+    }
+    DOWNLOADER_MIDDLEWARES = {
+        "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
+        "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
+    }
+    REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
 
 DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
@@ -95,6 +94,7 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 
 EXTENSIONS = {
     "locations.extensions.add_lineage.AddLineageExtension": 100,
+    "locations.extensions.filter_stats.FilterStatsExtension": 150,
     "locations.extensions.log_stats.LogStatsExtension": 1000,
 }
 
@@ -122,6 +122,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
     "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
+    "locations.pipelines.count_located_in.CountLocatedInPipeline": 830,
 }
 
 LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
