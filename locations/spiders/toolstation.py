@@ -27,18 +27,22 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
             item = DictParser.parse(store)
             item["website"] = response.url
             item["addr_full"] = store["address_text"].split("<br /><br />")[0]
+            if item.get("name")
+                item["branch"] = item.pop("name")
             yield item
         elif js := response.xpath('//script[contains(text(), "__NUXT__")]/text()').get():
             # stores is actually a JS function, so we have to parse the parameters and values
-            params = re.search(self.params_pattern, js).group(1).split(",")
-            values = chompjs.parse_js_object("[" + re.search(self.values_pattern, js).group(1) + "]")
-            args = {}
-            for i in range(0, len(params)):
-                args[params[i]] = values[i]
+            if re.search(self.params_pattern,js):
+                params = re.search(self.params_pattern, js).group(1).split(",")
+                values = chompjs.parse_js_object("[" + re.search(self.values_pattern, js).group(1) + "]")
+                args = {}
+                for i in range(0, len(params)):
+                    args[params[i]] = values[i]
 
-            store = chompjs.parse_js_object(re.search(self.stores_pattern, js).group(1))[0]["branch"]
-            self.populate(store, args)
-
+                store = chompjs.parse_js_object(re.search(self.stores_pattern, js).group(1))[0]["branch"]
+                self.populate(store, args)
+            else: 
+                return
             if store["status"] != 1:
                 return
 
