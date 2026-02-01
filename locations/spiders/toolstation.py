@@ -32,7 +32,7 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
             yield item
         elif js := response.xpath('//script[contains(text(), "__NUXT__")]/text()').get():
             # stores is actually a JS function, so we have to parse the parameters and values
-            if re.search(self.params_pattern,js):
+            if function in js:
                 params = re.search(self.params_pattern, js).group(1).split(",")
                 values = chompjs.parse_js_object("[" + re.search(self.values_pattern, js).group(1) + "]")
                 args = {}
