@@ -64,7 +64,8 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
                     item["opening_hours"].add_days_range(
                         day_range(start_day, end_day), start_time, end_time, time_format="%H%M"
                     )
-                item["branch"] = item.pop("name")
+                if item.get("name"):
+                    item["branch"] = item.pop("name")
             yield item
 
     @staticmethod
