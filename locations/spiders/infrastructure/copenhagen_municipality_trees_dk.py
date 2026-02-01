@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class CopenhagenMunicipalityTreesDKSpider(JSONBlobSpider):
     name = "copenhagen_municipality_trees_dk"
-    item_attributes = {"operator": "Copenhagen Municipality", "operator_wikidata": "Q504125"}
+    item_attributes = {"operator": "Københavns Kommune", "operator_wikidata": "Q504125", "nsi_id": "N/A"}
     allowed_domains = ["wfs-kbhkort.kk.dk"]
     start_urls = [
         "https://wfs-kbhkort.kk.dk/k101/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=k101:trae_basis&outputFormat=application%2Fjson&SRSNAME=EPSG:4326"
