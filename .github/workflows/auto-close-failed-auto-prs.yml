@@ -1,0 +1,74 @@
+name: Auto-close failed remove-requires-proxy PRs
+
+on:
+  status: {}
+
+permissions:
+  checks: read
+  pull-requests: write
+  issues: write
+  contents: write
+
+jobs:
+  close-failed-auto-pr:
+    if: contains(github.event.context, 'alltheplaces-fetch') && github.event.state == 'failure'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Close auto PRs created by remove-requires-proxy
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const ctx = context.payload.context || context.payload.check_name || '';
+            const state = context.payload.state;
+            if (!ctx || !ctx.includes('alltheplaces-fetch') || state !== 'failure') {
+              core.info(`Skipping status ${ctx} with state ${state}`);
+              return;
+            }
+
+            const commitSha = context.payload.sha || (context.payload.commit && context.payload.commit.sha);
+            if (!commitSha) {
+              core.info('No commit SHA on status payload; skipping.');
+              return;
+            }
+
+            const { data: pulls } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: commitSha });
+            if (!pulls || pulls.length === 0) {
+              core.info('No PRs associated with this commit.');
+              return;
+            }
+
+            for (const p of pulls) {
+              const prNumber = p.number;
+              core.info(`Processing PR #${prNumber}`);
+              const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+
+              const login = pr.user && pr.user.login || '';
+              const displayName = pr.user && pr.user.name || '';
+              const headRef = pr.head && pr.head.ref || '';
+              const headRepoFull = pr.head && pr.head.repo && pr.head.repo.full_name;
+
+              const isAuto = login === 'github-actions[bot]' || login === 'github-actions' || displayName === 'GitHub Actions' || headRef.includes('remove-requires-proxy') || (pr.title && pr.title.includes('requires_proxy'));
+              if (!isAuto) {
+                core.info(`PR #${prNumber} not identified as auto-generated; skipping.`);
+                continue;
+              }
+
+              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: "Looks like it didn't work. Closing" });
+              await github.rest.pulls.update({ owner, repo, pull_number: prNumber, state: 'closed' });
+
+              if (headRepoFull === `${owner}/${repo}` && headRef) {
+                try {
+                  await github.rest.git.deleteRef({ owner, repo, ref: `heads/${headRef}` });
+                  core.info(`Deleted branch ${headRef}`);
+                } catch (err) {
+                  core.warning(`Failed to delete branch ${headRef}: ${err}`);
+                }
+              } else {
+                core.info(`Head repo ${headRepoFull} is not the same repository; skipping branch deletion.`);
+              }
+            }

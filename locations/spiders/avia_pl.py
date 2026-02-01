@@ -65,7 +65,8 @@ class AviaPLSpider(Spider):
                 for tag, value in station["features"][key].items():
                     if not isinstance(value, bool):
                         continue
-                    apply_yes_no(FUELS_AND_SERVICES_MAPPING[tag], item, True if value else False)
+                    if fuel_and_services := FUELS_AND_SERVICES_MAPPING.get(tag):
+                        apply_yes_no(fuel_and_services, item, True if value else False)
 
             yield item
 

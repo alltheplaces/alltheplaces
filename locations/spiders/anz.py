@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature, set_closed
@@ -12,7 +12,7 @@ class AnzSpider(JSONBlobSpider):
     item_attributes = {"brand": "ANZ", "brand_wikidata": "Q714641"}
     locations_key = "Features"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://data.nowwhere.com.au/v3.2/features/ANZ_GLOBAL_LOCATIONS?key=lX8QnCpUMT4pv37nCCSY11Kpo4jCt6Cm8sElH7bF&bbox=-180 -90,180 90&sortBy=distance&filter=atm=1 or branch=1",
             headers={"Referer": "https://www.anz.com.au/"},

@@ -1,5 +1,9 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.linked_data_parser import LinkedDataParser
 from locations.user_agents import BROWSER_DEFAULT
@@ -14,7 +18,8 @@ class TuiGBSpider(SitemapSpider):
     }
     sitemap_urls = ["https://www.tui.co.uk/sitemap/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.tui\.co\.uk\/shop-finder\/([-\w]+)$", "parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
@@ -23,7 +28,7 @@ class TuiGBSpider(SitemapSpider):
             else:
                 yield entry
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         item = LinkedDataParser.parse(response, "Store")
 
         item["ref"] = response.url.split("/")[-1]
@@ -34,5 +39,5 @@ class TuiGBSpider(SitemapSpider):
         if "INSIDE NEXT" in item["name"].upper():
             item["located_in"] = "Next"
             item["located_in_wikidata"] = "Q246655"
-
+        apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
         return item

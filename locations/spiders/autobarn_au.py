@@ -16,7 +16,7 @@ class AutobarnAUSpider(SitemapSpider):
     item_attributes = {"brand": "Autobarn", "brand_wikidata": "Q105831666"}
     allowed_domains = ["autobarn.com.au"]
     sitemap_urls = ["https://autobarn.com.au/ab/sitemap/store/store-sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/autobarn\.com\.au\/ab\/store\/\d{2}[A-Z]{2}$", "parse")]
+    sitemap_rules = [(r"^https:\/\/autobarn\.com\.au\/ab\/store\/[A-Z][a-zA-Z\s\-]*$", "parse")]
 
     def parse(self, response: Response) -> Iterable[Feature]:
         properties = {

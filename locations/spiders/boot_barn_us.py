@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,9 +17,9 @@ class BootBarnUSSpider(JSONBlobSpider):
         "https://www.bootbarn.com/on/demandware.store/Sites-bootbarn_us-Site/default/LocationSearch-GetStoresForGeolocationPositionAjax"
     ]
     locations_key = ["InquiryResult", "data"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "Limit": 5000,
             "Offset": 0,
@@ -41,7 +41,12 @@ class BootBarnUSSpider(JSONBlobSpider):
             if not day_hours["Open"] or "CLOSED" in day_hours["Open"].upper():
                 item["opening_hours"].set_closed(day_hours["Day"])
             else:
-                item["opening_hours"].add_range(day_hours["Day"], day_hours["Open"], day_hours["Close"], "%I:%M%p")
+                item["opening_hours"].add_range(
+                    day_hours["Day"],
+                    day_hours["Open"].replace("**", ""),
+                    day_hours["Close"].replace("**", ""),
+                    "%I:%M%p",
+                )
 
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item

@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Selector, Spider
-from scrapy.http import Response
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
@@ -13,13 +13,13 @@ class FultonBankUSSpider(Spider):
     name = "fulton_bank_us"
     item_attributes = {"brand": "Fulton Bank", "brand_wikidata": "Q16976594"}
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.fultonbank.com/api/Branches/Search",
             formdata={
                 "QueryModel.SearchTerm": "kansas",
-                "QueryModel.Radius": "5000",
-            },  # center location with search radius
+                "QueryModel.MaxResults": "1000",
+            },  # center location
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

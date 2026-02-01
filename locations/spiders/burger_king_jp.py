@@ -1,17 +1,18 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingJPSpider(scrapy.Spider):
+class BurgerKingJPSpider(Spider):
     name = "burger_king_jp"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url="https://www.burgerking.co.jp/burgerking/BKJ0302.json",
             headers={
@@ -32,5 +33,5 @@ class BurgerKingJPSpider(scrapy.Spider):
             item["branch"] = location["storNm"]
             item["addr_full"] = location["storAddr"]
             item["website"] = "https://www.burgerking.co.jp/"
-
+            apply_category(Categories.FAST_FOOD, item)
             yield item

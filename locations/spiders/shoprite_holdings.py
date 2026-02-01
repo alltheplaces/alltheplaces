@@ -1,4 +1,5 @@
 from json.decoder import JSONDecodeError
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -67,7 +68,6 @@ COUNTRY_IDS = {
 
 
 class ShopriteHoldingsSpider(Spider):
-    # download_delay = 0.2
     name = "shoprite_holdings"
     brand_filters = [
         "Medirite",  # Gets Checkers, Checkers Hyper, Checkers LiquorShop, MediRite, MediRite Plus
@@ -80,7 +80,7 @@ class ShopriteHoldingsSpider(Spider):
         for country in COUNTRY_IDS
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_store_list, encoding="ISO-8859-1")
 

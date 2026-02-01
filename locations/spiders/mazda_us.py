@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import scrapy
 from scrapy.http import JsonRequest
 
@@ -15,15 +17,18 @@ class MazdaUSSpider(scrapy.Spider):
         if dealers := response.json()["body"]["results"]:
             for dealer in dealers:
                 item = DictParser.parse(dealer)
-
                 item["website"] = dealer.get("webUrl")
+                item["phone"] = dealer.get("dayPhone")
+
+                shop_item = deepcopy(item)
+                apply_category(Categories.SHOP_CAR, shop_item)
+                yield shop_item
 
                 if dealer.get("serviceUrl"):
-                    apply_category({"shop": "car", "service": "dealer;repair"}, item)
-                else:
-                    apply_category(Categories.SHOP_CAR, item)
-
-                yield item
+                    service_item = deepcopy(item)
+                    service_item["ref"] = f"{item['ref']}-SERVICE"
+                    apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                    yield service_item
 
             current_page = kwargs.get("page", 1)
 

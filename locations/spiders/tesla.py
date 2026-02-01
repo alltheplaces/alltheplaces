@@ -1,6 +1,6 @@
 import re
 from html import unescape
-from typing import Iterable, List
+from typing import AsyncIterator, Iterable, List
 
 import chompjs
 from scrapy import Selector, Spider
@@ -18,9 +18,9 @@ class TeslaSpider(Spider):
     TESLA_ATTRIBUTES = {"brand": "Tesla", "brand_wikidata": "Q478214"}
     TESLA_SUPERCHARGER_ATTRIBUTES = {"brand": "Tesla Supercharger", "brand_wikidata": "Q17089620"}
     requires_proxy = True
-    download_timeout = 60
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             "https://www.tesla.com/cua-api/tesla-locations?translate=en_US&usetrt=true",
             callback=self.parse_json_subrequest,

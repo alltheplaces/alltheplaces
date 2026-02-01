@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
@@ -15,10 +16,10 @@ iso_date = re.compile(r"(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)T(?P<hour>\d+):
 class CaliberCollisionUSSpider(JSONBlobSpider):
     name = "caliber_collision_us"
     item_attributes = {"brand": "Caliber Collision", "brand_wikidata": "Q109329782"}
-    download_timeout = 30
     locations_key = "contentlets"
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {"size": 100000, "query": {"bool": {"must": {"query_string": {"query": "+contentType:Center"}}}}}
         yield JsonRequest("https://www.caliber.com/api/es/search", data=data)
 

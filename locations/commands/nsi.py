@@ -1,8 +1,12 @@
+import argparse
+
+import requests
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 from locations.name_suggestion_index import NSI
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
 class NameSuggestionIndexCommand(ScrapyCommand):
@@ -17,13 +21,13 @@ class NameSuggestionIndexCommand(ScrapyCommand):
     default_settings = {"LOG_ENABLED": False}
     nsi = NSI()
 
-    def syntax(self):
+    def syntax(self) -> str:
         return "[options] <name | code | detect-missing>"
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Lookup wikidata code, (fuzzy match) brand name in the name suggestion index, or detecting missing by category"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         ScrapyCommand.add_options(self, parser)
         parser.add_argument(
             "--name",
@@ -44,7 +48,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             help="Query NSI for missing by NSI category. ie brands/shop/supermarket",
         )
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         if not len(args) == 1:
             raise UsageError("please supply one and only one argument")
         if opts.lookup_name:
@@ -54,11 +58,11 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         if opts.detect_missing:
             self.detect_missing(args)
 
-    def lookup_name(self, args):
+    def lookup_name(self, args: list[str]) -> None:
         for code, _ in self.nsi.iter_wikidata(args[0]):
             self.lookup_code([code])
 
-    def lookup_code(self, args):
+    def lookup_code(self, args: list[str]) -> None:
         if v := self.nsi.lookup_wikidata(args[0]):
             NameSuggestionIndexCommand.show(args[0], v)
             for item in self.nsi.iter_nsi(args[0]):
@@ -69,28 +73,31 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 )
                 print("       -> " + str(item))
 
-    def detect_missing(self, args):
-        codes = DuplicateWikidataCommand.wikidata_spiders(self.crawler_process)
-
+    def detect_missing(self, args: list[str]) -> None:
         missing = {}  # dict to filter out duplicates
 
-        # Fetch the category from NSI's github, and try to match to wikidata.
-        # TODO: This assumes you are going for only one category, by wikidata ID.
-        #       Is it worth having this just check all of the wikidata entries and printing out what is missing globally?
-        if "/" in args[0]:
-            response = self.nsi._request_file(f"data/{args[0]}.json")
-            print(f"Fetched {len(response['items'])} {response['properties']['path']} from NSI")
+        if crawler_process := self.crawler_process:
+            codes = DuplicateWikidataCommand.wikidata_spiders(crawler_process)
 
-            for item in response["items"]:
-                if "brand:wikidata" in item["tags"]:
-                    if not item["tags"]["brand:wikidata"] in codes.keys():
-                        missing[item["tags"]["brand:wikidata"]] = item
-        # Assume we are searching by location, either country code or some state geojson string
+            # Fetch the category from NSI's github, and try to match to wikidata.
+            # TODO: This assumes you are going for only one category, by wikidata ID.
+            #       Is it worth having this just check all of the wikidata entries and printing out what is missing globally?
+            if "/" in args[0]:
+                response = self._request_file(f"data/{args[0]}.json")
+                print(f"Fetched {len(response['items'])} {response['properties']['path']} from NSI")
+
+                for item in response["items"]:
+                    if "brand:wikidata" in item["tags"]:
+                        if not item["tags"]["brand:wikidata"] in codes.keys():
+                            missing[item["tags"]["brand:wikidata"]] = item
+            # Assume we are searching by location, either country code or some state geojson string
+            else:
+                for item in self.nsi.iter_country(args[0]):
+                    if "brand:wikidata" in item["tags"]:
+                        if item["tags"]["brand:wikidata"] not in codes.keys():
+                            missing[item["tags"]["brand:wikidata"]] = item
         else:
-            for item in self.nsi.iter_country(args[0]):
-                if "brand:wikidata" in item["tags"]:
-                    if item["tags"]["brand:wikidata"] not in codes.keys():
-                        missing[item["tags"]["brand:wikidata"]] = item
+            raise RuntimeError("Crawler process not defined")
 
         issue_list = {}
         for code, brand in missing.items():
@@ -102,7 +109,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.issue_template(code, data)
 
     @staticmethod
-    def show(code, data):
+    def show(code: str, data: dict) -> None:
         print('"{}", "{}"'.format(data["label"], code))
         print("       -> https://www.wikidata.org/wiki/{}".format(code))
         print("       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(code))
@@ -112,7 +119,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("       -> {}".format(s.get("website", "N/A")))
 
     @staticmethod
-    def issue_template(code, data):
+    def issue_template(code: str, data: dict) -> None:
         print("### Brand name\n")
         print(data["label"])
         print("")
@@ -130,3 +137,13 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print("Official Url(s): {}".format(website))
         print("")
         print("----")
+
+    @staticmethod
+    def _request_file(file: str) -> dict:
+        resp = requests.get(
+            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/refs/heads/main/{}".format(file),
+            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
+        )
+        if not resp.status_code == 200:
+            raise Exception("NSI load failure")
+        return resp.json()

@@ -1,8 +1,8 @@
 from datetime import UTC, datetime, timedelta
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -43,10 +43,10 @@ class SocrataSpider(Spider):
     higher value.
     """
 
-    dataset_attributes = {"source": "api", "api": "socrata"}
+    dataset_attributes: dict = {"source": "api", "api": "socrata"}
 
-    host: str = ""
-    resource_id: str = ""
+    host: str
+    resource_id: str
     page_size: int = 50000
     field_names: list[str] = []
 
@@ -54,13 +54,13 @@ class SocrataSpider(Spider):
     # download. The download size warning is increased to 256MiB.
     custom_settings = {"DOWNLOAD_TIMEOUT": 120, "DOWNLOAD_WARNSIZE": 268435456}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://{self.host}/resource/{self.resource_id}.json?$query=SELECT count(*) AS total_records",
             callback=self.parse_record_count,
         )
 
-    def parse_record_count(self, response: Response) -> Iterable[JsonRequest]:
+    def parse_record_count(self, response: TextResponse) -> Iterable[JsonRequest]:
         total_records = int(response.json()[0]["total_records"])
         yield JsonRequest(
             url=f"https://{self.host}/api/views/{self.resource_id}.json",
@@ -68,7 +68,7 @@ class SocrataSpider(Spider):
             callback=self.parse_schema,
         )
 
-    def parse_schema(self, response: Response) -> Iterable[JsonRequest]:
+    def parse_schema(self, response: TextResponse) -> Iterable[JsonRequest]:
         table_attributes = response.json()
 
         last_updated_epoch = table_attributes.get("rowsUpdatedAt", table_attributes.get("viewLastModified"))
@@ -104,7 +104,7 @@ class SocrataSpider(Spider):
                 callback=self.parse_features,
             )
 
-    def parse_features(self, response: Response) -> Iterable[Feature]:
+    def parse_features(self, response: TextResponse) -> Iterable[Feature]:
         features = response.json()["features"]
 
         for feature in features:
@@ -121,5 +121,5 @@ class SocrataSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         return
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         yield item

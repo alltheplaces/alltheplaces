@@ -1,8 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from chompjs import parse_js_object
-from scrapy import Request
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
@@ -19,7 +18,7 @@ class AsianPaintsBeautifulHomesINSpider(JSONBlobSpider):
     ]
     locations_keys = "result"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         # Scrapy doens't support multipart/form-data which this API requires.
         # Reference: https://github.com/scrapy/scrapy/issues/1897
         multipart_data = '-----------------------------524311191360322593742077878\r\nContent-Disposition: form-data; name="data"\r\n\r\n{"data":{"searchpath":"/content/asianpaintsbeautifulhomes/us/en/store-locator","limit":""},"headerJson":{}}\r\n-----------------------------524311191360322593742077878--\r\n'

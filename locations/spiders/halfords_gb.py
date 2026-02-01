@@ -1,51 +1,61 @@
-import re
+import json
+from typing import Any
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class HalfordsGBSpider(CrawlSpider, StructuredDataSpider):
+class HalfordsGBSpider(scrapy.Spider):
     name = "halfords_gb"
     start_urls = ["https://www.halfords.com/locations"]
-    rules = [Rule(LinkExtractor(r"/locations/([^/]+)/$"), "parse")]
-    wanted_types = ["AutomotiveBusiness", "LocalBusiness"]
-    search_for_facebook = False
-    search_for_twitter = False
-    drop_attributes = {"image"}
 
-    def pre_process_data(self, ld_data, **kwargs):
-        for rule in ld_data.get("openingHoursSpecification") or []:
-            rule["opens"] = (rule.get("opens") or "").strip()
-            rule["closes"] = (rule.get("closes") or "").strip()
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        raw_data = json.loads(response.xpath('//*[@type="application/json"]/text()').get())["__PRELOADED_STATE__"][
+            "__reactQuery"
+        ]["queries"]
+        for location in raw_data:
+            data = location.get("state").get("data")
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["ref"] = item["website"]
-        name = item.pop("name")
-        if name.startswith("Halfords Autocentre "):
-            item["branch"] = name.removeprefix("Halfords Autocentre ")
-            item["brand_wikidata"] = "Q5641894"
-        elif name.startswith("Halfords Garage Services "):
-            item["name"] = "Halfords Garage Services"
-            item["brand"] = "Halfords"
-            item["branch"] = name.removeprefix("Halfords Garage Services ")
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        elif name.startswith("National Tyres and Autocare ") or name.endswith(" (National Tyres)"):
-            item["branch"] = name.removeprefix("National Tyres and Autocare ").removesuffix(" (National Tyres)")
-            item["brand_wikidata"] = "Q6979055"
-        elif name.startswith("Halfords Store "):
-            item["branch"] = name.removeprefix("Halfords Store ")
-            item["brand_wikidata"] = "Q3398786"
-        else:
-            # 3, a mix of the above.
-            item["name"] = name
+            if not isinstance(data, dict):
+                continue
 
-        if m := re.search(
-            r"destination=(-?\d+\.\d+),(-?\d+\.\d+)",
-            response.xpath('//a[contains(@href, "www.google.com/maps")][contains(@href, "destination=")]/@href').get(),
-        ):
-            item["lat"], item["lon"] = m.groups()
+            store_data = data.get("stores")
+            if not store_data:
+                continue
 
-        yield item
+            for data in store_data:
+                if data.get("coordinates").get("latitude") == 0:
+                    continue
+
+                item = DictParser.parse(data)
+                item["street_address"] = merge_address_lines([item.pop("street_address"), data.get("address2")])
+                item["website"] = "https://www.halfords.com/locations/" + data["storeDetailsLink"]
+
+                oh = OpeningHours()
+                for day_time in data["storeHours"]["workingHours"]:
+                    for day, time in day_time.items():
+                        for open_close_time in time:
+                            if open_close_time in [{}, {"isToday": True}]:
+                                continue
+                            open_time = open_close_time.get("Start").strip()
+                            close_time = open_close_time.get("Finish").strip()
+                            oh.add_range(day=day, open_time=open_time, close_time=close_time)
+                item["opening_hours"] = oh
+
+                if data["storePrefix"] == "Halfords Autocentre":
+                    item["brand_wikidata"] = "Q5641894"
+                elif data["storePrefix"] == "Halfords Garage Services":
+                    item["brand"] = "Halfords"
+                    apply_category(Categories.SHOP_CAR_REPAIR, item)
+                elif data["storePrefix"] == "National Tyres and Autocare":
+                    item["brand_wikidata"] = "Q6979055"
+                elif data["storePrefix"] == "Halfords Store":
+                    item["brand_wikidata"] = "Q3398786"
+                else:
+                    item["brand_wikidata"] = "Q5641894"
+                yield item

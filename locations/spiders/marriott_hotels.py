@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -22,10 +25,9 @@ from locations.dict_parser import DictParser
 # 'https://westin.marriott.com/hotel-locations/'
 # 'https://st-regis.marriott.com/hotel-directory/'
 # 'https://fairfield.marriott.com/locations/'
-class MarriottHotelsSpider(scrapy.Spider):
+class MarriottHotelsSpider(Spider):
     name = "marriott_hotels"
-    custom_settings = {"REDIRECT_ENABLED": False}
-    download_delay = 2.0
+    custom_settings = {"REDIRECT_ENABLED": False, "DOWNLOAD_DELAY": 2}
     drop_attributes = {"image"}
 
     # Continue policy of ignoring collection hotels for now.
@@ -65,13 +67,13 @@ class MarriottHotelsSpider(scrapy.Spider):
         "XF": ["Four Points Express", "Q1439966"],
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         letters = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
         # Generate all possible Marriott brand codes.
         for x in letters:
             for y in letters:
                 url = "https://pacsys.marriott.com/data/marriott_properties_{}_en-US.json".format(x + y)
-                yield scrapy.Request(url, callback=self.parse_brand_json)
+                yield Request(url, callback=self.parse_brand_json)
 
     def parse_brand_json(self, response):
         for cities in DictParser.iter_matching_keys(response.json(), "city_properties"):

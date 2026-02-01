@@ -37,7 +37,7 @@ class QuarterraUSSpider(JSONBlobSpider):
     }
     locations_key = ["data", "locations"]
 
-    def start_requests(self):
+    async def start(self):
         yield JsonRequest("https://quarterra.com/api", data={"query": QUERY})
 
     def post_process_item(self, item, response, feature):

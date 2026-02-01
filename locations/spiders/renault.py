@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -20,13 +20,15 @@ class RenaultSpider(Spider):
         "alpine": {"brand": "Alpine", "brand_wikidata": "Q26944"},
     }
 
-    def make_request(self, host: str, page: int = 0) -> Request:
+    def make_request(self, host: str, page: int = 0) -> JsonRequest:
         return JsonRequest(urljoin(host, "/wired/commerce/v1/dealers?page={}&pageSize={}".format(page, self.PAGE_SIZE)))
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request("https://www.renault.nl/")
         yield self.make_request("https://www.dacia.fr/")
         yield self.make_request("https://www.alpinecars.de/")
+        yield self.make_request("https://www.renault.co.in/")
+        yield self.make_request("https://www.renault.com.br/")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:

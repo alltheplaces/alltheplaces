@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class EuroArgoEricFloatsSpider(JSONBlobSpider):
     skip_auto_cc_geocoder = True
     skip_auto_cc_domain = True
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = [
             {
                 "nested": "false",

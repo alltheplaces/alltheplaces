@@ -1,7 +1,10 @@
-import geonamescache
-import scrapy
+from typing import AsyncIterator
 
-from locations.categories import Categories, Extras, apply_yes_no
+import geonamescache
+from scrapy import Spider
+from scrapy.http import JsonRequest
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations, country_iseadgg_centroids
 from locations.hours import DAYS_EN, OpeningHours
@@ -10,18 +13,15 @@ from locations.pipelines.address_clean_up import clean_address
 BURGER_KING_SHARED_ATTRIBUTES = {
     "brand": "Burger King",
     "brand_wikidata": "Q177054",
-    "extras": Categories.FAST_FOOD.value,
 }
 
 
-class BurgerKingSpider(scrapy.Spider):
-    download_timeout = 30
+class BurgerKingSpider(Spider):
     name = "burger_king"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    download_delay = 2.0
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "DOWNLOAD_TIMEOUT": 30}
 
-    def make_request(self, lat, lon, country_code, search_radius, result_limit, url):
+    def make_request(self, lat, lon, country_code, search_radius, result_limit, url) -> JsonRequest:
         body = [
             {
                 "operationName": "GetRestaurants",
@@ -119,7 +119,7 @@ class BurgerKingSpider(scrapy.Spider):
                 ),
             }
         ]
-        return scrapy.http.JsonRequest(
+        return JsonRequest(
             url=url,
             data=body,
             headers={"x-ui-language": "en", "x-ui-region": country_code},
@@ -144,7 +144,7 @@ class BurgerKingSpider(scrapy.Spider):
         gc = geonamescache.GeonamesCache()
         return [(c["iso"], c["capital"]) for c in gc.get_countries().values() if c["continentcode"] == "EU"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         ae_endpoint = "https://www.burgerking.ae/api/whitelabel"
         eu_endpoint = "https://euc1-prod-bk.rbictg.com/graphql"
         gb_endpoint = "https://www.burgerking.co.uk/api/whitelabel"
@@ -261,6 +261,8 @@ class BurgerKingSpider(scrapy.Spider):
             if location.get("hasDelivery"):
                 if drive_through_hours := self.parse_opening_hours(location.get("deliveryHours")).as_opening_hours():
                     item["extras"]["opening_hours:delivery"] = drive_through_hours
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
 

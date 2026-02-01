@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 from urllib.parse import urlparse
 
 from scrapy import Spider
@@ -20,12 +21,12 @@ class FurnmartSpider(Spider):
         "brand_wikidata": "Q118185771",
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
-            yield from self.request_page(url, 1)
+            yield self.request_page(url, 1)
 
-    def request_page(self, url, page):
-        yield JsonRequest(
+    def request_page(self, url: str, page: int) -> JsonRequest:
+        return JsonRequest(
             url=url,
             data={
                 "latitude": "",
@@ -59,4 +60,4 @@ class FurnmartSpider(Spider):
             yield item
 
         if len(response.xpath('.//li[@class="shops-item visible"]')) == 20:
-            yield from self.request_page(response.meta["url"], response.meta["page"] + 1)
+            yield self.request_page(response.meta["url"], response.meta["page"] + 1)

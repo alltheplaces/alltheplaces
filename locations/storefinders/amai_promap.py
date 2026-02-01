@@ -1,41 +1,49 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from chompjs import parse_js_object
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AmaiPromapSpider(JSONBlobSpider):
     """
-    To use this spider, simply specify a store page URL with `start_urls`.
+    Amai ProMap or Rose Perl (RP) ProMap are self-hosted Shopify plugin
+    storefinders, with an official website of:
+    https://apps.shopify.com/store-locator-4
+
+    To use this spider, simply specify a store page URL as a single item
+    within the `start_urls` list attribute.
     """
 
-    locators = ["amaicdn", "roseperl"]  # Amai ProMap is same as Roseperl ProMap
+    start_urls: list[str] = []
+    _locators: list[str] = ["amaicdn", "roseperl"]  # Amai ProMap is same as Rose Perl ProMap
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield Request(url=url, callback=self.fetch_js)
+    async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0], callback=self.fetch_js)
 
-    def fetch_js(self, response: Response):
+    def fetch_js(self, response: TextResponse) -> Iterable[JsonRequest]:
         urls = parse_js_object(
             response.xpath('.//script[contains(text(), "var urls =")]/text()').get().split("var urls =")[1]
         )
         js_url = [
-            u for u in urls if any(f"{locator}.com/storelocator-prod/wtb/" in u for locator in self.locators)
+            u for u in urls if any(f"{locator}.com/storelocator-prod/wtb/" in u for locator in self._locators)
         ]  # should be only one
         for url in js_url:
             yield JsonRequest(url=url, callback=self.parse)
 
-    def extract_json(self, response: Response):
+    def extract_json(self, response: TextResponse) -> dict:
         chunks = response.text.split("SCASLWtb=")
         return parse_js_object(chunks[1])["locations"]
 
-    def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
+    def parse_feature_array(self, response: TextResponse, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
@@ -54,5 +62,5 @@ class AmaiPromapSpider(JSONBlobSpider):
 
             item["image"] = feature.get("store_image")
             item.pop("addr_full")
-            item["street_address"] = clean_address([feature.get("address"), feature.get("address2")])
+            item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address2")])
             yield from self.post_process_item(item, response, feature) or []

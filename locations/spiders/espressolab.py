@@ -1,31 +1,24 @@
-import re
-
-from scrapy import http
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
-
-from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
-
-MAP_SCRIPT_REGEX = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]*)\s*,\s*([-\d.]*)\s*\);")
+from locations.categories import Extras, apply_yes_no
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class EspressolabSpider(CrawlSpider):
+class EspressolabSpider(JSONBlobSpider):
     name = "espressolab"
     item_attributes = {"brand": "Espressolab", "brand_wikidata": "Q97599059"}
-    allowed_domains = ["espressolab.com"]
-    start_urls = ["https://espressolab.com/subeler/"]
-    rules = [Rule(LinkExtractor(allow=[r"/subeler/[\w-]+/"]), callback="parse_item")]
+    start_urls = ["https://espressolab.com/api/stores"]
+    locations_key = "response"
 
-    def parse_item(self, response: http.HtmlResponse):
-        item = Feature()
-        item["ref"] = response.url.split("/")[-2]
-        item["name"] = response.xpath("//h1/text()").get()
-        item["addr_full"] = merge_address_lines(response.css(".address ::text").getall())
-        item["lat"], item["lon"] = map(
-            float,
-            MAP_SCRIPT_REGEX.search(
-                response.xpath("//script[contains(text(), 'google.maps.LatLng')]/text()").get()
-            ).groups(),
-        )
+    def post_process_item(self, item, response, feature):
+        item["branch"] = item.pop("name")
+        apply_yes_no(Extras.DELIVERY, item, feature["hasHomeDelivery"])
+        apply_yes_no(Extras.WIFI, item, feature["hasWifi"])
+
+        oh = OpeningHours()
+        opening_data = feature.get("storeWorkTimes")
+        for days_range in opening_data:
+            if not days_range.get("isClosed"):
+                oh.add_range(DAYS_FULL[days_range["dayNumber"] - 1], days_range["openTime"], days_range["closeTime"])
+        item["opening_hours"] = oh
+
         yield item

@@ -1,6 +1,5 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -40,7 +39,7 @@ class CancerResearchUkGBSpider(Spider):
             headers={"Authorization": "Bearer search-yxrzepvos3f259zqovdykpmf"},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

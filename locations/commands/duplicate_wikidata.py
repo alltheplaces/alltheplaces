@@ -1,3 +1,4 @@
+import argparse
 import json
 import logging
 import os
@@ -5,6 +6,7 @@ import re
 import sys
 
 from scrapy.commands import ScrapyCommand
+from scrapy.crawler import CrawlerProcessBase
 
 from locations.exporters.geojson import find_spider_class
 
@@ -23,10 +25,10 @@ class DuplicateWikidataCommand(ScrapyCommand):
     requires_project = True
     default_settings = {"LOG_ENABLED": True}
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Report instances of the same wikidata code in multiple spider files"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         ScrapyCommand.add_options(self, parser)
         parser.add_argument(
             "--outfile",
@@ -42,11 +44,13 @@ class DuplicateWikidataCommand(ScrapyCommand):
         )
 
     @staticmethod
-    def wikidata_spiders(crawler_process):
+    def wikidata_spiders(crawler_process: CrawlerProcessBase) -> dict:
         codes = {}
         for spider_name in crawler_process.spider_loader.list():
             spider = find_spider_class(spider_name)
             file_name = sys.modules[spider.__module__].__file__
+            if not file_name:
+                continue
             simple_name = file_name.split("/locations/")[-1]
             with open(file_name) as f:
                 for code in re.findall("[\"|'](Q[0-9]*)[\"|']", f.read()):
@@ -55,21 +59,24 @@ class DuplicateWikidataCommand(ScrapyCommand):
                     codes[code] = files
         return codes
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         duplicates = {}
-        codes = self.wikidata_spiders(self.crawler_process)
-        for code, files in codes.items():
-            if len(files) == 1:
-                # wikidata codes that come from one spider only are not interesting to report
-                continue
-            if opts.cross_directory:
-                unique_dirs = set()
-                for file in files:
-                    unique_dirs.add(os.path.dirname(file))
-                if len(unique_dirs) == 1:
-                    # duplicates all exist in the same spider directory, ignore given command line option
+        if crawler_process := self.crawler_process:
+            codes = self.wikidata_spiders(crawler_process)
+            for code, files in codes.items():
+                if len(files) == 1:
+                    # wikidata codes that come from one spider only are not interesting to report
                     continue
-            duplicates[code] = list(files)
+                if opts.cross_directory:
+                    unique_dirs = set()
+                    for file in files:
+                        unique_dirs.add(os.path.dirname(file))
+                    if len(unique_dirs) == 1:
+                        # duplicates all exist in the same spider directory, ignore given command line option
+                        continue
+                duplicates[code] = list(files)
+        else:
+            raise RuntimeError("Crawler process not defined")
 
         # The results either go to terminal or a JSON file
         if opts.outfile:

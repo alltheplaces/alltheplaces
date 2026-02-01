@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -32,7 +32,7 @@ class EgAmericaUSSpider(Spider):
         20: {"brand": "Sprint", "brand_wikidata": "Q123012447"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], callback=self.parse)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

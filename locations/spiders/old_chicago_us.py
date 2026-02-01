@@ -1,19 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
 
 
-class OldChicagoUSSpider(scrapy.Spider):
+class OldChicagoUSSpider(Spider):
     name = "old_chicago_us"
     item_attributes = {"brand": "Old Chicago", "brand_wikidata": "Q64411347"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://oc-api-prod.azurewebsites.net/graphql",
-            data={
-                "query": """query {
+            data={"query": """query {
                     viewer {
                         locations {
                             edges {
@@ -44,8 +45,7 @@ class OldChicagoUSSpider(scrapy.Spider):
                             }
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response, **kwargs):

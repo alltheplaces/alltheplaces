@@ -1,6 +1,5 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
 from scrapy import Spider
 from scrapy.http import Request, Response
 
@@ -33,7 +32,7 @@ CATEGORY_MAPPING = {
 class MigrosTRSpider(Spider):
     name = "migros_tr"
 
-    def start_requests(self) -> Iterable[scrapy.Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request("https://api.migroskurumsal.com/api/StoreLocation/GetStoresWithDetails", method="POST")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

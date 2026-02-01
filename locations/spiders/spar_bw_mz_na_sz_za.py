@@ -19,12 +19,12 @@ BRANDS = {
 
 
 class SparBWMZNASZZASpider(JSONBlobSpider):
-    download_timeout = 30
     name = "spar_bw_mz_na_sz_za"
     start_urls = []
     skip_auto_cc_domain = True
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self):
         yield JsonRequest(
             url="https://www.spar.co.za/api/stores/search",
             data={"Types": ["SPAR", "SUPERSPAR", "KWIKSPAR", "SPAR Express", "Savemor", "Pharmacy"]},

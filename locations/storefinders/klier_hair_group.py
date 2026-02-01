@@ -1,14 +1,17 @@
 import re
+from typing import Iterable
 
-import scrapy
-from chompjs import chompjs
+from chompjs import parse_js_object
+from scrapy import Spider
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
-class KlierHairGroupSpider(scrapy.Spider):
+class KlierHairGroupSpider(Spider):
     """
     Klier Hair Group is a chain of hairdressers in Germany with several brands.
 
@@ -17,23 +20,26 @@ class KlierHairGroupSpider(scrapy.Spider):
     This class contains the common code to scrape all their brands.
     """
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
         locations_re = re.compile(r"locations\.push\(\s*({.*?})\);", re.DOTALL)
         locations_javascript = response.xpath('//script/text()[contains(., "locations.push")]').re(locations_re)
         for location_javascript in locations_javascript:
-            location = next(chompjs.parse_js_objects(location_javascript))
+            location = parse_js_object(location_javascript)
             location["id"] = location.pop("internal_id")
             location["street_address"] = location.pop("street")
             location["website"] = location.pop("sanitized")
             item = DictParser.parse(location)
             item["opening_hours"] = self.parse_opening_hours(location["business_hours"])
-            apply_category(Categories.SHOP_HAIRDRESSER, item)
-            yield item
+            yield from self.post_process_item(item, response, location)
 
     @staticmethod
-    def parse_opening_hours(business_hours):
+    def parse_opening_hours(business_hours: dict) -> OpeningHours:
         hours = OpeningHours()
         for day in business_hours:
             if not day["closed"]:
                 hours.add_range(day["openDay"], day["openTime"], day["closeTime"])
         return hours
+
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict, **kwargs) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_HAIRDRESSER, item)
+        yield item

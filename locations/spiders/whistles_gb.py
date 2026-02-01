@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator
 
 from scrapy import Request
 
@@ -14,7 +14,7 @@ class WhistlesGBSpider(JSONBlobSpider):
     item_attributes = {"brand": "Whistles", "brand_wikidata": "Q7994069"}
     locations_key = "stores"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in country_iseadgg_centroids(["gb"], 94):
             yield Request(
                 f"https://www.whistles.com/on/demandware.store/Sites-WH-UK-Site/en/Stores-FindStores?standaloneStore=on&lat={lat}&long={lon}&dwfrm_address_country=GB"

@@ -1,8 +1,8 @@
-import json
-from typing import Any, Iterable
+from json import dumps
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -13,7 +13,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class WalmartCASpider(scrapy.Spider):
+class WalmartCASpider(Spider):
     name = "walmart_ca"
     allowed_domains = ["www.walmart.ca"]
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
@@ -23,10 +23,10 @@ class WalmartCASpider(scrapy.Spider):
         "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
     }
-    base_url = "https://www.walmart.ca/orchestra/graphql/nearByNodes"
-    hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
+    base_url = "https://www.walmart.ca/orchestra/graphql/storeFinderNearbyNodesQuery"
+    hash = "d3236419dacf3a02137445459aeaeda81fd40630ddd2d3f218cf43f60e1ad16a"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # Tried raw GraphQL query, but it's blocked, hash appears to be stable and required for successful requests.
         for city in city_locations("CA", min_population=15000):
             variables = {
@@ -47,9 +47,9 @@ class WalmartCASpider(scrapy.Spider):
                 "disableNodeAddressPostalCode": False,
             }
             yield JsonRequest(
-                url=f"{self.base_url}/{self.hash}?{urlencode({'variables': json.dumps(variables)})}",
+                url=f"{self.base_url}/{self.hash}?{urlencode({'variables': dumps(variables)})}",
                 headers={
-                    "x-apollo-operation-name": "nearByNodes",
+                    "x-apollo-operation-name": "storeFinderNearbyNodesQuery",
                     "x-o-bu": "WALMART-CA",
                     "x-o-segment": "oaoh",
                 },

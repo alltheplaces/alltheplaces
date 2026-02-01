@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -16,14 +16,15 @@ class UberallSpider(Spider):
     Use by specifying the `key`, and optional filtering via `business_id_filter`
     """
 
-    dataset_attributes = {"source": "api", "api": "uberall.com"}
-    key: str = ""
-    business_id_filter: int = None
+    dataset_attributes: dict = {"source": "api", "api": "uberall.com"}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    key: str
+    business_id_filter: int | None = None
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=f"https://uberall.com/api/storefinders/{self.key}/locations/all")
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         if response.json()["status"] != "SUCCESS":
             self.logger.warning("Request failed")
 
@@ -52,11 +53,11 @@ class UberallSpider(Spider):
                             rule[f"from{i}"],
                             rule[f"to{i}"],
                         )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield from self.post_process_item(item, response, feature)
 
-    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item
 

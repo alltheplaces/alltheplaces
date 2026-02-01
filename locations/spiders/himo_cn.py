@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -14,7 +14,7 @@ class HimoCNSpider(JSONBlobSpider):
     start_urls = ["https://api-gateway.hzmantu.com/store/getStoreByCity"]
     locations_key = "msg"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "store_type": ["blue", "gold", "family"],
             "limit": 1000,

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 import scrapy
 from scrapy.http import JsonRequest, Request, Response
@@ -14,7 +14,7 @@ class SalmoiraghiAndViganoITSpider(JSONBlobSpider):
     item_attributes = {"brand": "Salmoiraghi & Viganò", "brand_wikidata": "Q21272314"}
     locations_key = "records"
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[JsonRequest | Request]:
         for lat, lng in point_locations("eu_centroids_120km_radius_country.csv", "IT"):
             yield scrapy.Request(
                 url=f"https://api-tab.luxottica.com/tl-store-locator/api/v1/SV/offices?latitude={lat}&longitude={lng}&radius=100&limit=1000&offset=0&officeTypes=BOUTIQUE"

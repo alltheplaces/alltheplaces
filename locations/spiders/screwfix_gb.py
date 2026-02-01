@@ -1,13 +1,13 @@
-import html
-import json
-
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class ScrewfixGBSpider(CrawlSpider):
+class ScrewfixGBSpider(CrawlSpider, StructuredDataSpider):
     name = "screwfix_gb"
     item_attributes = {"brand": "Screwfix", "brand_wikidata": "Q7439115"}
     allowed_domains = ["www.screwfix.com"]
@@ -15,22 +15,16 @@ class ScrewfixGBSpider(CrawlSpider):
     rules = [Rule(LinkExtractor(allow=r"\/stores\/([A-Z][A-Z][0-9])\/.+$"), callback="parse")]
     wanted_types = ["HardwareStore"]
 
-    def parse(self, response):
-        data = response.xpath('//script[@type="application/ld+json"][contains(., "HardwareStore")]/text()').get()
-        if not data:
-            return
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["phone"] = None
 
-        data = html.unescape(data)
-        data_json = json.loads(data)
-        if not data_json:
-            return
+        if item["name"].startswith("Screwfix City "):
+            item["branch"] = item.pop("name").removeprefix("Screwfix City ")
+            item["name"] = "Screwfix City"
+        else:
+            item["branch"] = item.pop("name").removeprefix("Screwfix ")
+            item["name"] = "Screwfix"
 
-        item = LinkedDataParser.parse_ld(data_json)
-        item["website"] = response.url
-
-        if "phone" in item and item["phone"] is not None and item["phone"].replace(" ", "").startswith("+443"):
-            item.pop("phone", None)
-
-        item.pop("name", None)
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
 
         yield item

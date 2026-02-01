@@ -83,7 +83,6 @@ if os.environ.get("ZYTE_API_KEY"):
         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
     }
     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
-    TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
 DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
@@ -95,6 +94,7 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 
 EXTENSIONS = {
     "locations.extensions.add_lineage.AddLineageExtension": 100,
+    "locations.extensions.filter_stats.FilterStatsExtension": 150,
     "locations.extensions.log_stats.LogStatsExtension": 1000,
 }
 
@@ -122,6 +122,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
     "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
+    "locations.pipelines.count_located_in.CountLocatedInPipeline": 830,
 }
 
 LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
@@ -156,7 +157,6 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
     "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
     "PLAYWRIGHT_BROWSER_TYPE": "firefox",
     "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
 }
 
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
@@ -174,7 +174,6 @@ DEFAULT_CAMOUFOX_SETTINGS = {
     },
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
     "ROBOTSTXT_OBEY": False,
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
 }
 
 DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS | {

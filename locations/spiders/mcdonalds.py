@@ -1,13 +1,17 @@
-import scrapy
+from typing import AsyncIterator, Iterable
+
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class McdonaldsSpider(scrapy.Spider):
+class McdonaldsSpider(Spider):
     name = "mcdonalds"
     item_attributes = {
         "brand": "McDonald's",
@@ -16,7 +20,7 @@ class McdonaldsSpider(scrapy.Spider):
     }
     allowed_domains = ["www.mcdonalds.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="
         for locale in [
             "en-ca",
@@ -39,6 +43,7 @@ class McdonaldsSpider(scrapy.Spider):
             "uk-ua",
             "hu-hu",
             "zh-tw",
+            "hr-hr",
         ]:
             country = locale.split("-")[1]
             for city in city_locations(country.upper(), 20000):
@@ -46,13 +51,13 @@ class McdonaldsSpider(scrapy.Spider):
                     url = template.format(city["latitude"], city["longitude"], "sar", "en")
                 else:
                     url = template.format(city["latitude"], city["longitude"], country, locale)
-                yield scrapy.Request(
+                yield Request(
                     url,
                     self.parse_major_api,
                     cb_kwargs=dict(country=country, locale=locale),
                 )
 
-    def parse_major_api(self, response, country, locale):
+    def parse_major_api(self, response: Response, country: str, locale: str) -> Iterable[Feature]:
         if len(response.body) == 0:
             return
         stores = response.json()["features"]
@@ -60,17 +65,7 @@ class McdonaldsSpider(scrapy.Spider):
             properties = store["properties"]
             store_identifier = properties["identifierValue"]
             store_url = None
-            if locale in [
-                "en-ca",
-                "en-gb",
-                "en-ie",
-                "en-us",
-                "fi-fi",
-                "fr-ch",
-                "hu-hu",
-                "sv-se",
-                "zh-tw",
-            ]:
+            if locale in ["en-ca", "en-gb", "en-ie", "en-us", "fi-fi", "fr-ch", "hu-hu", "sv-se", "zh-tw", "hr-hr"]:
                 # Individual store site pages in these locale's have a common pattern.
                 store_url = "https://www.mcdonalds.com/{}/{}/location/{}.html".format(country, locale, store_identifier)
             elif locale in ["de-de"]:
@@ -132,7 +127,7 @@ class McdonaldsSpider(scrapy.Spider):
 
             yield item
 
-    def store_hours(self, store_hours):
+    def store_hours(self, store_hours: dict) -> OpeningHours | None:
         if not store_hours:
             return None
 
@@ -141,7 +136,11 @@ class McdonaldsSpider(scrapy.Spider):
             if hours := store_hours.get("hours" + day):
                 try:
                     start_time, end_time = hours.split(" - ")
-                    oh.add_range(day, start_time.replace("24:00", "00:00"), end_time)
+                    if start_time.count(":") == 2:
+                        time_format = "%H:%M:%S"
+                    else:
+                        time_format = "%H:%M"
+                    oh.add_range(day, start_time.replace("24:00", "00:00"), end_time, time_format)
                 except:
                     self.logger.debug(f"Couldn't process opening hours: {hours}")
         return oh

@@ -1,29 +1,22 @@
-import scrapy
+from typing import AsyncIterator
+
 from geonamescache import GeonamesCache
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature, set_closed
-
-US_TERRITORIES = {
-    "AS": {"code": "AS", "name": "American Samoa"},
-    "FM": {"code": "FM", "name": "Micronesia"},
-    "GU": {"code": "GU", "name": "Guam"},
-    "MH": {"code": "MH", "name": "Marshall Islands"},
-    "MP": {"code": "MP", "name": "Northern Mariana Islands"},
-    "PW": {"code": "PW", "name": "Palau"},
-    "PR": {"code": "PR", "name": "Puerto Rico"},
-    "VI": {"code": "VI", "name": "U.S. Virgin Islands"},
-}
+from locations.pipelines.state_clean_up import US_TERRITORIES
 
 
-class XfinitySpider(scrapy.Spider):
+class XfinitySpider(Spider):
     name = "xfinity"
     item_attributes = {"brand": "Xfinity", "brand_wikidata": "Q5151002"}
     allowed_domains = ["www.xfinity.com", "api-support.xfinity.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for state in GeonamesCache().get_us_states() | US_TERRITORIES:
-            yield scrapy.http.Request(url=f"https://api-support.xfinity.com/servicecenters?location={state}")
+            yield Request(url=f"https://api-support.xfinity.com/servicecenters?location={state}")
 
     def store_hours(self, rules: str) -> OpeningHours:
         if not rules:

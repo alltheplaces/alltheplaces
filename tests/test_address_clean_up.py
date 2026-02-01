@@ -1,6 +1,3 @@
-from scrapy import Spider
-from scrapy.utils.test import get_crawler
-
 from locations.items import Feature
 from locations.pipelines.address_clean_up import AddressCleanUpPipeline, clean_address, merge_address_lines
 
@@ -70,23 +67,17 @@ def test_clean_address_dont_remove_short_valid_cjk():
 
 
 def get_objects(feature):
-    spider = Spider(name="test")
-    spider.crawler = get_crawler()
-    return (
-        feature,
-        AddressCleanUpPipeline(),
-        spider,
-    )
+    return feature, AddressCleanUpPipeline()
 
 
 def test_handle():
     # Junk
-    item, pipeline, spider = get_objects(
+    item, pipeline = get_objects(
         Feature(
             addr_full="123,    Example Street", postcode="    11111", street="-", state="      ", city=" \tExampletown"
         )
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("addr_full") == "123, Example Street"
     assert item.get("postcode") == "11111"
     assert item.get("street") == ""

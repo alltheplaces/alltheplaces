@@ -1,23 +1,23 @@
 import re
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.mcdonalds import McdonaldsSpider
-from locations.user_agents import FIREFOX_LATEST
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsBESpider(Spider):
+class McdonaldsBESpider(PlaywrightSpider):
     name = "mcdonalds_be"
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.be"]
     start_urls = ["https://www.mcdonalds.be/en/restaurants/api/restaurants"]
-    user_agent = FIREFOX_LATEST
-    requires_proxy = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

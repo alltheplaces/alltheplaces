@@ -1,7 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -14,7 +13,7 @@ class AuchanHUSpider(Spider):
     name = "auchan_hu"
     item_attributes = {"brand": "Auchan", "brand_wikidata": "Q758603"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://auchan.hu/api/v2/cache/petrol/list")
         yield JsonRequest(url="https://auchan.hu/api/v2/cache/store/list")
 

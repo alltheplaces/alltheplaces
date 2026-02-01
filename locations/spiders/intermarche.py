@@ -1,8 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-import scrapy
-from scrapy import FormRequest
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import FormRequest, JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -11,7 +10,7 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class IntermarcheSpider(scrapy.Spider):
+class IntermarcheSpider(Spider):
     name = "intermarche"
     allowed_domains = ["intermarche.com"]
     INTERMARCHE = {
@@ -42,13 +41,9 @@ class IntermarcheSpider(scrapy.Spider):
     }
 
     item_attributes = {"country": "FR"}
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DOWNLOAD_TIMEOUT": 180,
-    }
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 180, "USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         # Fetch cookies to get rid of DataDome captcha blockage
         yield FormRequest(
             url="https://dt.intermarche.com/js/",

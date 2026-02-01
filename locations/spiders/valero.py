@@ -1,19 +1,23 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
-class ValeroSpider(scrapy.Spider):
+class ValeroSpider(Spider):
     name = "valero"
     item_attributes = {"brand": "Valero", "brand_wikidata": "Q1283291"}
     allowed_domains = ["valero.com"]
     usa_bbox = [-125, 24, -65, 51]
     xstep = 5
     ystep = 3
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def make_search(self, xmin, ymin, xmax, ymax):
-        return scrapy.FormRequest(
+    def make_search(self, xmin: int, ymin: int, xmax: int, ymax: int) -> FormRequest:
+        return FormRequest(
             "https://locations.valero.com/en-us/Home/SearchForLocations",
             formdata={
                 "NEBound_Lat": str(ymax),
@@ -26,7 +30,7 @@ class ValeroSpider(scrapy.Spider):
             },
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         xs = list(range(self.usa_bbox[0], self.usa_bbox[2] + self.xstep, self.xstep))
         ys = list(range(self.usa_bbox[1], self.usa_bbox[3] + self.ystep, self.ystep))
         for xmin, xmax in zip(xs, xs[1:]):

@@ -1,5 +1,7 @@
-import scrapy
-from scrapy.http import JsonRequest
+from typing import Any, AsyncIterator, Iterable
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -118,23 +120,24 @@ PROPERTIES = {
 }
 
 
-class LukoilSpider(scrapy.Spider):
+class LukoilSpider(Spider):
     name = "lukoil"
-    download_delay = 0.10
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://auto.lukoil.ru/api/cartography/GetCountryDependentSearchObjectData?form=gasStation"]
+    allowed_domains = ["lukoil.ru"]
     handle_httpstatus_list = [403]
 
-    def start_requests(self):
-        yield JsonRequest(
-            "https://lukoil.bg/api/cartography/GetCountryDependentSearchObjectData?form=gasStation",
-            callback=self.get_results,
-        )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for url in self.start_urls:
+            yield JsonRequest(url=url, callback=self.get_results)
 
-    def get_results(self, response):
+    def get_results(self, response: Response) -> Iterable[JsonRequest]:
         for station in response.json()["GasStations"]:
-            yield JsonRequest(f"https://lukoil.bg/api/cartography/GetObjects?ids=gasStation{station['GasStationId']}")
+            yield JsonRequest(
+                f"https://auto.lukoil.ru/api/cartography/GetObjects?ids=gasStation{station['GasStationId']}"
+            )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         if data := response.json()[0]:
             poi = data.get("GasStation")
             item = DictParser.parse(poi)
@@ -149,7 +152,7 @@ class LukoilSpider(scrapy.Spider):
             apply_category(Categories.FUEL_STATION, item)
             yield item
 
-    def parse_brand(self, item: Feature, poi: dict):
+    def parse_brand(self, item: Feature, poi: dict) -> None:
         if company_name := poi.get("Company", {}).get("Name", ""):
             for brand, brand_tags in COMPANY_BRANDS.items():
                 if brand.lower() in company_name.lower():
@@ -159,7 +162,7 @@ class LukoilSpider(scrapy.Spider):
                 self.logger.warning(f"Unknown brand: {company_name}")
                 self.crawler.stats.inc_value(f"atp/lukoil/brand/failed/{company_name}")
 
-    def parse_attribute(self, item: Feature, poi: dict, attribute_name: str, mapping: dict):
+    def parse_attribute(self, item: Feature, poi: dict, attribute_name: str, mapping: dict) -> None:
         for attribute_entity in poi.get(attribute_name, []):
             if tag := mapping.get(attribute_entity.get("Name")):
                 apply_yes_no(tag, item, True)
@@ -167,7 +170,7 @@ class LukoilSpider(scrapy.Spider):
                 pass
                 # self.crawler.stats.inc_value(f"atp/lukoil/{attribute_name}/failed/{attribute_entity.get('Name')}")
 
-    def parse_hours(self, item: Feature, poi: dict):
+    def parse_hours(self, item: Feature, poi: dict) -> None:
         if poi.get("TwentyFourHour"):
             item["opening_hours"] = "24/7"
             return
@@ -183,7 +186,7 @@ class LukoilSpider(scrapy.Spider):
         except:
             self.crawler.stats.inc_value("atp/lukoil/hours/failed")
 
-    def parse_fuel_types(self, item: Feature, data: dict):
+    def parse_fuel_types(self, item: Feature, data: dict) -> None:
         if fuels := data.get("Fuels"):
             for fuel_type in fuels:
                 # Use fuel icon to determine fuel type as fuel name is not always available

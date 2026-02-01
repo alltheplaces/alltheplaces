@@ -1,5 +1,7 @@
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -11,7 +13,7 @@ class QuickBELUSpider(Spider):
     allowed_domains = ["www.quick.be"]
     start_urls = ["https://www.quick.be/fr/restaurants"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.find_json_file)
 

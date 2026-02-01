@@ -21,7 +21,7 @@ def _get_possible_links(response: Response | Selector):
     ]
 
 
-def extract_google_position(item: Feature, response: Response | Selector):
+def extract_google_position(item: Feature, response: Response | Selector) -> None:
     for link in _get_possible_links(response):
         try:
             coords = url_to_coords(link)
@@ -32,7 +32,7 @@ def extract_google_position(item: Feature, response: Response | Selector):
             return
 
 
-def url_to_coords(url: str) -> (float, float):  # noqa: C901
+def url_to_coords(url: str) -> tuple[float | None, float | None]:  # noqa: C901
     def get_query_param(link, query_param):
         parsed_link = urlsplit(link)
         queries = parse_qs(parsed_link.query)

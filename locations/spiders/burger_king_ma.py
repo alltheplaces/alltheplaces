@@ -1,6 +1,8 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -12,7 +14,7 @@ class BurgerKingMASpider(JSONBlobSpider):
     start_urls = ["https://api.solo.skylinedynamics.com/locations?_lat=0&_long=0"]
     locations_key = "data"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,
@@ -30,6 +32,7 @@ class BurgerKingMASpider(JSONBlobSpider):
         item["email"] = location["attributes"]["email"]
         item["addr_full"] = location["attributes"]["line1"]
         item["country"] = location["attributes"]["country"]
+        apply_category(Categories.FAST_FOOD, item)
         apply_yes_no(Extras.DELIVERY, item, location["attributes"]["delivery-enabled"] == 1, False)
         apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"]["is-drive-thru-enabled"], False)
         item["opening_hours"] = OpeningHours()

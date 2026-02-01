@@ -12,7 +12,7 @@ BRANDS = {
 
 class ErciyesAnadoluHoldingTRSpider(scrapy.Spider):
     name = "erciyes_anadolu_holding_tr"
-    download_delay = 3
+    custom_settings = {"DOWNLOAD_DELAY": 3}
     start_urls = ["https://brandapi.erciyes.com/api/ContactApi/GetCities"]
 
     def parse(self, response, **kwargs):

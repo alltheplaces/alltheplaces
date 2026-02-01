@@ -1,4 +1,7 @@
-from scrapy import FormRequest, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
@@ -24,7 +27,7 @@ class MoveYourselfAUSpider(Spider):
     allowed_domains = ["www.moveyourself.com.au"]
     start_urls = ["https://www.moveyourself.com.au/index.php"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {"getmapdata": "true"}
         yield FormRequest(url=self.start_urls[0], formdata=formdata, method="POST", callback=self.parse)
 

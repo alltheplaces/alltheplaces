@@ -1,6 +1,8 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -21,7 +23,7 @@ class BurgerKingNGSpider(JSONBlobSpider):
     request_headers = {"application": "5a426f83bbd4be2eb694497c5700c743"}
     request_data = {"latitude": "0", "longitude": "0", "order_types": [4, 6], "view": "search", "per_page": 50}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,
@@ -71,4 +73,5 @@ class BurgerKingNGSpider(JSONBlobSpider):
                 else:
                     item["opening_hours"].add_range(DAYS[day - 1], rule["time_from"], rule["time_to"])
 
+        apply_category(Categories.FAST_FOOD, item)
         yield item

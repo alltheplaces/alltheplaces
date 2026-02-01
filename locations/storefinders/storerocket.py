@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids, point_locations
@@ -51,16 +51,17 @@ class StoreRocketSpider(Spider):
        search radius values.
     """
 
-    dataset_attributes = {"source": "api", "api": "storerocket.io"}
-    storerocket_id: str = ""
+    dataset_attributes: dict = {"source": "api", "api": "storerocket.io"}
+
+    storerocket_id: str
     base_url: str | None = None
-    time_hours_format: str = 24  # or 12
+    time_hours_format: int = 24  # or 12
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
     search_radius: int = 0
     max_results: int = 1000
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.iseadgg_countries_list) == 0 and len(self.searchable_points_files) == 0:
             # PREFERRED approach of requesting all features at once in a
             # single API call. Note that some StoreRocket instances enforce a
@@ -85,7 +86,7 @@ class StoreRocketSpider(Spider):
             elif self.search_radius >= 15:
                 iseadgg_radius = 24
             else:
-                raise RuntimeError(
+                raise ValueError(
                     "A minimum search_radius of 15 (miles) is required to be used for the ISEADGG geographic radius search method."
                 )
             for lat, lon in country_iseadgg_centroids(self.iseadgg_countries_list, iseadgg_radius):
@@ -101,7 +102,7 @@ class StoreRocketSpider(Spider):
                         url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations?lat={lat}&lng={lon}&radius={self.search_radius}&limit={self.max_results}"
                     )
 
-    def parse(self, response, **kwargs) -> Iterable[Feature]:
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
         if not response.json()["success"]:
             return
 
@@ -113,11 +114,12 @@ class StoreRocketSpider(Spider):
                     "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use a smaller search_radius."
                 )
 
-            if len(locations) > 0:
-                self.crawler.stats.inc_value("atp/geo_search/hits")
-            else:
-                self.crawler.stats.inc_value("atp/geo_search/misses")
-            self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+            if self.crawler.stats:
+                if len(locations) > 0:
+                    self.crawler.stats.inc_value("atp/geo_search/hits")
+                else:
+                    self.crawler.stats.inc_value("atp/geo_search/misses")
+                self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
 
         for location in locations:
             self.pre_process_data(location)
@@ -148,5 +150,5 @@ class StoreRocketSpider(Spider):
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         yield item
 
-    def pre_process_data(self, location, **kwargs) -> None:
+    def pre_process_data(self, location: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""

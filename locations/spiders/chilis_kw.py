@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -9,10 +12,9 @@ from locations.user_agents import BROWSER_DEFAULT
 class ChilisKWSpider(Spider):
     name = "chilis_kw"
     item_attributes = {"brand": "Chili's", "brand_wikidata": "Q1072948"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "HTTPERROR_ALLOWED_CODES": [500]}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "HTTPERROR_ALLOWED_CODES": [500], "USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         gql_query = """
 {"query":" query ($subdomain: String!, $id: ID) { store(subdomain: $subdomain) { id branches(id: $id) { id titleAr titleEn addressAr addressEn areaEn contactNumber phoneNumber  lat lng openingHours } } }","variables":{"subdomain":"chiliskuwait"}}"""
         yield Request(

@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -6,8 +7,6 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class SpecsaversSpider(Spider):
@@ -18,14 +17,9 @@ class SpecsaversSpider(Spider):
         "www.specsavers.ca",
         "www.specsavers.com.au",
     ]
+    requires_proxy = True
 
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "USER_AGENT": BROWSER_DEFAULT,
-        "CONCURRENT_REQUESTS": 1,
-    }
-
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for domain in self.allowed_domains:
             country_code = domain[-2:].upper()
             if country_code == "UK":

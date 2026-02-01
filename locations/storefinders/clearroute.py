@@ -1,8 +1,8 @@
 from copy import deepcopy
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, MonitoringTypes, apply_category, apply_yes_no
 from locations.items import Feature
@@ -26,10 +26,11 @@ class ClearRouteSpider(Spider):
                    type of feature that it not available for the customer.
     """
 
-    customer_id: str = ""
+    dataset_attributes: dict = {"source": "api", "api": "iteris-atis.com"}
+    customer_id: str
     features: list[str] = ["cameras", "rwis"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if "cameras" in self.features:
             yield JsonRequest(
                 url=f"https://{self.customer_id}.cdn.iteris-atis.com/geojson/icons/metadata/icons.cameras.geojson",
@@ -41,7 +42,7 @@ class ClearRouteSpider(Spider):
                 callback=self.parse_rwis,
             )
 
-    def parse_cameras(self, response: Response) -> Iterable[Feature]:
+    def parse_cameras(self, response: TextResponse) -> Iterable[Feature]:
         for camera in response.json()["features"]:
             if camera.get("active") is False:
                 # Camera is disabled/not working and should be ignored.
@@ -75,7 +76,7 @@ class ClearRouteSpider(Spider):
                 properties["extras"]["camera:type"] = "fixed"
             yield Feature(**properties)
 
-    def parse_rwis(self, response: Response) -> Iterable[Feature]:
+    def parse_rwis(self, response: TextResponse) -> Iterable[Feature]:
         for rwis in response.json()["features"]:
             common_properties = {
                 "ref": next(filter(None, [rwis["properties"].get("id"), rwis.get("id")])),

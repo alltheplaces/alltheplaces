@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import urlencode
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
@@ -10,10 +10,10 @@ from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class YextLocationsSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "yext"}
+    dataset_attributes: dict = {"source": "api", "api": "yext"}
 
     endpoint: str = "https://cdn.yextapis.com/v2/accounts/me/content/locations"
-    api_key: str = ""
+    api_key: str
     api_version: str = "20231114"
     page_limit: int = 50
 
@@ -32,10 +32,10 @@ class YextLocationsSpider(Spider):
             )
         )
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request("")
 
-    def parse(self, response: Response) -> Iterable[Feature | JsonRequest]:
+    def parse(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         for location in response.json()["response"]["docs"]:
             item = DictParser.parse(location)
             item["branch"] = location.get("geomodifier")

@@ -27,7 +27,7 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
         "SSSC": ("SureStay Collection", "Q135246644"),
         "SSPL": ("SureStay Plus", "Q135246640"),
         "SSES": ("SureStay Studio", "Q135246687"),
-        "SUH": ("Sure Hotel", "Q135246620"),
+        "SUH": ("Sure Hotel", "Q135246628"),
         "SUPL": ("Sure Hotel", "Q135246628"),  # Sure Hotel Plus
         "SUSC": ("Sure Hotel Collection", "Q135246644"),
         "SUES": ("Sure Hotel Studio", "Q135246687"),
@@ -42,8 +42,7 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
 
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels-details.xml"]
     sitemap_rules = [(r"/en_US/book/[-\w]+/[-\w]+/propertyCode\.\d+\.html$", "parse_hotel")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
-    download_delay = 4
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 4}
     requires_proxy = True
 
     def parse_hotel(self, response):

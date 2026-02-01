@@ -1,8 +1,9 @@
-import json
 import re
+from json import loads
+from typing import AsyncIterator, Iterable
 
 from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
@@ -17,13 +18,13 @@ class StoreLocatorWidgetsSpider(Spider):
     To use, specify a `key`
     """
 
-    dataset_attributes = {"source": "api", "api": "storelocatorwidgets.com"}
-    key: str = ""
+    dataset_attributes: dict = {"source": "api", "api": "storelocatorwidgets.com"}
+    key: str
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=f"https://cdn.storelocatorwidgets.com/json/{self.key}")
 
-    def parse_hours_for_day_12h(self, oh: OpeningHours, day: str, hours_for_day: str):
+    def parse_hours_for_day_12h(self, oh: OpeningHours, day: str, hours_for_day: str) -> None:
         hours_for_day = (
             hours_for_day.replace("midnight", "12AM").replace("midday", "12PM").replace("24 hours", "12AM - 11:59PM")
         )
@@ -44,7 +45,7 @@ class StoreLocatorWidgetsSpider(Spider):
             end_time = f"{end_hour}:{end_min} {end_am_pm}"
             oh.add_range(day, start_time, end_time, time_format="%I:%M %p")
 
-    def parse_hours_for_day_24h(self, oh: OpeningHours, day: str, hours_for_day: str):
+    def parse_hours_for_day_24h(self, oh: OpeningHours, day: str, hours_for_day: str) -> None:
         hours_for_day = (
             hours_for_day.replace("midnight", "00:00").replace("midday", "12:00").replace("24 hours", "00:00 - 23:59")
         )
@@ -72,11 +73,11 @@ class StoreLocatorWidgetsSpider(Spider):
                     self.parse_hours_for_day_12h(oh, day, hours_for_day)
                 else:
                     self.parse_hours_for_day_24h(oh, day, hours_for_day)
-        return oh.as_opening_hours()
+        return oh
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         data_clean = response.text[4 : len(response.text) - 1]
-        locations = json.loads(data_clean)["stores"]
+        locations = loads(data_clean)["stores"]
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = location["storeid"]
@@ -94,5 +95,5 @@ class StoreLocatorWidgetsSpider(Spider):
             item["opening_hours"] = self.parse_hours(location)
             yield from self.parse_item(item, location)
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

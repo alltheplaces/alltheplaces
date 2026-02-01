@@ -1,10 +1,11 @@
-from typing import Any
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class StatSpider(Spider):
@@ -14,9 +15,16 @@ class StatSpider(Spider):
     because of the "stat" in the API path.
     """
 
-    dataset_attributes = {"source": "api", "api": "stat"}
+    start_urls: list[str]
+    dataset_attributes: dict = {"source": "api", "api": "stat"}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0])
+
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
         for store in response.json()["locations"]:
             store.update(store.pop("businessAddress"))
             item = DictParser.parse(store)
@@ -36,5 +44,5 @@ class StatSpider(Spider):
 
             yield from self.post_process_item(item, response, store)
 
-    def post_process_item(self, item, response, store):
+    def post_process_item(self, item: Feature, response: TextResponse, store: dict) -> Iterable[Feature]:
         yield item

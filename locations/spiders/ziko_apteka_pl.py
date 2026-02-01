@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -13,7 +14,7 @@ class ZikoAptekaPLSpider(Spider):
     allowed_domains = ["zikoapteka.pl"]
     start_urls = ["https://zikoapteka.pl/wp-admin/admin-ajax.php?action=get_pharmacies"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

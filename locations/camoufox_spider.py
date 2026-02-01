@@ -35,7 +35,7 @@ class CamoufoxSpider(PlaywrightSpider):
             solver = ClickSolver(framework=FrameworkType.CAMOUFOX, page=page)
             await solver.prepare()
 
-            if getattr(spider, "captcha_selector_indicating_success"):
+            if captcha_selector_indicating_success := getattr(spider, "captcha_selector_indicating_success"):
                 # Preferred method for a spider to confirm that a click-solver
                 # captcha has been successfully solved. The spider must set
                 # attribute "captcha_selector_indicating_success" to a string
@@ -50,7 +50,7 @@ class CamoufoxSpider(PlaywrightSpider):
                 await solver.solve_captcha(
                     captcha_container=page,
                     captcha_type=CaptchaType.CLOUDFLARE_TURNSTILE,
-                    expected_content_selector=spider.captcha_selector_indicating_success,
+                    expected_content_selector=captcha_selector_indicating_success,
                 )
             else:
                 # Fallback (default) mechanism where playwright_captcha tries

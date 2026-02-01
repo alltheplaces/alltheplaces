@@ -1,5 +1,6 @@
-from scrapy import Request
-from scrapy.http import Response
+from typing import AsyncIterator
+
+from scrapy.http import Request, Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Spider
 
@@ -14,7 +15,7 @@ class NaturalGrocersUSSpider(Spider):
     allowed_domains = ["naturalgrocers.com"]
     link_extractor = LinkExtractor(allow="/store/")
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request("https://www.naturalgrocers.com/store-directory?page=0", meta={"page": 0})
 
     def parse(self, response: Response, **kwargs):

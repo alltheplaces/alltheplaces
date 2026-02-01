@@ -20,9 +20,8 @@ class FarmersHomeFurnitureUSSpider(SitemapSpider):
     allowed_domains = ["www.farmershomefurniture.com"]
     sitemap_urls = ["https://www.farmershomefurniture.com/sitemaps/sitemap_stores.xml"]
     sitemap_rules = [("/stores/", "parse")]
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
     coordinates_pattern = re.compile(r"position: {lat:\s*([-\d.]+)[,\s]+lng:\s*([-\d.]+)}")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

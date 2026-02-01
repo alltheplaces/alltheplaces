@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
@@ -11,7 +11,7 @@ class MoyaPLSpider(Spider):
     name = "moya_pl"
     item_attributes = {"brand": "Moya", "brand_wikidata": "Q62297700"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://moyastacja.pl/mapa", data={"controller": "Main", "action": "GetMap"})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

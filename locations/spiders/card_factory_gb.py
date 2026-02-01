@@ -1,5 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
 from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
@@ -11,10 +13,10 @@ class CardFactoryGBSpider(Spider):
     item_attributes = {"brand": "Card Factory", "brand_wikidata": "Q5038192"}
     url_template = "https://www.cardfactory.co.uk/on/demandware.store/Sites-cardfactory-UK-Site/default/Stores-FindStores?showMap=true&radius=100&lat={}&long={}"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country in ["GB", "IE"]:
             for city in city_locations(country, 10000):
-                yield scrapy.Request(
+                yield Request(
                     self.url_template.format(city["latitude"], city["longitude"]),
                     callback=self.parse,
                     cb_kwargs=dict(country=country),

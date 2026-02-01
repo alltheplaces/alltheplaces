@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,7 +13,7 @@ class RayWhiteAUNZSpider(Spider):
     allowed_domains = ["raywhiteapi.ep.dynamics.net"]
     start_urls = ["https://raywhiteapi.ep.dynamics.net/v1/organisations?apiKey=6625c417-067a-4a8e-8c1d-85c812d0fb25"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "from": 0,
             "size": 10000,
