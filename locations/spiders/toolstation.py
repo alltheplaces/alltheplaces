@@ -27,6 +27,7 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
             item = DictParser.parse(store)
             item["website"] = response.url
             item["addr_full"] = store["address_text"].split("<br /><br />")[0]
+            item["branch"] = item.pop("name")
             yield item
         elif js := response.xpath('//script[contains(text(), "__NUXT__")]/text()').get():
             # stores is actually a JS function, so we have to parse the parameters and values
@@ -60,7 +61,7 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
                     item["opening_hours"].add_days_range(
                         day_range(start_day, end_day), start_time, end_time, time_format="%H%M"
                     )
-
+                item["branch"] = item.pop("name")
             yield item
 
     @staticmethod
