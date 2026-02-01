@@ -29,7 +29,6 @@ class WolseleyGBSpider(JSONBlobSpider):
         if opening_hours := feature.get("openingBusinessHours")["hours"]:
             item["opening_hours"] = OpeningHours()
             for rule in opening_hours:
-                print(rule)
                 if rule["closed"] == "true":
                     continue
                 item["opening_hours"].add_range(rule["dayOfWeek"], rule["openingTime"], rule["closingTime"])
