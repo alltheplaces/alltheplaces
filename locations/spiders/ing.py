@@ -15,7 +15,7 @@ class IngSpider(scrapy.Spider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    CASHPOINT_BRAND = {"brand": "Bancontact CASH", "brand_wikidata": "Q112875867"}
+    CASHPOINT_BRAND = {"brand": "Cash", "brand_wikidata": "Q112875867"}
 
     def parse(self, response, **kwargs):
         for store in response.json().get("locations"):

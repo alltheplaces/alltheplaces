@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -18,7 +19,7 @@ class SpecsaversSpider(Spider):
     ]
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for domain in self.allowed_domains:
             country_code = domain[-2:].upper()
             if country_code == "UK":

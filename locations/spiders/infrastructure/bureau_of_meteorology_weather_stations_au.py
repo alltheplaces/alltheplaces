@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -15,7 +15,7 @@ class BureauOfMeteorologyWeatherStationsAUSpider(Spider):
     skip_auto_cc = True  # Too coarse/Inaccurate polygons confuse outlying Australian islands/territories
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Scrapy always ignores FTP URLs unless ROBOTSTXT_OBEY=False
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.start_urls[0], meta={"ftp_user": "anonymous", "ftp_password": ""})
 
     def parse(self, response: Response) -> Iterable[Feature]:

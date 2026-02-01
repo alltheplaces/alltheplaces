@@ -1,19 +1,21 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class ChedrauiMXSpider(scrapy.Spider):
+class ChedrauiMXSpider(Spider):
     name = "chedraui_mx"
     item_attributes = {"brand": "Chedraui", "brand_wikidata": "Q2961952"}
+    allowed_domains = ["www.chedraui.com.mx"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.chedraui.com.mx/_v/public/graphql/v1",
-            data={
-                "query": """
+            data={"query": """
                 query @context(sender:"chedrauimx.locator@2.x",provider:"vtex.store-graphql@2.x"){
                   documents(pageSize:1000,acronym:"CS",fields:["id_store","full_name","address","postal_code","city","state","latitude","longitude","open_hour","close_hour","home_delivery","parking_bikes","parking_cars","parking_motos","parking_for_disabled","parking_pickup","store_pickup"]) {
                       fields {
@@ -21,8 +23,7 @@ class ChedrauiMXSpider(scrapy.Spider):
                             value
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response, **kwargs):

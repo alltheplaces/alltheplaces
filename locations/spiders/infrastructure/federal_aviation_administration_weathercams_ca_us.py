@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -14,7 +14,7 @@ class FederalAviationAdministrationWeathercamsCAUSSpider(JSONBlobSpider):
     start_urls = ["https://weathercams.faa.gov/api/sites"]
     locations_key = "payload"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], headers={"Referer": "https://weathercams.faa.gov"})
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

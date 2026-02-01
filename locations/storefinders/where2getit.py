@@ -8,73 +8,70 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# To use this storefinder, supply an api_brand_name value as would
-# be found in the following URL template:
-# https://hosted.where2getit.com/{api_brand_name}/rest/...
-# The api_key value needs to be supplied too and is found in the
-# request parameters for a POST to this URL. It is formatted as a
-# UUID (https://en.wikipedia.org/wiki/Universally_unique_identifier).
-
-# The api_filter value is optional and allows server-side
-# filtering of store locations which will be returned. This is useful
-# for spiders where you may want to only return official stores and
-# not resellers of a brand's products. It is also useful for
-# filtering out new stores not yet open, or stores which are closed
-# but which haven't been removed from the database.
-
-# Filters are a dictionary of nested rules that can include the
-# following types of rules:
-# * and     - all nested rules must return true
-# * or      - at least one nested rule must return true
-# * like    - a string must contain the specified string
-#             (case sensitive)
-# * ilike   - a string must contain the specified string
-#           (case insensitive)
-# * notlike - a string must not contain the specified string
-# * in      - a string must match one of the strings specified in a
-#             comma-separated list
-# * notin   - a string must not match any of the strings specified
-#             in a comma-separated list
-# * eq      - a string must equal the specified string
-# * ne      - a string must not equal the specified string
-# * gt      - a number must be greater than the specified number
-# * lt      - a number must be less than the specified number
-# * ge      - a number must be greater than or equal to the specified
-#             number
-# * le      - a number must be less than or equal to the specified
-#             number
-# * between - a number must be between (including lower and upper
-#             bounds) the number range specified as a
-#             comma-separated list
-#
-# As an example:
-# {"or": {"field1": {"in", "value1,value2,value3"},
-#         "field2": {"eq", "value4"}
-#        }
-# }
-#
-# As filters are complex to understand, it is best to search spiders
-# using "api_filter" to see other examples of filters being used.
-
-# Instead of Where2GetIt being provided as a service, it is also
-# possible for brands to self-host the software at a custom domain
-# name. If this is the case, change the api_endpoint value to be
-# the custom API url ending in "/rest/getlist".
-
-# If there are many store locations to return, it is possible the
-# response will time out. If this is the case, try setting the
-# value of the api_filter_admin_level to 1 for querying results
-# country-by-country. If timeouts still occur, set
-# api_filter_admin_level to 2 for querying results not just by
-# country, but also state-by-state or province-by-province. If you
-# still experience timeouts, you will need to overwrite the
-# make_request function to use a more granular form of querying, for
-# example, by city of each location.
-
 
 class Where2GetItSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "where2getit.com"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    """
+    To use this storefinder, supply an api_brand_name value as would be found
+    in the following URL template:
+    https://hosted.where2getit.com/{api_brand_name}/rest/...
+    The api_key value needs to be supplied too and is found in the request
+    parameters for a POST to this URL. It is formatted as a UUID
+    (https://en.wikipedia.org/wiki/Universally_unique_identifier).
+
+    The api_filter value is optional and allows server-side filtering of store
+    locations which will be returned. This is useful for spiders where you may
+    want to only return official stores and not resellers of a brand's
+    products. It is also useful for filtering out new stores not yet open, or
+    stores which are closed but which haven't been removed from the database.
+
+    Filters are a dictionary of nested rules that can include the following
+    types of rules:
+      and     - all nested rules must return true
+      or      - at least one nested rule must return true
+      like    - a string must contain the specified string (case sensitive)
+      ilike   - a string must contain the specified string (case insensitive)
+      notlike - a string must not contain the specified string
+      in      - a string must match one of the strings specified in a
+                comma-separated list
+      notin   - a string must not match any of the strings specified in a
+                comma-separated list
+      eq      - a string must equal the specified string
+      ne      - a string must not equal the specified string
+      gt      - a number must be greater than the specified number
+      lt      - a number must be less than the specified number
+      ge      - a number must be greater than or equal to the specified number
+      le      - a number must be less than or equal to the specified number
+      between - a number must be between (including lower and upper bounds)
+                the number range specified as a comma-separated list
+
+    As an example:
+      {
+        "or": {
+          "field1": {"in", "value1,value2,value3"},
+          "field2": {"eq", "value4"}
+        }
+      }
+
+    As filters are complex to understand, it is best to search spiders using
+    "api_filter" to see other examples of filters being used.
+
+    Instead of Where2GetIt being provided as a service, it is also possible
+    for brands to self-host the software at a custom domain name. If this is
+    the case, change the api_endpoint value to be the custom API url ending in
+    "/rest/getlist".
+
+    If there are many store locations to return, it is possible the response
+    will time out. If this is the case, try setting the value of the
+    api_filter_admin_level to 1 for querying results country-by-country. If
+    timeouts still occur, set api_filter_admin_level to 2 for querying results
+    not just by country, but also state-by-state or province-by-province. If
+    you still experience timeouts, you will need to overwrite the make_request
+    function to use a more granular form of querying, for example, by city of
+    each location.
+    """
+
+    dataset_attributes: dict = {"source": "api", "api": "where2getit.com"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
     api_endpoint: str | None = None
     api_brand_name: str
@@ -148,7 +145,7 @@ class Where2GetItSpider(Spider):
                     dont_filter=True,
                 )
         else:
-            async for request in self.make_request():
+            for request in self.make_request():
                 yield request
 
     def parse_country_list(self, response: TextResponse, **kwargs: Any) -> Iterable[JsonRequest]:
@@ -175,7 +172,8 @@ class Where2GetItSpider(Spider):
             self.logger.error(
                 f"Locations have probably been truncated due to {self.api_limit} features being returned by a single query. Increase api_limit to a higher value or try setting the api_filter_admin_level to a more specific value to avoid {self.api_limit} features being returned in any given request."
             )
-            self.crawler.stats.inc_value("api_limit_per_request_reached")
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("api_limit_per_request_reached")
 
         for location in response.json()["response"]["collection"]:
             self.pre_process_data(location)

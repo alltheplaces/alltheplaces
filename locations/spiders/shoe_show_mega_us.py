@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 import scrapy
 from scrapy.http import JsonRequest, Request, Response
@@ -25,7 +25,7 @@ class ShoeShowMegaUSSpider(JSONBlobSpider):
     custom_settings = {"ROBOTSTXT_OBEY": "False"}
     locations_key = "stores"
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[JsonRequest | Request]:
         for index, record in enumerate(postal_regions("US")):
             if index % 100 == 0:
                 yield scrapy.Request(

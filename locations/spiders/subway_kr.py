@@ -1,5 +1,5 @@
 import json
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import FormRequest
 from scrapy.http import Response
@@ -19,7 +19,7 @@ class SubwayKRSpider(JSONBlobSpider):
     }
     locations_key = "searchResult"
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.subway.co.kr/ajaxStoreSearch",
             formdata={

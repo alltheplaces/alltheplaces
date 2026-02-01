@@ -15,6 +15,8 @@ class ToppsTilesGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["catalog"]:
             store["street_address"] = store.pop("address")
+            if isinstance(store.get("postcode"), int):
+                store.pop("postcode")
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
             item["country"] = store["country_id"]

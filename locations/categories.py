@@ -71,6 +71,7 @@ class Categories(Enum):
     LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
+    LEISURE_SLIPWAY = {"leisure": "slipway"}
     LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
@@ -192,6 +193,7 @@ class Categories(Enum):
     SHOP_PRINTER_INK = {"shop": "printer_ink"}
     SHOP_PYROTECHNICS = {"shop": "pyrotechnics"}
     SHOP_RENTAL = {"shop": "rental"}
+    SHOP_SAFETY_EQUIPMENT = {"shop": "safety_equipment"}
     SHOP_SEAFOOD = {"shop": "seafood"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOE_REPAIR = {"shop": "shoe_repair"}
@@ -664,10 +666,14 @@ class PaymentMethods(Enum):
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
     APP = "payment:app"
     APPLE_PAY = "payment:apple_pay"
-    BANCOPOSTA = "payment:bancoposta"
     BANCOMAT = "payment:bancomat"
+    BANCONTACT = "payment:bancontact"
+    BANCOPOSTA = "payment:bancoposta"
     BCA_CARD = "payment:bca_card"
     BLIK = "payment:blik"
+    BRUNO = "payment:bruno"
+    CAPS = "payment:caps"
+    CARFOOD = "payment:carfood"
     CARDS = "payment:cards"
     CASH = "payment:cash"
     CASH_ONLY = "payment:cash=only"
@@ -677,18 +683,29 @@ class PaymentMethods(Enum):
     CREDIT_CARDS = "payment:credit_cards"
     D_BARAI = "payment:d_barai"
     DEBIT_CARDS = "payment:debit_cards"
+    DIESEL_CARD = "payment:diesel_card"
     DINACARD = "payment:dinacard"
     DINERS_CLUB = "payment:diners_club"
     DISCOVER_CARD = "payment:discover_card"
     EDY = "payment:edy"
+    EG = "payment:eg"
+    FLEETPASS = "payment:fleetpass"
     GCASH = "payment:gcash"
     GIFT_CARD = "payment:gift_card"
-    GOOGLE_PAY = "payment:google_pay"
     GIROCARD = "payment:girocard"
+    GO_EASY_WAY = "payment:go_easy_way"
+    GOOGLE_PAY = "payment:google_pay"
+    HAAN_CARD = "payment:haan_card"
     HUAWEI_PAY = "payment:huawei_pay"
     ID = "payment:id"
     JCB = "payment:jcb"
+    KUSTERS = "payment:kusters"
     LINE_PAY = "payment:line_pay"
+    MAES = "payment:maes"
+    MAES_APP = "payment:maes_app"
+    MAES_EUROPE_CARD = "payment:maes_europe_card"
+    MAES_HYBRID_CARD = "payment:maes_hybrid_card"
+    MAES_PREPAID = "payment:maes_prepaid"
     MAESTRO = "payment:maestro"
     MASTER_CARD = "payment:mastercard"
     MASTER_CARD_CONTACTLESS = "payment:mastercard_contactless"
@@ -700,6 +717,7 @@ class PaymentMethods(Enum):
     MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
+    OCTA_PLUS = "payment:octa_plus"
     PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
@@ -710,10 +728,14 @@ class PaymentMethods(Enum):
     SAMSUNG_PAY = "payment:samsung_pay"
     SATISPAY = "payment:satispay"
     SBP = "payment:sbp"  # https://www.cbr.ru/eng/psystem/sfp/
+    SMART_REPORTING = "payment:smart_reporting"
     SODEXO = "payment:sodexo"
+    TANX = "payment:tanx"
+    TRAVELCARD = "payment:travelcard"
     TWINT = "payment:twint"
     UNIONPAY = "payment:unionpay"
     UPI = "payment:upi"  # https://www.upichalega.com/
+    VAB = "payment:vab"
     VISA = "payment:visa"
     VISA_CONTACTLESS = "payment:visa_contactless"
     VISA_DEBIT = "payment:visa_debit"
@@ -721,6 +743,7 @@ class PaymentMethods(Enum):
     V_PAY = "payment:v_pay"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
+    XXIMO = "payment:xximo"
 
 
 payment_method_aliases = {

@@ -1,14 +1,13 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class SaqCASpider(scrapy.Spider):
+class SaqCASpider(Spider):
     name = "saq_ca"
     item_attributes = {"brand": "SAQ", "brand_wikidata": "Q3488077"}
 
@@ -19,7 +18,7 @@ class SaqCASpider(scrapy.Spider):
             cb_kwargs={"content_loaded": page},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

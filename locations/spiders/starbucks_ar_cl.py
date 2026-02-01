@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -15,7 +16,7 @@ class StarbucksARCLSpider(Spider):
     name = "starbucks_ar_cl"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country, base_url, min_population in [
             ("AR", "https://www.starbucks.com.ar", 100000),
             ("CL", "https://www.starbucks.cl", 15000),

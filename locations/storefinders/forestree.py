@@ -15,7 +15,7 @@ class ForestreeSpider(Spider):
     such as those in parks and arboretums). The main website for Forestree is
     https://forestree.app/
 
-    To use this spider, specify ai `host` and `customer_id`.
+    To use this spider, specify a `host` and `customer_id`.
 
     In the example URL of "https://trees.example.net/storage/data/ex/ex_trees.geojson":
       host = "trees.example.net"

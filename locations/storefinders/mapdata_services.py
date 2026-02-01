@@ -20,11 +20,11 @@ class MapDataServicesSpider(Spider):
     not automatically extract.
     """
 
-    dataset_attributes = {"source": "api", "api": "nowwhere.com.au"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt causes parsing errors
+    dataset_attributes: dict = {"source": "api", "api": "nowwhere.com.au"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt causes parsing errors
 
-    api_brand_name: str = ""
-    api_key: str = ""
+    api_brand_name: str
+    api_key: str
     api_filter: str | None = None
 
     async def start(self) -> AsyncIterator[JsonRequest]:

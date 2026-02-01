@@ -1,7 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -10,7 +9,7 @@ from locations.geo import city_locations
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
-class SevenElevenTHSpider(scrapy.Spider):
+class SevenElevenTHSpider(Spider):
     """
     Store locator: https://www.7eleven.co.th/find-store
     """
@@ -25,7 +24,7 @@ class SevenElevenTHSpider(scrapy.Spider):
         "ROBOTSTXT_OBEY": False,
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # TODO: better way to iterate over geo-based API, only half of the POIs are fetched.
         #       Small towns are not present in geonamescache.
         #       Big cities are not fully covered due to big area.

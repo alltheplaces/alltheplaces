@@ -24,11 +24,11 @@ class BpSpider(GeoMeSpider):
         "aral_pulse": {"brand": "Aral pulse", "operator": "Aral", "operator_wikidata": "Q565734"},
     }
 
-    def parse_item(self, item, location):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         if brand := self.brands.get(location["site_brand"]):
             item.update(brand)
         else:
-            item.update(self.brands["BP"])
+            item.update(self.brands["bp"])
             self.crawler.stats.inc_value("{}/unmapped_brand/{}".format(self.name, location["site_brand"]))
 
         products = location["products"]

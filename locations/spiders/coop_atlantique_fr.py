@@ -9,7 +9,6 @@ class CoopAtlantiqueFRSpider(scrapy.Spider):
     name = "coop_atlantique_fr"
     item_attributes = {"brand": "Coop Atlantique", "brand_wikidata": "Q2996560"}
     start_urls = ["https://www.coop-atlantique.fr/nos-activites/nos-magasins/"]
-    requires_proxy = True
 
     def parse(self, response, **kwargs):
         stores = chompjs.parse_js_object(response.xpath('//*[@id="arrayMagasin"]/@value').get())

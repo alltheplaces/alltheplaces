@@ -1,6 +1,7 @@
 import re
 from json import loads
 from typing import AsyncIterator, Iterable
+from urllib.parse import urljoin
 
 from scrapy import Request, Selector, Spider
 from scrapy.http import TextResponse
@@ -16,7 +17,7 @@ class AmastyStoreLocatorSpider(Spider):
       v1: https://amasty.com/docs/doku.php?id=magento_1:store_locator
       v2: https://amasty.com/docs/doku.php?id=magento_2:store_locator
 
-    To use this spider, specify one or more `allowed_domain`, and the default
+    To use this spider, specify `allowed_domains`, and the default
     path `/amlocator/index/ajax/` will be requested. If for some reason the
     path is not default, it can be overridden by supplying the full path in
     `start_urls`. Some implementations of Amasty Store Finder limit the number
@@ -34,6 +35,8 @@ class AmastyStoreLocatorSpider(Spider):
     """
 
     # Public attributes. You may set these attributes in a spider.
+    allowed_domains: list[str] = []
+    start_urls: list[str] = []
     pagination_mode: bool = False
 
     # Private attributes. Do not set these attributes in a spider.
@@ -45,14 +48,18 @@ class AmastyStoreLocatorSpider(Spider):
         pagination_attribute = ""
         if self.pagination_mode:
             pagination_attribute = "?p=1"
-        if len(self.start_urls) == 0:
-            for domain in self.allowed_domains:
-                yield Request(
-                    url=f"https://{domain}/amlocator/index/ajax/{pagination_attribute}", headers=headers, method="POST"
-                )
+        if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
+            yield Request(
+                url=f"https://{self.allowed_domains[0]}/amlocator/index/ajax/{pagination_attribute}",
+                headers=headers,
+                method="POST",
+            )
+        elif len(self.start_urls) == 1:
+            yield Request(url=urljoin(self.start_urls[0], pagination_attribute), headers=headers, method="POST")
         else:
-            for url in self.start_urls:
-                yield Request(url=f"{url}{pagination_attribute}", headers=headers, method="POST")
+            raise ValueError(
+                "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
+            )
 
     def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
         json_blob = re.search(r"items\":(\[.*\]),\"", response.text)
@@ -107,6 +114,8 @@ class AmastyStoreLocatorSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature | Request]:
+    def post_process_item(
+        self, item: Feature, feature: dict, popup_html: Selector | None = None
+    ) -> Iterable[Feature | Request]:
         """Override with any post-processing on the item."""
         yield item

@@ -1,8 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import chompjs
-import scrapy
-from scrapy import Request
+from chompjs import parse_js_object
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -11,7 +10,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class RadissonHotelsSpider(scrapy.Spider):
+class RadissonHotelsSpider(Spider):
     name = "radisson_hotels"
     allowed_domains = ["www.radissonhotels.com"]
     brand_mapping = {
@@ -35,13 +34,13 @@ class RadissonHotelsSpider(scrapy.Spider):
         "DOWNLOAD_TIMEOUT": 300,
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.radissonhotels.com/zimba-api/hotels?limit=1000", headers={"accept-language": "en-us"}
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel in chompjs.parse_js_object(response.text)["hotels"]:
+        for hotel in parse_js_object(response.text)["hotels"]:
             hotel.update(hotel.pop("contactInfo"))
             item = DictParser.parse(hotel)
             item["ref"] = hotel.get("code")
