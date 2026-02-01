@@ -24,6 +24,8 @@ class HdfcBankINSpider(Spider):
 
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
+            if not location:
+                continue
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").replace("_", " ").removesuffix(" ATM")
             item["state"] = location.get("geographicalState").replace("_", " ")

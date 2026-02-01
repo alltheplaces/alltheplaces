@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 import scrapy
+from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
@@ -22,8 +23,13 @@ class KwikTripSpider(scrapy.Spider):
     name = "kwik_trip"
     item_attributes = {"brand": "Kwik Trip", "brand_wikidata": "Q6450420"}
     allowed_domains = ["www.kwiktrip.com"]
-    start_urls = ["https://www.kwiktrip.com/Maps-Downloads/Store-List"]
-    requires_proxy = True
+    requires_proxy = "US"
+
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
+            url="https://www.kwiktrip.com/Maps-Downloads/Store-List",
+            meta={"zyte_api_automap": {"browserHtml": True}},
+        )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath("(//tr)[position()>1]"):
@@ -36,6 +42,9 @@ class KwikTripSpider(scrapy.Spider):
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
         location = response.json()
+        if "address" not in location:
+            # Store may be coming soon or closed
+            return
         item = DictParser.parse(location)
         item["street_address"] = merge_address_lines([location["address"]["address1"], location["address"]["address2"]])
 

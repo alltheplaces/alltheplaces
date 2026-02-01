@@ -15,3 +15,7 @@ class TradelinkAUSpider(LocalisrSpider):
         (-37.189167, 144.623059),  # VIC
         (-30.759026, 117.753404),  # WA
     ]
+
+    def parse_item(self, item, location):
+        item["street_address"] = item.pop("addr_full", None)
+        yield item
