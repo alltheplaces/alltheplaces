@@ -41,7 +41,7 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
 
                 store = chompjs.parse_js_object(re.search(self.stores_pattern, js).group(1))[0]["branch"]
                 self.populate(store, args)
-            else: 
+            else:
                 return
             if store["status"] != 1:
                 return
