@@ -6,7 +6,7 @@ import re
 import sys
 
 from scrapy.commands import ScrapyCommand
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerProcessBase
 
 from locations.exporters.geojson import find_spider_class
 
@@ -44,7 +44,7 @@ class DuplicateWikidataCommand(ScrapyCommand):
         )
 
     @staticmethod
-    def wikidata_spiders(crawler_process: CrawlerProcess) -> dict:
+    def wikidata_spiders(crawler_process: CrawlerProcessBase) -> dict:
         codes = {}
         for spider_name in crawler_process.spider_loader.list():
             spider = find_spider_class(spider_name)
@@ -61,19 +61,22 @@ class DuplicateWikidataCommand(ScrapyCommand):
 
     def run(self, args: list[str], opts: argparse.Namespace) -> None:
         duplicates = {}
-        codes = self.wikidata_spiders(self.crawler_process)
-        for code, files in codes.items():
-            if len(files) == 1:
-                # wikidata codes that come from one spider only are not interesting to report
-                continue
-            if opts.cross_directory:
-                unique_dirs = set()
-                for file in files:
-                    unique_dirs.add(os.path.dirname(file))
-                if len(unique_dirs) == 1:
-                    # duplicates all exist in the same spider directory, ignore given command line option
+        if crawler_process := self.crawler_process:
+            codes = self.wikidata_spiders(crawler_process)
+            for code, files in codes.items():
+                if len(files) == 1:
+                    # wikidata codes that come from one spider only are not interesting to report
                     continue
-            duplicates[code] = list(files)
+                if opts.cross_directory:
+                    unique_dirs = set()
+                    for file in files:
+                        unique_dirs.add(os.path.dirname(file))
+                    if len(unique_dirs) == 1:
+                        # duplicates all exist in the same spider directory, ignore given command line option
+                        continue
+                duplicates[code] = list(files)
+        else:
+            raise RuntimeError("Crawler process not defined")
 
         # The results either go to terminal or a JSON file
         if opts.outfile:

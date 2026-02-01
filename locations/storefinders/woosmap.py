@@ -8,16 +8,19 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Documentation available at https://developers.woosmap.com/products/search-api/get-started/
-#
-# To use this spider, supply the API 'key' which typically starts
-# with 'woos-' followed by a UUID. Also supply a value for 'origin'
-# which is the HTTP 'Origin' header value, typically similar to
-# 'https://www.brandname.example'.
-
 
 class WoosmapSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "woosmap.com"}
+    """
+    Documentation available at:
+    https://developers.woosmap.com/products/search-api/get-started/
+
+    To use this spider, supply the API 'key' which typically starts with
+    'woos-' followed by a UUID. Also supply a value for 'origin' which is the
+    HTTP 'Origin' header value, typically similar to
+    'https://www.brandname.example'.
+    """
+
+    dataset_attributes: dict = {"source": "api", "api": "woosmap.com"}
 
     key: str
     origin: str
@@ -34,7 +37,8 @@ class WoosmapSpider(Spider):
             for feature in features:
                 item = DictParser.parse(feature["properties"])
 
-                item["street_address"] = merge_address_lines(feature["properties"]["address"]["lines"])
+                if address_lines := feature["properties"]["address"]["lines"]:
+                    item["street_address"] = merge_address_lines(address_lines)
                 item["geometry"] = feature["geometry"]
 
                 item["opening_hours"] = OpeningHours()
@@ -54,9 +58,11 @@ class WoosmapSpider(Spider):
                 yield from self.parse_item(item, feature) or []
 
         if pagination := response.json()["pagination"]:
-            if pagination["page"] < pagination["pageCount"]:
+            current_page = int(pagination["page"])
+            total_pages = int(pagination["pageCount"])
+            if current_page < total_pages:
                 yield JsonRequest(
-                    url=f'https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page={pagination["page"] + 1}',
+                    url=f"https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page={current_page + 1}",
                     headers={"Origin": self.origin},
                     meta={"referrer_policy": "no-referrer"},
                 )

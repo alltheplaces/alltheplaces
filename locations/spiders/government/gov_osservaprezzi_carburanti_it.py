@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 from enum import Enum
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -14,10 +15,6 @@ from locations.spiders.q8_italia import Q8ItaliaSpider
 class GovOsservaprezziCarburantiITSpider(Spider):
     name = "gov_osservaprezzi_carburanti_it"
     dataset_attributes = {"source": "api", "api": "carburanti.mise.gov.it"}
-
-    custom_settings = {
-        "DOWNLOAD_DELAY": 0.1,
-    }
 
     FUELS = {
         "GPL": Fuel.LPG,
@@ -105,7 +102,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
             fuel_tag = fuel_tag.value
         return re.sub(r"^fuel:", "charge:", fuel_tag)
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in point_locations("italy_grid_10km.csv"):
             yield JsonRequest(
                 "https://carburanti.mise.gov.it/ospzApi/search/zone",

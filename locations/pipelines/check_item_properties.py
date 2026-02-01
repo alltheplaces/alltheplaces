@@ -4,32 +4,39 @@ from re import Pattern
 
 from geonamescache import GeonamesCache
 from scrapy import Spider
+from scrapy.crawler import Crawler
 
 from locations.hours import OpeningHours
-from locations.items import Feature, get_lat_lon, set_lat_lon
+from locations.items import Feature, set_lat_lon
 
 
 def check_field(
-    item: Feature, spider: Spider, param: str, allowed_types: type | tuple[type], match_regex: Pattern | None = None
+    item: Feature,
+    spider: Spider | None,
+    param: str,
+    allowed_types: type | tuple[type],
+    match_regex: Pattern | None = None,
 ) -> None:
     if val := item.get(param):
         if not isinstance(val, allowed_types):
-            spider.logger.error(
+            spider.logger.error(  # ty: ignore [possibly-missing-attribute]
                 f'Invalid type "{type(val).__name__}" for attribute "{param}". Expected type(s) are "{allowed_types}".'
             )
-            if spider.crawler.stats:
+            if spider and spider.crawler and spider.crawler.stats:
                 spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
         elif match_regex and not match_regex.match(val):
-            spider.logger.warning(
+            spider.logger.warning(  # ty: ignore [possibly-missing-attribute]
                 f'Invalid value "{val}" for attribute "{param}". Value did not match expected regular expression of r"{match_regex.pattern}".'
             )
-            if spider.crawler.stats:
+            if spider and spider.crawler and spider.crawler.stats:
                 spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
-    elif spider.crawler.stats:
+    elif spider and spider.crawler and spider.crawler.stats:
         spider.crawler.stats.inc_value(f"atp/field/{param}/missing")
 
 
 class CheckItemPropertiesPipeline:
+    crawler: Crawler
+
     countries = GeonamesCache().get_countries().keys()
     # From https://github.com/django/django/blob/master/django/core/validators.py
     url_regex = re.compile(
@@ -54,66 +61,132 @@ class CheckItemPropertiesPipeline:
     min_lon = -180.0
     max_lon = 180.0
 
-    def process_item(self, item: Feature, spider: Spider) -> Feature:  # noqa: C901
-        check_field(item, spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
-        check_field(item, spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
-        check_field(item, spider, "website", (str,), self.url_regex)
-        check_field(item, spider, "image", (str,), self.url_regex)
-        check_field(item, spider, "email", (str,), self.email_regex)
-        check_field(item, spider, "phone", (str,))
-        check_field(item, spider, "street_address", (str,))
-        check_field(item, spider, "city", (str,))
-        check_field(item, spider, "state", (str,))
-        check_field(item, spider, "postcode", (str,))
-        check_field(item, spider, "country", (str,))
-        check_field(item, spider, "name", (str,))
-        check_field(item, spider, "brand", (str,))
-        check_field(item, spider, "operator", (str,))
-        check_field(item, spider, "branch", (str,))
+    def __init__(self, crawler: Crawler):
+        self.crawler = crawler
 
-        self.check_geom(item, spider)
-        self.check_twitter(item, spider)
-        self.check_opening_hours(item, spider)
-        self.check_country(item, spider)
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature) -> Feature:  # noqa: C901
+        check_field(item, self.crawler.spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
+        check_field(
+            item, self.crawler.spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex
+        )
+        check_field(item, self.crawler.spider, "website", (str,), self.url_regex)
+        check_field(item, self.crawler.spider, "image", (str,), self.url_regex)
+        check_field(item, self.crawler.spider, "email", (str,), self.email_regex)
+        check_field(item, self.crawler.spider, "phone", (str,))
+        check_field(item, self.crawler.spider, "street_address", (str,))
+        check_field(item, self.crawler.spider, "city", (str,))
+        check_field(item, self.crawler.spider, "state", (str,))
+        check_field(item, self.crawler.spider, "postcode", (str,))
+        check_field(item, self.crawler.spider, "country", (str,))
+        check_field(item, self.crawler.spider, "name", (str,))
+        check_field(item, self.crawler.spider, "brand", (str,))
+        check_field(item, self.crawler.spider, "operator", (str,))
+        check_field(item, self.crawler.spider, "branch", (str,))
+
+        self.check_geom(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_twitter(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_opening_hours(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_country(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
 
         if country_code := item.get("country"):
-            if spider.crawler.stats:
-                spider.crawler.stats.inc_value(f"atp/country/{country_code}")
+            if (
+                self.crawler
+                and self.crawler.spider
+                and self.crawler.spider.crawler
+                and self.crawler.spider.crawler.stats
+            ):
+                self.crawler.spider.crawler.stats.inc_value(f"atp/country/{country_code}")
 
         return item
 
-    def check_geom(self, item: Feature, spider: Spider) -> None:
-        if coords := get_lat_lon(item):
-            lat, lon = coords
-
-            if not (self.min_lat < lat < self.max_lat):
-                if spider.crawler.stats:
-                    spider.crawler.stats.inc_value("atp/field/lat/invalid")
-                lat = None
-
-            if not (self.min_lon < lon < self.max_lon):
-                if spider.crawler.stats:
-                    spider.crawler.stats.inc_value("atp/field/lon/invalid")
-                lon = None
-
-            if isinstance(lat, float) and isinstance(lon, float):
-                if math.fabs(lat) < 3 and math.fabs(lon) < 3:
-                    if spider.crawler.stats:
-                        spider.crawler.stats.inc_value("atp/geometry/null_island")
-                    lat = None
-                    lon = None
-
-            if lat and lon:
-                set_lat_lon(item, lat, lon)
+    def check_geom(self, item: Feature, spider: Spider) -> None:  # noqa: C901
+        lat_untyped = None
+        lon_untyped = None
+        if geometry := item.get("geometry"):
+            if isinstance(geometry, dict):
+                if geometry.get("type") == "Point":
+                    if coords := geometry.get("coordinates"):
+                        if isinstance(coords, list):
+                            if len(coords) == 2:
+                                lat_untyped = coords[1]
+                                lon_untyped = coords[0]
+                    elif geometry.get("type") in [
+                        "MultiPoint",
+                        "LineString",
+                        "MultiLineString",
+                        "Polygon",
+                        "MultiPolygon",
+                    ]:
+                        # Other geometry types are currently not validated by
+                        # ATP so this pipeline will assume they're correct.
+                        item.pop("lat", None)
+                        item.pop("lon", None)
+                        return
+                    else:
+                        # Invalid geometry type. Refer to RFC 7946 for valid
+                        # types.
+                        if spider.crawler.stats:
+                            spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+                        item.pop("lat", None)
+                        item.pop("lon", None)
+                        item.pop("geometry", None)
+                        return
             else:
+                # Invalid geometry type.
+                if spider.crawler.stats:
+                    spider.crawler.stats.inc_value("atp/field/geometry/invalid")
                 item.pop("lat", None)
                 item.pop("lon", None)
                 item.pop("geometry", None)
+                return
+        else:
+            lat_untyped = item.get("lat")
+            lon_untyped = item.get("lon")
 
-        if not (item.get("geometry") or get_lat_lon(item)):
+        if lat_untyped is None or lon_untyped is None:
             if spider.crawler.stats:
-                spider.crawler.stats.inc_value("atp/field/lat/missing")
-                spider.crawler.stats.inc_value("atp/field/lon/missing")
+                spider.crawler.stats.inc_value("atp/field/geometry/missing")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return
+
+        # At this point, lat_untyped and lon_untyped were either extracted
+        # from the geometry attribute, or lat/lon attributes. They could be
+        # invalidly typed (e.g. strings) or have invalid values (e.g. 700).
+
+        try:
+            lat_typed = float(lat_untyped)
+            lon_typed = float(lon_untyped)
+        except (TypeError, ValueError):
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return
+
+        if lat_typed < -90.0 or lat_typed > 90.0 or lon_typed < -180.0 or lon_typed > 180.0:
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return None
+
+        if math.fabs(lat_typed) < 3 and math.fabs(lon_typed) < 3:
+            if spider.crawler.stats:
+                spider.crawler.stats.inc_value("atp/geometry/null_island")
+            item.pop("lat", None)
+            item.pop("lon", None)
+            item.pop("geometry", None)
+            return
+
+        set_lat_lon(item, lat_typed, lon_typed)
 
     def check_twitter(self, item: Feature, spider: Spider) -> None:
         if twitter := item.get("twitter"):

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import Request
 from scrapy.spiders import Spider
 
@@ -83,7 +85,7 @@ class MkrfRUSpider(Spider):
 
     api_key = "be088ddb94bfd718a196c7ac7f67d32303ba69681948ec0a21744cdd4f78bd16"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for dataset in self.datasets:
             yield Request(
                 url=f"https://opendata.mkrf.ru/v2/{dataset}/$?l=1000",

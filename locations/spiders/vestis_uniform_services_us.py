@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,10 +13,10 @@ class VestisUniformServicesUSSpider(Spider):
     allowed_domains = ["www.vestis.com"]
     start_urls = ["https://www.vestis.com/graphql"]
 
-    def start_requests(self):
-        yield from self.request_graphql_page()
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.request_graphql_page()
 
-    def request_graphql_page(self, cursor: str = None):
+    def request_graphql_page(self, cursor: str = None) -> JsonRequest:
         query = {
             "operationName": "findLocations",
             "variables": {"afterCursor": cursor},
@@ -46,12 +48,12 @@ class VestisUniformServicesUSSpider(Spider):
     }
 }""",
         }
-        yield JsonRequest(url=self.start_urls[0], method="POST", data=query)
+        return JsonRequest(url=self.start_urls[0], method="POST", data=query)
 
     def parse(self, response):
         pagination = response.json()["data"]["locations"]["pageInfo"]
         if pagination["hasNextPage"]:
-            yield from self.request_graphql_page(pagination["endCursor"])
+            yield self.request_graphql_page(pagination["endCursor"])
         for location in response.json()["data"]["locations"]["edges"]:
             item = DictParser.parse(location["node"])
             extra_fields_1 = {

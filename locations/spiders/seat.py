@@ -1,5 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
 import xmltodict
+from scrapy import Spider
 from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
@@ -7,7 +9,7 @@ from locations.dict_parser import DictParser
 from locations.spiders.volkswagen import VolkswagenSpider
 
 
-class SeatSpider(scrapy.Spider):
+class SeatSpider(Spider):
     name = "seat"
     item_attributes = {"brand": "Seat", "brand_wikidata": "Q188217"}
     COUNTRY_DEALER_LOCATOR_MAP = {
@@ -45,7 +47,7 @@ class SeatSpider(scrapy.Spider):
         "UA",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country, locator in self.COUNTRY_DEALER_LOCATOR_MAP.items():
             yield Request(
                 url=f"https://www.seat.{country}/{locator}.snw.xml?brandseat=true&max_dist=3000&city={country.upper()}".replace(

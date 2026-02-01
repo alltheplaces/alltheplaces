@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -20,22 +20,24 @@ class McdonaldsTRSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        data = {
-            "cityId": "0",
-            "subcity": "",
-            "avm": "false",
-            "birthday": "false",
-            "isDeliveryStore": "false",
-            "open724": "false",
-            "breakfast": "false",
-            "mcdcafe": "false",
-        }
-        for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", data=data)
+        yield JsonRequest(
+            url="https://www.mcdonalds.com.tr/restaurants/getstores",
+            data={
+                "cityId": "0",
+                "subcity": "",
+                "avm": "false",
+                "birthday": "false",
+                "isDeliveryStore": "false",
+                "open724": "false",
+                "breakfast": "false",
+                "mcdcafe": "false",
+            },
+        )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["addr_full"] = location["STORE_ADDRESS"]
             item["opening_hours"] = OpeningHours()
             if location["TWENTYFOUR_HRS"]:

@@ -1,18 +1,18 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class ShellRechargeSpider(scrapy.Spider):
+class ShellRechargeSpider(Spider):
     name = "shell_recharge"
     item_attributes = {"brand": "Shell Recharge", "brand_wikidata": "Q105883058"}
 
-    def start_requests(self):
-        yield scrapy.http.JsonRequest(
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
             url="https://sky.shellrecharge.com/greenlots/coreapi/v3/sites/map-search",
             data={
                 "latitude": 42.5,

@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
 
@@ -16,7 +16,7 @@ class SupermacsGBIESpider(Spider):
         "supermacs.ie",
     ]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             "https://supermacs.ie/wp-admin/admin-ajax.php",
             formdata={"action": "get_markers"},

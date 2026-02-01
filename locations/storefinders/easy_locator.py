@@ -5,17 +5,22 @@ from scrapy.http import JsonRequest, TextResponse
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
-# To use this spider, specify api_brand_name as the brand name key existing
-# in calls to the Easy Locator API at https://easylocator.net/ajax/...
-#
-# Example source URL: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
-# Example api_brand_name from source URL: gigiscupcakesusa
-
 
 class EasyLocatorSpider(JSONBlobSpider):
-    dataset_attributes = {"source": "api", "api": "easylocator.net"}
+    """
+    EasyLocator is a cloud-hosted store locator service with an official
+    website of https://easylocator.net/
+
+    To use this spider, specify api_brand_name as the brand name key existing
+    in calls to the Easy Locator API at https://easylocator.net/ajax/...
+
+    Example source URL: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
+    Example api_brand_name from source URL: gigiscupcakesusa
+    """
+
+    dataset_attributes: dict = {"source": "api", "api": "easylocator.net"}
     api_brand_name: str
-    loations_key = "physical"
+    loations_key: str | list[str] = "physical"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(

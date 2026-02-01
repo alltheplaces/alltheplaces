@@ -1,11 +1,14 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.geo import point_locations
 from locations.items import Feature
 
 
-class RuralviaESSpider(scrapy.Spider):
+class RuralviaESSpider(Spider):
     name = "ruralvia_es"
     allowed_domains = ["ruralvia.com"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
@@ -52,9 +55,9 @@ class RuralviaESSpider(scrapy.Spider):
         "3191": {"brand": "Caja Rural de Aragón", "brand_wikidata": "Q5719155"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", "ES"):
-            yield scrapy.Request(
+            yield Request(
                 f"https://www.ruralvia.com/rviaoperations/rest/locator/office?codigoEntidad=9998&longitud={lon}&latitud={lat}&radio=120&grupo=S"
             )
 
