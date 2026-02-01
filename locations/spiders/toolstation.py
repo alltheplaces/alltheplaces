@@ -26,7 +26,7 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
             store = json.loads(re.search(self.gm_pattern, js).group(1))[0]
             item = DictParser.parse(store)
             item["website"] = response.url
-            item["addr_full"] = store["address_text"].split("<br /><br />")[0]    
+            item["addr_full"] = store["address_text"].split("<br /><br />")[0]
             if item.get("name"):
                 item["branch"] = item.pop("name")
             yield item
