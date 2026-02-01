@@ -11,7 +11,9 @@ class CopenhagenMunicipalityTreesDKSpider(JSONBlobSpider):
     name = "copenhagen_municipality_trees_dk"
     item_attributes = {"operator": "Copenhagen Municipality", "operator_wikidata": "Q504125"}
     allowed_domains = ["wfs-kbhkort.kk.dk"]
-    start_urls = ["https://wfs-kbhkort.kk.dk/k101/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=k101:trae_basis&outputFormat=application%2Fjson&SRSNAME=EPSG:4326"]
+    start_urls = [
+        "https://wfs-kbhkort.kk.dk/k101/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=k101:trae_basis&outputFormat=application%2Fjson&SRSNAME=EPSG:4326"
+    ]
     locations_key = "features"
     custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
