@@ -1,17 +1,13 @@
 from typing import Iterable
 
 import chompjs
-
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+
 
 class WolseleyGBSpider(JSONBlobSpider):
     name = "wolseley_gb"
@@ -28,13 +24,13 @@ class WolseleyGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["identifier"]
         item["website"] = response.urljoin(f'https://www.wolseley.co.uk/branch/{feature["seoName"]}/')
-        item["lat"], item["lon"] = feature["coordinates"]["latitude"],feature["coordinates"]["longitude"]
+        item["lat"], item["lon"] = feature["coordinates"]["latitude"], feature["coordinates"]["longitude"]
         item["branch"] = item.pop("name")
         if opening_hours := feature.get("openingBusinessHours")["hours"]:
             item["opening_hours"] = OpeningHours()
             for rule in opening_hours:
                 print(rule)
-                if rule["closed"] == 'true':
+                if rule["closed"] == "true":
                     continue
                 item["opening_hours"].add_range(rule["dayOfWeek"], rule["openingTime"], rule["closingTime"])
 
