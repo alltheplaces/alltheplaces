@@ -26,8 +26,9 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
             store = json.loads(re.search(self.gm_pattern, js).group(1))[0]
             item = DictParser.parse(store)
             item["website"] = response.url
-            item["addr_full"] = store["address_text"].split("<br /><br />")[0]
-            item["branch"] = item.pop("name")
+            item["addr_full"] = store["address_text"].split("<br /><br />")[0]    
+            if item.get("name"):
+                item["branch"] = item.pop("name")
             yield item
         elif js := response.xpath('//script[contains(text(), "__NUXT__")]/text()').get():
             # stores is actually a JS function, so we have to parse the parameters and values
