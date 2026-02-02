@@ -13,7 +13,7 @@ from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 class BedBathNTableSpider(AmastyStoreLocatorSpider):
     name = "bed_bath_n_table"
     item_attributes = {"brand": "Bed Bath N' Table", "brand_wikidata": "Q118551276"}
-    allowed_domains = [
+    domains = [
         "www.bedbathntable.com.au",
         "www.bedbathntable.co.nz",
         "www.bedbathntable.com.sg",
@@ -21,11 +21,11 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
     data_from_locator_page = {}
 
     async def start(self) -> AsyncIterator[Request]:
-        for allowed_domain in self.allowed_domains:
-            self.data_from_locator_page[allowed_domain] = {}
+        for domain in self.domains:
+            self.data_from_locator_page[domain] = {}
             yield Request(
-                url=f"https://{allowed_domain}/locator",
-                meta={"allowed_domain": allowed_domain},
+                url=f"https://{domain}/locator",
+                meta={"domain": domain},
                 callback=self.scrape_data_from_locator_page,
             )
 
@@ -43,11 +43,14 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
             item["addr_full"] = unquote_plus(
                 feature.xpath('.//a[@class="get-direction"]/@href').get().split("//", 2)[2]
             )
-            item["phone"] = feature.xpath('.//div[@class="phone"]/text()').get().strip()
+            item["phone"] = feature.xpath('.//div[@class="phone"]/text()').get()
             hours_string = " ".join(feature.xpath('.//div[@class="amlocator-schedule-table"]/div/span/text()').getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
-            self.data_from_locator_page[response.meta["allowed_domain"]][ref] = item
+            self.data_from_locator_page[response.meta["domain"]][ref] = item
+
+        # AmastyStoreLocatorSpider requires exactly one domain in allowed_domains.
+        self.allowed_domains = [response.meta["domain"]]
         async for request in super().start():
             yield request
 
@@ -55,8 +58,8 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
         if "TEMPORARILY CLOSED" in popup_html.xpath('//a[@class="amlocator-link"]/@title').get("").upper():
             return
         item["ref"] = str(item["ref"])
-        for allowed_domain in self.allowed_domains:
-            if allowed_domain in item["website"]:
-                item.update(self.data_from_locator_page[allowed_domain][item["ref"]])
+        for domain in self.domains:
+            if domain in item["website"]:
+                item.update(self.data_from_locator_page[domain][item["ref"]])
                 break
         yield item
