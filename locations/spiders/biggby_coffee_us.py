@@ -1,13 +1,10 @@
-from typing import Iterable
 
 from chompjs import parse_js_object
 from scrapy import Spider
-from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 DAY_KEYS = {
