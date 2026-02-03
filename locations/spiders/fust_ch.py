@@ -25,21 +25,27 @@ class FustCHSpider(JSONBlobSpider):
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
+        feature.update(feature.pop("geoPoint", {}))
         if contact_info := feature.get("contactDetails"):
             feature.update(contact_info[0])
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature.get("erpStoreId")
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
-        item["branch"] = item.pop("name").replace("-", " ").title().removesuffix(" Center")
-        item["website"] = response.urljoin(feature["url"].split("?")[0].replace("/store/", "/store-finder/"))
-        item["opening_hours"] = OpeningHours()
-        for rule in feature.get("openingHours", {}).get("weekDayOpeningList", []):
-            if day := sanitise_day(rule["weekDay"].replace(".", ""), DAYS_DE):
-                if rule.get("closed"):
-                    item["opening_hours"].set_closed(day)
-                else:
-                    item["opening_hours"].add_range(
-                        day, rule["openingTime"]["formattedHour"], rule["closingTime"]["formattedHour"]
-                    )
-
+        item["branch"] = feature.get("displayName", "").removeprefix("Fust ").removesuffix(" Center")
+        item["website"] = f"https://www.fust.ch/store-finder/{feature.get('name')}"
+        item["opening_hours"] = self.parse_hours(feature)
         yield item
+
+    def parse_hours(self, feature: dict) -> OpeningHours:
+        oh = OpeningHours()
+        try:
+            for rule in feature.get("openingHours", {}).get("weekDayOpeningList", []):
+                if day := sanitise_day(rule["weekDay"].replace(".", ""), DAYS_DE):
+                    if rule.get("closed"):
+                        oh.set_closed(day)
+                    else:
+                        oh.add_range(day, rule["openingTime"]["formattedHour"], rule["closingTime"]["formattedHour"])
+        except Exception:
+            self.logger.warning("Failed to parse opening hours for %s", feature.get("name"))
+        return oh
