@@ -167,7 +167,7 @@ class HiltonSpider(Spider):
 
     def get_hotels(self, quadrant_id):
         # TODO: we should use JsonRequest here, but it doesn't work with this endpoint for some reason!
-        url = "https://www.hilton.com/graphql/customer?appName=dx_shop_search_app&operationName=hotelSummaryOptions&originalOpName=hotelSummaryOptions&bl=en"
+        url = "https://www.hilton.com/graphql/customer?appName=dx_shop_search_app&operationName=hotelSummaryOptions_geocodePage&originalOpName=hotelSummaryOptions_geocodePage&bl=en"
         data = {
             "operationName": "hotelSummaryOptions",
             "query": """
