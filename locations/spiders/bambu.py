@@ -37,8 +37,14 @@ class BambuSpider(Spider):
                         }
                     }
                 },
-                "pageRoles": {"2ce8cb33-8752-4449-94d9-2d91ce00e549": {"id": "q4yo6", "title": "Stores (All)"}},
+                "pageRoles": {
+                    "2ce8cb33-8752-4449-94d9-2d91ce00e549": {
+                        "id": "q4yo6",
+                        "title": "Stores (All)",
+                    }
+                },
                 "requestInfo": {"formFactor": "desktop"},
+                "routerSuffix": "/",
                 "fullUrl": "https://www.drinkbambu.com/properties/",
             },
         }
@@ -59,6 +65,8 @@ class BambuSpider(Spider):
         result = response.json()["result"]
         if response.json().get("exception", False):
             raise RuntimeError(result["name"] + result["message"])
+        if response.json().get("status", 200) != 200:
+            raise RuntimeError(f"{result['status']}: {result['message']}")
         for location in result["data"]["items"]:
             location.update(location.pop("mapLocation", {}))
             item = DictParser.parse(location)
