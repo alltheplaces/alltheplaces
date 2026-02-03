@@ -6,9 +6,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 
 def test_ld():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Restaurant",
@@ -37,9 +35,7 @@ def test_ld():
                 "email": "example@example.org",
                 "url": "http://www.greatfood.com"
             }
-            """
-        )
-    )
+            """))
 
     assert i["city"] == "Sunnyvale"
     assert i["state"] == "CA"
@@ -54,9 +50,7 @@ def test_ld():
 
 
 def test_strip_whitespace():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Restaurant",
@@ -70,9 +64,7 @@ def test_strip_whitespace():
                 "telephone": "\
                     (408) 714-1489    "
             }
-            """
-        )
-    )
+            """))
 
     assert i["city"] == "Sunnyvale"
     assert i["state"] == "CA"
@@ -82,9 +74,7 @@ def test_strip_whitespace():
 
 
 def test_ld_address_array():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "address": [
                 {
@@ -95,16 +85,12 @@ def test_ld_address_array():
                 }
                 ]
             }
-            """
-        )
-    )
+            """))
     assert i["street_address"] == "first-in-array"
 
 
 def test_ld_lowercase_attributes():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "@context": "http://schema.org",
                 "@type": "ConvenienceStore",
@@ -126,9 +112,7 @@ def test_ld_lowercase_attributes():
                     "latitude": "40.6862"
                 }
             }
-            """
-        )
-    )
+            """))
 
     assert i["state"] == "NE"
     assert i["postcode"] == "68847"
@@ -257,10 +241,7 @@ def test_ld_opening_hours_specification_as_list():
 
 
 def test_ld_parse_opening_hours():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Store",
@@ -287,11 +268,7 @@ def test_ld_parse_opening_hours():
                     }
                 ]
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Fr 09:00-11:00; Sa 12:00-14:00"
-    )
+            """)).as_opening_hours() == "Mo-Fr 09:00-11:00; Sa 12:00-14:00"
 
 
 def test_ld_parse_oh_empty_rule():
@@ -324,10 +301,7 @@ def test_ld_parse_oh_empty_rule():
 
 
 def test_ld_parse_opening_hours_string():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Pharmacy",
@@ -336,16 +310,9 @@ def test_ld_parse_opening_hours_string():
                 "openingHours": "Mo,Tu,We,Th 09:00-12:00",
                 "telephone": "+18005551234"
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Th 09:00-12:00"
-    )
+            """)).as_opening_hours() == "Mo-Th 09:00-12:00"
 
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Pharmacy",
@@ -354,16 +321,9 @@ def test_ld_parse_opening_hours_string():
                 "openingHours": "Mo-Th 09:00-12:00",
                 "telephone": "+18005551234"
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Th 09:00-12:00"
-    )
+            """)).as_opening_hours() == "Mo-Th 09:00-12:00"
 
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Pharmacy",
@@ -372,18 +332,11 @@ def test_ld_parse_opening_hours_string():
                 "openingHours": "Mo-Tu 09:00-12:00 We,Th 09:00-12:00",
                 "telephone": "+18005551234"
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Th 09:00-12:00"
-    )
+            """)).as_opening_hours() == "Mo-Th 09:00-12:00"
 
 
 def test_ld_parse_opening_hours_days_3_chars():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Pharmacy",
@@ -392,16 +345,9 @@ def test_ld_parse_opening_hours_days_3_chars():
                 "openingHours": "Mon-Thu 09:00-12:00",
                 "telephone": "+18005551234"
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Th 09:00-12:00"
-    )
+            """)).as_opening_hours() == "Mo-Th 09:00-12:00"
 
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Pharmacy",
@@ -410,33 +356,19 @@ def test_ld_parse_opening_hours_days_3_chars():
                 "openingHours": "Mon-Tue 09:00-12:00 Wed,Thu 09:00-12:00",
                 "telephone": "+18005551234"
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Th 09:00-12:00"
-    )
+            """)).as_opening_hours() == "Mo-Th 09:00-12:00"
 
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Pharmacy",
                 "openingHours": "Mon-Sat 10:00 - 19:00 Sun 12:00-17:00"
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Sa 10:00-19:00; Su 12:00-17:00"
-    )
+            """)).as_opening_hours() == "Mo-Sa 10:00-19:00; Su 12:00-17:00"
 
 
 def test_ld_parse_opening_hours_array():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": ["TouristAttraction", "AmusementPark"],
@@ -448,50 +380,29 @@ def test_ld_parse_opening_hours_array():
                 "paymentAccepted":"Cash, Credit Card",
                 "url":"http://www.disneylandparis.it/"
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Fr 10:00-19:00; Sa 10:00-22:00; Su 10:00-21:00"
-    )
+            """)).as_opening_hours() == "Mo-Fr 10:00-19:00; Sa 10:00-22:00; Su 10:00-21:00"
 
 
 def test_ld_parse_opening_hours_day_range():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "openingHours": ["Th-Tu 09:00-17:00"]
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Tu 09:00-17:00; Th-Su 09:00-17:00"
-    )
+            """)).as_opening_hours() == "Mo-Tu 09:00-17:00; Th-Su 09:00-17:00"
 
 
 def test_ld_parse_opening_hours_array_with_commas():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "openingHours": ["Mo-Su 00:00-01:00, 04:00-00:00"]
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Su 00:00-01:00,04:00-24:00"
-    )
+            """)).as_opening_hours() == "Mo-Su 00:00-01:00,04:00-24:00"
 
 
 def test_ld_parse_opening_hours_closed():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "openingHours": [
@@ -504,66 +415,40 @@ def test_ld_parse_opening_hours_closed():
                     "Su Closed"
                 ]
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Su closed"
-    )
+            """)).as_opening_hours() == "Mo-Su closed"
 
 
 def test_ld_parse_opening_hours_closed_range():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "openingHours": ["Mo-Su Closed"]
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Su closed"
-    )
+            """)).as_opening_hours() == "Mo-Su closed"
 
 
 def test_ld_parse_opening_hours_no_commas():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "openingHours": "Su 07:00 - 23:00 Mo 07:00 - 23:00 Tu 07:00 - 23:00 We 07:00 - 23:00 Th 07:00 - 23:00 Fr 07:00 - 23:00 Sa 07:00 - 23:00 "
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Su 07:00-23:00"
-    )
+            """)).as_opening_hours() == "Mo-Su 07:00-23:00"
 
 
 def test_ld_parse_opening_hours_no_commas_closed():
-    assert (
-        LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+    assert LinkedDataParser.parse_opening_hours(json.loads("""
             {
                 "@context": "https://schema.org",
                 "openingHours": "Su closed Mo closed Tu closed We closed Th closed Fr closed Sa closed "
             }
-            """
-            )
-        ).as_opening_hours()
-        == "Mo-Su closed"
-    )
+            """)).as_opening_hours() == "Mo-Su closed"
 
 
 def test_ld_parse_time_format():
     assert (
         LinkedDataParser.parse_opening_hours(
-            json.loads(
-                """
+            json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Store",
@@ -578,8 +463,7 @@ def test_ld_parse_time_format():
                     }
                 ]
             }
-            """
-            ),
+            """),
             "%H:%M:%S",
         ).as_opening_hours()
         == "Sa 12:00-14:00"
@@ -587,9 +471,7 @@ def test_ld_parse_time_format():
 
 
 def test_ld_lat_lon():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Place",
@@ -600,18 +482,14 @@ def test_ld_lat_lon():
                 },
                 "name": "Empire State Building"
             }
-            """
-        )
-    )
+            """))
 
     assert i["lat"] == 40.75
     assert i["lon"] == -73.98
 
 
 def test_funky_coords():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Place",
@@ -622,18 +500,14 @@ def test_funky_coords():
                 },
                 "name": "Empire State Building"
             }
-            """
-        )
-    )
+            """))
 
     assert i["lat"] == 40.75
     assert i["lon"] == -73.98
 
 
 def test_default_types():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Place",
@@ -648,9 +522,7 @@ def test_default_types():
                 },
                 "name": "Empire State Building"
             }
-            """
-        )
-    )
+            """))
 
     assert i["lat"] == 40.75
     assert i["lon"] == -73.98
@@ -661,18 +533,14 @@ def test_default_types():
 
 
 def test_flat_properties():
-    i = LinkedDataParser.parse_ld(
-        json.loads(
-            """
+    i = LinkedDataParser.parse_ld(json.loads("""
             {
                 "@context": "https://schema.org",
                 "@type": "Place",
                 "address": "a, b, c",
                 "image": "https://example.org/image"
             }
-            """
-        )
-    )
+            """))
 
     assert i["addr_full"] == "a, b, c"
     assert i["image"] == "https://example.org/image"

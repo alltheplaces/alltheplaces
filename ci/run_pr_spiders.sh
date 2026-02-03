@@ -218,10 +218,36 @@ do
                 FEATURE_COUNT="0"
             fi
 
+            # Short compare: show only an arrow and delta (e.g. "↑3" or "↓2").
+            # Also set a small link to the previous run stats when available.
+            COMPARE_TEXT=""
+            latest_run_id=$(curl -s 'https://data.alltheplaces.xyz/runs/latest.json' | jq -r '.run_id' 2>/dev/null)
+            if [ -n "${latest_run_id}" ] && [ "${latest_run_id}" != "null" ]; then
+                prev_stats_url="https://alltheplaces-data.openaddresses.io/runs/${latest_run_id}/stats/${SPIDER_NAME}.json"
+                prev_count=$(curl -s "${prev_stats_url}" | jq --raw-output '.item_scraped_count' 2>/dev/null)
+                if [ -z "${prev_count}" ] || [ "${prev_count}" = "null" ]; then
+                    # Don't show compare info if we can't get previous count
+                    COMPARE_TEXT=""
+                fi
+
+                if [ -n "${FEATURE_COUNT}" ]; then
+                    diff=$((FEATURE_COUNT - prev_count))
+                    if [ "$diff" -gt 0 ]; then
+                        COMPARE_TEXT=" [↑${diff}](${prev_stats_url})"
+                    elif [ "$diff" -lt 0 ]; then
+                        # show positive number after down arrow
+                        absdiff=${diff#-}
+                        COMPARE_TEXT=" [↓${absdiff}](${prev_stats_url})"
+                    else
+                        COMPARE_TEXT=" [→0](${prev_stats_url})"
+                    fi
+                fi
+            fi
+
             if [ "${FEATURE_COUNT}" == "0" ]; then
                 echo "${spider} has no output"
                 FAILURE_REASON="no output"
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) ${COMPARE_TEXT} |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
                 EXIT_CODE=1
                 continue
             fi
@@ -296,9 +322,9 @@ do
 
             if [ "${num_errors}" -gt 0 ] || [ "${num_warnings}" -gt 0 ]; then
                 # Include details in an expandable section if there are warnings or errors
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL})) ${COMPARE_TEXT}|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
             else
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL})) ${COMPARE_TEXT}|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
             fi
             continue
         else

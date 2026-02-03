@@ -106,8 +106,8 @@ class Command(scrapy.commands.genspider.Command):
         self.automatically_set_parameters()
 
         tvars = {
-            "project_name": self.settings.get("BOT_NAME"),
-            "ProjectName": string_camelcase(self.settings.get("BOT_NAME")),
+            "project_name": self.settings.get("BOT_NAME"),  # ty: ignore[possibly-missing-attribute]
+            "ProjectName": string_camelcase(self.settings.get("BOT_NAME")),  # ty: ignore[possibly-missing-attribute]
             "module": module,
             "name": name,
             "url": url,
@@ -128,8 +128,8 @@ class Command(scrapy.commands.genspider.Command):
     ) -> None:
         """Generate the spider module, based on the given template"""
         tvars = self._generate_template_variables(module, name, url, template_name)
-        if self.settings.get("NEWSPIDER_MODULE"):
-            spiders_module = import_module(self.settings["NEWSPIDER_MODULE"])
+        if self.settings.get("NEWSPIDER_MODULE"):  # ty: ignore[possibly-missing-attribute]
+            spiders_module = import_module(self.settings["NEWSPIDER_MODULE"])  # ty: ignore[not-subscriptable]
             assert spiders_module.__file__
             spiders_dir = Path(spiders_module.__file__).parent.resolve()
         else:

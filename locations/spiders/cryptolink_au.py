@@ -3,10 +3,14 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import Request, Response
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.bp import BpSpider
+from locations.spiders.iga_au import IgaAUSpider
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
 class CryptolinkAUSpider(Spider):
@@ -15,15 +19,22 @@ class CryptolinkAUSpider(Spider):
     allowed_domains = ["www.cryptolink.com.au"]
     start_urls = ["https://www.cryptolink.com.au"]
 
+    LOCATED_IN_MAPPINGS = [
+        (["BP"], BpSpider.brands["bp"]),
+        (["IGA"], IgaAUSpider.item_attributes),
+        (["SPAR"], SPAR_SHARED_ATTRIBUTES),
+        (["EZYMART"], {"brand": "EzyMart", "brand_wikidata": "Q117220554"}),
+    ]
+
     def parse(self, response: Response) -> Iterable[Request]:
         for location in response.xpath('//div[@class="location-div-block"]'):
+            location_name = location.xpath("./@data-location-name").get()
             properties = {
                 "ref": location.xpath(
                     './div[@class="location-buttons-div-block"]/a[contains(@href, "/locations/cl")]/@href'
                 )
                 .get()
                 .removeprefix("/locations/cl"),
-                "located_in": location.xpath("./@data-location-name").get(),
                 "lat": location.xpath("./@data-latitude").get(),
                 "lon": location.xpath("./@data-longitude").get(),
                 "street_address": merge_address_lines(
@@ -43,6 +54,9 @@ class CryptolinkAUSpider(Spider):
             }
 
             apply_category(Categories.ATM, properties)
+            properties["located_in"], properties["located_in_wikidata"] = extract_located_in(
+                location_name or "", self.LOCATED_IN_MAPPINGS, self
+            )
             properties["extras"]["currency:XBT"] = "yes"
             properties["extras"]["currency:ETH"] = "yes"
             properties["extras"]["currency:USDT"] = "yes"
