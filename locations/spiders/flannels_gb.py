@@ -11,7 +11,6 @@ class FlannelsGBSpider(SitemapSpider, StructuredDataSpider):
     name = "flannels_gb"
     item_attributes = {"brand": "Flannels", "brand_wikidata": "Q18160381"}
     sitemap_urls = ["https://www.flannels.com/sitemap-store-pages.xml"]
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Flannels ").removesuffix(" FL")
