@@ -2,11 +2,12 @@ import re
 
 import scrapy
 
-from locations.categories import apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.mcdonalds import McdonaldsSpider
-from locations.spiders.mcdonalds_au import FACILITIES_MAPPING
+
+FACILITIES_MAPPING = {"Drive Thru": Extras.DRIVE_THROUGH, "McDelivery": Extras.DELIVERY, "WiFi": Extras.WIFI}
 
 
 class McdonaldsEGSpider(scrapy.Spider):
