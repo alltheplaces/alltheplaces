@@ -1,4 +1,3 @@
-import uuid
 from json import dumps
 from typing import Any, AsyncIterator
 from urllib.parse import urlencode
@@ -26,7 +25,6 @@ class WalmartCASpider(Spider):
     }
     base_url = "https://www.walmart.ca/orchestra/graphql/storeFinderNearbyNodesQuery"
     hash = "d3236419dacf3a02137445459aeaeda81fd40630ddd2d3f218cf43f60e1ad16a"
-    pxvid = str(uuid.uuid1())
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         # Tried raw GraphQL query, but it's blocked, hash appears to be stable and required for successful requests.
@@ -54,8 +52,10 @@ class WalmartCASpider(Spider):
                     "x-apollo-operation-name": "storeFinderNearbyNodesQuery",
                     "x-o-bu": "WALMART-CA",
                     "x-o-segment": "oaoh",
+                    "x-o-gql-query": "query storeFinderNearbyNodesQuery",
+                    "x-o-mart": "B2C",
                 },
-                cookies={"_pxvid": self.pxvid, "walmart.nearestLatLng": f'{city["latitude"]},{city["longitude"]}'},
+                cookies={"walmart.nearestLatLng": f'{city["latitude"]},{city["longitude"]}'},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
