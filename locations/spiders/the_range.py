@@ -12,3 +12,9 @@ class TheRangeSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=r"/stores/\w+"), callback="parse_sd")]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if "Wilko" in item["name"]:
+            item["brand"] = "Wilko"
+            item["brand_wikidata"] = "Q8002536"
+            item["name"] = "Wilko"
