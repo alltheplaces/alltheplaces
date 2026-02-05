@@ -27,5 +27,5 @@ class AedLocationsNZSpider(Spider):
         location = response.json()
 
         item = DictParser.parse(location)
-
+        item["ref"] = location["properties"]["id"]
         yield item
