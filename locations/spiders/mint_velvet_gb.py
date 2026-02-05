@@ -9,4 +9,5 @@ class MintVelvetGBSpider(StockistSpider):
 
     def parse_item(self, item, location):
         if "Boutique" in item["name"]:
+            item["branch"] = item.pop("name")
             yield item
