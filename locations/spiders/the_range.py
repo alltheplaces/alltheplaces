@@ -14,7 +14,6 @@ class TheRangeSpider(CrawlSpider, StructuredDataSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     time_format = "%H:%M:%S"
 
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "Wilko" in item["name"]:
             item["brand"] = "Wilko"
