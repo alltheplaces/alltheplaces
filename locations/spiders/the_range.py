@@ -16,7 +16,7 @@ class TheRangeSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "Wilko" in item["name"]:
-            #duplicates of Wilko spider
+            # duplicates of Wilko spider
             return
-            
+
         yield item
