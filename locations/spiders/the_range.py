@@ -19,3 +19,4 @@ class TheRangeSpider(CrawlSpider, StructuredDataSpider):
             item["brand"] = "Wilko"
             item["brand_wikidata"] = "Q8002536"
             item["name"] = "Wilko"
+        yield item
