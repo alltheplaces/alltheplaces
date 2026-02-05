@@ -16,7 +16,7 @@ class TheRangeSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "Wilko" in item["name"]:
-            item["brand"] = "Wilko"
-            item["brand_wikidata"] = "Q8002536"
-            item["name"] = "Wilko"
+            #duplicates of Wilko spider
+            return
+            
         yield item
