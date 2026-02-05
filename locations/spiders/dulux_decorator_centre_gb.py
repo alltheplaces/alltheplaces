@@ -34,6 +34,7 @@ class DuluxDecoratorCentreGBSpider(Spider):
             item["state"] = store_details.xpath('//div[contains(@class, "store-country")]/text()').get("").strip()
             item["postcode"] = store_details.xpath('//div[@class="store-info"]/text()').get("").strip()
             item["website"] = "https://www.duluxdecoratorcentre.co.uk/" + item["website"]
+            item["branch"] = item.pop("name")
             hours_string = " ".join(store_details.xpath('//div[@class="store-days"]//text()').getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
