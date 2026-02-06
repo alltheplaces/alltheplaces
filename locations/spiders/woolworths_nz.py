@@ -16,7 +16,6 @@ class WoolworthsNZSpider(Spider):
     allowed_domains = ["api.cdx.nz"]
     start_urls = ["https://api.cdx.nz/site-location/api/v1/sites?latitude=-42&longitude=174&maxResults=10000"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = "NZ"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
