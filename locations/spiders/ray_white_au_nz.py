@@ -12,6 +12,7 @@ class RayWhiteAUNZSpider(Spider):
     item_attributes = {"brand": "Ray White", "brand_wikidata": "Q81077729"}
     allowed_domains = ["raywhiteapi.ep.dynamics.net"]
     start_urls = ["https://raywhiteapi.ep.dynamics.net/v1/organisations?apiKey=6625c417-067a-4a8e-8c1d-85c812d0fb25"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
