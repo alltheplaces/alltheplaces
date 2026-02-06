@@ -68,4 +68,5 @@ class McdonaldsLatinAmericaSpider(Spider):
 
             apply_category(Categories.FAST_FOOD, item)
 
+            item["street_address"] = item.pop("addr_full", None)
             yield item

@@ -3,8 +3,8 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
-from locations.items import Feature
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 PREEM = {"brand": "Preem", "brand_wikidata": "Q598835"}
@@ -17,64 +17,41 @@ class YxSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            url="https://meilisearch.yx.no/indexes/stations/search",
-            headers={"X-Meili-API-Key": "cda56406d550585ce01807040c54ad1614aca7bc81e42d9872633b3c194eeabe"},
-            data={
-                "facetsDistribution": ["tags", "chain", "fuel", "other"],
-                "attributesToHighlight": ["*"],
-                "limit": 2000,
-                "q": "",
-            },
+            url="https://www.preem.no/api/Stations/AllStations?$select=Id,Name,Address,PostalCode,City,PhoneNumber,StationType,StationSort,StationCardImage,OpeningHourWeekdayTime,ClosingHourWeekdayTime,OpeningHourSaturdayTime,ClosingHourSaturdayTime,OpeningHourSundayTime,ClosingHourSundayTime,CoordinateLatitude,CoordinateLongitude,Services/Name,Services/LinkedPage,Services/IconCssClass,FuelTypes/Name,FuelTypes/LinkedPage,FuelTypes/IconCssClass,FuelTypes/TextColor,FuelTypes/BackgroundColor,FuelTypes/BorderColor,FuelTypes/Type,FriendlyUrl,CampaignImage,CampaignUrl,TrailerRentalUrl,IsTrb,IsSaifa,IsSaifaStation,IsUnoX,IsUnoXTruck,TillhorInternationellaAllianser&$expand=FuelTypes,Services&currentLanguage=no",
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["hits"]:
-            item = Feature()
-            item["ref"] = item["extras"]["ref:yx"] = location["site"]
-            item["lat"] = location["_geo"]["lat"]
-            item["lon"] = location["_geo"]["lng"]
-            item["name"] = location["name"]
-            item["street_address"] = location["address"]
-            item["postcode"] = location["zipcode"]
-            item["country"] = location["country"]
-            item["email"] = location["email"]
-            item["phone"] = location["phone"]
-
-            if location["chain"] == "Preem":
+        for location in response.json():
+            item = DictParser.parse(location)
+            item["ref"] = location["FriendlyUrl"]
+            item["lat"] = location["CoordinateLatitude"]
+            item["lon"] = location["CoordinateLongitude"]
+            item["street_address"] = item.pop("addr_full")
+            if "https:" not in location["FriendlyUrl"]:
+                item["website"] = "https://www.preem.no" + location["FriendlyUrl"]
+            else:
+                item["website"] = item["ref"]
+            if "Yx" in item["name"] and "7-eleven" not in item["name"]:
+                item.update(YX)
+                item["branch"] = item.pop("name").removeprefix("Yx ")
+                apply_category(Categories.FUEL_STATION, item)
+            elif "Uno-x" in item["name"] and "7-eleven" not in item["name"]:
+                item.update(UNOX)
+                item["branch"] = item.pop("name").removeprefix("Uno-x ")
+                apply_category(Categories.FUEL_STATION, item)
+            elif "7-eleven" in item["name"]:
+                item.update(SEVEN_ELEVEN_SHARED_ATTRIBUTES)
+                item["branch"] = item.pop("name").removeprefix("Yx ").removeprefix("7-eleven ")
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+            else:
                 item.update(PREEM)
                 item["name"] = None
                 apply_category(Categories.FUEL_STATION, item)
-            elif location["chain"] == "YX":
-                item.update(YX)
-                item["branch"] = item.pop("name").removeprefix("YX ")
-                apply_category(Categories.FUEL_STATION, item)
-            elif location["chain"] == "YX 711":
-                item.update(SEVEN_ELEVEN_SHARED_ATTRIBUTES)
-                item["branch"] = item.pop("name").removeprefix("YX ").removeprefix("7-Eleven ")
-                apply_category(Categories.SHOP_CONVENIENCE, item)
-            elif location["chain"] == "YX Truck":
-                item.update(YX)
-                item["name"] = "YX Truck"
-                apply_category(Categories.FUEL_STATION, item)
-            elif location["chain"] == "Uno-X":
-                item.update(UNOX)
-                item["branch"] = item.pop("name").removeprefix("Uno-X ")
-                apply_category(Categories.FUEL_STATION, item)
 
-            apply_yes_no(Fuel.ADBLUE, item, "adblue" in location["fuel"])
-            apply_yes_no(Fuel.DIESEL, item, "diesel" in location["fuel"])
-            # apply_yes_no(, item, "diesel-colored" in location["fuel"])
-            apply_yes_no(Fuel.OCTANE_95, item, "gasoline95" in location["fuel"])
-            apply_yes_no(Fuel.OCTANE_98, item, "gasoline98" in location["fuel"])
-            # apply_yes_no(, item, "hvo100" in location["fuel"])
-
-            apply_yes_no(Extras.WIFI, item, "free-wifi" in location["other"])
-            apply_yes_no(Extras.CAR_WASH, item, "machine-wash" in location["other"])
-            apply_yes_no(Extras.SHOWERS, item, "shower" in location["other"])
-            apply_yes_no(Extras.VACUUM_CLEANER, item, "vacuum-cleaner" in location["other"])
-            apply_yes_no(Extras.TOILETS, item, "wc" in location["other"])
-
-            apply_yes_no(Access.HGV, item, "truck" in location["tags"])
-            apply_yes_no(Access.MOTOR_CAR, item, "passenger-car" in location["tags"])
-
+            for fuel_type in location["FuelTypes"]:
+                apply_yes_no(Fuel.ADBLUE, item, "adblue" in fuel_type["Name"].lower())
+                apply_yes_no(Fuel.DIESEL, item, "diesel" in fuel_type["Name"].lower())
+                apply_yes_no(Fuel.OCTANE_95, item, "bensin 95" in fuel_type["Name"].lower())
+                apply_yes_no(Fuel.OCTANE_98, item, "bensin 98" in fuel_type["Name"].lower())
+                apply_yes_no(Fuel.BIODIESEL, item, "hvo100" in fuel_type["Name"].lower())
             yield item

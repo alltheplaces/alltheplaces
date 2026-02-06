@@ -7,9 +7,9 @@ from locations.pipelines.drop_attributes import DropAttributesPipeline
 
 
 def get_objects() -> (Spider, DropAttributesPipeline, Feature):
-    spider = DefaultSpider()
-    spider.crawler = get_crawler()
-    return spider, DropAttributesPipeline(), Feature()
+    crawler = get_crawler(DefaultSpider)
+    crawler.spider = crawler._create_spider()
+    return crawler.spider, DropAttributesPipeline(crawler), Feature()
 
 
 def test_drop_top():
@@ -18,7 +18,7 @@ def test_drop_top():
 
     item["name"] = "aaaa"
 
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("name") is None
 
 
@@ -28,7 +28,7 @@ def test_drop_extras():
 
     item["extras"]["aaaa"] = "aaaa"
 
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("aaaa") is None and item["extras"].get("aaaa") is None
 
 
@@ -36,18 +36,18 @@ def test_drop_none():
     spider, pipeline, item = get_objects()
     spider.drop_attributes = {"name", "aaaa"}
 
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("name") is None
     assert item.get("aaaa") is None and item["extras"].get("aaaa") is None
 
     item["name"] = None
     item["extras"]["aaaa"] = None
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("name") is None
     assert item.get("aaaa") is None and item["extras"].get("aaaa") is None
 
     item["name"] = ""
     item["extras"]["aaaa"] = None
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("name") is None
     assert item.get("aaaa") is None and item["extras"].get("aaaa") is None

@@ -1,6 +1,6 @@
 import reverse_geocoder
 from geonamescache import GeonamesCache
-from scrapy import Spider
+from scrapy.crawler import Crawler
 
 from locations.items import Feature, get_lat_lon
 
@@ -38,6 +38,15 @@ STATE_OVERRIDES = {"Washington, D.C.": "DC"}
 
 
 class StateCodeCleanUpPipeline:
+    crawler: Crawler
+
+    def __init__(self, crawler: Crawler):
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
     @staticmethod
     def clean_state(state: str, country: str) -> str | None:
         if country not in STATES.keys():
@@ -53,7 +62,7 @@ class StateCodeCleanUpPipeline:
                 if possible_state["name"] == state:
                     return str(possible_state["code"])
 
-    def process_item(self, item: Feature, spider: Spider) -> Feature:
+    def process_item(self, item: Feature) -> Feature:
         country = item.get("country")
         if not country:
             return item
@@ -66,8 +75,8 @@ class StateCodeCleanUpPipeline:
         if not state:  # geocode state
             if location := get_lat_lon(item):
                 if result := reverse_geocoder.get((location[0], location[1]), mode=1, verbose=False):
-                    if spider.crawler.stats:
-                        spider.crawler.stats.inc_value("atp/field/state/from_reverse_geocoding")
+                    if self.crawler.stats:
+                        self.crawler.stats.inc_value("atp/field/state/from_reverse_geocoding")
                     state = result["admin1"]
 
         item["state"] = StateCodeCleanUpPipeline.clean_state(str(state), str(country))

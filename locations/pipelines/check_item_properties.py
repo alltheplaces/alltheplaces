@@ -4,32 +4,39 @@ from re import Pattern
 
 from geonamescache import GeonamesCache
 from scrapy import Spider
+from scrapy.crawler import Crawler
 
 from locations.hours import OpeningHours
 from locations.items import Feature, set_lat_lon
 
 
 def check_field(
-    item: Feature, spider: Spider, param: str, allowed_types: type | tuple[type], match_regex: Pattern | None = None
+    item: Feature,
+    spider: Spider | None,
+    param: str,
+    allowed_types: type | tuple[type],
+    match_regex: Pattern | None = None,
 ) -> None:
     if val := item.get(param):
         if not isinstance(val, allowed_types):
-            spider.logger.error(
+            spider.logger.error(  # ty: ignore [possibly-missing-attribute]
                 f'Invalid type "{type(val).__name__}" for attribute "{param}". Expected type(s) are "{allowed_types}".'
             )
-            if spider.crawler.stats:
+            if spider and spider.crawler and spider.crawler.stats:
                 spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
         elif match_regex and not match_regex.match(val):
-            spider.logger.warning(
+            spider.logger.warning(  # ty: ignore [possibly-missing-attribute]
                 f'Invalid value "{val}" for attribute "{param}". Value did not match expected regular expression of r"{match_regex.pattern}".'
             )
-            if spider.crawler.stats:
+            if spider and spider.crawler and spider.crawler.stats:
                 spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
-    elif spider.crawler.stats:
+    elif spider and spider.crawler and spider.crawler.stats:
         spider.crawler.stats.inc_value(f"atp/field/{param}/missing")
 
 
 class CheckItemPropertiesPipeline:
+    crawler: Crawler
+
     countries = GeonamesCache().get_countries().keys()
     # From https://github.com/django/django/blob/master/django/core/validators.py
     url_regex = re.compile(
@@ -54,31 +61,45 @@ class CheckItemPropertiesPipeline:
     min_lon = -180.0
     max_lon = 180.0
 
-    def process_item(self, item: Feature, spider: Spider) -> Feature:  # noqa: C901
-        check_field(item, spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
-        check_field(item, spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
-        check_field(item, spider, "website", (str,), self.url_regex)
-        check_field(item, spider, "image", (str,), self.url_regex)
-        check_field(item, spider, "email", (str,), self.email_regex)
-        check_field(item, spider, "phone", (str,))
-        check_field(item, spider, "street_address", (str,))
-        check_field(item, spider, "city", (str,))
-        check_field(item, spider, "state", (str,))
-        check_field(item, spider, "postcode", (str,))
-        check_field(item, spider, "country", (str,))
-        check_field(item, spider, "name", (str,))
-        check_field(item, spider, "brand", (str,))
-        check_field(item, spider, "operator", (str,))
-        check_field(item, spider, "branch", (str,))
+    def __init__(self, crawler: Crawler):
+        self.crawler = crawler
 
-        self.check_geom(item, spider)
-        self.check_twitter(item, spider)
-        self.check_opening_hours(item, spider)
-        self.check_country(item, spider)
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature) -> Feature:  # noqa: C901
+        check_field(item, self.crawler.spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
+        check_field(
+            item, self.crawler.spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex
+        )
+        check_field(item, self.crawler.spider, "website", (str,), self.url_regex)
+        check_field(item, self.crawler.spider, "image", (str,), self.url_regex)
+        check_field(item, self.crawler.spider, "email", (str,), self.email_regex)
+        check_field(item, self.crawler.spider, "phone", (str,))
+        check_field(item, self.crawler.spider, "street_address", (str,))
+        check_field(item, self.crawler.spider, "city", (str,))
+        check_field(item, self.crawler.spider, "state", (str,))
+        check_field(item, self.crawler.spider, "postcode", (str,))
+        check_field(item, self.crawler.spider, "country", (str,))
+        check_field(item, self.crawler.spider, "name", (str,))
+        check_field(item, self.crawler.spider, "brand", (str,))
+        check_field(item, self.crawler.spider, "operator", (str,))
+        check_field(item, self.crawler.spider, "branch", (str,))
+
+        self.check_geom(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_twitter(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_opening_hours(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_country(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
 
         if country_code := item.get("country"):
-            if spider.crawler.stats:
-                spider.crawler.stats.inc_value(f"atp/country/{country_code}")
+            if (
+                self.crawler
+                and self.crawler.spider
+                and self.crawler.spider.crawler
+                and self.crawler.spider.crawler.stats
+            ):
+                self.crawler.spider.crawler.stats.inc_value(f"atp/country/{country_code}")
 
         return item
 

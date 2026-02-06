@@ -10,7 +10,7 @@ from locations.hours import DAYS, OpeningHours
 
 class PxmartTWSpider(scrapy.Spider):
     name = "pxmart_tw"
-    item_attributes = {"brand_wikidata": "Q7262792"}
+    item_attributes = {"brand": "全聯福利中心", "brand_wikidata": "Q7262792"}
     start_urls = ["https://www.pxmart.com.tw/customer-service/stores"]
 
     def parse(self, response) -> Iterable[Request]:
