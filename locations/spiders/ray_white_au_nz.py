@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -57,7 +58,10 @@ class RayWhiteAUNZSpider(Spider):
             item = DictParser.parse(location["value"])
             item["lat"] = location["value"]["address"]["location"]["lat"]
             item["lon"] = location["value"]["address"]["location"]["lon"]
-            item["website"] = location["value"]["webSite"]
+            if website := re.sub(r"^(?:https?://)+", "", location["value"]["webSite"], flags=re.IGNORECASE):
+                if "http" not in website:
+                    item["website"] = f"https://{website}" if website else None
+
             for phone_number in location["value"].get("phones", []):
                 if phone_number["typeCode"] == "FIX":  # Fixed phone number
                     item["phone"] = phone_number["internationalizedNumber"]
