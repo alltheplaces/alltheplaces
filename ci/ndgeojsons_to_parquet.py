@@ -27,8 +27,7 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             con.execute("SET memory_limit='1GB'")
             con.execute("SET threads=2")
 
-            con.execute(
-                f"""
+            con.execute(f"""
             CREATE TABLE geojson_data AS
                 SELECT
                     id,
@@ -64,8 +63,7 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
                 ORDER BY ST_Hilbert(geom)
             ) TO '{str(output_file_path)}'
             (FORMAT PARQUET, COMPRESSION 'ZSTD', ROW_GROUP_SIZE 65536);
-            """
-            )
+            """)
             # TODO: size of group should be 128MB-256MB for better performance
 
     logger.info(f"✓ Created {output_file_path}")

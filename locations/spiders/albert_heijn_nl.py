@@ -26,8 +26,7 @@ class AlbertHeijnNLSpider(PlaywrightSpider):
         # Collect cookies
         yield JsonRequest(
             response.urljoin("/gql"),
-            data={
-                "query": """query storesMapResults {
+            data={"query": """query storesMapResults {
                   storesSearch(start: 0, limit: 5000) {
                     result {
                       id
@@ -58,8 +57,7 @@ class AlbertHeijnNLSpider(PlaywrightSpider):
                     }
                   }
                 }
-                """
-            },
+                """},
             callback=self.parse_api,
         )
 
