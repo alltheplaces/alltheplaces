@@ -63,7 +63,7 @@ def test_handle_missing():
     item["extras"]["fax"] = None
     pipeline.process_item(item)
     assert item.get("phone") is None
-    assert item.get("extras").get("fax") is None
+    assert item.get("extras", {}).get("fax") is None
 
 
 def test_handle_none():
@@ -113,6 +113,10 @@ def test_no_number():
     pipeline.process_item(item)
     assert not item.get("phone")
 
+    item, pipeline, spider = get_objects("n/a", "US")
+    pipeline.process_item(item)
+    assert not item.get("phone")
+
 
 def test_all_zeros():
     item, pipeline, spider = get_objects("0000", "US")
@@ -122,3 +126,16 @@ def test_all_zeros():
     item, pipeline, spider = get_objects("(000) 000-00-00", "US")
     pipeline.process_item(item)
     assert not item.get("phone")
+
+
+def test_wrong_type():
+    item, pipeline, spider = get_objects(["2484468015"], "US")
+    pipeline.process_item(item)
+    assert item.get("phone") == ["2484468015"]
+    assert spider.crawler.stats.get_value("atp/field/phone/wrong_type") == 1  # ty: ignore[possibly-missing-attribute]
+
+
+def test_no_country():
+    item, pipeline, spider = get_objects("2484468015", None)
+    pipeline.process_item(item)
+    assert item.get("phone") == "2484468015"
