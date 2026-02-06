@@ -15,7 +15,7 @@ class LiquorCityZASpider(scrapy.Spider):
         for location in response.json()["content"]["branch_list"]:
             location.update(location.pop("address"))
             item = DictParser.parse(location)
-            if name := item.get("name"):
+            if name := item.pop("name", None):
                 item["branch"] = name.replace("Liquor City ", "")
             item["ref"] = location["_id"]
             oh = OpeningHours()
