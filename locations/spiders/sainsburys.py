@@ -74,7 +74,9 @@ class SainsburysSpider(Spider):
             apply_yes_no(Extras.PARKING_WHEELCHAIR, item, any(f["id"] == 166 for f in store["facilities"]))
         apply_yes_no(PaymentMethods.CONTACTLESS, item, any(f["id"] == 104 for f in store["facilities"]))
 
-        if store["store_type"] == "local" or (store["store_type"] == "main" and store["additional_data"]["main_store_branded_as_local"]):
+        if store["store_type"] == "local" or (
+            store["store_type"] == "main" and store["additional_data"]["main_store_branded_as_local"]
+        ):
             item.update(self.SAINSBURYS_LOCAL)
             item["branch"] = item.pop("name").removesuffix(" Local")
             apply_category(Categories.SHOP_CONVENIENCE, item)
