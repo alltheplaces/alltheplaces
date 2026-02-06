@@ -29,11 +29,12 @@ class AmpchargeAUSpider(Spider):
             item["lon"], item["lat"] = location["Location"]["coordinates"]
             item["ref"] = location["LocationID"]
             item["street_address"] = location["Address"]
-            for connector in location["AmpChargeData"]["Connectors"]:
-                if tag := CONNECTORS.get(connector["ConnectorType"]):
-                    item["extras"]["socket:{}".format(tag)] = str(connector["TotalConnectors"])
-                else:
-                    self.logger.error("Unexpected connector type: {}".format(connector["ConnectorType"]))
+            if connectors := location.get("AmpChargeData"):
+                for connector in connectors["Connectors"]:
+                    if tag := CONNECTORS.get(connector["ConnectorType"]):
+                        item["extras"]["socket:{}".format(tag)] = str(connector["TotalConnectors"])
+                    else:
+                        self.logger.error("Unexpected connector type: {}".format(connector["ConnectorType"]))
 
             apply_category(Categories.CHARGING_STATION, item)
 
