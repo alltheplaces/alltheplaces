@@ -89,7 +89,7 @@ class WellsFargoSpider(scrapy.Spider):
             self.logger.warning("Could not parse time_range for %s", time_range)
             self.crawler.stats.inc_value("atp/wellsfargo/hours/failed")
 
-        (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
+        f_hr, f_min, f_ampm, t_hr, t_min, t_ampm = match.groups()
 
         if f_ampm == "P":
             f_hr = int(f_hr) + 12

@@ -1,6 +1,7 @@
 import re
 from json import loads
 from typing import AsyncIterator, Iterable
+from urllib.parse import urljoin
 
 from scrapy import Request, Selector, Spider
 from scrapy.http import TextResponse
@@ -54,7 +55,7 @@ class AmastyStoreLocatorSpider(Spider):
                 method="POST",
             )
         elif len(self.start_urls) == 1:
-            yield Request(url=f"https://{self.start_urls[0]}{pagination_attribute}", headers=headers, method="POST")
+            yield Request(url=urljoin(self.start_urls[0], pagination_attribute), headers=headers, method="POST")
         else:
             raise ValueError(
                 "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."
