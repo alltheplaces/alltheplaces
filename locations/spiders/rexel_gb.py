@@ -1,5 +1,7 @@
+from typing import Iterable
 from locations.storefinders.rexel import RexelSpider
 
+from locations.items import Feature
 
 class RexelGBSpider(RexelSpider):
     name = "rexel_gb"
@@ -8,3 +10,8 @@ class RexelGBSpider(RexelSpider):
     search_lat = 51
     search_lon = -0
     drop_attributes = {"image"}
+
+    def parse_item(self, item: Feature, feature: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("Rexel ","")
+        yield item
+
