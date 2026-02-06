@@ -22,4 +22,5 @@ class CurrysSpider(SitemapSpider, StructuredDataSpider):
         item["lat"] = response.xpath('//input[@class="storeDetailLat"]/@value').get()
         item["lon"] = response.xpath('//input[@class="storeDetailLong"]/@value').get()
         item["name"] = response.xpath('//h1[@class="store-information-page-title"]/text()').get().strip()
+        item["branch"] = item.pop("name")
         yield item
