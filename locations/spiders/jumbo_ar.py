@@ -20,7 +20,7 @@ class JumboARSpider(Spider):
         for data in response.json():
             item = DictParser.parse(data)
 
-            (lat, lon) = data["geocoordinates"].split(",")
+            lat, lon = data["geocoordinates"].split(",")
             item["lat"] = lat
             item["lon"] = lon
 

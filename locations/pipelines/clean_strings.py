@@ -1,6 +1,6 @@
 import html
 
-from scrapy import Spider
+from scrapy.crawler import Crawler
 
 from locations.items import Feature
 
@@ -10,10 +10,19 @@ def clean_string(val: str) -> str:
 
 
 class CleanStringsPipeline:
+    crawler: Crawler
+
     skipped_keys = {"nsi_id", "twitter", "facebook"}
     url_keys = {"ref", "website", "image"}
 
-    def process_item(self, item: Feature, spider: Spider) -> Feature:
+    def __init__(self, crawler: Crawler):
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature) -> Feature:
         for key, value in item.items():
             if not isinstance(value, str):
                 continue
@@ -25,13 +34,13 @@ class CleanStringsPipeline:
                 cleaned_value = value.strip()
                 if cleaned_value != value:
                     item[key] = cleaned_value
-                    if spider.crawler.stats:
-                        spider.crawler.stats.inc_value("atp/clean_strings/{}".format(key))
+                    if self.crawler.stats:
+                        self.crawler.stats.inc_value("atp/clean_strings/{}".format(key))
             else:
                 cleaned_value = clean_string(value)
                 if cleaned_value != value:
                     item[key] = cleaned_value
-                    if spider.crawler.stats:
-                        spider.crawler.stats.inc_value("atp/clean_strings/{}".format(key))
+                    if self.crawler.stats:
+                        self.crawler.stats.inc_value("atp/clean_strings/{}".format(key))
 
         return item
