@@ -7,7 +7,7 @@ def test_addition():
     item["image"] = "//example.org/image.png"
 
     pl = AssertURLSchemePipeline()
-    pl.process_item(item, None)
+    pl.process_item(item)
 
     assert item["image"] == "https://example.org/image.png"
 
@@ -17,12 +17,12 @@ def test_no_action():
     item["image"] = "https://example.org/image.png"
 
     pl = AssertURLSchemePipeline()
-    pl.process_item(item, None)
+    pl.process_item(item)
 
     assert item["image"] == "https://example.org/image.png"
 
     item["image"] = "http://example.org/image.png"
 
-    pl.process_item(item, None)
+    pl.process_item(item)
 
     assert item["image"] == "http://example.org/image.png"
