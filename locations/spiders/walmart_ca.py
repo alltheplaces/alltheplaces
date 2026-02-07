@@ -52,6 +52,8 @@ class WalmartCASpider(Spider):
                     "x-apollo-operation-name": "storeFinderNearbyNodesQuery",
                     "x-o-bu": "WALMART-CA",
                     "x-o-segment": "oaoh",
+                    "x-o-gql-query": "query storeFinderNearbyNodesQuery",
+                    "x-o-mart": "B2C",
                 },
                 cookies={"walmart.nearestLatLng": f'{city["latitude"]},{city["longitude"]}'},
             )
