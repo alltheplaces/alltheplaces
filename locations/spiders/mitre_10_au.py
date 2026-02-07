@@ -12,6 +12,7 @@ class Mitre10AUSpider(StructuredDataSpider):
     item_attributes = {"brand": "Mitre 10", "brand_wikidata": "Q6882393"}
     allowed_domains = ["mitre10.com.au"]
     start_urls = ["https://www.mitre10.com.au/stores"]
+    requires_proxy = True
 
     def parse(self, response):
         data_raw = response.xpath(
@@ -21,7 +22,7 @@ class Mitre10AUSpider(StructuredDataSpider):
         data_json = json.loads(data_clean)
         stores = data_json["*"]["Magento_Ui/js/core/app"]["components"]["store-locator-search"]["markers"]
         for store in stores:
-            yield scrapy.Request(store["url"], self.parse_sd)
+            yield scrapy.Request(response.urljoin(store["url"]), self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.pop("facebook")
