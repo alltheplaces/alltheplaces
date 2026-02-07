@@ -15,6 +15,8 @@ class FilterStatsExtension:
 
     def stats_spider_closing(self):
         located_in_failed_min = int(self.crawler.settings.get("STATS_FILTER_LOCATED_IN_FAILED_MIN", 50))
+        if not self.crawler.stats:
+            return
         for k, v in self.crawler.stats.get_stats().copy().items():
             if k.startswith("atp/located_in_failed/"):
                 if v < located_in_failed_min:
