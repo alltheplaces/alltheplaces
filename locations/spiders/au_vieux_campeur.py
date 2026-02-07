@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class AuVieuxCampeurSpider(SitemapSpider, StructuredDataSpider):
     name = "au_vieux_campeur"
     item_attributes = {
-        "brand": "Au Vieux Campeur",
+        "brand": "Au vieux campeur",
         "brand_wikidata": "Q2409646",
     }
     allowed_domains = ["boutiques.auvieuxcampeur.fr"]
