@@ -302,6 +302,7 @@ class Categories(Enum):
     }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MONUMENT = {"historic": "monument"}
     MORTUARY = {"amenity": "mortuary"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
@@ -472,6 +473,7 @@ top_level_tags = [
     "emergency",
     "healthcare",
     "highway",
+    "historic",
     "landuse",
     "leisure",
     "man_made",
