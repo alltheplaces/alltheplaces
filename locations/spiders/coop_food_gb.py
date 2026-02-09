@@ -14,7 +14,7 @@ class CoopFoodGBSpider(scrapy.Spider):
     start_urls = (
         "https://www.coop.co.uk/store-finder/api/locations/food?location=54.9966124%2C-7.308574799999974&distance=30000000000&always_one=true&format=json",
     )
-    requires_proxy = true
+    requires_proxy = True
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
