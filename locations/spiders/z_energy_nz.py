@@ -1,4 +1,5 @@
 import json
+import re
 
 from scrapy import Spider
 
@@ -61,12 +62,20 @@ class ZEnergyNZSpider(Spider):
             yield item
 
     def parse_opening_hours(self, business_hours: list) -> OpeningHours:
+        _r = re.compile(r"^(\d\d?)(:\d\d)?(am|pm) ?- ?(\d\d?)(:\d\d)?(am|pm)$")
         oh = OpeningHours()
         for rule in business_hours:
-            if rule["hours"] == "Open 24 hours":
+            if "open 24 hours" in rule["hours"].lower():
                 oh.add_range(rule["day"], "00:00", "24:00")
+            elif m := _r.match(
+                rule["hours"].replace("7.30:00am", "7:30am").replace(".", ":").replace("–", "-").strip()
+            ):
+                oh.add_range(
+                    rule["day"],
+                    "{}{}{}".format(m.group(1), m.group(2) or ":00", m.group(3)),
+                    "{}{}{}".format(m.group(4), m.group(5) or ":00", m.group(6)),
+                    time_format="%I:%M%p",
+                )
             else:
-                # slightly hacky approach
-                hours_string = f"{rule['day']}: {rule['hours']}"
-                oh.add_ranges_from_string(hours_string)
+                self.logger.error("Error parsing opening hours: {}".format(rule))
         return oh
