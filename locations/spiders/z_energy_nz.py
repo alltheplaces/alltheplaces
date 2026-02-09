@@ -9,11 +9,10 @@ from locations.hours import OpeningHours
 
 class ZEnergyNZSpider(Spider):
     name = "z_energy_nz"
-    item_attributes = {"brand": "Z", "brand_wikidata": "Q8063337"}
     start_urls = ["https://www.z.co.nz/find-a-station", "https://www.caltex.co.nz/find-a-station"]
     BRANDS = {
-        "z": ("Z", "Q8063337"),
-        "caltex": ("Caltex", "Q277470"),
+        "z": {"brand": "Z", "brand_wikidata": "Q8063337"},
+        "caltex": {"brand": "Caltex", "brand_wikidata": "Q277470"},
     }
 
     def parse(self, response, **kwargs):
@@ -21,10 +20,13 @@ class ZEnergyNZSpider(Spider):
             response.xpath('//script[contains(text(), "stations")]/text()').re_first(r"({\"stations\":.+});")
         )["stations"]:
             item = DictParser.parse(location)
-            brand = response.url.split(".")[1]
-            if brand_details := self.BRANDS.get(brand):
-                item["brand"], item["brand_wikidata"] = brand_details
-            item["branch"] = item.pop("name").removeprefix("Z ").removeprefix("Caltex ")
+
+            if brand := self.BRANDS.get(response.url.split(".")[1]):
+                item.update(brand)
+                item["branch"] = item.pop("name").removeprefix("Z ").removeprefix("Caltex ")
+            else:
+                self.logger.error("Unknown brand: {}".format(response.url))
+
             item["ref"] = location["site_id"]
             item["website"] = response.urljoin(location["link"])
             item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
@@ -34,7 +36,8 @@ class ZEnergyNZSpider(Spider):
             elif location["type_slug"] == "service-station":
                 apply_category(Categories.FUEL_STATION, item)
             elif location["type_slug"] == "truck-stop":
-                apply_category(Categories.FUEL_STATION.value | {"hgv": "only"}, item)
+                apply_category(Categories.FUEL_STATION, item)
+                apply_yes_no("hgv=only", item, True)
 
             apply_yes_no(Fuel.DIESEL, item, any("Diesel" in s["name"] for s in location["fuels"]))
             apply_yes_no(
