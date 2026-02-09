@@ -16,7 +16,6 @@ class HarveyNormanSpider(Spider):
     # There is no robots.txt, instead the store finder page (HTML)
     # is returned and this confuses Scrapy.
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = "AU"
 
     def parse(self, response):
         data_raw = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
