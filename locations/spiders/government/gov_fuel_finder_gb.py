@@ -1,21 +1,17 @@
 import datetime
-from pickletools import read_stringnl_noescape_pair
 from typing import Any, AsyncIterator
 
 from playwright.async_api import Page
 from scrapy import Request
 from scrapy.http import Response
-from scrapy.spiders import CSVFeedSpider
 from scrapy.utils.iterators import csviter
-from scrapy_playwright.page import PageMethod
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS, DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS, ITEM_PIPELINES
-from locations.user_agents import BROWSER_DEFAULT
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS, ITEM_PIPELINES
 
 BRAND_MAP = {
     "ESSO": {"brand": "Esso", "brand_wikidata": "Q867662"},
@@ -44,12 +40,12 @@ BRAND_MAP = {
     "TOTAL HARVEST ENERGY": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
     "MURCO": {"brand": "Murco", "brand_wikidata": "Q16998281"},
     "CIRCLE K": {"brand": "Circle K", "brand_wikidata": "Q3268010"},
-    "SHELL HARVEST ENERGY":{"brand": "Shell", "brand_wikidata": "Q110716465"},
+    "SHELL HARVEST ENERGY": {"brand": "Shell", "brand_wikidata": "Q110716465"},
 }
 FUEL_MAP = {
     "E5": "e5",
     "E10": "e10",
-    #"B7P": None,
+    # "B7P": None,
     "B7S": "diesel",
     "B10": "b10",
     "HVO": "biodiesel",
@@ -104,11 +100,11 @@ class GovFuelFinderGBSpider(PlaywrightSpider):
 
             apply_yes_no(Extras.CAR_WASH, item, row["forecourts.amenities.vehicle_services.car_wash"] == "true")
             apply_yes_no(Extras.TOILETS, item, row["forecourts.amenities.customer_toilets"] == "true")
-            #"forecourts.amenities.fuel_and_energy_services.adblue_pumps"
-            #"forecourts.amenities.fuel_and_energy_services.adblue_packaged"
-            #"forecourts.amenities.fuel_and_energy_services.lpg_pumps"
-            #"forecourts.amenities.air_pump_or_screenwash"
-            #"forecourts.amenities.water_filling"
+            # "forecourts.amenities.fuel_and_energy_services.adblue_pumps"
+            # "forecourts.amenities.fuel_and_energy_services.adblue_packaged"
+            # "forecourts.amenities.fuel_and_energy_services.lpg_pumps"
+            # "forecourts.amenities.air_pump_or_screenwash"
+            # "forecourts.amenities.water_filling"
 
             if row["forecourts.temporary_closure"] == "true":
                 item["opening_hours"] = "off"
@@ -120,9 +116,9 @@ class GovFuelFinderGBSpider(PlaywrightSpider):
 
             apply_category(Categories.FUEL_STATION, item)
 
-            for key,tag in FUEL_MAP.items():
+            for key, tag in FUEL_MAP.items():
                 if price := row.get("forecourts.fuel_price.{}".format(key)):
-                    price=float(price)
+                    price = float(price)
                     if price < 50:
                         price *= 100
                     elif price > 1000:
