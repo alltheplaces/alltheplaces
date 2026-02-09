@@ -48,12 +48,14 @@ class CapitecBankZASpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
 
         oh = OpeningHours()
-        for day in DAYS_TERMS:
-            if location[day] is not None:
-                if location[day].startswith("Closed"):
-                    oh.set_closed(DAYS_TERMS[day])
-                else:
-                    oh.add_ranges_from_string(location[day])
-        item["opening_hours"] = oh.as_opening_hours()
+        for key, days in DAYS_TERMS.items():
+            value = location.get(key)
+            if not value or "temporarily" in value.lower():
+                continue
+            if "closed" in value.lower():
+                oh.set_closed(days)
+            else:
+                oh.add_ranges_from_string(value)
+        item["opening_hours"] = oh
 
         yield item
