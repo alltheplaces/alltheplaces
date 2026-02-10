@@ -107,7 +107,7 @@ class GovFuelFinderGBSpider(PlaywrightSpider):
             # "forecourts.amenities.water_filling"
 
             if row["forecourts.temporary_closure"] == "true":
-                item["opening_hours"] = "off"
+                item["opening_hours"] = "closed"
             else:
                 item["opening_hours"] = self.parse_opening_hours(row)
 
