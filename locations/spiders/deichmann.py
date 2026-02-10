@@ -23,13 +23,7 @@ class DeichmannSpider(SitemapSpider, StructuredDataSpider):
             item.update(self.DOSENBACH)
 
         item["ref"] = item["ref"].split("#")[1]
-        item["branch"] = (
-            item.pop("name")
-            .replace("DEICHMANN Store ", "")
-            .replace("DOSENBACH Filiale ", "")
-            .replace("DEICHMANN mağaza ", "")
-            .replace("Predajňa DEICHMANN ", "")
-        )
+        item["name"] = None
         # remove fields that aren't unique amongst stores
         item.pop("email")
         item.pop("image")
