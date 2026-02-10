@@ -8,7 +8,7 @@ from scrapy.utils.iterators import csviter
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS, ITEM_PIPELINES
@@ -111,8 +111,16 @@ class GovFuelFinderGBSpider(PlaywrightSpider):
             else:
                 item["opening_hours"] = self.parse_opening_hours(row)
 
-            # row["forecourts.permanent_closure"]
-            # row["forecourts.permanent_closure_date"]
+            if row["forecourts.permanent_closure"] == "true":
+                set_closed(item)
+            if row["forecourts.permanent_closure_date"]:
+                set_closed(
+                    item,
+                    datetime.datetime.strptime(
+                        row["forecourts.permanent_closure_date"],
+                        "%a %b %d %Y %H:%M:%S %Z%z (Coordinated Universal Time)",
+                    ),
+                )
 
             apply_category(Categories.FUEL_STATION, item)
 
