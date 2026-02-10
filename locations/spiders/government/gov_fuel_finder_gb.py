@@ -138,8 +138,9 @@ class GovFuelFinderGBSpider(PlaywrightSpider):
 
         await page.close()
 
-    def parse_opening_hours(self, poi: dict) -> OpeningHours:
-        # "forecourts.amenities.twenty_four_hour_fuel"
+    def parse_opening_hours(self, poi: dict) -> OpeningHours | str:
+        if poi["forecourts.amenities.twenty_four_hour_fuel"] == "true":
+            return "24/7"
         oh = OpeningHours()
         for day in map(str.lower, DAYS_FULL):
             if poi["forecourts.opening_times.usual_days.{}.is_24_hours".format(day)] == "true":
