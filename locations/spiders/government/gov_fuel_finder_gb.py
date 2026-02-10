@@ -58,6 +58,7 @@ class GovFuelFinderGBSpider(PlaywrightSpider):
         "PLAYWRIGHT_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script", "fetch", "xhr"],
         "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None},
     }
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Any]:
         yield Request(
