@@ -4,6 +4,17 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
+PICK_N_PAY_BRANDS = {
+    "PNP": {
+        "brand": "Pick n Pay",
+        "brand_wikidata": "Q7190735",
+    },
+    "BOXER": {
+        "brand": "Boxer",
+        "brand_wikidata": "Q116586275",
+    },
+}
+
 
 class PickNPaySpider(scrapy.Spider):
     name = "pick_n_pay"
@@ -34,13 +45,8 @@ class PickNPaySpider(scrapy.Spider):
                 # "LOCAL", "MINI" appear to be branded as normal PnP supermarkets
                 # "FAMILY", "SUPER" are standard PnP supermarkets
                 # "MARKET" probably should be shown as PnP supermarket. Township location stores and numbers have dropped significantly in recent years
-                item.update(
-                    {
-                        "brand": "Pick n Pay",
-                        "brand_wikidata": "Q7190735",
-                        "extras": Categories.SHOP_SUPERMARKET.value,
-                    }
-                )
+                item.update(PICK_N_PAY_BRANDS["PNP"])
+                item["extras"] = Categories.SHOP_SUPERMARKET.value
             elif store["storeType"] == "HYPER":
                 item.update(
                     {
@@ -73,13 +79,8 @@ class PickNPaySpider(scrapy.Spider):
                     }
                 )
             elif store["storeType"] in ("BOXER", "BOXER PUNCH", "BOXER SUPERSTOR"):
-                item.update(
-                    {
-                        "brand": "Boxer",
-                        "brand_wikidata": "Q116586275",
-                        "extras": Categories.SHOP_SUPERMARKET.value,
-                    }
-                )
+                item.update(PICK_N_PAY_BRANDS["BOXER"])
+                item["extras"] = Categories.SHOP_SUPERMARKET.value
             elif store["storeType"] == "BOXER LIQUOR":
                 item.update(
                     {
@@ -113,13 +114,8 @@ class PickNPaySpider(scrapy.Spider):
                     }
                 )
             else:
-                item.update(
-                    {
-                        "brand": "Pick n Pay",
-                        "brand_wikidata": "Q7190735",
-                        "extras": Categories.SHOP_SUPERMARKET.value,
-                    }
-                )
+                item.update(PICK_N_PAY_BRANDS["PNP"])
+                item["extras"] = Categories.SHOP_SUPERMARKET.value
             # Unhandled:
             # "DAILY" was two stores, but both marked as incomplete in the data
 

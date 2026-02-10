@@ -2,18 +2,8 @@ import re
 
 from locations.categories import Categories, apply_category
 from locations.spiders.bash import BASH_BRANDS
+from locations.spiders.pick_n_pay import PICK_N_PAY_BRANDS
 from locations.storefinders.location_bank import LocationBankSpider
-
-PICK_N_PAY_BRANDS = {
-    "PNP": {
-        "brand": "Pick n Pay",
-        "brand_wikidata": "Q7190735",
-    },
-    "BOXER": {
-        "brand": "Boxer",
-        "brand_wikidata": "Q116586275",
-    },
-}
 
 
 class TymebankZASpider(LocationBankSpider):
