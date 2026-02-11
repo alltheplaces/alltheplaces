@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -27,6 +28,7 @@ class ChangeGroupSpider(JSONBlobSpider):
             except:
                 self.logger.error("Failed to parse opening hours {}".format(hours))
 
+        apply_yes_no(Extras.ATM, item, feature.get("Servicios", {}).get("ATM"))
         yield item
 
     def parse_opening_hours(self, rules: dict) -> OpeningHours:
