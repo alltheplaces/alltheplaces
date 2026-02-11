@@ -29,6 +29,7 @@ class WestpacNZSpider(Spider):
                     item["opening_hours"].set_closed(day)
                 elif "24/7" in location[hours_key]:
                     item["opening_hours"] = "24/7"
+                    break
                 elif location[hours_key] == "Open limited hours":
                     pass
                 else:
