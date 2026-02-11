@@ -16,6 +16,7 @@ class BricomarchePLSpider(JSONBlobSpider):
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Bricomarché ")
         if slug := feature.get("Slug"):
             item["website"] = urljoin("https://www.bricomarche.pl/sklep/", slug)
         apply_category(Categories.SHOP_DOITYOURSELF, item)
