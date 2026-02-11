@@ -1,9 +1,10 @@
 from typing import Iterable
 
-from scrapy.http import  TextResponse
+from scrapy.http import TextResponse
+
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.hours import DAYS_FULL, OpeningHours
 
 
 class MilletsGBSpider(JSONBlobSpider):
@@ -21,5 +22,9 @@ class MilletsGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
-            item["opening_hours"].add_range(day, feature["hours"][f"{day.lower()}"]["openIntervals"][0]["start"], feature["hours"][f"{day.lower()}"]["openIntervals"][0]["end"])
+            item["opening_hours"].add_range(
+                day,
+                feature["hours"][f"{day.lower()}"]["openIntervals"][0]["start"],
+                feature["hours"][f"{day.lower()}"]["openIntervals"][0]["end"],
+            )
         yield item
