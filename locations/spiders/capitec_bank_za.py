@@ -1,39 +1,20 @@
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy.http import JsonRequest, Request, TextResponse
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.storefinders.go_review_api import GoReviewApiSpider
 
 
-class CapitecBankZASpider(JSONBlobSpider):
+class CapitecBankZASpider(GoReviewApiSpider):
     name = "capitec_bank_za"
     item_attributes = {"brand": "Capitec Bank", "brand_wikidata": "Q5035822"}
-    locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 300}
-    requires_proxy = "ZA"
-
-    async def start(self) -> AsyncIterator[Request]:
-        yield JsonRequest(
-            url="https://admin.goreview.co.za/website/api/locations/search",
-            data={
-                "domain": "capitecpages.localpages.io",
-                "latitude": "-30.559482",
-                "longitude": "22.937506",
-                "attributes": "[]",
-                "radius": "1000",
-                "initialLoad": "true",
-                "selectedCountryFilter": "null",
-                "selectedProvinceFilter": "null",
-                "selectedCityFilter": "null",
-            },
-            headers={"x-requested-by-application": "localpages"},
-        )
+    domain = "capitecpages.localpages.io"
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["storeCode"]
-        item["website"] = feature["local_page_url"]
         for location_type in ["Capitec Bank ATM", "Capitec Bank", "Capitec Business Centre"]:
             if location_type in item["name"]:
                 item["name"] = location_type
