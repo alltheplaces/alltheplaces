@@ -22,6 +22,8 @@ class WestpacNZSpider(Spider):
             "branches"
         ]:
             item = DictParser.parse(location)
+            if "0800 400 600" in (item.get("phone") or ""):
+                item["phone"] = None
             if location["siteName"].startswith("Community Banking - "):
                 item["branch"] = location["siteName"].removeprefix("Community Banking - ")
                 item["name"] = "Westpac Community Banking"
@@ -51,6 +53,7 @@ class WestpacNZSpider(Spider):
                 else:
                     open_time, closed_time = location[hours_key].split(" - ")
                     item["opening_hours"].add_range(day, open_time, closed_time, "%H:%M%p")
+
             match location["locationType"]:
                 case "Branch":
                     apply_category(Categories.BANK, item)
