@@ -133,6 +133,7 @@ class SignetJewelersSpider(Spider):
             item = DictParser.parse(data)
             item["ref"] = data.get("name")
             item["name"] = data.get("displayName")
+            item["branch"] = item.pop("name")
             item["website"] = response.url
             item["brand"] = BRANDS[brand]["brand"]
             item["brand_wikidata"] = BRANDS[brand]["brand_wikidata"]
