@@ -22,7 +22,20 @@ class WestpacNZSpider(Spider):
             "branches"
         ]:
             item = DictParser.parse(location)
-            item["branch"] = location["siteName"]
+            if location["siteName"].startswith("Community Banking - "):
+                item["branch"] = location["siteName"].removeprefix("Community Banking - ")
+                item["name"] = "Westpac Community Banking"
+            elif location["siteName"].startswith("New World "):
+                item["branch"] = location["siteName"].removeprefix("New World ")
+                item["located_in"] = "New World"
+            elif location["siteName"].startswith("Pak n Save "):
+                item["branch"] = location["siteName"].removeprefix("Pak n Save ")
+                item["located_in"] = "Pak n Save"
+            elif location["siteName"].startswith("Woolworths "):
+                item["branch"] = location["siteName"].removeprefix("Woolworths ")
+                item["located_in"] = "Woolworths"
+            else:
+                item["branch"] = location["siteName"]
             item["ref"] = location["key"]
 
             item["opening_hours"] = OpeningHours()
