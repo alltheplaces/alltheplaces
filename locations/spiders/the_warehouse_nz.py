@@ -18,8 +18,8 @@ class TheWarehouseNZSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         ruleset = json.loads(feature["storeHoursJson"])["openingHours"]
         item["street_address"] = feature["address1"]
+        item["branch"] = item.pop("name", None)
         item["opening_hours"] = OpeningHours()
-        item["branch"] = item.pop("name")
         for rules in ruleset:
             item["opening_hours"].add_ranges_from_string(rules)
         yield item
