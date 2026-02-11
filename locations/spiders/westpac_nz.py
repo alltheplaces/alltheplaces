@@ -10,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class WestpacNZSpider(Spider):
     name = "westpac_nz"
-    item_attributes = {"brand": "Westpac", "brand_wikidata": "Q2565531"}
+    item_attributes = {"brand": "Westpac", "brand_wikidata": "Q2031726"}
     start_urls = ["https://www.westpac.co.nz/contact-us/branch-finder/"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     no_refs = True
