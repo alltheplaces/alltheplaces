@@ -1,6 +1,8 @@
 import json
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -13,15 +15,16 @@ class WestpacNZSpider(Spider):
     item_attributes = {"brand": "Westpac", "brand_wikidata": "Q2031726"}
     start_urls = ["https://www.westpac.co.nz/contact-us/branch-finder/"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    no_refs = True
     requires_proxy = "NZ"
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(response.xpath('//div[@class="js-branch-finder-map container"]/@data-props').get())[
             "branches"
         ]:
             item = DictParser.parse(location)
             item["branch"] = location["siteName"]
+            item["ref"] = location["key"]
+
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 hours_key = "{}Hours".format(day.lower())
