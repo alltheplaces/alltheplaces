@@ -18,6 +18,11 @@ class CinnaholicUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
+        item["email"] = (
+            response.xpath('//div[contains(@class, "email contact-item hide")]/@class')
+            .get()
+            .removeprefix("email contact-item hide")
+        )
 
         apply_category(Categories.SHOP_BAKERY, item)
 
