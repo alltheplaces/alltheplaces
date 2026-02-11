@@ -9,3 +9,6 @@ class MilletsGBSpider(JSONBlobSpider):
     ]
     locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False}
+
+    def pre_process_data(self, feature: dict) -> None:
+        feature["ref"] = feature["address"]["postalCode"]
