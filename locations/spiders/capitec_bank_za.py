@@ -43,6 +43,8 @@ class CapitecBankZASpider(JSONBlobSpider):
         if "ATM" in location_attributes:
             apply_category(Categories.ATM, item)
             apply_yes_no(Extras.CASH_IN, item, "Cash Accepting ATM" in location_attributes, False)
+            item["opening_hours"] = "24/7"
         else:
             apply_category(Categories.BANK, item)
+            # feature["operating_hours"] don't have whole week hours info, seems to provide a single day hours, hence ignored.
         yield item
