@@ -17,8 +17,8 @@ class CapitecBankZASpider(GoReviewApiSpider):
         item["ref"] = feature["storeCode"]
         for location_type in ["Capitec Bank ATM", "Capitec Bank", "Capitec Business Centre"]:
             if location_type in item["name"]:
-                item["name"] = location_type
                 item["branch"] = item["name"].split(location_type)[1].strip()
+                item["name"] = location_type
                 break
         location_attributes = [attribute["value"] for attribute in feature.get("attributes", [])]
         if "ATM" in location_attributes:
@@ -26,5 +26,5 @@ class CapitecBankZASpider(GoReviewApiSpider):
             apply_yes_no(Extras.CASH_IN, item, "Cash Accepting ATM" in location_attributes, False)
         else:
             apply_category(Categories.BANK, item)
-            # feature["operating_hours"] don't have whole week hours info, seems to provide a single day hours, hence ignored.
+        # feature["operating_hours"] don't have whole week hours info, seems to provide a single day hours, hence ignored.
         yield item
