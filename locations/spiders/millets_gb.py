@@ -21,11 +21,10 @@ class MilletsGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["website"] = feature["websiteUrl"]["displayUrl"]
+
         item["opening_hours"] = OpeningHours()
-        for day in DAYS_FULL:
-            item["opening_hours"].add_range(
-                day,
-                feature["hours"][f"{day.lower()}"]["openIntervals"][0]["start"],
-                feature["hours"][f"{day.lower()}"]["openIntervals"][0]["end"],
-            )
+        for day in map(str.lower, DAYS_FULL):
+            for time in feature["hours"][day]["openIntervals"]:
+                item["opening_hours"].add_range(day, time["start"], time["end"])
+
         yield item
