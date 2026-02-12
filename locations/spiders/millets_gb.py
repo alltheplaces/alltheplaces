@@ -20,7 +20,7 @@ class MilletsGBSpider(JSONBlobSpider):
         feature["ref"] = feature["address"]["postalCode"]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["website"] = feature["websiteUrl"]["displayUrl"]
+        item["website"] = feature["websiteUrl"]["displayUrl"].replace("/our-stores/", "/stores/")
 
         item["opening_hours"] = OpeningHours()
         for day in map(str.lower, DAYS_FULL):
