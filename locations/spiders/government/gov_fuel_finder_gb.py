@@ -55,6 +55,7 @@ class GovFuelFinderGBSpider(CSVFeedSpider):
     custom_settings = {
         "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None}
     }
+    requires_proxy = True
 
     def parse_row(self, response: Response, row: dict[str, str]) -> Any:
         item = Feature()
