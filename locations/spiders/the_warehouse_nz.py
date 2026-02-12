@@ -4,6 +4,7 @@ from typing import AsyncIterator, Iterable
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import apply_category, Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -40,11 +41,25 @@ class TheWarehouseNZSpider(JSONBlobSpider):
             )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        ruleset = json.loads(feature["storeHoursJson"])["openingHours"]
         item["branch"] = item.pop("name", None)
         item["addr_full"] = item["addr_full"].removeprefix("The Warehouse")
         item["street_address"] = feature["address1"]
-        item["opening_hours"] = OpeningHours()
-        for rules in ruleset:
-            item["opening_hours"].add_ranges_from_string(rules)
+
+        try:
+            item["opening_hours"] = self.parse_opening_hours(json.loads(feature["storeHoursJson"])["openingHours"])
+        except:
+            self.logger.error("Error paring opening hours: {}".format(feature["storeHoursJson"]))
+
+        apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+
         yield item
+
+    def parse_opening_hours(self, rules: list[str]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            day, times = rule.split(" ")
+            if times == "CLOSED":
+                oh.set_closed(day)
+            else:
+                oh.add_range(day, *times.split("-"))
+        return oh
