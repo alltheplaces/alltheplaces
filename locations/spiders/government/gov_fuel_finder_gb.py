@@ -6,7 +6,7 @@ from scrapy import Request
 from scrapy.http import Response
 from scrapy.utils.iterators import csviter
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -101,9 +101,13 @@ class GovFuelFinderGBSpider(PlaywrightSpider):
 
             apply_yes_no(Extras.CAR_WASH, item, row["forecourts.amenities.vehicle_services.car_wash"] == "true")
             apply_yes_no(Extras.TOILETS, item, row["forecourts.amenities.customer_toilets"] == "true")
-            # "forecourts.amenities.fuel_and_energy_services.adblue_pumps"
-            # "forecourts.amenities.fuel_and_energy_services.adblue_packaged"
-            # "forecourts.amenities.fuel_and_energy_services.lpg_pumps"
+            apply_yes_no(Fuel.ADBLUE, item, row["forecourts.amenities.fuel_and_energy_services.adblue_pumps"] == "true")
+            apply_yes_no(
+                "fuel:adblue:canister",
+                item,
+                row["forecourts.amenities.fuel_and_energy_services.adblue_packaged"] == "true",
+            )
+            apply_yes_no(Fuel.LPG, item, row["forecourts.amenities.fuel_and_energy_services.lpg_pumps"] == "true")
             # "forecourts.amenities.air_pump_or_screenwash"
             # "forecourts.amenities.water_filling"
 
