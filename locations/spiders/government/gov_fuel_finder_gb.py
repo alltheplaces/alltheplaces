@@ -4,6 +4,7 @@ from typing import Any, AsyncIterator
 from playwright.async_api import Page
 from scrapy import Request
 from scrapy.http import Response
+from scrapy.spiders import CSVFeedSpider
 from scrapy.utils.iterators import csviter
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
@@ -52,96 +53,77 @@ FUEL_MAP = {
 }
 
 
-class GovFuelFinderGBSpider(PlaywrightSpider):
+class GovFuelFinderGBSpider(CSVFeedSpider):
     name = "gov_fuel_finder_gb"
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "PLAYWRIGHT_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script", "fetch", "xhr"],
-        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None},
+    start_urls = ["https://www.fuel-finder.service.gov.uk/internal/v1.0.2/csv/get-latest-fuel-prices-csv"]
+    custom_settings = {
+        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None}
     }
-    requires_proxy = True
 
-    async def start(self) -> AsyncIterator[Any]:
-        yield Request(
-            "https://www.developer.fuel-finder.service.gov.uk/access-latest-fuelprices",
-            meta={"playwright_include_page": True, "playwright_page_goto_kwargs": {"wait_until": "networkidle"}},
-            callback=self.parse_webpage,
+    def parse_row(self, response: Response, row: dict[str, str]) -> Any:
+        item = Feature()
+        item["ref"] = row["forecourts.node_id"]
+        item["lat"] = row["forecourts.location.latitude"]
+        item["lon"] = row["forecourts.location.longitude"]
+
+        if brand := BRAND_MAP.get(row["forecourts.brand_name"]):
+            item.update(brand)
+        else:
+            item["name"] = row["forecourts.trading_name"]
+
+        item["operator"] = row["mft.name"]
+        item["phone"] = row["forecourts.public_phone_number"]
+        item["street_address"] = merge_address_lines(
+            [row["forecourts.location.address_line_1"], row["forecourts.location.address_line_2"]]
         )
+        item["city"] = row["forecourts.location.city"]
+        item["postcode"] = row["forecourts.location.postcode"]
 
-    async def parse_webpage(self, response: Response, **kwargs: Any) -> Any:
-        page: Page = response.meta["playwright_page"]
-        async with page.expect_response(
-            lambda response: response.url.startswith(
-                "https://ff-raw-data-bronze-ics-prod.s3.eu-west-2.amazonaws.com/UpdatedFuelPrice-"
-            )
-        ) as data:
-            await page.click(selector="p.govuk-body:nth-child(10) > a:nth-child(1)")
+        item["extras"]["check_date"] = datetime.datetime.strptime(
+            row["latest_update_timestamp"], "%a %b %d %Y %H:%M:%S %Z%z (Coordinated Universal Time)"
+        ).strftime("%Y-%m-%d")
 
-        for row in csviter(await (await data.value).body()):
-            item = Feature()
-            item["ref"] = row["forecourts.node_id"]
-            item["lat"] = row["forecourts.location.latitude"]
-            item["lon"] = row["forecourts.location.longitude"]
+        apply_yes_no(Extras.CAR_WASH, item, row["forecourts.amenities.vehicle_services.car_wash"] == "true")
+        apply_yes_no(Extras.TOILETS, item, row["forecourts.amenities.customer_toilets"] == "true")
+        apply_yes_no(Fuel.ADBLUE, item, row["forecourts.amenities.fuel_and_energy_services.adblue_pumps"] == "true")
+        apply_yes_no(
+            "fuel:adblue:canister",
+            item,
+            row["forecourts.amenities.fuel_and_energy_services.adblue_packaged"] == "true",
+        )
+        apply_yes_no(Fuel.LPG, item, row["forecourts.amenities.fuel_and_energy_services.lpg_pumps"] == "true")
+        # "forecourts.amenities.air_pump_or_screenwash"
+        # "forecourts.amenities.water_filling"
 
-            if brand := BRAND_MAP.get(row["forecourts.brand_name"]):
-                item.update(brand)
-            else:
-                item["name"] = row["forecourts.trading_name"]
+        if row["forecourts.temporary_closure"] == "true":
+            item["opening_hours"] = "closed"
+        else:
+            item["opening_hours"] = self.parse_opening_hours(row)
 
-            item["operator"] = row["mft.name"]
-            item["phone"] = row["forecourts.public_phone_number"]
-            item["street_address"] = merge_address_lines(
-                [row["forecourts.location.address_line_1"], row["forecourts.location.address_line_2"]]
-            )
-            item["city"] = row["forecourts.location.city"]
-            item["postcode"] = row["forecourts.location.postcode"]
-
-            item["extras"]["check_date"] = datetime.datetime.strptime(
-                row["latest_update_timestamp"], "%a %b %d %Y %H:%M:%S %Z%z (Coordinated Universal Time)"
-            ).strftime("%Y-%m-%d")
-
-            apply_yes_no(Extras.CAR_WASH, item, row["forecourts.amenities.vehicle_services.car_wash"] == "true")
-            apply_yes_no(Extras.TOILETS, item, row["forecourts.amenities.customer_toilets"] == "true")
-            apply_yes_no(Fuel.ADBLUE, item, row["forecourts.amenities.fuel_and_energy_services.adblue_pumps"] == "true")
-            apply_yes_no(
-                "fuel:adblue:canister",
+        if row["forecourts.permanent_closure"] == "true":
+            set_closed(item)
+        if row["forecourts.permanent_closure_date"]:
+            set_closed(
                 item,
-                row["forecourts.amenities.fuel_and_energy_services.adblue_packaged"] == "true",
+                datetime.datetime.strptime(
+                    row["forecourts.permanent_closure_date"],
+                    "%a %b %d %Y %H:%M:%S %Z%z (Coordinated Universal Time)",
+                ),
             )
-            apply_yes_no(Fuel.LPG, item, row["forecourts.amenities.fuel_and_energy_services.lpg_pumps"] == "true")
-            # "forecourts.amenities.air_pump_or_screenwash"
-            # "forecourts.amenities.water_filling"
 
-            if row["forecourts.temporary_closure"] == "true":
-                item["opening_hours"] = "closed"
-            else:
-                item["opening_hours"] = self.parse_opening_hours(row)
+        apply_category(Categories.FUEL_STATION, item)
 
-            if row["forecourts.permanent_closure"] == "true":
-                set_closed(item)
-            if row["forecourts.permanent_closure_date"]:
-                set_closed(
-                    item,
-                    datetime.datetime.strptime(
-                        row["forecourts.permanent_closure_date"],
-                        "%a %b %d %Y %H:%M:%S %Z%z (Coordinated Universal Time)",
-                    ),
-                )
+        for key, tag in FUEL_MAP.items():
+            if price := row.get("forecourts.fuel_price.{}".format(key)):
+                price = float(price)
+                if price < 50:
+                    price *= 100
+                elif price > 1000:
+                    price /= 10
+                item["extras"]["charge:{}".format(tag)] = "{} GBP/1 litre".format(round(price / 100, 2))
+                apply_yes_no("fuel:{}".format(tag), item, True)
 
-            apply_category(Categories.FUEL_STATION, item)
-
-            for key, tag in FUEL_MAP.items():
-                if price := row.get("forecourts.fuel_price.{}".format(key)):
-                    price = float(price)
-                    if price < 50:
-                        price *= 100
-                    elif price > 1000:
-                        price /= 10
-                    item["extras"]["charge:{}".format(tag)] = "{} GBP/1 litre".format(round(price / 100, 2))
-                    apply_yes_no("fuel:{}".format(tag), item, True)
-
-            yield item
-
-        await page.close()
+        yield item
 
     def parse_opening_hours(self, poi: dict) -> OpeningHours | str:
         if poi["forecourts.amenities.twenty_four_hour_fuel"] == "true":
