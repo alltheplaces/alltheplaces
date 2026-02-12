@@ -1,6 +1,6 @@
 import json
 import re
-from typing import AsyncIterator, Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request, Response
