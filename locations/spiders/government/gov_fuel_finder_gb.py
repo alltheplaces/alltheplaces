@@ -1,18 +1,14 @@
 import datetime
-from typing import Any, AsyncIterator
+from typing import Any
 
-from playwright.async_api import Page
-from scrapy import Request
 from scrapy.http import Response
 from scrapy.spiders import CSVFeedSpider
-from scrapy.utils.iterators import csviter
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS, ITEM_PIPELINES
+from locations.settings import ITEM_PIPELINES
 
 BRAND_MAP = {
     "ESSO": {"brand": "Esso", "brand_wikidata": "Q867662"},
