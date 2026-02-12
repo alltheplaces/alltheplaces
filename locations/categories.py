@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Iterable, Mapping
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -302,6 +303,7 @@ class Categories(Enum):
     }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MONUMENT = {"historic": "monument"}
     MORTUARY = {"amenity": "mortuary"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
@@ -425,7 +427,7 @@ class Categories(Enum):
     NATURAL_TREE = {"natural": "tree"}
 
 
-def apply_category(category: dict | Enum, item: Feature | dict) -> None:
+def apply_category(category: Mapping | Enum, item: Feature | dict) -> None:
     """
     Apply categories to a Feature, where categories can be supplied as a
     single Enum, or dictionary of key-value strings. If a value for the
@@ -441,7 +443,7 @@ def apply_category(category: dict | Enum, item: Feature | dict) -> None:
     """
     if isinstance(category, Enum):
         tags = category.value
-    elif isinstance(category, dict):
+    elif isinstance(category, Mapping):
         tags = category
     else:
         raise TypeError("dict or Enum required")
@@ -472,6 +474,7 @@ top_level_tags = [
     "emergency",
     "healthcare",
     "highway",
+    "historic",
     "landuse",
     "leisure",
     "man_made",
@@ -489,7 +492,7 @@ top_level_tags = [
 ]
 
 
-def get_category_tags(source: Feature | Enum | dict) -> dict:
+def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     """
     Retrieve OpenStreetMap top level tags from a Feature, Enum or
     dict. All top level tags can exist on their own and do not
@@ -505,7 +508,7 @@ def get_category_tags(source: Feature | Enum | dict) -> dict:
         tags = source.get("extras", {})
     elif isinstance(source, Enum):
         tags = source.value
-    elif isinstance(source, dict):
+    elif isinstance(source, Mapping):
         tags = source
 
     categories = {}
@@ -857,7 +860,7 @@ class Clothes(Enum):
     WOMEN = "women"
 
 
-def apply_clothes(clothes: type[Clothes] | list[type[Clothes]], item: Feature | dict) -> None:
+def apply_clothes(clothes: Clothes | Iterable[Clothes], item: Feature | dict) -> None:
     """
     Apply clothing categories to a feature. If the feature already has
     clothing categories defined, this function will append to the list of
@@ -875,7 +878,7 @@ def apply_clothes(clothes: type[Clothes] | list[type[Clothes]], item: Feature | 
     else:
         current = []
 
-    for v in clothes if isinstance(clothes, list) else [clothes]:
+    for v in clothes if isinstance(clothes, Iterable) else [clothes]:
         if v.value not in current:
             current.append(v.value)
             apply_yes_no(f"clothes:{v.value}", item, True)
@@ -901,7 +904,7 @@ class Vending(Enum):
     WATER = "water"
 
 
-def add_vending(vending: type[Vending] | list[type[Vending]], item: Feature | dict) -> None:
+def add_vending(vending: Vending | Iterable[Vending], item: Feature | dict) -> None:
     """
     Apply vending tags to a feature. If the feature already has
     vending tags defined, this function will append to the list of
@@ -919,7 +922,7 @@ def add_vending(vending: type[Vending] | list[type[Vending]], item: Feature | di
     else:
         current = []
 
-    for v in vending if isinstance(vending, list) else [vending]:
+    for v in vending if isinstance(vending, Iterable) else [vending]:
         if v.value not in current:
             current.append(v.value)
 
@@ -943,7 +946,7 @@ class Sport(Enum):
     CRICKET = "cricket"
 
 
-def add_sport(sport: Sport | list[type[Sport]], item: Feature | dict) -> None:
+def add_sport(sport: Sport | Iterable[Sport], item: Feature | dict) -> None:
     """
     Apply sport tags to a feature. If the feature already has
     sport tags defined, this function will append to the list of
@@ -961,7 +964,7 @@ def add_sport(sport: Sport | list[type[Sport]], item: Feature | dict) -> None:
     else:
         current = []
 
-    for v in sport if isinstance(sport, list) else [sport]:
+    for v in sport if isinstance(sport, Iterable) else [sport]:
         if v.value not in current:
             current.append(v.value)
 
@@ -1072,7 +1075,7 @@ class HealthcareSpecialities(Enum):
 
 
 def apply_healthcare_specialities(
-    speciality: HealthcareSpecialities | list[HealthcareSpecialities], item: Feature | dict
+    speciality: HealthcareSpecialities | Iterable[HealthcareSpecialities], item: Feature | dict
 ) -> None:
     """
     Apply healthcare speciality tags to a feature. If the feature already has
@@ -1091,7 +1094,7 @@ def apply_healthcare_specialities(
     else:
         current = []
 
-    for v in speciality if isinstance(speciality, list) else [speciality]:
+    for v in speciality if isinstance(speciality, Iterable) else [speciality]:
         if v.value not in current:
             current.append(v.value)
 
