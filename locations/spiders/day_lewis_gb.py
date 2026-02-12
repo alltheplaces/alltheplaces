@@ -12,5 +12,6 @@ class DayLewisGBSpider(AgileStoreLocatorSpider):
     allowed_domains = ["daylewis.co.uk"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
         item["website"] = f'https://www.daylewis.co.uk/pharmacy-page/{feature["slug"]}/'
         yield item
