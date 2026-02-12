@@ -4,7 +4,7 @@ from typing import AsyncIterator, Iterable
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
