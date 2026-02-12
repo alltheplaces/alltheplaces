@@ -28,6 +28,7 @@ class LadbrokesGBSpider(Spider):
                 item["addr_full"] = store["ad"]
                 item["postcode"] = store.get("pc")
                 item["phone"] = store["p"]
+                item["website"] = None
                 if store["c"] == "ROI":
                     item["country"] = "IE"
                 else:
