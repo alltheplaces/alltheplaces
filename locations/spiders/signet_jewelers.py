@@ -1,9 +1,9 @@
 import json
 import re
-from typing import AsyncIterator
+from typing import AsyncIterator, Any
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -123,7 +123,7 @@ class SignetJewelersSpider(Spider):
         for i in cities:
             yield Request(response.urljoin(i), callback=self.parse)
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').extract())
 
         if re.search(r"(?s)storeInformation\s=\s(.*);", script) is not None:
@@ -131,9 +131,8 @@ class SignetJewelersSpider(Spider):
             data = json.loads(data.replace("y:", "y").replace("},", "}"))
             brand = re.search(r"www.(\w+)", response.url)[1]
             item = DictParser.parse(data)
-            item["ref"] = data.get("name")
-            item["name"] = data.get("displayName")
-            item["branch"] = item.pop("name")
+            item["ref"] = item.pop("name")
+            item["branch"] = data.get("displayName")
             item["website"] = response.url
             item["brand"] = BRANDS[brand]["brand"]
             item["brand_wikidata"] = BRANDS[brand]["brand_wikidata"]
