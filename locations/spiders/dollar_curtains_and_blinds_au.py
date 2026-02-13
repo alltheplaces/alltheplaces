@@ -23,6 +23,7 @@ class DollarCurtainsAndBlindsAUSpider(PlaywrightSpider):
             location.update(location.pop("map_location"))
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").removeprefix("dollar curtains + blinds ")
+            item["name"] = self.item_attributes["brand"]
             item["ref"] = item["website"] = location["link"]
             item["addr_full"] = location["address_formatted"]
             item["opening_hours"] = OpeningHours()
