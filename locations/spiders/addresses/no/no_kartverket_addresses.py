@@ -10,14 +10,14 @@ from locations.items import Feature
 from locations.licenses import Licenses
 
 
-class KartverketAddressesNOSpider(AddressSpider):
+class NoKartverketAddressesSpider(AddressSpider):
     """
     Spider to collect addresses from Norway's official address registry (Matrikkelen).
 
     Data is provided by Kartverket (Norwegian Mapping Authority) via CSV downloads.
     """
 
-    name = "kartverket_addresses_no"
+    name = "no_kartverket_addresses"
     allowed_domains = ["nedlasting.geonorge.no"]
     dataset_attributes = Licenses.CC4.value | {
         "attribution:website": "https://kartkatalog.geonorge.no/metadata/matrikkelen-adresse/f7df7a18-b30f-4745-bd64-d0863812350c",
