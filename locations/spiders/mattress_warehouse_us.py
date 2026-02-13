@@ -1,12 +1,13 @@
+import json
 import re
 from typing import Any
 
-from scrapy import Request
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class MattressWarehouseUSSpider(CrawlSpider):
@@ -18,7 +19,6 @@ class MattressWarehouseUSSpider(CrawlSpider):
     start_urls = ["https://mattresswarehouse.com/store-locator"]
 
     rules = [
-        Rule(LinkExtractor(allow=r"/store-locator/[a-z]+$")),
         Rule(
             LinkExtractor(allow=r"/store-locator/mattress-stores-in"),
             callback="parse",
@@ -26,28 +26,30 @@ class MattressWarehouseUSSpider(CrawlSpider):
         ),
     ]
 
-    store_link_extractor = LinkExtractor(allow=r"/store-locator/(sleep-outfitters-of-|mattress-warehouse-of-)")
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        lat_lon_data = re.findall(
-            r"(\d+\.\d+),.*?(-?\d+\.\d+)", response.xpath('//*[contains(text(),"loaderData")]/text()').get(default="")
-        )
-        links = self.store_link_extractor.extract_links(response)
-        for link in links:
-            for lat_lon in lat_lon_data:
-                yield Request(url=link.url, callback=self.parse_details, cb_kwargs={"lat_lon": lat_lon})
-
-    def parse_details(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["branch"] = response.xpath("//h1/div[2]/text()").get()
-        item["addr_full"] = response.xpath('//*[@class="flex items-center gap-3"]//text()').get()
-        item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
-        item["ref"] = item["website"] = response.url
-        item["lat"], item["lon"] = kwargs.get("lat_lon", (None, None))
-        if "sleep-outfitters" in response.url:
-            item.update(self.BRANDS["sleep_outfitters"])
-
-        else:
-            item.update(self.BRANDS["mattress_warehouse"])
-        yield item
+        if raw_data := response.xpath('//*[contains(text(),"postalCode")]/text()').get():
+            for location in json.loads(
+                re.search(r"locationDetails\"\s*:\s*(\[.*\]),\"cityStateSlug", raw_data).group(1)
+            ):
+                item = DictParser.parse(location)
+                item["addr_full"] = location["addressMetafield"]
+                item["branch"] = (
+                    item.pop("name").replace("Mattress Warehouse of ", "").replace("Sleep Outfitters of ", "")
+                )
+                brand_slug = re.search(r"(.+\s*of)\s*", location["name"]).group(1).lower().replace(" ", "-")
+                branch_slug = location["nameMetafield"].replace(" ", "_").replace(",", "").lower()
+                item["website"] = response.url.replace(
+                    "mattress-stores-in", "-".join([brand_slug, branch_slug, item["ref"]])
+                )
+                if "Sleep Outfitters" in location["name"]:
+                    item.update(self.BRANDS["sleep_outfitters"])
+                else:
+                    item.update(self.BRANDS["mattress_warehouse"])
+                oh = OpeningHours()
+                for day, time in location["hours"].items():
+                    day = day
+                    open_time = time["start"]
+                    close_time = time["end"]
+                    oh.add_range(day, open_time, close_time)
+                item["opening_hours"] = oh
+                yield item
