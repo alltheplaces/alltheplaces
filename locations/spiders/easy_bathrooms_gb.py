@@ -15,6 +15,7 @@ class EasyBathroomsGBSpider(Spider):
     item_attributes = {"brand": "Easy Bathrooms", "brand_wikidata": "Q114348566"}
     allowed_domains = ["www.easybathrooms.com"]
     start_urls = ["https://www.easybathrooms.com/our-showrooms"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for lat, lon, popup in re.findall(
