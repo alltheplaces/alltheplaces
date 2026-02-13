@@ -16,7 +16,7 @@ class AedJPSpider(Spider):
 
     def get_page(self, n):
         return Request(
-            f"https://www.qqzaidanmap.jp/api/aed/list?limit=100&page={n}",
+            f"https://www.qqzaidanmap.jp/api/aed/list?limit=1000&page={n}",
             meta={"page": n},
         )
 
@@ -40,5 +40,5 @@ class AedJPSpider(Spider):
 
             yield item
 
-        if data["pages"]["current_page"] < 2:  # data["pages"]["current_page"] < data["pages"]["total_pages"]:
+        if data["pages"]["current_page"] < data["pages"]["total_pages"]:
             yield self.get_page(1 + response.meta["page"])
