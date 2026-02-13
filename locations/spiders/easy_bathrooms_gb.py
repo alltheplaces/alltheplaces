@@ -19,7 +19,9 @@ class EasyBathroomsGBSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for lat, lon, popup in re.findall(
-            r"lat: (-?\d+\.\d+),.+?lng: (-?\d+\.\d+),.+?\(({.+?})\);", response.text, re.DOTALL
+            r"lat[=\s]+parseFloat\((-?\d+\.\d+)\);.+?lng[=\s]+parseFloat\((-?\d+\.\d+)\);.+?google\.maps\.InfoWindow\(({.+?})\);",
+            response.text,
+            re.DOTALL,
         ):
             item = Feature()
             item["lat"] = lat
