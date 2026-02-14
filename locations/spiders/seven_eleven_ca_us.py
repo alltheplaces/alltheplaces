@@ -31,7 +31,7 @@ class SevenElevenCAUSSpider(scrapy.Spider):
     name = "seven_eleven_ca_us"
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     start_urls = [
-        "https://www.7-eleven.com/locations/wv/st-albans/301-w-main-st-35914"  # Get access token from any store page
+        "https://www.7-eleven.com/locations/tx/frisco/11065-fm-720-33117"  # Get access token from any store page
     ]
     api = "https://api.7-eleven.com/v4/stores"
     token = ""
