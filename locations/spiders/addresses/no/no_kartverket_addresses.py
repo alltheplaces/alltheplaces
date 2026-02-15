@@ -1,6 +1,6 @@
 import csv
 from io import BytesIO, TextIOWrapper
-from typing import Iterable
+from typing import Any, AsyncIterator, Iterable
 from zipfile import ZipFile
 
 from scrapy.http import Request, Response
@@ -10,25 +10,25 @@ from locations.items import Feature
 from locations.licenses import Licenses
 
 
-class KartverketAddressesNOSpider(AddressSpider):
+class NoKartverketAddressesSpider(AddressSpider):
     """
     Spider to collect addresses from Norway's official address registry (Matrikkelen).
 
     Data is provided by Kartverket (Norwegian Mapping Authority) via CSV downloads.
     """
 
-    name = "kartverket_addresses_no"
+    name = "no_kartverket_addresses"
     allowed_domains = ["nedlasting.geonorge.no"]
     dataset_attributes = Licenses.CC4.value | {
         "attribution:website": "https://kartkatalog.geonorge.no/metadata/matrikkelen-adresse/f7df7a18-b30f-4745-bd64-d0863812350c",
         "attribution:name": "Contains data from Matrikkelen - Adresse distributed by Kartverket",
     }
-    custom_settings = {"DOWNLOAD_TIMEOUT": 300}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 300, "ROBOTSTXT_OBEY": False}
 
     # File format: Basisdata_<areaCode>_<areaName>_<projection>_MatrikkelenAdresse_CSV.zip
     csv_url = "https://nedlasting.geonorge.no/geonorge/Basisdata/MatrikkelenAdresse/CSV/Basisdata_0000_Norge_4258_MatrikkelenAdresse_CSV.zip"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Any]:
         yield Request(url=self.csv_url, callback=self.parse_zip)
 
     def parse_zip(self, response: Response) -> Iterable[Feature]:
