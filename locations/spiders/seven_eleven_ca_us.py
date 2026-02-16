@@ -12,6 +12,10 @@ from locations.spiders.speedway_us import SpeedwayUSSpider
 FUEL_TYPES_MAPPING = {
     "DEF": Fuel.ADBLUE,
     "Diesel": Fuel.DIESEL,
+    "E85": Fuel.E85,
+    "Kerosene": Fuel.KEROSENE,
+    "Kersonse": Fuel.KEROSENE,
+    "Mid-grade": Fuel.OCTANE_89,
     "Mid-Grade": Fuel.OCTANE_89,
     "Regular": Fuel.OCTANE_87,
     "Premium": Fuel.OCTANE_91,
