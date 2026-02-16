@@ -22,7 +22,7 @@ class SbarroSpider(scrapy.Spider):
             properties = {
                 "ref": response.meta["ref"],
                 "name": response.xpath('//*[@class="location-name "]/text()').extract_first(),
-                "addr_full": data["address"]["streetAddress"],
+                "street_address": data["address"]["streetAddress"],
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],
