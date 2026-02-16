@@ -13,7 +13,6 @@ class SystemeUSpider(SitemapSpider):
     allowed_domains = ["magasins-u.com"]
     sitemap_urls = ["https://www.magasins-u.com/sitemap.xml"]
     sitemap_rules = [(r"com\/(magasin|station)\/", "parse_stores")]
-    requires_proxy = "FR"  # Proxy or other captcha drama?
     brands = {
         "uexpress": {"brand": "U Express", "brand_wikidata": "Q2529029"},
         "superu": {"brand": "Super U", "brand_wikidata": "Q2529029"},
