@@ -3,6 +3,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature, set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -28,7 +29,8 @@ class LakelandGBSpider(SitemapSpider, StructuredDataSpider):
             item["lon"] = coords.group(2)
         else:
             # Closed shop
-            return
+            set_closed(item)
 
         apply_category(Categories.SHOP_HOUSEWARE, item)
+
         yield item
