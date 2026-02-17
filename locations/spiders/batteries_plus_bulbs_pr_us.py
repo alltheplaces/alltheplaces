@@ -21,4 +21,6 @@ class BatteriesPlusBulbsPRUSSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Check us out in ", "")
+        item["image"] = None
+
         yield item
