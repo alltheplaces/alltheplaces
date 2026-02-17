@@ -15,7 +15,7 @@ class UnichemNZSpider(ClosebySpider):
         item["lat"] = feature["latitude"]
         item["lon"] = feature["longitude"]
         if branch_name := item.pop("name", None):
-            item["branch"] = branch_name.removeprefix("Unichem ")
+            item["branch"] = branch_name.removeprefix("Unichem ").removesuffix(" Pharmacy")
         if item["email"]:
             if ", " in item["email"]:
                 item["email"] = item["email"].split(", ")[0]
