@@ -1,14 +1,12 @@
+import json
 import logging
 from argparse import ArgumentParser
 from logging import getLogger
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Optional, Tuple
 
 import duckdb
-import json
 import pyarrow.parquet as pq
-import pyarrow as pa
 
 logger = getLogger(__name__)
 logging.basicConfig(level=logging.INFO, filename="ndgeojson_to_parquet.log", filemode="a", encoding="utf-8")
