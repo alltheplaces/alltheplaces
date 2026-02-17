@@ -12,7 +12,7 @@ class RawsonZASpider(JSONBlobSpider):
         return parse_js_object(response.xpath(".//find-office-map").get())
 
     def post_process_item(self, item, response, location):
-        if "addr_full" in item:
-            item["street_address"] = item.pop("addr_full")
+        item["street_address"] = item.pop("addr_full", None)
         item["branch"] = item.pop("name")
+
         yield item
