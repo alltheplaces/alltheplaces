@@ -33,13 +33,9 @@ class CountryCodeCleanUpPipeline:
                 # No spider name set, cannot determine country code(s) from the spider name.
                 return item
 
-            if country := self.country_utils.country_code_from_spider_name(
-                spider_name
-            ):
+            if country := self.country_utils.country_code_from_spider_name(spider_name):
                 if self.crawler.stats:
-                    self.crawler.stats.inc_value(
-                        "atp/field/country/from_spider_name"
-                    )
+                    self.crawler.stats.inc_value("atp/field/country/from_spider_name")
                 item["country"] = country
                 return item
 
@@ -53,9 +49,7 @@ class CountryCodeCleanUpPipeline:
 
             if country := self.country_utils.country_code_from_url(website_url):
                 if self.crawler.stats:
-                    self.crawler.stats.inc_value(
-                        "atp/field/country/from_website_url"
-                    )
+                    self.crawler.stats.inc_value("atp/field/country/from_website_url")
                 item["country"] = country
                 return item
 
@@ -64,9 +58,7 @@ class CountryCodeCleanUpPipeline:
             if location := get_lat_lon(item):
                 if result := reverse_geocoder.get((location[0], location[1]), mode=1, verbose=False):
                     if self.crawler.stats:
-                        self.crawler.stats.inc_value(
-                            "atp/field/country/from_reverse_geocoding"
-                        )
+                        self.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
                     item["country"] = result["cc"]
 
                     if not item.get("state"):

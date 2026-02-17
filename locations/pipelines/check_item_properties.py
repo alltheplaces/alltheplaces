@@ -72,7 +72,9 @@ class CheckItemPropertiesPipeline:
 
     def process_item(self, item: Feature) -> Feature:  # noqa: C901
         if not self.crawler or not self.crawler.spider:
-            raise RuntimeError("Could not execute CheckItemPropertiesPipeline. Crawler or associated spider object missing.")
+            raise RuntimeError(
+                "Could not execute CheckItemPropertiesPipeline. Crawler or associated spider object missing."
+            )
             return item
 
         check_field(item, self.crawler.spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
@@ -99,10 +101,7 @@ class CheckItemPropertiesPipeline:
         self.check_country(item, self.crawler.spider)
 
         if country_code := item.get("country"):
-            if (
-                self.crawler.spider.crawler
-                and self.crawler.spider.crawler.stats
-            ):
+            if self.crawler.spider.crawler and self.crawler.spider.crawler.stats:
                 self.crawler.spider.crawler.stats.inc_value(f"atp/country/{country_code}")
 
         return item

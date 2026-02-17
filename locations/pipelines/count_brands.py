@@ -15,7 +15,9 @@ class CountBrandsPipeline:
 
     def process_item(self, item: Feature):
         if not self.crawler.stats:
-            raise RuntimeError("CountBrands pipeline cannot operate and has no effect as the Scrapy crawler has no stats collector instantiated.")
+            raise RuntimeError(
+                "CountBrands pipeline cannot operate and has no effect as the Scrapy crawler has no stats collector instantiated."
+            )
             return item
         if brand := item.get("brand"):
             self.crawler.stats.inc_value(f"atp/brand/{brand}")

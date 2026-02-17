@@ -16,7 +16,9 @@ class CountCategoriesPipeline:
 
     def process_item(self, item: Feature):
         if not self.crawler.stats:
-            raise RuntimeError("CountCategories pipeline cannot operate and has no effect as the Scrapy crawler has no stats collector instantiated.")
+            raise RuntimeError(
+                "CountCategories pipeline cannot operate and has no effect as the Scrapy crawler has no stats collector instantiated."
+            )
             return item
         if categories := get_category_tags(item):
             for k, v in sorted(categories.items()):
