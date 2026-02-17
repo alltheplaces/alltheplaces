@@ -19,6 +19,8 @@ class OliverBonasGBIESpider(Spider):
             item = Feature()
             item["ref"] = store["id"]
             item["branch"] = re.sub(r"\s*Oliver Bonas (Outlet )?Store\b.*$", "", store.get("store_name", ""))
+            if "Oliver Bonas Outlet" in store.get("store_name", ""):
+                item["name"] = "Oliver Bonas Outlet"
             item["street_address"] = store.get("address")
             item["city"] = store.get("city")
             item["state"] = store.get("state")
@@ -27,7 +29,9 @@ class OliverBonasGBIESpider(Spider):
             item["lat"] = store.get("latitude")
             item["lon"] = store.get("longitude")
             item["phone"] = store.get("phone")
+
             apply_category(Categories.SHOP_CLOTHES, item)
+
             if url := store.get("url"):
                 item["website"] = f"https://www.oliverbonas.com{url}"
                 yield response.follow(url, self.parse_store, cb_kwargs={"item": item})
