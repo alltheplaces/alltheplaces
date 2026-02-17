@@ -15,12 +15,15 @@ class CountCategoriesPipeline:
         return cls(crawler)
 
     def process_item(self, item: Feature):
+        if not self.crawler.stats:
+            raise RuntimeError("CountCategories pipeline cannot operate and has no effect as the Scrapy crawler has no stats collector instantiated.")
+            return item
         if categories := get_category_tags(item):
             for k, v in sorted(categories.items()):
-                self.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))  # ty: ignore[possibly-missing-attribute]
+                self.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))
                 break
             if len(categories) > 1:
-                self.crawler.stats.inc_value("atp/category/multiple")  # ty: ignore[possibly-missing-attribute]
+                self.crawler.stats.inc_value("atp/category/multiple")
         else:
-            self.crawler.stats.inc_value("atp/category/missing")  # ty: ignore[possibly-missing-attribute]
+            self.crawler.stats.inc_value("atp/category/missing")
         return item

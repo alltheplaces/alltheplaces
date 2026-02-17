@@ -23,7 +23,12 @@ class DuplicatesPipeline:
         if getattr(self.crawler.spider, "no_refs", False):
             return item
 
-        ref = (self.crawler.spider.name, item["ref"])  # ty: ignore[possibly-missing-attribute]
+        spider_name = getattr(self.crawler.spider, "name", False)
+        if not isinstance(spider_name, str):
+            raise RuntimeError("Spider is missing a 'name' attribute. Duplicates pipeline cannot operate.")
+            return item
+
+        ref = (spider_name, item["ref"])
         if ref in self.ids_seen:
             if self.crawler.stats:
                 self.crawler.stats.inc_value("atp/duplicate_count")

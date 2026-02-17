@@ -35,31 +35,37 @@ class ApplyNSICategoriesPipeline:
         matches = self.wikidata_cache.get(code, [])
 
         if len(matches) == 0 and item.get("brand_wikidata"):
-            self.crawler.stats.inc_value("atp/nsi/brand_missing")  # ty: ignore [possibly-missing-attribute]
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/nsi/brand_missing")
             return item
         elif len(matches) == 0 and item.get("operator_wikidata"):
-            self.crawler.stats.inc_value("atp/nsi/operator_missing")  # ty: ignore [possibly-missing-attribute]
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/nsi/operator_missing")
             return item
 
         if len(matches) == 1:
-            self.crawler.stats.inc_value("atp/nsi/perfect_match")  # ty: ignore [possibly-missing-attribute]
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/nsi/perfect_match")
             return self.apply_tags(matches[0], item)
 
         if cc := item.get("country"):
             matches = self.filter_cc(matches, cc.lower(), get_category_tags(item))
 
             if len(matches) == 1:
-                self.crawler.stats.inc_value("atp/nsi/cc_match")  # ty: ignore [possibly-missing-attribute]
+                if self.crawler.stats:
+                    self.crawler.stats.inc_value("atp/nsi/cc_match")
                 return self.apply_tags(matches[0], item)
 
         if categories := get_category_tags(item):
             matches = self.filter_categories(matches, categories)
 
             if len(matches) == 1:
-                self.crawler.stats.inc_value("atp/nsi/category_match")  # ty: ignore [possibly-missing-attribute]
+                if self.crawler.stats:
+                    self.crawler.stats.inc_value("atp/nsi/category_match")
                 return self.apply_tags(matches[0], item)
 
-        self.crawler.stats.inc_value("atp/nsi/match_failed")  # ty: ignore [possibly-missing-attribute]
+        if self.crawler.stats:
+            self.crawler.stats.inc_value("atp/nsi/match_failed")
         return item
 
     def filter_cc(self, matches: list[dict], cc: str, categories: dict | None = None) -> list[dict]:

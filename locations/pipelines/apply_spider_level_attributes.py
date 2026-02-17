@@ -14,12 +14,13 @@ class ApplySpiderLevelAttributesPipeline:
     def process_item(self, item):
         if not hasattr(self.crawler.spider, "item_attributes"):
             return item
-
         item_attributes = self.crawler.spider.item_attributes
+        if not isinstance(item_attributes, dict):
+            return item
 
-        for key, value in item_attributes.items():  # ty: ignore [unresolved-attribute]
-            if key == "extras":
-                extras = item.get("extras", {})
+        for key, value in item_attributes.items():
+            if key == "extras" and isinstance(value, dict):
+                extras = item["extras"]
                 for k, v in value.items():
                     if extras.get(k) is None:
                         extras[k] = v

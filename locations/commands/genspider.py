@@ -9,6 +9,7 @@ import scrapy.commands.genspider
 from scrapy.commands.genspider import extract_domain, render_templatefile, string_camelcase
 
 from locations.name_suggestion_index import NSI
+from locations.settings import BOT_NAME, NEWSPIDER_MODULE
 
 
 class Command(scrapy.commands.genspider.Command):
@@ -105,9 +106,13 @@ class Command(scrapy.commands.genspider.Command):
         self.start_urls = [url]
         self.automatically_set_parameters()
 
+        project_name = BOT_NAME
+        if self.settings and isinstance(self.settings.get("BOT_NAME"), str):
+            project_name = self.settings["BOT_NAME"]
+
         tvars = {
-            "project_name": self.settings.get("BOT_NAME"),  # ty: ignore[possibly-missing-attribute]
-            "ProjectName": string_camelcase(self.settings.get("BOT_NAME")),  # ty: ignore[possibly-missing-attribute]
+            "project_name": project_name,
+            "ProjectName": string_camelcase(project_name),
             "module": module,
             "name": name,
             "url": url,
@@ -127,9 +132,13 @@ class Command(scrapy.commands.genspider.Command):
         template_file: Union[str, os.PathLike],
     ) -> None:
         """Generate the spider module, based on the given template"""
+        newspider_module = NEWSPIDER_MODULE
+        if self.settings and isinstance(self.settings.get("NEWSPIDER_MODULE"), str):
+            newspider_module = self.settings["NEWSPIDER_MODULE"]
+
         tvars = self._generate_template_variables(module, name, url, template_name)
-        if self.settings.get("NEWSPIDER_MODULE"):  # ty: ignore[possibly-missing-attribute]
-            spiders_module = import_module(self.settings["NEWSPIDER_MODULE"])  # ty: ignore[not-subscriptable]
+        if newspider_module:
+            spiders_module = import_module(newspider_module)
             assert spiders_module.__file__
             spiders_dir = Path(spiders_module.__file__).parent.resolve()
         else:

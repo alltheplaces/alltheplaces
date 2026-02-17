@@ -19,15 +19,17 @@ def check_field(
 ) -> None:
     if val := item.get(param):
         if not isinstance(val, allowed_types):
-            spider.logger.error(  # ty: ignore [possibly-missing-attribute]
-                f'Invalid type "{type(val).__name__}" for attribute "{param}". Expected type(s) are "{allowed_types}".'
-            )
+            if spider and spider.logger:
+                spider.logger.error(
+                    f'Invalid type "{type(val).__name__}" for attribute "{param}". Expected type(s) are "{allowed_types}".'
+                )
             if spider and spider.crawler and spider.crawler.stats:
                 spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
         elif match_regex and not match_regex.match(val):
-            spider.logger.warning(  # ty: ignore [possibly-missing-attribute]
-                f'Invalid value "{val}" for attribute "{param}". Value did not match expected regular expression of r"{match_regex.pattern}".'
-            )
+            if spider and spider.logger:
+                spider.logger.warning(
+                    f'Invalid value "{val}" for attribute "{param}". Value did not match expected regular expression of r"{match_regex.pattern}".'
+                )
             if spider and spider.crawler and spider.crawler.stats:
                 spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
     elif spider and spider.crawler and spider.crawler.stats:
@@ -69,6 +71,10 @@ class CheckItemPropertiesPipeline:
         return cls(crawler)
 
     def process_item(self, item: Feature) -> Feature:  # noqa: C901
+        if not self.crawler or not self.crawler.spider:
+            raise RuntimeError("Could not execute CheckItemPropertiesPipeline. Crawler or associated spider object missing.")
+            return item
+
         check_field(item, self.crawler.spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
         check_field(
             item, self.crawler.spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex
@@ -87,16 +93,14 @@ class CheckItemPropertiesPipeline:
         check_field(item, self.crawler.spider, "operator", (str,))
         check_field(item, self.crawler.spider, "branch", (str,))
 
-        self.check_geom(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
-        self.check_twitter(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
-        self.check_opening_hours(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
-        self.check_country(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_geom(item, self.crawler.spider)
+        self.check_twitter(item, self.crawler.spider)
+        self.check_opening_hours(item, self.crawler.spider)
+        self.check_country(item, self.crawler.spider)
 
         if country_code := item.get("country"):
             if (
-                self.crawler
-                and self.crawler.spider
-                and self.crawler.spider.crawler
+                self.crawler.spider.crawler
                 and self.crawler.spider.crawler.stats
             ):
                 self.crawler.spider.crawler.stats.inc_value(f"atp/country/{country_code}")
