@@ -27,16 +27,18 @@ class TrackSourcesMiddleware:
 
         if not item["extras"].get("@source_uri"):
             item["extras"]["@source_uri"] = response.url
-        if not self.crawler.stats:
-            return
 
         try:
-            self.crawler.stats.inc_value(
-                "atp/item_scraped_host_count/{}".format(urlparse(item["extras"]["@source_uri"]).netloc)
-            )
+            source_uri_netloc = urlparse(item["extras"]["@source_uri"]).netloc
         except ValueError:
-            self.crawler.stats.inc_value("atp/parse_error/@source_uri")
-            raise RuntimeError("Failed to parse @source_uri: {}".format(item["extras"]["@source_uri"]))
+            if self.crawler.spider and self.crawler.spider.logger:
+                self.crawler.spider.logger.warning("Failed to parse @source_uri: {}".format(item["extras"]["@source_uri"]))
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/parse_error/@source_uri")
+            return
+
+        if self.crawler.stats:
+            self.crawler.stats.inc_value("atp/item_scraped_host_count/{}".format(source_uri_netloc))
 
     def process_spider_output(self, response: Response, result: Iterable[Item | Request]) -> Iterable[Item | Request]:
         for x in result:
