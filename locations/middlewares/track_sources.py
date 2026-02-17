@@ -32,7 +32,9 @@ class TrackSourcesMiddleware:
             source_uri_netloc = urlparse(item["extras"]["@source_uri"]).netloc
         except ValueError:
             if self.crawler.spider and self.crawler.spider.logger:
-                self.crawler.spider.logger.warning("Failed to parse @source_uri: {}".format(item["extras"]["@source_uri"]))
+                self.crawler.spider.logger.warning(
+                    "Failed to parse @source_uri: {}".format(item["extras"]["@source_uri"])
+                )
             if self.crawler.stats:
                 self.crawler.stats.inc_value("atp/parse_error/@source_uri")
             return
