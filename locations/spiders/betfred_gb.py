@@ -16,7 +16,6 @@ class BetfredGBSpider(JSONBlobSpider):
     allowed_domains = ["www.betfredgroup.com"]
     item_attributes = {"brand": "Betfred", "brand_wikidata": "Q4897425"}
     requires_proxy = True
-    seen = set()
 
     async def start(self) -> AsyncIterator[FormRequest]:
         for region in postal_regions("GB"):
@@ -31,9 +30,6 @@ class BetfredGBSpider(JSONBlobSpider):
         return []
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        if item["ref"] in self.seen:
-            return
-        self.seen.add(item["ref"])
         item["branch"] = item.pop("name")
         oh = OpeningHours()
         oh.add_ranges_from_string(feature.get("OpeningHoursDescription", ""))
