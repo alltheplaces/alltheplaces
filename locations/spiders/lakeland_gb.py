@@ -1,5 +1,7 @@
 import re
+from typing import Iterable
 
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -9,15 +11,13 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class LakelandGBSpider(SitemapSpider, StructuredDataSpider):
     name = "lakeland_gb"
-    item_attributes = {
-        "brand": "Lakeland",
-        "brand_wikidata": "Q16256199",
-    }
+    item_attributes = {"brand": "Lakeland", "brand_wikidata": "Q16256199"}
     sitemap_urls = ["https://www.lakeland.co.uk/export/sitemap/retail-outlets.xml"]
     search_for_twitter = False
     search_for_facebook = False
 
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["name"] = None
         # Lakeland uses addressRegion for city (should be addressLocality)
         item["city"] = item.pop("state", None)
         item["branch"] = response.xpath("//h1/text()").get()
