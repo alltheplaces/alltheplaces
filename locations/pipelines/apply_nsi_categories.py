@@ -23,7 +23,7 @@ class ApplyNSICategoriesPipeline:
         if item.get("nsi_id"):
             return item
 
-        code = item.get("brand_wikidata", item.get("operator_wikidata"))
+        code = item.get("brand_wikidata", item.get("operator_wikidata", item.get("network_wikidata")))
         if not code:
             return item
 
