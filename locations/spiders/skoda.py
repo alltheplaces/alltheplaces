@@ -35,6 +35,7 @@ class SkodaSpider(Spider):
         308: ("fr-ma", "MA"),
         318: ("en-dz", "DZ"),
         334: ("fr-TN", "TN"),
+        352: ("vi-VN", "VN"),
         411: ("lv-LV", "LV"),
         423: ("tr-tr", "TR"),
         428: ("en-sa", "SA"),

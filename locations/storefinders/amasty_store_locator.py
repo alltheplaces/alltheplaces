@@ -48,12 +48,13 @@ class AmastyStoreLocatorSpider(Spider):
         pagination_attribute = ""
         if self.pagination_mode:
             pagination_attribute = "?p=1"
-        if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield Request(
-                url=f"https://{self.allowed_domains[0]}/amlocator/index/ajax/{pagination_attribute}",
-                headers=headers,
-                method="POST",
-            )
+        if len(self.start_urls) == 0 and len(self.allowed_domains) >= 1:
+            for domain in self.allowed_domains:
+                yield Request(
+                    url=f"https://{domain}/amlocator/index/ajax/{pagination_attribute}",
+                    headers=headers,
+                    method="POST",
+                )
         elif len(self.start_urls) == 1:
             yield Request(url=urljoin(self.start_urls[0], pagination_attribute), headers=headers, method="POST")
         else:

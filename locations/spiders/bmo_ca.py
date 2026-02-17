@@ -143,15 +143,11 @@ LOCATION_MAPPINGS = [
 ]
 
 
-class BmoSpider(Where2GetItSpider):
-    name = "bmo"
+class BmoCASpider(Where2GetItSpider):
+    name = "bmo_ca"
     item_attributes = {"brand": "BMO", "brand_wikidata": "Q4835981"}
-    api_brand_name = "BMO"
-    api_endpoint = "https://branchlocator.bmo.com/rest/getlist"
-    api_key = [
-        "343095D0-C235-11E6-93AB-1BF70C70A832",  # CA
-        "D07C1CB0-80A3-11ED-BCB3-F57F326043C3",  # US
-    ]
+    api_brand_name = "bmobranch"
+    api_key = "343095D0-C235-11E6-93AB-1BF70C70A832"
     api_filter_admin_level = 2
 
     # flake8: noqa: C901
@@ -161,27 +157,21 @@ class BmoSpider(Where2GetItSpider):
         item["ref"] = location["clientkey"]
         item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
 
-        base_url = ""
-        if location["country"] == "CA":
-            item["state"] = location["province"]
-            base_url = "https://branches.bmo.com"
-        elif location["country"] == "US":
-            base_url = "https://usbranches.bmo.com"
-
-        item["website"] = f'{base_url}/{item["state"]}/{item["city"]}/{location["clientkey"]}/'.lower().replace(
-            " ", "-"
-        )
+        if isinstance(location.get("links", None), list):
+            # Sometimes multiple websites are listed in different locales.
+            # English is observed to be the first in the list, so use that.
+            item["website"] = location["links"][0]
 
         try:
             item["opening_hours"] = self.parse_opening_hours(location)
         except:
             self.logger.error("Failed to parse opening hours")
 
-        if location["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
+        if location["grouptype"].startswith("BMO") and location["grouptype"].endswith("Branches"):
             apply_category(Categories.BANK, item)
             if location.get("abmcount"):
                 apply_yes_no(Extras.ATM, item, True, False)
-        elif location["grouptype"] in ["BMOHarrisATM", "BMOATM"]:
+        elif location["grouptype"].startswith("BMO") and location["grouptype"].endswith("ATM"):
             apply_category(Categories.ATM, item)
             item["located_in"], item["located_in_wikidata"] = extract_located_in(
                 item["name"] or "", LOCATION_MAPPINGS, self

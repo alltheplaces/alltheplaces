@@ -6,6 +6,16 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
+DAY_KEYS = {
+    "Mo": "monday",
+    "Tu": "tuesday",
+    "We": "wednesday",
+    "Th": "thursday",
+    "Fr": "friday",
+    "Sa": "sat",
+    "Su": "sun",
+}
+
 
 class BiggbyCoffeeUSSpider(Spider):
     name = "biggby_coffee_us"
@@ -20,45 +30,29 @@ class BiggbyCoffeeUSSpider(Spider):
 
     def parse(self, response):
         for location in self.extract_json(response):
-            if location["acf"]["store_coming_soon"]:
+            meta = location.get("meta", {})
+            if meta.get("store_coming_soon"):
                 continue
-            item = DictParser.parse(location["acf"])
-            item["street_address"] = clean_address([location["acf"]["address_one"], location["acf"]["address_two"]])
-            if location["acf"].get("location_map"):
-                item["addr_full"] = location["acf"]["location_map"]["address"]
-                item["lat"] = location["acf"]["location_map"]["lat"]
-                item["lon"] = location["acf"]["location_map"]["lng"]
-            if location["acf"].get("monday_thru_thurs_open_hour"):
-                item["opening_hours"] = OpeningHours()
-                hours_string = (
-                    "Mo-Th: "
-                    + location["acf"].get("monday_thru_thurs_open_hour", "")
-                    + " - "
-                    + location["acf"].get("mon_thru_thurs_close_hour", "")
-                )
-                hours_string = (
-                    hours_string
-                    + " Fr: "
-                    + location["acf"].get("friday_open_hour", "")
-                    + " - "
-                    + location["acf"].get("friday_close_hour", "")
-                )
-                hours_string = (
-                    hours_string
-                    + " Sa: "
-                    + location["acf"].get("sat_open_hour", "")
-                    + " - "
-                    + location["acf"].get("sat_close_hour", "")
-                )
-                hours_string = (
-                    hours_string
-                    + " Su: "
-                    + location["acf"].get("sun_open_hour", "")
-                    + " - "
-                    + location["acf"].get("sun_close_hour", "")
-                )
-                item["opening_hours"].add_ranges_from_string(hours_string)
+            item = DictParser.parse(meta)
+            item["street_address"] = clean_address([meta.get("address_one"), meta.get("address_two")])
+            if location_map := meta.get("location_map"):
+                item["addr_full"] = location_map.get("address")
+                item["lat"] = location_map.get("lat")
+                item["lon"] = location_map.get("lng")
+            item["opening_hours"] = self.parse_hours(meta)
             apply_category(Categories.CAFE, item)
-            apply_yes_no(Extras.WIFI, item, location["acf"]["wifi"], False)
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location["acf"]["drive_thru"], False)
+            apply_yes_no(Extras.WIFI, item, meta.get("wifi"), False)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, meta.get("drive_thru"), False)
             yield item
+
+    def parse_hours(self, meta: dict) -> OpeningHours:
+        oh = OpeningHours()
+        try:
+            for day_abbrev, day_key in DAY_KEYS.items():
+                open_hour = meta.get(f"{day_key}_open_hour")
+                close_hour = meta.get(f"{day_key}_close_hour")
+                if open_hour and close_hour:
+                    oh.add_range(day_abbrev, open_hour, close_hour, time_format="%H%M")
+        except Exception:
+            pass
+        return oh

@@ -24,7 +24,7 @@ class SlimChickensGBSpider(Spider):
             item = DictParser.parse(location)
             if not location["address"]:  # Some GBK places are delivery only
                 continue
-            item["branch"] = location["title"]
+            item["branch"] = item.pop("name")
             item["website"] = location["permalink"]
             item["street_address"] = item["addr_full"]
             del item["addr_full"]

@@ -354,19 +354,22 @@ class DictParser:
                     "position",
                     "positions",
                     "display-coordinate",
+                    "location-geopoint",
                     "yextDisplayCoordinate",
                     # NO
                     "koordinat",
                 ],
             )
             if location and isinstance(location, dict):
-                # Latitude/longitude are wrapped inside a "coordinates" /
-                # "location" style of named dictionary.
+                # First attempt to find coordinates:
+                #   Latitude/longitude are wrapped inside a "coordinates" /
+                #   "location" style of named dictionary.
                 item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
                 item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
-            else:
-                # Latitude/longitude are properties of the root dictionary or
-                # any other nested dictionary of any name.
+            if item.get("lat", None) is None or item.get("lon", None) is None:
+                # Second attempt to find coordinates if first attempt failed:
+                #   Latitude/longitude are properties of the root dictionary
+                #   or any other nested dictionary of any name.
                 item["lat"] = DictParser.get_first_key(obj, DictParser.lat_keys)
                 item["lon"] = DictParser.get_first_key(obj, DictParser.lon_keys)
 
