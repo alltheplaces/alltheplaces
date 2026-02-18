@@ -66,6 +66,7 @@ class SparkNZSpider(JSONBlobSpider):
             self.log("Error parsing opening hours: {}".format(feature["operatingHours"]))
 
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
+
         yield item
 
     def parse_opening_hours(self, business_hours: list) -> OpeningHours:
@@ -73,12 +74,7 @@ class SparkNZSpider(JSONBlobSpider):
         for rule in business_hours:
             if rule["open"] is None:
                 oh.set_closed(rule["day"])
-            elif "|" in rule["open"]:
-                rule_per_day_count = len(rule["open"].split("|"))
-                open_rules = rule["open"].split("|")
-                closed_rules = rule["close"].split("|")
-                for rule_number in range(0, rule_per_day_count):
-                    oh.add_range(rule["day"], open_rules[rule_number], closed_rules[rule_number], "%H:%M:%S")
             else:
-                oh.add_range(rule["day"], rule["open"], rule["close"], "%H:%M:%S")
+                for opens, closes in zip(rule["open"].split("|"), rule["close"].split("|")):
+                    oh.add_range(rule["day"], opens, closes, "%H:%M:%S")
         return oh
