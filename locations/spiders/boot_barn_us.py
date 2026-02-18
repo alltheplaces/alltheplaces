@@ -23,6 +23,8 @@ class BootBarnUSSpider(SitemapSpider):
         item["state"] = response.xpath('//*[@class="store-address-state"]/text()').get()
         item["postcode"] = response.xpath('//*[@class="store-address-postal-code"]/text()').get()
         item["phone"] = response.xpath('//*[@class="store-phone"]/text()').get()
+        item["lat"] = response.xpath("//@data-lat").get()
+        item["lon"] = response.xpath("//@data-lon").get()
         item["ref"] = item["website"] = response.url
         oh = OpeningHours()
         container = response.css(".store-hours-container .store-hours-days")
