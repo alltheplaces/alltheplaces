@@ -14,6 +14,7 @@ class ObriensIESpider(JSONBlobSpider):
     start_urls = ["https://adminob.iplanit.ie/api/getLocationsInventory"]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
         item["street_address"] = merge_address_lines([feature["address1"], feature["address2"]])
         oh = OpeningHours()
         oh.add_ranges_from_string(feature["openingHours"])
