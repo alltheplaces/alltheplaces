@@ -12,13 +12,12 @@ from locations.json_blob_spider import JSONBlobSpider
 class OneNZSpider(JSONBlobSpider):
     name = "one_nz"
     item_attributes = {"brand": "One NZ", "brand_wikidata": "Q7939291"}
-    interaction_id = str(uuid4())
     locations_key = ["locations"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.public.one.nz/vf/public/eshop-store-locator-rest/v1/stores/locations",
-            headers={"x-correlation-id": self.interaction_id, "x-source": "ESHOP", "x-channel-id": "ONLINE"},
+            headers={"x-correlation-id": str(uuid4()), "x-source": "ESHOP", "x-channel-id": "ONLINE"},
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
@@ -34,6 +33,7 @@ class OneNZSpider(JSONBlobSpider):
             self.log("Error parsing opening hours: {}".format(feature["regularHours"]))
 
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
+
         yield item
 
     def parse_opening_hours(self, business_hours: dict) -> OpeningHours:
