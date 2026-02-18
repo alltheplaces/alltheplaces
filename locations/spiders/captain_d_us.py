@@ -6,7 +6,6 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class CaptainDUSSpider(SitemapSpider):
@@ -14,7 +13,6 @@ class CaptainDUSSpider(SitemapSpider):
     item_attributes = {"brand": "Captain D's", "brand_wikidata": "Q5036616"}
     sitemap_urls = ["https://locations.captainds.com/sitemap_index.xml"]
     sitemap_rules = [(r"https://locations.captainds.com/ll/[^/]+/[^/]+/[^/]+/[a-z-0-9]+/$", "parse")]
-    
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = chompjs.parse_js_object(response.xpath('//*[@type="application/ld+json"][2]/text()').get().strip())
