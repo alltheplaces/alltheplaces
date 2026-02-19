@@ -1,12 +1,12 @@
 from typing import Any
 
 import chompjs
+import scrapy
 from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.playwright_spider import PlaywrightSpider
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.user_agents import FIREFOX_LATEST
 
@@ -19,7 +19,7 @@ SERVICES_MAPPING = {
 }
 
 
-class KfcDESpider(PlaywrightSpider):
+class KfcDESpider(scrapy.Spider):
     name = "kfc_de"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.de/find-a-kfc/allrestaurant"]
