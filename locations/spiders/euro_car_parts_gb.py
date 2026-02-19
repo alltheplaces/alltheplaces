@@ -1,5 +1,8 @@
+from typing import Any
+
 import chompjs
-import scrapy
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -8,13 +11,13 @@ from locations.items import Feature
 from locations.react_server_components import parse_rsc
 
 
-class EuroCarPartsGBSpider(scrapy.Spider):
+class EuroCarPartsGBSpider(Spider):
     name = "euro_car_parts_gb"
     allowed_domains = ["www.eurocarparts.com"]
     start_urls = ["https://www.eurocarparts.com/store-locator"]
     item_attributes = {"brand": "Euro Car Parts", "brand_wikidata": "Q23782692"}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
         objs = [chompjs.parse_js_object(s) for s in scripts]
         rsc = "".join([s for n, s in objs]).encode()
@@ -45,6 +48,7 @@ class EuroCarPartsGBSpider(scrapy.Spider):
             item["opening_hours"] = OpeningHours()
             for entry in store.get("openingHours", []):
                 if entry["start"] is None or entry["end"] is None:  # Closed days
+                    item["opening_hours"].set_closed(DAYS[entry["dayOfWeek"]])
                     continue
 
                 # start and end are seconds since midnight
