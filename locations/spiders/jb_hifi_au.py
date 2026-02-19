@@ -31,13 +31,13 @@ class JbHifiAUSpider(AlgoliaSpider):
         if feature.get("displayOnWeb") != "p":
             return
 
-        if feature["locationType"] == 2:
-            item["brand"] = item["name"] = "JB Hi-Fi Home"
+        if feature["storeName"].endswith(" HOME") or feature["storeName"].endswith(" Home"):
+            item["name"] = "JB Hi-Fi Home"
         else:
             del item["name"]
 
         item["ref"] = feature["shopId"]
-        item["branch"] = feature["storeName"]
+        item["branch"] = feature["storeName"].removesuffix(" HOME").removesuffix(" Home")
         item["street_address"] = clean_address(
             [
                 feature["storeAddress"]["Line1"],
