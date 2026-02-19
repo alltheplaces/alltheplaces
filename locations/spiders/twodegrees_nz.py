@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -18,7 +18,7 @@ class TwodegreesNZSpider(JSONBlobSpider):
             apply_category(Categories.SHOP_MOBILE_PHONE, item)
             item["branch"] = item.pop("name").removeprefix("2degrees ")
             item["phone"] = feature["contactDetails"]
-            item["website"] = "https://www.2degrees.nz{}".format(feature["link"])
+            item["website"] = response.urljoin(feature["link"])
             try:
                 item["opening_hours"] = self.parse_opening_hours(feature["openingHours"])
             except ValueError:
@@ -27,8 +27,7 @@ class TwodegreesNZSpider(JSONBlobSpider):
 
     def parse_opening_hours(self, business_hours: dict) -> OpeningHours:
         oh = OpeningHours()
-        for day in DAYS_FULL:
-            rule = business_hours[day.lower()]
+        for day, rule in business_hours.items():
             if rule["open"] is not None:
                 oh.add_range(day, rule["open"], rule["close"], "%H:%M")
         return oh
