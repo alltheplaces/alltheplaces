@@ -59,5 +59,5 @@ class KfcDESpider(Spider):
         oh = OpeningHours()
         for rule in rules:
             if rule["disposition"] == mode:
-                oh.add_range(DAYS[rule["dayOfWeek"]], rule["start"], rule["end"])
+                oh.add_range(DAYS[rule["dayOfWeek"] - 1], rule["start"], rule["end"])
         return oh
