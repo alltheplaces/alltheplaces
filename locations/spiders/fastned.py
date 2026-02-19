@@ -21,6 +21,7 @@ class FastnedSpider(Spider):
     def parse_feature(self, response: Response):
         feature = response.json()["location"]
         item = DictParser.parse(feature)
+        item["branch"] = item.pop("name")
         item["street_address"] = item.pop("addr_full")
         item["lat"] = response.meta["lat"]
         item["lon"] = response.meta["lon"]
