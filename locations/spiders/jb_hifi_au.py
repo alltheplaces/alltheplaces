@@ -14,6 +14,7 @@ class JbHifiAUSpider(AlgoliaSpider):
     item_attributes = {"brand": "JB Hi-Fi", "brand_wikidata": "Q3310113"}
     api_key = "a0c0108d737ad5ab54a0e2da900bf040"
     app_id = "VTVKM5URPX"
+    domain = "com.au"
     index_name = "shopify_store_locations"
 
     def extract_opening_hours(self, store_hours: dict) -> OpeningHours:
@@ -49,6 +50,6 @@ class JbHifiAUSpider(AlgoliaSpider):
         item["opening_hours"] = self.extract_opening_hours(feature["normalTradingHours"])
 
         slug = re.sub(r"\W+", "-", feature["storeName"]).lower()
-        item["website"] = f"https://www.jbhifi.com.au/pages/{slug}"
+        item["website"] = f"https://www.jbhifi.{self.domain}/pages/{slug}"
 
         yield item
