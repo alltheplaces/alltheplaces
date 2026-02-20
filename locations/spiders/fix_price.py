@@ -12,7 +12,6 @@ class FixPriceSpider(Spider):
     name = "fix_price"
     item_attributes = {"brand": "Fix Price", "brand_wikidata": "Q4038791"}
     allowed_domains = ["api.fix-price.com"]
-    requires_proxy = "RU"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://api.fix-price.com/buyer/v1/location/country", callback=self.fetch_pois_for_country)
