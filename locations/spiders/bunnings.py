@@ -12,6 +12,7 @@ from locations.items import Feature
 
 class BunningsSpider(SitemapSpider):
     name = "bunnings"
+    requires_proxy = True
     allowed_domains = ["bunnings.com.au", "bunnings.co.nz"]
     sitemap_urls = [
         "https://www.bunnings.com.au/stores.xml",
