@@ -16,7 +16,7 @@ class AedJPSpider(Spider):
 
     def get_page(self, n):
         return Request(
-            f"https://www.qqzaidanmap.jp/api/aed/list?limit=1000&page={n}",
+            f"https://www.qqzaidanmap.jp/api/aed/list?limit=200&page={n}",
             meta={"page": n},
         )
 
