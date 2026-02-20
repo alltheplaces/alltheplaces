@@ -16,7 +16,7 @@ class PoundstretcherGBSpider(ShopAppsSpider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         item.pop("email")  # Emails always the same
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").removeprefix("Poundstretcher ")
         item["website"] = location["website"].replace("pound-stretcher-store.myshopify.com", "poundstretcher.co.uk")
 
         if item["branch"].endswith(" Bargain Buys"):
