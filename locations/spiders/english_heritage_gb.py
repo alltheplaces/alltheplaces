@@ -1,18 +1,22 @@
+from typing import Iterable
+
+from scrapy.http import TextResponse
+
 from locations.categories import Extras, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class EnglishHeritageGBSpider(JSONBlobSpider):
     name = "english_heritage_gb"
     item_attributes = {"operator": "English Heritage", "operator_wikidata": "Q936287", "nsi_id": "N/A"}
     start_urls = ["https://www.english-heritage.org.uk/api/PropertySearch/GetAll"]
-    no_refs = True
     locations_key = "Results"
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         item["website"] = response.urljoin(location["Path"])
+        item["image"] = response.urljoin(location["ImagePath"])
 
         apply_category({"tourism": "attraction"}, item)
 
@@ -39,18 +43,18 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
 
         if location["PrimaryPropertyType"] == 1:
             item["extras"]["historic"] = "church"
-        if location["PrimaryPropertyType"] == 2:
+        elif location["PrimaryPropertyType"] == 2:
             item["extras"]["historic"] = "castle"
-        if location["PrimaryPropertyType"] == 3:
+        elif location["PrimaryPropertyType"] == 3:
             item["extras"]["leisure"] = "garden"
-        if location["PrimaryPropertyType"] == 4:
+        elif location["PrimaryPropertyType"] == 4:
             item["extras"]["historic"] = "building"
-        if location["PrimaryPropertyType"] == 5:
+        elif location["PrimaryPropertyType"] == 5:
             item["extras"]["historic"] = "building"
-        if location["PrimaryPropertyType"] == 6:
+        elif location["PrimaryPropertyType"] == 6:
             item["extras"]["historic"] = "archaeological_site"
             item["extras"]["historic:civilization"] = "prehistoric"
-        if location["PrimaryPropertyType"] == 7:
+        elif location["PrimaryPropertyType"] == 7:
             item["extras"]["historic"] = "archaeological_site"
             item["extras"]["historic:civilization"] = "roman"
 
