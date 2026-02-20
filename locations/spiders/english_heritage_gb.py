@@ -12,7 +12,7 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
     item_attributes = {"operator": "English Heritage", "operator_wikidata": "Q936287", "nsi_id": "N/A"}
     start_urls = ["https://www.english-heritage.org.uk/api/PropertySearch/GetAll"]
     locations_key = "Results"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
+    needs_json_request = True
 
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         item["website"] = response.urljoin(location["Path"])
