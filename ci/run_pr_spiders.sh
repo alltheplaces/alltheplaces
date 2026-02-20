@@ -85,7 +85,7 @@ upload_file() {
     upload_to_r2 "${file_path}" "${R2_BUCKET}/${path}"
 }
 
-PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
+PR_COMMENT_BODY="I ran the spiders in this pull request for a __2 minute__ test and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
 if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY_BASE64}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
     echo "GitHub App credentials not set"
