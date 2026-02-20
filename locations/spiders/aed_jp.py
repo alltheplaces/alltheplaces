@@ -10,10 +10,8 @@ from locations.dict_parser import DictParser
 class AedJPSpider(Spider):
     name = "aed_jp"
     country_code = "JP"
-    
-    custom_settings = {
-        "DOWNLOAD_TIMEOUT": 60
-    }
+
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(1)
