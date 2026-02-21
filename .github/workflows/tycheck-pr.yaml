@@ -3,6 +3,9 @@ name: Run ty
 on:
   pull_request:
     paths:
+    - '.github/workflows/*.yaml'
+    - 'pyproject.toml'
+    - 'uv.lock'
     - 'locations/**/*.py'
     - '!locations/spiders/**'
 
