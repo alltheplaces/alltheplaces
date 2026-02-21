@@ -31,7 +31,8 @@ class PhoneCleanUpPipeline:
         if isinstance(phone, int):
             phone = str(phone)
         elif not isinstance(phone, str):
-            self.crawler.stats.inc_value("atp/field/phone/wrong_type")  # ty: ignore[possibly-missing-attribute]
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/field/phone/wrong_type")
             return item
         item["phone"] = self.normalize_numbers(phone, country, self.crawler.spider)
         return item
