@@ -4,7 +4,7 @@ from io import StringIO
 from chompjs import parse_js_object
 from scrapy import Request, Spider
 
-from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -16,7 +16,7 @@ BRANDS = {
 }
 MAX_ITEMS = 1640  # determined experimentally
 RADIUS_KM = 24
-MAP_ID = "lawson" # for storefinder
+MAP_ID = "lawson"  # for storefinder
 
 
 class LawsonJPSpider(Spider):
