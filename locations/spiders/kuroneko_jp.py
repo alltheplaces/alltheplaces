@@ -4,9 +4,8 @@ from io import StringIO
 from chompjs import parse_js_object
 from scrapy import Request, Spider
 
-from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
-from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 BRANDS = {
@@ -25,7 +24,7 @@ MAP_ID = "yamato01"  # for storefinder
 
 class KuronekoJPSpider(Spider):
     name = "kuroneko_jp"
-    
+
     def make_request(self, lat, lon, offset=1, count=900):
         radius_m = RADIUS_KM * 1000
         return Request(
@@ -66,16 +65,16 @@ class KuronekoJPSpider(Spider):
                 apply_category(Categories.PARCEL_LOCKER, item)
             else:
                 apply_category(Categories.POST_PARTNER, item)
-                item["extras"]["post_office:service_provider"] = "ヤマト運輸"          
-            
+                item["extras"]["post_office:service_provider"] = "ヤマト運輸"
+
             item["brand"], item["brand_wikidata"] = BRANDS.get(row[3], (None, None))
             item["name"] = row[6]
             item["addr_full"] = row[7]
             item["phone"] = row[16]
-            
+
             # row 35-42 =1 is days the place is closed. 35-41 is Mon-Sun, 42 is holidays. row 43 =1 means open every day.
-            
+
             if row[44] == "1":
                 item["opening_hours"] = "24/7"
-            
+
             yield item
