@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -18,7 +18,7 @@ class DennysJPSpider(Spider):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
-                       
+
             if store["extra_fields"]["24時間営業"] == "1":
                 item["opening_hours"] = "24/7"
             item["website"] = f"https://shop.dennys.co.jp/map/{store['key']}/"
