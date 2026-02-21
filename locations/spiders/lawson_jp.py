@@ -16,6 +16,7 @@ BRANDS = {
 }
 MAX_ITEMS = 1640  # determined experimentally
 RADIUS_KM = 24
+MAP_ID = "lawson" # for storefinder
 
 
 class LawsonJPSpider(Spider):
@@ -28,7 +29,7 @@ class LawsonJPSpider(Spider):
     def make_request(self, lat, lon, offset=1, count=900):
         radius_m = RADIUS_KM * 1000
         return Request(
-            f"https://www.e-map.ne.jp/p/lawson/zdcemaphttp.cgi?target=http%3A%2F%2F127.0.0.1%2Fcgi%2Fnkyoten.cgi%3F%26cid%3Dlawson%26pos%3D{offset}%26lat%3D{lat}%26lon%3D{lon}%26knsu%3D{MAX_ITEMS}%26cnt%3D{count}%26hour%3D1%26rad%3D{radius_m}&zdccnt=1",
+            f"https://www.e-map.ne.jp/p/{MAP_ID}/zdcemaphttp.cgi?target=http%3A%2F%2F127.0.0.1%2Fcgi%2Fnkyoten.cgi%3F%26cid%3D{MAP_ID}%26pos%3D{offset}%26lat%3D{lat}%26lon%3D{lon}%26knsu%3D{MAX_ITEMS}%26cnt%3D{count}%26hour%3D1%26rad%3D{radius_m}&zdccnt=1",
             cb_kwargs={"lat": lat, "lon": lon, "offset": offset},
         )
 
@@ -56,7 +57,7 @@ class LawsonJPSpider(Spider):
         for row in reader:
             item = Feature()
             item["ref"] = row[0]
-            item["website"] = f"https://www.e-map.ne.jp/p/lawson/dtl/{row[0]}/"
+            item["website"] = f"https://www.e-map.ne.jp/p/{MAP_ID}/dtl/{row[0]}/"
             item["lat"] = row[1]
             item["lon"] = row[2]
             item["brand"], item["brand_wikidata"] = BRANDS.get(row[3], (None, None))
@@ -72,19 +73,21 @@ class LawsonJPSpider(Spider):
             apply_yes_no(Extras.ATM, item, row[13] in ("1", "2"))
             apply_yes_no("parking", item, row[39] == "1")
             apply_yes_no(Fuel.ELECTRIC, item, row[28] == "1")
-            apply_yes_no(PaymentMethods.CONTACTLESS, item, row[45] == "1")
+            apply_yes_no("self_service", item, row[45] == "1")
             apply_yes_no(Extras.INDOOR_SEATING, item, row[43] == "1")
             apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, row[44] == "1")
 
-            apply_yes_no("drinks", item, row[14] == "1")
-            apply_yes_no("food", item, row[28] == "1")
-            apply_yes_no("books", item, row[42] == "1")
+            apply_yes_no("sells:alcohol", item, row[14] == "1")
+            apply_yes_no("sells:books", item, row[42] == "1")
             apply_yes_no(Extras.HALAL, item, row[46] == "1")
 
             # TODO: delivery, COL_79
-            apply_yes_no(Extras.PARCEL_MAIL_IN, item, row[49] == "1")
+            if row[49] == "1":
+                apply_category(Categories.POST_PARTNER, item)
+                item["extras"]["post_office:parcel_from"] = "yes"
+                item["extras"]["post_office:service_provider"] = "Smari"
             apply_yes_no(Extras.COPYING, item, row[18] == "1")
-            apply_yes_no("laundry_service", item, row[34] == "1")
+            apply_yes_no("dry_cleaning", item, row[34] == "1")
             apply_yes_no("duty_free", item, row[47] == "1")
             # TODO: 移動販売 / "Mobile sales"
 
