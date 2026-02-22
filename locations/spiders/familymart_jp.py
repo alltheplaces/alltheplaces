@@ -66,6 +66,7 @@ class FamilymartJPSpider(Spider):
     ]
     
     allowed_domains = ["store.family.co.jp"]
+    country_code = "JP"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:
