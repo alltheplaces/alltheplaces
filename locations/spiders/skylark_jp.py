@@ -146,7 +146,8 @@ class SkylarkJPSpider(Spider):
 
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["extra_fields"]["クレジット（有無）フラグ"] == "1")
             apply_yes_no(Extras.WIFI, item, store["extra_fields"]["ｗｉ－ｆｉ（有無）フラグ"] == "1")
-            item["website"] = f"https://store-info.skylark.co.jp/skylark/map/{store['id']}"
+            item["ref"] = store["key"]
+            item["website"] = f"https://store-info.skylark.co.jp/skylark/map/{store['key']}/"
             item["phone"] = f"+81 {store['extra_fields']['電話番号']}"
             apply_yes_no("parking", item, store["extra_fields"]["駐車場（有無）フラグ"] == "有")
             item["extras"]["start_date"] = re.search(
