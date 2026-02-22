@@ -1,4 +1,6 @@
-from scrapy import Request
+from typing import AsyncIterator
+
+from scrapy.http import Request
 
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -17,7 +19,7 @@ class BearesSpider(JSONBlobSpider):
     item_attributes = {"brand": "Beares", "brand_wikidata": "Q116474908"}
     start_urls = ["https://beares.co.za/controllers/get_locations.php"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(
                 url=url,

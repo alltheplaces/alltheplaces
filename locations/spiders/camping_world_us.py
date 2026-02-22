@@ -1,20 +1,19 @@
-import json
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
-import scrapy
 from scrapy.http import JsonRequest, Request
 
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class CampingWorldUSSpider(scrapy.Spider):
+class CampingWorldUSSpider(PlaywrightSpider):
     name = "camping_world_us"
     item_attributes = {"brand": "Camping World", "brand_wikidata": "Q5028383"}
 
     locator_url = "https://rv.campingworld.com/locations"
     api_url = "https://api.rvs.com/api/geodata/getclosestdealer"
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     request_json = """
@@ -30,7 +29,7 @@ class CampingWorldUSSpider(scrapy.Spider):
         }
     """.strip()
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.locator_url, callback=self.parse_locator)
 
     def parse_locator(self, response):
@@ -49,7 +48,7 @@ class CampingWorldUSSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        for store in json.loads(response.xpath("/html/body/pre/text()").get())["closestDealer"]:
+        for store in response.json()["closestDealer"]:
             yield Feature(
                 lat=store["lat"],
                 lon=store["long"],

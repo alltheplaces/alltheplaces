@@ -22,6 +22,7 @@ class CountryUtils:
         "scotland": "GB",
         "wales": "GB",
         "northern ireland": "GB",
+        "netherlands": "NL",
         "uk": "GB",
         "norge": "NO",
         "united states of america": "US",
@@ -29,6 +30,7 @@ class CountryUtils:
         "belgie": "BE",
         "u s a": "US",
         "deutschland": "DE",
+        "czech republic": "CZ",
     }
 
     def to_iso_alpha2_country_code(self, country_str):
@@ -63,25 +65,41 @@ class CountryUtils:
         # Finally let's go digging in the random country string collection!
         return self.UNHANDLED_COUNTRY_MAPPINGS.get(country_name)
 
-    def _convert_to_iso2_country_code(self, splits):
-        if len(splits) > 0 and len(splits[-1]) == 2:
-            candidate = splits[-1].upper()
+    def _convert_to_iso2_country_code(self, candidate: str) -> str | None:
+        if len(candidate) == 2:
+            candidate = candidate.upper()
             if self.gc.get_countries().get(candidate):
                 return candidate
             if candidate == "UK":
                 return "GB"
         return None
 
-    def country_code_from_spider_name(self, spider_name):
+    def country_codes_from_spider_name(self, spider_name: str) -> list[str]:
+        countries = []
         if isinstance(spider_name, str):
-            splits = [split for split in spider_name.split("_") if len(split) == 2]
-            if len(splits) == 1:  # Skip multiple countries e.g. homebase_gb_ie
-                return self._convert_to_iso2_country_code(splits)
-        return None
+            all_splits = spider_name.split("_")
+            for split in reversed(all_splits):  # Only take suffixes into account
+                country = self._convert_to_iso2_country_code(split)
+                if country:
+                    countries.append(country)
+                else:
+                    break
+            countries.reverse()
+        return countries
+
+    def country_code_from_spider_name(self, spider_name: str) -> str | None:
+        codes = self.country_codes_from_spider_name(spider_name)
+        if len(codes) == 1:
+            # Skip multiple countries e.g. homebase_gb_ie
+            return codes[0]
+        else:
+            return None
 
     def country_code_from_url(self, url):
         if isinstance(url, str):
-            return self._convert_to_iso2_country_code(urlparse(url).netloc.split("."))
+            splits = urlparse(url).netloc.split(".")
+            if len(splits) > 0:
+                return self._convert_to_iso2_country_code(splits[-1])
         return None
 
 

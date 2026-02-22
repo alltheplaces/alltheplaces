@@ -1,7 +1,9 @@
 import re
+from typing import Any
 
 from chompjs import parse_js_object
 from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -9,20 +11,16 @@ from locations.items import Feature
 
 class TheGymGroupGBSpider(Spider):
     name = "the_gym_group_gb"
-    item_attributes = {
-        "brand": "The Gym",
-        "brand_wikidata": "Q48815022",
-        "country": "GB",
-    }
+    item_attributes = {"brand": "The Gym Group", "brand_wikidata": "Q48815022"}
     allowed_domains = ["www.thegymgroup.com"]
     start_urls = ["https://www.thegymgroup.com/find-a-gym/"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         locations_js = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         for location in parse_js_object(locations_js)["props"]["pageProps"]["gymMapData"]:
             properties = {
                 "ref": location["gym"]["branchId"],
-                "name": location["gym"]["gymName"],
+                "branch": location["gym"]["gymName"],
                 "lat": location["position"]["lat"],
                 "lon": location["position"]["lng"],
                 "addr_full": re.sub(r"\s+", " ", location["gym"]["gymAddress"]),
@@ -30,7 +28,7 @@ class TheGymGroupGBSpider(Spider):
             }
             yield Request(url=properties["website"], meta={"item": Feature(**properties)}, callback=self.add_hours)
 
-    def add_hours(self, response):
+    def add_hours(self, response: Response, **kwargs: Any) -> Any:
         item = response.meta["item"]
         hours_string = " ".join(
             filter(None, response.xpath('//div[@id="gym_times_location_section"]//p/text()').getall())

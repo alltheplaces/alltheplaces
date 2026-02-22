@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -10,10 +13,9 @@ class TorchysTacosSpider(scrapy.Spider):
     name = "torchys_tacos"
     item_attributes = {"brand": "Torchy's Tacos", "brand_wikidata": "Q106769573"}
     allowed_domains = ["torchystacos.com"]
-    start_urls = ("https://torchystacos.com/locations/",)
-    download_delay = 0.7
+    start_urls = ["https://torchystacos.com/locations/"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         stores = response.xpath('//div[@class="details-title"]/a/@href').extract()
         for store in stores:
             yield scrapy.Request(store, callback=self.parse_store)

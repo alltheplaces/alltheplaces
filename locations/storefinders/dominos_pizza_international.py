@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -12,25 +12,25 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class DominosPizzaInternationalSpider(JSONBlobSpider):
-    dataset_attributes = {"source": "api", "api": "dominos_pizza"}
+    dataset_attributes: dict = {"source": "api", "api": "dominos_pizza"}
 
-    item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    locations_key = "Stores"
+    item_attributes: dict = {"brand": "Domino's", "brand_wikidata": "Q839466"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    locations_key: str | list[str] = "Stores"
 
-    domain = "order.golo03.dominos.com"
+    domain: str = "order.golo03.dominos.com"
     region_code: str
     dpz_market: str
-    dpz_language = "en"
-    days = DAYS_EN
-    city_search = False  # JM needs this
-    additional_headers = {}  # AE needs this
+    dpz_language: str = "en"
+    days: dict = DAYS_EN
+    city_search: bool = False  # JM needs this
+    additional_headers: dict = {}  # AE needs this
     search_radius: int | None = None  # HR and SK need this, at least MX must not have this
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         headers = {"DPZ-Language": self.dpz_language, "DPZ-Market": self.dpz_market} | self.additional_headers
         if self.city_search:
-            url = f"https://order.golo01.dominos.com/store-locator-international/locations/city?regionCode={self.region_code}"
+            url = f"https://{self.domain}/store-locator-international/locations/city?regionCode={self.region_code}"
             yield JsonRequest(url=url, headers=headers, callback=self.parse_cities)
         coordinates = [coords for country, coords in country_coordinates(True).items() if country == self.region_code]
         for lat, lon in coordinates:
@@ -39,19 +39,19 @@ class DominosPizzaInternationalSpider(JSONBlobSpider):
                 url = url + f"&Radius={self.search_radius}"
             yield JsonRequest(url=url, headers=headers, callback=self.parse)
 
-    def parse_cities(self, response):
+    def parse_cities(self, response: TextResponse) -> Iterable[JsonRequest]:
         for city in response.json():
             headers = {"DPZ-Language": self.dpz_language, "DPZ-Market": self.dpz_market}
-            url = f"https://order.golo01.dominos.com/store-locator-international/locate/store?regionCode={self.region_code}&City={city['name']}"
+            url = f"https://{self.domain}/store-locator-international/locate/store?regionCode={self.region_code}&City={city['name']}"
             yield JsonRequest(url=url, headers=headers, callback=self.parse)
 
-    def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
+    def parse_feature_array(self, response: TextResponse, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
             yield from self.process_store(item, response, feature) or []
 
-    def process_store(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+    def process_store(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         if item["lat"] is None and location.get("StoreCoordinates") is not None:
             item["lat"] = location["StoreCoordinates"].get("StoreLatitude")
         if item["lon"] is None and location.get("StoreCoordinates") is not None:
@@ -62,8 +62,8 @@ class DominosPizzaInternationalSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         item["street_address"] = item.pop("street")
 
-        apply_yes_no(Extras.DELIVERY, item, location.get("AllowDeliveryOrders"))
-        apply_yes_no(Extras.TAKEAWAY, item, location.get("AllowCarryoutOrders"))
+        apply_yes_no(Extras.DELIVERY, item, bool(location.get("AllowDeliveryOrders")))
+        apply_yes_no(Extras.TAKEAWAY, item, bool(location.get("AllowCarryoutOrders")))
 
         if hours := location.get("HoursDescription"):
             item["opening_hours"] = OpeningHours()

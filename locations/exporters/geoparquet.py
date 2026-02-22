@@ -1,4 +1,6 @@
 import geopandas
+import pyarrow as pa
+import pyarrow.parquet
 from scrapy.exporters import BaseItemExporter
 
 from locations.exporters.geojson import item_to_geojson_feature
@@ -35,5 +37,16 @@ class GeoparquetExporter(BaseItemExporter):
         # Create a GeoDataFrame from the features
         gdf = geopandas.GeoDataFrame.from_features(self.features)
 
-        # Write the GeoDataFrame to a Parquet file
-        gdf.to_parquet(self.file)
+        # Determine if we have a file path or a file-like object
+        if isinstance(self.file, str):
+            # It's a file path string, use gdf.to_parquet directly
+            gdf.to_parquet(self.file)
+        elif hasattr(self.file, "name") and isinstance(self.file.name, str):
+            # It's a real file handle with a .name attribute (opened by Scrapy)
+            # Use the file path instead of the file handle to avoid issues with geopandas.to_parquet()
+            gdf.to_parquet(self.file.name)
+        else:
+            # It's a file-like object (BytesIO), convert geometry to WKB and use pyarrow directly
+            gdf_wkb = gdf.to_wkb()
+            table = pa.Table.from_pandas(gdf_wkb, preserve_index=False)
+            pyarrow.parquet.write_table(table, self.file)

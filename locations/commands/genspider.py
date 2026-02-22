@@ -34,7 +34,7 @@ class Command(scrapy.commands.genspider.Command):
         )
 
     # TODO: Remove this when autospidergen is merged
-    def automatically_set_brand_or_operator_from_start_url(self):
+    def automatically_set_brand_or_operator_from_start_url(self) -> None:
         """
         Automatically extract parameters["brand_wikidata"] or
         parameters["operator_wikidata"] from a supplied
@@ -55,7 +55,7 @@ class Command(scrapy.commands.genspider.Command):
                         self.parameters["operator_wikidata"] = wikidata_code
 
     # TODO: Remove this when autospidergen is merged
-    def automatically_set_parameters(self):
+    def automatically_set_parameters(self) -> None:
         """
         Automatically extract parameters from at least one or more
         of the following:
@@ -99,15 +99,15 @@ class Command(scrapy.commands.genspider.Command):
         name: str,
         url: str,
         template_name: str,
-    ):
+    ) -> dict:
         capitalized_module = "".join(s.capitalize() for s in module.split("_"))
 
         self.start_urls = [url]
         self.automatically_set_parameters()
 
         tvars = {
-            "project_name": self.settings.get("BOT_NAME"),
-            "ProjectName": string_camelcase(self.settings.get("BOT_NAME")),
+            "project_name": self.settings.get("BOT_NAME"),  # ty: ignore[possibly-missing-attribute]
+            "ProjectName": string_camelcase(self.settings.get("BOT_NAME")),  # ty: ignore[possibly-missing-attribute]
             "module": module,
             "name": name,
             "url": url,
@@ -128,8 +128,8 @@ class Command(scrapy.commands.genspider.Command):
     ) -> None:
         """Generate the spider module, based on the given template"""
         tvars = self._generate_template_variables(module, name, url, template_name)
-        if self.settings.get("NEWSPIDER_MODULE"):
-            spiders_module = import_module(self.settings["NEWSPIDER_MODULE"])
+        if self.settings.get("NEWSPIDER_MODULE"):  # ty: ignore[possibly-missing-attribute]
+            spiders_module = import_module(self.settings["NEWSPIDER_MODULE"])  # ty: ignore[not-subscriptable]
             assert spiders_module.__file__
             spiders_dir = Path(spiders_module.__file__).parent.resolve()
         else:

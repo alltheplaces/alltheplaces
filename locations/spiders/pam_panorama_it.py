@@ -1,8 +1,8 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import FormRequest, Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -26,7 +26,7 @@ BRANDS = {
 class PamPanoramaITSpider(Spider):
     name = "pam_panorama_it"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://coeus.ppapi.it/api/v2_2/post/query?noCache=0&typeUuid=store",
             formdata={
@@ -57,10 +57,14 @@ class PamPanoramaITSpider(Spider):
             item["lat"] = location["metadatas"]["latitude"]
             item["lon"] = location["metadatas"]["longitude"]
 
-            if brand := BRANDS.get(location["description"]):
-                item.update(brand[0])
-                apply_category(brand[1], item)
-            else:
-                self.logger.error("Unexpected brand: {}".format(location["description"]))
+            if brand_name := location.get("description"):
+                # Meda and monti are convenience stores with description equal to street name
+                if brand_name in ["Meda", "monti"]:
+                    brand_name = "Pam Local"
+                if brand := BRANDS.get(brand_name):
+                    item.update(brand[0])
+                    apply_category(brand[1], item)
+                else:
+                    self.logger.error("Unexpected brand: {}".format(location["description"]))
 
             yield item

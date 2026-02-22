@@ -1,8 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -12,13 +11,12 @@ from locations.hours import OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class WawaSpider(scrapy.Spider):
+class WawaSpider(Spider):
     name = "wawa"
     item_attributes = {"brand": "Wawa", "brand_wikidata": "Q5936320"}
-    download_delay = 1.5
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_DELAY": 1.5}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("US", 87000):
             yield JsonRequest(
                 url="https://www.wawa.com/api/bff",

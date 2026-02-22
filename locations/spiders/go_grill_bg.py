@@ -4,16 +4,16 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class GoGrillBGSpider(JSONBlobSpider):
+class GoGrillBGSpider(WPStoreLocatorSpider):
     name = "go_grill_bg"
     item_attributes = {"brand": "Go Grill", "brand_wikidata": "Q122839782"}
-    start_urls = ["https://gogrill.bg/wp-admin/admin-ajax.php?action=store_search&autoload=1"]
+    allowed_domains = ["gogrill.bg"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = feature.get("store").replace("GO GRILL • ", "")
+        item["branch"] = item.pop("name").removeprefix("GO GRILL • ")
         item["website"] = None
 
         apply_category(Categories.RESTAURANT, item)

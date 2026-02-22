@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 import geonamescache
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -12,7 +14,7 @@ class EnterpriseSpider(Spider):
     item_attributes = {"brand": "Enterprise", "brand_wikidata": "Q17085454"}
     allowed_domains = ["prd.location.enterprise.com", "int1.location.enterprise.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         gc = geonamescache.GeonamesCache()
         countries = gc.get_countries()
         for country_code in countries.keys():

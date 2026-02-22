@@ -1,6 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import FormRequest, Request, Spider
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
@@ -20,7 +21,7 @@ class TeboilRUSpider(Spider):
     item_attributes = {"brand": "Teboil", "brand_wikidata": "Q7692079"}
     allowed_domains = ["azs.teboil.ru"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://azs.teboil.ru/map/ajax/map.php",
             formdata={"cityId[]": ""},

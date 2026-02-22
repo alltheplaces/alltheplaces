@@ -11,9 +11,19 @@ from locations.spiders.tesco_gb import set_located_in
 from locations.storefinders.mapdata_services import MapDataServicesSpider
 
 SHOP_BRANDS = {
+    "Dunnings": {"brand": "Dunnings"},
+    "Eagle Group": None,
+    "Maranos": None,
+    "NightOwl": None,
+    "NorthCoast": None,
+    "OTR": OtrAUSpider.item_attributes,
+    "OilsPlus": None,
+    "Perrys": None,
     "Reddy Express": {"brand": "Reddy Express", "brand_wikidata": "Q5144653"},
-    "Coles Express": {},
-    "Otr": OtrAUSpider.item_attributes,
+    "Store24": None,
+    "Sunraysia": None,
+    "TAS Petroleum": None,
+    "Urbanista": None,
 }
 FUEL_BRANDS = {
     "Advantage": None,
@@ -32,27 +42,23 @@ class ShellAUSpider(MapDataServicesSpider):
     api_brand_name = "SHE_FuelLocations"
     api_key = "KYAmqfaKFEsYWtweMcoqStasRlCoipBukIAt3gSb"
     api_filter = '(shell_card_accepted = 1) AND (Status = "Temp Closure" OR Status = "Open")'
+    no_refs = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if not FUEL_BRANDS.get(feature["forecourt_brand"]):
             return
 
-        item["ref"] = feature.get("uuid")
         item["street_address"] = item.pop("street", None)
 
         if feature.get("retail_shop") == "1":
             shop = item.deepcopy()
-            shop["ref"] = "{}-shop".format(shop["ref"])
+            shop["name"] = None
             set_located_in(FUEL_BRANDS[feature["forecourt_brand"]], shop)
 
             apply_category(Categories.SHOP_CONVENIENCE, shop)
 
-            name = shop.pop("name").removeprefix(feature["forecourt_brand"]).strip()
-            for shop_brand in SHOP_BRANDS.keys():
-                if name.startswith(shop_brand):
-                    shop["branch"] = name.removeprefix(shop_brand).strip()
-                    shop.update(SHOP_BRANDS[shop_brand])
-                    break
+            if brand := SHOP_BRANDS.get(feature["shop_brand"]):
+                shop.update(brand)
 
             yield shop
 

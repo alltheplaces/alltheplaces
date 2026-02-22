@@ -19,6 +19,7 @@ RESTAURANTS = {
     "Table Table": ("Table Table", "Q16952586", Categories.RESTAURANT),
     "Thyme Bar & Grill": ("Thyme", "Q120645568", Categories.RESTAURANT),
     "Toby Carvery": ("Toby Carvery", "Q7811777", Categories.RESTAURANT),
+    "Cookhouse and Pub": ("Cookhouse and Pub", "Q137927878", Categories.RESTAURANT),
 }
 
 
@@ -28,7 +29,7 @@ class PremierInnSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ("https://www.premierinn.com/sitemap-english.xml",)
     sitemap_rules = [(r"gb/en/hotels/[^/]+/[^/]+/[^/]+/[^/]+.html", "parse")]
     wanted_types = ["Hotel"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         if response.xpath('//section[@class="seo-hotel-listings"]'):

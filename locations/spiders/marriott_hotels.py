@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -22,10 +25,9 @@ from locations.dict_parser import DictParser
 # 'https://westin.marriott.com/hotel-locations/'
 # 'https://st-regis.marriott.com/hotel-directory/'
 # 'https://fairfield.marriott.com/locations/'
-class MarriottHotelsSpider(scrapy.Spider):
+class MarriottHotelsSpider(Spider):
     name = "marriott_hotels"
-    custom_settings = {"REDIRECT_ENABLED": False}
-    download_delay = 2.0
+    custom_settings = {"REDIRECT_ENABLED": False, "DOWNLOAD_DELAY": 2}
     drop_attributes = {"image"}
 
     # Continue policy of ignoring collection hotels for now.
@@ -43,7 +45,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "EB": ["Edition Hotels", "Q91218404"],
         "EL": ["Element", "Q91948072"],
         "ER": ["Marriott Executive Apartments", "Q72636824"],
-        "FI": ["Fairfield by Marriott", "Q5430314"],
+        "FI": ["Fairfield Inn", "Q5430314"],
         "FP": ["Four Points by Sheraton", "Q1439966"],
         "GE": ["Gaylord Hotels", "Q3099664"],
         "JW": ["JW Marriott Hotels", "Q1067636"],
@@ -57,7 +59,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "SI": ["Sheraton", "Q634831"],
         "SH": ["SpringHill Suites", "Q7580351"],
         "TX": "ignore",  # Tribute Portfolio
-        "XR": ["St. Regis Hotels & Resorts", "Q30715430"],
+        "XR": ["St. Regis", "Q30715430"],
         "TS": ["TownePlace Suites", "Q7830092"],
         "WH": ["W Hotels", "Q7958488"],
         "WI": ["Westin Hotels & Resorts", "Q1969162"],
@@ -65,13 +67,13 @@ class MarriottHotelsSpider(scrapy.Spider):
         "XF": ["Four Points Express", "Q1439966"],
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         letters = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
         # Generate all possible Marriott brand codes.
         for x in letters:
             for y in letters:
                 url = "https://pacsys.marriott.com/data/marriott_properties_{}_en-US.json".format(x + y)
-                yield scrapy.Request(url, callback=self.parse_brand_json)
+                yield Request(url, callback=self.parse_brand_json)
 
     def parse_brand_json(self, response):
         for cities in DictParser.iter_matching_keys(response.json(), "city_properties"):

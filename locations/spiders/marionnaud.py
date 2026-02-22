@@ -18,7 +18,7 @@ class MarionnaudSpider(JSONBlobSpider):
         "https://api.marionnaud.fr/api/v2/mfr/stores?radius=10000&pageSize=100000&fields=FULL",
     ]
     locations_key = "stores"
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
     needs_json_request = True
 
@@ -28,8 +28,10 @@ class MarionnaudSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["addr_full"] = location["formattedAddress"]
         item["street_address"] = merge_address_lines([location["line1"], location.get("line2")])
-        item["website"] = response.urljoin(location["url"]).replace("api.marionnaud", "www.marionnaud")
-
+        item["ref"] = item["website"] = response.urljoin(location["url"]).replace("api.marionnaud", "www.marionnaud")
+        item["branch"] = item.pop("name").replace("Marionnaud ", "")
+        if isinstance(item.get("state"), dict):
+            item["state"] = item["state"].get("isocode")
         item["opening_hours"] = OpeningHours()
         for rule in location["openingHours"]["weekDayOpeningList"]:
             if rule["closed"]:
@@ -39,5 +41,6 @@ class MarionnaudSpider(JSONBlobSpider):
                 rule["shortenedWeekDay"],
                 rule["openingTime"]["formattedHour"].replace(".", ":"),
                 rule["closingTime"]["formattedHour"].replace(".", ":"),
+                "%I:%M %p",
             )
         yield item

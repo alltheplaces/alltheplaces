@@ -17,7 +17,7 @@ class TheGoodFeetStoreSpider(YextSpider):
             return
         item["branch"] = location["c_officialStoreName"]
         item.pop("name", None)
-        item["website"] = location["c_pagesURL"]
+        item["website"] = location.get("c_pagesURL")
         apply_category(Categories.SHOP_SHOES, item)
         item["extras"].pop("contact:instagram")
         if google_place_id := location.get("googlePlaceId"):

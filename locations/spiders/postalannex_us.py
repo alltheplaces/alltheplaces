@@ -10,7 +10,7 @@ from locations.microdata_parser import MicrodataParser
 class PostalannexUSSpider(Spider):
     name = "postalannex_us"
     item_attributes = {"operator": "PostalAnnex", "operator_wikidata": "Q61960357"}
-    start_urls = ["https://www.postalannex.com/location-results"]
+    start_urls = ["https://www.postalannex.com/locations"]
 
     def parse(self, response):
         script = response.xpath("//script[starts-with(text(), 'jQuery.extend')]/text()").get()

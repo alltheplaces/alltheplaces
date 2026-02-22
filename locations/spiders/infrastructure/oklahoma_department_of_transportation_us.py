@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -13,11 +13,11 @@ class OklahomaDepartmentOfTransportationUSSpider(JSONBlobSpider):
     allowed_domains = ["oktraffic.org"]
     start_urls = ["https://oktraffic.org/api/CameraPoles"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             self.start_urls[0],
             headers={
-                "filter": '{"include":[{"relation":"mapCameras","scope":{"include":"streamDictionary","where":{"status":{"neq":"Out Of Service"},"type":"Web","blockAtis":{"neq":"1"}}}},{"relation":"cameraLocationLinks","scope":{"include":["linkedCameraPole","cameraPole"]}}]}'
+                "filter": '{"include":[{"relation":"mapCameras","scope":{"include":"streamDictionary","where":{"status":{"neq":"Out Of Service"},"type":"Web","blockAtis":{"neq":"1"}}}}, {"relation":"cameraLocationLinks","scope":{"include":["linkedCameraPole","cameraPole"]}}]}'
             },
         )
 

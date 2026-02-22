@@ -1,7 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import FormRequest, Request
-from scrapy.http import Response
+from scrapy.http import FormRequest, Request, Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -17,7 +16,7 @@ class SalvatoreCASpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor("/en/restaurant/"), "parse_sd")]
     wanted_types = ["FastFoodRestaurant"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request("https://salvatore.com/en/restaurant", callback=self.parse_page)
 
     def parse_page(self, response: Response, **kwargs):
@@ -27,7 +26,6 @@ class SalvatoreCASpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
-        item["addr_full"] = item.pop("street_address")
         item["lat"], item["lon"] = item["lon"], item["lat"]
 
         item["website"] = response.xpath('//link[@rel="canonical"]/@href').get()

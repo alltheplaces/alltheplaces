@@ -17,7 +17,9 @@ class GreenMotionSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["addr_full"] = ", ".join([feature.get(f"address_{x}") for x in range(1, 4) if feature.get(f"address_{x}")])
+        item["street_address"] = ", ".join(
+            [feature.get(f"address_{x}") for x in range(1, 4) if feature.get(f"address_{x}")]
+        )
         item["email"] = feature.get("emails")[0]
         item["country"] = feature["country"]["data"]["iso_alpha2"]
         item["website"] = "https://greenmotion.com/locations/{}/{}".format(

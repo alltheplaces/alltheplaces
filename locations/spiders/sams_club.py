@@ -1,67 +1,62 @@
-import json
-from typing import Any
+from scrapy import Spider
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
-
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.user_agents import FIREFOX_LATEST
 
 
-class SamsClubSpider(SitemapSpider):
+class SamsClubSpider(Spider):
     name = "sams_club"
     item_attributes = {"brand": "Sam's Club", "brand_wikidata": "Q1972120"}
-    allowed_domains = ["www.samsclub.com"]
-    sitemap_urls = ["https://www.samsclub.com/sitemap_locators.xml"]
-    user_agent = FIREFOX_LATEST
+    start_urls = [
+        "https://www.samsclub.com/api/node/vivaldi/browse/v2/clubfinder/list?singleLineAddr=USA&distance=50000&nbrOfStores=1000"
+    ]
+    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http.HTTPDownloadHandler"}}
 
-    depts = {
-        "GAS": ("/local/fuel-center/", Categories.FUEL_STATION),
-        # "PHARMACY": ("/local/pharmacy/", Categories.PHARMACY),
-    }
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        [script] = filter(
-            lambda script: "clubDetails" in script,
-            response.xpath('//script[@type="application/json"]/text()').extract(),
-        )
-        data = json.loads(script)["clubDetails"]
-
-        if data["clubType"] in ["HOME_OFFICE", "TEST"]:
-            return
-        elif data["clubType"] == "REGULAR":
-            pass
-        else:
-            self.logger.error("Unexpected club: {}".format(data["clubType"]))
-
-        item = DictParser.parse(data)
-        item["name"] = None
-        item["website"] = response.url
-        item["opening_hours"] = self.parse_opening_hours(data["operationalHours"])
-
-        for service in data["services"]:
-            if service["name"] not in self.depts:
+    def parse(self, response):
+        for store in response.json():
+            if store.get("clubAttributes", {}).get("isDeleted") or store.get("clubAttributes", {}).get(
+                "isTemporarilyClosed"
+            ):
                 continue
-            dept = item.deepcopy()
-            dept["ref"] = "{}-{}".format(item["ref"], service["name"])
-            dept["website"] = item["website"].replace("/club/", self.depts[service["name"]][0])
-            dept["opening_hours"] = self.parse_opening_hours(service["operationalHours"])
 
-            if phone := service.get("phone"):
-                dept["phone"] = phone
+            store.update(store.pop("address", {}))
+            store.update(store.pop("geoPoint", {}))
+            store["street_address"] = store.get("address1")
+            item = DictParser.parse(store)
+            item["website"] = f"https://www.samsclub.com/club/{store['id']}"
 
-            apply_category(self.depts[service["name"]][1], dept)
+            services = store.get("services", [])
 
-            yield dept
-        # TODO: gasPrices
+            if gas_prices := store.get("gasPrices"):
+                fuel_station = item.deepcopy()
+                fuel_station["ref"] = f"{store['id']}_fuel"
+                fuel_station["extras"] = {}
+                fuel_types = {fuel["name"] for fuel in gas_prices}
+                apply_yes_no(Fuel.OCTANE_87, fuel_station, "UNLEAD" in fuel_types)
+                apply_yes_no(Fuel.OCTANE_89, fuel_station, "MIDGRAD" in fuel_types or "MID CLR" in fuel_types)
+                apply_yes_no(Fuel.OCTANE_91, fuel_station, "PREMIUM" in fuel_types or "PREM CLR" in fuel_types)
+                apply_yes_no(Fuel.DIESEL, fuel_station, "DIESEL" in fuel_types)
+                apply_category(Categories.FUEL_STATION, fuel_station)
+                yield fuel_station
 
-        apply_category(Categories.SHOP_WHOLESALE, item)
-        yield item
+            club_attrs = store.get("clubAttributes", {})
+            apply_yes_no(Extras.TYRE_SERVICES, item, "tires_&_batteries" in services)
+            apply_yes_no(Extras.SELF_CHECKOUT, item, club_attrs.get("isScanNGo"))
+            apply_yes_no(Extras.DELIVERY, item, club_attrs.get("isClubEnabledForRegularDelivery"))
+            item["opening_hours"] = self.parse_hours(store.get("operationalHours", {}))
 
-    def parse_opening_hours(self, operational_hours: dict) -> OpeningHours:
+            apply_category(Categories.SHOP_WHOLESALE, item)
+
+            yield item
+
+    def parse_hours(self, hours_data: dict) -> OpeningHours:
         oh = OpeningHours()
-        for day, interval in operational_hours.items():
-            oh.add_range(day[:2], interval["startHrs"], interval["endHrs"])
+        if mon_fri := hours_data.get("monToFriHrs"):
+            for day in ["Mo", "Tu", "We", "Th", "Fr"]:
+                oh.add_range(day, mon_fri["startHrs"], mon_fri["endHrs"])
+        if sat := hours_data.get("saturdayHrs"):
+            oh.add_range("Sa", sat["startHrs"], sat["endHrs"])
+        if sun := hours_data.get("sundayHrs"):
+            oh.add_range("Su", sun["startHrs"], sun["endHrs"])
         return oh

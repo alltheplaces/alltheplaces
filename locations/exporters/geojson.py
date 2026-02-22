@@ -1,10 +1,9 @@
 import base64
 import datetime
 import hashlib
-import io
 import json
-import logging
 import uuid
+from io import BytesIO, StringIO
 from typing import Any, Generator, Type
 
 from scrapy import Item, Spider
@@ -14,6 +13,7 @@ from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
 from locations.extensions.add_lineage import spider_class_to_lineage
+from locations.geo import extract_geojson_point_geometry
 from locations.settings import SPIDER_MODULES
 
 mapping = (
@@ -38,6 +38,8 @@ mapping = (
     ("brand_wikidata", "brand:wikidata"),
     ("operator", "operator"),
     ("operator_wikidata", "operator:wikidata"),
+    ("network", "network"),
+    ("network_wikidata", "network:wikidata"),
     ("located_in", "located_in"),
     ("located_in_wikidata", "located_in:wikidata"),
     ("nsi_id", "nsi_id"),
@@ -69,35 +71,48 @@ def item_to_properties(item: Item) -> dict[str, Any]:
 
 def item_to_geometry(item: Item) -> dict | None:
     """
-    Convert the item to a GeoJSON geometry object. If the item has lat and lon fields,
-    but no geometry field, then a Point geometry will be created. Otherwise the
-    geometry field will be returned as is.
+    Extract a GeoJSON geometry object from an Item. Point geometry and
+    MultiPoint geometry with a single coordinate pair are both validated.
+    Other GeoJSON geometry types (e.g. Polygon) are not validated and are
+    returned as-is.
 
-    :param item: The scraped item.
-    :return: The GeoJSON geometry object.
+    If the Item has lat and lon attributes defined instead of a geometry
+    attribute, this function will return the GeoJSON Point geometry
+    equivalent.
+
+    If point geometry is validated and found to be invalid (e.g. lat of 700)
+    then this function returns None.
+
+    :param item: Item which may have geometry defined either in the geometry
+                 field, or as lat/lon fields.
+    :return: GeoJSON geometry dictionary or None if no such geometry could be
+             extracted.
     """
-
-    lat = item.get("lat")
-    lon = item.get("lon")
-    geometry = item.get("geometry")
-
-    if lat and lon and not geometry:
-        try:
-            geometry = {
-                "type": "Point",
-                "coordinates": [float(item["lon"]), float(item["lat"])],
-            }
-        except ValueError:
-            logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
-
-    # Check for empty or missing coordinates list in geometry
-    if geometry and isinstance(geometry, dict):
-        coordinates = geometry.get("coordinates")
-        if not coordinates:
-            logging.warning("Invalid geometry coordinates: %s", geometry)
+    if geometry := item.get("geometry"):
+        if geojson_point := extract_geojson_point_geometry(geometry):
+            return geojson_point
+        else:
+            if geometry.get("type") in ["MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]:
+                return geometry
+            else:
+                return None
+    else:
+        lat_untyped = item.get("lat", None)
+        lon_untyped = item.get("lon", None)
+        if lat_untyped is None or lon_untyped is None:
             return None
-
-    return geometry
+        try:
+            lat_typed = float(lat_untyped)
+            lon_typed = float(lon_untyped)
+        except (TypeError, ValueError):
+            return None
+        if lat_typed < -90.0 or lat_typed > 90.0 or lon_typed < -180.0 or lon_typed > 180.0:
+            return None
+        geojson_point = {
+            "type": "Point",
+            "coordinates": [lon_typed, lat_typed],
+        }
+        return geojson_point
 
 
 def item_to_geojson_feature(item: Item) -> dict:
@@ -137,7 +152,7 @@ def iter_spider_classes_in_modules(modules=SPIDER_MODULES) -> Generator[Type[Spi
                 yield spider_class
 
 
-def get_dataset_attributes(spider_name) -> {}:
+def get_dataset_attributes(spider_name: str) -> dict:
     spider_class = find_spider_class(spider_name)
     dataset_attributes = getattr(spider_class, "dataset_attributes", {})
     settings = getattr(spider_class, "custom_settings", {}) or {}
@@ -153,32 +168,41 @@ def get_dataset_attributes(spider_name) -> {}:
 
 
 class GeoJsonExporter(JsonItemExporter):
-    def __init__(self, file, **kwargs):
-        super().__init__(file, **kwargs)
-        self.spider_name = None
+    spider_name: str | None = None
 
-    def start_exporting(self):
+    def __init__(self, file: BytesIO, **kwargs):
+        super().__init__(file, **kwargs)
+
+    def start_exporting(self) -> None:
         pass
 
-    def export_item(self, item):
+    def export_item(self, item: Item) -> None:
         spider_name = item.get("extras", {}).get("@spider")
+        if not spider_name:
+            raise RuntimeError("Spider should have a 'name' attribute specified.")
 
         if self.first_item:
             self.spider_name = spider_name
             self.write_geojson_header()
 
+        if not self.spider_name:
+            raise RuntimeError(
+                "Exporter expected a spider name but none was available. Check the spider has a 'name' attribute specified and is not None."
+            )
         if spider_name != self.spider_name:
             # It really should not happen that a single exporter instance
             # handles output from different spiders. If it does happen,
             # we rather crash than emit GeoJSON with the wrong dataset
             # properties, which may include legally relevant license tags.
             raise ValueError(
-                f"harvest from multiple spiders ({spider_name, self.spider_name}) cannot be written to same GeoJSON file"
+                f"Extracted data from multiple spiders ({spider_name, self.spider_name}) cannot be written to same GeoJSON file"
             )
 
         super().export_item(item)
 
-    def _get_serialized_fields(self, item, default_value=None, include_empty=None):
+    def _get_serialized_fields(
+        self, item: Item, default_value: Any = None, include_empty: bool | None = None
+    ) -> list[tuple]:
         feature = [
             ("type", "Feature"),
             ("id", compute_hash(item)),
@@ -188,8 +212,10 @@ class GeoJsonExporter(JsonItemExporter):
 
         return feature
 
-    def write_geojson_header(self):
-        header = io.StringIO()
+    def write_geojson_header(self) -> None:
+        if not self.spider_name:
+            raise RuntimeError("Spider should have a 'name' attribute specified.")
+        header = StringIO()
         header.write('{"type":"FeatureCollection","dataset_attributes":')
         json.dump(
             get_dataset_attributes(self.spider_name), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True
@@ -197,6 +223,6 @@ class GeoJsonExporter(JsonItemExporter):
         header.write(',"features":[\n')
         self.file.write(to_bytes(header.getvalue(), self.encoding))
 
-    def finish_exporting(self):
+    def finish_exporting(self) -> None:
         if not self.first_item:
             self.file.write(b"\n]}\n")

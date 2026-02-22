@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -18,9 +18,11 @@ class HarborFreightToolsUSSpider(JSONBlobSpider):
         'https://api.harborfreight.com/graphql?operationName=FindStoresNearCoordinates&variables={"filter":{"status":"OPEN"},"latitude":0,"longitude":0,"withDistance":true}&extensions={"persistedQuery":{"version":1,"sha256Hash":"3af6e542b419920c44979e2521ef6b73cd998b9089694f1c12f8f3c29edb7eb1"}}'
     ]
     locations_key = ["data", "findStoresNearCoordinates", "stores"]
-    download_delay = 10  # Aggressive HTTP 403 rate limiting is used, robots.txt wants a delay of 10s
+    custom_settings = {
+        "DOWNLOAD_DELAY": 10
+    }  # Aggressive HTTP 403 rate limiting is used, robots.txt wants a delay of 10s
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # GraphQL query returns results in a 60mi radius.
         for coordinates in country_iseadgg_centroids(["US"], 94):
             graphql_url = (

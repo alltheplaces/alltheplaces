@@ -20,7 +20,7 @@ class RaleysUSSpider(JSONBlobSpider):
     locations_key = ["data"]
     allowed_domains = ["www.raleys.com"]
 
-    def start_requests(self):
+    async def start(self):
         for domain in self.allowed_domains:
             yield Request(f"https://{domain}/stores", callback=self.start_api_request)
 

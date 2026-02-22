@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class NinetynineRanchMarketUSSpider(Spider):
     allowed_domains = ["api.awsprod.99ranch.com"]
     start_urls = ["https://api.awsprod.99ranch.com/store/web/nearby/stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "address": "Foster City, CA, USA",
             "zipCode": "",

@@ -1,9 +1,9 @@
 from datetime import UTC, datetime, timedelta
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import quote_plus
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -65,13 +65,13 @@ class ArcGISFeatureServerSpider(Spider):
          schema of the feature layer to omit, rename or replace a field.
     """
 
-    dataset_attributes = {"source": "api", "api": "arcgis"}
+    dataset_attributes: dict = {"source": "api", "api": "arcgis"}
 
-    host: str = ""
-    context_path: str = ""
-    service_id: str = ""
+    host: str
+    context_path: str
+    service_id: str
     server_type: str = "FeatureServer"  # Or "MapServer"
-    layer_id: str = ""
+    layer_id: str
     field_names: list[str] = []
     where_query: str = "1=1"
     additional_parameters: dict = {}
@@ -80,7 +80,7 @@ class ArcGISFeatureServerSpider(Spider):
     # triggers a number of Scrapy warning messages.
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         layer_details_url = f"https://{self.host}/{self.context_path}/rest/services/{self.service_id}/{self.server_type}/{self.layer_id}?f=json"
         if len(self.additional_parameters.keys()) > 0:
             additional_parameters_str = "".join(
@@ -92,7 +92,7 @@ class ArcGISFeatureServerSpider(Spider):
             layer_details_url = layer_details_url + additional_parameters_str
         yield JsonRequest(url=layer_details_url, callback=self.parse_layer_details)
 
-    def parse_layer_details(self, response: Response) -> Iterable[JsonRequest]:
+    def parse_layer_details(self, response: TextResponse) -> Iterable[JsonRequest]:
         layer_details = response.json()
 
         server_capabilities = list(map(str.strip, layer_details["capabilities"].split(",")))
@@ -161,7 +161,7 @@ class ArcGISFeatureServerSpider(Spider):
             query_url = query_url + additional_parameters_str
         yield JsonRequest(url=query_url, callback=self.parse_features)
 
-    def parse_features(self, response: Response) -> Iterable[Feature]:
+    def parse_features(self, response: TextResponse) -> Iterable[Feature]:
         features = response.json()["features"]
 
         for feature in features:
@@ -182,13 +182,19 @@ class ArcGISFeatureServerSpider(Spider):
             yield from self.post_process_item(item, response, feature)
 
         if "&resultRecordCount=" in response.url:
-            max_record_count = int(response.request.url.split("&resultRecordCount=", 1)[1].split("&", 1)[0])
+            request = response.request
+            if not request:
+                raise RuntimeError(
+                    "Response object did not have a corresponding Request object to parse URL parameters from."
+                )
+                return
+            max_record_count = int(request.url.split("&resultRecordCount=", 1)[1].split("&", 1)[0])
             if len(features) == max_record_count:
                 # More results exist and need to be queried for.
-                current_offset = int(response.request.url.split("&resultOffset=", 1)[1].split("&", 1)[0])
+                current_offset = int(request.url.split("&resultOffset=", 1)[1].split("&", 1)[0])
                 next_offset = current_offset + max_record_count
                 yield JsonRequest(
-                    url=response.request.url.replace(f"&resultOffset={current_offset}", f"&resultOffset={next_offset}"),
+                    url=request.url.replace(f"&resultOffset={current_offset}", f"&resultOffset={next_offset}"),
                     callback=self.parse_features,
                     dont_filter=True,
                 )
@@ -196,5 +202,5 @@ class ArcGISFeatureServerSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         return
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         yield item

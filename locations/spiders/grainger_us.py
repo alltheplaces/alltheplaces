@@ -1,22 +1,20 @@
 import re
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class GraingerUSSpider(CrawlSpider):
+class GraingerUSSpider(SitemapSpider, PlaywrightSpider):
     name = "grainger_us"
     item_attributes = {"brand": "Grainger", "brand_wikidata": "Q1627894"}
-    start_urls = ["https://www.grainger.com/content/find-branch-location"]
-    rules = [Rule(LinkExtractor("/branch/"), callback="parse")]
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    user_agent = BROWSER_DEFAULT
+    sitemap_urls = ["https://www.grainger.com/branch-location-sitemap.xml"]
+    sitemap_rules = [(r"^https://www.grainger.com/branch/[\w\-]+$", "parse")]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response, **kwargs):
         item = Feature()

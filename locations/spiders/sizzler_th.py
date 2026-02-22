@@ -1,20 +1,18 @@
-import scrapy
-from scrapy.http import Request
+from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SizzlerTHSpider(scrapy.Spider):
+class SizzlerTHSpider(Spider):
     name = "sizzler_th"
     item_attributes = {
         "brand": "Sizzler",
         "brand_wikidata": "Q1848822",
     }
+    start_urls = ["https://www.sizzler.co.th/api/search/location?location=&province=&lang=en"]
+    allowed_domains = ["www.sizzler.co.th"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
-
-    def start_requests(self):
-        yield Request(url="https://www.sizzler.co.th/api/search/location?location=&province=&lang=en")
 
     def parse(self, response):
         locations = response.json()

@@ -1,6 +1,8 @@
 import urllib.parse
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, PaymentMethods, apply_category, map_payment
 from locations.items import Feature
@@ -12,9 +14,13 @@ from locations.items import Feature
 # that aren't part of a chain.
 
 
-class DiscoverSwissSpider(scrapy.Spider):
+class DiscoverSwissSpider(Spider):
     name = "discover_swiss"
     allowed_domains = ["api.discover.swiss"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "URLLENGTH_LIMIT": 4096,
+    }
     dataset_attributes = {
         # Mandatory attribution as per CC-BY 4.0, waived for OpenStreetMap
         # via standard template. Negotiations took place in January 2025
@@ -34,8 +40,8 @@ class DiscoverSwissSpider(scrapy.Spider):
     }
     url = "https://api.discover.swiss/info/v2/lodgingbusinesses/?project=dsod-content&top=-1"
 
-    def start_requests(self):
-        yield scrapy.Request(self.url, headers=self.headers)
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(self.url, headers=self.headers)
 
     def parse(self, response):
         data = response.json()
@@ -43,7 +49,7 @@ class DiscoverSwissSpider(scrapy.Spider):
         if token and data.get("hasNextPage"):
             token_quoted = urllib.parse.quote(token, safe="")
             next_url = self.url + "&continuationToken=" + token_quoted
-            yield scrapy.Request(next_url, headers=self.headers)
+            yield Request(next_url, headers=self.headers)
         for item in data.get("data", []):
             category = self.parse_category(item)
             ref = self.parse_ref(item)

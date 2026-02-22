@@ -1,4 +1,7 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -15,7 +18,7 @@ class MyhouseAUSpider(Spider):
     allowed_domains = ["myhouse.com.au"]
     start_urls = ["https://myhouse.com.au/api/get-stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, method="POST")
 

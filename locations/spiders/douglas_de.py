@@ -20,7 +20,7 @@ class DouglasDESpider(JSONBlobSpider):
     locations_key = "stores"
     needs_json_request = True
     days = DAYS_DE
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True  # Data centre IP addresses appear to be blocked.
 
     def pre_process_data(self, feature: dict) -> None:

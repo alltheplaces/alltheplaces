@@ -1,21 +1,13 @@
-from scrapy.spiders import SitemapSpider
-
 from locations.categories import Categories, apply_category
-from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.storefinders.uberall import UberallSpider
 
 
-class AldiSudIESpider(SitemapSpider, StructuredDataSpider):
+class AldiSudIESpider(UberallSpider):
     name = "aldi_sud_ie"
-    item_attributes = {"brand": "Aldi", "brand_wikidata": "Q41171672", "country": "IE"}
-    allowed_domains = ["aldi.ie"]
-    sitemap_urls = ["https://stores.aldi.ie/sitemap.xml"]
-    sitemap_rules = [(r"https://stores\.aldi\.ie/[^/]+/[^/]+/[^/]+$", "parse")]
-    user_agent = BROWSER_DEFAULT
+    item_attributes = {"brand": "Aldi", "brand_wikidata": "Q41171672"}
+    key = "lS2g9eY7aREuErMGkEiNnvTRoO6jQM"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("ALDI ")
-
+        item["name"] = item["phone"] = None
         apply_category(Categories.SHOP_SUPERMARKET, item)
-
         yield item

@@ -1,84 +1,90 @@
 import random
+from typing import AsyncIterator, Iterable
 
 import pygeohash
 from chompjs import parse_js_object
 from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.python.failure import Failure
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
-
-# Documentation for this Stockist store finder is available at:
-# https://help.stockist.co/
-#
-# To use this store finder, specify the API key using the "key"
-# attribute of this class. You may need to define a parse_item
-# function to extract additional location data and to make
-# corrections to automatically extracted location data.
-#
-# Note that some brands may have disabled the ability for clients to
-# list all locations in a single query. This store finder will
-# automatically detect this situation and will use an alternative
-# approach of searching for locations by radius searches. No
-# additional parameters need to be supplied to this store finder.
-# Just note that some additional requests will be required for this
-# store finder to return all locations.
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class StockistSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "stockist.co"}
-    key: str = ""
+    """
+    Documentation for this Stockist store finder is available at:
+    https://help.stockist.co/
+
+    To use this store finder, specify the API key using the "key" attribute of
+    this class. You may need to define a parse_item function to extract
+    additional location data and to make corrections to automatically
+    extracted location data.
+
+    Note that some brands may have disabled the ability for clients to list
+    all locations in a single query. This store finder will automatically
+    detect this situation and will use an alternative approach of searching
+    for locations by radius searches. No additional parameters need to be
+    supplied to this store finder. Just note that some additional requests
+    will be required for this store finder to return all locations.
+    """
+
+    dataset_attributes: dict = {"source": "api", "api": "stockist.co"}
+    key: str
     max_distance: int = 50000
     coordinates_pending: list[tuple[float, float]] = []
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://stockist.co/api/v1/{self.key}/locations/all",
             callback=self.parse_all_locations,
             errback=self.parse_all_locations_error,
         )
 
-    def parse_all_locations(self, response: Response):
+    def parse_all_locations(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():
             yield from self.parse_item(self.parse_location(location), location) or []
 
     @staticmethod
-    def parse_location(location):
+    def parse_location(location: dict) -> Feature:
         item = DictParser.parse(location)
-        item["street_address"] = clean_address([location.get("address_line_1"), location.get("address_line_2")])
+        item["street_address"] = merge_address_lines([location.get("address_line_1"), location.get("address_line_2")])
         return item
 
-    def parse_all_locations_error(self, failure):
-        if failure.check(HttpError):
-            if failure.value.response.status == 400:
-                if "error" in failure.value.response.json().keys():
-                    if failure.value.response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
-                        yield Request(
-                            url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
-                        )
+    def parse_all_locations_error(self, failure: Failure) -> Iterable[Request]:
+        if failure.check(HttpError) and hasattr(failure.value, "response"):
+            response = failure.value.response
+            if isinstance(response, TextResponse):
+                if response.status == 400:
+                    if "error" in response.json().keys():
+                        if response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
+                            yield Request(
+                                url=f"https://stockist.co/api/v1/{self.key}/widget.js",
+                                callback=self.parse_search_config,
+                            )
 
-    def parse_search_config(self, response: Response):
+    def parse_search_config(self, response: TextResponse) -> Iterable[JsonRequest]:
         config = parse_js_object(response.text.split("(", 1)[1].split(");", 1)[0])
         self.max_distance = config["max_distance"]
         yield JsonRequest(
             url=f"https://stockist.co/api/v1/{self.key}/locations/overview.js", callback=self.parse_geohashes
         )
 
-    def parse_geohashes(self, response: Response):
+    def parse_geohashes(self, response: TextResponse) -> Iterable[JsonRequest]:
         self.coordinates_pending = [pygeohash.decode(geohash[:-1]) for geohash in response.json()["i"]]
         if len(self.coordinates_pending) > 0:
             yield from self.make_next_search_request()
 
-    def make_next_search_request(self):
+    def make_next_search_request(self) -> Iterable[JsonRequest]:
         next_coordinates = random.choice(self.coordinates_pending)
         yield JsonRequest(
             url=f"https://stockist.co/api/v1/{self.key}/locations/search?latitude={next_coordinates[0]}&longitude={next_coordinates[1]}&distance={self.max_distance}",
             callback=self.parse_search_results,
         )
 
-    def parse_search_results(self, response: Response):
+    def parse_search_results(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json()["locations"]:
             yield from self.parse_item(self.parse_location(location), location) or []
 
@@ -92,5 +98,5 @@ class StockistSpider(Spider):
         if len(self.coordinates_pending) > 0:
             yield from self.make_next_search_request()
 
-    def parse_item(self, item: Feature, location: dict):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         yield item

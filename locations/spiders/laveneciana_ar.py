@@ -10,7 +10,6 @@ class LavenecianaARSpider(JSONBlobSpider):
     name = "laveneciana_ar"
     item_attributes = {"brand": "La Veneciana"}
     allowed_domains = ["laveneciana.com.ar"]
-    download_delay = 0.5
     start_urls = ("http://laveneciana.com.ar/sucursales/",)
 
     def extract_json(self, response):

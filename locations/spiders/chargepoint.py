@@ -1,17 +1,19 @@
 import json
 import urllib.parse
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class ChargepointSpider(scrapy.Spider):
+class ChargepointSpider(Spider):
     name = "chargepoint"
     item_attributes = {"brand": "ChargePoint", "brand_wikidata": "Q5176149"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         bounds = (-180.0, -90.0, 180.0, 90.0)
         query = {
             "map_data": {
@@ -40,7 +42,7 @@ class ChargepointSpider(scrapy.Spider):
                 },
             }
         }
-        yield scrapy.http.JsonRequest(
+        yield JsonRequest(
             url="https://mc.chargepoint.com/map-prod/get?" + urllib.parse.quote(json.dumps(query).encode("utf8")),
             method="GET",
         )
@@ -94,7 +96,7 @@ class ChargepointSpider(scrapy.Spider):
                         },
                     }
                 }
-                yield scrapy.http.JsonRequest(
+                yield JsonRequest(
                     url="https://mc.chargepoint.com/map-prod/get?"
                     + urllib.parse.quote(json.dumps(query).encode("utf8")),
                     method="GET",
@@ -130,7 +132,7 @@ class ChargepointSpider(scrapy.Spider):
                         },
                     }
                 }
-                yield scrapy.http.JsonRequest(
+                yield JsonRequest(
                     url="https://mc.chargepoint.com/map-prod/get?"
                     + urllib.parse.quote(json.dumps(query).encode("utf8")),
                     method="GET",

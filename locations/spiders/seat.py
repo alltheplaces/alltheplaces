@@ -1,12 +1,15 @@
-import scrapy
+from typing import AsyncIterator
+
 import xmltodict
-from scrapy import Request
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.spiders.volkswagen import VolkswagenSpider
 
 
-class SeatSpider(scrapy.Spider):
+class SeatSpider(Spider):
     name = "seat"
     item_attributes = {"brand": "Seat", "brand_wikidata": "Q188217"}
     COUNTRY_DEALER_LOCATOR_MAP = {
@@ -20,9 +23,31 @@ class SeatSpider(scrapy.Spider):
         "ch": "de/haendlersuche",
         "se": "hitta-aterforsaljare",
         "pl": "mapa-dealerow-i-serwisow",
+        "lu": "car-dealer-locator",
+        "fi": "yhteystiedot/jalleenmyyjahaku",
+        "nl": "car-dealer-locator",
     }
 
-    def start_requests(self):
+    available_countries_porsche_api = [
+        "AL",
+        "AT",
+        "BA",
+        "CL",
+        "CO",
+        "CZ",
+        "HR",
+        "HU",
+        "MK",
+        "PT",
+        "RO",
+        "RS",
+        "SG",
+        "SI",
+        "SK",
+        "UA",
+    ]
+
+    async def start(self) -> AsyncIterator[Request]:
         for country, locator in self.COUNTRY_DEALER_LOCATOR_MAP.items():
             yield Request(
                 url=f"https://www.seat.{country}/{locator}.snw.xml?brandseat=true&max_dist=3000&city={country.upper()}".replace(
@@ -30,6 +55,13 @@ class SeatSpider(scrapy.Spider):
                 ).replace(
                     "seat.uk", "seat.co.uk"
                 )
+            )
+
+        for country in self.available_countries_porsche_api:
+            yield Request(
+                url=f"https://groupcms-services-api.porsche-holding.com/v3/dealers/{country}/S",
+                callback=VolkswagenSpider.parse_porsche_api,
+                meta={"brand": self.item_attributes, "country": country, "crawler": self.crawler},
             )
 
     def parse(self, response):
@@ -42,7 +74,10 @@ class SeatSpider(scrapy.Spider):
             item["street_address"] = item.pop("street", "")
             item["phone"] = store.get("phone1")
             item["extras"]["fax"] = store.get("fax1")
-            apply_category(Categories.SHOP_CAR, item)
+            if store["types"]["type"] == "D":
+                apply_category(Categories.SHOP_CAR, item)
+            elif store["types"]["type"] == "S":
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
             yield item
 
     def repair_website(self, item):

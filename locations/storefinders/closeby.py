@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -17,13 +17,13 @@ class ClosebySpider(Spider):
     hexadecimal value (regex: "[\\da-f]{32}").
     """
 
-    dataset_attributes = {"source": "api", "api": "closeby.co"}
-    api_key: str = ""
+    dataset_attributes: dict = {"source": "api", "api": "closeby.co"}
+    api_key: str
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=f"https://www.closeby.co/embed/{self.api_key}/locations")
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
         for feature in response.json()["locations"]:
             self.pre_process_data(feature)
 
@@ -32,9 +32,9 @@ class ClosebySpider(Spider):
 
             yield from self.post_process_item(item, response, feature) or []
 
-    def pre_process_data(self, feature: dict) -> dict:
+    def pre_process_data(self, feature: dict):
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

@@ -1,18 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 
 
-class BootsTHSpider(scrapy.Spider):
+class BootsTHSpider(Spider):
     name = "boots_th"
     item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
-    download_delay = 0.5
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(1)
 
-    def get_page(self, n):
-        return scrapy.Request(
+    def get_page(self, n: int) -> Request:
+        return Request(
             f"https://store.boots.co.th/api/v1/branches/web?locale=en&latitude=0&longitude=0&filter_type=1&page={n}",
             meta={"page": n},
         )

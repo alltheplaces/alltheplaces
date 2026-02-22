@@ -9,7 +9,7 @@ from locations.storefinders.algolia import AlgoliaSpider
 
 class WarhammerSpider(AlgoliaSpider):
     name = "warhammer"
-    item_attributes = {"brand": "Warhammer", "brand_wikidata": "Q587270"}
+    item_attributes = {"brand": "Warhammer", "brand_wikidata": "Q136613133"}
     app_id = "M5ZIQZNQ2H"
     api_key = "92c6a8254f9d34362df8e6d96475e5d8"
     index_name = "prod-lazarus-store"
@@ -28,4 +28,5 @@ class WarhammerSpider(AlgoliaSpider):
             for time in rule.get("openIntervals", []):
                 item["opening_hours"].add_range(day, time["start"], time["end"])
 
-        yield item
+        if item.get("lat") is None or item["lat"] > -80:  # skips broken/joke entries
+            yield item

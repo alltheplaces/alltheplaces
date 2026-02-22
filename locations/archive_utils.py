@@ -11,5 +11,9 @@ def unzip_file_from_archive(compressed_data: bytes, file_path: str, password: st
     :return: extracted file as a bytes array
     """
     with ZipFile(BytesIO(compressed_data)) as archive:
-        with archive.open(file_path, mode="r", pwd=password) as file:
-            return file.read()
+        if password:
+            with archive.open(file_path, mode="r", pwd=password.encode("utf-8")) as file:
+                return file.read()
+        else:
+            with archive.open(file_path, mode="r") as file:
+                return file.read()

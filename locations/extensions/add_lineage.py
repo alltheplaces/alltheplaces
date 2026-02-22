@@ -1,8 +1,9 @@
 import sys
 from enum import Enum
-from typing import Type
+from typing import Self
 
 from scrapy import Spider
+from scrapy.crawler import Crawler
 from scrapy.signals import spider_opened
 
 
@@ -15,7 +16,7 @@ class Lineage(Enum):
     Unknown = "S_?"
 
 
-def spider_class_to_lineage(spider: Type) -> Lineage:
+def spider_class_to_lineage(spider: Spider) -> Lineage:
     """
     Provide an indication of the origin of the spider.
     :param spider: the spider
@@ -26,6 +27,8 @@ def spider_class_to_lineage(spider: Type) -> Lineage:
         return getattr(spider, "lineage")
 
     file_path = sys.modules[spider.__module__].__file__
+    if not file_path:
+        return Lineage.Unknown
 
     if "locations/spiders/government/" in file_path:
         return Lineage.Governments
@@ -44,10 +47,12 @@ def spider_class_to_lineage(spider: Type) -> Lineage:
 class AddLineageExtension:
 
     @classmethod
-    def from_crawler(cls, crawler):
+    def from_crawler(cls, crawler: Crawler) -> Self:
         ext = cls()
         crawler.signals.connect(ext.spider_opened, signal=spider_opened)
         return ext
 
-    def spider_opened(self, spider: Spider):
+    def spider_opened(self, spider: Spider) -> None:
+        if not spider.crawler.stats:
+            return
         spider.crawler.stats.set_value("atp/lineage", spider_class_to_lineage(spider).value)

@@ -1,7 +1,7 @@
 import string
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -44,7 +44,7 @@ class NationalRailGBSpider(Spider):
         "XS": ("London Southend Airport", None),
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for letter in string.ascii_uppercase:
             yield JsonRequest(
                 url="https://stationpicker.nationalrail.co.uk/stationPicker/{}".format(letter),

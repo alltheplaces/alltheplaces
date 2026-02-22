@@ -1,8 +1,12 @@
-import scrapy
+from typing import Any, AsyncIterator
 
-from locations.categories import Categories
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 DAYS = {
     1: "Monday",
@@ -15,17 +19,22 @@ DAYS = {
 }
 
 
-class SparDKSpider(scrapy.Spider):
+class SparDKSpider(Spider):
     name = "spar_dk"
-    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = SPAR_SHARED_ATTRIBUTES
 
-    def start_requests(self):
-        url = "https://spar.dk/search"
-        headers = {"Content-Type": "application/json"}
-        body = '{"params":{"wt":"json"},"filter":[],"query":"ss_search_api_datasource:\\"entity:node\\" AND bs_status:true AND ss_type:\\"store\\"","limit":1000}'
-        yield scrapy.Request(url, method="POST", body=body, headers=headers, callback=self.parse)
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            "https://spar.dk/search",
+            data={
+                "params": {"wt": "json"},
+                "filter": [],
+                "query": 'ss_search_api_datasource:"entity:node" AND bs_status:true AND ' 'ss_type:"store"',
+                "limit": 1000,
+            },
+        )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["docs"]:
             opening_hours = OpeningHours()
             try:
@@ -40,7 +49,7 @@ class SparDKSpider(scrapy.Spider):
             except NameError:
                 pass
             properties = {
-                "name": location["tm_X3b_en_title"][0],
+                "branch": location["tm_X3b_en_title"][0].removeprefix("SPAR "),
                 "ref": location["id"],
                 "street_address": location["tm_X3b_en_address_line1"][0],
                 "city": location["tm_X3b_en_locality"][0],
@@ -51,5 +60,7 @@ class SparDKSpider(scrapy.Spider):
                 "lon": location["fts_lon"],
                 "website": location.get("ss_field_custom_pane_link"),
             }
+
+            apply_category(Categories.SHOP_SUPERMARKET, properties)
 
             yield Feature(**properties)

@@ -1,8 +1,8 @@
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS_PL, OpeningHours
@@ -14,7 +14,7 @@ class DealzPLSpider(Spider):
     item_attributes = {"brand": "Dealz", "brand_wikidata": "Q16942585"}
     allowed_domains = ["www.dealz.pl"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         # Fifty closest shops are returned no matter their distance from the
         # supplied centroid. Small search radius (24km) required to find the
         # maximum number of features.

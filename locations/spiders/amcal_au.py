@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -9,7 +11,7 @@ class AmcalAUSpider(Spider):
     name = "amcal_au"
     item_attributes = {"brand": "Amcal", "brand_wikidata": "Q63367373"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "businessid": "4",
             "latitude": "0",
