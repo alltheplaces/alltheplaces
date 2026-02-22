@@ -3,13 +3,17 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class FamilymartJPSpider(Spider):
     name = "familymart_jp"
-    item_attributes = {"brand": "ファミリーマート", "brand_wikidata": "Q11247682", "extras": Categories.SHOP_CONVENIENCE.value}
+    item_attributes = {
+        "brand": "ファミリーマート",
+        "brand_wikidata": "Q11247682",
+        "extras": Categories.SHOP_CONVENIENCE.value,
+    }
 
     start_urls = [
         "https://store.family.co.jp/api/points/w",
@@ -62,9 +66,9 @@ class FamilymartJPSpider(Spider):
         "https://store.family.co.jp/api/points/xng",
         "https://store.family.co.jp/api/points/xnu",
         "https://store.family.co.jp/api/points/xp",
-        "https://store.family.co.jp/api/points/z",        
+        "https://store.family.co.jp/api/points/z",
     ]
-    
+
     allowed_domains = ["store.family.co.jp"]
     country_code = "JP"
 
@@ -72,7 +76,7 @@ class FamilymartJPSpider(Spider):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
-            
+
             match store["extra_fields"]["C1"]:
                 case "1":
                     item.update({"brand_wikidata": "Q11247682"})
@@ -82,7 +86,7 @@ class FamilymartJPSpider(Spider):
                     item.update({"brand": "ファミマ!!"})
                     apply_category(Categories.SHOP_CONVENIENCE, item)
                 case "3":
-                    item.update({"brand_wikidata": "Q11247682"}) # using familymart until tomony is accepted.
+                    item.update({"brand_wikidata": "Q11247682"})  # using familymart until tomony is accepted.
                     # item.update({"brand_wikidata": "Q11249798"}) # no NSI for this one yet, pull request submitted 2026-Feb-22
                     # item.update({"brand": "TOMONY"})
                     # item["extras"]["brand:en"] = "TOMONY"
@@ -95,11 +99,11 @@ class FamilymartJPSpider(Spider):
                 item["opening_hours"] = "24/7"
             else:
                 item["opening_hours"] = store["extra_fields"]["I1"]
-            
+
             item["ref"] = store["key"]
             item["website"] = f"https://store.family.co.jp/points/{store['key']}"
             item["phone"] = f"+81 {store['extra_fields']['Tel']}"
             item["postcode"] = store["extra_fields"]["ZipCode"]
             item["branch"] = store["name"]
-            
+
             yield item
