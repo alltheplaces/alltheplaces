@@ -11,7 +11,13 @@ from locations.dict_parser import DictParser
 class SkylarkJPSpider(Spider):
     name = "skylark_jp"
 
-    start_urls = ["https://store-info.skylark.co.jp/api/point/xn7/"]
+    start_urls = [
+        "https://store-info.skylark.co.jp/api/point/w/",
+        "https://store-info.skylark.co.jp/api/point/xj/",
+        "https://store-info.skylark.co.jp/api/point/xn/",
+        "https://store-info.skylark.co.jp/api/point/xp/",
+        "https://store-info.skylark.co.jp/api/point/z/",
+    ]
     allowed_domains = ["store-info.skylark.co.jp"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
