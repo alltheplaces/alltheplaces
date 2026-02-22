@@ -70,7 +70,7 @@ class FamilymartJPSpider(Spider):
     ]
     custom_settings = {
         "CONCURRENT_REQUESTS": 1,
-      #  "DOWNLOAD_DELAY": 3,
+        #  "DOWNLOAD_DELAY": 3,
     }
 
     allowed_domains = ["store.family.co.jp"]
