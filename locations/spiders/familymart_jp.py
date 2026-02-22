@@ -10,7 +10,7 @@ from locations.dict_parser import DictParser
 class FamilymartJPSpider(Spider):
     name = "familymart_jp"
     item_attributes = {
-        "brand": "ファミリーマート",
+        "brand": "FamilyMart",
         "brand_wikidata": "Q11247682",
         "extras": Categories.SHOP_CONVENIENCE.value,
     }
