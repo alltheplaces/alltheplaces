@@ -68,6 +68,10 @@ class FamilymartJPSpider(Spider):
         "https://store.family.co.jp/api/points/xp",
         "https://store.family.co.jp/api/points/z",
     ]
+    custom_settings = {
+        "CONCURRENT_REQUESTS": 1,
+      #  "DOWNLOAD_DELAY": 3,
+    }
 
     allowed_domains = ["store.family.co.jp"]
     country_code = "JP"
