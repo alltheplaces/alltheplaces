@@ -1,8 +1,8 @@
 import re
-from typing import Any
+from typing import AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -10,17 +10,11 @@ from locations.dict_parser import DictParser
 
 class SkylarkJPSpider(Spider):
     name = "skylark_jp"
-
-    start_urls = [
-        "https://store-info.skylark.co.jp/api/point/w/",
-        "https://store-info.skylark.co.jp/api/point/xj/",
-        "https://store-info.skylark.co.jp/api/point/xn/",
-        "https://store-info.skylark.co.jp/api/point/xp/",
-        "https://store-info.skylark.co.jp/api/point/z/",
-    ]
-    allowed_domains = ["store-info.skylark.co.jp"]
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for points in ["w", "xj", "xn", "xp", "z"]:
+            yield JsonRequest(url=f"https://store-info.skylark.co.jp/api/point/{points}/")
+    
+    def parse(self, response):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
