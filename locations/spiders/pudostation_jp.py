@@ -12,7 +12,7 @@ class PudostationJPSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["w", "x", "z"]:
             yield JsonRequest(url=f"https://map.pudo.jp/api/points/{points}")
-    
+
     item_attributes = {
         "brand_wikidata": "Q86738066",
     }
