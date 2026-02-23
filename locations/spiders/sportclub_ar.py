@@ -39,7 +39,8 @@ class SportclubARSpider(Spider):
                 item["phone"] = club.get("telefono")
                 item["website"] = "https://www.sportclub.com.ar/sedes/" + club.get("slug", "")
                 apply_category(Categories.GYM, item)
-                item["street_address"] = item.pop("addr_full", None)
+                if item.get("street_address") == item.get("addr_full"):
+                    item.pop("addr_full", None)
                 yield item
 
         if response.status == 422:
