@@ -1,7 +1,7 @@
-from typing import Any
+from typing import AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -9,13 +9,14 @@ from locations.dict_parser import DictParser
 
 class SeimsJPSpider(Spider):
     name = "seims_jp"
-    start_urls = ["https://store.seims.co.jp/api/point/xn/"]
-    allowed_domains = ["store.seims.co.jp"]
     item_attributes = {
         "brand_wikidata": "Q11456137",
     }
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for points in ["w", "x", "z"]:
+            yield JsonRequest(url=f"https://store.seims.co.jp/api/point/{points}/")
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
