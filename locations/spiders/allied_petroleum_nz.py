@@ -1,4 +1,7 @@
+from typing import Iterable
+
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.storefinders.storepoint import StorepointSpider
 
 
@@ -7,14 +10,12 @@ class AlliedPetroleumNZSpider(StorepointSpider):
     item_attributes = {"brand": "Allied Petroleum", "brand_wikidata": "Q112543637"}
     key = "15f7a892408575"
 
-    def parse_item(self, item, location):
-        if "Mobil" in item["name"]:
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
+        if "Mobil" in (item.get("name") or ""):
             return
-        item["branch"] = item.pop("name", None)
-        if item["branch"]:
+        if branch := item.pop("name", None):
             item["branch"] = (
-                item["branch"]
-                .replace("Fuel Stop", "")
+                branch.replace("Fuel Stop", "")
                 .replace("Fuelstop", "")
                 .replace("Marine Stop", "")
                 .replace("24/7", "")
