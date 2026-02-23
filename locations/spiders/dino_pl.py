@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -48,26 +48,20 @@ class DinoPLSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "").strip().rsplit(" ", 1)[0]
-        item["opening_hours"] = OpeningHours()
+
         try:
-            day_hours_map = {
-                "mondayHours": "Mo",
-                "tuesdayHours": "Tu",
-                "wednesdayHours": "We",
-                "thursdayHours": "Th",
-                "fridayHours": "Fr",
-                "saturdayHours": "Sa",
-                "sundayHours": "Su",
-            }
-            for day_key, osm_day in day_hours_map.items():
-                if hours := feature.get(day_key):
-                    if ":" in hours:
-                        try:
-                            start, end = hours.split("-", 1)
-                            item["opening_hours"].add_range(osm_day, start.strip(), end.strip())
-                        except Exception as e:
-                            self.logger.warning(f"Failed to parse {day_key}: {hours} - {e}")
+            item["opening_hours"] = self.parse_opening_hours(feature)
         except Exception as e:
             self.logger.error(f"Failed to parse opening hours: {e}")
 
         yield item
+
+    def parse_opening_hours(self, feature: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            if times := feature.get("{}Hours".format(day.lower())):
+                if times == "nieczynne":
+                    oh.set_closed(day)
+                else:
+                    oh.add_range(day, *times.split("-"))
+        return oh
