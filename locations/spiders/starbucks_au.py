@@ -1,7 +1,7 @@
 import html
+import json
 import re
 
-import chompjs
 import scrapy
 
 from locations.categories import Categories, apply_category
@@ -16,10 +16,12 @@ class StarbucksAUSpider(scrapy.Spider):
     start_urls = ["https://www.starbucks.com.au/find-a-store/"]
 
     def parse(self, response, **kwargs):
-        stores = chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "features")]/text()').re_first(r"let features = (.+);")
+        stores = json.loads(
+            re.search(
+                r"features\"\s*:\s*(\[.*\])\s*};", response.xpath('//script[contains(text(), "features")]/text()').get()
+            ).group(1)
         )
-        for store in stores["features"]:
+        for store in stores:
             if "closed" in store["properties"].get("address", ""):
                 continue
             item = DictParser.parse(store["properties"])
