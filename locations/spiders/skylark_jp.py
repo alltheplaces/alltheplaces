@@ -10,10 +10,11 @@ from locations.dict_parser import DictParser
 
 class SkylarkJPSpider(Spider):
     name = "skylark_jp"
+
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["w", "xj", "xn", "xp", "z"]:
             yield JsonRequest(url=f"https://store-info.skylark.co.jp/api/point/{points}/")
-    
+
     def parse(self, response):
         for store in response.json()["items"]:
 
