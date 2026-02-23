@@ -18,14 +18,33 @@ class DinoPLSpider(JSONBlobSpider):
     def extract_json(self, response: Response) -> list:
         payload = response.json()
 
-        def parse_feature(raw):
-            coords = payload[payload[raw["geometry"]]["coordinates"]]
-            return {k: payload[v] if isinstance(v, int) else v for k, v in payload[raw["properties"]].items()} | {
-                "lon": coords[0],
-                "lat": coords[1],
-            }
+        def is_populateable(v) -> bool:
+            return isinstance(v, int) and 0 < v < len(payload)
 
-        return [parse_feature(payload[idx]) for idx in payload[6]]
+        def populate(index: int):
+            val = payload[index]
+            if isinstance(val, dict):
+                for k, v in val.items():
+                    if is_populateable(v):
+                        val[k] = populate(v)
+            elif isinstance(val, list):
+                for i in range(0, len(val)):
+                    if is_populateable(val[i]):
+                        val[i] = populate(val[i])
+            elif isinstance(val, dict):
+                for k, v in val.items():
+                    if is_populateable(v):
+                        val[k] = payload[v]
+            return val
+
+        return [
+            v["properties"]
+            | {
+                "lon": v["geometry"]["coordinates"][0],
+                "lat": v["geometry"]["coordinates"][1],
+            }
+            for v in populate(0)["data"][1]["map-data"]["features"]
+        ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "").strip().rsplit(" ", 1)[0]
