@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, Fuel, FuelCards, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.storefinders.storepoint import StorepointSpider
 
@@ -25,8 +25,13 @@ class AlliedPetroleumNZSpider(StorepointSpider):
         apply_category(Categories.FUEL_STATION, item)
         if "open 24/7" in location["tags"]:
             item["opening_hours"] = "24/7"
+        if item["facebook"] == "0":
+            item["facebook"] = ""
+        if item["twitter"] == "0":
+            item["twitter"] = ""
         apply_yes_no(Fuel.ADBLUE, item, "alliedblue" in location["tags"])
         apply_yes_no(Fuel.DIESEL, item, "diesel" in location["tags"])
         apply_yes_no(Fuel.OCTANE_91, item, "91 petrol" in location["tags"])
         apply_yes_no(Fuel.OCTANE_95, item, "95 petrol" in location["tags"])
+        apply_yes_no(FuelCards.MOBIL, item, "mobilcard" in location["tags"])
         yield item
