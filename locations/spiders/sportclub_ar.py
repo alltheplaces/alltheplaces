@@ -34,13 +34,13 @@ class SportclubARSpider(Spider):
                 item["geometry"] = club["location"]
                 item["geometry"]["type"] = "Point"
                 item["street_address"] = club.get("direccion")
+                if item.get("street_address") == item.get("addr_full"):
+                    item.pop("addr_full", None)
                 item["city"] = club.get("zona")
                 item["state"] = club.get("provincia")
                 item["phone"] = club.get("telefono")
                 item["website"] = "https://www.sportclub.com.ar/sedes/" + club.get("slug", "")
                 apply_category(Categories.GYM, item)
-                if item.get("street_address") == item.get("addr_full"):
-                    item.pop("addr_full", None)
                 yield item
 
         if response.status == 422:
