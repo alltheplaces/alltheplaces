@@ -101,7 +101,10 @@ class FamilymartJPSpider(Spider):
 
             item["ref"] = store["key"]
             item["website"] = f"https://store.family.co.jp/points/{store['key']}"
-            item["phone"] = f"+81 {store['extra_fields']['Tel']}"
+            try:
+                item["phone"] = f"+81 {store['extra_fields']['Tel']}"
+            except:
+                pass
             item["postcode"] = store["extra_fields"]["ZipCode"]
             item["branch"] = store["name"]
             item["name"] = None  # resets name to brand instead of branch
