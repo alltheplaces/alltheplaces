@@ -104,6 +104,6 @@ class FamilymartJPSpider(Spider):
             item["phone"] = f"+81 {store['extra_fields']['Tel']}"
             item["postcode"] = store["extra_fields"]["ZipCode"]
             item["branch"] = store["name"]
-            item["name"] = None # resets name to brand instead of branch
+            item["name"] = None  # resets name to brand instead of branch
 
             yield item
