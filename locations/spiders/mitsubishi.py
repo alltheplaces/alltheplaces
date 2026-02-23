@@ -40,7 +40,6 @@ class MitsubishiSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         countries = list(GeonamesCache().get_countries().keys())
-        countries.remove("BE")  # mitsubishi_be_lu
         for country in countries:
             locale = get_locale(country)
             language = locale.split("-")[0] if locale else "en"
