@@ -80,10 +80,7 @@ class FamilymartJPSpider(Spider):
                     item.update({"brand": "ファミマ!!", "brand_wikidata": "Q115868189"})
                     apply_category(Categories.SHOP_CONVENIENCE, item)
                 case "3":
-                    item.update({"brand_wikidata": "Q11247682"})  # using familymart until tomony is accepted.
-                    # item.update({"brand_wikidata": "Q11249798"}) # no NSI for this one yet, pull request submitted 2026-Feb-22
-                    # item.update({"brand": "TOMONY"})
-                    # item["extras"]["brand:en"] = "TOMONY"
+                    item.update({"brand_wikidata": "Q11249798"})
                     apply_category(Categories.SHOP_CONVENIENCE, item)
                 case _:
                     item.update({"brand_wikidata": "Q11247682"})
