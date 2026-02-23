@@ -55,6 +55,14 @@ PAYMENT_TYPES = {
     "UTA fuel card": FuelCards.UTA,
     "Vpay": PaymentMethods.V_PAY,
     "Карта AMEX": PaymentMethods.AMERICAN_EXPRESS,
+    # Russian language payment types
+    "Банковские карты": PaymentMethods.CARDS,  # Bank Cards,
+    "Безналичный расчет": PaymentMethods.CARDS,  # Cashless Non-cash payment methods
+    "Топливные карты ЛУКОЙЛ": FuelCards.LUKOIL,  # LUKOIL fuel card
+    "Оплата баллами ЛУКОЙЛ": FuelCards.LUKOIL_LOYALTY_PROGRAM,  # LUKOIL rewards card
+    "СБП": PaymentMethods.SBP,  # Fast payment system
+    "Бесконтактные платежи": PaymentMethods.CONTACTLESS,  # Contactless Payments
+    "Топливные карты DKV": FuelCards.DKV,  # DKV fuel card
     # TODO: find payment methods for the following
     '"Халва" cards': None,
     "Bancontact/mister cash": None,
@@ -76,6 +84,13 @@ SERVICES = {
     "handicap accessible restroom": Extras.TOILETS_WHEELCHAIR,
     "Oil Change": Extras.OIL_CHANGE,
     "Vacuum": Extras.VACUUM_CLEANER,
+    # Russian language services
+    "Выдача наличных": Extras.ATM,  # Cash withdrawal
+    "Туалет": Extras.TOILETS,  # Restroom
+    "Подкачка шин": Extras.COMPRESSED_AIR,  # Air tower
+    "Автомойка": Extras.CAR_WASH,  # Car Wash
+    "Пылесос": Extras.VACUUM_CLEANER,  # Vacuum
+    "Туалет для маломобильных групп населения": Extras.TOILETS_WHEELCHAIR,  # Accessibility restroom
     # Values below are not mapped as they should exist as separate POIs,
     # or already mapped in other attributes, or not possible to map at all.
     "ASE": None,
