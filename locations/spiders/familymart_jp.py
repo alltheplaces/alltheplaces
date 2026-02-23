@@ -1,7 +1,7 @@
-from typing import Any
+from typing import AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -9,74 +9,17 @@ from locations.dict_parser import DictParser
 
 class FamilymartJPSpider(Spider):
     name = "familymart_jp"
-    item_attributes = {
-        "brand": "FamilyMart",
-        "brand_wikidata": "Q11247682",
-        "extras": Categories.SHOP_CONVENIENCE.value,
-    }
-
-    start_urls = [
-        "https://store.family.co.jp/api/points/w",
-        "https://store.family.co.jp/api/points/xjb",
-        "https://store.family.co.jp/api/points/xn0",
-        "https://store.family.co.jp/api/points/xn1",
-        "https://store.family.co.jp/api/points/xn2",
-        "https://store.family.co.jp/api/points/xn3",
-        "https://store.family.co.jp/api/points/xn4",
-        "https://store.family.co.jp/api/points/xn5",
-        "https://store.family.co.jp/api/points/xn6",
-        "https://store.family.co.jp/api/points/xn70",
-        "https://store.family.co.jp/api/points/xn71",
-        "https://store.family.co.jp/api/points/xn72",
-        "https://store.family.co.jp/api/points/xn73",
-        "https://store.family.co.jp/api/points/xn74",
-        "https://store.family.co.jp/api/points/xn75",
-        "https://store.family.co.jp/api/points/xn76",
-        "https://store.family.co.jp/api/points/xn77",
-        "https://store.family.co.jp/api/points/xn78",
-        "https://store.family.co.jp/api/points/xn79",
-        "https://store.family.co.jp/api/points/xn7b",
-        "https://store.family.co.jp/api/points/xn7c",
-        "https://store.family.co.jp/api/points/xn7d",
-        "https://store.family.co.jp/api/points/xn7e",
-        "https://store.family.co.jp/api/points/xn7f",
-        "https://store.family.co.jp/api/points/xn7g",
-        "https://store.family.co.jp/api/points/xn7h",
-        "https://store.family.co.jp/api/points/xn7k",
-        "https://store.family.co.jp/api/points/xn7j",
-        "https://store.family.co.jp/api/points/xn7m",
-        "https://store.family.co.jp/api/points/xn7n",
-        "https://store.family.co.jp/api/points/xn7p",
-        "https://store.family.co.jp/api/points/xn7q",
-        "https://store.family.co.jp/api/points/xn7r",
-        "https://store.family.co.jp/api/points/xn7s",
-        "https://store.family.co.jp/api/points/xn7t",
-        "https://store.family.co.jp/api/points/xn7u",
-        "https://store.family.co.jp/api/points/xn7v",
-        "https://store.family.co.jp/api/points/xn7w",
-        "https://store.family.co.jp/api/points/xn7x",
-        "https://store.family.co.jp/api/points/xn7y",
-        "https://store.family.co.jp/api/points/xn7z",
-        "https://store.family.co.jp/api/points/xnk",
-        "https://store.family.co.jp/api/points/xn9",
-        "https://store.family.co.jp/api/points/xnd",
-        "https://store.family.co.jp/api/points/xne",
-        "https://store.family.co.jp/api/points/xns",
-        "https://store.family.co.jp/api/points/xnf",
-        "https://store.family.co.jp/api/points/xng",
-        "https://store.family.co.jp/api/points/xnu",
-        "https://store.family.co.jp/api/points/xp",
-        "https://store.family.co.jp/api/points/z",
-    ]
+    item_attributes = {"brand_wikidata": "Q11247682"}
+    
     custom_settings = {
         "CONCURRENT_REQUESTS": 1,
-        #  "DOWNLOAD_DELAY": 3,
     }
 
-    allowed_domains = ["store.family.co.jp"]
-    country_code = "JP"
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for points in ["w", "xjb", "xn0", "xn1", "xn2", "xn3", "xn4", "xn5", "xn6", "xn70", "xn71", "xn72", "xn73", "xn74", "xn75", "xn76", "xn77", "xn78", "xn79", "xn7b", "xn7c", "xn7d", "xn7e", "xn7f", "xn7g", "xn7h", "xn7k", "xn7j", "xn7m", "xn7n", "xn7p", "xn7q", "xn7r", "xn7s", "xn7t", "xn7u", "xn7v", "xn7w", "xn7x", "xn7y", "xn7z", "xnk", "xn9", "xnd", "xne", "xns", "xnf", "xng", "xnu", "xp", "z"]:
+            yield JsonRequest(url=f"https://store.family.co.jp/api/points/{points}")
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
@@ -111,3 +54,4 @@ class FamilymartJPSpider(Spider):
             item["branch"] = store["name"]
 
             yield item
+            
