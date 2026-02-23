@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -67,7 +67,7 @@ class FamilymartJPSpider(Spider):
         ]:
             yield JsonRequest(url=f"https://store.family.co.jp/api/points/{points}")
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
@@ -77,8 +77,7 @@ class FamilymartJPSpider(Spider):
                     item.update({"brand_wikidata": "Q11247682"})
                     apply_category(Categories.SHOP_CONVENIENCE, item)
                 case "2":
-                    item.update({"brand_wikidata": "Q115868189"})
-                    item.update({"brand": "ファミマ!!"})
+                    item.update({"brand": "ファミマ!!", "brand_wikidata": "Q115868189"})
                     apply_category(Categories.SHOP_CONVENIENCE, item)
                 case "3":
                     item.update({"brand_wikidata": "Q11247682"})  # using familymart until tomony is accepted.
