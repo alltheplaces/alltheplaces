@@ -9,11 +9,7 @@ from locations.dict_parser import DictParser
 
 class FamilymartJPSpider(Spider):
     name = "familymart_jp"
-    item_attributes = {"brand_wikidata": "Q11247682"}
-
-    custom_settings = {
-        "CONCURRENT_REQUESTS": 1,
-    }
+    custom_settings = {"CONCURRENT_REQUESTS": 1}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in [
