@@ -8,6 +8,8 @@ class AlliedPetroleumNZSpider(StorepointSpider):
     key = "15f7a892408575"
 
     def parse_item(self, item, location):
+        if "Mobil" in item["name"]:
+            return
         item["branch"] = item.pop("name", None)
         if item["branch"]:
             item["branch"] = (
