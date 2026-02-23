@@ -41,7 +41,7 @@ class FordDealersUSSpider(scrapy.Spider):
             )
 
     def parse_details(self, response):
-        if data := json.loads(response.xpath("//pre/text()").get()).get("Response").get("Dealer")   :
+        if data := json.loads(response.xpath("//pre/text()").get()).get("Response").get("Dealer"):
             for dealer in data:
                 item = DictParser.parse(dealer)
                 item["ref"] = dealer.get("PACode")
