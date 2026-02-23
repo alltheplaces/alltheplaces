@@ -10,13 +10,65 @@ from locations.dict_parser import DictParser
 class FamilymartJPSpider(Spider):
     name = "familymart_jp"
     item_attributes = {"brand_wikidata": "Q11247682"}
-    
+
     custom_settings = {
         "CONCURRENT_REQUESTS": 1,
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for points in ["w", "xjb", "xn0", "xn1", "xn2", "xn3", "xn4", "xn5", "xn6", "xn70", "xn71", "xn72", "xn73", "xn74", "xn75", "xn76", "xn77", "xn78", "xn79", "xn7b", "xn7c", "xn7d", "xn7e", "xn7f", "xn7g", "xn7h", "xn7k", "xn7j", "xn7m", "xn7n", "xn7p", "xn7q", "xn7r", "xn7s", "xn7t", "xn7u", "xn7v", "xn7w", "xn7x", "xn7y", "xn7z", "xnk", "xn9", "xnd", "xne", "xns", "xnf", "xng", "xnu", "xp", "z"]:
+        for points in [
+            "w",
+            "xjb",
+            "xn0",
+            "xn1",
+            "xn2",
+            "xn3",
+            "xn4",
+            "xn5",
+            "xn6",
+            "xn70",
+            "xn71",
+            "xn72",
+            "xn73",
+            "xn74",
+            "xn75",
+            "xn76",
+            "xn77",
+            "xn78",
+            "xn79",
+            "xn7b",
+            "xn7c",
+            "xn7d",
+            "xn7e",
+            "xn7f",
+            "xn7g",
+            "xn7h",
+            "xn7k",
+            "xn7j",
+            "xn7m",
+            "xn7n",
+            "xn7p",
+            "xn7q",
+            "xn7r",
+            "xn7s",
+            "xn7t",
+            "xn7u",
+            "xn7v",
+            "xn7w",
+            "xn7x",
+            "xn7y",
+            "xn7z",
+            "xnk",
+            "xn9",
+            "xnd",
+            "xne",
+            "xns",
+            "xnf",
+            "xng",
+            "xnu",
+            "xp",
+            "z",
+        ]:
             yield JsonRequest(url=f"https://store.family.co.jp/api/points/{points}")
 
     def parse(self, response):
@@ -54,4 +106,3 @@ class FamilymartJPSpider(Spider):
             item["branch"] = store["name"]
 
             yield item
-            
