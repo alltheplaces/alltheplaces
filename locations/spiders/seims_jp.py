@@ -12,6 +12,7 @@ class SeimsJPSpider(Spider):
     item_attributes = {
         "brand_wikidata": "Q11456137",
     }
+
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["w", "x", "z"]:
             yield JsonRequest(url=f"https://store.seims.co.jp/api/point/{points}/")
