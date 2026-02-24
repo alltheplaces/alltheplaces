@@ -32,7 +32,14 @@ class VolksbankRaiffeisenbankDESpider(Spider):
             item = DictParser.parse(bank)
             item["ref"] = str(item["ref"]) + f' -{response.meta["category"].upper()}'
             item["street_address"] = item.pop("street", "")
-            item["website"] = bank["additional_infos"].get("detail_page_url")
+            item["website"] = (
+                bank["additional_infos"]
+                .get("detail_page_url")
+                .replace("//hhttps//", "//")
+                .repplace("//https/", "//")
+                .replace("//http/", "//")
+                .replace(",", ".")
+            )
             item["opening_hours"] = self.parse_hours(bank["opening_hours"])
             item["extras"]["services"] = bank["services"]
             item["operator"] = bank["institute"]["name"]
