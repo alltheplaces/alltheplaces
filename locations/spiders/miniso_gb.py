@@ -1,12 +1,12 @@
-import chompjs
 import json
 from typing import Iterable
 
+import chompjs
 from scrapy.http import Response
 
-from locations.json_blob_spider import JSONBlobSpider
-from locations.items import Feature
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class MinisoGBSpider(JSONBlobSpider):
@@ -25,7 +25,7 @@ class MinisoGBSpider(JSONBlobSpider):
         return features_dict
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").replace("MINISO ","").split(", ")[0]
+        item["branch"] = item.pop("name").replace("MINISO ", "").split(", ")[0]
         item["street_address"] = item.pop("addr_full")
         item["website"] = ""
         oh = OpeningHours()
