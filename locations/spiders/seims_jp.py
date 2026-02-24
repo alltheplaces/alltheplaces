@@ -9,10 +9,7 @@ from locations.dict_parser import DictParser
 
 class SeimsJPSpider(Spider):
     name = "seims_jp"
-    item_attributes = {
-        "brand_wikidata": "Q11456137",
-    }
-
+    
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["w", "x", "z"]:
             yield JsonRequest(url=f"https://store.seims.co.jp/api/point/{points}/")
@@ -22,8 +19,27 @@ class SeimsJPSpider(Spider):
 
             item = DictParser.parse(store)
 
-            item["brand"] = store["marker"]["ja"]["name"]
-
+            match store["marker"]["ja"]["name"]:
+                case "ドラッグセイムス":
+                    item["brand_wikidata"] = "Q11456137"              
+                case "ドラッグユタカ":
+                    item["brand"] = "ドラッグユタカ" # complicated NSI
+                    item["brand_wikidata"] = "Q11345601"            
+                case "アメリカンドラッグ":
+                    item["brand"] = "アメリカンドラッグ"
+                    item["brand_wikidata"] = "Q11285057" # no NSI
+                case "オストジャパン":
+                    item["brand"] = store["marker"]["ja"]["name"] # this and others have no Wikidata
+                case "スーパードラッグキリン":
+                    item["brand"] = store["marker"]["ja"]["name"]
+                case "ドラッグストアスマイル":
+                    item["brand"] = store["marker"]["ja"]["name"]
+                case "救命堂":
+                    item["brand"] = store["marker"]["ja"]["name"]
+                case _:
+                    item["brand"] = store["marker"]["ja"]["name"]
+                        
+            item["name"] = store["marker"]["ja"]["name"]
             item["postcode"] = store["extra_fields"]["郵便番号"]
             item["extras"]["addr:province"] = store["extra_fields"]["都道府県"]
             item["extras"]["branch:ja-Hira"] = store["extra_fields"]["店名かな"]
