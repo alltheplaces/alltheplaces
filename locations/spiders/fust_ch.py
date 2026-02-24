@@ -19,11 +19,9 @@ class FustCHSpider(JSONBlobSpider):
     start_urls = ["https://www.fust.ch/store-finder"]
 
     def extract_json(self, response: Response) -> list[dict]:
-        location_data = response.xpath('//script[contains(text(), "pointOfService")]/text()').get()
-        return [
-            chompjs.parse_js_object(location, unicode_escape=True)
-            for location in location_data.split(r"{\"pointOfService\":")[1:]
-        ]
+        scripts = response.xpath('//script[contains(text(), "pointOfService")]/text()').getall()
+        location_data = "".join(scripts).split(r"{\"pointOfService\":")[1:]
+        return [chompjs.parse_js_object(location, unicode_escape=True) for location in location_data]
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
@@ -33,7 +31,6 @@ class FustCHSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
         item["branch"] = item.pop("name").replace("-", " ").title().removesuffix(" Center")
-        item["website"] = response.urljoin(feature["url"].split("?")[0].replace("/store/", "/store-finder/"))
         item["opening_hours"] = OpeningHours()
         for rule in feature.get("openingHours", {}).get("weekDayOpeningList", []):
             if day := sanitise_day(rule["weekDay"].replace(".", ""), DAYS_DE):

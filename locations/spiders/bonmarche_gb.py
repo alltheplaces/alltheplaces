@@ -1,6 +1,6 @@
 import re
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -17,7 +17,7 @@ class BonmarcheGBSpider(JSONBlobSpider):
     allowed_domains = ["www.bonmarche.co.uk"]
     locations_key = "stores"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("GB", 500):
             lat, lon = city["latitude"], city["longitude"]
             yield JsonRequest(
@@ -27,14 +27,24 @@ class BonmarcheGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["name"]
         item.pop("name", None)
-        item["addr_full"] = feature["address2"]
-        item.pop("street_address", None)
+        item["street_address"] = feature["address2"]
         item.pop("website", None)
 
-        item["opening_hours"] = OpeningHours()
-        hours = loads(re.sub(r"\s+", "", feature["storeHours"]).replace(".", ":"))
-        for day_name, day_hours in hours.items():
-            item["opening_hours"].add_range(day_name.title(), *day_hours.split("-", 1), "%I:%M%p")
-
+        try:
+            item["opening_hours"] = OpeningHours()
+            hours = loads(re.sub(r"\s+", "", feature["storeHours"]).replace(".", ":"))
+            for day_name, day_hours in hours.items():
+                if "CLOSED" in day_hours.upper():
+                    item["opening_hours"].set_closed(day_name)
+                else:
+                    start_time, end_time = day_hours.split("-", 1)
+                    end_time = end_time.replace("17:30pm", "5:30pm").replace("16:00pm", "4:00pm").replace("om", "pm")
+                    if "AM" in start_time.upper() or "PM" in start_time.upper():
+                        time_format = "%I:%M%p"
+                    else:
+                        time_format = "%H:%M"
+                    item["opening_hours"].add_range(day_name.title(), start_time, end_time, time_format=time_format)
+        except Exception as e:
+            self.logger.warning(f"Failed to parse opening hours: {e}")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item

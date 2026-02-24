@@ -1,56 +1,36 @@
-import re
+from typing import Any
 
-import scrapy
+import chompjs
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.items import Feature
-
-SIEVE = ("View on Map", "Make My Preferred Store!")
-DAYS = r"M|Tue|Wed|Thu|Sat|Sun|Fri"
-AM_PM = r"am|pm|a.m.|p.m.|a|p"
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class CountyMarketSpider(scrapy.Spider):
+class CountyMarketSpider(SitemapSpider):
     name = "county_market"
     item_attributes = {"brand": "County Market", "brand_wikidata": "Q5177716"}
-    allowed_domains = [
-        "www.mycountymarket.com",
-    ]
+    sitemap_urls = ["https://www.mycountymarket.com/sitemap.xml"]
+    sitemap_rules = [("/stores/", "parse")]
 
-    start_urls = ("http://www.mycountymarket.com/shop/store-locator/",)
-
-    def parse_hours(self, hours):
-        if re.search(r"24 hours", hours.lower()):
-            return "24/7"
-        elif not re.search(DAYS, hours):
-            hours = hours.replace(" ", "").replace("to", "-").replace("Midnight", "00:00")
-            return "Mo-Su {}".format(re.sub(AM_PM, ":00", hours))
-
-    def process_store(self, store):
-        opening_hours, phone = ("", "")
-        data = store.xpath('//div[@class="col-lg-4"]/div/*[not(self::h2 or self::strong)]//text()').extract()
-        normalize_data = [val for val in [info.strip() for info in data] if val]
-        final_data = [clean for clean in normalize_data if clean not in SIEVE]
-        city, state_zip = final_data[2].split(",")
-        state, pcode = state_zip.strip().split()
-        if "Phone Number" in final_data:
-            phone = final_data[final_data.index("Phone Number") + 1]
-        if "Store Hours" in final_data:
-            opening_hours = self.parse_hours(final_data[final_data.index("Store Hours") + 1 :][0])
-
-        props = {
-            "addr_full": final_data[1],
-            "ref": store.url,
-            "city": city,
-            "postcode": pcode,
-            "state": state,
-            "website": store.url,
-            "opening_hours": opening_hours,
-            "phone": phone,
-        }
-
-        yield Feature(**props)
-
-    def parse(self, response):
-        stores = response.xpath('//div[@style="padding:5px;"]/a/@href').extract()
-        for store in stores:
-            yield scrapy.Request(url=response.urljoin(store), callback=self.process_store)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        raw_data = list(chompjs.parse_js_objects(response.xpath('//*[@id="wpsl-js-js-extra"]/text()').get()))[1][
+            "locations"
+        ][0]
+        item = DictParser.parse(raw_data)
+        item["name"] = self.item_attributes["brand"]
+        item["street_address"] = item.pop("addr_full")
+        item["branch"] = raw_data["store"].replace("County Market in ", "")
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        item["website"] = response.url
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+        item["opening_hours"] = OpeningHours()
+        for day_time in response.xpath('//*[@class="wpsl-opening-hours"]//tr'):
+            day = day_time.xpath(".//td/text()").get()
+            open_time, close_time = day_time.xpath(".//time/text()").get().split(" - ")
+            item["opening_hours"].add_range(
+                day=day, open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M %p"
+            )
+        yield item

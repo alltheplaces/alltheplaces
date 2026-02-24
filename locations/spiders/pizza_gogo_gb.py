@@ -11,6 +11,7 @@ class PizzaGogoGBSpider(Spider):
     name = "pizza_gogo_gb"
     item_attributes = {"brand": "Pizza GoGo", "brand_wikidata": "Q118121277"}
     start_urls = ["https://www.pizzagogo.co.uk/ajax/?do=all_stores_for_map"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in zip(

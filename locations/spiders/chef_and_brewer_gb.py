@@ -11,3 +11,4 @@ class ChefAndBrewerGBSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://www.chefandbrewer.com/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.chefandbrewer\.com\/pubs\/([-\w]+)\/([-\w]+)$", "parse_sd")]
+    wanted_types = ["BarOrPub"]

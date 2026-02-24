@@ -1,10 +1,14 @@
-import scrapy
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class BlyzenkoUASpider(scrapy.Spider):
+class BlyzenkoUASpider(JSONBlobSpider):
     name = "blyzenko_ua"
     item_attributes = {"brand": "Близенько", "brand_wikidata": "Q117670418"}
     allowed_domains = ["blyzenko.ua"]
@@ -12,32 +16,16 @@ class BlyzenkoUASpider(scrapy.Spider):
         "https://blyzenko.ua/wp-json/wp/v2/shops-list",
     ]
 
-    def parse(self, response):
-        for store in response.json():
-            acf_fields = store["acf_fields"]
-            shop_map = acf_fields["shop_map"]
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature["acf_fields"].pop("shop_map"))
 
-            item = DictParser.parse(acf_fields)
-            item["ref"] = store["id"]
-            item["website"] = store["url"]
-            item["phone"] = acf_fields["shop_tel"]
-            item["addr_full"] = shop_map["address"]
-            item["lat"] = shop_map["lat"]
-            item["lon"] = shop_map["lng"]
-            # Google place ID? "place_id": "ChIJ1w8zu0jdOkcRUeY2kB95b3I",
-            if "street_number" in shop_map:
-                item["housenumber"] = shop_map["street_number"]
-            if "street_name" in shop_map:
-                item["street"] = shop_map["street_name"]
-            if "city" in shop_map:
-                item["city"] = shop_map["city"]
-            item["state"] = shop_map["state"]
-            if "post_code" in shop_map:
-                item["postcode"] = shop_map["post_code"]
-            item["country"] = shop_map["country_short"]
-            apply_category(Categories.SHOP_CONVENIENCE, item)
-
-            # Open 7 days a week? Data contains:
-            #  {'shop_start': '08:00', 'shop_time_end': '22:00'}
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["acf_fields"]["shop_id"]
+        item["street_address"] = feature["acf_fields"]["shop_adress"]
+        item["phone"] = feature["acf_fields"]["shop_tel"]
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_days_range(
+            DAYS, feature["acf_fields"]["shop_start"], feature["acf_fields"]["shop_time_end"]
+        )
+        apply_category(Categories.SHOP_CONVENIENCE, item)
+        yield item

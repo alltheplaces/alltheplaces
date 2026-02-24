@@ -1,11 +1,13 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class NissanEUSpider(scrapy.Spider):
+class NissanEUSpider(Spider):
     name = "nissan_eu"
     item_attributes = {
         "brand": "Nissan",
@@ -31,7 +33,7 @@ class NissanEUSpider(scrapy.Spider):
         ("ua", "uk", "e70c", "5fe8", "14d"),
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country, lang, slug_1, slug_2, slug_3 in self.COUNTRY_DEALER_LOCATOR_SLUGS:
             if not slug_1:
                 yield JsonRequest(
@@ -59,7 +61,7 @@ class NissanEUSpider(scrapy.Spider):
             if "car" in services:
                 apply_category(Categories.SHOP_CAR, item)
                 if "configure" in services:
-                    apply_yes_no("service:vehicle:car_repair", item, True)
+                    apply_yes_no(Extras.CAR_REPAIR, item, True)
             elif "configure" in services:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             else:

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -14,7 +14,7 @@ class BanyuleCityCouncilAUSpider(JSONBlobSpider):
     start_urls = ["https://www.banyule.vic.gov.au/ocmaps/layer"]
     locations_key = ["layerItems"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "Bounds": "-90,-180,90,180",
             "IdList": [

@@ -1,14 +1,15 @@
 from typing import Any
 
-import chompjs
-import scrapy
+from chompjs import parse_js_object
+from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingHUSpider(scrapy.Spider):
+class BurgerKingHUSpider(Spider):
     name = "burger_king_hu"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = [
@@ -17,10 +18,11 @@ class BurgerKingHUSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         bk_locations = response.xpath('//*[contains(text(),"bkLocations")]/text()').get()
-        stores = chompjs.parse_js_object(bk_locations)["restaurants"]
+        stores = parse_js_object(bk_locations)["restaurants"]
         for store in stores:
             item = DictParser.parse(store)
             item["addr_full"] = store["info"]
             item["street_address"] = store["address"]
             item["website"] = "https://burgerking.hu/"
+            apply_category(Categories.FAST_FOOD, item)
             yield item

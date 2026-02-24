@@ -1,6 +1,8 @@
 from enum import Enum
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -40,7 +42,7 @@ class SheetzSpider(scrapy.Spider):
     item_attributes = {"brand": "Sheetz", "brand_wikidata": "Q7492551"}
     allowed_domains = ["orders.sheetz.com"]
     start_urls = ["https://orders.sheetz.com/anybff/api/stores/getOperatingStates"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def make_request(self, state, page=0):
         return scrapy.http.JsonRequest(
@@ -50,11 +52,11 @@ class SheetzSpider(scrapy.Spider):
             meta={"state": state, "page": page},
         )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for state in response.json()["states"].keys():
             yield self.make_request(state)
 
-    def parse_stores(self, response):
+    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
         if store := response.json()["stores"]:
             for store in store:
                 store["street-address"] = store.pop("address")
@@ -94,7 +96,7 @@ class SheetzSpider(scrapy.Spider):
 
         if features.get("evTeslaSupercharger"):
             apply_category(Categories.CHARGING_STATION, item)
-            apply_yes_no("socket:tesla_supercharger", item, True)
+            apply_yes_no("socket:nacs", item, True)
 
         if features.get("evChaDemoDcFastCharging"):
             apply_category(Categories.CHARGING_STATION, item)

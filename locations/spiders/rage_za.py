@@ -1,5 +1,5 @@
 import html
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
@@ -22,7 +22,7 @@ class RageZASpider(JSONBlobSpider):
             meta={"page": page},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

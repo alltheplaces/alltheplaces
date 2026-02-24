@@ -1,17 +1,35 @@
-from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
+from typing import Any
+
+import scrapy
+from scrapy.http import Response
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class BancaSellaITSpider(JSONBlobSpider):
+class BancaSellaITSpider(scrapy.Spider):
     name = "banca_sella_it"
     item_attributes = {"brand": "Banca Sella", "brand_wikidata": "Q3633749"}
-    start_urls = ["https://www.sella.it/banca-online/store-locator/store-list.jsp"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    locations_key = "stores"
-    no_refs = True
+    start_urls = ["https://www.sella.it/SSRLocatorBranch?bankAbi=03268"]
 
-    def post_process_item(self, item, response, location):
-        item["city"] = location.get("citta")
-        item["postcode"] = location.get("cap")
-        apply_category(Categories.BANK, item)
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json():
+            item = DictParser.parse(location)
+            item["ref"] = location["subjectId"]
+            item["street_address"] = item.pop("addr_full")
+            item["lat"] = location["yCoordinate"]
+            item["lon"] = location["xCoordinate"]
+            apply_category(Categories.BANK, item)
+            apply_yes_no(Extras.ATM, item, bool(location["evoluedATM"]))
+            oh = OpeningHours()
+            for day, time in location["openingHours"].items():
+                if time["composed"] == "  ":
+                    oh.set_closed(day)
+                else:
+                    for open_close_time in time["composed"].strip().split("  "):
+                        open_time, close_time = open_close_time.split("-")
+                        oh.add_range(day=day, open_time=open_time, close_time=close_time)
+            item["opening_hours"] = oh
+
+            yield item

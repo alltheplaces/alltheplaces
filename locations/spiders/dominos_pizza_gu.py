@@ -5,4 +5,4 @@ class DominosPizzaGUSpider(DominosPizzaInternationalSpider):
     name = "dominos_pizza_gu"
     region_code = "GU"
     dpz_market = "GUAM"
-    domain = "order.golo01.dominos.com"
+    domain = "order.golo04.dominos.com"

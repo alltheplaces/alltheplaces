@@ -21,7 +21,7 @@ def _get_possible_links(response: Response | Selector):
     ]
 
 
-def extract_google_position(item: Feature, response: Response | Selector):
+def extract_google_position(item: Feature, response: Response | Selector) -> None:
     for link in _get_possible_links(response):
         try:
             coords = url_to_coords(link)
@@ -32,7 +32,7 @@ def extract_google_position(item: Feature, response: Response | Selector):
             return
 
 
-def url_to_coords(url: str) -> (float, float):  # noqa: C901
+def url_to_coords(url: str) -> tuple[float | None, float | None]:  # noqa: C901
     def get_query_param(link, query_param):
         parsed_link = urlsplit(link)
         queries = parse_qs(parsed_link.query)
@@ -42,6 +42,11 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
 
     # replace alternative domains such as google.cz or google.co.uk with google.com
     url = re.sub(r"google(\.[a-z]{2,3})?\.[a-z]{2,3}/", "google.com/", url)
+
+    # add scheme for scheme-relative-special-URL strings
+    # reference: https://url.spec.whatwg.org/#scheme-relative-special-url-string
+    if url.startswith("//"):
+        url = f"https:{url}"
 
     if match := re.search(r"@(-?\d+.\d+),\s?(-?\d+.\d+),[\d.]+[zm]", url):
         return float(match.group(1)), float(match.group(2))

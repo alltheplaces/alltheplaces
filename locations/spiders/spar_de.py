@@ -1,18 +1,20 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
-class SparDESpider(scrapy.Spider):
+class SparDESpider(Spider):
     name = "spar_de"
-    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
+    item_attributes = SPAR_SHARED_ATTRIBUTES
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in [
             (48.65141, 12.23430),
             (48.56922, 9.16833),

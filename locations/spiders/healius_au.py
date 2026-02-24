@@ -59,7 +59,7 @@ class HealiusAUSpider(JSONBlobSpider):
     }
     allowed_domains = ["api.apps.healius.com.au"]
     start_urls = [
-        "https://api.apps.healius.com.au/entity/location/location/filtered?fields=ID,ADDRESS,ADDRESS2,BROCHURE,CC_ID,CLOSURES,DAYS,EMAIL,FACILITIES,FAX,GALLERY_IMAGES,HERO_IMAGE,IS_ADF_SITE,LOGO,MODALITIES,NAME,NEXT_OPEN,OPEN_DAYS,OPEN_EARLY_DAYS,OPEN_LATE_DAYS,PHONE,POSITION,SERVICE_TYPE,SPECIAL_TESTS,STATE,STATUS,TODAY_SHIFTS,NOTICE_EXTERNAL,URL&serviceType=ALL"
+        "https://api.apps.healius.com.au/entity/location/map/location/filtered?fields=ID,ADDRESS,ADDRESS2,BROCHURE,CC_ID,CLOSURES,DAYS,EMAIL,FACILITIES,FAX,GALLERY_IMAGES,HERO_IMAGE,IS_ADF_SITE,LOGO,MODALITIES,NAME,NEXT_OPEN,OPEN_DAYS,OPEN_EARLY_DAYS,OPEN_LATE_DAYS,PHONE,POSITION,SERVICE_TYPE,SPECIAL_TESTS,STATE,STATUS,TODAY_SHIFTS,NOTICE_EXTERNAL,URL&serviceType=ALL"
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

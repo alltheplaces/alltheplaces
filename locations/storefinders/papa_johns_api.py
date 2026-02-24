@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Iterable
 
 from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import Request, TextResponse
 from unidecode import unidecode
 
 from locations.categories import PaymentMethods, apply_yes_no
@@ -34,10 +34,10 @@ class PapaJohnsApiSpider(Spider):
     Paginated JSON response, initial call to something like https://api.new.papajohns.es/v1/stores?latitude=0&longitude=0
     """
 
-    item_attributes = PAPA_JOHNS_SHARED_ATTRIBUTES
-    website_base = ""
+    item_attributes: dict = PAPA_JOHNS_SHARED_ATTRIBUTES
+    website_base: str = ""
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
         features = response.json().get("page", [])
         for location in features:
             self.pre_process_data(location)
@@ -58,14 +58,14 @@ class PapaJohnsApiSpider(Spider):
                 for method in payment_methods:
                     if tag := PAYMENT_OPTIONS_MAP.get(method):
                         apply_yes_no(tag, item, True)
-                    else:
+                    elif self.crawler.stats:
                         self.crawler.stats.inc_value(f"atp/{self.name}/unknown_payment/{method}")
 
             item["opening_hours"] = self.parse_hours(location, "in_store")
             item["extras"]["opening_hours:delivery"] = self.parse_hours(location, "pj_delivery").as_opening_hours()
 
             for rule in location["business_hours"]:
-                if rule["dispatch_method"] not in ["in_store", "pj_delivery"]:
+                if rule["dispatch_method"] not in ["in_store", "pj_delivery"] and self.crawler.stats:
                     self.crawler.stats.inc_value(f"atp/{self.name}/unknown_hours_type/{rule['dispatch_method']}")
 
             yield from self.post_process_item(item, response, location) or []
@@ -74,7 +74,7 @@ class PapaJohnsApiSpider(Spider):
         if next_page := response.json()["next_page"]:
             yield Request(url=f"{self.start_urls[0]}&page={next_page}")
 
-    def parse_hours(self, location, dispatch_method: str) -> OpeningHours:
+    def parse_hours(self, location: dict, dispatch_method: str) -> OpeningHours:
         oh = OpeningHours()
         for rule in location["business_hours"]:
             if rule["dispatch_method"] != dispatch_method:
@@ -91,6 +91,6 @@ class PapaJohnsApiSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the data"""
 
-    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         """Override with any post processing on the item"""
         yield item

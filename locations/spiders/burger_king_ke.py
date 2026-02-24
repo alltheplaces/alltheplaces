@@ -1,8 +1,10 @@
+from typing import AsyncIterator
+
 from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import Request
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -16,7 +18,7 @@ class BurgerKingKESpider(Spider):
     js_url = "https://burgerking.ke/js/googlemap.js"
     coordinates = {}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=self.js_url, callback=self.parse_coordinates)
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse)
@@ -36,6 +38,8 @@ class BurgerKingKESpider(Spider):
             item["addr_full"] = clean_address(
                 location.xpath('.//div[@class="restaurant-modal-address"]/p/text()').get()
             )
+
+            apply_category(Categories.FAST_FOOD, item)
 
             ways_to_order = location.xpath('string(.//div[@class="restaurant-modal-waystoorder"])').get().lower()
             apply_yes_no(Extras.DELIVERY, item, "delivery" in ways_to_order, False)

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class CommonwealthBankAUSpider(Spider):
     name = "commonwealth_bank_au"
     item_attributes = {"brand": "Commonwealth Bank", "brand_wikidata": "Q285328"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("AU", 1500):
             yield JsonRequest(
                 f'https://www.commbank.com.au/digital/locate-us/api/branches/findByLocation?location={city["latitude"]},{city["longitude"]}&top=1000',

@@ -14,9 +14,8 @@ class SklavenitisGRSpider(JSONBlobSpider):
     }
     start_urls = ["https://www.sklavenitis.gr/about/katastimata/"]
     # TODO: Technically, doesn't need to be playwright as I can get it to work via url when copying what my browser does
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def extract_json(self, response):
         locations = []

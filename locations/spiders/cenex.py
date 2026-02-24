@@ -1,16 +1,19 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
-class CenexSpider(scrapy.Spider):
+class CenexSpider(Spider):
     name = "cenex"
     item_attributes = {"brand": "Cenex", "brand_wikidata": "Q62127191"}
 
-    def start_requests(self):
-        yield scrapy.http.JsonRequest(
-            "https://www.cenex.com/getlocationsearch",
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            "https://www.cenex.com/chs-sitecore/api/locationsearch/search",
             method="POST",
             data={
                 "SearchLat": 0,

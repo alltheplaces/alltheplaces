@@ -1,9 +1,9 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -22,15 +22,14 @@ class WinnDixieUSSpider(Spider):
     item_attributes = {
         "brand": "Winn-Dixie",
         "brand_wikidata": "Q1264366",
-        "extras": Categories.SHOP_SUPERMARKET.value,
     }
     allowed_domains = ["www.winndixie.com"]
     start_urls = [
         "https://www.winndixie.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter="
     ]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], method="POST")
 
     def parse(self, response: Response) -> Iterable[Feature]:
@@ -54,4 +53,5 @@ class WinnDixieUSSpider(Spider):
                 + "?search="
                 + item["ref"].lower()
             )
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item

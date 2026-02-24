@@ -1,46 +1,44 @@
-import chompjs
-import scrapy
-from scrapy import Request
+import json
+from typing import AsyncIterator, Iterable
+
+from scrapy import FormRequest
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.subway import SubwaySpider
 
 
-class SubwayKRSpider(scrapy.Spider):
+class SubwayKRSpider(JSONBlobSpider):
     name = "subway_kr"
     item_attributes = SubwaySpider.item_attributes
-    link_extractor = LinkExtractor(allow="/storeDetail?")
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+    }
+    locations_key = "searchResult"
 
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    def start_requests(self):
-        yield Request("https://www.subway.co.kr/storeSearch?page=1", meta={"page": 1})
-
-    def parse(self, response: Response, **kwargs):
-        links = self.link_extractor.extract_links(response)
-        if len(links) == 0:
-            return
-        else:
-            next_page = response.meta["page"] + 1
-            yield Request(f"https://www.subway.co.kr/storeSearch?page={next_page}", meta={"page": next_page})
-
-            for link in links:
-                yield Request(link.url, callback=self.parse_store)
-
-    def parse_store(self, response, **kwargs):
-        data = chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "var storeInfo")]/text()').re_first(r"var storeInfo = (\{.*\});")
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
+            url="https://www.subway.co.kr/ajaxStoreSearch",
+            formdata={
+                "keyword": "",
+                "page": "1",
+                "pagination": json.dumps({"pageNo": 1, "itemCountPerPage": 1500, "displayPageNoCount": 1500}),
+            },
         )
-        data.update(data.pop("franchiseDetail"))
-        item = DictParser.parse(data)
-        item["name"] = data.get("storNm")
-        item["addr_full"] = merge_address_lines([data.get("storAddr1"), data.get("storAddr2")])
-        item["phone"] = data.get("storTel")
-        item["ref"] = item["website"] = response.url
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature.get("openYn") == "N":  # coming soon or not in operation
+            return
+        item["addr_full"] = merge_address_lines([feature.get("storAddr1"), feature.get("storAddr2")])
+        if not item["addr_full"] or feature.get("lat") in ["0", ""]:
+            return
+        item["ref"] = feature.get("storCd")
+        item["branch"] = feature.get("storNm")
+        item["phone"] = feature.get("storTel")
+        item["website"] = f'https://www.subway.co.kr/storeDetail?franchiseNo={feature.get("franchiseNo")}'
         apply_category(Categories.FAST_FOOD, item)
         item["extras"]["cuisine"] = "sandwich"
         item["extras"]["takeaway"] = "yes"

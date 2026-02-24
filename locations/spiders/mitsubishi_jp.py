@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from typing import Any
 
 from scrapy.http import Response
@@ -21,12 +22,24 @@ class MitsubishiJPSpider(CrawlSpider):
         Rule(LinkExtractor(allow=r"showKyoten\.do\?hanshaCD=\d+&kyotenCD=\d+&tenpoCD=\d+$"), callback="parse"),
     ]
 
+    def build_sales_item(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def build_service_item(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         location_info = json.loads(response.xpath('//*[@id="kyotenInfoId"]/text()').get(""))[0]
         item = Feature()
         item["ref"] = response.url.split("tenpoCD=")[1]
         item["website"] = response.url
-        item["name"] = location_info["kyotenName"]
+        item["branch"] = location_info["kyotenName"]
         item["lat"] = location_info["kyotenIdo"]
         item["lon"] = location_info["kyotenKeido"]
         # location_info["kyoten_addr"] doesn't contain postcode
@@ -37,11 +50,23 @@ class MitsubishiJPSpider(CrawlSpider):
         item["extras"]["fax"] = response.xpath('//*[contains(@class, "mod-link-fax")]/text()').get()
 
         services = response.xpath('//*[@class="dealer__icon__txt"]/text()').getall()
-        if "新車" or "中古車" in services:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, "メンテナンス" in services)
-        elif "メンテナンス" in services:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        apply_yes_no(Extras.USED_CAR_SALES, item, "中古車" in services)
-        apply_yes_no(Extras.WIFI, item, "WiFi" in services)
-        yield item
+        sales_available = "新車" in services or "中古車" in services
+        service_available = "メンテナンス" in services
+
+        if sales_available:
+            sales_item = self.build_sales_item(item)
+            apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
+            apply_yes_no(Extras.USED_CAR_SALES, sales_item, "中古車" in services)
+            apply_yes_no(Extras.WIFI, sales_item, "WiFi" in services)
+            yield sales_item
+
+        if service_available:
+            service_item = self.build_service_item(item)
+            apply_yes_no(Extras.WIFI, service_item, "WiFi" in services)
+            yield service_item
+
+        if not sales_available and not service_available:
+            self.logger.error(f"Unknown services: {services}, {item['branch']}, {item['ref']}")
+            # Fallback yield for unknown cases
+            apply_yes_no(Extras.WIFI, item, "WiFi" in services)
+            yield item

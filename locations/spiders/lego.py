@@ -1,18 +1,20 @@
+from typing import AsyncIterator
+
 import pycountry
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class LegoSpider(JSONBlobSpider):
     name = "lego"
-    item_attributes = {"brand": "Lego", "brand_wikidata": "Q1063455", "extras": Categories.SHOP_TOYS.value}
+    item_attributes = {"brand": "Lego", "brand_wikidata": "Q1063455"}
     # locations_key = ["data", "storeSearch", "stores"]
-    download_timeout = 30
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in pycountry.countries:
             yield JsonRequest(
                 url="https://www.lego.com/api/graphql/StoreSearch",
@@ -32,12 +34,14 @@ class LegoSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace("LEGO® Store ", "")
-        if item["website"] == "store.default.url":
-            item["website"] = "https://www.lego.com/stores/store/" + location["urlKey"]
-        item["ref"] = item["website"]  # stores have "storeId" field, but it is not unique
+        # if item["website"] == "store.default.url":# I think this works for all stores
+        item["website"] = "https://www.lego.com/stores/store/" + location["urlKey"]
+        item["ref"] = location["urlKey"]  # stores have "storeId" field, but it is not unique
 
         item["opening_hours"] = OpeningHours()
         for day in location["openingTimes"]:
             item["opening_hours"].add_ranges_from_string(day["day"] + " " + day["timeRange"])
+
+        apply_category(Categories.SHOP_TOYS, item)
 
         yield item

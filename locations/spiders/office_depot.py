@@ -1,6 +1,5 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 BRANDS = {
@@ -17,20 +16,12 @@ class OfficeDepotSpider(SitemapSpider, StructuredDataSpider):
     requires_proxy = "US"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = None
         item["website"] = response.url
         if item.get("image") == "http://www.example.com/LocationImageURL":
             item["image"] = None
-        oh = OpeningHours()
-        for row in response.css(".thehours .hoursrow"):
-            day = row.css(".hourslabel::text").get()
-            interval = row.css(".hour::text").get().strip()
-            if interval.lower() == "closed":
-                continue
-            open_time, close_time = interval.split("-")
-            oh.add_range(day[:2], open_time, close_time, "%I:%M%p")
-        item["opening_hours"] = oh.as_opening_hours()
-
-        name = item["name"] = response.css(".storetitle::text").get().strip()
-        item.update(BRANDS[name])
-
+        if "/office-depot-" in response.url:
+            item.update(BRANDS["Office Depot"])
+        elif "/officemax-" in response.url:
+            item.update(BRANDS["OfficeMax"])
         yield item

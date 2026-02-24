@@ -1,7 +1,7 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
@@ -85,7 +85,7 @@ class FirehouseSubsSpider(Spider):
             meta=dict(country=country, offset=offset, limit=limit),
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["us", "ca"]:
             yield self.make_request(country, 0)
 

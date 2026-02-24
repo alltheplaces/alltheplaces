@@ -1,21 +1,22 @@
-from scrapy import Spider
+from typing import AsyncIterator
+
 from scrapy.http import Request
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
 
-class YuppiechefZASpider(Spider):
+class YuppiechefZASpider(PlaywrightSpider):
     name = "yuppiechef_za"
     item_attributes = {"brand": "Yuppiechef", "brand_wikidata": "Q24234053"}
     start_urls = ["https://www.yuppiechef.com/store-directory.htm"]
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url=self.start_urls[0],
             meta={"playwright": True, "playwright_include_page": True},

@@ -1,8 +1,8 @@
-import json
-from typing import Any, Iterable, Optional
+from json import JSONDecodeError, loads
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -21,32 +21,41 @@ class RioSeoSpider(Spider):
         `?template=search&level=search`
       - `template`: mandatory parameter, should be either "domain" or "search"
       - `radius`: optional parameter, default value is 20038
-      - `limit`: optional parameter, default value is 3000
+      - `limit`: optional parameter, default value is 10000
     """
 
-    dataset_attributes = {"source": "api", "api": "rio_seo"}
+    dataset_attributes: dict = {"source": "api", "api": "rio_seo"}
 
-    end_point: Optional[str] = None
+    end_point: str | None = None
     limit: int = 10000
     radius: int = 20038
     template: str = "domain"
 
-    def start_requests(self) -> Iterable[Request]:
-        yield JsonRequest(f"{self.end_point}/api/getAutocompleteData", callback=self.parse_autocomplete)
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        if self.end_point is None:
+            raise ValueError("The 'end_point' attribute must be specified.")
+            return
+        if self.template not in ["domain", "search"]:
+            raise ValueError("The 'template' attribute must be specified as either 'domain' or 'search'.")
+            return
+        yield JsonRequest(
+            f"{self.end_point}/api/getAutocompleteData?template={self.template}&level={self.template}",
+            callback=self.parse_autocomplete,
+        )
 
-    def parse_autocomplete(self, response: Response, **kwargs: Any) -> Any:
+    def parse_autocomplete(self, response: TextResponse, **kwargs: Any) -> Iterable[JsonRequest]:
         yield JsonRequest(
             f"{self.end_point}/api/getAsyncLocations?template={self.template}&level={self.template}&search={response.json()['data'][0]}&radius={self.radius}&limit={self.limit}"
         )
 
-    def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
         map_list = response.json()["maplist"]
         if map_list == "":
             return
         map_list = map_list.removeprefix('<div class="tlsmap_list">')
         map_list = map_list.removesuffix(",</div>")
         map_list = map_list.replace("\t", " ")
-        data = json.loads(f"[{map_list}]")
+        data = loads(f"[{map_list}]")
 
         if len(data) == self.limit:
             self.logger.warning(f"Received {len(data)} entries, the limit may need to be raised")
@@ -74,8 +83,8 @@ class RioSeoSpider(Spider):
     def parse_hours(self, hours: dict | str) -> OpeningHours | None:
         if isinstance(hours, str):
             try:
-                hours = json.loads(hours)
-            except json.decoder.JSONDecodeError:
+                hours = loads(hours)
+            except JSONDecodeError:
                 self.logger.warning(f"Could not parse hours: {hours!r}")
                 return
 

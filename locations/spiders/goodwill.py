@@ -1,9 +1,9 @@
 import base64
 import csv
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -23,7 +23,7 @@ def b64_wrap(obj) -> str:
     return base64.b64encode(str(obj).encode()).decode()
 
 
-class GoodwillSpider(scrapy.Spider):
+class GoodwillSpider(Spider):
     name = "goodwill"
     item_attributes = {
         "brand": "Goodwill",
@@ -32,9 +32,8 @@ class GoodwillSpider(scrapy.Spider):
     }
     allowed_domains = ["www.goodwill.org"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.2
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         with open_searchable_points("us_centroids_25mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -10,9 +12,8 @@ class TopsAtSparSpider(Spider):
     item_attributes = {"brand_wikidata": "Q116377563"}
     skip_auto_cc_spider_name = True
     skip_auto_cc_domain = True
-    requires_proxy = "ZA"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.topsatspar.co.za/api/stores/search",
             data={"SearchText": "", "Types": ["TOPS"], "Services": []},

@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
@@ -9,16 +11,15 @@ from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KfcAUSpider(scrapy.Spider):
+class KfcAUSpider(Spider):
     name = "kfc_au"
     item_attributes = KFC_SHARED_ATTRIBUTES
     region_code = "apac"
     tenant_id = "afd3813afa364270bfd33f0a8d77252d"
     web_root = "https://www.kfc.com.au/restaurants/"
-    requires_proxy = True  # Requires AU proxy, possibly residential IPs only.
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://orderserv-kfc-" + self.region_code + "-olo-api.yum.com/dev/v1/stores/",
             headers={"x-tenant-id": self.tenant_id},

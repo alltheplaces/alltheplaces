@@ -10,7 +10,7 @@ class SunglassHutINSpider(JSONBlobSpider):
     start_urls = ["https://sunglasshut.in/api/service/application/catalog/v1.0/locations/?page_size=100000"]
     locations_key = "items"
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,

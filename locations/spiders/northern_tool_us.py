@@ -1,4 +1,7 @@
-from scrapy import FormRequest, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
@@ -9,9 +12,9 @@ class NorthernToolUSSpider(Spider):
     name = "northern_tool_us"
     item_attributes = {"brand": "Northern Tool + Equipment", "brand_wikidata": "Q43379813"}
     requires_proxy = True  # cloudflare
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             method="GET",
             url="https://www.northerntool.com/wcs/resources/store/6970/storelocator/latitude/38.8/longitude/-106.5",

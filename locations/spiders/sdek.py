@@ -1,7 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
@@ -11,11 +10,11 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SdekSpider(scrapy.Spider):
+class SdekSpider(Spider):
     name = "sdek"
     allowed_domains = ["www.cdek.ru"]
-    item_attributes = {"brand": "СДЭК", "brand_wikidata": "Q28665980", "extras": {"brand:en": "SDEK"}}
-    user_agent = BROWSER_DEFAULT
+    item_attributes = {"brand": "СДЭК", "brand_wikidata": "Q28665980"}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     # Because of bot detection after certain no. of requests querying GraphQL API https://www.cdek.ru/api-site/v1/graphql/ for individual POI details is no longer feasible.
     def make_request(self, page: int, limit: int = 100) -> JsonRequest:
@@ -25,7 +24,7 @@ class SdekSpider(scrapy.Spider):
             dont_filter=True,
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -45,6 +44,7 @@ class SdekSpider(scrapy.Spider):
                 apply_yes_no("parcel_mail_in", item, poi.get("isReception"))
                 apply_yes_no("parcel_pickup", item, poi.get("isHangout"))
             self.parse_hours(item, poi)
+            item["extras"]["brand:en"] = "SDEK"
             yield item
 
         if response.json()["data"]["count"] == 100:

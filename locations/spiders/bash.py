@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request
@@ -31,8 +32,8 @@ BASH_BRANDS = {
     "FIX": {"brand": "The FIX", "brand_wikidata": "Q116379523"},
     "FOSCHINI": {"brand": "Foschini", "brand_wikidata": "Q116391780"},
     "FOS": {"brand": "Foschini", "brand_wikidata": "Q116391780"},
-    "G-STAR RAW": {"brand": "G-Star RAW", "brand_wikidata": "Q1484081"},
-    "G-STAR": {"brand": "G-Star RAW", "brand_wikidata": "Q1484081"},
+    "G-STAR RAW": {"brand": "G-Star Raw", "brand_wikidata": "Q1484081"},
+    "G-STAR": {"brand": "G-Star Raw", "brand_wikidata": "Q1484081"},
     "HI": {"brand": "hi", "brand_wikidata": "Q116431177", "extras": Categories.SHOP_CLOTHES.value},
     "@HOME LIVINGSPACE": {"brand": "@Home Livingspace", "brand_wikidata": "Q117406343"},
     "@HOME": {"brand": "@home", "brand_wikidata": "Q116429887"},
@@ -75,7 +76,7 @@ class BashSpider(JSONBlobSpider):
     allowed_domains = ["bash.com"]
     start_urls = ["https://bash.com/store-finder"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         self.brand_name_regex = re.compile(r"^(" + "|".join(BASH_BRANDS) + r") ", re.IGNORECASE)
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_json)

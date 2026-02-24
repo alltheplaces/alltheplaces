@@ -1,7 +1,29 @@
-from locations.storefinders.uberall import UberallSpider
+import json
+from typing import Iterable
+
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class GrandOpticalSpider(UberallSpider):
+class GrandOpticalSpider(SitemapSpider, StructuredDataSpider):
     name = "grand_optical"
     item_attributes = {"brand": "GrandOptical", "brand_wikidata": "Q3113677"}
-    key = "3wg7zoSQ5DhaI1rhTTqlOG1fMUBRw0"
+    sitemap_urls = ["https://www.grandoptical.com/sitemap.xml"]
+    sitemap_rules = [(r"/opticien/[^/]+/\d+", "parse_sd")]
+
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["website"] = response.url
+        item["branch"] = item.pop("name").replace("GRANDOPTICAL", "").replace("Opticien", "")
+
+        data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        store = data["props"]["initialProps"]["pageProps"]["storeData"]
+        item["lat"] = store["lat"]
+        item["lon"] = store["lon"]
+
+        apply_category(Categories.SHOP_OPTICIAN, item)
+
+        yield item

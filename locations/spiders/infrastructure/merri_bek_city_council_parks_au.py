@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from pyproj import Transformer
 from scrapy.http import Request, Response
@@ -23,7 +23,7 @@ class MerriBekCityCouncilParksAUSpider(XMLFeedSpider):
     ]
     itertag = "gml:featureMember"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         request_body = """<wfs:GetFeature xmlns:wfs="http://www.opengis.net/wfs" service="WFS" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-transaction.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<wfs:Query typeName="feature:OpenSpace" xmlns:feature="http://www.moreland.vic.gov.au">
 		<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
