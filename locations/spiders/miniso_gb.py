@@ -26,13 +26,23 @@ class MinisoGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("MINISO ", "").split(", ")[0]
         item["street_address"] = item.pop("addr_full")
-        item["website"] = ""
         oh = OpeningHours()
         for day in DAYS_FULL:
             time = json.loads(feature["time_store"])[f"{day.lower()}"]
             if json.loads(feature["time_store"])[f"{day.lower()}_time"] == "1":
-                open_time = time["from"]["hours"] + ":" + f'{time["to"]["minutes"]:02}' + "AM"
+                if int(time["from"]["hours"]) == 0:
+                    time["from"]["hours"] = "12"
+                    open_time = time["from"]["hours"] + ":" + f'{time["to"]["minutes"]:02}' + "PM"
+                else:
+                    open_time = time["from"]["hours"] + ":" + f'{time["to"]["minutes"]:02}'
+                    if int(time["from"]["hours"]) > 7:
+                        open_time = open_time + "AM"
+                    else:
+                        open_time = open_time + "PM"
+                if int(time["to"]["hours"]) == 0:
+                    time["to"]["hours"] = "12"
                 close_time = time["to"]["hours"] + ":" + f'{time["to"]["minutes"]:02}' + "PM"
                 oh.add_range(day, open_time, close_time, "%I:%M%p")
         item["opening_hours"] = oh
+
         yield item
