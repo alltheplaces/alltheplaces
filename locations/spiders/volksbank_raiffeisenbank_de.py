@@ -36,7 +36,7 @@ class VolksbankRaiffeisenbankDESpider(Spider):
                 bank["additional_infos"]
                 .get("detail_page_url")
                 .replace("//hhttps//", "//")
-                .repplace("//https/", "//")
+                .replace("//https/", "//")
                 .replace("//http/", "//")
                 .replace(",", ".")
             )
