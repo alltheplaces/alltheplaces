@@ -11,8 +11,8 @@ from locations.hours import OpeningHours
 class VolksbankRaiffeisenbankDESpider(Spider):
     name = "volksbank_raiffeisenbank_de"
     item_attributes = {"brand": "Volksbank Raiffeisenbank", "brand_wikidata": "Q1361800"}
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"token": "2MEN71Lg25DxWLysCqC94b2H"}}
-    template_url = "https://api.geno-datenhub.de/places?_latitude={lat}&_longitude={lon}&kind[]={category}&_per_page=1000&_page={page}&_radius=5000000"
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"token": "2MEN71Lg25DxWLysCqC94b2H"}, "ROBOTSTXT_OBEY": False}
+    template_url = "https://api.geno-datenhub.de/locations?_latitude={lat}&_longitude={lon}&kind[]={category}&_per_page=1000&_page={page}&_radius=5000000"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in [(53.3964452, 10.4589624), (48.0927718, 10.5688257)]:
@@ -30,12 +30,13 @@ class VolksbankRaiffeisenbankDESpider(Spider):
             bank["latitude"] = bank["address"].pop("latitude")
             bank["longitude"] = bank["address"].pop("longitude")
             item = DictParser.parse(bank)
+            item["ref"] = str(item["ref"]) + f' -{response.meta["category"].upper()}'
             item["street_address"] = item.pop("street", "")
-            item["website"] = bank["links"].get("detail_page_url") or bank["links"]["url"]
+            item["website"] = bank["additional_infos"].get("detail_page_url")
             item["opening_hours"] = self.parse_hours(bank["opening_hours"])
             item["extras"]["services"] = bank["services"]
             item["operator"] = bank["institute"]["name"]
-            if bank["kind"] == "atm":
+            if response.meta["category"] == "atm":
                 apply_category(Categories.ATM, item)
             else:
                 apply_category(Categories.BANK, item)
