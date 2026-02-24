@@ -1,63 +1,45 @@
-import scrapy
+import re
+from typing import AsyncIterator
+
+from scrapy import Request
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
+
+STORE_URL_RE = re.compile(r"/store-finder/[A-Z0-9]+-[A-Z0-9]+/", re.IGNORECASE)
+ZYTE_API_BROWSER_GB = {"browserHtml": True, "geolocation": "GB", "javascript": True}
 
 
-class CoopFoodGBSpider(scrapy.Spider):
+class CoopFoodGBSpider(SitemapSpider, StructuredDataSpider):
     name = "coop_food_gb"
     item_attributes = {"brand": "Co-op Food", "brand_wikidata": "Q3277439"}
     allowed_domains = ["coop.co.uk"]
-    page_number = 1
-    start_urls = (
-        "https://www.coop.co.uk/store-finder/api/locations/food?location=54.9966124%2C-7.308574799999974&distance=30000000000&always_one=true&format=json",
-    )
+    sitemap_urls = ["https://www.coop.co.uk/store-finder/sitemap.xml"]
+    sitemap_rules = [(STORE_URL_RE, "parse_sd")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        for hour in hours:
-            open_time = hour["opens"]
-            close_time = hour["closes"]
-            if hour["type"] == "24_hour":
-                close_time = "23:59"
-            try:
-                opening_hours.add_range(day=hour["name"][:2], open_time=open_time, close_time=close_time)
-            except:  # no opening hours
-                continue
-        return opening_hours.as_opening_hours()
+    async def start(self) -> AsyncIterator[Request]:
+        for url in self.sitemap_urls:
+            yield Request(
+                url,
+                self._parse_sitemap,
+                meta={"zyte_api": {"httpResponseBody": True, "geolocation": "GB"}},
+            )
 
-    def parse(self, response):
-        data = response.json()
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if STORE_URL_RE.search(entry["loc"]):
+                yield entry
 
-        for store in data["results"]:
-            if not store["public"]:
-                continue
-            open_hours = self.parse_hours(store["opening_hours"])
+    def _parse_sitemap(self, response):
+        for request in super()._parse_sitemap(response):
+            if isinstance(request, Request):
+                request.meta["zyte_api"] = ZYTE_API_BROWSER_GB
+            yield request
 
-            properties = {
-                "ref": store["url"],
-                "opening_hours": open_hours,
-                "website": "https://www.coop.co.uk" + store["url"],
-                "street_address": merge_address_lines(
-                    [store["street_address"], store["street_address2"], store["street_address3"]]
-                ),
-                "city": store["town"],
-                "postcode": store["postcode"],
-                "lon": float(store["position"]["x"]),
-                "lat": float(store["position"]["y"]),
-                "phone": store["phone"],
-                "operator": store["society"],
-                "extras": {
-                    "location_type": store["location_type"],
-                },
-            }
-
-            apply_category(Categories.SHOP_CONVENIENCE, properties)
-
-            yield Feature(**properties)
-
-        if data["next"] is not None:
-            self.page_number = self.page_number + 1
-            yield scrapy.Request(self.start_urls[0] + "&page=" + str(self.page_number))
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("name", None)
+        apply_category(Categories.SHOP_CONVENIENCE, item)
+        yield item
