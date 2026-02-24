@@ -34,7 +34,7 @@ class VolksbankRaiffeisenbankDESpider(Spider):
             item["street_address"] = item.pop("street", "")
             if website := bank["additional_infos"].get("detail_page_url"):
                 item["website"] = (
-                    website.get("detail_page_url")
+                    website
                     .replace("//hhttps//", "//")
                     .replace("//https/", "//")
                     .replace("//http/", "//")
