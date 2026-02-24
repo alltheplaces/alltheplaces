@@ -14,6 +14,7 @@ class MinisoGBSpider(JSONBlobSpider):
     item_attributes = {"brand": "Miniso", "brand_wikidata": "Q20732498"}
     start_urls = ["https://minisoshop.co.uk/store-locator"]
     drop_attributes = {"facebook", "phone", "email", "twitter"}
+    requires_proxy = "GB"
 
     def extract_json(self, response: Response) -> dict | list[dict]:
         data_raw = response.xpath("//script[contains(text(), 'jsonLocations:')]/text()").get()
