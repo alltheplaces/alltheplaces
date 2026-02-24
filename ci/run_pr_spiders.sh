@@ -85,7 +85,8 @@ upload_file() {
     upload_to_r2 "${file_path}" "${R2_BUCKET}/${path}"
 }
 
-PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
+PR_COMMENT_BODY="I ran the spiders in this pull request for a __2 minute__ test and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
+HAD_TIMEOUT=false
 
 if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY_BASE64}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
     echo "GitHub App credentials not set"
@@ -190,6 +191,7 @@ do
         (>&2 echo "${spider} hit shell timeout")
         EXIT_CODE=1
         FAILURE_REASON="timeout"
+        HAD_TIMEOUT=true
     elif grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
         (>&2 echo "${spider} exited with errors")
         EXIT_CODE=1
@@ -197,6 +199,7 @@ do
     elif grep -q "Spider closed (closespider_timeout)" $LOGFILE; then
         (>&2 echo "${spider} exited because of timeout")
         FAILURE_REASON="timeout"
+        HAD_TIMEOUT=true
     fi
 
     upload_file "${LOGFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
@@ -347,6 +350,10 @@ done
 if [[ ! "$(ls ${RUN_DIR})" ]]; then
     echo "Nothing ran. Exiting."
     echo $EXIT_CODE
+fi
+
+if [ "${HAD_TIMEOUT}" = true ]; then
+    PR_COMMENT_BODY="${PR_COMMENT_BODY}\\n<details><summary>ℹ️ What does <code>timeout</code> mean?</summary>\\n\\nThe pull request CI runs each spider for a maximum of **2 minutes**. A \`timeout\` result means the spider was still running when this time limit was reached. This is not necessarily a problem — many spiders take longer than 2 minutes to complete a full run. The important thing is to check that the spider is producing results and that the output looks correct within the time allowed.\\n</details>\\n"
 fi
 
 if [ "${pull_request_number}" != "false" ]; then

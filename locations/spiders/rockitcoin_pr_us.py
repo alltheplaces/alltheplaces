@@ -18,7 +18,7 @@ from locations.spiders.exxon_mobil import ExxonMobilSpider
 from locations.spiders.gulf_pr_us import GulfPRUSSpider
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.phillips_66_conoco_76 import Phillips66Conoco76Spider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.shell import ShellSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
 from locations.spiders.valero import ValeroSpider
@@ -50,7 +50,7 @@ class RockitcoinPRUSSpider(JSONBlobSpider):
         (["76 GAS", "76"], Phillips66Conoco76Spider.BRANDS["76"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["PHILLIPS 66"], Phillips66Conoco76Spider.BRANDS["P66"]),
-        (["7-ELEVEN", "7ELEVEN", "ALON / 7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["7-ELEVEN", "7ELEVEN", "ALON / 7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["AMPM", "AM/PM"], AmpmUSSpider.item_attributes),
         (["AMOCO"], BpSpider.brands["amoco"]),
         (["RACEWAY"], {"brand": "RaceWay", "brand_wikidata": "Q73039084"}),

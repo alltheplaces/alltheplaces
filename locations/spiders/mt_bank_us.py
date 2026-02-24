@@ -12,7 +12,7 @@ from locations.spiders.giant_food_stores import GiantFoodStoresSpider
 from locations.spiders.giant_food_us import GiantFoodUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
 from locations.spiders.safeway import SafewaySpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.stop_and_shop_us import StopAndShopUSSpider
 from locations.spiders.target_us import TargetUSSpider
@@ -33,7 +33,7 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
 
     LOCATED_IN_MAPPINGS = [
         (["STOP & SHOP", "STOP AND SHOP"], StopAndShopUSSpider.item_attributes),
-        (["7ELEVEN", "7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["7ELEVEN", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["WALGREENS"], WalgreensSpider.WALGREENS),
         (["DUANE READE"], WalgreensSpider.DUANE_READE),
         (["CVS"], CVS_BRANDS["CVS Pharmacy"]),

@@ -11,7 +11,7 @@ from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 class SevenElevenMXSpider(Spider):
     name = "seven_eleven_mx"
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
-    start_urls = ["https://www.7-eleven.com.mx/buscador-de-tiendas/fetch_data.php"]
+    start_urls = ["https://7-eleven.com.mx/buscador-de-tiendas/fetch_data.php"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         store_keys = [key.removesuffix("_tienda") for key in response.json()["values"][0]]
