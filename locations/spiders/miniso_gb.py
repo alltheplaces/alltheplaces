@@ -31,8 +31,8 @@ class MinisoGBSpider(JSONBlobSpider):
         for day in DAYS_FULL:
             time = json.loads(feature["time_store"])[f"{day.lower()}"]
             if json.loads(feature["time_store"])[f"{day.lower()}_time"] == "1":
-                open_time = f'{time["from"]["hours"]:02}' + ":" + f'{time["to"]["minutes"]:02}' + "AM"
-                close_time = f'{time["to"]["hours"]:02}' + ":" + f'{time["to"]["minutes"]:02}' + "PM"
+                open_time = time["from"]["hours"] + ":" + f'{time["to"]["minutes"]:02}' + "AM"
+                close_time = time["to"]["hours"] + ":" + f'{time["to"]["minutes"]:02}' + "PM"
                 oh.add_range(day, open_time, close_time, "%I:%M%p")
         item["opening_hours"] = oh
         yield item
