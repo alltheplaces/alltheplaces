@@ -31,9 +31,7 @@ class TheEntertainerGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["address"]["id"]
-        if item["website"]:
-
-            item["website"] = "https://www.thetoyshop.com" + item["website"].split("?")[0]
+        item["website"] = "https://www.thetoyshop.com" + feature["name"]
         item["street_address"] = merge_address_lines([feature["address"].get("line1"), feature["address"].get("line2")])
         item["branch"] = item.pop("name")
         if "tesco" in item["website"]:
