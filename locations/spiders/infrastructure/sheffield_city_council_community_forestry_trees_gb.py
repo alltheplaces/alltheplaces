@@ -4,17 +4,15 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
+
+# https://sheffield-city-council-open-data-sheffieldcc.hub.arcgis.com/datasets/47dbf190bd254de8aea2008e6aedbbd2_14/explore
 
 
 class SheffieldCityCouncilCommunityForestryTreesGBSpider(ArcGISFeatureServerSpider):
     name = "sheffield_city_council_community_forestry_trees_gb"
-    dataset_attributes = {
-        "source": "api",
-        "api": "arcgis",
-        "license": "Open Government Licence v3",
-        "license:website": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-    }
+    dataset_attributes = ArcGISFeatureServerSpider.dataset_attributes | Licenses.GB_OGLv3.value
     item_attributes = {
         "operator": "Sheffield City Council",
         "operator_wikidata": "Q7492609",
