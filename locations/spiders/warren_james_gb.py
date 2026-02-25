@@ -14,5 +14,6 @@ class WarrenJamesGBSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         )
     ]
-
     wanted_types = ["localBusiness"]
+    drop_attributes = {"facebook"}
+
