@@ -7,10 +7,12 @@ from locations.items import Feature
 from locations.licenses import Licenses
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
+# https://sheffield-city-council-open-data-sheffieldcc.hub.arcgis.com/datasets/b154cc83f4634becb86da2ddb704e8f5_11/explore
+
 
 class SheffieldCityCouncilStreetLightsGBSpider(ArcGISFeatureServerSpider):
     name = "sheffield_city_council_street_lights_gb"
-    dataset_attributes = Licenses.GB_OGLv3.value | {"source": "api", "api": "arcgis"}
+    dataset_attributes = ArcGISFeatureServerSpider.dataset_attributes | Licenses.GB_OGLv3.value
     item_attributes = {
         "operator": "Sheffield City Council",
         "operator_wikidata": "Q7492609",
