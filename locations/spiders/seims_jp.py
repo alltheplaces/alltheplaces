@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -39,7 +40,12 @@ class SeimsJPSpider(Spider):
                 case _:
                     item["brand"] = store["marker"]["ja"]["name"]
 
-            item["name"] = store["marker"]["ja"]["name"]
+            try:
+                item["branch"] = re.search(r"(?:\s)\b\S+$", str(store["name"])).group()
+                del item["name"]
+            except:
+                pass
+            
             item["postcode"] = store["extra_fields"]["郵便番号"]
             item["extras"]["addr:province"] = store["extra_fields"]["都道府県"]
             item["extras"]["branch:ja-Hira"] = store["extra_fields"]["店名かな"]
