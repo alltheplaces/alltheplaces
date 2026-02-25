@@ -45,7 +45,7 @@ class SeimsJPSpider(Spider):
                 del item["name"]
             except:
                 pass
-            
+
             item["postcode"] = store["extra_fields"]["郵便番号"]
             item["extras"]["addr:province"] = store["extra_fields"]["都道府県"]
             item["extras"]["branch:ja-Hira"] = store["extra_fields"]["店名かな"]
