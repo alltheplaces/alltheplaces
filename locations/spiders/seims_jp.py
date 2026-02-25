@@ -59,7 +59,7 @@ class SeimsJPSpider(Spider):
 
             apply_yes_no("drinking_water:refill", item, store["extra_fields"]["給水器"] == "1")
             apply_yes_no("drive_through", item, store["extra_fields"]["【調剤】調剤ドライブスルー"] == "1")
-            
+
             apply_yes_no("sells:rice", item, store["extra_fields"]["【取扱】米"] == "1")
             apply_yes_no("sells:meat", item, store["extra_fields"]["【取扱】精肉"] == "1")
             apply_yes_no("sells:pet_supplies", item, store["extra_fields"]["【取扱】ペット用品"] == "1")
@@ -69,17 +69,17 @@ class SeimsJPSpider(Spider):
             apply_yes_no("sells:alcohol", item, store["extra_fields"]["【取扱】酒類"] == "1")
             apply_yes_no("sells:contact_lenses", item, store["extra_fields"]["【取扱】コンタクトレンズ"] == "1")
             apply_yes_no("sells:baby_goods", item, store["extra_fields"]["【取扱】ベビー用品"] == "1")
-            
+
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["extra_fields"]["【支払】ｸﾚｼﾞｯﾄ"] == "1")
             apply_yes_no(PaymentMethods.CONTACTLESS, item, store["extra_fields"]["【支払】ｸﾚｼﾞｯﾄ(タッチ決済)"] == "1")
-            
+
             if str("".join(filter(str.isdigit, str(store["extra_fields"]["駐車場台数"])))) in ("", "0"):
                 pass
             else:
                 item["extras"]["parking:capacity:standard"] = str(
                     "".join(filter(str.isdigit, str(store["extra_fields"]["駐車場台数"])))
                 )
-            
+
             item["website"] = f"https://store.seims.co.jp/map/{store['key']}/"
             item["extras"]["website:booking"] = store["extra_fields"]["【調剤】処方せんネット受付URL"]
             item["ref"] = store["key"]
