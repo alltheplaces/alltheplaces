@@ -4,7 +4,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -57,7 +57,31 @@ class SeimsJPSpider(Spider):
             else:
                 item["phone"] = f"+81 {store['extra_fields']['調剤電話番号']}"
 
+            apply_yes_no("drinking_water:refill", item, store["extra_fields"]["給水器"] == "1")
+            apply_yes_no("drive_through", item, store["extra_fields"]["【調剤】調剤ドライブスルー"] == "1")
+            
+            apply_yes_no("sells:rice", item, store["extra_fields"]["【取扱】米"] == "1")
+            apply_yes_no("sells:meat", item, store["extra_fields"]["【取扱】精肉"] == "1")
+            apply_yes_no("sells:pet_supplies", item, store["extra_fields"]["【取扱】ペット用品"] == "1")
+            apply_yes_no("sells:dairy", item, store["extra_fields"]["【取扱】乳製品"] == "1")
+            apply_yes_no("sells:frozen_food", item, store["extra_fields"]["【取扱】冷凍食品"] == "1")
+            apply_yes_no("sells:produce", item, store["extra_fields"]["【取扱】青果"] == "1")
+            apply_yes_no("sells:alcohol", item, store["extra_fields"]["【取扱】酒類"] == "1")
+            apply_yes_no("sells:contact_lenses", item, store["extra_fields"]["【取扱】コンタクトレンズ"] == "1")
+            apply_yes_no("sells:baby_goods", item, store["extra_fields"]["【取扱】ベビー用品"] == "1")
+            
+            apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["extra_fields"]["【支払】ｸﾚｼﾞｯﾄ"] == "1")
+            apply_yes_no(PaymentMethods.CONTACTLESS, item, store["extra_fields"]["【支払】ｸﾚｼﾞｯﾄ(タッチ決済)"] == "1")
+            
+            if str("".join(filter(str.isdigit, str(store["extra_fields"]["駐車場台数"])))) in ("", "0"):
+                pass
+            else:
+                item["extras"]["parking:capacity:standard"] = str(
+                    "".join(filter(str.isdigit, str(store["extra_fields"]["駐車場台数"])))
+                )
+            
             item["website"] = f"https://store.seims.co.jp/map/{store['key']}/"
+            item["extras"]["website:booking"] = store["extra_fields"]["【調剤】処方せんネット受付URL"]
             item["ref"] = store["key"]
             if store["extra_fields"]["ドラッグストア"] == "1":
                 apply_category(Categories.SHOP_CHEMIST, item)
