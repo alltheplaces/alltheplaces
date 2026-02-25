@@ -7,16 +7,12 @@ from locations.items import Feature
 from locations.licenses import Licenses
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
-# https://sheffield-city-council-open-data-sheffieldcc.hub.arcgis.com/datasets/7b2df397e9994ca5984bad0b679ce6d9_14/explore
+# https://sheffield-city-council-open-data-sheffieldcc.hub.arcgis.com/datasets/47dbf190bd254de8aea2008e6aedbbd2_14/explore
 
 
-class SheffieldCityCouncilStreetTreesGBSpider(ArcGISFeatureServerSpider):
-    name = "sheffield_city_council_street_trees_gb"
-    dataset_attributes = (
-        ArcGISFeatureServerSpider.dataset_attributes
-        | Licenses.GB_INSPIRE.value
-        | {"attribution:name": "SCC Environmental data released under the European Directive INSPIRE."}
-    )
+class SheffieldCityCouncilCommunityForestryTreesGBSpider(ArcGISFeatureServerSpider):
+    name = "sheffield_city_council_community_forestry_trees_gb"
+    dataset_attributes = ArcGISFeatureServerSpider.dataset_attributes | Licenses.GB_OGLv3.value
     item_attributes = {
         "operator": "Sheffield City Council",
         "operator_wikidata": "Q7492609",
@@ -24,11 +20,11 @@ class SheffieldCityCouncilStreetTreesGBSpider(ArcGISFeatureServerSpider):
     }
     host = "sheffieldcitycouncil.cloud.esriuk.com"
     context_path = "server"
-    service_id = "AGOL/INSPIRE"
+    service_id = "AGOL/Community_Forestry_Trees"
     layer_id = "14"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = str(feature["id"])
+        item["ref"] = str(feature["treeid"])
         apply_category(Categories.NATURAL_TREE, item)
-        item["extras"]["species"] = feature.get("featuretypename")
+        item["extras"]["species"] = feature.get("species")
         yield item
