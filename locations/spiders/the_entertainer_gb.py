@@ -1,4 +1,4 @@
-from typing import Iterable
+.from typing import Iterable
 
 from scrapy.http import Response
 
@@ -31,7 +31,7 @@ class TheEntertainerGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["address"]["id"]
-        item["website"] = "https://www.thetoyshop.com" + feature["name"]
+        item["website"] = "https://www.thetoyshop.com" + feature["name"].lower().replace(" ","-")
         item["street_address"] = merge_address_lines([feature["address"].get("line1"), feature["address"].get("line2")])
         item["branch"] = item.pop("name")
         if "tesco" in item["website"]:
