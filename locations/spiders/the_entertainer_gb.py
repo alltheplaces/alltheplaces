@@ -1,4 +1,4 @@
-.from typing import Iterable
+from typing import Iterable
 
 from scrapy.http import Response
 
