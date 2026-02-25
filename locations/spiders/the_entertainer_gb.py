@@ -30,4 +30,5 @@ class TheEntertainerGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["address"]["id"]
+        item["website"] = "https://www.thetoyshop.com" + item["website"]
         yield item
