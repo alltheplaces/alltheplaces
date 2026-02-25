@@ -33,4 +33,5 @@ class TheEntertainerGBSpider(JSONBlobSpider):
         item["ref"] = feature["address"]["id"]
         item["website"] = "https://www.thetoyshop.com" + item["website"]
         item["street_address"] = merge_address_lines([feature["address"].get("line1"), feature["address"].get("line2")])
+        item["branch"] = item.pop("name")
         yield item
