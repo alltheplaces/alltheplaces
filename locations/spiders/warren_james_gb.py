@@ -19,7 +19,7 @@ class WarrenJamesGBSpider(CrawlSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["localBusiness"]
-    drop_attributes = {"facebook"}
+    drop_attributes = {"facebook", "image"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["name"], item["branch"] = item["name"].split(" - ")
