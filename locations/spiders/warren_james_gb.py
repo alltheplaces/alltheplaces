@@ -16,4 +16,3 @@ class WarrenJamesGBSpider(CrawlSpider, StructuredDataSpider):
     ]
     wanted_types = ["localBusiness"]
     drop_attributes = {"facebook"}
-
