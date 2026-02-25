@@ -17,7 +17,7 @@ class BurgerKingTRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = item["website"] = response.url
-        item["name"] = None
+        item["name"] = item["phone"] = None
         item["branch"] = response.xpath('//*[@class="current-page-name"]/text()').get("").strip()
         apply_category(Categories.FAST_FOOD, item)
         yield item
