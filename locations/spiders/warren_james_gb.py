@@ -1,8 +1,8 @@
-
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
+
 
 class WarrenJamesGBSpider(CrawlSpider, StructuredDataSpider):
     name = "warren_james_gb"
@@ -12,6 +12,7 @@ class WarrenJamesGBSpider(CrawlSpider, StructuredDataSpider):
         Rule(
             LinkExtractor(allow=r"/shop-locator/[^/]+$"),
             callback="parse_sd",
-        )]
+        )
+    ]
 
     wanted_types = ["localBusiness"]
