@@ -4,11 +4,17 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
+
+# https://data-aucklandcouncil.opendata.arcgis.com/datasets/6791310ce58c45649be085c94bd6364f_0/explore
 
 
 class AucklandCouncilFurnitureNZ(ArcGISFeatureServerSpider):
     name = "auckland_council_furniture_nz"
+    dataset_attributes = (
+        ArcGISFeatureServerSpider.dataset_attributes | Licenses.CC4.value | {"attribution:name": "Auckland Council"}
+    )
     item_attributes = {"operator": "Auckland Council", "operator_wikidata": "Q758635"}
     host = "services1.arcgis.com"
     context_path = "n4yPwebTjJCmXB6W/ArcGIS"
