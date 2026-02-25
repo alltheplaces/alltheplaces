@@ -34,4 +34,7 @@ class TheEntertainerGBSpider(JSONBlobSpider):
         item["website"] = "https://www.thetoyshop.com" + item["website"]
         item["street_address"] = merge_address_lines([feature["address"].get("line1"), feature["address"].get("line2")])
         item["branch"] = item.pop("name")
+        if "tesco" in item["website"]:
+            item["located_in"] = "Tesco"
+            item["located_in_wikidata"] = "Q487494"
         yield item
