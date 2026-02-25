@@ -1,38 +1,39 @@
+import json
 import re
+from typing import Any
 
-from scrapy.spiders import SitemapSpider
+import scrapy
+from scrapy.http import Response
 
-from locations.google_url import extract_google_position
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
-class CrashChampionsUSSpider(SitemapSpider):
+class CrashChampionsUSSpider(scrapy.Spider):
     name = "crash_champions_us"
     item_attributes = {
         "brand_wikidata": "Q121435028",
         "brand": "Crash Champions",
     }
-    sitemap_urls = [
-        "https://www.crashchampions.com/sitemap.xml",
+    start_urls = [
+        "https://www.crashchampions.com/locations?view=view-all-centers",
     ]
-    sitemap_rules = [(r"/locations/", "parse_store")]
 
-    def parse_store(self, response):
-        if "crashchampions" not in response.url:
-            return
-        properties = {
-            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": response.xpath("//*[@class='about-center__center']/text()").extract_first(),
-            "addr_full": response.xpath("//*[@class='about-center__address']/text()").extract_first().strip(),
-            "phone": response.xpath("//*[@class='about-center__phoneno']/a/text()").extract_first().strip(),
-            "website": response.url,
-        }
-
-        item = Feature(**properties)
-        item["opening_hours"] = OpeningHours()
-        for day_range in response.xpath("//*[@class='about-center__timings']/p/text()").getall():
-            item["opening_hours"].add_ranges_from_string(day_range)
-
-        extract_google_position(item, response)
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        raw_data = json.loads(
+            re.search(
+                r"geoPoints\"\s*:\s*(\[.*\]),\"user\"", response.xpath('//*[contains(text(),"geoPoints")]/text()').get()
+            ).group(1)
+        )
+        for location in raw_data:
+            item = DictParser.parse(location)
+            item["ref"] = location["nid"]
+            item["street_address"] = item.pop("addr_full")
+            item["website"] = "https://www.crashchampions.com" + location["alias"]
+            oh = OpeningHours()
+            for day_time in location.keys():
+                if "openhours" in day_time:
+                    day_time_string = location[day_time]
+                    oh.add_ranges_from_string(day_time_string)
+            item["opening_hours"] = oh
+            yield item
