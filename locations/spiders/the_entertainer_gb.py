@@ -1,3 +1,8 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -22,3 +27,6 @@ class TheEntertainerGBSpider(JSONBlobSpider):
             "Connection": "keep-alive",
         },
     }
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["address"]["id"]
