@@ -4,6 +4,7 @@ from scrapy.http import Response
 
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TheEntertainerGBSpider(JSONBlobSpider):
@@ -31,4 +32,5 @@ class TheEntertainerGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["address"]["id"]
         item["website"] = "https://www.thetoyshop.com" + item["website"]
+        item["street_address"] = merge_address_lines([feature["address"].get("line1"), feature["address"].get("line2")])
         yield item
