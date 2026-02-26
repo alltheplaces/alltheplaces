@@ -1,7 +1,8 @@
-import chompjs
+import json
+import re
+
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 
@@ -18,17 +19,19 @@ class HunkemollerSpider(SitemapSpider):
     ]
 
     def parse(self, response, **kwargs):
-        script_text = response.xpath('//script[contains(text(), "pageContext")]/text()').get()
-        poi = chompjs.parse_js_object(script_text)["analytics"]["store"]
-        item = DictParser.parse(poi)
-        item["ref"] = item["website"] = response.url
-        item["opening_hours"] = OpeningHours()
-        if not poi.get("openingHours"):
-            return
-        for rule in poi.get("openingHours", []):
-            if day := sanitise_day(rule["dayOfWeek"], DAYS_NL):
-                open_time = rule.get("open")
-                close_time = rule.get("close")
-                item["opening_hours"].add_range(day, open_time, close_time)
-        apply_category(Categories.SHOP_CLOTHES, item)
+        script_text = json.loads(
+            re.search(
+                r"data\"s*:\s*\[({\"address1\".*})\],\s*\"total",
+                response.xpath('//*[contains(text(), "latitude")]/text()').get(),
+            ).group(1)
+        )
+        item = DictParser.parse(script_text)
+        item["website"] = response.url
+        oh = OpeningHours()
+        for day_time in script_text["c_openingHours"]:
+            day = sanitise_day(day_time["dayOfWeek"], DAYS_NL)
+            open_time = day_time["open"]
+            close_time = day_time["close"]
+            oh.add_range(day=day, open_time=open_time, close_time=close_time)
+        item["opening_hours"] = oh
         yield item
