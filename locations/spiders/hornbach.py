@@ -48,6 +48,7 @@ class HornbachSpider(JSONBlobSpider):
         feature.update(feature.pop("data"))
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = item.pop("street")
         item["branch"] = item.pop("name").removeprefix("BODENHAUS ").removeprefix("HORNBACH ")
         if brand_info := self.BRANDS.get(feature["client"]):
             item.update(brand_info)
