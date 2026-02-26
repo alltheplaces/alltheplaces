@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -39,4 +40,7 @@ class DieselSpider(SitemapSpider, StructuredDataSpider):
             item["name"] = "Diesel Womenswear"
         else:
             item["branch"] = item.pop("name").removeprefix("DIESEL ")
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+
         yield item
