@@ -15,7 +15,7 @@ class PalclosetSpider(Spider):
         for points in [
             "w",
             "x",
-            "z",            
+            "z",
         ]:
             yield JsonRequest(url=f"https://palcloset.storelocator.jp/api/point/{points}/")
 
