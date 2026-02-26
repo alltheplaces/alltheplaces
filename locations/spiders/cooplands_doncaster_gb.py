@@ -26,7 +26,7 @@ class CooplandsDoncasterGBSpider(scrapy.Spider):
 
             yield Feature(
                 ref=index,
-                name=store.xpath("h4/text()").extract_first(),
+                branch=store.xpath("h4/text()").extract_first(),
                 addr_full=addr_full,
                 postcode=data[-2].strip(),
                 phone=data[-1].strip(),
