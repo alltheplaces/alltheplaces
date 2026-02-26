@@ -4,6 +4,7 @@ import chompjs
 from scrapy.http import JsonRequest, Response, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -52,4 +53,15 @@ class HornbachSpider(JSONBlobSpider):
             item.update(brand_info)
         if feature["client"] == "bodenhaus":
             apply_category(Categories.SHOP_FLOORING, item)
+
+        item["opening_hours"] = self.parse_opening_hours(feature.get("simplifiedOpeningHours", []))
         yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            start_day = rule.get("weekdayFrom")
+            end_day = rule.get("weekdayTo") or start_day
+            if start_day and end_day:
+                oh.add_days_range(day_range(start_day, end_day), rule["timeFrom"], rule["timeTo"], "%H:%M:%S")
+        return oh
