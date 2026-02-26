@@ -1,52 +1,44 @@
-from typing import AsyncIterator, Iterable
+from typing import Any
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
-class BootBarnUSSpider(JSONBlobSpider):
+class BootBarnUSSpider(SitemapSpider):
     name = "boot_barn_us"
     item_attributes = {"brand": "Boot Barn", "brand_wikidata": "Q109825187"}
     allowed_domains = ["www.bootbarn.com"]
-    start_urls = [
-        "https://www.bootbarn.com/on/demandware.store/Sites-bootbarn_us-Site/default/LocationSearch-GetStoresForGeolocationPositionAjax"
-    ]
-    locations_key = ["InquiryResult", "data"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    sitemap_urls = ["https://www.bootbarn.com/sitemap-store-sitemap.xml"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 3, "CONCURRENT_REQUESTS": 1}
+    requires_proxy = True
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        data = {
-            "Limit": 5000,
-            "Offset": 0,
-            "Query": "",
-            "Source": "StoreLocatorPage",
-        }
-        yield JsonRequest(url=self.start_urls[0], data=data)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["branch"] = response.xpath('//*[@class="section-title"]/text()').get().replace(" Store", "")
+        item["street_address"] = response.xpath('//*[@class="store-address1"]/text()').get()
+        item["city"] = response.xpath('//*[@class="store-address-city"]/text()').get()
+        item["state"] = response.xpath('//*[@class="store-address-state"]/text()').get()
+        item["postcode"] = response.xpath('//*[@class="store-address-postal-code"]/text()').get()
+        item["phone"] = response.xpath('//*[@class="store-phone"]/text()').get()
+        item["lat"] = response.xpath("//@data-lat").get()
+        item["lon"] = response.xpath("//@data-lon").get()
+        item["ref"] = item["website"] = response.url
+        oh = OpeningHours()
+        container = response.css(".store-hours-container .store-hours-days")
+        if not container:
+            self.logger.warning("Hours container not found on %s", response.url)
+            return
 
-    def pre_process_data(self, feature: dict) -> None:
-        feature.update(feature.pop("StoreInfo"))
+        for day_span in container.css("span.stores-day"):
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name", None)
-        item["email"] = "store" + feature["code"] + "@bootbarn.com"
-        item["website"] = "https://www.bootbarn.com/stores?StoreID=" + feature["code"]
+            day = day_span.xpath("normalize-space(text())").get().replace(":", "")
 
-        item["opening_hours"] = OpeningHours()
-        for day_hours in feature["HoursByDay"]:
-            if not day_hours["Open"] or "CLOSED" in day_hours["Open"].upper():
-                item["opening_hours"].set_closed(day_hours["Day"])
-            else:
-                item["opening_hours"].add_range(
-                    day_hours["Day"],
-                    day_hours["Open"].replace("**", ""),
-                    day_hours["Close"].replace("**", ""),
-                    "%I:%M%p",
-                )
+            time = " ".join(day_span.xpath("following-sibling::span[1]").xpath("normalize-space(.)").get().split())
+            open_time, close_time = time.split(" - ")
+            oh.add_range(day, open_time.strip(), close_time.strip(), "%I:%M%p")
+            item["opening_hours"] = oh
 
-        apply_category(Categories.SHOP_CLOTHES, item)
         yield item

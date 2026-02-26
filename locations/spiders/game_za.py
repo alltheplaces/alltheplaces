@@ -1,4 +1,7 @@
-from scrapy import Spider
+from typing import Any
+
+from scrapy import Selector, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -7,30 +10,34 @@ from locations.items import Feature
 
 class GameZASpider(Spider):
     name = "game_za"
-    item_attributes = {"brand": "Game", "brand_wikidata": "Q129263113"}
+    item_attributes = {"brand": "Game", "brand_wikidata": "Q126811048"}
     start_urls = ["https://www.game.co.za/occ/v2/game/stores?fields=FULL"]
 
-    def parse(self, response):
-        for location in response.xpath("//stores"):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        sel = Selector(text=response.text, type="xml")
+        for location in sel.xpath("//stores"):
             item = Feature()
-            item["name"] = location.xpath(".//displayName/text()").get()
-            item["street_address"] = location.xpath(".//address//streetAddress/text()").get()
-            item["city"] = location.xpath(".//town/text()").get()
-            item["postcode"] = location.xpath(".//postalCode/text()").get()
-            item["phone"] = location.xpath(".//phone/text()").get()
-            item["addr_full"] = location.xpath(".//formattedAddress/text()").get()
-            item["email"] = location.xpath(".//email/text()").get()
+            item["ref"] = location.xpath("./name/text()").get()
+            item["branch"] = location.xpath("./displayName/text()").get().removeprefix("Game ")
+            item["addr_full"] = location.xpath(".//address/formattedAddress/text()").get()
+            item["state"] = location.xpath(".//address/region/name/text()").get()
+            item["phone"] = location.xpath(".//address/phone/text()").get()
+            item["email"] = location.xpath(".//address/email/text()").get()
             item["lat"] = location.xpath(".//geoPoint/latitude/text()").get()
             item["lon"] = location.xpath(".//geoPoint/longitude/text()").get()
-            item["ref"] = location.xpath(".//id/text()").get()
-            apply_category(Categories.SHOP_SUPERMARKET, item)
             item["website"] = "https://www.game.co.za/"
-            item["opening_hours"] = OpeningHours()
-            for day_time in location.xpath(".//openingHours//weekDayOpeningList"):
-                day = day_time.xpath(".//weekDay/text()").get()
-                open_time = day_time.xpath(".//openingTime/formattedHour/text()").get()
-                close_time = day_time.xpath(".//closingTime/formattedHour/text()").get()
-                item["opening_hours"].add_range(
-                    day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p"
-                )
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+            item["opening_hours"] = self.parse_opening_hours(location)
             yield item
+
+    def parse_opening_hours(self, location: Selector) -> OpeningHours:
+        oh = OpeningHours()
+        try:
+            for day_time in location.xpath(".//openingHours//weekDayOpeningList"):
+                day = day_time.xpath("./weekDay/text()").get()
+                open_time = day_time.xpath("./openingTime/formattedHour/text()").get()
+                close_time = day_time.xpath("./closingTime/formattedHour/text()").get()
+                oh.add_range(day, open_time, close_time, "%I:%M %p")
+        except Exception:
+            pass
+        return oh

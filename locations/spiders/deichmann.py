@@ -23,7 +23,7 @@ class DeichmannSpider(SitemapSpider, StructuredDataSpider):
             item.update(self.DOSENBACH)
 
         item["ref"] = item["ref"].split("#")[1]
-
+        item["name"] = None
         # remove fields that aren't unique amongst stores
         item.pop("email")
         item.pop("image")
