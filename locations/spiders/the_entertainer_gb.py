@@ -36,6 +36,6 @@ class TheEntertainerGBSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         if "tesco" in item["website"]:
             return
-            #item["located_in"] = "Tesco"
-            #item["located_in_wikidata"] = "Q487494"
+            # item["located_in"] = "Tesco"
+            # item["located_in_wikidata"] = "Q487494"
         yield item
