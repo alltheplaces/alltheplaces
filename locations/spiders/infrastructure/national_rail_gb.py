@@ -53,11 +53,10 @@ class NationalRailGBSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["payload"]["stations"]:
-            if location["classification"] != "NORMAL":
+            if location["classification"] not in {"LONDON", "NORMAL"}:
                 continue
             if not location["operator"]:
                 continue
-
             item = Feature()
             item["ref"] = item["extras"]["ref:crs"] = location["crsCode"]
             item["name"] = location["name"]
