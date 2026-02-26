@@ -42,7 +42,7 @@ BRAND_MAP = {
 FUEL_MAP = {
     "E5": "e5",
     "E10": "e10",
-    # "B7P": None,
+    "B7P": "diesel",
     "B7S": "diesel",
     "B10": "b10",
     "HVO": "biodiesel",
