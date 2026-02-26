@@ -1,5 +1,6 @@
 from typing import Any, Iterable
 
+import chompjs
 from scrapy.http import JsonRequest, Response, TextResponse
 
 from locations.categories import Categories, apply_category
@@ -28,11 +29,14 @@ class HornbachSpider(JSONBlobSpider):
     custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        locale = response.xpath("//@data-locale").get("").replace("-", "_")
-        company_code = response.xpath("//@data-company-code").get()
+        client_config = chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "OIDC_CLIENT_CONFIG")]/text()').get()
+        )
+        locale = client_config.get("ui_locales")
+        company_code = client_config.get("companyCode")
         if locale and company_code:
             yield JsonRequest(
-                url=f"https://svc.hornbach.de/cmscontent-service/stores?language={locale}&companyCode={company_code}",
+                url=f"https://svc.hornbach.de/cmscontent-service/stores?language={locale.replace('-', '_')}&companyCode={company_code}",
                 callback=self.parse_locations,
             )
 
