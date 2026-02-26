@@ -12,3 +12,11 @@ class TheRangeSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=r"/stores/\w+"), callback="parse_sd")]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    time_format = "%H:%M:%S"
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if "Wilko" in item["name"]:
+            # duplicates of Wilko spider
+            return
+
+        yield item
