@@ -28,16 +28,18 @@ class Motel6Spider(scrapy.Spider):
 
     def parse_hotel(self, response: Response, **kwargs: Any) -> Any:
         data = json.loads(response.xpath("//pre/text()").get())
-        if data:
-            data.update(data.pop("address", {}))
-            item = DictParser.parse(data)
-            item["ref"] = data["property_id"]
-            item["street_address"] = data.get("address_line_0")
-            item["website"] = "https://www.motel6.com/en/home/motels.{}.{}.{}.html".format(
-                data["state"].lower(),
-                data["city"].lower().replace(" ", "-"),
-                data["property_id"],
-            )
-            item["image"] = "https://www.motel6.com/bin/g6/image.g6PropertyDetailSlider.jpg" + data["lead_image_path"]
-            item["brand"] = BRANDS[data["brand_id"]]
-            yield item
+        if not data:
+            return
+        data.update(data.pop("address", {}))
+        item = DictParser.parse(data)
+        item["name"] = None
+        item["ref"] = data["property_id"]
+        item["street_address"] = data.get("address_line_0")
+        item["website"] = "https://www.motel6.com/en/home/motels.{}.{}.{}.html".format(
+            data["state"].lower(),
+            data["city"].lower().replace(" ", "-"),
+            data["property_id"],
+        )
+        item["image"] = "https://www.motel6.com/bin/g6/image.g6PropertyDetailSlider.jpg" + data["lead_image_path"]
+        item["brand"] = BRANDS[data["brand_id"]]
+        yield item
