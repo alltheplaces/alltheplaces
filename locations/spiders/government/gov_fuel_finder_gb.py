@@ -59,7 +59,7 @@ class GovFuelFinderGBSpider(CSVFeedSpider):
 
     def parse_row(self, response: Response, row: dict[str, str]) -> Any:
         item = Feature()
-        item["ref"] = row["forecourts.node_id"]
+        item["ref"] = item["extras"]["ref:GB:fuel_finder"] = row["forecourts.node_id"]
         item["lat"] = row["forecourts.location.latitude"]
         item["lon"] = row["forecourts.location.longitude"]
 
