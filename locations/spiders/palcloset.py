@@ -1,17 +1,23 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class PalclosetJPSpider(Spider):
-    name = "palcloset_jp"
+class PalclosetSpider(Spider):
+    name = "palcloset"
+    skip_auto_cc_domain = True
 
-    start_urls = ["https://palcloset.storelocator.jp/api/point/x/"]
-    allowed_domains = ["palcloset.storelocator.jp"]
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for points in [
+            "w",
+            "x",
+            "z",
+        ]:
+            yield JsonRequest(url=f"https://palcloset.storelocator.jp/api/point/{points}/")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:
