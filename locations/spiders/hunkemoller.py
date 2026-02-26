@@ -25,13 +25,16 @@ class HunkemollerSpider(SitemapSpider):
                 response.xpath('//*[contains(text(), "latitude")]/text()').get(),
             ).group(1)
         )
+
         item = DictParser.parse(script_text)
         item["website"] = response.url
+
         oh = OpeningHours()
-        for day_time in script_text["c_openingHours"]:
+        for day_time in script_text.get("c_openingHours") or []:
             day = sanitise_day(day_time["dayOfWeek"], DAYS_NL)
             open_time = day_time["open"]
             close_time = day_time["close"]
             oh.add_range(day=day, open_time=open_time, close_time=close_time)
         item["opening_hours"] = oh
+
         yield item
