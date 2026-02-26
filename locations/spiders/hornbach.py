@@ -19,11 +19,22 @@ class HornbachSpider(JSONBlobSpider):
         "https://www.hornbach.at",
         "https://www.hornbach.ch",
         "https://www.hornbach.lu",
+        "https://www.hornbach.cz",
+        "https://www.hornbach.nl",
+        "https://www.hornbach.ro",
+        "https://www.hornbach.se",
+        "https://www.hornbach.sk",
     ]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        if api_endpoint := response.xpath("//@endpoint").get():
-            yield JsonRequest(url=api_endpoint.replace("/store?", "/stores?"), callback=self.parse_locations)
+        locale = response.xpath("//@data-locale").get("").replace("-", "_")
+        company_code = response.xpath("//@data-company-code").get()
+        if locale and company_code:
+            yield JsonRequest(
+                url=f"https://svc.hornbach.de/cmscontent-service/stores?language={locale}&companyCode={company_code}",
+                callback=self.parse_locations,
+            )
 
     def parse_locations(self, response: TextResponse) -> Any:
         yield from super().parse(response)
