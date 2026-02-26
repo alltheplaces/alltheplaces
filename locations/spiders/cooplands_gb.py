@@ -1,5 +1,8 @@
+from scrapy.http import TextResponse
+
 from locations.categories import Categories
 from locations.hours import DAYS_EN
+from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -11,3 +14,7 @@ class CooplandsGBSpider(WPStoreLocatorSpider):
     search_radius = 24
     max_results = 50
     days = DAYS_EN
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        yield item
