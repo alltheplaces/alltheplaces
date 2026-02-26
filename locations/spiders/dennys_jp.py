@@ -15,7 +15,7 @@ class DennysJPSpider(Spider):
         for points in [
             "w",
             "x",
-            "z",            
+            "z",
         ]:
             yield JsonRequest(url=f"https://shop.dennys.co.jp/api/point/{points}/")
 
