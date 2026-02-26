@@ -1,22 +1,28 @@
-import re
+from typing import Iterable
 
-from locations.hours import DAYS, OpeningHours
-from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
-from locations.structured_data_spider import clean_facebook
+import scrapy
+from requests import Response
+from scrapy.http import JsonRequest
+
+from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class RulerFoodsUSSpider(StoreLocatorPlusSelfSpider):
+class RulerFoodsUSSpider(scrapy.Spider):
     name = "ruler_foods_us"
     item_attributes = {"brand": "Ruler Foods", "brand_wikidata": "Q17125470"}
-    allowed_domains = ["rulerfoods.com"]
-    iseadgg_countries_list = ["US"]
-    search_radius = 500
-    max_results = 50
+    allowed_domains = ["falcon.shop.inmar.io"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse_item(self, item, location):
-        item.pop("website", None)
-        item["facebook"] = clean_facebook(location.get("url"))
-        hours_range = re.sub(r"\s+", " ", location["hours"]).strip().upper()
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_days_range(DAYS, *hours_range.split(" TO ", 1), "%I:%M %p")
-        yield item
+    async def start(self):
+        yield JsonRequest(
+            url="https://falcon.shop.inmar.io/v2/locations?fulfillmentMethod=instore",
+            headers={"Inmar-Session-Id": "1MyVgoGgwdgZWxlNcPEREQ"},
+        )
+
+    def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
+        for location in response.json()["data"]["item"]["modules"]["itemListModules"][0]["items"]["locationItems"]:
+            location.update(location.pop("locationAddress"))
+            item = DictParser.parse(location)
+            yield item
