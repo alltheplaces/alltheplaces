@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from scrapy.http import TextResponse
 
 from locations.categories import Categories
