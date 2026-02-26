@@ -11,7 +11,7 @@ from locations.items import Feature
 
 class ScotrailGBSpider(SitemapSpider):
     name = "scotrail_gb"
-    item_attributes = {"operator": "ScotRail", "operator_wikidata": "Q18356161"}
+    item_attributes = {"network": "ScotRail", "network_wikidata": "Q18356161"}
     sitemap_urls = ["https://www.scotrail.co.uk/default/sub/sitemaps/content--station/sitemap.xml"]
     sitemap_rules = [(r"/plan-your-journey", "parse")]
 
