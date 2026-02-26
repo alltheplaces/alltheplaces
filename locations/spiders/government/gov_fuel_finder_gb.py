@@ -68,7 +68,6 @@ class GovFuelFinderGBSpider(CSVFeedSpider):
         else:
             item["name"] = row["forecourts.trading_name"]
 
-        item["operator"] = row["mft.name"]
         item["phone"] = row["forecourts.public_phone_number"]
         item["street_address"] = merge_address_lines(
             [row["forecourts.location.address_line_1"], row["forecourts.location.address_line_2"]]
@@ -77,7 +76,7 @@ class GovFuelFinderGBSpider(CSVFeedSpider):
         item["postcode"] = row["forecourts.location.postcode"]
 
         item["extras"]["check_date"] = datetime.datetime.strptime(
-            row["latest_update_timestamp"], "%a %b %d %Y %H:%M:%S %Z%z (Coordinated Universal Time)"
+            row["forecourt_update_timestamp"], "%a %b %d %Y %H:%M:%S %Z%z (Coordinated Universal Time)"
         ).strftime("%Y-%m-%d")
 
         apply_yes_no(Extras.CAR_WASH, item, row["forecourts.amenities.vehicle_services.car_wash"] == "true")
