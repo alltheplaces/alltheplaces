@@ -20,9 +20,7 @@ class MioSESpider(Spider):
     start_urls = ["https://www.mio.se/butiker"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for link in response.xpath(
-            '//a[starts-with(@href, "/butiker/") and string-length(@href) > 10]'
-        ):
+        for link in response.xpath('//a[starts-with(@href, "/butiker/") and string-length(@href) > 10]'):
             href = link.xpath("@href").get()
             if not href or href.strip("/") == "butiker":
                 continue
