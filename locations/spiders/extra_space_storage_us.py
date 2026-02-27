@@ -32,4 +32,6 @@ class ExtraSpaceStorageUSSpider(SitemapSpider):
                 " ", "_"
             ).lower()
         )
+        if isinstance(item.get("phone"), dict):
+            item["phone"] = ";".join(item["phone"].values())
         yield item
