@@ -25,10 +25,18 @@ class EvanstonCityCouncilTreesUSSpider(ArcGISFeatureServerSpider):
         apply_category(Categories.NATURAL_TREE, item)
         item["extras"]["protected"] = "yes"
         item["extras"]["genus"] = feature.get("Genus")
-        if cultivar := feature.get("CULTIVAR"):
-            item["extras"]["species"] = "{} {}".format(feature.get("SPP").strip(), cultivar.strip())
+        species = feature.get("SPP")
+        if species:
+            species = species.strip()
         else:
-            item["extras"]["species"] = feature.get("SPP")
+            species = ""
+        cultivar = feature.get("CULTIVAR")
+        if cultivar:
+            cultivar = cultivar.strip()
+        else:
+            cultivar = ""
+        if species or cultivar:
+            item["extras"]["species"] = "{} {}".format(species, cultivar).strip()
         item["extras"]["taxon:en"] = feature.get("Common")
         if dbh_in := feature.get("DBH"):
             item["extras"]["diameter"] = f'{dbh_in}"'
