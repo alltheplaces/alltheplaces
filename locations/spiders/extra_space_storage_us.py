@@ -4,6 +4,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
+from locations.linked_data_parser import LinkedDataParser
 
 
 class ExtraSpaceStorageUSSpider(SitemapSpider):
@@ -34,4 +35,11 @@ class ExtraSpaceStorageUSSpider(SitemapSpider):
         )
         if isinstance(item.get("phone"), dict):
             item["phone"] = ";".join(filter(None, item["phone"].values()))
+
+        store["jsonLd"]["openingHours"] = store["jsonLd"].pop("hoursOfOperation", [])
+        try:
+            item["opening_hours"] = LinkedDataParser.parse_opening_hours(store["jsonLd"])
+        except:
+            self.logger.error("Failed to parse opening hours:  {}".format(store["jsonLd"]["openingHours"]))
+
         yield item
