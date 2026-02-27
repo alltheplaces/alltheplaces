@@ -57,14 +57,10 @@ class BrodernasSESpider(Spider):
                 else:
                     item["addr_full"] = addr_text
                 if item.get("addr_full"):
-                    street_match = re.match(
-                        r"^(.+?),?\s*(\d{3}\s*\d{2})\s+(.+)$", item["addr_full"]
-                    )
+                    street_match = re.match(r"^(.+?),?\s*(\d{3}\s*\d{2})\s+(.+)$", item["addr_full"])
                     if street_match:
                         item["street_address"] = street_match.group(1).strip()
-                        item["postcode"] = re.sub(
-                            r"\s+", " ", street_match.group(2).strip()
-                        )
+                        item["postcode"] = re.sub(r"\s+", " ", street_match.group(2).strip())
                         item["city"] = street_match.group(3).strip()
 
             phone = wrap.xpath('.//a[starts-with(@href, "tel:")]/text()').get()
@@ -92,8 +88,5 @@ class BrodernasSESpider(Spider):
         return re.sub(
             r"[^a-z0-9]+",
             "-",
-            name.lower()
-            .replace("å", "a")
-            .replace("ä", "a")
-            .replace("ö", "o"),
+            name.lower().replace("å", "a").replace("ä", "a").replace("ö", "o"),
         ).strip("-")
