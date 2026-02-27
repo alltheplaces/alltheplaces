@@ -19,7 +19,6 @@ class CanadianTireCASpider(SitemapSpider):
     allowed_domains = ["canadiantire.ca"]
     sitemap_urls = ["https://www.canadiantire.ca/sitemap_Store-en_CA-CAD.xml"]
     sitemap_rules = [("", "parse_store_details")]
-    requires_proxy = True  # Data centre IP ranges appear to be blocked (time out)
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
             "User-Agent": BROWSER_DEFAULT,
