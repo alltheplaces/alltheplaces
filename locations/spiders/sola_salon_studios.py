@@ -18,12 +18,15 @@ class SolaSalonStudiosSpider(Spider):
         for state in response.json()["data"]:
             for location in state["locations"]:
                 item = DictParser.parse(location)
+                item["branch"] = item.pop("name")
                 item["website"] = "https://www.solasalonstudios.com/locations/" + location["url_name"]
                 yield Request(url=item["website"], meta={"item": item}, callback=self.add_address_details)
 
     def add_address_details(self, response: Response) -> Any:
-        location_js = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        location = parse_js_object(location_js)["props"]["pageProps"]["locationSEODetails"]["data"]
+        data = parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        location = data["props"]["pageProps"]["locationData"].get("data")
+        if not location:
+            return
         item = response.meta["item"]
         item["street_address"] = clean_address([location["address_1"], location["address_2"]])
         item["country"] = location["country"]
