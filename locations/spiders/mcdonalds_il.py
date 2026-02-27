@@ -1,63 +1,39 @@
 import re
+from typing import Any, Iterable
 
-import scrapy
+import chompjs
+from scrapy.http import JsonRequest, Response, TextResponse
 
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class McdonaldsILSpider(scrapy.Spider):
+class McdonaldsILSpider(JSONBlobSpider):
     name = "mcdonalds_il"
     item_attributes = {"brand_wikidata": "Q12061542"}
-    allowed_domains = ["www.mcdonalds.co.il"]
-    start_urls = ("https://www.mcdonalds.co.il/%D7%90%D7%99%D7%AA%D7%95%D7%A8_%D7%9E%D7%A1%D7%A2%D7%93%D7%94",)
+    start_urls = ["https://order.mcdonalds.co.il"]
+    locations_key = ["data", "stores"]
+    requires_proxy = True
 
-    # TODO: Does have hours but the days are not in english and the function does not work. Hence its deletion
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield response.follow(
+            url=response.xpath('//script[contains(@src,"/_next/static/chunks/pages/_app-")]/@src').get(),
+            callback=self.build_api_url,
+        )
 
-    def parse_ref(self, data):
-        match = re.search(r"store_id=(.*\d)", data)
-        ref = match.groups()[0]
-        return ref
+    def build_api_url(self, response: Response, **kwargs: Any) -> Any:
+        api_details = chompjs.parse_js_object(
+            re.search(r"\(this,[a-z],({https.+?baseUrl:\".+?})\)", response.text).group(1)
+        )
+        yield JsonRequest(
+            url=f'https://{api_details["baseUrl"]}/{api_details["parts"]["path"]}/{api_details["parts"]["platform"]}/{api_details["parts"]["version"]}/getStores',
+            callback=self.parse_locations,
+        )
 
-    def parse_name(self, name):
-        name = name.xpath("//h2[@class='mod_geo_location_store_title']/text()").extract_first()
-        return name.strip()
+    def parse_locations(self, response: TextResponse) -> Any:
+        yield from super().parse(response)
 
-    def parse_latlon(self, data, store_id):
-        lat = lng = ""
-        lat = data.xpath(f'//div[@class="mod_geo_location_store store_id_{store_id}"]/@lat').extract_first()
-        lng = data.xpath(f'//div[@class="mod_geo_location_store store_id_{store_id}"]/@lng').extract_first()
-        return lat, lng
-
-    def parse_phone(self, phone):
-        phone = phone.xpath('//div[@class="mod_geo_location_store_phone"]/span/a/text()').extract_first()
-        if not phone:
-            return ""
-        return phone.strip()
-
-    def parse_address(self, address):
-        address = address.xpath("//div[@class='mod_geo_location_store_adrress']/h3[not(@class)]/text()").extract_first()
-        return address.strip()
-
-    def parse_store(self, response, store_id):
-        name = self.parse_name(response)
-        address = self.parse_address(response)
-        phone = self.parse_phone(response)
-        lat, lon = self.parse_latlon(response, store_id)
-        properties = {
-            "ref": response.meta["ref"],
-            "phone": phone,
-            "lon": lon,
-            "lat": lat,
-            "name": name,
-            "addr_full": address,
-        }
-
-        yield Feature(**properties)
-
-    def parse(self, response):
-        stores = response.xpath('//div[@class="mod_geo_location_store_link"]/span/a/@href').extract()
-        for store in stores:
-            ref = self.parse_ref(store)
-            yield scrapy.Request(
-                "https:" + store, meta={"ref": ref}, callback=self.parse_store, cb_kwargs={"store_id": ref}
-            )
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["StoreIndex"]
+        item["branch"] = feature["StoreNameLong"]
+        yield item
