@@ -35,15 +35,13 @@ class ErikshjalpenSESpider(PlaywrightSpider):
         page = response.meta["playwright_page"]
         await page.wait_for_load_state("domcontentloaded", timeout=15000)
         for _ in range(10):
-            clicked = await page.evaluate(
-                """() => {
+            clicked = await page.evaluate("""() => {
                     const btn = document.querySelector('button.load-button');
                     if (!btn || !btn.offsetParent) return false;
                     btn.scrollIntoView({block: 'center'});
                     btn.click();
                     return true;
-                }"""
-            )
+                }""")
             if not clicked:
                 break
             await page.wait_for_timeout(2000)
@@ -58,7 +56,9 @@ class ErikshjalpenSESpider(PlaywrightSpider):
             if name:
                 item["name"] = name.strip()
 
-            store_url = store.xpath('.//a[contains(@class, "contact--storeurl")][contains(@href, "/stores/")]/@href').get()
+            store_url = store.xpath(
+                './/a[contains(@class, "contact--storeurl")][contains(@href, "/stores/")]/@href'
+            ).get()
             if store_url:
                 item["website"] = store_url
                 item["ref"] = store_url.rstrip("/").split("/")[-1]
@@ -69,7 +69,9 @@ class ErikshjalpenSESpider(PlaywrightSpider):
                     item["lat"] = m.group(1)
                     item["lon"] = m.group(2)
 
-            addr = store.xpath('.//div[contains(@class, "contact")]//ul[contains(@class, "infoline")]/li[1]/span[2]/text()').get()
+            addr = store.xpath(
+                './/div[contains(@class, "contact")]//ul[contains(@class, "infoline")]/li[1]/span[2]/text()'
+            ).get()
             if addr:
                 item["street_address"] = addr.strip()
 
