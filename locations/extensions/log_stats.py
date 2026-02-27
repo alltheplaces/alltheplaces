@@ -24,17 +24,19 @@ class LogStatsExtension:
         self.crawler = crawler
 
     def spider_closed(self):
-        filename = self.crawler.settings.get("LOGSTATS_FILE")
+        filename = None
+        if self.crawler.settings and isinstance(self.crawler.settings.get("LOGSTATS_FILE"), str):
+            filename = self.crawler.settings["LOGSTATS_FILE"]
 
         def myconverter(o):
             if isinstance(o, datetime.datetime):
                 return o.isoformat()
 
-        if filename:
+        if filename and self.crawler.stats:
             with open(filename, "w") as f:
                 f.write(
                     json.dumps(
-                        self.crawler.stats.get_stats(),  # ty: ignore [possibly-missing-attribute]
+                        self.crawler.stats.get_stats(),
                         default=myconverter,
                         sort_keys=True,
                         indent=1,

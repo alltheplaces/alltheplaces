@@ -95,7 +95,7 @@ class CountryUtils:
         else:
             return None
 
-    def country_code_from_url(self, url):
+    def country_code_from_url(self, url: str) -> str | None:
         if isinstance(url, str):
             splits = urlparse(url).netloc.split(".")
             if len(splits) > 0:
