@@ -23,9 +23,7 @@ class LeosLeklandSESpider(Spider):
         for card in response.xpath('//li[contains(@class, "Card_card")]'):
             name = card.xpath('.//a[contains(@class, "Card_titleLink")]/text()').get()
             href = card.xpath('.//a[contains(@class, "Card_titleLink")]/@href').get()
-            addr = card.xpath(
-                './/div[contains(@class, "Card_addressContainer")]//p/text()'
-            ).get()
+            addr = card.xpath('.//div[contains(@class, "Card_addressContainer")]//p/text()').get()
             if not name or not href:
                 continue
             name = name.strip()
@@ -35,9 +33,7 @@ class LeosLeklandSESpider(Spider):
             item["website"] = response.urljoin(href)
             if addr:
                 item["addr_full"] = addr.strip()
-                if m := re.match(
-                    r"^(.+?),?\s*(\d{3}\s*\d{2})\s+(.+)$", item["addr_full"]
-                ):
+                if m := re.match(r"^(.+?),?\s*(\d{3}\s*\d{2})\s+(.+)$", item["addr_full"]):
                     item["street_address"] = m.group(1).strip()
                     item["postcode"] = re.sub(r"\s+", " ", m.group(2).strip())
                     item["city"] = m.group(3).strip()
@@ -51,9 +47,7 @@ class LeosLeklandSESpider(Spider):
     def parse_store(self, response: Response, **kwargs: Any) -> Any:
         item = response.meta["item"]
         extract_google_position(item, response)
-        googl = response.xpath(
-            './/a[contains(@href, "maps.app.goo.gl")]/@href'
-        ).get()
+        googl = response.xpath('.//a[contains(@href, "maps.app.goo.gl")]/@href').get()
         if googl and not item.get("lat") and not item.get("geometry"):
             yield Request(
                 url=googl.strip(),
