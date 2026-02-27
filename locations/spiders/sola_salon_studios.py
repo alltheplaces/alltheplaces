@@ -1,6 +1,6 @@
+import json
 from typing import Any
 
-from chompjs import parse_js_object
 from scrapy import Request, Spider
 from scrapy.http import Response
 
@@ -22,9 +22,9 @@ class SolaSalonStudiosSpider(Spider):
                 yield Request(url=item["website"], meta={"item": item}, callback=self.add_address_details)
 
     def add_address_details(self, response: Response) -> Any:
-        location_js = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        location = parse_js_object(location_js)["props"]["pageProps"]["locationSEODetails"]["data"]
-        item = response.meta["item"]
-        item["street_address"] = clean_address([location["address_1"], location["address_2"]])
-        item["country"] = location["country"]
-        yield item
+        location_js = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        if location := (location_js)["props"]["pageProps"]["locationData"].get("data"):
+            item = response.meta["item"]
+            item["street_address"] = clean_address([location["address_1"], location["address_2"]])
+            item["country"] = location["country"]
+            yield item
