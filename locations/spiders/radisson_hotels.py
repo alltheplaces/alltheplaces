@@ -1,6 +1,6 @@
+import json
 from typing import Any, AsyncIterator
 
-from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -40,7 +40,7 @@ class RadissonHotelsSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel in parse_js_object(response.text)["hotels"]:
+        for hotel in json.loads(response.xpath("//pre/text()").get())["hotels"]:
             hotel.update(hotel.pop("contactInfo"))
             item = DictParser.parse(hotel)
             item["ref"] = hotel.get("code")

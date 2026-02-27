@@ -1,3 +1,4 @@
+import json
 import re
 from typing import Any
 
@@ -20,7 +21,7 @@ class McdonaldsBESpider(PlaywrightSpider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
+        for location in json.loads(response.xpath("//pre/text()").get()):
             item = DictParser.parse(location)
             item["branch"] = re.sub(r"\(\s*(Drive|Mall|In-Store)\s*\)", "", item.pop("name"), re.IGNORECASE).strip()
             item["housenumber"] = location.get("nr")

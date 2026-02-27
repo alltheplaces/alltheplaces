@@ -10,10 +10,16 @@ from locations.hours import OpeningHours
 
 class ZEnergyNZSpider(Spider):
     name = "z_energy_nz"
-    start_urls = ["https://www.z.co.nz/find-a-station", "https://www.caltex.co.nz/find-a-station"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = [
+        "https://www.z.co.nz/find-a-station",
+        "https://www.caltex.co.nz/find-a-station",
+        "https://www.ugoselfserve.co.nz/find-ugo/",
+    ]
     BRANDS = {
         "z": {"brand": "Z", "brand_wikidata": "Q8063337"},
         "caltex": {"brand": "Caltex", "brand_wikidata": "Q277470"},
+        "ugoselfserve": {"brand": "U-Go", "brand_wikidata": "Q135112888"},
     }
 
     def parse(self, response, **kwargs):
@@ -21,14 +27,20 @@ class ZEnergyNZSpider(Spider):
             response.xpath('//script[contains(text(), "stations")]/text()').re_first(r"({\"stations\":.+});")
         )["stations"]:
             item = DictParser.parse(location)
-
+            if "Opens" in location["closed_message"]:
+                # usually means a location that hasn't opened up yet, seen with the U-GO site
+                continue
             if brand := self.BRANDS.get(response.url.split(".")[1]):
                 item.update(brand)
-                item["branch"] = item.pop("name").removeprefix("Z ").removeprefix("Caltex ")
+                item["branch"] = item.pop("name").removeprefix("Z ").removeprefix("Caltex ").removeprefix("U-GO ")
             else:
                 self.logger.error("Unknown brand: {}".format(response.url))
 
-            item["ref"] = location["site_id"]
+            item["street_address"] = location["location"]["address"]
+            item["city"] = location["location"]["city"]
+            item["state"] = location["location"]["region"]
+            item["postcode"] = location["location"]["postcode"]
+            item["ref"] = location["uuid"]
             item["website"] = response.urljoin(location["link"])
             item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
 

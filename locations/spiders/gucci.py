@@ -1,18 +1,17 @@
+import json
 from typing import Any, AsyncIterator
 
-import chompjs
-from scrapy import Spider
 from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import FIREFOX_LATEST
 
 
-class GucciSpider(Spider):
+class GucciSpider(PlaywrightSpider):
     name = "gucci"
     item_attributes = {"brand": "Gucci", "brand_wikidata": "Q178516"}
-    is_playwright_spider = True
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Request]:
@@ -22,7 +21,7 @@ class GucciSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in chompjs.parse_js_object(response.text)["features"]:
+        for location in json.loads(response.xpath("//pre/text()").get())["features"]:
             if location["properties"]["active"] is not True:
                 continue
             item = DictParser.parse(location["properties"])

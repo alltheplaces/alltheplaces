@@ -1,8 +1,8 @@
 import re
-from typing import Any
+from typing import AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -11,10 +11,11 @@ from locations.dict_parser import DictParser
 class SkylarkJPSpider(Spider):
     name = "skylark_jp"
 
-    start_urls = ["https://store-info.skylark.co.jp/api/point/xn7/"]
-    allowed_domains = ["store-info.skylark.co.jp"]
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for points in ["w", "xj", "xn", "xp", "z"]:
+            yield JsonRequest(url=f"https://store-info.skylark.co.jp/api/point/{points}/")
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
@@ -140,7 +141,8 @@ class SkylarkJPSpider(Spider):
 
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["extra_fields"]["クレジット（有無）フラグ"] == "1")
             apply_yes_no(Extras.WIFI, item, store["extra_fields"]["ｗｉ－ｆｉ（有無）フラグ"] == "1")
-            item["website"] = f"https://store-info.skylark.co.jp/skylark/map/{store['id']}"
+            item["ref"] = store["key"]
+            item["website"] = f"https://store-info.skylark.co.jp/skylark/map/{store['key']}/"
             item["phone"] = f"+81 {store['extra_fields']['電話番号']}"
             apply_yes_no("parking", item, store["extra_fields"]["駐車場（有無）フラグ"] == "有")
             item["extras"]["start_date"] = re.search(

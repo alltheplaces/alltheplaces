@@ -34,7 +34,7 @@ from locations.spiders.quickchek_us import QuickchekUSSpider
 from locations.spiders.race_trac_us import RaceTracUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.sheetz import SheetzSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
@@ -120,7 +120,7 @@ class CitiSpider(Spider):
         (["SHEETZ"], SheetzSpider.item_attributes),
         (["UDF"], UnitedDairyFarmersUSSpider.item_attributes),
         (["QUICKCHEK"], QuickchekUSSpider.item_attributes),
-        (["7ELEVEN", "7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["7ELEVEN", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["WALGREENS"], WalgreensSpider.WALGREENS),
         (["CVS"], CVS_BRANDS["CVS Pharmacy"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),

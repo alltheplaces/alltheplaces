@@ -1,32 +1,29 @@
-from typing import Any
+import chompjs
 
-from scrapy.http import Response
-from scrapy.spiders import Spider
+from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
-from locations.items import Feature
 
-
-class AwaySpider(Spider):
+class AwaySpider(JSONBlobSpider):
     name = "away"
     item_attributes = {"brand": "Away", "brand_wikidata": "Q48743138"}
     start_urls = ["https://www.awaytravel.com/pages/stores"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for button in response.xpath("//button[@data-mobile-store]"):
-            location_name = button.xpath("./@data-mobile-store").get()
-            footer = response.xpath(f"//div[@data-footer-store={location_name!r}]")
-            if not footer:
-                continue
+    def extract_json(self, response):
+        search = "window.AwayStores ="
+        script = response.xpath(f"//script[contains(text(), {search!r})]/text()").get()
+        return chompjs.parse_js_object(script[script.find(search) + len(search) :])["stores"]
 
-            item = Feature()
-            item["branch"] = location_name
-            item["ref"] = button.xpath("./@data-href").get().removeprefix("/pages/store/")
-            item["website"] = response.urljoin(button.xpath("./@data-href").get())
-            item["lat"] = button.xpath("./@data-latitude").get()
-            item["lon"] = button.xpath("./@data-longitude").get()
+    def post_process_item(self, item, response, location):
+        item["branch"] = item.pop("name")
 
-            item["image"] = response.urljoin(footer.xpath(".//div[@class='footer-store__image']/img/@src").get())
-            item["phone"] = footer.xpath(".//a[starts-with(@href, 'tel:')]/@href").get()
-            item["addr_full"] = footer.xpath(".//address/*/text()").get()
+        item["addr_full"] = merge_address_lines(location["address"])
+        item["lon"], item["lat"] = location["coords"]
 
-            yield item
+        oh = OpeningHours()
+        for line in location["hours"]:
+            oh.add_ranges_from_string(line)
+        item["opening_hours"] = oh
+
+        yield item

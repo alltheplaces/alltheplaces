@@ -40,6 +40,7 @@ class ClarksSpider(JSONBlobSpider):
         item["website"] = (
             f'{store_locator}/{country}/{item["city"]}/{item["ref"]}'.replace(" ", "") if country else store_locator
         )
+        item["branch"] = item.pop("name").replace("Clarks Outlet", "").replace("Clarks", "")
         item["opening_hours"] = OpeningHours()
         for rule in feature.get("openingHours", []):
             if day := sanitise_day(rule.get("day")):

@@ -19,4 +19,5 @@ class ElinoilGRSpider(JSONBlobSpider):
         apply_yes_no(Fuel.DIESEL, item, "Diesel Crystal Next" in services)
         apply_yes_no(Fuel.LPG, item, "Gas Υγραέριο" in services)
         apply_yes_no(PaymentMethods.DINERS_CLUB, item, "Diners Club International" in services)
+        item["street_address"] = item.pop("addr_full", None)
         yield item

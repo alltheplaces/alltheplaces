@@ -1,25 +1,20 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.google_url import extract_google_position
-from locations.structured_data_spider import StructuredDataSpider
+from locations.open_graph_spider import OpenGraphSpider
 
 
-class SportClipsUSSpider(CrawlSpider, StructuredDataSpider):
+class SportClipsUSSpider(CrawlSpider, OpenGraphSpider):
     name = "sport_clips_us"
     item_attributes = {"brand": "Sport Clips", "brand_wikidata": "Q7579310"}
     allowed_domains = ["sportclips.com"]
     start_urls = ["https://sportclips.com/states"]
-    rules = [Rule(LinkExtractor(allow=[r"/states/[\w-]+$"]), callback="parse_sd")]
-    search_for_facebook = False
-    search_for_twitter = False
+    rules = [
+        Rule(LinkExtractor(allow=[r"/states/[\w-]+$"]), follow=True),
+        Rule(LinkExtractor(allow=[r"/states/[\w-]+/[\w-]+$"]), follow=True),
+        Rule(LinkExtractor(allow=[r"/us-[a-z]{2}-[\w-]+-[a-z]{2}\d+"]), callback="parse_og"),
+    ]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("Sport Clips Haircuts of ")
-
-        el = response.xpath(f"//h4[starts-with(text(), {ld_data['name']!r})]/..")
-        item["website"] = item["ref"] = el.xpath(".//a[text()='View Website']/@href").get()
-        assert item["ref"] is not None
-        extract_google_position(item, el)
-
+    def post_process_item(self, item, response, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Haircuts for Men | Sport Clips Haircuts Of ")
         yield item

@@ -115,6 +115,31 @@ def test_multiple_addresses():
     }
 
 
+def test_protocol_relative_itemtype():
+    src = """
+<section itemscope itemtype="//schema.org/Store">
+    <span itemprop="name">Test Store</span>
+    <div itemprop="address" itemscope itemtype="//schema.org/PostalAddress">
+        <span itemprop="streetAddress">123 Main St</span>
+        <span itemprop="postalCode">AB1 2CD</span>
+    </div>
+</section>
+    """
+    doc = Selector(text=src)
+    items = MicrodataParser.extract_microdata(doc)
+    ld = MicrodataParser.convert_to_graph(items)
+    assert ld == {
+        "@context": "https://schema.org",
+        "@type": "Store",
+        "name": "Test Store",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "postalCode": "AB1 2CD",
+        },
+    }
+
+
 def test_rdfa():
     src = """
 <main vocab="http://schema.org/" typeof="GroceryStore">
