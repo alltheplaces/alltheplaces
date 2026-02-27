@@ -18,6 +18,7 @@ class SolaSalonStudiosSpider(Spider):
         for state in response.json()["data"]:
             for location in state["locations"]:
                 item = DictParser.parse(location)
+                item["branch"] = item.pop("name")
                 item["website"] = "https://www.solasalonstudios.com/locations/" + location["url_name"]
                 yield Request(url=item["website"], meta={"item": item}, callback=self.add_address_details)
 
