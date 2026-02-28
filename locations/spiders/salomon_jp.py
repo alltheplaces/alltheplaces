@@ -9,11 +9,11 @@ from locations.dict_parser import DictParser
 
 class SalomonJPSpider(Spider):
     name = "salomon_jp"
-    
+
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["x", "w", "z"]:
             yield JsonRequest(url=f"https://store.amersports.jp/api/points/{points}")
-    
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:
 
