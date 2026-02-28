@@ -4,13 +4,14 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 
 
 class CocoIchibanyaSpider(Spider):
     name = "coco_ichibanya"
     skip_auto_cc_domain = True
-    item_attributes = {"brand": "CoCo Ichibanya", "brand_wikidata": "Q5986105"}
+    item_attributes = {"brand": "CoCo Ichibanya", "brand_wikidata": "Q5986105", "extras": Categories.RESTAURANT.value,}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["g", "t", "q", "w", "x", "8", "9"]:
