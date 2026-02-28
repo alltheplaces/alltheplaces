@@ -18,14 +18,14 @@ OBJECT_TYPE_MAP = {
     22: ("Ferist", {"barrier": "cattle_grid"}, None),
     23: ("Vegbom", {"barrier": "gate"}, None),
     25: ("Leskur", {"amenity": "shelter", "shelter_type": "public_transport"}, None),
-    37: ("Motorvegkryss", {"highway": "motorway_junction"}, "Navn"),
+    37: ("Vegkryss", {"highway": "motorway_junction"}, "Navn"),
     39: ("Rasteplass", {"highway": "rest_area"}, "Navn"),
     40: ("Snuplass", {"highway": "turning_circle"}, None),
     45: ("Bomstasjon", {"barrier": "toll_booth"}, "Navn bomstasjon"),
-    47: ("Møteplass", {"highway": "passing_place"}, None),
+    47: ("Trafikklomme", {"highway": "passing_place"}, None),
     60: ("Bru", {"man_made": "bridge"}, "Navn"),
     64: ("Ferjekai", {"amenity": "ferry_terminal"}, "Navn"),
-    66: ("Skredsikring", {"tunnel": "avalanche_protector"}, "Navn"),
+    66: ("Skredoverbygg", {"tunnel": "avalanche_protector"}, "Navn"),
     67: ("Tunnelløp", {"tunnel": "yes", "man_made": "tunnel"}, "Navn"),
     83: ("Kum", {"man_made": "manhole"}, None),
     87: ("Belysningspunkt", {"highway": "street_lamp", "support": "pole"}, None),
@@ -40,8 +40,8 @@ OBJECT_TYPE_MAP = {
     199: ("Trær", {"natural": "tree"}, None),
     209: ("Hydrant", {"emergency": "fire_hydrant"}, None),
     291: ("Viltfare", {"hazard": "animal_crossing"}, None),
-    607: ("Sperring", {"barrier": "yes"}, None),
-    809: ("Døgnhvileplass", {"highway": "rest_area", "truck": "yes"}, "Navn"),
+    607: ("Vegsperring", {"barrier": "yes"}, None),
+    809: ("Døgnhvileplass", {"highway": "rest_area", "hgv": "yes"}, "Navn"),
     854: ("Kuldeport", {"barrier": "roller_shutter"}, None),
     875: ("Trapp", {"highway": "steps"}, None),
 }
@@ -202,6 +202,9 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         # Apply OSM category tags
         apply_category(category, item)
 
+        # Apply common property mappings
+        self._apply_common_props(item, props)
+
         # Apply type-specific extras
         if not self._apply_type_extras(item, type_id, props, egenskaper):
             return None
@@ -213,6 +216,32 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["street"] = adresser[0].get("navn")
 
         return item
+
+    def _apply_common_props(self, item: Feature, props: dict) -> None:
+        """Apply common NVDB property mappings shared across many object types.
+
+        Maps standard NVDB properties to OSM-compatible tags:
+        - Tilleggsinformasjon -> description
+        - Etableringsår -> start_date
+        - Produsent -> manufacturer
+        - Produktnavn -> model
+        """
+        if description := props.get("Tilleggsinformasjon"):
+            item["extras"]["description"] = description
+        if start_date := props.get("Etableringsår"):
+            item["extras"]["start_date"] = start_date
+        if manufacturer := props.get("Produsent"):
+            item["extras"]["manufacturer"] = manufacturer
+        if model := props.get("Produktnavn"):
+            item["extras"]["model"] = model
+
+    def _apply_material(self, item: Feature, props: dict) -> None:
+        """Map NVDB Materialtype to OSM material tag."""
+        if material_type := props.get("Materialtype"):
+            if material_type in self._MATERIAL_TYPE_MAP:
+                item["extras"]["material"] = self._MATERIAL_TYPE_MAP[material_type]
+            else:
+                item["extras"]["material"] = material_type.lower()
 
     def _apply_type_extras(self, item: Feature, type_id: int, props: dict, egenskaper: list[dict]) -> bool:
         """Apply type-specific OSM tags based on the object type and its properties.
@@ -252,8 +281,9 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
     def _extras_ferist(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
         """Type 22: Ferist (Cattle grid)."""
-        if material := props.get("Materiale"):
-            item["extras"]["material"] = material.lower()
+        if cattle_grid_type := props.get("Type"):
+            if cattle_grid_type == "Elektrisk":
+                item["extras"]["cattle_grid"] = "electric"
         return True
 
     _BARRIER_TYPE_MAP = {
@@ -268,8 +298,29 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         "Låst bom": "yes",
     }
 
+    _MATERIAL_TYPE_MAP = {
+        # Type 23 (Vegbom) materials
+        "Stål": "steel",
+        "Aluminium": "aluminium",
+        "Tre": "wood",
+        "Plast": "plastic",
+        "Betong": "concrete",
+        "Stein": "stone",
+        # Type 25 (Leskur) materials
+        "Metall, aluminium": "aluminium",
+        "Metall, stål, galvanisert": "steel",
+        "Metall": "metal",
+        "Pleksiglass": "plexiglass",
+        "Polykarbonat": "polycarbonate",
+        "Herdet glass": "tempered_glass",
+        "Glassfiber": "fiberglass",
+        # Type 875 (Trapp) materials
+        "Granitt": "granite",
+    }
+
     def _extras_vegbom(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
         """Type 23: Vegbom (Road barrier)."""
+        self._apply_material(item, props)
         bom_type = props.get("Type", "")
         if bom_type in self._BARRIER_TYPE_MAP:
             item["extras"]["barrier"] = self._BARRIER_TYPE_MAP[bom_type]
@@ -285,17 +336,18 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         return True
 
     def _extras_leskur(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
-        """Type 25: Leskur (Bus shelter)."""
+        """Type 25: Leskur (Public transport shelter)."""
+        self._apply_material(item, props)
         if props.get("Innvendig belysning") == "Ja":
             item["extras"]["lit"] = "yes"
-        if material := props.get("Materialtype"):
-            item["extras"]["material"] = material.lower()
         if props.get("Sittemulighet") == "Ja":
             item["extras"]["bench"] = "yes"
+        if props.get("Areal tilpasset rullestol") == "Ja":
+            item["extras"]["wheelchair"] = "yes"
         return True
 
     def _extras_motorvegkryss(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
-        """Type 37: Motorvegkryss (Motorway junction)."""
+        """Type 37: Vegkryss (Road junction — filtered to motorway junctions only)."""
         if "Planskilt kryss" not in props.get("Type", ""):
             return False
         if ref := props.get("Kryssnummer"):
@@ -334,7 +386,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         return True
 
     def _extras_moteplass(self, _item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
-        """Type 47: Møteplass (Passing place)."""
+        """Type 47: Trafikklomme (Traffic bay — filtered to passing places only)."""
         return props.get("Bruksområde", "") == "Møteplass"
 
     _BRIDGE_MOVABLE_MAP = {
@@ -380,7 +432,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         return True
 
     def _extras_skredsikring(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
-        """Type 66: Skredsikring (Avalanche protector)."""
+        """Type 66: Skredoverbygg (Avalanche protector)."""
         item["extras"]["layer"] = "-1"
         return True
 
@@ -394,9 +446,6 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["maxheight"] = height
         if year := props.get("Åpningsår"):
             item["extras"]["start_date"] = year
-        if props.get("Sykkelforbud") == "Ja":
-            item["extras"]["bicycle"] = "no"
-            item["extras"]["foot"] = "no"
         return True
 
     def _extras_signalanlegg(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
@@ -419,14 +468,12 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
                     item["extras"]["crossing:light"] = "yes"
         return True
 
+    # Enum values from NVDB datakatalog type 103 -> OSM traffic_calming values
     _TRAFFIC_CALMING_MAP = {
         "Fartshump": "hump",
         "Fartsputer": "cushion",
-        "Fartspute": "cushion",
-        "Opphøyd gangfelt": "table",
         "Innsnevring": "choker",
         "Innsnevring i kryss": "choker",
-        "Opphøyd kryss": "table",
         "Opphøyd kryssområde": "table",
         "Sideforskyvning": "chicane",
         "Innsnevring og sideforskyvning": "chicane",
@@ -461,7 +508,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
     def _extras_gangfelt(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
         """Type 174: Gangfelt (Pedestrian crossing)."""
-        if props.get("Trafikklys") == "Ja":
+        if props.get("Lysregulert") == "Ja":
             item["extras"]["crossing"] = "traffic_signals"
         elif props.get("Markering av striper", "") != "Ikke striper" or props.get("Skiltet") == "Ja":
             item["extras"]["crossing"] = "uncontrolled"
@@ -502,11 +549,8 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
     def _extras_hydrant(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
         """Type 209: Hydrant."""
-        placement = props.get("Plassering", "")
-        if "Underjordisk" in placement or "Under" in placement:
-            item["extras"]["fire_hydrant:type"] = "underground"
-        elif "Overgrunn" in placement or "Stolpe" in placement:
-            item["extras"]["fire_hydrant:type"] = "pillar"
+        if flow_rate := props.get("Kapasitet"):
+            item["extras"]["flow_rate"] = f"{flow_rate} l/s"
         return True
 
     _SPECIES_MAP = {
@@ -521,23 +565,23 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         if art := props.get("Art"):
             if species := self._SPECIES_MAP.get(art):
                 item["extras"]["species:en"] = species
+        if props.get("Beskrivelse"):
+            item["extras"]["description"] = props["Beskrivelse"]
         return True
 
     def _extras_sperring(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
-        """Type 607: Sperring (Road barrier/blocker)."""
+        """Type 607: Vegsperring (Road barrier/blocker)."""
         bom_type = props.get("Type", "")
         if bom_type in self._BARRIER_TYPE_MAP:
             item["extras"]["barrier"] = self._BARRIER_TYPE_MAP[bom_type]
-        bruk = props.get("Bruksområde", "")
-        if bruk == "Gang-/sykkelveg, sluse" and (bom_type == "Annen type vegbom/sperring" or not bom_type):
-            item["extras"]["barrier"] = "swing_gate"
-        if bruk in ("Tunnel", "Bomstasjon", "Ferjekai", "Jernbane"):
+        funksjon = props.get("Funksjon", "")
+        if funksjon == "Betalingssperre":
             return False
         return True
 
     def _extras_dognhvileplass(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
         """Type 809: Døgnhvileplass (24h truck rest area)."""
-        if cap_large := props.get("Antall oppstillingspl. store kjt."):
+        if cap_large := props.get("Antall oppstillingsplasser vogntog"):
             item["extras"]["capacity:hgv"] = cap_large
         if cap_charge := props.get("Antall oppstillingspl. med lading, store kjt."):
             item["extras"]["capacity:hgv:charging"] = cap_charge
@@ -555,8 +599,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["step_count"] = steps
         if width := props.get("Bredde"):
             item["extras"]["width"] = f"{width} m"
-        if material := props.get("Materialtype"):
-            item["extras"]["material"] = material.lower()
-        if props.get("Barnevognsport") == "Ja":
+        self._apply_material(item, props)
+        if props.get("Barnevognspor") == "Ja":
             item["extras"]["ramp:stroller"] = "yes"
         return True
