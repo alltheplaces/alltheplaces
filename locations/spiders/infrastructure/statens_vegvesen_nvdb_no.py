@@ -218,290 +218,345 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         """Apply type-specific OSM tags based on the object type and its properties.
         Returns True if the item should be kept, False to skip it.
         """
+        handler = {
+            22: self._extras_ferist,
+            23: self._extras_vegbom,
+            25: self._extras_leskur,
+            37: self._extras_motorvegkryss,
+            39: self._extras_rasteplass,
+            40: self._extras_snuplass,
+            45: self._extras_bomstasjon,
+            47: self._extras_moteplass,
+            60: self._extras_bru,
+            64: self._extras_ferjekai,
+            66: self._extras_skredsikring,
+            67: self._extras_tunnellop,
+            89: self._extras_signalanlegg,
+            100: self._extras_jernbanekryssing,
+            103: self._extras_fartsdemper,
+            153: self._extras_vaerstasjon,
+            163: self._extras_kamera,
+            174: self._extras_gangfelt,
+            180: self._extras_nodtelefon,
+            199: self._extras_traer,
+            209: self._extras_hydrant,
+            291: self._extras_viltfare,
+            607: self._extras_sperring,
+            809: self._extras_dognhvileplass,
+            854: self._extras_kuldeport,
+            875: self._extras_trapp,
+        }.get(type_id)
+        if handler is None:
+            return True
+        return handler(item, props, egenskaper)
 
-        if type_id == 22:  # Ferist (Cattle grid)
-            if material := props.get("Materiale"):
-                item["extras"]["material"] = material.lower()
+    def _extras_ferist(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 22: Ferist (Cattle grid)."""
+        if material := props.get("Materiale"):
+            item["extras"]["material"] = material.lower()
+        return True
 
-        elif type_id == 23:  # Vegbom (Road barrier)
-            barriers = {
-                "Heve-/senkebom": "lift_gate",
-                "Svingbom": "swing_gate",
-                "Stolpe/pullert/kjegle": "bollard",
-                "Rørgelender": "cycle_barrier",
-                "Steinblokk": "block",
-                "Betongblokk": "jersey_barrier",
-                "Bussluse": "bus_trap",
-                "Annen type vegbom/sperring": "gate",
-                "Låst bom": "yes",
-            }
-            bom_type = props.get("Type", "")
-            if bom_type in barriers:
-                item["extras"]["barrier"] = barriers[bom_type]
-            bruk = props.get("Bruksområde", "")
-            if bruk == "Gang-/sykkelveg, sluse" and (bom_type == "Annen type vegbom/sperring" or not bom_type):
-                item["extras"]["barrier"] = "swing_gate"
-            if bruk == "Høyfjellsovergang":
-                item["extras"]["access"] = "yes"
-                if stedsnavn := props.get("Stedsnavn"):
-                    item["name"] = stedsnavn
-            # Skip barriers in contexts handled by other types
-            if bruk in ("Tunnel", "Bomstasjon", "Ferjekai", "Jernbane"):
-                return False
+    _BARRIER_TYPE_MAP = {
+        "Heve-/senkebom": "lift_gate",
+        "Svingbom": "swing_gate",
+        "Stolpe/pullert/kjegle": "bollard",
+        "Rørgelender": "cycle_barrier",
+        "Steinblokk": "block",
+        "Betongblokk": "jersey_barrier",
+        "Bussluse": "bus_trap",
+        "Annen type vegbom/sperring": "gate",
+        "Låst bom": "yes",
+    }
 
-        elif type_id == 25:  # Leskur (Bus shelter)
-            if props.get("Innvendig belysning") == "Ja":
-                item["extras"]["lit"] = "yes"
-            if material := props.get("Materialtype"):
-                item["extras"]["material"] = material.lower()
-            if props.get("Sittemulighet") == "Ja":
-                item["extras"]["bench"] = "yes"
+    def _extras_vegbom(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 23: Vegbom (Road barrier)."""
+        bom_type = props.get("Type", "")
+        if bom_type in self._BARRIER_TYPE_MAP:
+            item["extras"]["barrier"] = self._BARRIER_TYPE_MAP[bom_type]
+        bruk = props.get("Bruksområde", "")
+        if bruk == "Gang-/sykkelveg, sluse" and (bom_type == "Annen type vegbom/sperring" or not bom_type):
+            item["extras"]["barrier"] = "swing_gate"
+        if bruk == "Høyfjellsovergang":
+            item["extras"]["access"] = "yes"
+            if stedsnavn := props.get("Stedsnavn"):
+                item["name"] = stedsnavn
+        if bruk in ("Tunnel", "Bomstasjon", "Ferjekai", "Jernbane"):
+            return False
+        return True
 
-        elif type_id == 37:  # Motorvegkryss (Motorway junction)
-            junction_type = props.get("Type", "")
-            if "Planskilt kryss" not in junction_type:
-                return False
-            if ref := props.get("Kryssnummer"):
-                item["extras"]["ref"] = str(ref)
+    def _extras_leskur(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 25: Leskur (Bus shelter)."""
+        if props.get("Innvendig belysning") == "Ja":
+            item["extras"]["lit"] = "yes"
+        if material := props.get("Materialtype"):
+            item["extras"]["material"] = material.lower()
+        if props.get("Sittemulighet") == "Ja":
+            item["extras"]["bench"] = "yes"
+        return True
 
-        elif type_id == 39:  # Rasteplass (Rest area)
-            if cap_small := props.get("Antall oppstillingspl. små kjt."):
-                item["extras"]["capacity:car"] = cap_small
-            if cap_large := props.get("Antall oppstillingspl. store kjt."):
-                item["extras"]["capacity:hgv"] = cap_large
-            if props.get("Fast dekke") == "Ja":
-                item["extras"]["surface"] = "paved"
+    def _extras_motorvegkryss(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 37: Motorvegkryss (Motorway junction)."""
+        if "Planskilt kryss" not in props.get("Type", ""):
+            return False
+        if ref := props.get("Kryssnummer"):
+            item["extras"]["ref"] = str(ref)
+        return True
 
-        elif type_id == 40:  # Snuplass (Turning point)
-            utforming = props.get("Utforming", "")
-            if "trafikkøy" in utforming.lower():
-                item["extras"]["highway"] = "turning_loop"
+    def _extras_rasteplass(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 39: Rasteplass (Rest area)."""
+        if cap_small := props.get("Antall oppstillingspl. små kjt."):
+            item["extras"]["capacity:car"] = cap_small
+        if cap_large := props.get("Antall oppstillingspl. store kjt."):
+            item["extras"]["capacity:hgv"] = cap_large
+        if props.get("Fast dekke") == "Ja":
+            item["extras"]["surface"] = "paved"
+        return True
 
-        elif type_id == 45:  # Bomstasjon (Toll booth)
-            if operator_name := props.get("Navn bompengeanlegg"):
-                item["extras"]["toll:operator"] = operator_name
-            if url := props.get("Link til bomstasjon"):
-                if not url.startswith("http"):
-                    url = "https://" + url
-                item["website"] = url
-            if bom_type := props.get("Bomstasjonstype"):
-                if "AutoPASS" in bom_type:
-                    item["extras"]["payment:autopass"] = "yes"
-                if "automatisk" in bom_type.lower():
-                    item["extras"]["toll:automatic"] = "yes"
+    def _extras_snuplass(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 40: Snuplass (Turning point)."""
+        if "trafikkøy" in props.get("Utforming", "").lower():
+            item["extras"]["highway"] = "turning_loop"
+        return True
 
-        elif type_id == 47:  # Møteplass (Passing place)
-            bruk = props.get("Bruksområde", "")
-            if bruk != "Møteplass":
-                return False
+    def _extras_bomstasjon(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 45: Bomstasjon (Toll booth)."""
+        if operator_name := props.get("Navn bompengeanlegg"):
+            item["extras"]["toll:operator"] = operator_name
+        if url := props.get("Link til bomstasjon"):
+            if not url.startswith("http"):
+                url = "https://" + url
+            item["website"] = url
+        if bom_type := props.get("Bomstasjonstype"):
+            if "AutoPASS" in bom_type:
+                item["extras"]["payment:autopass"] = "yes"
+            if "automatisk" in bom_type.lower():
+                item["extras"]["toll:automatic"] = "yes"
+        return True
 
-        elif type_id == 60:  # Bru (Bridge)
-            if length := props.get("Lengde"):
-                item["extras"]["length"] = f"{length} m"
-            if year := props.get("Byggeår"):
-                item["extras"]["start_date"] = year
-            # Clean up bridge name like reference nvdb2osm
-            if name := item.get("name"):
-                item["extras"]["bridge:description"] = name.replace("  ", " ").replace(" Bru", " bru").strip()
-            # Detailed bridge structure type mapping from reference
-            if bygge_type := props.get("Byggverkstype"):
-                bridge_type = bygge_type.lower()
-                if "hengebru" in bridge_type:
-                    item["extras"]["bridge:structure"] = "suspension"
-                elif "bue" in bridge_type or "hvelv" in bridge_type:
-                    item["extras"]["bridge:structure"] = "arch"
-                elif "fagverk" in bridge_type:
-                    item["extras"]["bridge:structure"] = "truss"
-                elif bridge_type in ("klaffebru", "svingbru", "rullebru"):
-                    item["extras"]["bridge"] = "movable"
-                    movable_types = {
-                        "klaffebru": "bascule",
-                        "svingbru": "swing",
-                        "rullebru": "retractable",
-                    }
-                    if movable := movable_types.get(bridge_type):
-                        item["extras"]["bridge:movable"] = movable
-                elif bridge_type == "flytebru":
-                    item["extras"]["bridge:structure"] = "floating"
-                else:
-                    item["extras"]["bridge:structure"] = bridge_type
+    def _extras_moteplass(self, _item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 47: Møteplass (Passing place)."""
+        return props.get("Bruksområde", "") == "Møteplass"
 
-        elif type_id == 64:  # Ferjekai (Ferry terminal)
-            # Clean up ferry terminal name (strip Fk/Kai prefixes)
-            if name := item.get("name"):
-                item["name"] = name.replace("Fk", "").replace("Kai", "").replace("  ", " ").strip()
-            if nsr_id := _get_prop(egenskaper, "NSR_Stopplace_ID"):
-                item["extras"]["ref:nsrq"] = nsr_id
+    _BRIDGE_MOVABLE_MAP = {
+        "klaffebru": "bascule",
+        "svingbru": "swing",
+        "rullebru": "retractable",
+    }
 
-        elif type_id == 66:  # Skredsikring (Avalanche protector)
-            item["extras"]["layer"] = "-1"
+    def _extras_bru(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 60: Bru (Bridge)."""
+        if length := props.get("Lengde"):
+            item["extras"]["length"] = f"{length} m"
+        if year := props.get("Byggeår"):
+            item["extras"]["start_date"] = year
+        if name := item.get("name"):
+            item["extras"]["bridge:description"] = name.replace("  ", " ").replace(" Bru", " bru").strip()
+        if bygge_type := props.get("Byggverkstype"):
+            self._apply_bridge_structure(item, bygge_type.lower())
+        return True
 
-        elif type_id == 67:  # Tunnelløp (Tunnel)
-            if length := props.get("Lengde"):
-                item["extras"]["tunnel:length"] = f"{length} m"
-            if width := props.get("Bredde"):
-                item["extras"]["width"] = f"{width} m"
-            if height := props.get("Høyde"):
-                item["extras"]["maxheight"] = height
-            if year := props.get("Åpningsår"):
-                item["extras"]["start_date"] = year
-            if props.get("Sykkelforbud") == "Ja":
-                item["extras"]["bicycle"] = "no"
-                item["extras"]["foot"] = "no"
+    def _apply_bridge_structure(self, item: Feature, bridge_type: str) -> None:
+        """Map Norwegian bridge construction type to OSM bridge:structure."""
+        if "hengebru" in bridge_type:
+            item["extras"]["bridge:structure"] = "suspension"
+        elif "bue" in bridge_type or "hvelv" in bridge_type:
+            item["extras"]["bridge:structure"] = "arch"
+        elif "fagverk" in bridge_type:
+            item["extras"]["bridge:structure"] = "truss"
+        elif bridge_type in self._BRIDGE_MOVABLE_MAP:
+            item["extras"]["bridge"] = "movable"
+            item["extras"]["bridge:movable"] = self._BRIDGE_MOVABLE_MAP[bridge_type]
+        elif bridge_type == "flytebru":
+            item["extras"]["bridge:structure"] = "floating"
+        else:
+            item["extras"]["bridge:structure"] = bridge_type
 
-        elif type_id == 89:  # Signalanlegg (Traffic signals)
-            bruk = props.get("Bruksområde", "")
-            if bruk == "Gangfelt":
-                # Pedestrian crossing signal — override to crossing category
-                item["extras"]["highway"] = "crossing"
-                item["extras"]["crossing"] = "traffic_signals"
+    def _extras_ferjekai(self, item: Feature, _props: dict, egenskaper: list[dict]) -> bool:
+        """Type 64: Ferjekai (Ferry terminal)."""
+        if name := item.get("name"):
+            item["name"] = name.replace("Fk", "").replace("Kai", "").replace("  ", " ").strip()
+        if nsr_id := _get_prop(egenskaper, "NSR_Stopplace_ID"):
+            item["extras"]["ref:nsrq"] = nsr_id
+        return True
 
-        elif type_id == 100:  # Jernbanekryssing (Railway crossing)
-            crossing_type = props.get("Type", "")
-            if "I plan" in crossing_type:
-                if "uten lysregulering og bommer" in crossing_type:
-                    item["extras"]["crossing"] = "uncontrolled"
-                else:
-                    if "uten bommer" not in crossing_type or "grind" in crossing_type:
-                        item["extras"]["crossing:barrier"] = "yes"
-                    if "lysregulert" in crossing_type:
-                        item["extras"]["crossing:light"] = "yes"
+    def _extras_skredsikring(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 66: Skredsikring (Avalanche protector)."""
+        item["extras"]["layer"] = "-1"
+        return True
 
-        elif type_id == 103:  # Fartsdemper (Speed bump/hump)
-            bump_type = props.get("Type", "")
-            type_map = {
-                "Fartshump": "hump",
-                "Fartsputer": "cushion",
-                "Fartspute": "cushion",
-                "Opphøyd gangfelt": "table",
-                "Innsnevring": "choker",
-                "Innsnevring i kryss": "choker",
-                "Opphøyd kryss": "table",
-                "Opphøyd kryssområde": "table",
-                "Sideforskyvning": "chicane",
-                "Innsnevring og sideforskyvning": "chicane",
-                "Rumlefelt": "rumble_strip",
-            }
-            if osm_type := type_map.get(bump_type):
-                # Fartshump with length >= 7m is a raised table, not a hump
-                if bump_type == "Fartshump":
-                    if length_str := props.get("Lengde, langs kjøreretning"):
-                        try:
-                            if float(length_str) >= 7:
-                                osm_type = "table"
-                        except ValueError:
-                            pass
-                item["extras"]["traffic_calming"] = osm_type
+    def _extras_tunnellop(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 67: Tunnelløp (Tunnel)."""
+        if length := props.get("Lengde"):
+            item["extras"]["tunnel:length"] = f"{length} m"
+        if width := props.get("Bredde"):
+            item["extras"]["width"] = f"{width} m"
+        if height := props.get("Høyde"):
+            item["extras"]["maxheight"] = height
+        if year := props.get("Åpningsår"):
+            item["extras"]["start_date"] = year
+        if props.get("Sykkelforbud") == "Ja":
+            item["extras"]["bicycle"] = "no"
+            item["extras"]["foot"] = "no"
+        return True
 
-        elif type_id == 153:  # Værstasjon (Weather station)
-            apply_yes_no(MonitoringTypes.WEATHER, item, True)
-            if station_nr := props.get("Målestasjonsnummer"):
-                item["extras"]["ref:station"] = station_nr
+    def _extras_signalanlegg(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 89: Signalanlegg (Traffic signals)."""
+        if props.get("Bruksområde", "") == "Gangfelt":
+            item["extras"]["highway"] = "crossing"
+            item["extras"]["crossing"] = "traffic_signals"
+        return True
 
-        elif type_id == 162:  # ATK-punkt (Speed enforcement camera)
-            pass  # Category tags is all relevant info we have
-
-        elif type_id == 163:  # Kamera (Camera)
-            item["extras"]["surveillance:purpose"] = "traffic"
-
-        elif type_id == 174:  # Gangfelt (Pedestrian crossing)
-            # Detailed crossing tagging based on nvdb2osm reference
-            if props.get("Trafikklys") == "Ja":
-                item["extras"]["crossing"] = "traffic_signals"
-            elif props.get("Markering av striper", "") != "Ikke striper" or props.get("Skiltet") == "Ja":
+    def _extras_jernbanekryssing(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 100: Jernbanekryssing (Railway crossing)."""
+        crossing_type = props.get("Type", "")
+        if "I plan" in crossing_type:
+            if "uten lysregulering og bommer" in crossing_type:
                 item["extras"]["crossing"] = "uncontrolled"
             else:
-                item["extras"]["crossing"] = "unmarked"
-            striper = props.get("Markering av striper")
-            if striper and striper != "Ikke striper":
-                item["extras"]["crossing:markings"] = "zebra"
-            if props.get("Trafikkøy") == "Ja":
-                item["extras"]["crossing:island"] = "yes"
-            if props.get("Hevet") == "Ja":
-                item["extras"]["traffic_calming"] = "table"
-            if props.get("Belysning") == "Ja":
-                item["extras"]["lit"] = "yes"
+                if "uten bommer" not in crossing_type or "grind" in crossing_type:
+                    item["extras"]["crossing:barrier"] = "yes"
+                if "lysregulert" in crossing_type:
+                    item["extras"]["crossing:light"] = "yes"
+        return True
 
-        elif type_id == 180:  # Nødtelefon (Emergency phone)
-            item["extras"]["amenity"] = "telephone"
+    _TRAFFIC_CALMING_MAP = {
+        "Fartshump": "hump",
+        "Fartsputer": "cushion",
+        "Fartspute": "cushion",
+        "Opphøyd gangfelt": "table",
+        "Innsnevring": "choker",
+        "Innsnevring i kryss": "choker",
+        "Opphøyd kryss": "table",
+        "Opphøyd kryssområde": "table",
+        "Sideforskyvning": "chicane",
+        "Innsnevring og sideforskyvning": "chicane",
+        "Rumlefelt": "rumble_strip",
+    }
 
-        elif type_id == 199:  # Trær (Trees)
-            tree_type = props.get("Type/gruppering", "")
-            if tree_type == "Enkeltstående":
-                pass  # already natural=tree
-            elif "Tregruppe" in tree_type or "Allé" in tree_type:
-                item["extras"]["natural"] = "tree_row" if "Allé" in tree_type else "tree"
-            if phase := props.get("Utviklingsfase"):
-                phase_lower = phase.lower()
-                if "nyplantet" in phase_lower:
-                    item["extras"]["denotation"] = "avenue"
-            if leaf := props.get("Løvfellende/vintergrønne"):
-                if "Løvfellende" in leaf:
-                    item["extras"]["leaf_cycle"] = "deciduous"
-                elif "Vintergrønne" in leaf or "Bartre" in leaf:
-                    item["extras"]["leaf_cycle"] = "evergreen"
-            if count := props.get("Antall"):
-                if count != "1":
-                    item["extras"]["tree_count"] = count
+    def _extras_fartsdemper(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 103: Fartsdemper (Speed bump/hump)."""
+        bump_type = props.get("Type", "")
+        if osm_type := self._TRAFFIC_CALMING_MAP.get(bump_type):
+            if bump_type == "Fartshump":
+                if length_str := props.get("Lengde, langs kjøreretning"):
+                    try:
+                        if float(length_str) >= 7:
+                            osm_type = "table"
+                    except ValueError:
+                        pass
+            item["extras"]["traffic_calming"] = osm_type
+        return True
 
-        elif type_id == 209:  # Hydrant
-            placement = props.get("Plassering", "")
-            if "Underjordisk" in placement or "Under" in placement:
-                item["extras"]["fire_hydrant:type"] = "underground"
-            elif "Overgrunn" in placement or "Stolpe" in placement:
-                item["extras"]["fire_hydrant:type"] = "pillar"
+    def _extras_vaerstasjon(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 153: Værstasjon (Weather station)."""
+        apply_yes_no(MonitoringTypes.WEATHER, item, True)
+        if station_nr := props.get("Målestasjonsnummer"):
+            item["extras"]["ref:station"] = station_nr
+        return True
 
-        elif type_id == 291:  # Viltfare (Animal crossing hazard)
-            species_map = {
-                "Hjort": "deer",
-                "Elg": "moose",
-                "Rein": "reindeer",
-                "Rådyr": "roe_deer",
-            }
-            if art := props.get("Art"):
-                if species := species_map.get(art):
-                    item["extras"]["species:en"] = species
+    def _extras_kamera(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 163: Kamera (Camera)."""
+        item["extras"]["surveillance:purpose"] = "traffic"
+        return True
 
-        elif type_id == 607:  # Sperring (Road barrier/blocker)
-            barriers = {
-                "Heve-/senkebom": "lift_gate",
-                "Svingbom": "swing_gate",
-                "Stolpe/pullert/kjegle": "bollard",
-                "Rørgelender": "cycle_barrier",
-                "Steinblokk": "block",
-                "Betongblokk": "jersey_barrier",
-                "Bussluse": "bus_trap",
-                "Annen type vegbom/sperring": "gate",
-                "Låst bom": "yes",
-            }
-            bom_type = props.get("Type", "")
-            if bom_type in barriers:
-                item["extras"]["barrier"] = barriers[bom_type]
-            bruk = props.get("Bruksområde", "")
-            if bruk == "Gang-/sykkelveg, sluse" and (bom_type == "Annen type vegbom/sperring" or not bom_type):
-                item["extras"]["barrier"] = "swing_gate"
-            # Skip barriers in contexts handled by other types
-            if bruk in ("Tunnel", "Bomstasjon", "Ferjekai", "Jernbane"):
-                return False
+    def _extras_gangfelt(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 174: Gangfelt (Pedestrian crossing)."""
+        if props.get("Trafikklys") == "Ja":
+            item["extras"]["crossing"] = "traffic_signals"
+        elif props.get("Markering av striper", "") != "Ikke striper" or props.get("Skiltet") == "Ja":
+            item["extras"]["crossing"] = "uncontrolled"
+        else:
+            item["extras"]["crossing"] = "unmarked"
+        striper = props.get("Markering av striper")
+        if striper and striper != "Ikke striper":
+            item["extras"]["crossing:markings"] = "zebra"
+        if props.get("Trafikkøy") == "Ja":
+            item["extras"]["crossing:island"] = "yes"
+        if props.get("Hevet") == "Ja":
+            item["extras"]["traffic_calming"] = "table"
+        if props.get("Belysning") == "Ja":
+            item["extras"]["lit"] = "yes"
+        return True
 
-        elif type_id == 809:  # Døgnhvileplass (24h truck rest area)
-            if cap_large := props.get("Antall oppstillingspl. store kjt."):
-                item["extras"]["capacity:hgv"] = cap_large
-            if cap_charge := props.get("Antall oppstillingspl. med lading, store kjt."):
-                item["extras"]["capacity:hgv:charging"] = cap_charge
+    def _extras_nodtelefon(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 180: Nødtelefon (Emergency phone)."""
+        item["extras"]["amenity"] = "telephone"
+        return True
 
-        elif type_id == 854:  # Kuldeport (Cold gate)
-            item["extras"]["access"] = "yes"
-            item["extras"]["note"] = "Kuldeport"
+    def _extras_traer(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 199: Trær (Trees)."""
+        tree_type = props.get("Type/gruppering", "")
+        if "Allé" in tree_type:
+            item["extras"]["natural"] = "tree_row"
+        elif "Tregruppe" in tree_type:
+            item["extras"]["natural"] = "tree"
+        if leaf := props.get("Løvfellende/vintergrønne"):
+            if "Løvfellende" in leaf:
+                item["extras"]["leaf_cycle"] = "deciduous"
+            elif "Vintergrønne" in leaf or "Bartre" in leaf:
+                item["extras"]["leaf_cycle"] = "evergreen"
+        if count := props.get("Antall"):
+            if count != "1":
+                item["extras"]["tree_count"] = count
+        return True
 
-        elif type_id == 875:  # Trapp (Stairs)
-            if steps := props.get("Antall trinn"):
-                item["extras"]["step_count"] = steps
-            if width := props.get("Bredde"):
-                item["extras"]["width"] = f"{width} m"
-            if material := props.get("Materialtype"):
-                item["extras"]["material"] = material.lower()
-            if props.get("Barnevognsport") == "Ja":
-                item["extras"]["ramp:stroller"] = "yes"
+    def _extras_hydrant(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 209: Hydrant."""
+        placement = props.get("Plassering", "")
+        if "Underjordisk" in placement or "Under" in placement:
+            item["extras"]["fire_hydrant:type"] = "underground"
+        elif "Overgrunn" in placement or "Stolpe" in placement:
+            item["extras"]["fire_hydrant:type"] = "pillar"
+        return True
 
+    _SPECIES_MAP = {
+        "Hjort": "deer",
+        "Elg": "moose",
+        "Rein": "reindeer",
+        "Rådyr": "roe_deer",
+    }
+
+    def _extras_viltfare(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 291: Viltfare (Animal crossing hazard)."""
+        if art := props.get("Art"):
+            if species := self._SPECIES_MAP.get(art):
+                item["extras"]["species:en"] = species
+        return True
+
+    def _extras_sperring(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 607: Sperring (Road barrier/blocker)."""
+        bom_type = props.get("Type", "")
+        if bom_type in self._BARRIER_TYPE_MAP:
+            item["extras"]["barrier"] = self._BARRIER_TYPE_MAP[bom_type]
+        bruk = props.get("Bruksområde", "")
+        if bruk == "Gang-/sykkelveg, sluse" and (bom_type == "Annen type vegbom/sperring" or not bom_type):
+            item["extras"]["barrier"] = "swing_gate"
+        if bruk in ("Tunnel", "Bomstasjon", "Ferjekai", "Jernbane"):
+            return False
+        return True
+
+    def _extras_dognhvileplass(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 809: Døgnhvileplass (24h truck rest area)."""
+        if cap_large := props.get("Antall oppstillingspl. store kjt."):
+            item["extras"]["capacity:hgv"] = cap_large
+        if cap_charge := props.get("Antall oppstillingspl. med lading, store kjt."):
+            item["extras"]["capacity:hgv:charging"] = cap_charge
+        return True
+
+    def _extras_kuldeport(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 854: Kuldeport (Cold gate)."""
+        item["extras"]["access"] = "yes"
+        item["extras"]["note"] = "Kuldeport"
+        return True
+
+    def _extras_trapp(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 875: Trapp (Stairs)."""
+        if steps := props.get("Antall trinn"):
+            item["extras"]["step_count"] = steps
+        if width := props.get("Bredde"):
+            item["extras"]["width"] = f"{width} m"
+        if material := props.get("Materialtype"):
+            item["extras"]["material"] = material.lower()
+        if props.get("Barnevognsport") == "Ja":
+            item["extras"]["ramp:stroller"] = "yes"
         return True
