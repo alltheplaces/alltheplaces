@@ -14,6 +14,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 class ErikshjalpenSESpider(PlaywrightSpider):
     name = "erikshjalpen_se"
     item_attributes = {
+        "name": "Erikshjälpen Second Hand",
         "brand": "Erikshjälpen Second Hand",
         "brand_wikidata": "Q10487741",
         "country": "SE",
@@ -54,7 +55,7 @@ class ErikshjalpenSESpider(PlaywrightSpider):
 
             name = store.xpath('.//span[contains(@class, "font-size-3")]/text()').get()
             if name:
-                item["name"] = name.strip()
+                item["branch"] = name.strip()
 
             store_url = store.xpath(
                 './/a[contains(@class, "contact--storeurl")][contains(@href, "/stores/")]/@href'
