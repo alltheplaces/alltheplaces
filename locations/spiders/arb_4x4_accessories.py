@@ -3,6 +3,7 @@ from typing import AsyncIterator, Iterable
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -57,5 +58,14 @@ class Arb4x4AccessoriesSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("ARB ").removeprefix("Accessories ").removeprefix("4x4 ")
         item["website"] = f'https://www.arb.com.au/arb-stores/{feature["name"]}'.lower().replace(" ", "-")
+        item["opening_hours"] = self.parse_opening_hours(feature["attributes"])
         apply_category(Categories.SHOP_CAR_PARTS, item)
         yield item
+
+    def parse_opening_hours(self, location_attributes: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for attribute in location_attributes:
+            if "_schedule" in attribute["attribute_code"]:
+                days = attribute["attribute_code"].split("_schedule")[0].replace("weekday", "Monday-Friday")
+                opening_hours.add_ranges_from_string(f'{days} {attribute["value"]}')
+        return opening_hours
