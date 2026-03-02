@@ -13,7 +13,7 @@ from locations.items import Feature
 class ChopchopSESpider(Spider):
     name = "chopchop_se"
     item_attributes = {
-        "brand": "ChopChop Asian Express",
+        "brand": "ChopChop",
         "brand_wikidata": "Q104631081",
         "country": "SE",
     }
@@ -26,7 +26,7 @@ class ChopchopSESpider(Spider):
 
             name = store.xpath('.//h3[contains(@class, "elementor-heading-title")]/text()').get()
             if name:
-                item["name"] = name.strip()
+                item["branch"] = name.strip()
 
             link = store.xpath('.//a[contains(@href, "chopchop.se/restaurant/")]/@href').get()
             if link:
