@@ -1,23 +1,25 @@
+import json
 from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy.http import JsonRequest, Response
-from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import FIREFOX_LATEST
 
 
-class SuperdrugSpider(Spider):
+class SuperdrugSpider(PlaywrightSpider):
     name = "superdrug"
     item_attributes = {"brand": "Superdrug", "brand_wikidata": "Q7643261"}
     custom_settings = {
         "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
         "USER_AGENT": FIREFOX_LATEST,
-    }
+    } | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
@@ -30,7 +32,8 @@ class SuperdrugSpider(Spider):
         yield self.make_request(0)
 
     def parse_api(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["stores"]:
+        results = json.loads(response.xpath("//pre/text()").get())
+        for location in results["stores"]:
             if location["address"]["country"]["isocode"] == "AZ":
                 location["address"]["country"]["isocode"] = None  # Null island
 
@@ -58,6 +61,6 @@ class SuperdrugSpider(Spider):
             apply_category(Categories.SHOP_CHEMIST, item)
             yield item
 
-        pagination = response.json()["pagination"]
+        pagination = results["pagination"]
         if pagination["currentPage"] < pagination["totalPages"]:
             yield self.make_request(pagination["currentPage"] + 1)
