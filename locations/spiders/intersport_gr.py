@@ -21,10 +21,11 @@ class IntersportGRSpider(PlaywrightSpider):
             item = LinkedDataParser.parse_ld(
                 json.loads(store.xpath('.//script[@type="application/ld+json"]/text()').get())
             )
+            item["name"] = item["email"] = item["phone"] = None
             item["lat"] = store.xpath(".//@data-latitude").get()
             item["lon"] = store.xpath(".//@data-longitude").get()
             item["ref"] = item["website"] = response.urljoin(
-                store.xpath('.//a[contains(text(),"Περισσότερα")]/@href').get()
+                store.xpath('.//a[contains(text(), "Περισσότερα")]/@href').get()
             )
             item["branch"] = store.xpath('.//li[@class="name"]/text()').get()
             yield item
