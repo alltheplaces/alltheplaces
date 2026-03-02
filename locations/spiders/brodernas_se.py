@@ -37,13 +37,11 @@ class BrodernasSESpider(Spider):
             store_id = header.xpath("./@id").get()
             item = Feature()
             item["ref"] = store_id or self._slug(name)
-            item["name"] = name
+            item["branch"] = name
 
             link = wrap.xpath('.//a[.//h2[contains(@class, "restaurants")]]/@href').get()
             if link:
                 item["website"] = response.urljoin(link)
-            else:
-                item["website"] = self.start_urls[0]
 
             addr_text = wrap.xpath(
                 './/div[contains(@class, "paragraph--14") and contains(@class, "restaurants")]/text()'
@@ -63,9 +61,7 @@ class BrodernasSESpider(Spider):
                         item["postcode"] = re.sub(r"\s+", " ", street_match.group(2).strip())
                         item["city"] = street_match.group(3).strip()
 
-            phone = wrap.xpath('.//a[starts-with(@href, "tel:")]/text()').get()
-            if phone:
-                item["phone"] = phone.strip()
+            item["phone"] = wrap.xpath('.//a[starts-with(@href, "tel:")]/text()').get()
 
             apply_category(Categories.FAST_FOOD, item)
 
