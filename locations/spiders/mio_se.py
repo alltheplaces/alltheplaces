@@ -31,7 +31,7 @@ class MioSESpider(Spider):
         item = Feature()
         name = response.xpath("//h1/text()").get()
         if name:
-            item["name"] = name.strip()
+            item["branch"] = name.strip().removeprefix("Mio ")
         item["website"] = response.url
         item["ref"] = response.url.rstrip("/").split("/")[-1]
 
