@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -11,11 +11,7 @@ from locations.hours import DAYS, OpeningHours
 class CocoIchibanyaSpider(Spider):
     name = "coco_ichibanya"
     skip_auto_cc_domain = True
-    item_attributes = {
-        "brand": "CoCo Ichibanya",
-        "brand_wikidata": "Q5986105",
-        "extras": Categories.RESTAURANT.value,
-    }
+    item_attributes = {"brand": "CoCo Ichibanya", "brand_wikidata": "Q5986105"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["g", "t", "q", "w", "x", "8", "9"]:
@@ -25,7 +21,7 @@ class CocoIchibanyaSpider(Spider):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
-            item["branch"] = store["name"].replace("店", "")
+            item["branch"] = item.pop("name").replace("店", "")
             item["ref"] = store["key"]
             try:
                 item["opening_hours"] = OpeningHours()
@@ -36,5 +32,7 @@ class CocoIchibanyaSpider(Spider):
                 )
             except:
                 pass
-            item["name"] = None
+
+            apply_category(Categories.RESTAURANT, item)
+
             yield item
