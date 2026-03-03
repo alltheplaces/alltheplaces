@@ -3,6 +3,7 @@ from typing import Any
 from requests_cache import Response
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
@@ -26,6 +27,8 @@ class LillyRSSpider(Spider):
                 item["opening_hours"] = self.parse_opening_hours(location)
             except:
                 self.logger.error("Error parsing opening hours: {}".format(location))
+
+            apply_category(Categories.SHOP_CHEMIST, item)
 
             yield item
 
