@@ -25,6 +25,7 @@ class AllsaintsSpider(CrawlSpider, StructuredDataSpider):
             "Connection": "keep-alive",
         },
     }
+    drop_attributes = {"email", "contact:facebook", "contact:twitter"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").replace("AllSaints ", "")
