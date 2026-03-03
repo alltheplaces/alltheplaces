@@ -1,6 +1,6 @@
+import json
 import re
 
-import json
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
