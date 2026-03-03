@@ -8,8 +8,7 @@ from locations.categories import MonitoringTypes, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.licenses import Licenses
 
-# NVDB default pagination size
-NVDB_PAGE_SIZE = 750
+NVDB_PAGE_SIZE = 10000
 
 # NVDB vegobjekttype ID -> OSM category mapping. (https://datakatalogen.atlas.vegvesen.no/)
 # Each entry: {type_id: (label, category_dict, name_attr_key_or_None)}
