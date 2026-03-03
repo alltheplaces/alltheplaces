@@ -1,4 +1,4 @@
-from scrapy import Spider, FormRequest
+from scrapy import FormRequest, Spider
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
@@ -14,7 +14,7 @@ FUEL_MAP = {
     "etanolHidratadoGrid": Fuel.ETHANOL,
     "etanolGrid": Fuel.ETHANOL,
     "lubrax": Fuel.ENGINE_OIL,
-    "fluaPetrobras": Fuel.ADBLUE
+    "fluaPetrobras": Fuel.ADBLUE,
 }
 
 STATES_BR = {
