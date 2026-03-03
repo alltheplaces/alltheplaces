@@ -39,6 +39,7 @@ OBJECT_TYPE_MAP = {
     180: ("Nødtelefon", {"emergency": "phone"}, None),
     199: ("Trær", {"natural": "tree"}, None),
     209: ("Hydrant", {"emergency": "fire_hydrant"}, None),
+    451: ("Sykkelparkering", {"amenity": "bicycle_parking"}, None),
     470: ("Antenne", {"man_made": "antenna"}, None),
     607: ("Vegsperring", {"barrier": "yes"}, None),
     809: ("Døgnhvileplass", {"highway": "rest_area", "hgv": "yes"}, "Navn"),
@@ -272,6 +273,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             180: self._extras_nodtelefon,
             199: self._extras_traer,
             209: self._extras_hydrant,
+            451: self._extras_sykkelparkering,
             470: self._extras_antenne,
             607: self._extras_sperring,
             809: self._extras_dognhvileplass,
@@ -342,6 +344,18 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         """Type 29: Strøsandkasse (Grit bin)."""
         if volume := props.get("Volum"):
             item["extras"]["capacity"] = f"{volume} l"
+        return True
+
+    def _extras_sykkelparkering(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 451: Sykkelparkering (Bicycle parking)."""
+        if props.get("Sykkelstativ") == "Ja":
+            item["extras"]["bicycle_parking"] = "stands"
+        if props.get("Takoverbygg") == "Ja":
+            item["extras"]["covered"] = "yes"
+        elif props.get("Takoverbygg") == "Nei":
+            item["extras"]["covered"] = "no"
+        if capacity := props.get("Antall sykler totalt"):
+            item["extras"]["capacity"] = capacity
         return True
 
     def _extras_leskur(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
