@@ -46,6 +46,7 @@ OBJECT_TYPE_MAP = {
     809: ("Døgnhvileplass", {"highway": "rest_area", "hgv": "yes"}, "Navn"),
     854: ("Kuldeport", {"barrier": "roller_shutter"}, None),
     875: ("Trapp", {"highway": "steps"}, None),
+    996: ("Flaggstang", {"man_made": "flagpole"}, None),
 }
 
 # Regex to parse WKT POINT geometries: "POINT (x y)" or "POINT Z (x y z)"
@@ -281,6 +282,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             809: self._extras_dognhvileplass,
             854: self._extras_kuldeport,
             875: self._extras_trapp,
+            996: self._extras_flaggstang,
         }.get(type_id)
         if handler is None:
             return True
@@ -607,6 +609,12 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             if osm_type := self._ANTENNA_TYPE_MAP.get(antenna_type):
                 item["extras"]["communication"] = osm_type
         if height := props.get("Innfestingshøyde"):
+            item["extras"]["height"] = f"{height} m"
+        return True
+
+    def _extras_flaggstang(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 996: Flaggstang (Flagpole)."""
+        if height := props.get("Høyde"):
             item["extras"]["height"] = f"{height} m"
         return True
 
