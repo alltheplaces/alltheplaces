@@ -16,7 +16,7 @@ query {
             name
             isActive
             address {
-                number
+                house_number: number
                 street
                 neighborhood
                 city
@@ -57,7 +57,6 @@ class DiaARSpider(Spider):
             store["location"] = store.get("address", {}).get("location", {})
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
-            item["housenumber"] = store.get("address", {}).get("number")
             item["country"] = "AR"
 
             try:
