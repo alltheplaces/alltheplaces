@@ -1,22 +1,23 @@
 import re
 from typing import Any
 
-import xmltodict
 from requests_cache import Response
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class LillyRSSpider(Spider):
     name = "lilly_rs"
     item_attributes = {"brand": "Lilly", "brand_wikidata": "Q111764460"}
     allowed_domains = ["www.lilly.rs"]
-    start_urls = ["https://www.lilly.rs/rest/V1/locations?name="]
+    start_urls = ["https://www.lilly.rs/locations/index/index?name="]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in xmltodict.parse(response.text)["response"]["item"]:
+        for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location["entity_id"]
             item["branch"] = item.pop("name")
