@@ -1,8 +1,9 @@
 import csv
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 import scrapy
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import MonitoringTypes, apply_category, apply_yes_no
@@ -141,14 +142,14 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
     name = "statens_vegvesen_nvdb_no"
     allowed_domains = ["nvdb-eksport.atlas.vegvesen.no"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 600}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 600, "DOWNLOAD_WARNSIZE": 268435456}
     dataset_attributes = Licenses.NO_NLODv2.value | {
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Statens vegvesen"
     }
 
-    def start_requests(self) -> Iterable[scrapy.Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for type_id in OBJECT_TYPE_MAP:
-            yield scrapy.Request(
+            yield Request(
                 url=f"https://nvdb-eksport.atlas.vegvesen.no/vegobjekter/{type_id}.csv?inkluder=alle&srid=4326",
                 headers={"X-Client": "alltheplaces", "Accept": "text/csv"},
                 cb_kwargs={"type_id": type_id},
