@@ -20,7 +20,7 @@ class BigBrandTireAndServiceUSSpider(Spider):
     start_urls = ["https://www.bigbrandtire.com/api/publicWeb/getLocations"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        data = {"appBrandId": 1}
+        data = {"StoreBrandId": 1}
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
 
     def parse(self, response: Response) -> Iterable[Feature]:
