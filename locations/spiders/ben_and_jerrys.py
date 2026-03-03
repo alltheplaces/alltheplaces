@@ -20,8 +20,8 @@ class BenAndJerrysSpider(Where2GetItSpider):
             item["lon"] = location["longitude"]
             item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
             if website := item.get("website"):
-                if "facebook" in website:  
-                    item.pop("website") 
+                if "facebook" in website:
+                    item.pop("website")
                 elif "kojote" in website:
                     item["website"] = "https://www." + item["website"]
             apply_category(Categories.ICE_CREAM, item)
@@ -38,5 +38,3 @@ class BenAndJerrysSpider(Where2GetItSpider):
                     item["opening_hours"].add_ranges_from_string(day + " " + location.get(day.lower()))
 
             yield item
-
-
