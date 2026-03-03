@@ -39,6 +39,7 @@ OBJECT_TYPE_MAP = {
     180: ("Nødtelefon", {"emergency": "phone"}, None),
     199: ("Trær", {"natural": "tree"}, None),
     209: ("Hydrant", {"emergency": "fire_hydrant"}, None),
+    243: ("Toalettanlegg", {"amenity": "toilets"}, None),
     451: ("Sykkelparkering", {"amenity": "bicycle_parking"}, None),
     470: ("Antenne", {"man_made": "antenna"}, None),
     607: ("Vegsperring", {"barrier": "yes"}, None),
@@ -273,6 +274,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             180: self._extras_nodtelefon,
             199: self._extras_traer,
             209: self._extras_hydrant,
+            243: self._extras_toalettanlegg,
             451: self._extras_sykkelparkering,
             470: self._extras_antenne,
             607: self._extras_sperring,
@@ -344,6 +346,24 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         """Type 29: Strøsandkasse (Grit bin)."""
         if volume := props.get("Volum"):
             item["extras"]["capacity"] = f"{volume} l"
+        return True
+
+    _TOILET_DISPOSAL_MAP = {
+        "Vannklosett": "flush",
+        "Tørrklosett": "dry_toilet",
+    }
+
+    def _extras_toalettanlegg(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 243: Toalettanlegg (Toilets)."""
+        if toilet_type := props.get("Type"):
+            if disposal := self._TOILET_DISPOSAL_MAP.get(toilet_type):
+                item["extras"]["toilets:disposal"] = disposal
+        if num_toilets := props.get("Antall klosett"):
+            item["extras"]["toilets:number"] = num_toilets
+        if props.get("Universelt utformet") == "Ja":
+            item["extras"]["wheelchair"] = "yes"
+        elif props.get("Universelt utformet") == "Nei":
+            item["extras"]["wheelchair"] = "no"
         return True
 
     def _extras_sykkelparkering(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
