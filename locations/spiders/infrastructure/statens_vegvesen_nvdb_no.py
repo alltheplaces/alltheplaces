@@ -30,6 +30,7 @@ OBJECT_TYPE_MAP = {
     83: ("Kum", {"man_made": "manhole"}, None),
     87: ("Belysningspunkt", {"highway": "street_lamp", "support": "pole"}, None),
     89: ("Signalanlegg", {"highway": "traffic_signals"}, "Navn"),
+    96: ("Skiltplate", {"highway": "traffic_sign"}, None),
     100: ("Jernbanekryssing", {"railway": "level_crossing"}, None),
     103: ("Fartsdemper", {"traffic_calming": "bump"}, None),
     153: ("Værstasjon", {"man_made": "monitoring_station"}, None),
@@ -142,7 +143,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
     name = "statens_vegvesen_nvdb_no"
     allowed_domains = ["nvdb-eksport.atlas.vegvesen.no"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 600, "DOWNLOAD_WARNSIZE": 268435456}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 600, "DOWNLOAD_WARNSIZE": 268435456, "DOWNLOAD_FAIL_ON_DATALOSS": False}
     dataset_attributes = Licenses.NO_NLODv2.value | {
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Statens vegvesen"
     }
@@ -271,6 +272,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             66: self._extras_skredsikring,
             67: self._extras_tunnellop,
             89: self._extras_signalanlegg,
+            96: self._extras_skiltplate,
             100: self._extras_jernbanekryssing,
             103: self._extras_fartsdemper,
             153: self._extras_vaerstasjon,
@@ -503,6 +505,43 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         if props.get("Bruksområde", "") == "Gangfelt":
             item["extras"]["highway"] = "crossing"
             item["extras"]["crossing"] = "traffic_signals"
+        return True
+
+    _SIGN_DIRECTION_MAP = {
+        "Trafikk i metreringsretning": "forward",
+        "Trafikk mot metreringsretning": "backward",
+        "Tosidig": "both",
+    }
+
+    def _extras_skiltplate(self, item: Feature, props: dict) -> bool:
+        """Type 96: Skiltplate (Traffic sign plate)."""
+        skiltnummer = props.get("Skiltnummer", "")
+        if not skiltnummer:
+            return False
+
+        # Extract sign code. Example input: "908 - Hindermarkering, høyre", output: "908"
+        sign_code = skiltnummer.split(" - ", 1)[0].strip()
+        if not sign_code:
+            return False
+
+        item["extras"]["traffic_sign"] = f"NO:{sign_code}"
+
+        if facing := props.get("Ansiktsside, rettet mot"):
+            if direction := self._SIGN_DIRECTION_MAP.get(facing):
+                item["extras"]["direction"] = direction
+
+        if text := props.get("Tekst"):
+            item["extras"]["traffic_sign:text"] = text
+
+        belysning = props.get("Belysning", "")
+        if belysning in ("Innvendig", "Utvendig"):
+            item["extras"]["lit"] = "yes"
+        elif belysning == "Ingen":
+            item["extras"]["lit"] = "no"
+
+        if leverandor := props.get("Leverandør"):
+            item["extras"]["manufacturer"] = leverandor
+
         return True
 
     def _extras_jernbanekryssing(self, item: Feature, props: dict) -> bool:
