@@ -17,6 +17,7 @@ OBJECT_TYPE_MAP = {
     22: ("Ferist", {"barrier": "cattle_grid"}, None),
     23: ("Vegbom", {"barrier": "gate"}, None),
     25: ("Leskur", {"amenity": "shelter", "shelter_type": "public_transport"}, None),
+    29: ("Strøsandkasse", {"amenity": "grit_bin"}, None),
     37: ("Vegkryss", {"highway": "motorway_junction"}, "Navn"),
     39: ("Rasteplass", {"highway": "rest_area"}, "Navn"),
     40: ("Snuplass", {"highway": "turning_circle"}, None),
@@ -38,6 +39,7 @@ OBJECT_TYPE_MAP = {
     180: ("Nødtelefon", {"emergency": "phone"}, None),
     199: ("Trær", {"natural": "tree"}, None),
     209: ("Hydrant", {"emergency": "fire_hydrant"}, None),
+    470: ("Antenne", {"man_made": "antenna"}, None),
     607: ("Vegsperring", {"barrier": "yes"}, None),
     809: ("Døgnhvileplass", {"highway": "rest_area", "hgv": "yes"}, "Navn"),
     854: ("Kuldeport", {"barrier": "roller_shutter"}, None),
@@ -232,6 +234,8 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["manufacturer"] = manufacturer
         if model := props.get("Produktnavn"):
             item["extras"]["model"] = model
+        if operator := props.get("Vedlikeholdsansvarlig"):
+            item["operator"] = operator
 
     def _apply_material(self, item: Feature, props: dict) -> None:
         """Map NVDB Materialtype to OSM material tag."""
@@ -249,6 +253,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             22: self._extras_ferist,
             23: self._extras_vegbom,
             25: self._extras_leskur,
+            29: self._extras_strosandkasse,
             37: self._extras_motorvegkryss,
             39: self._extras_rasteplass,
             40: self._extras_snuplass,
@@ -267,6 +272,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             180: self._extras_nodtelefon,
             199: self._extras_traer,
             209: self._extras_hydrant,
+            470: self._extras_antenne,
             607: self._extras_sperring,
             809: self._extras_dognhvileplass,
             854: self._extras_kuldeport,
@@ -330,6 +336,12 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
                 item["name"] = stedsnavn
         if bruk in ("Tunnel", "Bomstasjon", "Ferjekai", "Jernbane"):
             return False
+        return True
+
+    def _extras_strosandkasse(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 29: Strøsandkasse (Grit bin)."""
+        if volume := props.get("Volum"):
+            item["extras"]["capacity"] = f"{volume} l"
         return True
 
     def _extras_leskur(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
@@ -548,6 +560,20 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         """Type 209: Hydrant."""
         if flow_rate := props.get("Kapasitet"):
             item["extras"]["flow_rate"] = f"{flow_rate} l/s"
+        return True
+
+    _ANTENNA_TYPE_MAP = {
+        "Radio": "radio",
+        "Mobiltelefon": "mobile_phone",
+    }
+
+    def _extras_antenne(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 470: Antenne (Antenna)."""
+        if antenna_type := props.get("Type"):
+            if osm_type := self._ANTENNA_TYPE_MAP.get(antenna_type):
+                item["extras"]["communication"] = osm_type
+        if height := props.get("Innfestingshøyde"):
+            item["extras"]["height"] = f"{height} m"
         return True
 
     def _extras_sperring(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
