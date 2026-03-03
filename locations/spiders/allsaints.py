@@ -1,10 +1,8 @@
-
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.linkextractors import LinkExtractor
 
 
 class AllsaintsSpider(CrawlSpider, StructuredDataSpider):
@@ -25,10 +23,10 @@ class AllsaintsSpider(CrawlSpider, StructuredDataSpider):
             "upgrade-insecure-requests": "1",
             "Referer": "https://www.allsaints.com/",
             "Connection": "keep-alive",
-        }
+        },
     }
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").replace("AllSaints ","")
+        item["branch"] = item.pop("name").replace("AllSaints ", "")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
