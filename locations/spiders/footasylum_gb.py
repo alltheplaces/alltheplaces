@@ -1,7 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.spiders.central_england_cooperative import COOP_FUNERALCARE, set_operator
 from locations.structured_data_spider import StructuredDataSpider
 
 
