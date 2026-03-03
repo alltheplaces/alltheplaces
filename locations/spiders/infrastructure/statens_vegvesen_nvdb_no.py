@@ -39,6 +39,7 @@ OBJECT_TYPE_MAP = {
     180: ("Nødtelefon", {"emergency": "phone"}, None),
     199: ("Trær", {"natural": "tree"}, None),
     209: ("Hydrant", {"emergency": "fire_hydrant"}, None),
+    213: ("Brannslokningsapparat", {"emergency": "fire_extinguisher"}, None),
     243: ("Toalettanlegg", {"amenity": "toilets"}, None),
     451: ("Sykkelparkering", {"amenity": "bicycle_parking"}, None),
     470: ("Antenne", {"man_made": "antenna"}, None),
@@ -275,6 +276,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             180: self._extras_nodtelefon,
             199: self._extras_traer,
             209: self._extras_hydrant,
+            213: self._extras_brannslokningsapparat,
             243: self._extras_toalettanlegg,
             451: self._extras_sykkelparkering,
             470: self._extras_antenne,
@@ -610,6 +612,25 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
                 item["extras"]["communication"] = osm_type
         if height := props.get("Innfestingshøyde"):
             item["extras"]["height"] = f"{height} m"
+        return True
+
+    _FIRE_EXTINGUISHER_TYPE_MAP = {
+        "Pulverapparat": "powder",
+        "Skumapparat": "foam",
+        "CO-apparat": "co2",
+    }
+
+    def _extras_brannslokningsapparat(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+        """Type 213: Brannslokningsapparat (Fire extinguisher)."""
+        if extinguisher_type := props.get("Type"):
+            if osm_type := self._FIRE_EXTINGUISHER_TYPE_MAP.get(extinguisher_type):
+                item["extras"]["fire_extinguisher:type"] = osm_type
+        if capacity := props.get("Kapasitet"):
+            item["extras"]["capacity"] = f"{capacity} kg"
+        if diameter := props.get("Diameter"):
+            item["extras"]["diameter"] = diameter
+        if props.get("Plassering i teknisk rom") == "Ja":
+            item["extras"]["indoor"] = "yes"
         return True
 
     def _extras_flaggstang(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
