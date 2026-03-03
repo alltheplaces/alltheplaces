@@ -41,7 +41,6 @@ query {
 class DiaARSpider(Spider):
     name = "dia_ar"
     item_attributes = {"brand": "Dia", "brand_wikidata": "Q925132"}
-    seen_ids = set()
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in country_iseadgg_centroids("AR", 158):
@@ -54,9 +53,6 @@ class DiaARSpider(Spider):
         for store in response.json()["data"]["getStores"]["items"]:
             if not store.get("isActive"):
                 continue
-            if store["id"] in self.seen_ids:
-                continue
-            self.seen_ids.add(store["id"])
 
             store["location"] = store.get("address", {}).get("location", {})
             item = DictParser.parse(store)
