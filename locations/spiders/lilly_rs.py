@@ -19,8 +19,7 @@ class LillyRSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["ref"] = location["entity_id"]
-            item["branch"] = item.pop("name")
+            item["ref"] = item.pop("name").removeprefix("Apoteka ")
             item["street_address"] = item.pop("addr_full")
 
             try:
