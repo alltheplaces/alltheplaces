@@ -39,7 +39,6 @@ OBJECT_TYPE_MAP = {
     180: ("Nødtelefon", {"emergency": "phone"}, None),
     199: ("Trær", {"natural": "tree"}, None),
     209: ("Hydrant", {"emergency": "fire_hydrant"}, None),
-    291: ("Viltfare", {"hazard": "animal_crossing"}, None),
     607: ("Vegsperring", {"barrier": "yes"}, None),
     809: ("Døgnhvileplass", {"highway": "rest_area", "hgv": "yes"}, "Navn"),
     854: ("Kuldeport", {"barrier": "roller_shutter"}, None),
@@ -269,7 +268,6 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             180: self._extras_nodtelefon,
             199: self._extras_traer,
             209: self._extras_hydrant,
-            291: self._extras_viltfare,
             607: self._extras_sperring,
             809: self._extras_dognhvileplass,
             854: self._extras_kuldeport,
@@ -551,22 +549,6 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         """Type 209: Hydrant."""
         if flow_rate := props.get("Kapasitet"):
             item["extras"]["flow_rate"] = f"{flow_rate} l/s"
-        return True
-
-    _SPECIES_MAP = {
-        "Hjort": "deer",
-        "Elg": "moose",
-        "Rein": "reindeer",
-        "Rådyr": "roe_deer",
-    }
-
-    def _extras_viltfare(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
-        """Type 291: Viltfare (Animal crossing hazard)."""
-        if art := props.get("Art"):
-            if species := self._SPECIES_MAP.get(art):
-                item["extras"]["species:en"] = species
-        if props.get("Beskrivelse"):
-            item["extras"]["description"] = props["Beskrivelse"]
         return True
 
     def _extras_sperring(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
