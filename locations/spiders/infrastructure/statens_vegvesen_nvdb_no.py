@@ -138,12 +138,12 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
     tunnels, weather stations, traffic signals, rest areas, pedestrian
     crossings, fire hydrants, trees, and more.
 
-    Export API documentation: https://nvdb-docs.atlas.vegvesen.no/eksport/
+    Export API documentation: https://www.nvdb.no/hent-og-se-data/eksport/nvdb-eksport/brukerveiledning/
     """
 
     name = "statens_vegvesen_nvdb_no"
     allowed_domains = ["nvdb-eksport.atlas.vegvesen.no"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 600, "DOWNLOAD_WARNSIZE": 268435456, "DOWNLOAD_FAIL_ON_DATALOSS": False}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 600, "DOWNLOAD_WARNSIZE": 268435456}
     dataset_attributes = Licenses.NO_NLODv2.value | {
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Statens vegvesen"
     }
